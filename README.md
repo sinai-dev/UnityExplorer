@@ -5,7 +5,7 @@
 A simple, universal Runtime Explorer for Unity IL2CPP games.
 
 ## Features
-* Scene heirarchy explorer
+* Scene hierarchy explorer
 * Traverse and manipulate GameObjects
 * Generic Reflection inspector
 * REPL Console
