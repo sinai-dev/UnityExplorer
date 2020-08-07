@@ -7,8 +7,8 @@
     <ProjectGuid>{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Explorer</RootNamespace>
-    <AssemblyName>HPExplorer</AssemblyName>
+    <RootNamespace>CppExplorer</RootNamespace>
+    <AssemblyName>CppExplorer</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
