@@ -19,7 +19,7 @@ Universal Runtime Inspector/Explorer for Unity IL2CPP games.
 This requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be installed for your game.
 
 1. Download <b>CppExplorer.zip</b> from [Releases](https://github.com/sinaioutlander/CppExplorer/releases).
-2. Put the file in your `MyGame/Mods/` folder, and unzip with <b>"Extract here"</b> option.
+2. Put the file in your `MyGame\Mods\` folder, and unzip with <b>"Extract here"</b> option.
 3. It should not go into a sub-folder, you should see `CppExplorer.dll` and `mcs.dll` in your `Mods\` folder.
 
 ## How to use
@@ -50,4 +50,4 @@ Written by Sinai.
 
 Credits to ManlyMarco for his [Runtime Unity Editor](https://github.com/ManlyMarco/RuntimeUnityEditor), which I used for the REPL Console and the "Find instances" snippet, and used the same MCS that he uses*.
 
-<i>* note: I commented out the `SkipVisibilityExt` constructor since it was causing an exception for some reason.</i>
+<i>* note: I commented out the `SkipVisibilityExt` constructor in `mcs.dll` since it was causing an exception with the Hook it attempted.</i>
