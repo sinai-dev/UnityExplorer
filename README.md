@@ -48,6 +48,6 @@ REPL console:
 
 Written by Sinai.
 
-Credits to ManlyMarco for his [Runtime Unity Editor](https://github.com/ManlyMarco/RuntimeUnityEditor), which I used for the REPL Console and the "Find instances" snippet, and used the same MCS that he uses*.
+Credits to ManlyMarco for their [Runtime Unity Editor](https://github.com/ManlyMarco/RuntimeUnityEditor), which I used for the REPL Console and the "Find instances" snippet, and the MCS* version.
 
 <i>* note: I commented out the `SkipVisibilityExt` constructor in `mcs.dll` since it was causing an exception with the Hook it attempted.</i>
