@@ -22,7 +22,7 @@ Credits to ManlyMarco for his [Runtime Unity Editor](https://github.com/ManlyMar
 
 This requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be installed for your game.
 
-1. Download <b>CppExplorer.dll</b> from the Releases folder.
+1. Download <b>CppExplorer.dll</b> from [Releases](https://github.com/sinaioutlander/CppExplorer/releases).
 2. Put the file in your `MyGame/Mods/` folder.
 
 ## How to use
