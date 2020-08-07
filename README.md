@@ -21,15 +21,13 @@ A simple, universal Runtime Explorer for Unity IL2CPP games.
 Requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be installed for your game.
 
 1. Download <b>CppExplorer.zip</b> from [Releases](https://github.com/sinaioutlander/CppExplorer/releases).
-2. Put the file in your `MyGame\Mods\` folder, and unzip with <b>"Extract here"</b> option.
-3. It should not go into a sub-folder, you should see `CppExplorer.dll` and `mcs.dll` in your `Mods\` folder.
+2. Unzip the file into the `Mods` folder in your game's installation directory, created by MelonLoader.
+3. Make sure it's not in a sub-folder, `CppExplorer.dll` and `mcs.dll` should be directly in the `Mods\` folder.
 
 ## How to use
 
 * Press F7 to show or hide the menu.
 * Simply browse through the scene, search for objects, etc, it's pretty self-explanatory.
-
-If you have any specific questions about it you can contact me here, on NexusMods (Sinaioutlander), or on Discord (Sinai#4637, in MelonLoader discord).
 
 ## Images
 
