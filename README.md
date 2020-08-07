@@ -10,14 +10,6 @@ Universal Runtime Inspector/Explorer for Unity IL2CPP games.
 * Inspect any object with Reflection, set primitive values, etc
 * REPL Console for executing on-the-fly code
 
-## Credits
-
-Written by Sinai.
-
-Credits to ManlyMarco for his [Runtime Unity Editor](https://github.com/ManlyMarco/RuntimeUnityEditor), which I used for the REPL Console and the "Find instances" snippet, and used the same MCS that he uses*.
-
-<i>* note: I commented out the `SkipVisibilityExt` constructor since it was causing an exception for some reason.</i>
-
 ## How to install
 
 This requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be installed for your game.
@@ -48,3 +40,11 @@ Advanced search feature.
 REPL console.
 
 [![](https://i.imgur.com/14Dbtf8.png)]()
+
+## Credits
+
+Written by Sinai.
+
+Credits to ManlyMarco for his [Runtime Unity Editor](https://github.com/ManlyMarco/RuntimeUnityEditor), which I used for the REPL Console and the "Find instances" snippet, and used the same MCS that he uses*.
+
+<i>* note: I commented out the `SkipVisibilityExt` constructor since it was causing an exception for some reason.</i>
