@@ -4,15 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using System.IO;
-using System.Reflection;
 using MelonLoader;
-using Harmony;
-using UnhollowerBaseLib.Runtime;
-using UnhollowerRuntimeLib;
 using UnhollowerBaseLib;
-using System.Runtime.CompilerServices;
-using UnhollowerBaseLib.Attributes;
 
 namespace Explorer
 {
@@ -20,9 +13,9 @@ namespace Explorer
     {
         // consts
 
-        public const string ID = "com.sinai.explorer";
+        public const string ID = "com.sinai.cppexplorer";
         public const string NAME = "IL2CPP Runtime Explorer";
-        public const string VERSION = "0.91";
+        public const string VERSION = "1.0.0";
         public const string AUTHOR = "Sinai";
 
         // fields
@@ -65,30 +58,14 @@ namespace Explorer
 
             Instance = this;
 
-            LoadMCS();
-
             new MainMenu();
             new WindowManager();
 
-            var harmony = HarmonyInstance.Create(ID);
-            harmony.PatchAll();
+            //var harmony = HarmonyInstance.Create(ID);
+            //harmony.PatchAll();
 
             // done init
             ShowMenu = true;
-        }
-
-        private void LoadMCS()
-        {
-            var mcsPath = @"Mods\mcs.dll";
-            if (File.Exists(mcsPath))
-            {
-                Assembly.Load(File.ReadAllBytes(mcsPath));
-                MelonLogger.Log("Loaded mcs.dll");
-            }
-            else
-            {
-                MelonLogger.LogError("Could not find mcs.dll!");
-            }
         }
 
         public override void OnLevelWasLoaded(int level)

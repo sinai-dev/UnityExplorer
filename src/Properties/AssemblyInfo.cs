@@ -10,12 +10,12 @@ using MelonLoader;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("CppExplorer")]
+[assembly: AssemblyTitle(CppExplorer.NAME)]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("CppExplorer")]
-[assembly: AssemblyCopyright("By Sinai")]
+[assembly: AssemblyCompany(CppExplorer.AUTHOR)]
+[assembly: AssemblyProduct(CppExplorer.NAME)]
+[assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
