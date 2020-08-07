@@ -65,32 +65,31 @@ namespace Explorer
 
             Instance = this;
 
+            LoadMCS();
+
             new MainMenu();
             new WindowManager();
 
-            //LoadMCS();
-
-            //// init debugging hooks
-            //var harmony = HarmonyInstance.Create(ID);
-            //harmony.PatchAll();
+            var harmony = HarmonyInstance.Create(ID);
+            harmony.PatchAll();
 
             // done init
             ShowMenu = true;
         }
 
-        //private void LoadMCS()
-        //{
-        //    var mcsPath = @"Mods\mcs.dll";
-        //    if (File.Exists(mcsPath))
-        //    {
-        //        Assembly.Load(File.ReadAllBytes(mcsPath));
-        //        MelonLogger.Log("Loaded mcs.dll");
-        //    }
-        //    else
-        //    {
-        //        MelonLogger.LogError("Could not find mcs.dll!");
-        //    }
-        //}
+        private void LoadMCS()
+        {
+            var mcsPath = @"Mods\mcs.dll";
+            if (File.Exists(mcsPath))
+            {
+                Assembly.Load(File.ReadAllBytes(mcsPath));
+                MelonLogger.Log("Loaded mcs.dll");
+            }
+            else
+            {
+                MelonLogger.LogError("Could not find mcs.dll!");
+            }
+        }
 
         public override void OnLevelWasLoaded(int level)
         {

@@ -44,6 +44,11 @@
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\Il2CppSystem.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="mcs, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Release\mcs.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="MelonLoader.ModHandler">
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\MelonLoader.ModHandler.dll</HintPath>
       <Private>False</Private>
@@ -114,16 +119,16 @@
   <ItemGroup>
     <Compile Include="ILBehaviour.cs" />
     <Compile Include="CppExplorer.cs" />
-    <Compile Include="Menu\MainMenu\ConsolePage.cs" />
-    <Compile Include="Menu\MainMenu\Console\REPL.cs" />
-    <Compile Include="Menu\MainMenu\Console\REPLHelper.cs" />
+    <Compile Include="MainMenu\Pages\ConsolePage.cs" />
+    <Compile Include="MainMenu\Pages\Console\REPL.cs" />
+    <Compile Include="MainMenu\Pages\Console\REPLHelper.cs" />
     <Compile Include="WindowManager.cs" />
-    <Compile Include="Menu\MainMenu.cs" />
-    <Compile Include="Menu\Inspectors\GameObjectWindow.cs" />
-    <Compile Include="Menu\Inspectors\ReflectionWindow.cs" />
-    <Compile Include="Menu\MainMenu\ScenePage.cs" />
-    <Compile Include="Menu\MainMenu\SearchPage.cs" />
-    <Compile Include="Menu\UIStyles.cs" />
+    <Compile Include="MainMenu\MainMenu.cs" />
+    <Compile Include="Inspectors\GameObjectWindow.cs" />
+    <Compile Include="Inspectors\ReflectionWindow.cs" />
+    <Compile Include="MainMenu\Pages\ScenePage.cs" />
+    <Compile Include="MainMenu\Pages\SearchPage.cs" />
+    <Compile Include="UIStyles.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="utils\AccessTools.cs" />
   </ItemGroup>

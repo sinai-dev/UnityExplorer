@@ -19,7 +19,7 @@ namespace Explorer
 
             Pages.Add(new ScenePage());
             Pages.Add(new SearchPage());
-            //Pages.Add(new ConsolePage());
+            Pages.Add(new ConsolePage());
 
             foreach (var page in Pages)
             {
