@@ -31,18 +31,18 @@ If you have any specific questions about it you can contact me here, on NexusMod
 
 ## Images
 
-Scene explorer, and inspection of a MonoBehaviour object.
+Scene explorer, and inspection of a MonoBehaviour object:
 
-[![](https://i.imgur.com/Yxizwcz.png)]()
+[![](https://i.imgur.com/Yxizwcz.png)](https://i.imgur.com/Yxizwcz.png)
 
-Advanced search feature.
+Search feature:
 
-[![](https://i.imgur.com/F9ZfMvz.png)]()
+[![](https://i.imgur.com/F9ZfMvz.png)](https://i.imgur.com/F9ZfMvz.png)
 
 
-REPL console.
+REPL console:
 
-[![](https://i.imgur.com/14Dbtf8.png)]()
+[![](https://i.imgur.com/14Dbtf8.png)](https://i.imgur.com/14Dbtf8.png)
 
 ## Credits
 
