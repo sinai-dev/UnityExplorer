@@ -44,10 +44,9 @@
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\Il2CppSystem.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="mcs, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Release\mcs.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="mcs">
+      <HintPath>..\lib\mcs.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="MelonLoader.ModHandler">
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\MelonLoader.ModHandler.dll</HintPath>
