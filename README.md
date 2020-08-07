@@ -10,6 +10,10 @@ Universal Runtime Inspector/Explorer for Unity IL2CPP games.
 * Inspect any object with Reflection, set primitive values, etc
 * REPL Console for executing on-the-fly code
 
+### Known Issues / Todo
+* Fix `List` and `Array` support, need to use IL2CPPSystem types.
+* Add mouse lock and prevent click-through
+
 ## How to install
 
 This requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be installed for your game.
@@ -21,14 +25,9 @@ This requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to b
 ## How to use
 
 * Press F7 to show or hide the menu.
-* Currently does <b>not</b> grant locked mouse or prevent clicking-through the menu, be careful of this.
 * Simply browse through the scene, search for objects, etc, it's pretty self-explanatory.
 
 If you have any specific questions about it you can contact me here, on NexusMods (Sinaioutlander), or on Discord (Sinai#4637, in MelonLoader discord).
-
-## Known Issues / Todo
-* Fix `List` and `Array` support, need to use IL2CPPSystem types.
-* Add mouse lock and prevent click-through
 
 ## Images
 
