@@ -18,3 +18,15 @@ This requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to b
 * Simply browse through the scene, search for objects, etc, it's pretty self-explanatory.
 
 If you have any specific questions about it you can contact me here, on NexusMods (Sinaioutlander), or on Discord (Sinai#4637, in MelonLoader discord).
+
+## Images
+
+Scene explorer, and inspection of a MonoBehaviour object.
+
+[![](https://i.imgur.com/Yxizwcz.png)]()
+
+Advanced search feature.
+
+[![](https://i.imgur.com/F9ZfMvz.png)]()
+
+
