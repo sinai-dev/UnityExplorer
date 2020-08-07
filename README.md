@@ -26,6 +26,10 @@ This requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to b
 
 If you have any specific questions about it you can contact me here, on NexusMods (Sinaioutlander), or on Discord (Sinai#4637, in MelonLoader discord).
 
+## Known Issues / Todo
+* Fix `List` and `Array` support, need to use IL2CPPSystem types.
+* Add mouse lock and prevent click-through
+
 ## Images
 
 Scene explorer, and inspection of a MonoBehaviour object.
