@@ -2,13 +2,14 @@
 
 [![Version](https://img.shields.io/badge/MelonLoader-0.2.6-green.svg)]()
 
-Universal Runtime Inspector/Explorer for Unity IL2CPP games.
+A simple, universal Runtime Explorer for Unity IL2CPP games.
 
 ## Features
-* Scene exploration (traverse in the same way as the Unity Editor)
-* Inspect GameObjects/Transforms and manipulate them
-* Inspect any object with Reflection, set primitive values, etc
-* REPL Console for executing on-the-fly code
+* Scene heirarchy explorer
+* Traverse and manipulate GameObjects
+* Generic Reflection inspector
+* REPL Console
+* Inspect-under-mouse
 
 ### Known Issues / Todo
 * Fix `List` and `Array` support, need to use IL2CPPSystem types.
@@ -16,7 +17,7 @@ Universal Runtime Inspector/Explorer for Unity IL2CPP games.
 
 ## How to install
 
-This requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be installed for your game.
+Requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be installed for your game.
 
 1. Download <b>CppExplorer.zip</b> from [Releases](https://github.com/sinaioutlander/CppExplorer/releases).
 2. Put the file in your `MyGame\Mods\` folder, and unzip with <b>"Extract here"</b> option.
