@@ -444,7 +444,10 @@ namespace Explorer
                         }
                     }
 
-                    propInfo.SetValue(propInfo.GetAccessors()[0].IsStatic ? null : obj, m_value, null);
+                    var declaring = propInfo.DeclaringType;
+                    var cast = CppExplorer.Il2CppCast(obj, declaring);
+
+                    propInfo.SetValue(propInfo.GetAccessors()[0].IsStatic ? null : cast, m_value, null);
                 }
                 catch
                 {
