@@ -2,7 +2,7 @@
 
 [![Version](https://img.shields.io/badge/MelonLoader-0.2.6-green.svg)]()
 
-A simple, universal Runtime Explorer for Unity IL2CPP games.
+Simple in-game explorer and debugging tool for IL2CPP Unity games, using MelonLoader.
 
 ## Features
 * Scene hierarchy explorer
