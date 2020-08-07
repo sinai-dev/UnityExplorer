@@ -2,7 +2,7 @@
 
 [![Version](https://img.shields.io/badge/MelonLoader-0.2.6-green.svg)]()
 
-Universal Runtime Inspector/Explorer for Unity Il2CPP games.
+Universal Runtime Inspector/Explorer for Unity IL2CPP games.
 
 ## How to install
 
