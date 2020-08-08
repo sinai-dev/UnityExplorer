@@ -12,10 +12,6 @@ Simple in-game explorer and debugging tool for IL2CPP Unity games, using MelonLo
 * REPL Console
 * Inspect-under-mouse
 
-### Known Issues / Todo
-* Fix `List` and `Array` support, need to use IL2CPPSystem types.
-* Add mouse lock and prevent click-through
-
 ## How to install
 
 Requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be installed for your game.
