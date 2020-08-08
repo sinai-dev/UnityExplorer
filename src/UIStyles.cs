@@ -2,7 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
+using Il2CppSystem.Collections;
+using Il2CppSystem.Reflection;
+using MelonLoader;
+using UnhollowerBaseLib;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -234,50 +239,79 @@ namespace Explorer
                     }
 
                     GUILayout.Label(value.ToString(), null);
-
                 }
-                else if (valueType.IsArray || ReflectionWindow.IsList(valueType))
+                else if (value is System.Collections.IEnumerable || ReflectionWindow.IsList(valueType))
                 {
-                    object[] m_array;
-                    if (valueType.IsArray)
+                    System.Collections.IEnumerable enumerable;
+
+                    if (value is System.Collections.IEnumerable isEnumerable)
                     {
-                        m_array = (value as Array).Cast<object>().ToArray();
+                        enumerable = isEnumerable;
                     }
                     else
                     {
-                        m_array = (value as IEnumerable).Cast<object>().ToArray();
+                        var listValueType = value.GetType().GetGenericArguments()[0];
+                        var listType = typeof(Il2CppSystem.Collections.Generic.List<>).MakeGenericType(new Type[] { listValueType });
+                        var method = listType.GetMethod("ToArray");
+                        enumerable = (System.Collections.IEnumerable)method.Invoke(value, new object[0]);
                     }
 
+                    int count = enumerable.Cast<object>().Count();
+
                     GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-                    if (GUILayout.Button("<color=yellow>[" + m_array.Length + "] " + valueType + "</color>", new GUILayoutOption[] { GUILayout.MaxWidth(rect.width - 230) }))
+                    string btnLabel = "<color=yellow>[" + count + "] " + valueType + "</color>";
+                    if (GUILayout.Button(btnLabel, new GUILayoutOption[] { GUILayout.MaxWidth(rect.width - 230) }))
                     {
                         WindowManager.InspectObject(value, out bool _);
                     }
                     GUI.skin.button.alignment = TextAnchor.MiddleCenter;
 
-                    for (int i = 0; i < m_array.Length; i++)
+                    var enumerator = enumerable.GetEnumerator();
+                    if (enumerator != null)
                     {
-                        var obj = m_array[i];
-
-                        // collapsing the BeginHorizontal called from ReflectionWindow.WindowFunction or previous array entry
-                        GUILayout.EndHorizontal();
-                        GUILayout.BeginHorizontal(null);
-                        GUILayout.Space(190);
-
-                        if (i > CppExplorer.ArrayLimit)
+                        int i = 0;
+                        while (enumerator.MoveNext())
                         {
-                            GUILayout.Label($"<i><color=red>{m_array.Length - CppExplorer.ArrayLimit} results omitted, array is too long!</color></i>", null);
-                            break;
-                        }
+                            var obj = enumerator.Current;
 
-                        if (obj == null)
-                        {
-                            GUILayout.Label("<i><color=grey>null</color></i>", null);
-                        }
-                        else
-                        {
-                            var type = obj.GetType();
-                            DrawMember(ref obj, type.ToString(), i.ToString(), rect, setTarget, setAction, 25, true);
+                            //collapsing the BeginHorizontal called from ReflectionWindow.WindowFunction or previous array entry
+                            GUILayout.EndHorizontal();
+                            GUILayout.BeginHorizontal(null);
+                            GUILayout.Space(190);
+
+                            if (i > CppExplorer.ArrayLimit)
+                            {
+                                GUILayout.Label($"<i><color=red>{count - CppExplorer.ArrayLimit} results omitted, array is too long!</color></i>", null);
+                                break;
+                            }
+
+                            if (obj == null)
+                            {
+                                GUILayout.Label("<i><color=grey>null</color></i>", null);
+                            }
+                            else
+                            {
+                                var type = obj.GetType();
+                                var lbl = i + ": <color=cyan>" + obj.ToString() + "</color>";
+
+                                if (type.IsPrimitive || typeof(string).IsAssignableFrom(type))
+                                {
+                                    GUILayout.Label(lbl, null);
+                                }
+                                else
+                                {
+                                    GUI.skin.button.alignment = TextAnchor.MiddleLeft;
+                                    if (GUILayout.Button(lbl, null))
+                                    {
+                                        WindowManager.InspectObject(obj, out _);
+                                    }
+                                    GUI.skin.button.alignment = TextAnchor.MiddleCenter;
+                                }
+                                //var type = obj.GetType();
+                                //DrawMember(ref obj, type.ToString(), i.ToString(), rect, setTarget, setAction, 25, true);
+                            }
+
+                            i++;
                         }
                     }
                 }
@@ -288,6 +322,30 @@ namespace Explorer
                     if (valueType == typeof(Object)) 
                     {
                         label = (value as Object).name;
+                    }
+                    else if (value is Vector4 vec4)
+                    {
+                        label = vec4.ToString();
+                    }
+                    else if (value is Vector3 vec3)
+                    {
+                        label = vec3.ToString();
+                    }
+                    else if (value is Vector2 vec2)
+                    {
+                        label = vec2.ToString();
+                    }
+                    else if (value is Rect rec)
+                    {
+                        label = rec.ToString();
+                    }
+                    else if (value is Matrix4x4 matrix)
+                    {
+                        label = matrix.ToString();
+                    }
+                    else if (value is Color col)
+                    {
+                        label = col.ToString();
                     }
 
                     GUI.skin.button.alignment = TextAnchor.MiddleLeft;

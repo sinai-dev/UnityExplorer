@@ -15,7 +15,7 @@ namespace Explorer
 
         public const string ID = "com.sinai.cppexplorer";
         public const string NAME = "IL2CPP Runtime Explorer";
-        public const string VERSION = "1.0.0";
+        public const string VERSION = "1.1.0";
         public const string AUTHOR = "Sinai";
 
         // fields

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using MelonLoader;
+using Mono.CSharp;
 using UnhollowerBaseLib;
 using UnityEngine;
 
@@ -275,9 +276,10 @@ namespace Explorer
 
         public static bool IsList(Type t)
         {
-            return t.IsGenericType && t.GetGenericTypeDefinition().IsAssignableFrom(typeof(List<>));
+            return t.IsGenericType 
+                && t.GetGenericTypeDefinition() is Type typeDef
+                && (typeDef.IsAssignableFrom(typeof(List<>)) || typeDef.IsAssignableFrom(typeof(Il2CppSystem.Collections.Generic.List<>)));
         }
-
 
         private void GetProperties(object m_object, List<string> names = null)
         {
@@ -292,6 +294,11 @@ namespace Explorer
             {
                 foreach (var pi in type.GetProperties(At.flags))
                 {
+                    if (pi.Name == "Il2CppType")
+                    {
+                        continue;
+                    }
+
                     if (names.Contains(pi.Name))
                     {
                         continue;
@@ -382,15 +389,15 @@ namespace Explorer
                 }
                 catch (Exception e)
                 {
-                    MelonLogger.Log("Exception on PropertyInfoHolder.UpdateValue, Name: " + this.propInfo.Name);
-                    MelonLogger.Log(e.GetType() + ", " + e.Message);
+                    //MelonLogger.Log("Exception on PropertyInfoHolder.UpdateValue, Name: " + this.propInfo.Name);
+                    //MelonLogger.Log(e.GetType() + ", " + e.Message);
 
-                    var inner = e.InnerException;
-                    while (inner != null)
-                    {
-                        MelonLogger.Log("inner: " + inner.GetType() + ", " + inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    //var inner = e.InnerException;
+                    //while (inner != null)
+                    //{
+                    //    MelonLogger.Log("inner: " + inner.GetType() + ", " + inner.Message);
+                    //    inner = inner.InnerException;
+                    //}
 
                     m_value = null;
                 }
@@ -402,7 +409,7 @@ namespace Explorer
                 {
                     if (propInfo.PropertyType.IsEnum)
                     {
-                        if (Enum.Parse(propInfo.PropertyType, m_value.ToString()) is object enumValue && enumValue != null)
+                        if (System.Enum.Parse(propInfo.PropertyType, m_value.ToString()) is object enumValue && enumValue != null)
                         {
                             m_value = enumValue;
                         }
@@ -451,7 +458,7 @@ namespace Explorer
                 }
                 catch
                 {
-                    MelonLogger.Log("Exception trying to set property " + this.propInfo.Name);
+                    //MelonLogger.Log("Exception trying to set property " + this.propInfo.Name);
                 }
             }
         }
@@ -496,7 +503,7 @@ namespace Explorer
             {
                 if (fieldInfo.FieldType.IsEnum)
                 {
-                    if (Enum.Parse(fieldInfo.FieldType, m_value.ToString()) is object enumValue && enumValue != null)
+                    if (System.Enum.Parse(fieldInfo.FieldType, m_value.ToString()) is object enumValue && enumValue != null)
                     {
                         m_value = enumValue;
                     }
