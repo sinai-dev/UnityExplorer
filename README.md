@@ -2,7 +2,9 @@
 
 [![Version](https://img.shields.io/badge/MelonLoader-0.2.6-green.svg)]()
 
-Simple in-game explorer and debugging tool for IL2CPP Unity games, using MelonLoader.
+An in-game explorer and a suite of debugging tools for [IL2CPP](https://docs.unity3d.com/Manual/IL2CPP.html) Unity games, using [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader). 
+
+This was designed to be an IL2CPP-compatible equivalent to [Runtime Unity Editor](https://github.com/ManlyMarco/RuntimeUnityEditor).
 
 ## Features
 * Scene hierarchy explorer
