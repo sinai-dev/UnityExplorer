@@ -40,7 +40,7 @@ namespace Explorer
 
             m_currentTransform = null;
             CancelSearch();
-            
+
         }
 
         public override void Update()
@@ -68,7 +68,7 @@ namespace Explorer
                 }
                 else
                 {
-                    var scene = SceneManager.GetActiveScene();
+                    var scene = SceneManager.GetSceneByName(m_currentScene);
                     var rootObjects = scene.GetRootGameObjects();
 
                     // add objects with children first
@@ -87,11 +87,41 @@ namespace Explorer
         // --------- GUI Draw Functions --------- //        
 
         public override void DrawWindow()
-        {            
+        {
             try
             {
+                GUILayout.BeginHorizontal(null);
                 // Current Scene label
-                GUILayout.Label("Current Scene: <color=cyan>" + m_currentScene + "</color>", null);
+                GUILayout.Label("Current Scene:", new GUILayoutOption[] { GUILayout.Width(120) });
+                if (SceneManager.sceneCount > 1)
+                {
+                    int changeWanted = 0;
+                    if (GUILayout.Button("<", new GUILayoutOption[] { GUILayout.Width(30) }))
+                    {
+                        changeWanted = -1;
+                    }
+                    if (GUILayout.Button(">", new GUILayoutOption[] { GUILayout.Width(30) }))
+                    {
+                        changeWanted = 1;
+                    }
+                    if (changeWanted != 0)
+                    {
+                        var scenes = SceneManager.GetAllScenes();
+                        int index = scenes.IndexOf(SceneManager.GetSceneByName(m_currentScene));
+                        index += changeWanted;
+                        if (index >= scenes.Count - 1)
+                        {
+                            index = 0;
+                        }
+                        else if (index > 0)
+                        {
+                            index = scenes.Count - 1;
+                        }
+                        m_currentScene = scenes[index].name;
+                    }
+                }
+                GUILayout.Label("<color=cyan>" + m_currentScene + "</color>", null);
+                GUILayout.EndHorizontal();
 
                 // ----- GameObject Search -----
                 GUILayout.BeginHorizontal(GUI.skin.box, null);
@@ -168,7 +198,7 @@ namespace Explorer
             }
         }
 
-        
+
 
         // -------- Actual Methods (not drawing GUI) ---------- //
 
@@ -207,9 +237,9 @@ namespace Explorer
 
             foreach (var obj in Resources.FindObjectsOfTypeAll<GameObject>())
             {
-                if (obj.name.ToLower().Contains(_search.ToLower()) && obj.scene.name == CppExplorer.ActiveSceneName)
+                if (obj.name.ToLower().Contains(_search.ToLower()) && obj.scene.name == m_currentScene)
                 {
-                    matches.Add(obj);   
+                    matches.Add(obj);
                 }
             }
 
