@@ -2,7 +2,9 @@
 
 [![Version](https://img.shields.io/badge/MelonLoader-0.2.6-green.svg)]()
 
-Simple in-game explorer and debugging tool for IL2CPP Unity games, using MelonLoader.
+An in-game explorer and a suite of debugging tools for [IL2CPP](https://docs.unity3d.com/Manual/IL2CPP.html) Unity games, using [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader). 
+
+This was designed to be an IL2CPP-compatible equivalent to [Runtime Unity Editor](https://github.com/ManlyMarco/RuntimeUnityEditor).
 
 ## Features
 * Scene hierarchy explorer
@@ -44,6 +46,6 @@ REPL console:
 
 Written by Sinai.
 
-Credits to ManlyMarco for their [Runtime Unity Editor](https://github.com/ManlyMarco/RuntimeUnityEditor), which I used for the REPL Console and the "Find instances" snippet, and the MCS* version.
-
-<i>* note: I commented out the `SkipVisibilityExt` constructor in `mcs.dll` since it was causing an exception with the Hook it attempted.</i>
+Thanks to:
+* [ManlyMarco](https://github.com/ManlyMarco) for their [Runtime Unity Editor](https://github.com/ManlyMarco/RuntimeUnityEditor), which I used for the REPL Console and the "Find instances" snippet, and the UI style.
+* [denikson](https://github.com/denikson) for [mcs-unity](https://github.com/denikson/mcs-unity). I commented out the `SkipVisibilityExt` constructor in `mcs.dll` since it was causing an exception with the Hook it attempted.
