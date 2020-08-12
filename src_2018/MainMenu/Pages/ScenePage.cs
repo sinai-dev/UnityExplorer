@@ -20,12 +20,13 @@ namespace Explorer
 
         // gameobject list
         private Transform m_currentTransform;
-        private List<GameObject> m_objectList = new List<GameObject>();
+        private List<GameObjectCache> m_objectList = new List<GameObjectCache>();
+        private float m_timeOfLastUpdate = -1f;
 
         // search bar
         private bool m_searching = false;
         private string m_searchInput = "";
-        private List<GameObject> m_searchResults = new List<GameObject>();
+        private List<GameObjectCache> m_searchResults = new List<GameObjectCache>();
 
         // ------------ Init and Update ------------ //
 
@@ -40,17 +41,24 @@ namespace Explorer
 
             m_currentTransform = null;
             CancelSearch();
-
         }
 
         public override void Update()
         {
+            if (Time.time - m_timeOfLastUpdate < 1f)
+            {
+                return;
+            }
+            m_timeOfLastUpdate = Time.time;
+
+            var start = Time.realtimeSinceStartup;
+
             if (!m_searching)
             {
-                m_objectList = new List<GameObject>();
+                m_objectList = new List<GameObjectCache>();
                 if (m_currentTransform)
                 {
-                    var noChildren = new List<GameObject>();
+                    var endAppend = new List<GameObjectCache>();
                     for (int i = 0; i < m_currentTransform.childCount; i++)
                     {
                         var child = m_currentTransform.GetChild(i);
@@ -58,13 +66,13 @@ namespace Explorer
                         if (child)
                         {
                             if (child.childCount > 0)
-                                m_objectList.Add(child.gameObject);
+                                m_objectList.Add(new GameObjectCache(child.gameObject));
                             else
-                                noChildren.Add(child.gameObject);
+                                endAppend.Add(new GameObjectCache(child.gameObject));
                         }
                     }
-                    m_objectList.AddRange(noChildren);
-                    noChildren = null;
+                    m_objectList.AddRange(endAppend);
+                    endAppend = null;
                 }
                 else
                 {
@@ -74,11 +82,11 @@ namespace Explorer
                     // add objects with children first
                     foreach (var obj in rootObjects.Where(x => x.transform.childCount > 0))
                     {
-                        m_objectList.Add(obj);
+                        m_objectList.Add(new GameObjectCache(obj));
                     }
                     foreach (var obj in rootObjects.Where(x => x.transform.childCount == 0))
                     {
-                        m_objectList.Add(obj);
+                        m_objectList.Add(new GameObjectCache(obj));
                     }
                 }
             }
@@ -120,7 +128,8 @@ namespace Explorer
                         m_currentScene = scenes[index].name;
                     }
                 }
-                GUILayout.Label("<color=cyan>" + m_currentScene + "</color>", null);
+                GUILayout.Label("<color=cyan>" + m_currentScene + "</color>", null); //new GUILayoutOption[] { GUILayout.Width(250) });
+
                 GUILayout.EndHorizontal();
 
                 // ----- GameObject Search -----
@@ -160,10 +169,13 @@ namespace Explorer
 
                     if (m_objectList.Count > 0)
                     {
+                        var start = Time.realtimeSinceStartup;
                         foreach (var obj in m_objectList)
                         {
-                            UIStyles.GameobjButton(obj, SetTransformTarget, true, MainMenu.MainRect.width - 170);
+                            //UIStyles.GameobjButton(obj, SetTransformTarget, true, MainMenu.MainRect.width - 170);
+                            UIStyles.FastGameobjButton(obj.RefGameObject, obj.EnabledColor, obj.Label, obj.RefGameObject.activeSelf, SetTransformTarget, true, MainMenu.MainRect.width - 170);
                         }
+                        var diff = Time.realtimeSinceStartup - start;
                     }
                     else
                     {
@@ -183,7 +195,8 @@ namespace Explorer
                     {
                         foreach (var obj in m_searchResults)
                         {
-                            UIStyles.GameobjButton(obj, SetTransformTarget, true, MainMenu.MainRect.width - 170);
+                            //UIStyles.GameobjButton(obj, SetTransformTarget, true, MainMenu.MainRect.width - 170);
+                            UIStyles.FastGameobjButton(obj.RefGameObject, obj.EnabledColor, obj.Label, obj.RefGameObject.activeSelf, SetTransformTarget, true, MainMenu.MainRect.width - 170);
                         }
                     }
                     else
@@ -231,19 +244,54 @@ namespace Explorer
             m_searching = false;
         }
 
-        public List<GameObject> SearchSceneObjects(string _search)
+        public List<GameObjectCache> SearchSceneObjects(string _search)
         {
-            var matches = new List<GameObject>();
+            var matches = new List<GameObjectCache>();
 
             foreach (var obj in Resources.FindObjectsOfTypeAll<GameObject>())
             {
                 if (obj.name.ToLower().Contains(_search.ToLower()) && obj.scene.name == m_currentScene)
                 {
-                    matches.Add(obj);
+                    matches.Add(new GameObjectCache(obj));
                 }
             }
 
             return matches;
+        }
+
+        public class GameObjectCache
+        {
+            public GameObject RefGameObject;
+            public string Label;
+            public Color EnabledColor;
+            public int ChildCount;
+
+            public GameObjectCache(GameObject obj)
+            {
+                RefGameObject = obj;
+                ChildCount = obj.transform.childCount;
+
+                Label = (ChildCount > 0) ? "[" + obj.transform.childCount + " children] " : "";
+                Label += obj.name;
+
+                bool enabled = obj.activeSelf;
+                int childCount = obj.transform.childCount;
+                if (enabled)
+                {
+                    if (childCount > 0)
+                    {
+                        EnabledColor = Color.green;
+                    }
+                    else
+                    {
+                        EnabledColor = UIStyles.LightGreen;
+                    }
+                }
+                else
+                {
+                    EnabledColor = Color.red;
+                }
+            }
         }
     }
 }

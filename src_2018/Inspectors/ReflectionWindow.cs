@@ -93,9 +93,13 @@ namespace Explorer
                 return;
             }
 
-            m_objectType = type;
-            GetFields(m_object);
-            GetProperties(m_object);
+            try
+            {
+                m_objectType = type;
+                GetFields(m_object);
+                GetProperties(m_object);
+            }
+            catch { }
 
             UpdateValues();
         }
@@ -276,7 +280,7 @@ namespace Explorer
 
         public static bool IsList(Type t)
         {
-            return t.IsGenericType 
+            return t.IsGenericType
                 && t.GetGenericTypeDefinition() is Type typeDef
                 && (typeDef.IsAssignableFrom(typeof(List<>)) || typeDef.IsAssignableFrom(typeof(Il2CppSystem.Collections.Generic.List<>)));
         }
@@ -292,8 +296,20 @@ namespace Explorer
 
             foreach (var type in types)
             {
-                foreach (var pi in type.GetProperties(At.flags))
+                PropertyInfo[] propInfos = new PropertyInfo[0];
+
+                try
                 {
+                    propInfos = type.GetProperties(At.flags);
+                }
+                catch (TypeLoadException)
+                {
+                    MelonLogger.Log($"Couldn't get Properties for Type '{type.Name}', it may not support Il2Cpp Reflection at the moment.");
+                }
+
+                foreach (var pi in propInfos)
+                {
+                    // this member causes a crash when inspected, so just skipping it for now.
                     if (pi.Name == "Il2CppType")
                     {
                         continue;
@@ -335,7 +351,7 @@ namespace Explorer
                 }
             }
         }
-        
+
 
         /* *********************
          *   PROPERTYINFO HOLDER
@@ -346,6 +362,7 @@ namespace Explorer
             public Type classType;
             public PropertyInfo propInfo;
             public object m_value;
+            public bool IsExpanded;
 
             public PropertyInfoHolder(Type _type, PropertyInfo _propInfo)
             {
@@ -355,14 +372,7 @@ namespace Explorer
 
             public void Draw(ReflectionWindow window)
             {
-                if (propInfo.CanWrite)
-                {
-                    UIStyles.DrawMember(ref m_value, propInfo.PropertyType.Name, propInfo.Name, window.m_rect, window.m_object, SetValue);
-                }
-                else
-                {
-                    UIStyles.DrawMember(ref m_value, propInfo.PropertyType.Name, propInfo.Name, window.m_rect, window.m_object);
-                }
+                UIStyles.DrawMember(ref m_value, ref this.IsExpanded, this.propInfo, window.m_rect, window.m_object, SetValue);
             }
 
             public void UpdateValue(object obj)
@@ -389,15 +399,15 @@ namespace Explorer
                 }
                 catch (Exception e)
                 {
-                    //MelonLogger.Log("Exception on PropertyInfoHolder.UpdateValue, Name: " + this.propInfo.Name);
-                    //MelonLogger.Log(e.GetType() + ", " + e.Message);
+                    MelonLogger.Log("Exception on PropertyInfoHolder.UpdateValue, Name: " + this.propInfo.Name);
+                    MelonLogger.Log(e.GetType() + ", " + e.Message);
 
-                    //var inner = e.InnerException;
-                    //while (inner != null)
-                    //{
-                    //    MelonLogger.Log("inner: " + inner.GetType() + ", " + inner.Message);
-                    //    inner = inner.InnerException;
-                    //}
+                    var inner = e.InnerException;
+                    while (inner != null)
+                    {
+                        MelonLogger.Log("inner: " + inner.GetType() + ", " + inner.Message);
+                        inner = inner.InnerException;
+                    }
 
                     m_value = null;
                 }
@@ -473,6 +483,7 @@ namespace Explorer
             public Type classType;
             public FieldInfo fieldInfo;
             public object m_value;
+            public bool IsExpanded;
 
             public FieldInfoHolder(Type _type, FieldInfo _fieldInfo)
             {
@@ -487,16 +498,7 @@ namespace Explorer
 
             public void Draw(ReflectionWindow window)
             {
-                bool canSet = !(fieldInfo.IsLiteral && !fieldInfo.IsInitOnly);
-
-                if (canSet)
-                {
-                    UIStyles.DrawMember(ref m_value, fieldInfo.FieldType.Name, fieldInfo.Name, window.m_rect, window.m_object, SetValue);
-                }
-                else
-                {
-                    UIStyles.DrawMember(ref m_value, fieldInfo.FieldType.Name, fieldInfo.Name, window.m_rect, window.m_object);
-                }
+                UIStyles.DrawMember(ref m_value, ref this.IsExpanded, this.fieldInfo, window.m_rect, window.m_object, SetValue);
             }
 
             public void SetValue(object obj)

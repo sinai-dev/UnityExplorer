@@ -104,7 +104,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ILBehaviour.cs" />
     <Compile Include="CppExplorer.cs" />
     <Compile Include="MainMenu\Pages\ConsolePage.cs" />
     <Compile Include="MainMenu\Pages\Console\REPL.cs" />
