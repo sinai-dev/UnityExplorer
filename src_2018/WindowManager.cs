@@ -142,11 +142,11 @@ namespace Explorer
 
         // ============= Resize Window Helper ============
 
-        static readonly GUIContent gcDrag = new GUIContent("<->");
+        //static readonly GUIContent gcDrag = new GUIContent("<->");
 
-        private static bool isResizing = false;
-        private static Rect m_currentResize;
-        private static int m_currentWindow;
+        //private static bool isResizing = false;
+        //private static Rect m_currentResize;
+        //private static int m_currentWindow;
 
         public static Rect ResizeWindow(Rect _rect, int ID)
         {

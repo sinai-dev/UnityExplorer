@@ -91,7 +91,8 @@ namespace Explorer
                     {
                         var obj = m_searchResults[i];
 
-                        UIStyles.DrawValue(ref obj, _temprect);
+                        bool _ = false;
+                        UIStyles.DrawValue(ref obj, _temprect, ref _);
                     }
                 }
                 else
@@ -262,7 +263,6 @@ namespace Explorer
                 {
                     var findType = CppExplorer.GetType(_type);
                     type = Il2CppSystem.Type.GetType(findType.AssemblyQualifiedName);
-                    MelonLogger.Log("Got type: " + type.AssemblyQualifiedName);
                 }
                 catch (Exception e)
                 {
