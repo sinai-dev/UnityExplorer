@@ -15,8 +15,8 @@ namespace Explorer
         // consts
 
         public const string ID = "com.sinai.cppexplorer";
-        public const string NAME = "IL2CPP Runtime Explorer";
-        public const string VERSION = "1.3.0";
+        public const string NAME = "IL2CPP Runtime Explorer (Unity 2018)";
+        public const string VERSION = "1.3.1";
         public const string AUTHOR = "Sinai";
 
         // fields
@@ -28,7 +28,7 @@ namespace Explorer
         // props
 
         public static bool ShowMenu { get; set; } = false;
-        public static int ArrayLimit { get; set; } = 100;
+        public static int ArrayLimit { get; set; } = 20;
         public bool MouseInspect { get; set; } = false;
 
         public static string ActiveSceneName

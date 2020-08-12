@@ -12,9 +12,9 @@ using MelonLoader;
 
 namespace Explorer
 {
-    public class ConsolePage : MainMenu.WindowPage
+    public class ConsolePage : WindowPage
     {
-        public override string Name { get => "Console"; set => base.Name = value; }
+        public override string Name { get => "C# Console"; set => base.Name = value; }
 
         private ScriptEvaluator _evaluator;
         private readonly StringBuilder _sb = new StringBuilder();
@@ -41,13 +41,18 @@ namespace Explorer
 
             try
             {
-                MethodInput = @"// This is a basic REPL console used to execute a method.
-// Some common directives are added by default, you can add more below.
+                MethodInput = @"// This is a basic C# REPL console. 
+// Some common using directives are added by default, you can add more below.
 // If you want to return some output, MelonLogger.Log() it.
 
 MelonLogger.Log(""hello world"");";
 
                 ResetConsole();
+
+                foreach (var use in m_defaultUsing)
+                {
+                    AddUsing(use);
+                }
             }
             catch (Exception e)
             {
@@ -65,11 +70,6 @@ MelonLogger.Log(""hello world"");";
             _evaluator = new ScriptEvaluator(new StringWriter(_sb)) { InteractiveBaseClass = typeof(REPL) };
 
             UsingDirectives = new List<string>();
-            UsingDirectives.AddRange(m_defaultUsing);
-            foreach (string asm in UsingDirectives)
-            {
-                Evaluate(AsmToUsing(asm));
-            }
         }
 
         public string AsmToUsing(string asm, bool richtext = false)
@@ -111,7 +111,7 @@ MelonLogger.Log(""hello world"");";
 
         public override void DrawWindow()
         {
-            GUILayout.Label("<b><size=15><color=cyan>REPL Console</color></size></b>", null);
+            GUILayout.Label("<b><size=15><color=cyan>C# REPL Console</color></size></b>", null);
 
             GUILayout.Label("Method:", null);
             MethodInput = GUILayout.TextArea(MethodInput, new GUILayoutOption[] { GUILayout.Height(300) });

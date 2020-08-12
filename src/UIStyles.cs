@@ -196,7 +196,7 @@ namespace Explorer
             GUILayout.EndHorizontal();
         }
 
-        public static void DrawMember(ref object value, ref bool isExpanded, MemberInfo memberInfo, Rect rect, object setTarget = null, Action<object> setAction = null, float labelWidth = 180, bool autoSet = false)
+        public static void DrawMember(ref object value, ref bool isExpanded, ref int arrayOffset, MemberInfo memberInfo, Rect rect, object setTarget = null, Action<object> setAction = null, float labelWidth = 180, bool autoSet = false)
         {
             GUILayout.Label("<color=cyan>" + memberInfo.Name + ":</color>", new GUILayoutOption[] { GUILayout.Width(labelWidth) });
 
@@ -213,10 +213,10 @@ namespace Explorer
                 canWrite = pi.CanWrite;
             }
 
-            DrawValue(ref value, rect, ref isExpanded, valueType, (canWrite ? setTarget : null), (canWrite ? setAction : null), autoSet);
+            DrawValue(ref value, ref isExpanded, ref arrayOffset, rect, valueType, (canWrite ? setTarget : null), (canWrite ? setAction : null), autoSet);
         }
 
-        public static void DrawValue(ref object value, Rect rect, ref bool isExpanded, string nullValueType = null, object setTarget = null, Action<object> setAction = null, bool autoSet = false)
+        public static void DrawValue(ref object value, ref bool isExpanded, ref int arrayOffset, Rect rect, string nullValueType = null, object setTarget = null, Action<object> setAction = null, bool autoSet = false)
         {
             if (value == null)
             {
@@ -304,12 +304,41 @@ namespace Explorer
 
                 if (isExpanded)
                 {
+                    if (count > CppExplorer.ArrayLimit)
+                    {
+                        GUILayout.EndHorizontal();
+                        GUILayout.BeginHorizontal(null);
+                        GUILayout.Space(190);
+                        int maxOffset = (int)Mathf.Ceil(count / CppExplorer.ArrayLimit);
+                        GUILayout.Label($"Page {arrayOffset + 1}/{maxOffset + 1}", new GUILayoutOption[] { GUILayout.Width(80) });
+                        // prev/next page buttons
+                        if (GUILayout.Button("< Prev", null))
+                        {
+                            if (arrayOffset > 0) arrayOffset--;
+                        }
+                        if (GUILayout.Button("Next >", null))
+                        {
+                            if (arrayOffset < maxOffset) arrayOffset++;
+                        }
+                    }
+
+                    int offset = arrayOffset * CppExplorer.ArrayLimit;
+
+                    if (offset >= count) offset = 0;
+
                     var enumerator = enumerable.GetEnumerator();
                     if (enumerator != null)
                     {
                         int i = 0;
+                        int preiterated = 0;
                         while (enumerator.MoveNext())
                         {
+                            if (offset > 0 && preiterated < offset)
+                            {
+                                preiterated++;
+                                continue;
+                            }
+
                             var obj = enumerator.Current;
 
                             //collapsing the BeginHorizontal called from ReflectionWindow.WindowFunction or previous array entry
@@ -317,9 +346,9 @@ namespace Explorer
                             GUILayout.BeginHorizontal(null);
                             GUILayout.Space(190);
 
-                            if (i > CppExplorer.ArrayLimit)
+                            if (i > CppExplorer.ArrayLimit - 1)
                             {
-                                GUILayout.Label($"<i><color=red>{count - CppExplorer.ArrayLimit} results omitted, array is too long!</color></i>", null);
+                                //GUILayout.Label($"<i><color=red>{count - CppExplorer.ArrayLimit} results omitted, array is too long!</color></i>", null);
                                 break;
                             }
 
@@ -330,7 +359,8 @@ namespace Explorer
                             else
                             {
                                 var type = obj.GetType();
-                                var lbl = i + ": <color=cyan>" + obj.ToString() + "</color>";
+
+                                var lbl = (i + offset) + ": <color=cyan>" + obj.ToString() + "</color>";
 
                                 if (type.IsPrimitive || typeof(string).IsAssignableFrom(type))
                                 {

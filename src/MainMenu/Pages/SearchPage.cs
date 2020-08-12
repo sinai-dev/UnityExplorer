@@ -12,15 +12,16 @@ using UnhollowerBaseLib;
 
 namespace Explorer
 {
-    public class SearchPage : MainMenu.WindowPage
+    public class SearchPage : WindowPage
     {
         public static SearchPage Instance;
 
-        public override string Name { get => "Advanced Search"; set => base.Name = value; }
+        public override string Name { get => "Object Search"; set => base.Name = value; }
 
         private string m_searchInput = "";
         private string m_typeInput = "";
         private int m_limit = 100;
+        private int m_pageOffset = 0;
 
         public SceneFilter SceneMode = SceneFilter.Any;
         public TypeFilter TypeMode = TypeFilter.Object;
@@ -52,6 +53,7 @@ namespace Explorer
         public void OnSceneChange()
         {
             m_searchResults.Clear();
+            m_pageOffset = 0;
         }
 
         public override void Update() 
@@ -68,6 +70,7 @@ namespace Explorer
                 if (GUILayout.Button("Find Static Instances", new GUILayoutOption[] { GUILayout.Width(180) }))
                 {
                     m_searchResults = GetInstanceClassScanner().ToList();
+                    m_pageOffset = 0;
                 }
                 GUILayout.EndHorizontal();
 
@@ -78,8 +81,29 @@ namespace Explorer
                 GUILayout.BeginVertical(GUI.skin.box, null);
 
                 GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-                GUILayout.Label("<b><color=orange>Results</color></b>", null);
+                GUILayout.Label("<b><color=orange>Results </color></b>" + " (" + m_searchResults.Count + ")", null);
                 GUI.skin.label.alignment = TextAnchor.UpperLeft;
+
+                int count = m_searchResults.Count;
+
+                if (count > CppExplorer.ArrayLimit)
+                {
+                    // prev/next page buttons
+                    GUILayout.BeginHorizontal(null);
+                    int maxOffset = (int)Mathf.Ceil(count / CppExplorer.ArrayLimit);
+                    if (GUILayout.Button("< Prev", null))
+                    {
+                        if (m_pageOffset > 0) m_pageOffset--;
+                    }
+
+                    GUILayout.Label($"Page {m_pageOffset + 1}/{maxOffset + 1}", new GUILayoutOption[] { GUILayout.Width(80) });
+
+                    if (GUILayout.Button("Next >", null))
+                    {
+                        if (m_pageOffset < maxOffset) m_pageOffset++;
+                    }
+                    GUILayout.EndHorizontal();
+                }
 
                 resultsScroll = GUILayout.BeginScrollView(resultsScroll, GUI.skin.scrollView);
 
@@ -87,12 +111,29 @@ namespace Explorer
 
                 if (m_searchResults.Count > 0)
                 {
+                    int offset = m_pageOffset * CppExplorer.ArrayLimit;
+                    int preiterated = 0;
+
+                    if (offset >= count) offset = 0;
+
                     for (int i = 0; i < m_searchResults.Count; i++)
                     {
+                        if (offset > 0 && preiterated < offset)
+                        {
+                            preiterated++;
+                            continue;
+                        }
+
+                        if (i - offset > CppExplorer.ArrayLimit - 1)
+                        {
+                            break;
+                        }
+
                         var obj = m_searchResults[i];
 
                         bool _ = false;
-                        UIStyles.DrawValue(ref obj, _temprect, ref _);
+                        int __ = 0;
+                        UIStyles.DrawValue(ref obj, ref _, ref __, _temprect);
                     }
                 }
                 else
@@ -125,7 +166,7 @@ namespace Explorer
             m_searchInput = GUILayout.TextField(m_searchInput, new GUILayoutOption[] { GUILayout.Width(200) });
 
             GUI.skin.label.alignment = TextAnchor.MiddleRight;
-            GUILayout.Label("Result limit:", new GUILayoutOption[] { GUILayout.Width(100) });
+            GUILayout.Label("Results per page:", new GUILayoutOption[] { GUILayout.Width(120) });
             var resultinput = m_limit.ToString();
             resultinput = GUILayout.TextField(resultinput, new GUILayoutOption[] { GUILayout.Width(55) });
             if (int.TryParse(resultinput, out int _i) && _i > 0)
@@ -289,26 +330,9 @@ namespace Explorer
             }
 
             var matches = new List<object>();
-            int added = 0;
-
-            //MelonLogger.Log("Trying to get IL Type. ASM name: " + type.Assembly.GetName().Name + ", Namespace: " + type.Namespace + ", name: " + type.Name);
-
-            //var asmName = type.Assembly.GetName().Name;
-            //if (asmName.Contains("UnityEngine"))
-            //{
-            //    asmName = "UnityEngine";
-            //}
-
-            //var intPtr = IL2CPP.GetIl2CppClass(asmName, type.Namespace, type.Name);
-            //var ilType = Il2CppType.TypeFromPointer(intPtr);
 
             foreach (var obj in Resources.FindObjectsOfTypeAll(type))
             {
-                if (added == m_limit)
-                {
-                    break;
-                }
-
                 if (_search != "" && !obj.name.ToLower().Contains(_search.ToLower()))
                 {
                     continue;
@@ -360,7 +384,6 @@ namespace Explorer
                 if (!matches.Contains(obj))
                 {
                     matches.Add(obj);
-                    added++;
                 }
             }
 

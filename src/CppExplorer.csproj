@@ -7,7 +7,7 @@
     <ProjectGuid>{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CppExplorer</RootNamespace>
+    <RootNamespace>Explorer</RootNamespace>
     <AssemblyName>CppExplorer</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -113,9 +113,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CppExplorer.cs" />
+    <Compile Include="Inspectors\Reflection\FieldInfoHolder.cs" />
+    <Compile Include="Inspectors\Reflection\MemberInfoHolder.cs" />
+    <Compile Include="Inspectors\Reflection\PropertyInfoHolder.cs" />
+    <Compile Include="Inspectors\UIWindow.cs" />
     <Compile Include="MainMenu\Pages\ConsolePage.cs" />
     <Compile Include="MainMenu\Pages\Console\REPL.cs" />
     <Compile Include="MainMenu\Pages\Console\REPLHelper.cs" />
+    <Compile Include="MainMenu\Pages\WindowPage.cs" />
     <Compile Include="WindowManager.cs" />
     <Compile Include="MainMenu\MainMenu.cs" />
     <Compile Include="Inspectors\GameObjectWindow.cs" />

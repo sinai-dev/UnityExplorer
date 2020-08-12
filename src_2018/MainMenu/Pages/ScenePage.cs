@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 namespace Explorer
 {
-    public class ScenePage : MainMenu.WindowPage
+    public class ScenePage : WindowPage
     {
         public static ScenePage Instance;
 
@@ -45,7 +45,7 @@ namespace Explorer
 
         public override void Update()
         {
-            if (Time.time - m_timeOfLastUpdate < 1f)
+            if (Time.time - m_timeOfLastUpdate < 0.2f)
             {
                 return;
             }

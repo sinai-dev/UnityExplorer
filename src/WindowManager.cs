@@ -1,5 +1,4 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -142,117 +141,49 @@ namespace Explorer
 
         // ============= Resize Window Helper ============
 
-        static readonly GUIContent gcDrag = new GUIContent("<->", "drag to resize");
-
+        // static readonly GUIContent gcDrag = new GUIContent("<->", "drag to resize");
+        private static readonly GUIContent gcDrag = new GUIContent("<->");
         private static bool isResizing = false;
         private static Rect m_currentResize;
         private static int m_currentWindow;
 
         public static Rect ResizeWindow(Rect _rect, int ID)
         {
-            GUILayout.BeginHorizontal(null);
-            GUILayout.Space(_rect.width - 35);
-
-            GUILayout.Button(gcDrag, GUI.skin.label, new GUILayoutOption[] { GUILayout.Width(25), GUILayout.Height(25) });
-
-            var r = GUILayoutUtility.GetLastRect();
-
-            Vector2 mouse = GUIUtility.ScreenToGUIPoint(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y));
-
-            if (r.Contains(mouse) && Input.GetMouseButtonDown(0))
+            try
             {
-                isResizing = true;
-                m_currentWindow = ID;
-                m_currentResize = new Rect(mouse.x, mouse.y, _rect.width, _rect.height);
-            }
-            else if (!Input.GetMouseButton(0))
-            {
-                isResizing = false;
-            }
+                GUILayout.BeginHorizontal(null);
+                GUILayout.Space(_rect.width - 35);
 
-            if (isResizing && ID == m_currentWindow)
-            {
-                _rect.width = Mathf.Max(100, m_currentResize.width + (mouse.x - m_currentResize.x));
-                _rect.height = Mathf.Max(100, m_currentResize.height + (mouse.y - m_currentResize.y));
-                _rect.xMax = Mathf.Min(Screen.width, _rect.xMax);  // modifying xMax affects width, not x
-                _rect.yMax = Mathf.Min(Screen.height, _rect.yMax);  // modifying yMax affects height, not y
-            }
+                GUILayout.Button(gcDrag, GUI.skin.label, new GUILayoutOption[] { GUILayout.Width(25), GUILayout.Height(25) });
 
-            GUILayout.EndHorizontal();
+                var r = GUILayoutUtility.GetLastRect();
+
+                Vector2 mouse = GUIUtility.ScreenToGUIPoint(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y));
+
+                if (r.Contains(mouse) && Input.GetMouseButtonDown(0))
+                {
+                    isResizing = true;
+                    m_currentWindow = ID;
+                    m_currentResize = new Rect(mouse.x, mouse.y, _rect.width, _rect.height);
+                }
+                else if (!Input.GetMouseButton(0))
+                {
+                    isResizing = false;
+                }
+
+                if (isResizing && ID == m_currentWindow)
+                {
+                    _rect.width = Mathf.Max(100, m_currentResize.width + (mouse.x - m_currentResize.x));
+                    _rect.height = Mathf.Max(100, m_currentResize.height + (mouse.y - m_currentResize.y));
+                    _rect.xMax = Mathf.Min(Screen.width, _rect.xMax);  // modifying xMax affects width, not x
+                    _rect.yMax = Mathf.Min(Screen.height, _rect.yMax);  // modifying yMax affects height, not y
+                }
+
+                GUILayout.EndHorizontal();
+            }
+            catch { }
 
             return _rect;
-        }
-
-        // ============ GENERATED WINDOW HOLDER ============
-
-        public abstract class UIWindow
-        {
-            public abstract Il2CppSystem.String Name { get; set; }
-
-            public object Target;
-
-            public int windowID;
-            public Rect m_rect = new Rect(0, 0, 550, 700);
-
-            public Vector2 scroll = Vector2.zero;
-
-            public static UIWindow CreateWindow<T>(object target) where T: UIWindow
-            {
-                //var component = (UIWindow)AddToGameObject<T>(Instance.gameObject);
-                var component = Activator.CreateInstance<T>();
-
-                component.Target = target;
-                component.windowID = NextWindowID();
-                component.m_rect = GetNewWindowRect();
-
-                Windows.Add(component);
-
-                component.Init();
-
-                return component;
-            }
-
-            public void DestroyWindow()
-            {
-                try 
-                { 
-                    Windows.Remove(this); 
-                } 
-                catch (Exception e)
-                {
-                    MelonLogger.Log("Exception removing Window from WindowManager.Windows list!");
-                    MelonLogger.Log($"{e.GetType()} : {e.Message}\r\n{e.StackTrace}");
-                }
-                //Destroy(this);
-            }
-
-            public abstract void Init();
-            public abstract void WindowFunction(int windowID);
-            public abstract void Update();
-
-            public void OnGUI()
-            {
-                if (CppExplorer.ShowMenu)
-                {
-                    var origSkin = GUI.skin;
-
-                    GUI.skin = UIStyles.WindowSkin;
-                    m_rect = GUI.Window(windowID, m_rect, (GUI.WindowFunction)WindowFunction, Name);
-
-                    GUI.skin = origSkin;
-                }
-            }
-
-            public void Header()
-            {
-                GUI.DragWindow(new Rect(0, 0, m_rect.width - 90, 20));
-
-                if (GUI.Button(new Rect(m_rect.width - 90, 2, 80, 20), "<color=red><b>X</b></color>"))
-                {
-                    DestroyWindow();
-                    return;
-                }
-            }
         }
     }
 }

@@ -9,9 +9,9 @@ using UnityEngine.SceneManagement;
 
 namespace Explorer
 {
-    public class GameObjectWindow : WindowManager.UIWindow
+    public class GameObjectWindow : UIWindow
     {
-        public override Il2CppSystem.String Name { get => "GameObject Inspector"; set => Name = value; }
+        public override string Name { get => "GameObject Inspector"; set => Name = value; }
 
         public GameObject m_object;
 

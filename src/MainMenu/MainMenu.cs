@@ -119,18 +119,5 @@ namespace Explorer
             GUILayout.Space(10);
             GUI.color = Color.white;
         }
-
-        public abstract class WindowPage
-        {
-            public virtual string Name { get; set; }
-
-            public Vector2 scroll = Vector2.zero;
-
-            public abstract void Init();
-
-            public abstract void DrawWindow();
-
-            public abstract void Update();
-        }
     }
 }
