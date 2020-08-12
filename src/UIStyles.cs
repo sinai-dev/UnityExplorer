@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Il2CppSystem.Collections;
-//using Il2CppSystem.Reflection;
+using Il2CppSystem.Reflection;
 using MelonLoader;
 using UnhollowerBaseLib;
 using UnityEngine;
@@ -15,8 +15,6 @@ namespace Explorer
 {
     public class UIStyles
     {
-        public static Color LightGreen = new Color(Color.green.r - 0.3f, Color.green.g - 0.3f, Color.green.b - 0.3f);
-
         public static GUISkin WindowSkin
         {
             get
@@ -117,48 +115,42 @@ namespace Explorer
         // helper for drawing a styled button for a GameObject or Transform
         public static void GameobjButton(GameObject obj, Action<GameObject> specialInspectMethod = null, bool showSmallInspectBtn = true, float width = 380)
         {
-            bool children = obj.transform.childCount > 0;
-
-            string label = children ? "[" + obj.transform.childCount + " children] " : "";
-            label += obj.name;
-
-            bool enabled = obj.activeSelf;
-            int childCount = obj.transform.childCount;
-            Color color;
-
-            if (enabled)
-            {
-                if (childCount > 0)
-                {
-                    color = Color.green;
-                }
-                else
-                {
-                    color = LightGreen;
-                }
-            }
-            else
-            {
-                color = Color.red;
-            }
-
-            FastGameobjButton(obj, color, label, obj.activeSelf, specialInspectMethod, showSmallInspectBtn, width);
-        }
-        
-        public static void FastGameobjButton(GameObject obj, Color activeColor, string label, bool enabled, Action<GameObject> specialInspectMethod = null, bool showSmallInspectBtn = true, float width = 380)
-        {
-            if (!obj)
+            if (obj == null)
             {
                 GUILayout.Label("<i><color=red>null</color></i>", null);
                 return;
             }
 
-            // ------ toggle active button ------
+            bool enabled = obj.activeSelf;
+            bool children = obj.transform.childCount > 0;
 
             GUILayout.BeginHorizontal(null);
             GUI.skin.button.alignment = TextAnchor.UpperLeft;
 
-            GUI.color = activeColor;
+            // ------ build name ------
+
+            string label = children ? "[" + obj.transform.childCount + " children] " : "";
+            label += obj.name;
+
+            // ------ Color -------
+
+            if (enabled)
+            {
+                if (children)
+                {
+                    GUI.color = Color.green;
+                }
+                else
+                {
+                    GUI.color = new Color(Color.green.r - 0.3f, Color.green.g - 0.3f, Color.green.b - 0.3f);
+                }
+            }
+            else
+            {
+                GUI.color = Color.red;
+            }
+
+            // ------ toggle active button ------
 
             enabled = GUILayout.Toggle(enabled, "", new GUILayoutOption[] { GUILayout.Width(18) });
             if (obj.activeSelf != enabled)
@@ -196,114 +188,84 @@ namespace Explorer
             GUILayout.EndHorizontal();
         }
 
-        public static void DrawMember(ref object value, ref bool isExpanded, MemberInfo memberInfo, Rect rect, object setTarget = null, Action<object> setAction = null, float labelWidth = 180, bool autoSet = false)
+        public static void DrawMember(ref object value, string valueType, string memberName, Rect rect, object setTarget = null, Action<object> setAction = null, float labelWidth = 180, bool autoSet = false)
         {
-            GUILayout.Label("<color=cyan>" + memberInfo.Name + ":</color>", new GUILayoutOption[] { GUILayout.Width(labelWidth) });
+            GUILayout.Label("<color=cyan>" + memberName + ":</color>", new GUILayoutOption[] { GUILayout.Width(labelWidth) });
 
-            string valueType = "";
-            bool canWrite = true;
-            if (memberInfo is FieldInfo fi)
-            {
-                valueType = fi.FieldType.Name;
-                canWrite = !(fi.IsLiteral && !fi.IsInitOnly);
-            }
-            else if (memberInfo is PropertyInfo pi)
-            {
-                valueType = pi.PropertyType.Name;
-                canWrite = pi.CanWrite;
-            }
-
-            DrawValue(ref value, rect, ref isExpanded, valueType, (canWrite ? setTarget : null), (canWrite ? setAction : null), autoSet);
+            DrawValue(ref value, rect, valueType, memberName, setTarget, setAction, autoSet);
         }
 
-        public static void DrawValue(ref object value, Rect rect, ref bool isExpanded, string nullValueType = null, object setTarget = null, Action<object> setAction = null, bool autoSet = false)
+        public static void DrawValue(ref object value, Rect rect, string nullValueType = null, string memberName = null, object setTarget = null, Action<object> setAction = null, bool autoSet = false)
         {
             if (value == null)
             {
                 GUILayout.Label("<i>null (" + nullValueType + ")</i>", null);
-                return;
             }
-
-            var valueType = value.GetType();
-            if (valueType.IsPrimitive || value.GetType() == typeof(string))
+            else
             {
-                DrawPrimitive(ref value, rect, setTarget, setAction);
-            }
-            else if (valueType == typeof(GameObject) || valueType == typeof(Transform))
-            {
-                GameObject go;
-                if (value.GetType() == typeof(Transform))
+                var valueType = value.GetType();
+                if (valueType.IsPrimitive || value.GetType() == typeof(string))
                 {
-                    go = (value as Transform).gameObject;
+                    DrawPrimitive(ref value, rect, setTarget, setAction);
                 }
-                else
+                else if (valueType == typeof(GameObject) || valueType == typeof(Transform))
                 {
-                    go = (value as GameObject);
-                }
-
-                GameobjButton(go, null, false, rect.width - 250);
-            }
-            else if (valueType.IsEnum)
-            {
-                if (setAction != null)
-                {
-                    if (GUILayout.Button("<", new GUILayoutOption[] { GUILayout.Width(25) }))
+                    GameObject go;
+                    if (value.GetType() == typeof(Transform))
                     {
-                        SetEnum(ref value, -1);
-                        setAction.Invoke(setTarget);
+                        go = (value as Transform).gameObject;
                     }
-                    if (GUILayout.Button(">", new GUILayoutOption[] { GUILayout.Width(25) }))
+                    else
                     {
-                        SetEnum(ref value, 1);
-                        setAction.Invoke(setTarget);
+                        go = (value as GameObject);
                     }
+
+                    UIStyles.GameobjButton(go, null, false, rect.width - 250);
                 }
-
-                GUILayout.Label(value.ToString(), null);
-            }
-            else if (value is System.Collections.IEnumerable || ReflectionWindow.IsList(valueType))
-            {
-                System.Collections.IEnumerable enumerable;
-
-                if (value is System.Collections.IEnumerable isEnumerable)
+                else if (valueType.IsEnum)
                 {
-                    enumerable = isEnumerable;
-                }
-                else
-                {
-                    var listValueType = value.GetType().GetGenericArguments()[0];
-                    var listType = typeof(Il2CppSystem.Collections.Generic.List<>).MakeGenericType(new Type[] { listValueType });
-                    var method = listType.GetMethod("ToArray");
-                    enumerable = (System.Collections.IEnumerable)method.Invoke(value, new object[0]);
-                }
-
-                int count = enumerable.Cast<object>().Count();
-
-                if (!isExpanded)
-                {
-                    if (GUILayout.Button("v", new GUILayoutOption[] { GUILayout.Width(25) }))
+                    if (setAction != null)
                     {
-                        isExpanded = true;
+                        if (GUILayout.Button("<", new GUILayoutOption[] { GUILayout.Width(25) }))
+                        {
+                            SetEnum(ref value, -1);
+                            setAction.Invoke(setTarget);
+                        }
+                        if (GUILayout.Button(">", new GUILayoutOption[] { GUILayout.Width(25) }))
+                        {
+                            SetEnum(ref value, 1);
+                            setAction.Invoke(setTarget);
+                        }
                     }
+
+                    GUILayout.Label(value.ToString(), null);
                 }
-                else
+                else if (value is System.Collections.IEnumerable || ReflectionWindow.IsList(valueType))
                 {
-                    if (GUILayout.Button("^", new GUILayoutOption[] { GUILayout.Width(25) }))
+                    System.Collections.IEnumerable enumerable;
+
+                    if (value is System.Collections.IEnumerable isEnumerable)
                     {
-                        isExpanded = false;
+                        enumerable = isEnumerable;
                     }
-                }
+                    else
+                    {
+                        var listValueType = value.GetType().GetGenericArguments()[0];
+                        var listType = typeof(Il2CppSystem.Collections.Generic.List<>).MakeGenericType(new Type[] { listValueType });
+                        var method = listType.GetMethod("ToArray");
+                        enumerable = (System.Collections.IEnumerable)method.Invoke(value, new object[0]);
+                    }
 
-                GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-                string btnLabel = "<color=yellow>[" + count + "] " + valueType + "</color>";
-                if (GUILayout.Button(btnLabel, new GUILayoutOption[] { GUILayout.MaxWidth(rect.width - 260) }))
-                {
-                    WindowManager.InspectObject(value, out bool _);
-                }
-                GUI.skin.button.alignment = TextAnchor.MiddleCenter;
+                    int count = enumerable.Cast<object>().Count();
 
-                if (isExpanded)
-                {
+                    GUI.skin.button.alignment = TextAnchor.MiddleLeft;
+                    string btnLabel = "<color=yellow>[" + count + "] " + valueType + "</color>";
+                    if (GUILayout.Button(btnLabel, new GUILayoutOption[] { GUILayout.MaxWidth(rect.width - 230) }))
+                    {
+                        WindowManager.InspectObject(value, out bool _);
+                    }
+                    GUI.skin.button.alignment = TextAnchor.MiddleCenter;
+
                     var enumerator = enumerable.GetEnumerator();
                     if (enumerator != null)
                     {
@@ -353,67 +315,48 @@ namespace Explorer
                         }
                     }
                 }
-            }
-            else
-            {
-                var label = value.ToString();
+                else
+                {
+                    var label = value.ToString();
 
-                if (valueType == typeof(Object))
-                {
-                    label = (value as Object).name;
-                }
-                else if (value is Vector4 vec4)
-                {
-                    label = vec4.ToString();
-                }
-                else if (value is Vector3 vec3)
-                {
-                    label = vec3.ToString();
-                }
-                else if (value is Vector2 vec2)
-                {
-                    label = vec2.ToString();
-                }
-                else if (value is Rect rec)
-                {
-                    label = rec.ToString();
-                }
-                else if (value is Matrix4x4 matrix)
-                {
-                    label = matrix.ToString();
-                }
-                else if (value is Color col)
-                {
-                    label = col.ToString();
-                }
+                    if (valueType == typeof(Object)) 
+                    {
+                        label = (value as Object).name;
+                    }
+                    else if (value is Vector4 vec4)
+                    {
+                        label = vec4.ToString();
+                    }
+                    else if (value is Vector3 vec3)
+                    {
+                        label = vec3.ToString();
+                    }
+                    else if (value is Vector2 vec2)
+                    {
+                        label = vec2.ToString();
+                    }
+                    else if (value is Rect rec)
+                    {
+                        label = rec.ToString();
+                    }
+                    else if (value is Matrix4x4 matrix)
+                    {
+                        label = matrix.ToString();
+                    }
+                    else if (value is Color col)
+                    {
+                        label = col.ToString();
+                    }
 
-                GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-                if (GUILayout.Button("<color=yellow>" + label + "</color>", new GUILayoutOption[] { GUILayout.MaxWidth(rect.width - 230) }))
-                {
-                    WindowManager.InspectObject(value, out bool _);
+                    GUI.skin.button.alignment = TextAnchor.MiddleLeft;
+                    if (GUILayout.Button("<color=yellow>" + label + "</color>", new GUILayoutOption[] { GUILayout.MaxWidth(rect.width - 230) }))
+                    {
+                        WindowManager.InspectObject(value, out bool _);
+                    }
+                    GUI.skin.button.alignment = TextAnchor.MiddleCenter;
                 }
-                GUI.skin.button.alignment = TextAnchor.MiddleCenter;
             }
         }
-
-        //public static void DrawMember(ref object value, string valueType, string memberName, Rect rect, object setTarget = null, Action<object> setAction = null, float labelWidth = 180, bool autoSet = false)
-        //{
-        //    GUILayout.Label("<color=cyan>" + memberName + ":</color>", new GUILayoutOption[] { GUILayout.Width(labelWidth) });
-
-        //    DrawValue(ref value, rect, valueType, memberName, setTarget, setAction, autoSet);
-        //}
-
-        //public static void DrawValue(ref object value, Rect rect, string nullValueType = null, string memberName = null, object setTarget = null, Action<object> setAction = null, bool autoSet = false)
-        //{
-        //    if (value == null)
-        //    {
-        //        GUILayout.Label("<i>null (" + nullValueType + ")</i>", null);
-        //    }
-        //    else
-        //    {
-
-        //    }
-        //}
 
         // Helper for drawing primitive values (with Apply button)
 
@@ -444,10 +387,10 @@ namespace Explorer
                 }
                 else
                 {
-                    value = GUILayout.TextField(value.ToString(), new GUILayoutOption[] { GUILayout.MaxWidth(m_rect.width - 260) });
+                    value = GUILayout.TextField(value.ToString(),  new GUILayoutOption[] { GUILayout.MaxWidth(m_rect.width - 260) });
                 }
 
-                if (autoSet || (allowSet && GUILayout.Button("<color=#00FF00>Apply</color>", new GUILayoutOption[] { GUILayout.Width(60) })))
+                if (autoSet || (allowSet && GUILayout.Button("<color=#00FF00>Apply</color>",  new GUILayoutOption[] { GUILayout.Width(60) })))
                 {
                     setAction.Invoke(setTarget);
                 }

@@ -44,7 +44,7 @@ namespace Explorer
         private List<object> m_searchResults = new List<object>();
         private Vector2 resultsScroll = Vector2.zero;
 
-        public override void Init()
+        public override void Init() 
         {
             Instance = this;
         }
@@ -54,7 +54,7 @@ namespace Explorer
             m_searchResults.Clear();
         }
 
-        public override void Update()
+        public override void Update() 
         {
         }
 
@@ -91,8 +91,7 @@ namespace Explorer
                     {
                         var obj = m_searchResults[i];
 
-                        bool _ = false;
-                        UIStyles.DrawValue(ref obj, _temprect, ref _);
+                        UIStyles.DrawValue(ref obj, _temprect);
                     }
                 }
                 else
@@ -148,14 +147,14 @@ namespace Explorer
             {
                 GUILayout.BeginHorizontal(null);
                 GUI.skin.label.alignment = TextAnchor.MiddleRight;
-                GUILayout.Label("Custom Class:", new GUILayoutOption[] { GUILayout.Width(250) });
+                GUILayout.Label("Custom Class:", new GUILayoutOption[] {  GUILayout.Width(250) });
                 GUI.skin.label.alignment = TextAnchor.UpperLeft;
-                m_typeInput = GUILayout.TextField(m_typeInput, new GUILayoutOption[] { GUILayout.Width(250) });
+                m_typeInput = GUILayout.TextField(m_typeInput, new GUILayoutOption[] {  GUILayout.Width(250) });
                 GUILayout.EndHorizontal();
             }
 
             GUILayout.BeginHorizontal(null);
-            GUILayout.Label("Scene Filter:", new GUILayoutOption[] { GUILayout.Width(100) });
+            GUILayout.Label("Scene Filter:", new GUILayoutOption[] {  GUILayout.Width(100) });
             SceneFilterToggle(SceneFilter.Any, "Any", 60);
             SceneFilterToggle(SceneFilter.This, "This Scene", 100);
             SceneFilterToggle(SceneFilter.DontDestroy, "DontDestroyOnLoad", 140);
@@ -263,6 +262,7 @@ namespace Explorer
                 {
                     var findType = CppExplorer.GetType(_type);
                     type = Il2CppSystem.Type.GetType(findType.AssemblyQualifiedName);
+                    MelonLogger.Log("Got type: " + type.AssemblyQualifiedName);
                 }
                 catch (Exception e)
                 {
@@ -372,7 +372,7 @@ namespace Explorer
             if (type == typeof(GameObject) || typeof(Component).IsAssignableFrom(type))
             {
                 var go = obj as GameObject ?? (obj as Component).gameObject;
-
+                
                 if (go != null && go.scene.name == CppExplorer.ActiveSceneName && go.scene.name != "DontDestroyOnLoad")
                 {
                     return true;

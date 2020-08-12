@@ -36,17 +36,17 @@ namespace Explorer
             return MB.FindAll<T>();
         }
 
-        //[Documentation("runCoroutine(enumerator) - runs an IEnumerator as a Unity coroutine.")]
-        //public static object runCoroutine(IEnumerator i)
-        //{
-        //    return MB.RunCoroutine(i);
-        //}
+        [Documentation("runCoroutine(enumerator) - runs an IEnumerator as a Unity coroutine.")]
+        public static object runCoroutine(IEnumerator i)
+        {
+            return MB.RunCoroutine(i);
+        }
 
-        //[Documentation("endCoroutine(co) - ends a Unity coroutine.")]
-        //public static void endCoroutine(Coroutine c)
-        //{
-        //    MB.EndCoroutine(c);
-        //}
+        [Documentation("endCoroutine(co) - ends a Unity coroutine.")]
+        public static void endCoroutine(Coroutine c)
+        {
+            MB.EndCoroutine(c);
+        }
 
         ////[Documentation("type<T>() - obtain type info about a type T. Provides some Reflection helpers.")]
         ////public static TypeHelper type<T>()

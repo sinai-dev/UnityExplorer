@@ -21,14 +21,14 @@ namespace Explorer
             return FindObjectsOfType<T>();
         }
 
-        //public object RunCoroutine(IEnumerator enumerator)
-        //{
-        //    return MelonCoroutines.Start(enumerator);
-        //}
+        public object RunCoroutine(IEnumerator enumerator)
+        {
+            return MelonCoroutines.Start(enumerator);
+        }
 
-        //public void EndCoroutine(Coroutine c)
-        //{
-        //    StopCoroutine(c);
-        //}
+        public void EndCoroutine(Coroutine c)
+        {
+            StopCoroutine(c);
+        }
     }
 }
