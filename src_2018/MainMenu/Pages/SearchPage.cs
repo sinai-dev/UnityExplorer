@@ -22,6 +22,8 @@ namespace Explorer
         private string m_typeInput = "";
         private int m_limit = 100;
         private int m_pageOffset = 0;
+        private List<object> m_searchResults = new List<object>();
+        private Vector2 resultsScroll = Vector2.zero;
 
         public SceneFilter SceneMode = SceneFilter.Any;
         public TypeFilter TypeMode = TypeFilter.Object;
@@ -41,9 +43,6 @@ namespace Explorer
             Component,
             Custom
         }
-
-        private List<object> m_searchResults = new List<object>();
-        private Vector2 resultsScroll = Vector2.zero;
 
         public override void Init()
         {
@@ -114,7 +113,7 @@ namespace Explorer
                     int offset = m_pageOffset * CppExplorer.ArrayLimit;
                     int preiterated = 0;
 
-                    if (offset >= count) offset = 0;
+                    if (offset >= count) m_pageOffset = 0;
 
                     for (int i = 0; i < m_searchResults.Count; i++)
                     {
@@ -246,7 +245,110 @@ namespace Explorer
         }
 
 
-        // -------------- ACTUAL METHODS (not Gui draw) ----------------- //
+        // -------------- ACTUAL METHODS (not Gui draw) ----------------- //        
+
+        // ======= search functions =======
+
+        private void Search()
+        {
+            m_pageOffset = 0;
+            m_searchResults = FindAllObjectsOfType(m_searchInput, m_typeInput);
+        }
+
+        private List<object> FindAllObjectsOfType(string _search, string _type)
+        {
+            Il2CppSystem.Type type = null;
+
+            if (TypeMode == TypeFilter.Custom)
+            {
+                try
+                {
+                    var findType = CppExplorer.GetType(_type);
+                    type = Il2CppSystem.Type.GetType(findType.AssemblyQualifiedName);
+                }
+                catch (Exception e)
+                {
+                    MelonLogger.Log("Exception: " + e.GetType() + ", " + e.Message + "\r\n" + e.StackTrace);
+                }
+            }
+            else if (TypeMode == TypeFilter.Object)
+            {
+                type = CppExplorer.ObjectType;
+            }
+            else if (TypeMode == TypeFilter.GameObject)
+            {
+                type = CppExplorer.GameObjectType;
+            }
+            else if (TypeMode == TypeFilter.Component)
+            {
+                type = CppExplorer.ComponentType;
+            }
+
+            if (!CppExplorer.ObjectType.IsAssignableFrom(type))
+            {
+                MelonLogger.LogError("Your Class Type must inherit from UnityEngine.Object! Leave blank to default to UnityEngine.Object");
+                return new List<object>();
+            }
+
+            var matches = new List<object>();
+
+            var allObjectsOfType = Resources.FindObjectsOfTypeAll(type);
+
+            foreach (var obj in allObjectsOfType)
+            {
+                if (_search != "" && !obj.name.ToLower().Contains(_search.ToLower()))
+                {
+                    continue;
+                }
+
+                if (SceneMode != SceneFilter.Any && !FilterScene(obj, this.SceneMode))
+                {
+                    continue;
+                }
+
+                if (!matches.Contains(obj))
+                {
+                    matches.Add(obj);
+                }
+            }
+
+            return matches;
+        }
+
+        public static bool FilterScene(object obj, SceneFilter filter)
+        {
+            GameObject go;
+            if (obj is Il2CppSystem.Object ilObject)
+            {
+                go = ilObject.TryCast<GameObject>() ?? ilObject.TryCast<Component>().gameObject;
+            }
+            else
+            {
+                go = (obj as GameObject) ?? (obj as Component).gameObject;
+            }
+
+            if (!go)
+            {
+                // object is not on a GameObject, cannot perform scene filter operation.
+                return false;
+            }
+
+            if (filter == SceneFilter.None)
+            {
+                return string.IsNullOrEmpty(go.scene.name);
+            }
+            else if (filter == SceneFilter.This)
+            {
+                return go.scene.name == CppExplorer.ActiveSceneName;
+            }
+            else if (filter == SceneFilter.DontDestroy)
+            {
+                return go.scene.name == "DontDestroyOnLoad";
+            }
+            return false;
+        }
+
+        // ====== other ========
 
         // credit: ManlyMarco (RuntimeUnityEditor)
         public static IEnumerable<object> GetInstanceClassScanner()
@@ -285,173 +387,6 @@ namespace Explorer
             try { return asm.GetTypes(); }
             catch (ReflectionTypeLoadException e) { return e.Types.Where(x => x != null); }
             catch { return Enumerable.Empty<Type>(); }
-        }
-
-        // ======= search functions =======
-
-        private void Search()
-        {
-            m_searchResults = FindAllObjectsOfType(m_searchInput, m_typeInput);
-        }
-
-        private List<object> FindAllObjectsOfType(string _search, string _type)
-        {
-            Il2CppSystem.Type type = null;
-
-            if (TypeMode == TypeFilter.Custom)
-            {
-                try
-                {
-                    var findType = CppExplorer.GetType(_type);
-                    type = Il2CppSystem.Type.GetType(findType.AssemblyQualifiedName);
-                }
-                catch (Exception e)
-                {
-                    MelonLogger.Log("Exception: " + e.GetType() + ", " + e.Message + "\r\n" + e.StackTrace);
-                }
-            }
-            else if (TypeMode == TypeFilter.Object)
-            {
-                type = Il2CppType.Of<Object>();
-            }
-            else if (TypeMode == TypeFilter.GameObject)
-            {
-                type = Il2CppType.Of<GameObject>();
-            }
-            else if (TypeMode == TypeFilter.Component)
-            {
-                type = Il2CppType.Of<Component>();
-            }
-
-            if (!Il2CppType.Of<Object>().IsAssignableFrom(type))
-            {
-                MelonLogger.LogError("Your Class Type must inherit from UnityEngine.Object! Leave blank to default to UnityEngine.Object");
-                return new List<object>();
-            }
-
-            var matches = new List<object>();
-
-            foreach (var obj in Resources.FindObjectsOfTypeAll(type))
-            {
-                if (_search != "" && !obj.name.ToLower().Contains(_search.ToLower()))
-                {
-                    continue;
-                }
-
-                if (SceneMode != SceneFilter.Any)
-                {
-                    if (SceneMode == SceneFilter.None)
-                    {
-                        if (!NoSceneFilter(obj, obj.GetType()))
-                        {
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        GameObject go;
-
-                        var objtype = obj.GetType();
-                        if (objtype == typeof(GameObject))
-                        {
-                            go = obj as GameObject;
-                        }
-                        else if (typeof(Component).IsAssignableFrom(objtype))
-                        {
-                            go = (obj as Component).gameObject;
-                        }
-                        else { continue; }
-
-                        if (!go) { continue; }
-
-                        if (SceneMode == SceneFilter.This)
-                        {
-                            if (go.scene.name != CppExplorer.ActiveSceneName || go.scene.name == "DontDestroyOnLoad")
-                            {
-                                continue;
-                            }
-                        }
-                        else if (SceneMode == SceneFilter.DontDestroy)
-                        {
-                            if (go.scene.name != "DontDestroyOnLoad")
-                            {
-                                continue;
-                            }
-                        }
-                    }
-                }
-
-                if (!matches.Contains(obj))
-                {
-                    matches.Add(obj);
-                }
-            }
-
-            return matches;
-        }
-
-        public static bool ThisSceneFilter(object obj, Type type)
-        {
-            if (type == typeof(GameObject) || typeof(Component).IsAssignableFrom(type))
-            {
-                var go = obj as GameObject ?? (obj as Component).gameObject;
-
-                if (go != null && go.scene.name == CppExplorer.ActiveSceneName && go.scene.name != "DontDestroyOnLoad")
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public static bool DontDestroyFilter(object obj, Type type)
-        {
-            if (type == typeof(GameObject) || typeof(Component).IsAssignableFrom(type))
-            {
-                var go = obj as GameObject ?? (obj as Component).gameObject;
-
-                if (go != null && go.scene.name == "DontDestroyOnLoad")
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public static bool NoSceneFilter(object obj, Type type)
-        {
-            if (type == typeof(GameObject))
-            {
-                var go = obj as GameObject;
-
-                if (go.scene.name != CppExplorer.ActiveSceneName && go.scene.name != "DontDestroyOnLoad")
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else if (typeof(Component).IsAssignableFrom(type))
-            {
-                var go = (obj as Component).gameObject;
-
-                if (go == null || (go.scene.name != CppExplorer.ActiveSceneName && go.scene.name != "DontDestroyOnLoad"))
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                return true;
-            }
         }
     }
 }

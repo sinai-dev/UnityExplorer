@@ -6,6 +6,7 @@ using System.Text;
 using UnityEngine;
 using MelonLoader;
 using UnhollowerBaseLib;
+using UnhollowerRuntimeLib;
 using Harmony;
 
 namespace Explorer
@@ -16,7 +17,7 @@ namespace Explorer
 
         public const string ID = "com.sinai.cppexplorer";
         public const string NAME = "IL2CPP Runtime Explorer (Unity 2018)";
-        public const string VERSION = "1.3.1";
+        public const string VERSION = "1.3.2";
         public const string AUTHOR = "Sinai";
 
         // fields
@@ -30,6 +31,13 @@ namespace Explorer
         public static bool ShowMenu { get; set; } = false;
         public static int ArrayLimit { get; set; } = 20;
         public bool MouseInspect { get; set; } = false;
+
+        // prop helpers
+
+        public static Il2CppSystem.Type GameObjectType => Il2CppType.Of<GameObject>();
+        public static Il2CppSystem.Type TransformType => Il2CppType.Of<Transform>();
+        public static Il2CppSystem.Type ObjectType => Il2CppType.Of<UnityEngine.Object>();
+        public static Il2CppSystem.Type ComponentType => Il2CppType.Of<Component>();
 
         public static string ActiveSceneName
         {

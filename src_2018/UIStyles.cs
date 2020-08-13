@@ -225,20 +225,29 @@ namespace Explorer
             }
 
             var valueType = value.GetType();
+
+            Il2CppSystem.Type ilType = null;
+            if (value is Il2CppSystem.Object ilObject)
+            {
+                ilType = ilObject.GetIl2CppType();
+            }
+
             if (valueType.IsPrimitive || value.GetType() == typeof(string))
             {
                 DrawPrimitive(ref value, rect, setTarget, setAction);
             }
-            else if (valueType == typeof(GameObject) || valueType == typeof(Transform))
+            //else if (valueType == typeof(GameObject) || typeof(Component).IsAssignableFrom(valueType))
+            else if (ilType != null && ilType == CppExplorer.GameObjectType || CppExplorer.ComponentType.IsAssignableFrom(ilType))
             {
                 GameObject go;
-                if (value.GetType() == typeof(Transform))
+                var ilObj = value as Il2CppSystem.Object;
+                if (ilType == CppExplorer.GameObjectType)
                 {
-                    go = (value as Transform).gameObject;
+                    go = ilObj.TryCast<GameObject>();
                 }
                 else
                 {
-                    go = (value as GameObject);
+                    go = ilObj.TryCast<Component>().gameObject;
                 }
 
                 GameobjButton(go, null, false, rect.width - 250);
