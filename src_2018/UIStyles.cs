@@ -236,8 +236,7 @@ namespace Explorer
             {
                 DrawPrimitive(ref value, rect, setTarget, setAction);
             }
-            //else if (valueType == typeof(GameObject) || typeof(Component).IsAssignableFrom(valueType))
-            else if (ilType != null && ilType == CppExplorer.GameObjectType || CppExplorer.ComponentType.IsAssignableFrom(ilType))
+            else if (ilType != null && ilType == CppExplorer.GameObjectType || CppExplorer.TransformType.IsAssignableFrom(ilType))
             {
                 GameObject go;
                 var ilObj = value as Il2CppSystem.Object;
@@ -247,7 +246,7 @@ namespace Explorer
                 }
                 else
                 {
-                    go = ilObj.TryCast<Component>().gameObject;
+                    go = ilObj.TryCast<Transform>().gameObject;
                 }
 
                 GameobjButton(go, null, false, rect.width - 250);
@@ -426,6 +425,20 @@ namespace Explorer
                     label = col.ToString();
                 }
 
+                string typeLabel;
+                if (ilType != null)
+                {
+                    typeLabel = ilType.FullName;
+                }
+                else
+                {
+                    typeLabel = value.GetType().FullName;
+                }
+                if (!label.Contains(typeLabel))
+                {
+                    label += $" ({typeLabel})";
+                }
+
                 GUI.skin.button.alignment = TextAnchor.MiddleLeft;
                 if (GUILayout.Button("<color=yellow>" + label + "</color>", new GUILayoutOption[] { GUILayout.MaxWidth(rect.width - 230) }))
                 {
@@ -434,25 +447,6 @@ namespace Explorer
                 GUI.skin.button.alignment = TextAnchor.MiddleCenter;
             }
         }
-
-        //public static void DrawMember(ref object value, string valueType, string memberName, Rect rect, object setTarget = null, Action<object> setAction = null, float labelWidth = 180, bool autoSet = false)
-        //{
-        //    GUILayout.Label("<color=cyan>" + memberName + ":</color>", new GUILayoutOption[] { GUILayout.Width(labelWidth) });
-
-        //    DrawValue(ref value, rect, valueType, memberName, setTarget, setAction, autoSet);
-        //}
-
-        //public static void DrawValue(ref object value, Rect rect, string nullValueType = null, string memberName = null, object setTarget = null, Action<object> setAction = null, bool autoSet = false)
-        //{
-        //    if (value == null)
-        //    {
-        //        GUILayout.Label("<i>null (" + nullValueType + ")</i>", null);
-        //    }
-        //    else
-        //    {
-
-        //    }
-        //}
 
         // Helper for drawing primitive values (with Apply button)
 

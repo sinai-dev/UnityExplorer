@@ -33,6 +33,7 @@ namespace Explorer
                 if (obj is Il2CppSystem.Object ilObject)
                 {
                     var declaringType = this.propInfo.DeclaringType;
+
                     if (declaringType == typeof(Il2CppObjectBase))
                     {
                         m_value = ilObject.Pointer;
@@ -40,7 +41,7 @@ namespace Explorer
                     else
                     {
                         var cast = CppExplorer.Il2CppCast(obj, declaringType);
-                        m_value = this.propInfo.GetValue(cast, null);
+                        m_value = this.propInfo.GetValue(this.propInfo.GetAccessors()[0].IsStatic ? null : cast, null);
                     }
                 }
                 else
@@ -70,7 +71,7 @@ namespace Explorer
             {
                 if (propInfo.PropertyType.IsEnum)
                 {
-                    if (System.Enum.Parse(propInfo.PropertyType, m_value.ToString()) is object enumValue && enumValue != null)
+                    if (Enum.Parse(propInfo.PropertyType, m_value.ToString()) is object enumValue && enumValue != null)
                     {
                         m_value = enumValue;
                     }

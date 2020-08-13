@@ -31,54 +31,6 @@ namespace Explorer
             Field
         }
 
-        public Type GetActualType(object m_object)
-        {
-            if (m_object is Il2CppSystem.Object ilObject)
-            {
-                var iltype = ilObject.GetIl2CppType();
-                return Type.GetType(iltype.AssemblyQualifiedName);
-            }
-            else
-            {
-                return m_object.GetType();
-            }
-        }
-
-        public Type[] GetAllBaseTypes(object m_object)
-        {
-            var list = new List<Type>();
-
-            if (m_object is Il2CppSystem.Object ilObject)
-            {
-                var ilType = ilObject.GetIl2CppType();
-                if (Type.GetType(ilType.AssemblyQualifiedName) is Type ilTypeToManaged)
-                {
-                    list.Add(ilTypeToManaged);
-
-                    while (ilType.BaseType != null)
-                    {
-                        ilType = ilType.BaseType;
-                        if (Type.GetType(ilType.AssemblyQualifiedName) is Type ilBaseTypeToManaged)
-                        {
-                            list.Add(ilBaseTypeToManaged);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                var type = m_object.GetType();
-                list.Add(type);
-                while (type.BaseType != null)
-                {
-                    type = type.BaseType;
-                    list.Add(type);
-                }
-            }
-
-            return list.ToArray();
-        }
-
         public override void Init()
         {
             m_object = Target;
@@ -101,7 +53,7 @@ namespace Explorer
             }
             catch { }
 
-            UpdateValues();
+            UpdateValues(true);
         }
 
         public override void Update()
@@ -112,9 +64,9 @@ namespace Explorer
             }
         }
 
-        private void UpdateValues()
+        private void UpdateValues(bool forceAll = false)
         {
-            if (m_filter == MemberFilter.Both || m_filter == MemberFilter.Field)
+            if (forceAll || m_filter == MemberFilter.Both || m_filter == MemberFilter.Field)
             {
                 foreach (var holder in this.m_FieldInfos)
                 {
@@ -125,7 +77,7 @@ namespace Explorer
                 }
             }
 
-            if (m_filter == MemberFilter.Both || m_filter == MemberFilter.Property)
+            if (forceAll || m_filter == MemberFilter.Both || m_filter == MemberFilter.Property)
             {
                 foreach (var holder in this.m_PropertyInfos)
                 {
@@ -276,6 +228,56 @@ namespace Explorer
                 m_filter = mode;
             }
             GUI.color = Color.white;
+        }
+
+        // ============ HELPERS =============== 
+
+        public Type GetActualType(object m_object)
+        {
+            if (m_object is Il2CppSystem.Object ilObject)
+            {
+                var iltype = ilObject.GetIl2CppType();
+                return Type.GetType(iltype.AssemblyQualifiedName);
+            }
+            else
+            {
+                return m_object.GetType();
+            }
+        }
+
+        public Type[] GetAllBaseTypes(object m_object)
+        {
+            var list = new List<Type>();
+
+            if (m_object is Il2CppSystem.Object ilObject)
+            {
+                var ilType = ilObject.GetIl2CppType();
+                if (Type.GetType(ilType.AssemblyQualifiedName) is Type ilTypeToManaged)
+                {
+                    list.Add(ilTypeToManaged);
+
+                    while (ilType.BaseType != null)
+                    {
+                        ilType = ilType.BaseType;
+                        if (Type.GetType(ilType.AssemblyQualifiedName) is Type ilBaseTypeToManaged)
+                        {
+                            list.Add(ilBaseTypeToManaged);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var type = m_object.GetType();
+                list.Add(type);
+                while (type.BaseType != null)
+                {
+                    type = type.BaseType;
+                    list.Add(type);
+                }
+            }
+
+            return list.ToArray();
         }
 
         public static bool IsList(Type t)

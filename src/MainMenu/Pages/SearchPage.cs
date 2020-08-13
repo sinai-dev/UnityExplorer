@@ -20,7 +20,7 @@ namespace Explorer
 
         private string m_searchInput = "";
         private string m_typeInput = "";
-        private int m_limit = 100;
+        private int m_limit = 20;
         private int m_pageOffset = 0;
         private List<object> m_searchResults = new List<object>();
         private Vector2 resultsScroll = Vector2.zero;
@@ -85,11 +85,11 @@ namespace Explorer
 
                 int count = m_searchResults.Count;
 
-                if (count > CppExplorer.ArrayLimit)
+                if (count > this.m_limit)
                 {
                     // prev/next page buttons
                     GUILayout.BeginHorizontal(null);
-                    int maxOffset = (int)Mathf.Ceil(count / CppExplorer.ArrayLimit);
+                    int maxOffset = (int)Mathf.Ceil(count / this.m_limit);
                     if (GUILayout.Button("< Prev", null))
                     {
                         if (m_pageOffset > 0) m_pageOffset--;
@@ -110,7 +110,7 @@ namespace Explorer
 
                 if (m_searchResults.Count > 0)
                 {
-                    int offset = m_pageOffset * CppExplorer.ArrayLimit;
+                    int offset = m_pageOffset * this.m_limit;
                     int preiterated = 0;
 
                     if (offset >= count) m_pageOffset = 0;
@@ -123,7 +123,7 @@ namespace Explorer
                             continue;
                         }
 
-                        if (i - offset > CppExplorer.ArrayLimit - 1)
+                        if (i - offset > this.m_limit - 1)
                         {
                             break;
                         }
@@ -257,14 +257,14 @@ namespace Explorer
 
         private List<object> FindAllObjectsOfType(string _search, string _type)
         {
-            Il2CppSystem.Type type = null;
+            Il2CppSystem.Type searchType = null;
 
             if (TypeMode == TypeFilter.Custom)
             {
                 try
                 {
                     var findType = CppExplorer.GetType(_type);
-                    type = Il2CppSystem.Type.GetType(findType.AssemblyQualifiedName);
+                    searchType = Il2CppSystem.Type.GetType(findType.AssemblyQualifiedName);
                 }
                 catch (Exception e)
                 {
@@ -273,31 +273,38 @@ namespace Explorer
             }
             else if (TypeMode == TypeFilter.Object)
             {
-                type = CppExplorer.ObjectType;
+                searchType = CppExplorer.ObjectType;
             }
             else if (TypeMode == TypeFilter.GameObject)
             {
-                type = CppExplorer.GameObjectType;
+                searchType = CppExplorer.GameObjectType;
             }
             else if (TypeMode == TypeFilter.Component)
             {
-                type = CppExplorer.ComponentType;
+                searchType = CppExplorer.ComponentType;
             }
 
-            if (!CppExplorer.ObjectType.IsAssignableFrom(type))
+            if (!CppExplorer.ObjectType.IsAssignableFrom(searchType))
             {
-                MelonLogger.LogError("Your Class Type must inherit from UnityEngine.Object! Leave blank to default to UnityEngine.Object");
+                MelonLogger.LogError("Your Custom Class Type must inherit from UnityEngine.Object!");
                 return new List<object>();
             }
 
             var matches = new List<object>();
 
-            var allObjectsOfType = Resources.FindObjectsOfTypeAll(type);
+            var allObjectsOfType = Resources.FindObjectsOfTypeAll(searchType);
 
             foreach (var obj in allObjectsOfType)
             {
                 if (_search != "" && !obj.name.ToLower().Contains(_search.ToLower()))
                 {
+                    continue;
+                }
+
+                if (searchType == CppExplorer.ComponentType && CppExplorer.TransformType.IsAssignableFrom(obj.GetIl2CppType()))
+                {
+                    // Transforms shouldn't really be counted as Components, skip them.
+                    // They're more akin to GameObjects.
                     continue;
                 }
 
