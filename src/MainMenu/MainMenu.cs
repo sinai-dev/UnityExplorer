@@ -56,7 +56,7 @@ namespace Explorer
                 var origSkin = GUI.skin;
                 GUI.skin = UIStyles.WindowSkin;
 
-                MainRect = GUI.Window(MainWindowID, MainRect, (GUI.WindowFunction)MainWindow, "IL2CPP Runtime Explorer");
+                MainRect = GUI.Window(MainWindowID, MainRect, (GUI.WindowFunction)MainWindow, CppExplorer.NAME);
 
                 GUI.skin = origSkin;
             }

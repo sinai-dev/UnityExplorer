@@ -16,9 +16,14 @@ namespace Explorer
         // consts
 
         public const string ID = "com.sinai.cppexplorer";
-        public const string NAME = "IL2CPP Runtime Explorer";
         public const string VERSION = "1.3.2";
         public const string AUTHOR = "Sinai";
+
+#if Release_Unity2018
+        public const string NAME = "IL2CPP Runtime Explorer (Unity 2018)";
+#else
+        public const string NAME = "IL2CPP Runtime Explorer";
+#endif
 
         // fields
 

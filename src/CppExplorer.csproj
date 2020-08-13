@@ -8,31 +8,33 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Explorer</RootNamespace>
-    <AssemblyName>CppExplorer</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <AssemblyName>CppExplorer</AssemblyName>
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\Release\</OutputPath>
-    <DefineConstants>
-    </DefineConstants>
+    <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x64</PlatformTarget>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_Unity2018|AnyCPU' ">
+    <AssemblyName>CppExplorer_Unity2018</AssemblyName>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\Release\</OutputPath>
+    <DefineConstants>Release_Unity2018</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
@@ -66,48 +68,70 @@
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnhollowerRuntimeLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.TextMeshPro">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\Unity.TextMeshPro.dll</HintPath>
+    <!-- Unity 2019 build (InputLegacyModule.dll) -->
+    <Reference Include="UnityEngine" Condition="'$(Configuration)'=='Debug'">
+      <HintPath>..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.CoreModule.dll</HintPath>
+    <Reference Include="UnityEngine.CoreModule" Condition="'$(Configuration)'=='Debug'">
+      <HintPath>..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+    <Reference Include="UnityEngine.IMGUIModule" Condition="'$(Configuration)'=='Debug'">
+      <HintPath>..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+    <Reference Include="UnityEngine.InputModule" Condition="'$(Configuration)'=='Debug'">
+      <HintPath>..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.InputModule">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.InputModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.ParticleSystemModule">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.PhysicsModule">
+    <Reference Include="UnityEngine.PhysicsModule" Condition="'$(Configuration)'=='Debug'">
       <HintPath>..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.PhysicsModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+    <Reference Include="UnityEngine.TextRenderingModule" Condition="'$(Configuration)'=='Debug'">
+      <HintPath>..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.UI.dll</HintPath>
+    <Reference Include="UnityEngine.UI" Condition="'$(Configuration)'=='Debug'">
+      <HintPath>..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.UIElementsModule">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.UIElementsModule.dll</HintPath>
+    <Reference Include="UnityEngine.UIElementsModule" Condition="'$(Configuration)'=='Debug'">
+      <HintPath>..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.UIElementsModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.UIModule">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.UIModule.dll</HintPath>
+    <!-- Unity 2018 build (InputModule.dll) -->
+    <Reference Include="UnityEngine" Condition="'$(Configuration)'=='Release_Unity2018'">
+      <HintPath>..\..\..\Steam\steamapps\common\VRChat\MelonLoader\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule" Condition="'$(Configuration)'=='Release_Unity2018'">
+      <HintPath>..\..\..\Steam\steamapps\common\VRChat\MelonLoader\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule" Condition="'$(Configuration)'=='Release_Unity2018'">
+      <HintPath>..\..\..\Steam\steamapps\common\VRChat\MelonLoader\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InputModule" Condition="'$(Configuration)'=='Release_Unity2018'">
+      <HintPath>..\..\..\Steam\steamapps\common\VRChat\MelonLoader\Managed\UnityEngine.InputModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule" Condition="'$(Configuration)'=='Release_Unity2018'">
+      <HintPath>..\..\..\Steam\steamapps\common\VRChat\MelonLoader\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule" Condition="'$(Configuration)'=='Release_Unity2018'">
+      <HintPath>..\..\..\Steam\steamapps\common\VRChat\MelonLoader\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI" Condition="'$(Configuration)'=='Release_Unity2018'">
+      <HintPath>..\..\..\Steam\steamapps\common\VRChat\MelonLoader\Managed\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIElementsModule" Condition="'$(Configuration)'=='Release_Unity2018'">
+      <HintPath>..\..\..\Steam\steamapps\common\VRChat\MelonLoader\Managed\UnityEngine.UIElementsModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

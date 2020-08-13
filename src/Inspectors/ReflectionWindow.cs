@@ -70,7 +70,7 @@ namespace Explorer
             {
                 foreach (var holder in this.m_FieldInfos)
                 {
-                    if (m_search == "" || holder.fieldInfo.Name.ToLower().Contains(m_search.ToLower()))
+                    if (forceAll || m_search == "" || holder.fieldInfo.Name.ToLower().Contains(m_search.ToLower()))
                     {
                         holder.UpdateValue(m_object);
                     }
@@ -81,7 +81,7 @@ namespace Explorer
             {
                 foreach (var holder in this.m_PropertyInfos)
                 {
-                    if (m_search == "" || holder.propInfo.Name.ToLower().Contains(m_search.ToLower()))
+                    if (forceAll || m_search == "" || holder.propInfo.Name.ToLower().Contains(m_search.ToLower()))
                     {
                         holder.UpdateValue(m_object);
                     }
