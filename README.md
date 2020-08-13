@@ -4,14 +4,14 @@
 
 An in-game explorer and a suite of debugging tools for [IL2CPP](https://docs.unity3d.com/Manual/IL2CPP.html) Unity games, using [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader). 
 
-This was designed to be an IL2CPP-compatible equivalent to [Runtime Unity Editor](https://github.com/ManlyMarco/RuntimeUnityEditor).
+Most games running on Unity 2017 to 2019 should be supported. If you find that the GUI does not display properly and you get errors in the MelonLoader console about it, then this is likely due to a bug with Il2CppAssemblyUnhollower's unstripping. This bug is known by the developer of the tool and they will fix it as soon as they are able to.
 
 ## Features
 * Scene hierarchy explorer
 * Search loaded assets with filters
 * Traverse and manipulate GameObjects
 * Generic Reflection inspector
-* REPL Console
+* C# REPL Console
 * Inspect-under-mouse
 
 ## How to install
@@ -38,7 +38,7 @@ Search feature:
 [![](https://i.imgur.com/F9ZfMvz.png)](https://i.imgur.com/F9ZfMvz.png)
 
 
-REPL console:
+C# REPL console:
 
 [![](https://i.imgur.com/14Dbtf8.png)](https://i.imgur.com/14Dbtf8.png)
 
