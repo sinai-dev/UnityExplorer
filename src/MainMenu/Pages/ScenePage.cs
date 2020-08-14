@@ -21,7 +21,6 @@ namespace Explorer
         // gameobject list
         private Transform m_currentTransform;
         private List<GameObjectCache> m_objectList = new List<GameObjectCache>();
-        private float m_timeOfLastUpdate = -1f;
 
         // search bar
         private bool m_searching = false;
@@ -45,14 +44,6 @@ namespace Explorer
 
         public override void Update()
         {
-            if (Time.time - m_timeOfLastUpdate < 0.2f)
-            {
-                return;
-            }
-            m_timeOfLastUpdate = Time.time;
-
-            var start = Time.realtimeSinceStartup;
-
             if (!m_searching)
             {
                 m_objectList = new List<GameObjectCache>();
@@ -101,33 +92,39 @@ namespace Explorer
                 GUILayout.BeginHorizontal(null);
                 // Current Scene label
                 GUILayout.Label("Current Scene:", new GUILayoutOption[] { GUILayout.Width(120) });
-                if (SceneManager.sceneCount > 1)
+                try
                 {
-                    int changeWanted = 0;
-                    if (GUILayout.Button("<", new GUILayoutOption[] { GUILayout.Width(30) }))
+                    // Need to do 'ToList()' so the object isn't cleaned up by Il2Cpp GC.
+                    var scenes = SceneManager.GetAllScenes().ToList();
+
+                    if (scenes.Count > 1)
                     {
-                        changeWanted = -1;
-                    }
-                    if (GUILayout.Button(">", new GUILayoutOption[] { GUILayout.Width(30) }))
-                    {
-                        changeWanted = 1;
-                    }
-                    if (changeWanted != 0)
-                    {
-                        var scenes = SceneManager.GetAllScenes();
-                        int index = scenes.IndexOf(SceneManager.GetSceneByName(m_currentScene));
-                        index += changeWanted;
-                        if (index >= scenes.Count - 1)
+                        int changeWanted = 0;
+                        if (GUILayout.Button("<", new GUILayoutOption[] { GUILayout.Width(30) }))
                         {
-                            index = 0;
+                            changeWanted = -1;
                         }
-                        else if (index > 0)
+                        if (GUILayout.Button(">", new GUILayoutOption[] { GUILayout.Width(30) }))
                         {
-                            index = scenes.Count - 1;
+                            changeWanted = 1;
                         }
-                        m_currentScene = scenes[index].name;
+                        if (changeWanted != 0)
+                        {
+                            int index = scenes.IndexOf(SceneManager.GetSceneByName(m_currentScene));
+                            index += changeWanted;
+                            if (index > scenes.Count - 1)
+                            {
+                                index = 0;
+                            }
+                            else if (index < 0)
+                            {
+                                index = scenes.Count - 1;
+                            }
+                            m_currentScene = scenes[index].name;
+                        }
                     }
                 }
+                catch { }
                 GUILayout.Label("<color=cyan>" + m_currentScene + "</color>", null); //new GUILayoutOption[] { GUILayout.Width(250) });
 
                 GUILayout.EndHorizontal();
@@ -169,17 +166,11 @@ namespace Explorer
 
                     if (m_objectList.Count > 0)
                     {
-                        var start = Time.realtimeSinceStartup;
                         foreach (var obj in m_objectList)
                         {
                             //UIStyles.GameobjButton(obj, SetTransformTarget, true, MainMenu.MainRect.width - 170);
                             UIStyles.FastGameobjButton(obj.RefGameObject, obj.EnabledColor, obj.Label, obj.RefGameObject.activeSelf, SetTransformTarget, true, MainMenu.MainRect.width - 170);
                         }
-                        var diff = Time.realtimeSinceStartup - start;
-                    }
-                    else
-                    {
-                        // if m_currentTransform != null ...
                     }
                 }
                 else // ------ Scene Search results ------

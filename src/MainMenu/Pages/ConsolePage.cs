@@ -146,11 +146,11 @@ MelonLogger.Log(""hello world"");";
             GUILayout.BeginHorizontal(null);
             GUILayout.Label("Add namespace:", new GUILayoutOption[] { GUILayout.Width(110) });
             UsingInput = GUILayout.TextField(UsingInput, new GUILayoutOption[] { GUILayout.Width(150) });
-            if (GUILayout.Button("Add", new GUILayoutOption[] { GUILayout.Width(50) }))
+            if (GUILayout.Button("<b><color=lime>Add</color></b>", new GUILayoutOption[] { GUILayout.Width(120) }))
             {
                 AddUsing(UsingInput);
             }
-            if (GUILayout.Button("<color=red>Reset</color>", null))
+            if (GUILayout.Button("<b><color=red>Clear All</color></b>", new GUILayoutOption[] { GUILayout.Width(120) }))
             {
                 ResetConsole();
             }

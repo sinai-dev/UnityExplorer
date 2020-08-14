@@ -8,6 +8,7 @@ using MelonLoader;
 using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
 using Harmony;
+using Il2CppSystem.Runtime.InteropServices;
 
 namespace Explorer
 {
@@ -16,7 +17,7 @@ namespace Explorer
         // consts
 
         public const string ID = "com.sinai.cppexplorer";
-        public const string VERSION = "1.3.2";
+        public const string VERSION = "1.3.3";
         public const string AUTHOR = "Sinai";
 
 #if Release_Unity2018
