@@ -27,6 +27,14 @@ Requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be ins
 * Press F7 to show or hide the menu.
 * Simply browse through the scene, search for objects, etc, it's pretty self-explanatory.
 
+### Help! I can't use the mouse!
+
+It is fairly common for games to override mouse control with their own mouse behaviour. Unfortunately, it's not feasible for CppExplorer to handle this due to how differently every game will go about it.
+
+In general, pressing Escape (to open a menu) will usually give you control over the mouse.
+
+For more control, you can create a plugin like [VRCExplorerMouseControl](https://github.com/sinaioutlander/VRCExplorerMouseControl), which was made for VRChat. With just one simple Harmony patch you should be able to give yourself control over the mouse while using CppExplorer.
+
 ## Images
 
 Scene explorer, and inspection of a MonoBehaviour object:
