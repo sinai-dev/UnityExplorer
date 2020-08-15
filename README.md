@@ -32,10 +32,10 @@ Requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be ins
 It is fairly common for games to override mouse control with their own mouse behaviour. Unfortunately, it's not feasible for CppExplorer to handle this due to how differently every game will go about it.
 
 In order to fix this problem, you can:
-* Use [VRCExplorerMouseControl (VRChat)](https://github.com/sinaioutlander/VRCExplorerMouseControl)
-* Use [HPExplorerMouseControl (Hellpoint)](https://github.com/sinaioutlander/Hellpoint-Mods/tree/master/HPExplorerMouseControl/HPExplorerMouseControl)
+* Use [VRCExplorerMouseControl](https://github.com/sinaioutlander/VRCExplorerMouseControl) (for VRChat)
+* Use [HPExplorerMouseControl](https://github.com/sinaioutlander/Hellpoint-Mods/tree/master/HPExplorerMouseControl/HPExplorerMouseControl) (for Hellpoint)
 * In general, pressing Escape (to open a menu) will usually give you temporary control over the mouse.
-* Create your own mini-plugin using one of the two plugins above as an example. Usually only 1 or 2 Harmony simple patches are needed to fix the problem.
+* Create your own mini-plugin using one of the two plugins above as an example. Usually only 1 or 2 simple Harmony patches are needed to fix the problem.
 
 ## Images
 
