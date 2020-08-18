@@ -48,8 +48,6 @@ namespace Explorer
             CacheFields(types);
             CacheProperties(types);
 
-            MelonLogger.Log("Cached properties: " + m_PropertyInfos.Length);
-
             UpdateValues(true);
         }
 

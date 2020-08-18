@@ -137,6 +137,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CppExplorer.cs" />
+    <Compile Include="Extensions\ReflectionExtensions.cs" />
+    <Compile Include="Extensions\UnityExtensions.cs" />
     <Compile Include="Helpers\ReflectionHelpers.cs" />
     <Compile Include="Helpers\UIHelpers.cs" />
     <Compile Include="Helpers\UnityHelpers.cs" />

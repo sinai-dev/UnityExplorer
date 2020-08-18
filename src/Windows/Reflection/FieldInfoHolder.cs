@@ -28,7 +28,8 @@ namespace Explorer
                 {
                     var declaringType = this.fieldInfo.DeclaringType;
 
-                    var cast = ReflectionHelpers.Il2CppCast(obj, declaringType);
+                    //var cast = ReflectionHelpers.Il2CppCast(obj, declaringType);
+                    var cast = obj.Il2CppCast(declaringType);
                     m_value = this.fieldInfo.GetValue(fieldInfo.IsStatic ? null : cast);
                 }
                 else
@@ -103,7 +104,8 @@ namespace Explorer
                 {
                     var declaringType = this.fieldInfo.DeclaringType;
 
-                    var cast = ReflectionHelpers.Il2CppCast(obj, declaringType);
+                    //var cast = ReflectionHelpers.Il2CppCast(obj, declaringType);
+                    var cast = obj.Il2CppCast(declaringType);
                     fieldInfo.SetValue(fieldInfo.IsStatic ? null : cast, m_value);
                 }
                 else

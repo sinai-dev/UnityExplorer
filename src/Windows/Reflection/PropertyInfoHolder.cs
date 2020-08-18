@@ -40,7 +40,8 @@ namespace Explorer
                     }
                     else
                     {
-                        var cast = ReflectionHelpers.Il2CppCast(obj, declaringType);
+                        //var cast = ReflectionHelpers.Il2CppCast(obj, declaringType);
+                        var cast = obj.Il2CppCast(declaringType);
                         m_value = this.propInfo.GetValue(this.propInfo.GetAccessors()[0].IsStatic ? null : cast, null);
                     }
                 }
@@ -49,19 +50,19 @@ namespace Explorer
                     m_value = this.propInfo.GetValue(obj, null);
                 }
             }
-            catch (Exception e)
+            catch //(Exception e)
             {
-                MelonLogger.Log("Exception on PropertyInfoHolder.UpdateValue, Name: " + this.propInfo.Name);
-                MelonLogger.Log(e.GetType() + ", " + e.Message);
+                //MelonLogger.Log("Exception on PropertyInfoHolder.UpdateValue, Name: " + this.propInfo.Name);
+                //MelonLogger.Log(e.GetType() + ", " + e.Message);
 
-                var inner = e.InnerException;
-                while (inner != null)
-                {
-                    MelonLogger.Log("inner: " + inner.GetType() + ", " + inner.Message);
-                    inner = inner.InnerException;
-                }
+                //var inner = e.InnerException;
+                //while (inner != null)
+                //{
+                //    MelonLogger.Log("inner: " + inner.GetType() + ", " + inner.Message);
+                //    inner = inner.InnerException;
+                //}
 
-                m_value = null;
+                //m_value = null;
             }
         }
 
@@ -113,9 +114,7 @@ namespace Explorer
                     }
                 }
 
-                var declaring = propInfo.DeclaringType;
-                var cast = ReflectionHelpers.Il2CppCast(obj, declaring);
-
+                var cast = obj.Il2CppCast(propInfo.DeclaringType);
                 propInfo.SetValue(propInfo.GetAccessors()[0].IsStatic ? null : cast, m_value, null);
             }
             catch
