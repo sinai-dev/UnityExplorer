@@ -23,7 +23,7 @@ namespace Explorer
 
         public override void Draw(ReflectionWindow window)
         {
-            UIStyles.DrawMember(ref m_value, ref this.IsExpanded, ref this.arrayOffset, this.propInfo, window.m_rect, window.m_object, SetValue);
+            UIHelpers.DrawMember(ref m_value, ref this.IsExpanded, ref this.arrayOffset, this.propInfo, window.m_rect, window.Target, SetValue);
         }
 
         public override void UpdateValue(object obj)
@@ -40,7 +40,7 @@ namespace Explorer
                     }
                     else
                     {
-                        var cast = CppExplorer.Il2CppCast(obj, declaringType);
+                        var cast = ReflectionHelpers.Il2CppCast(obj, declaringType);
                         m_value = this.propInfo.GetValue(this.propInfo.GetAccessors()[0].IsStatic ? null : cast, null);
                     }
                 }
@@ -114,7 +114,7 @@ namespace Explorer
                 }
 
                 var declaring = propInfo.DeclaringType;
-                var cast = CppExplorer.Il2CppCast(obj, declaring);
+                var cast = ReflectionHelpers.Il2CppCast(obj, declaring);
 
                 propInfo.SetValue(propInfo.GetAccessors()[0].IsStatic ? null : cast, m_value, null);
             }

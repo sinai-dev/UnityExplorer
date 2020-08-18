@@ -137,23 +137,26 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CppExplorer.cs" />
-    <Compile Include="Inspectors\Reflection\FieldInfoHolder.cs" />
-    <Compile Include="Inspectors\Reflection\MemberInfoHolder.cs" />
-    <Compile Include="Inspectors\Reflection\PropertyInfoHolder.cs" />
-    <Compile Include="Inspectors\UIWindow.cs" />
+    <Compile Include="Helpers\ReflectionHelpers.cs" />
+    <Compile Include="Helpers\UIHelpers.cs" />
+    <Compile Include="Helpers\UnityHelpers.cs" />
+    <Compile Include="MainMenu\InspectUnderMouse.cs" />
+    <Compile Include="Windows\Reflection\FieldInfoHolder.cs" />
+    <Compile Include="Windows\Reflection\MemberInfoHolder.cs" />
+    <Compile Include="Windows\Reflection\PropertyInfoHolder.cs" />
+    <Compile Include="Windows\UIWindow.cs" />
     <Compile Include="MainMenu\Pages\ConsolePage.cs" />
     <Compile Include="MainMenu\Pages\Console\REPL.cs" />
     <Compile Include="MainMenu\Pages\Console\REPLHelper.cs" />
     <Compile Include="MainMenu\Pages\WindowPage.cs" />
-    <Compile Include="WindowManager.cs" />
+    <Compile Include="Windows\WindowManager.cs" />
     <Compile Include="MainMenu\MainMenu.cs" />
-    <Compile Include="Inspectors\GameObjectWindow.cs" />
-    <Compile Include="Inspectors\ReflectionWindow.cs" />
+    <Compile Include="Windows\GameObjectWindow.cs" />
+    <Compile Include="Windows\ReflectionWindow.cs" />
     <Compile Include="MainMenu\Pages\ScenePage.cs" />
     <Compile Include="MainMenu\Pages\SearchPage.cs" />
-    <Compile Include="UIStyles.cs" />
+    <Compile Include="Helpers\UIStyles.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="utils\AccessTools.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

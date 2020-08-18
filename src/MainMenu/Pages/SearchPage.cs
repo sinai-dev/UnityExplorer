@@ -132,7 +132,7 @@ namespace Explorer
 
                         bool _ = false;
                         int __ = 0;
-                        UIStyles.DrawValue(ref obj, ref _, ref __, _temprect);
+                        UIHelpers.DrawValue(ref obj, ref _, ref __, _temprect);
                     }
                 }
                 else
@@ -263,7 +263,7 @@ namespace Explorer
             {
                 try
                 {
-                    var findType = CppExplorer.GetType(_type);
+                    var findType = ReflectionHelpers.GetTypeByName(_type);
                     searchType = Il2CppSystem.Type.GetType(findType.AssemblyQualifiedName);
                 }
                 catch (Exception e)
@@ -273,18 +273,18 @@ namespace Explorer
             }
             else if (TypeMode == TypeFilter.Object)
             {
-                searchType = CppExplorer.ObjectType;
+                searchType = ReflectionHelpers.ObjectType;
             }
             else if (TypeMode == TypeFilter.GameObject)
             {
-                searchType = CppExplorer.GameObjectType;
+                searchType = ReflectionHelpers.GameObjectType;
             }
             else if (TypeMode == TypeFilter.Component)
             {
-                searchType = CppExplorer.ComponentType;
+                searchType = ReflectionHelpers.ComponentType;
             }
 
-            if (!CppExplorer.ObjectType.IsAssignableFrom(searchType))
+            if (!ReflectionHelpers.ObjectType.IsAssignableFrom(searchType))
             {
                 MelonLogger.LogError("Your Custom Class Type must inherit from UnityEngine.Object!");
                 return new List<object>();
@@ -301,7 +301,7 @@ namespace Explorer
                     continue;
                 }
 
-                if (searchType == CppExplorer.ComponentType && CppExplorer.TransformType.IsAssignableFrom(obj.GetIl2CppType()))
+                if (searchType == ReflectionHelpers.ComponentType && ReflectionHelpers.TransformType.IsAssignableFrom(obj.GetIl2CppType()))
                 {
                     // Transforms shouldn't really be counted as Components, skip them.
                     // They're more akin to GameObjects.
@@ -346,7 +346,7 @@ namespace Explorer
             }
             else if (filter == SceneFilter.This)
             {
-                return go.scene.name == CppExplorer.ActiveSceneName;
+                return go.scene.name == UnityHelpers.ActiveSceneName;
             }
             else if (filter == SceneFilter.DontDestroy)
             {

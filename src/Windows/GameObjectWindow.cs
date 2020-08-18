@@ -133,7 +133,7 @@ namespace Explorer
 
             GUILayout.BeginHorizontal(null);
             GUILayout.Label("Scene: <color=cyan>" + (m_scene == "" ? "n/a" : m_scene) + "</color>", null);
-            if (m_scene == CppExplorer.ActiveSceneName)
+            if (m_scene == UnityHelpers.ActiveSceneName)
             {
                 if (GUILayout.Button("<color=#00FF00>< View in Scene Explorer</color>", new GUILayoutOption[] { GUILayout.Width(230) }))
                 {
@@ -145,7 +145,7 @@ namespace Explorer
 
             GUILayout.BeginHorizontal(null);
             GUILayout.Label("Path:", new GUILayoutOption[] { GUILayout.Width(50) });
-            string pathlabel = CppExplorer.GetGameObjectPath(m_object.transform);
+            string pathlabel = m_object.transform.GetGameObjectPath();
             if (m_object.transform.parent != null)
             {
                 if (GUILayout.Button("<-", new GUILayoutOption[] { GUILayout.Width(35) }))
@@ -198,7 +198,7 @@ namespace Explorer
                         GUILayout.Label("null", null);
                         continue;
                     }
-                    UIStyles.GameobjButton(obj.gameObject, InspectGameObject, false, this.m_rect.width / 2 - 60);
+                    UIHelpers.GameobjButton(obj.gameObject, InspectGameObject, false, this.m_rect.width / 2 - 60);
                 }
                 foreach (var obj in m_children.Where(x => x.childCount == 0))
                 {
@@ -207,7 +207,7 @@ namespace Explorer
                         GUILayout.Label("null", null);
                         continue;
                     }
-                    UIStyles.GameobjButton(obj.gameObject, InspectGameObject, false, this.m_rect.width / 2 - 60);
+                    UIHelpers.GameobjButton(obj.gameObject, InspectGameObject, false, this.m_rect.width / 2 - 60);
                 }
             }
             else
@@ -329,7 +329,7 @@ namespace Explorer
                 new GUILayoutOption[] { GUILayout.Width(80) });
             if (m_object.activeSelf != m_active) { m_object.SetActive(m_active); }
 
-            UIStyles.InstantiateButton(m_object, 100);            
+            UIHelpers.InstantiateButton(m_object, 100);            
 
             GUILayout.EndHorizontal();
 

@@ -28,7 +28,7 @@ namespace Explorer
                 {
                     var declaringType = this.fieldInfo.DeclaringType;
 
-                    var cast = CppExplorer.Il2CppCast(obj, declaringType);
+                    var cast = ReflectionHelpers.Il2CppCast(obj, declaringType);
                     m_value = this.fieldInfo.GetValue(fieldInfo.IsStatic ? null : cast);
                 }
                 else
@@ -44,7 +44,7 @@ namespace Explorer
 
         public override void Draw(ReflectionWindow window)
         {
-            UIStyles.DrawMember(ref m_value, ref this.IsExpanded, ref this.arrayOffset, this.fieldInfo, window.m_rect, window.m_object, SetValue);
+            UIHelpers.DrawMember(ref m_value, ref this.IsExpanded, ref this.arrayOffset, this.fieldInfo, window.m_rect, window.Target, SetValue);
         }
 
         public override void SetValue(object obj)
@@ -103,7 +103,7 @@ namespace Explorer
                 {
                     var declaringType = this.fieldInfo.DeclaringType;
 
-                    var cast = CppExplorer.Il2CppCast(obj, declaringType);
+                    var cast = ReflectionHelpers.Il2CppCast(obj, declaringType);
                     fieldInfo.SetValue(fieldInfo.IsStatic ? null : cast, m_value);
                 }
                 else

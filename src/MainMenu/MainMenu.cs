@@ -98,7 +98,7 @@ namespace Explorer
             {
                 CppExplorer.ArrayLimit = _lim;
             }
-            CppExplorer.Instance.MouseInspect = GUILayout.Toggle(CppExplorer.Instance.MouseInspect, "Inspect Under Mouse (Shift + RMB)", null);
+            InspectUnderMouse.EnableInspect = GUILayout.Toggle(InspectUnderMouse.EnableInspect, "Inspect Under Mouse (Shift + RMB)", null);
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal(null);

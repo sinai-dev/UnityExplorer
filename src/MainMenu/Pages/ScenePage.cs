@@ -36,7 +36,7 @@ namespace Explorer
 
         public void OnSceneChange()
         {
-            m_currentScene = CppExplorer.ActiveSceneName;
+            m_currentScene = UnityHelpers.ActiveSceneName;
 
             m_currentTransform = null;
             CancelSearch();
@@ -155,7 +155,7 @@ namespace Explorer
                         }
                         else
                         {
-                            GUILayout.Label(CppExplorer.GetGameObjectPath(m_currentTransform), null);
+                            GUILayout.Label(m_currentTransform.GetGameObjectPath(), null);
                         }
                         GUILayout.EndHorizontal();
                     }
@@ -169,7 +169,7 @@ namespace Explorer
                         foreach (var obj in m_objectList)
                         {
                             //UIStyles.GameobjButton(obj, SetTransformTarget, true, MainMenu.MainRect.width - 170);
-                            UIStyles.FastGameobjButton(obj.RefGameObject, obj.EnabledColor, obj.Label, obj.RefGameObject.activeSelf, SetTransformTarget, true, MainMenu.MainRect.width - 170);
+                            UIHelpers.FastGameobjButton(obj.RefGameObject, obj.EnabledColor, obj.Label, obj.RefGameObject.activeSelf, SetTransformTarget, true, MainMenu.MainRect.width - 170);
                         }
                     }
                 }
@@ -187,7 +187,7 @@ namespace Explorer
                         foreach (var obj in m_searchResults)
                         {
                             //UIStyles.GameobjButton(obj, SetTransformTarget, true, MainMenu.MainRect.width - 170);
-                            UIStyles.FastGameobjButton(obj.RefGameObject, obj.EnabledColor, obj.Label, obj.RefGameObject.activeSelf, SetTransformTarget, true, MainMenu.MainRect.width - 170);
+                            UIHelpers.FastGameobjButton(obj.RefGameObject, obj.EnabledColor, obj.Label, obj.RefGameObject.activeSelf, SetTransformTarget, true, MainMenu.MainRect.width - 170);
                         }
                     }
                     else
