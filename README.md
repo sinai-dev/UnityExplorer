@@ -1,5 +1,9 @@
 # CppExplorer
 
+<p align="center">
+<img align="center" src="https://i.imgur.com/QyX6REA.png">
+</p>
+
 [![Version](https://img.shields.io/badge/MelonLoader-0.2.6-green.svg)]()
 
 An in-game explorer and a suite of debugging tools for [IL2CPP](https://docs.unity3d.com/Manual/IL2CPP.html) Unity games, using [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader). 
