@@ -1,5 +1,5 @@
 <p align="center">
-<img align="center" src="https://i.imgur.com/QyX6REA.png">
+<img align="center" src="https://i.imgur.com/1ZoZemW.png">
 </p>
 
 [![Version](https://img.shields.io/badge/MelonLoader-0.2.6-green.svg)]()
