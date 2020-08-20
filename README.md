@@ -1,5 +1,3 @@
-# CppExplorer
-
 <p align="center">
 <img align="center" src="https://i.imgur.com/QyX6REA.png">
 </p>
