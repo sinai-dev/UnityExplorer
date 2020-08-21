@@ -1,11 +1,14 @@
+# CppExplorer [![Version](https://img.shields.io/badge/MelonLoader-0.2.6-green.svg)]()
+
 <p align="center">
 <img align="center" src="https://i.imgur.com/1ZoZemW.png">
 </p>
 
-[![Version](https://img.shields.io/badge/MelonLoader-0.2.6-green.svg)]()
-
 An in-game explorer and a suite of debugging tools for [IL2CPP](https://docs.unity3d.com/Manual/IL2CPP.html) Unity games, using [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader). 
 
+[Releases](https://github.com/sinai-dev/CppExplorer/releases) | [![GitHub Downloads](https://img.shields.io/github/downloads/sinai-dev/CppExplorer/total.svg)]()
+
+### Note
 Most games running on Unity 2017 to 2019 should be supported. If you find that the GUI does not display properly and you get errors in the MelonLoader console about it, then this is likely due to a bug with Il2CppAssemblyUnhollower's unstripping. This bug is known by the developer of the tool and they will fix it as soon as they are able to.
 
 ## Features
