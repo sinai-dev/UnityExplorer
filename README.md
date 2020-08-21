@@ -6,7 +6,7 @@
 
 An in-game explorer and a suite of debugging tools for [IL2CPP](https://docs.unity3d.com/Manual/IL2CPP.html) Unity games, using [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader). 
 
-[Releases](https://github.com/sinai-dev/CppExplorer/releases) | [![GitHub Downloads](https://img.shields.io/github/downloads/sinai-dev/CppExplorer/total.svg)]()
+[![Latest Release](https://img.shields.io/github/release/sinai-dev/CppExplorer.svg)](../../releases/latest) [![GitHub Downloads](https://img.shields.io/github/downloads/sinai-dev/CppExplorer/total.svg)]()
 
 ### Note
 Most games running on Unity 2017 to 2019 should be supported. If you find that the GUI does not display properly and you get errors in the MelonLoader console about it, then this is likely due to a bug with Il2CppAssemblyUnhollower's unstripping. This bug is known by the developer of the tool and they will fix it as soon as they are able to.
@@ -43,6 +43,8 @@ In order to fix this problem, you can:
 * Create your own mini-plugin using one of the two plugins above as an example. Usually only 1 or 2 simple Harmony patches are needed to fix the problem.
 
 ## Images
+
+<i>Note: images may be slightly outdated, taken from version 1.2</i>.
 
 Scene explorer, and inspection of a MonoBehaviour object:
 
