@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,8 +23,10 @@ namespace Explorer
         private string m_typeInput = "";
         private int m_limit = 20;
         private int m_pageOffset = 0;
-        private List<object> m_searchResults = new List<object>();
+        //private List<object> m_searchResults = new List<object>();
         private Vector2 resultsScroll = Vector2.zero;
+
+        private List<CacheObject> m_searchResults = new List<CacheObject>();
 
         public SceneFilter SceneMode = SceneFilter.Any;
         public TypeFilter TypeMode = TypeFilter.Object;
@@ -59,6 +62,24 @@ namespace Explorer
         {
         }
 
+        private void CacheResults(IEnumerable results)
+        {
+            m_searchResults = new List<CacheObject>();
+
+            foreach (var obj in results)
+            {
+                var toCache = obj;
+
+                if (toCache is Il2CppSystem.Object ilObject)
+                {
+                    toCache = ilObject.TryCast<GameObject>() ?? ilObject.TryCast<Transform>()?.gameObject ?? ilObject;
+                }
+
+                var cache = CacheObject.GetCacheObject(toCache);
+                m_searchResults.Add(cache);
+            }
+        }
+
         public override void DrawWindow()
         {
             try
@@ -68,7 +89,8 @@ namespace Explorer
                 GUILayout.Label("<b><color=orange>Helpers</color></b>", new GUILayoutOption[] { GUILayout.Width(70) });
                 if (GUILayout.Button("Find Static Instances", new GUILayoutOption[] { GUILayout.Width(180) }))
                 {
-                    m_searchResults = GetInstanceClassScanner().ToList();
+                    //m_searchResults = GetInstanceClassScanner().ToList();
+                    CacheResults(GetInstanceClassScanner());
                     m_pageOffset = 0;
                 }
                 GUILayout.EndHorizontal();
@@ -111,28 +133,12 @@ namespace Explorer
                 if (m_searchResults.Count > 0)
                 {
                     int offset = m_pageOffset * this.m_limit;
-                    int preiterated = 0;
-
                     if (offset >= count) m_pageOffset = 0;
 
-                    for (int i = 0; i < m_searchResults.Count; i++)
+                    for (int i = offset; i < offset + CppExplorer.ArrayLimit && i < count; i++)
                     {
-                        if (offset > 0 && preiterated < offset)
-                        {
-                            preiterated++;
-                            continue;
-                        }
-
-                        if (i - offset > this.m_limit - 1)
-                        {
-                            break;
-                        }
-
-                        var obj = m_searchResults[i];
-
-                        bool _ = false;
-                        int __ = 0;
-                        UIHelpers.DrawValue(ref obj, ref _, ref __, _temprect);
+                        m_searchResults[i].Draw(MainMenu.MainRect, 0f);
+                        //m_searchResults[i].DrawValue(MainMenu.MainRect);
                     }
                 }
                 else
@@ -141,7 +147,6 @@ namespace Explorer
                 }
 
                 GUILayout.EndScrollView();
-
                 GUILayout.EndVertical();
             }
             catch
@@ -252,7 +257,7 @@ namespace Explorer
         private void Search()
         {
             m_pageOffset = 0;
-            m_searchResults = FindAllObjectsOfType(m_searchInput, m_typeInput);
+            CacheResults(FindAllObjectsOfType(m_searchInput, m_typeInput));
         }
 
         private List<object> FindAllObjectsOfType(string _search, string _type)

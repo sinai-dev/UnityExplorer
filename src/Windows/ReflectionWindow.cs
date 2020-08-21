@@ -16,20 +16,21 @@ namespace Explorer
         public override string Name { get => "Object Reflection"; set => Name = value; }
 
         public Type ObjectType;
-        //public object Target;
 
-        private FieldInfoHolder[] m_FieldInfos;
-        private PropertyInfoHolder[] m_PropertyInfos;
+        private CacheObject[] m_cachedMembers;
+        private CacheObject[] m_cachedMemberFiltered;
+        private int m_pageOffset;
 
         private bool m_autoUpdate = false;
         private string m_search = "";
-        public MemberFilter m_filter = MemberFilter.Property;
+        public MemberInfoType m_filter = MemberInfoType.Property;
 
-        public enum MemberFilter
+        public enum MemberInfoType
         {
-            Both,
+            Field,
             Property,
-            Field
+            Method,
+            All
         }
 
         public override void Init()
@@ -44,119 +45,114 @@ namespace Explorer
             ObjectType = type;
 
             var types = ReflectionHelpers.GetAllBaseTypes(Target);
+            CacheMembers(types);
 
-            CacheFields(types);
-            CacheProperties(types);
-
-            UpdateValues(true);
+            m_filter = MemberInfoType.All;
+            m_cachedMemberFiltered = m_cachedMembers.Where(x => ShouldProcessMember(x)).ToArray();
+            UpdateValues();
+            m_filter = MemberInfoType.Property;
         }
 
         public override void Update()
         {
+            m_cachedMemberFiltered = m_cachedMembers.Where(x => ShouldProcessMember(x)).ToArray();
+
             if (m_autoUpdate)
             {
                 UpdateValues();
             }
         }
 
-        private void UpdateValues(bool forceAll = false)
+        private void UpdateValues()
         {
-            UpdateMemberList(forceAll, this.m_FieldInfos, MemberFilter.Field);
-            UpdateMemberList(forceAll, this.m_PropertyInfos, MemberFilter.Property);
+            UpdateMembers();
         }
 
-        private void UpdateMemberList(bool forceAll, MemberInfoHolder[] list, MemberFilter filter)
+        private void UpdateMembers()
         {
-            if (forceAll || m_filter == MemberFilter.Both || m_filter == filter)
+            foreach (var member in m_cachedMemberFiltered)
             {
-                foreach (var holder in list)
-                {
-                    if (forceAll || ShouldUpdateMemberInfo(holder))
-                    {
-                        holder.UpdateValue(Target);
-                    }
-                }
+                member.UpdateValue(Target);
             }
         }
 
-        private bool ShouldUpdateMemberInfo(MemberInfoHolder holder)
+        private bool ShouldProcessMember(CacheObject holder)
         {
-            var memberName = holder is FieldInfoHolder ? 
-                (holder as FieldInfoHolder).fieldInfo.Name : 
-                (holder as PropertyInfoHolder).propInfo.Name;
+            if (m_filter != MemberInfoType.All && m_filter != holder.MemberInfoType) return false;
 
-            return m_search == "" || memberName.ToLower().Contains(m_search.ToLower());
+            if (m_search == "" || holder.MemberInfo == null) return true;
+
+            return holder.MemberInfo.Name
+                .ToLower()
+                .Contains(m_search.ToLower());
         }
 
-        private void CacheProperties(Type[] types, List<string> names = null)
+        private void CacheMembers(Type[] types, List<string> names = null)
         {
             if (names == null)
             {
                 names = new List<string>();
             }
 
-            var list = new List<PropertyInfoHolder>();
+            var list = new List<CacheObject>();
 
             foreach (var type in types)
             {
-                PropertyInfo[] propInfos = new PropertyInfo[0];
+                MemberInfo[] infos;
 
                 try
                 {
-                    propInfos = type.GetProperties(ReflectionHelpers.CommonFlags);
+                    infos = type.GetMembers(ReflectionHelpers.CommonFlags);
                 }
-                catch (TypeLoadException)
+                catch 
                 {
-                    MelonLogger.Log($"Couldn't get Properties for Type '{type.Name}', it may not support Il2Cpp Reflection at the moment.");
+                    MelonLogger.Log("Exception getting members for type: " + type.Name);
+                    continue;
                 }
 
-                foreach (var pi in propInfos)
+                foreach (var member in infos)
                 {
-                    // this member causes a crash when inspected, so just skipping it for now.
-                    if (pi.Name == "Il2CppType")
+                    try
                     {
-                        continue;
-                    }
+                        if (member.MemberType == MemberTypes.Field || member.MemberType == MemberTypes.Property)
+                        {
+                            if (member.Name == "Il2CppType") continue;
 
-                    if (names.Contains(pi.Name))
+                            if (names.Contains(member.Name)) continue;
+                            names.Add(member.Name);
+
+                            object value = null;
+                            object target = Target;
+
+                            if (target is Il2CppSystem.Object ilObject)
+                            {
+                                if (member.DeclaringType == typeof(Il2CppObjectBase)) continue;
+
+                                target = ilObject.Il2CppCast(member.DeclaringType);
+                            }
+
+                            if (member is FieldInfo)
+                            {
+                                value = (member as FieldInfo).GetValue(target);
+                            }
+                            else if (member is PropertyInfo)
+                            {
+                                value = (member as PropertyInfo).GetValue(target);
+                            }
+
+                            list.Add(CacheObject.GetCacheObject(value, member, Target));
+                        }
+                    }
+                    catch (Exception e)
                     {
-                        continue;
+                        MelonLogger.Log("Exception caching member " + member.Name + "!");
+                        MelonLogger.Log(e.GetType() + ", " + e.Message);
+                        MelonLogger.Log(e.StackTrace);
                     }
-                    names.Add(pi.Name);
-
-                    var piHolder = new PropertyInfoHolder(type, pi);
-                    list.Add(piHolder);
                 }
             }
 
-            m_PropertyInfos = list.ToArray();
-        }
-
-        private void CacheFields(Type[] types, List<string> names = null)
-        {
-            if (names == null)
-            {
-                names = new List<string>();
-            }
-
-            var list = new List<FieldInfoHolder>();
-
-            foreach (var type in types)
-            {
-                foreach (var fi in type.GetFields(ReflectionHelpers.CommonFlags))
-                {
-                    if (names.Contains(fi.Name))
-                    {
-                        continue;
-                    }
-                    names.Add(fi.Name);
-
-                    var fiHolder = new FieldInfoHolder(type, fi);
-                    list.Add(fiHolder);
-                }
-            }
-
-            m_FieldInfos = list.ToArray();
+            m_cachedMembers = list.ToArray();
         }
 
         // =========== GUI DRAW =========== //
@@ -211,9 +207,9 @@ namespace Explorer
 
                 GUILayout.BeginHorizontal(null);
                 GUILayout.Label("<b>Filter:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
-                FilterToggle(MemberFilter.Both, "Both");
-                FilterToggle(MemberFilter.Property, "Properties");
-                FilterToggle(MemberFilter.Field, "Fields");
+                FilterToggle(MemberInfoType.All, "All");
+                FilterToggle(MemberInfoType.Property, "Properties");
+                FilterToggle(MemberInfoType.Field, "Fields");
                 GUILayout.EndHorizontal();
 
                 GUILayout.BeginHorizontal(null);
@@ -229,19 +225,32 @@ namespace Explorer
 
                 GUILayout.Space(10);
 
+                int count = m_cachedMemberFiltered.Length;
+
+                if (count > 20)
+                {
+                    // prev/next page buttons
+                    GUILayout.BeginHorizontal(null);
+                    int maxOffset = (int)Mathf.Ceil(count / 20);
+                    if (GUILayout.Button("< Prev", null))
+                    {
+                        if (m_pageOffset > 0) m_pageOffset--;
+                    }
+
+                    GUILayout.Label($"Page {m_pageOffset + 1}/{maxOffset + 1}", new GUILayoutOption[] { GUILayout.Width(80) });
+
+                    if (GUILayout.Button("Next >", null))
+                    {
+                        if (m_pageOffset < maxOffset) m_pageOffset++;
+                    }
+                    GUILayout.EndHorizontal();
+                }
+
                 scroll = GUILayout.BeginScrollView(scroll, GUI.skin.scrollView);
 
                 GUILayout.Space(10);
 
-                if (m_filter == MemberFilter.Both || m_filter == MemberFilter.Field)
-                {
-                    DrawMembers(this.m_FieldInfos, "Fields");
-                }
-
-                if (m_filter == MemberFilter.Both || m_filter == MemberFilter.Property)
-                {
-                    DrawMembers(this.m_PropertyInfos, "Properties");
-                }
+                DrawMembers(this.m_cachedMemberFiltered);
 
                 GUILayout.EndScrollView();
 
@@ -257,28 +266,59 @@ namespace Explorer
             }
         }
 
-        private void DrawMembers(MemberInfoHolder[] members, string title)
+        private void DrawMembers(CacheObject[] members)
         {
+            // todo pre-cache list based on current search, otherwise this doesnt work.
+
+            int i = 0;
+            DrawMembersInternal("Properties", MemberInfoType.Property, members, ref i);
+            DrawMembersInternal("Fields", MemberInfoType.Field, members, ref i);
+        }
+
+        private void DrawMembersInternal(string title, MemberInfoType filter, CacheObject[] members, ref int index)
+        {
+            if (m_filter != filter && m_filter != MemberInfoType.All)
+            {
+                return;
+            }
+
             UIStyles.HorizontalLine(Color.grey);
 
             GUILayout.Label($"<size=18><b><color=gold>{title}</color></b></size>", null);
 
-            foreach (var holder in members)
-            {
-                var memberName = (holder as FieldInfoHolder)?.fieldInfo.Name ?? (holder as PropertyInfoHolder)?.propInfo.Name;
+            int offset = (m_pageOffset * 20) + index;
 
-                if (m_search != "" && !memberName.ToLower().Contains(m_search.ToLower()))
-                {
-                    continue;
-                }
+            if (offset >= m_cachedMemberFiltered.Length)
+            {
+                m_pageOffset = 0;
+                offset = 0;
+            }
+
+            for (int j = offset; j < offset + 20 && j < members.Length; j++)
+            {
+                var holder = members[j];
+
+                if (holder.MemberInfoType != filter || !ShouldProcessMember(holder)) continue;
 
                 GUILayout.BeginHorizontal(new GUILayoutOption[] { GUILayout.Height(25) });
-                holder.Draw(this);
+                try
+                {
+                    holder.Draw(this.m_rect, 180f);
+                }
+                catch // (Exception e)
+                {
+                    //MelonLogger.Log("Exception drawing member " + holder.MemberInfo.Name);
+                    //MelonLogger.Log(e.GetType() + ", " + e.Message);
+                    //MelonLogger.Log(e.StackTrace);
+                }
                 GUILayout.EndHorizontal();
+
+                index++;
+                if (index >= 20) break;
             }
         }
 
-        private void FilterToggle(MemberFilter mode, string label)
+        private void FilterToggle(MemberInfoType mode, string label)
         {
             if (m_filter == mode)
             {

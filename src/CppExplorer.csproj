@@ -136,6 +136,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CachedObjects\CacheEnum.cs" />
+    <Compile Include="CachedObjects\CacheGameObject.cs" />
+    <Compile Include="CachedObjects\CacheList.cs" />
+    <Compile Include="CachedObjects\CachePrimitive.cs" />
+    <Compile Include="CachedObjects\CacheIl2CppObject.cs" />
+    <Compile Include="CachedObjects\CacheStruct.cs" />
+    <Compile Include="CachedObjects\CacheOther.cs" />
     <Compile Include="CppExplorer.cs" />
     <Compile Include="Extensions\ReflectionExtensions.cs" />
     <Compile Include="Extensions\UnityExtensions.cs" />
@@ -143,9 +150,7 @@
     <Compile Include="Helpers\UIHelpers.cs" />
     <Compile Include="Helpers\UnityHelpers.cs" />
     <Compile Include="MainMenu\InspectUnderMouse.cs" />
-    <Compile Include="Windows\Reflection\FieldInfoHolder.cs" />
-    <Compile Include="Windows\Reflection\MemberInfoHolder.cs" />
-    <Compile Include="Windows\Reflection\PropertyInfoHolder.cs" />
+    <Compile Include="CachedObjects\CacheObject.cs" />
     <Compile Include="Windows\UIWindow.cs" />
     <Compile Include="MainMenu\Pages\ConsolePage.cs" />
     <Compile Include="MainMenu\Pages\Console\REPL.cs" />

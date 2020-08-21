@@ -23,9 +23,12 @@ namespace Explorer
 
         public Vector2 scroll = Vector2.zero;
 
+        public abstract void Init();
+        public abstract void WindowFunction(int windowID);
+        public abstract void Update();
+
         public static UIWindow CreateWindow<T>(object target) where T : UIWindow
         {
-            //var component = (UIWindow)AddToGameObject<T>(Instance.gameObject);
             var window = Activator.CreateInstance<T>();
 
             window.Target = target;
@@ -50,12 +53,7 @@ namespace Explorer
                 MelonLogger.Log("Exception removing Window from WindowManager.Windows list!");
                 MelonLogger.Log($"{e.GetType()} : {e.Message}\r\n{e.StackTrace}");
             }
-            //Destroy(this);
         }
-
-        public abstract void Init();
-        public abstract void WindowFunction(int windowID);
-        public abstract void Update();
 
         public void OnGUI()
         {

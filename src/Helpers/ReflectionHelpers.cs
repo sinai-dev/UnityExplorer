@@ -56,6 +56,8 @@ namespace Explorer
 
         public static Type GetActualType(object m_object)
         {
+            if (m_object == null) return null;
+
             if (m_object is Il2CppSystem.Object ilObject)
             {
                 var iltype = ilObject.GetIl2CppType();
