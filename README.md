@@ -1,12 +1,18 @@
 # CppExplorer [![Version](https://img.shields.io/badge/MelonLoader-0.2.6-green.svg)]()
 
 <p align="center">
-<img align="center" src="https://i.imgur.com/1ZoZemW.png">
+  <img align="center" src="https://i.imgur.com/1ZoZemW.png">
 </p>
 
-An in-game explorer and a suite of debugging tools for [IL2CPP](https://docs.unity3d.com/Manual/IL2CPP.html) Unity games, using [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader). 
+<p align="center">
+  An in-game explorer and a suite of debugging tools for <a href="https://docs.unity3d.com/Manual/IL2CPP.html">IL2CPP</a> Unity games, using <a href="https://github.com/HerpDerpinstine/MelonLoader">MelonLoader</a>.<br><br>
 
-[![Latest Release](https://img.shields.io/github/release/sinai-dev/CppExplorer.svg)](../../releases/latest) [![GitHub Downloads](https://img.shields.io/github/downloads/sinai-dev/CppExplorer/total.svg)]()
+  <a href="../../releases/latest">
+    <img src="https://img.shields.io/github/release/sinai-dev/CppExplorer.svg" />
+  </a>
+ 
+  <img src="https://img.shields.io/github/downloads/sinai-dev/CppExplorer/total.svg" />
+</p>
 
 ### Note
 Most games running on Unity 2017 to 2019 should be supported. If you find that the GUI does not display properly and you get errors in the MelonLoader console about it, then this is likely due to a bug with Il2CppAssemblyUnhollower's unstripping. This bug is known by the developer of the tool and they will fix it as soon as they are able to.
