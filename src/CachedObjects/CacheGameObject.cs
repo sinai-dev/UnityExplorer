@@ -43,9 +43,9 @@ namespace Explorer
             throw new NotImplementedException("TODO");
         }
 
-        public override void UpdateValue(object obj)
+        public override void UpdateValue()
         {
-            base.UpdateValue(obj);
+            base.UpdateValue();
 
             m_gameObject = GetGameObject(Value);
         }

@@ -15,8 +15,11 @@ namespace Explorer
 
         public CacheEnum(object obj)
         {
-            m_enumType = obj.GetType();
-            m_names = Enum.GetNames(obj.GetType());
+            if (obj != null)
+            {
+                m_enumType = obj.GetType();
+                m_names = Enum.GetNames(m_enumType);
+            }
         }
 
         public override void DrawValue(Rect window, float width)

@@ -23,6 +23,8 @@ namespace Explorer
 
         public CachePrimitive(object obj)
         {
+            if (obj == null) return;
+
             if (obj is bool)
             {
                 m_primitiveType = PrimitiveType.Bool;
@@ -35,7 +37,7 @@ namespace Explorer
             {
                 m_primitiveType = PrimitiveType.Float;
             }
-            else if (obj is int)
+            else if (obj is int || obj is IntPtr || obj is uint)
             {
                 m_primitiveType = PrimitiveType.Int;
             }

@@ -9,6 +9,7 @@ using UnhollowerRuntimeLib;
 using UnityEngine;
 using BF = System.Reflection.BindingFlags;
 using ILBF = Il2CppSystem.Reflection.BindingFlags;
+using MelonLoader;
 
 namespace Explorer
 {
@@ -26,8 +27,51 @@ namespace Explorer
 
         public static object Il2CppCast(object obj, Type castTo)
         {
+            if (!typeof(Il2CppSystem.Object).IsAssignableFrom(castTo)) return obj;
+
             var generic = m_tryCastMethodInfo.MakeGenericMethod(castTo);
             return generic.Invoke(obj, null);
+        }
+
+        public static string ExceptionToString(Exception e)
+        {
+            if (IsFailedGeneric(e))
+            {
+                return "Unable to initialize this type.";
+            }
+            else if (IsObjectCollected(e))
+            {
+                return "Garbage collected in Il2Cpp.";
+            }
+
+            return e.GetType() + ", " + e.Message;
+        }
+
+        public static bool IsFailedGeneric(Exception e)
+        {
+            return IsExceptionOfType(e, typeof(TargetInvocationException)) && IsExceptionOfType(e, typeof(TypeLoadException));
+        }
+
+        public static bool IsObjectCollected(Exception e)
+        {
+            return IsExceptionOfType(e, typeof(ObjectCollectedException));
+        }
+
+        public static bool IsExceptionOfType(Exception e, Type t, bool strict = true, bool checkInner = true)
+        {
+            bool isType;
+
+            if (strict)
+                isType = e.GetType() == t;
+            else
+                isType = t.IsAssignableFrom(e.GetType());
+
+            if (isType) return true;
+
+            if (e.InnerException != null && checkInner)
+                return IsExceptionOfType(e.InnerException, t, strict);
+            else
+                return false;
         }
 
         public static bool IsList(Type t)

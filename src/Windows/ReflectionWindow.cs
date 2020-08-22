@@ -20,10 +20,12 @@ namespace Explorer
         private CacheObject[] m_cachedMembers;
         private CacheObject[] m_cachedMemberFiltered;
         private int m_pageOffset;
+        private int m_limitPerPage = 20;
 
         private bool m_autoUpdate = false;
         private string m_search = "";
         public MemberInfoType m_filter = MemberInfoType.Property;
+        private bool m_hideFailedReflection = true;
 
         public enum MemberInfoType
         {
@@ -72,7 +74,7 @@ namespace Explorer
         {
             foreach (var member in m_cachedMemberFiltered)
             {
-                member.UpdateValue(Target);
+                member.UpdateValue();
             }
         }
 
@@ -80,74 +82,66 @@ namespace Explorer
         {
             if (m_filter != MemberInfoType.All && m_filter != holder.MemberInfoType) return false;
 
+            if (!string.IsNullOrEmpty(holder.ReflectionException) && m_hideFailedReflection) return false;
+
             if (m_search == "" || holder.MemberInfo == null) return true;
 
-            return holder.MemberInfo.Name
+            return holder.FullName
                 .ToLower()
                 .Contains(m_search.ToLower());
         }
 
-        private void CacheMembers(Type[] types, List<string> names = null)
+        private void CacheMembers(Type[] types)
         {
-            if (names == null)
-            {
-                names = new List<string>();
-            }
-
             var list = new List<CacheObject>();
 
-            foreach (var type in types)
+            var names = new List<string>();
+
+            foreach (var declaringType in types)
             {
+                if (declaringType == typeof(Il2CppObjectBase)) continue;
+
                 MemberInfo[] infos;
+
+                string exception = null;
 
                 try
                 {
-                    infos = type.GetMembers(ReflectionHelpers.CommonFlags);
+                    infos = declaringType.GetMembers(ReflectionHelpers.CommonFlags);
                 }
                 catch 
                 {
-                    MelonLogger.Log("Exception getting members for type: " + type.Name);
+                    MelonLogger.Log("Exception getting members for type: " + declaringType.Name);
                     continue;
+                }
+
+                //object value = null;
+                object target = Target;
+                if (target is Il2CppSystem.Object ilObject)
+                {
+                    try
+                    {
+                        target = ilObject.Il2CppCast(declaringType);
+                    }
+                    catch (Exception e)
+                    {
+                        exception = ReflectionHelpers.ExceptionToString(e);
+                    }
                 }
 
                 foreach (var member in infos)
                 {
-                    try
+                    if (member.MemberType == MemberTypes.Field || member.MemberType == MemberTypes.Property)
                     {
-                        if (member.MemberType == MemberTypes.Field || member.MemberType == MemberTypes.Property)
-                        {
-                            if (member.Name == "Il2CppType") continue;
+                        if (member.Name == "Il2CppType") continue;
 
-                            if (names.Contains(member.Name)) continue;
-                            names.Add(member.Name);
+                        var name = member.DeclaringType.Name + "." + member.Name;
+                        if (names.Contains(name)) continue;
+                        names.Add(name);
 
-                            object value = null;
-                            object target = Target;
-
-                            if (target is Il2CppSystem.Object ilObject)
-                            {
-                                if (member.DeclaringType == typeof(Il2CppObjectBase)) continue;
-
-                                target = ilObject.Il2CppCast(member.DeclaringType);
-                            }
-
-                            if (member is FieldInfo)
-                            {
-                                value = (member as FieldInfo).GetValue(target);
-                            }
-                            else if (member is PropertyInfo)
-                            {
-                                value = (member as PropertyInfo).GetValue(target);
-                            }
-
-                            list.Add(CacheObject.GetCacheObject(value, member, Target));
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        MelonLogger.Log("Exception caching member " + member.Name + "!");
-                        MelonLogger.Log(e.GetType() + ", " + e.Message);
-                        MelonLogger.Log(e.StackTrace);
+                        var cached = CacheObject.GetCacheObject(null, member, target);
+                        list.Add(cached);
+                        cached.ReflectionException = exception;
                     }
                 }
             }
@@ -203,6 +197,13 @@ namespace Explorer
                 GUILayout.BeginHorizontal(null);
                 GUILayout.Label("<b>Search:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
                 m_search = GUILayout.TextField(m_search, null);
+                GUILayout.Label("<b>Limit per page:</b>", new GUILayoutOption[] { GUILayout.Width(125) });
+                var limitString = m_limitPerPage.ToString();
+                limitString = GUILayout.TextField(limitString, new GUILayoutOption[] { GUILayout.Width(60) });
+                if (int.TryParse(limitString, out int i))
+                {
+                    m_limitPerPage = i;
+                }
                 GUILayout.EndHorizontal();
 
                 GUILayout.BeginHorizontal(null);
@@ -220,6 +221,8 @@ namespace Explorer
                 }
                 GUI.color = m_autoUpdate ? Color.green : Color.red;
                 m_autoUpdate = GUILayout.Toggle(m_autoUpdate, "Auto-update?", new GUILayoutOption[] { GUILayout.Width(100) });
+                GUI.color = m_hideFailedReflection ? Color.green : Color.red;
+                m_hideFailedReflection = GUILayout.Toggle(m_hideFailedReflection, "Hide failed Reflection?", new GUILayoutOption[] { GUILayout.Width(150) });
                 GUI.color = Color.white;
                 GUILayout.EndHorizontal();
 
@@ -227,11 +230,11 @@ namespace Explorer
 
                 int count = m_cachedMemberFiltered.Length;
 
-                if (count > 20)
+                if (count > m_limitPerPage)
                 {
                     // prev/next page buttons
                     GUILayout.BeginHorizontal(null);
-                    int maxOffset = (int)Mathf.Ceil(count / 20);
+                    int maxOffset = (int)Mathf.Ceil((float)(count / (decimal)m_limitPerPage)) - 1;
                     if (GUILayout.Button("< Prev", null))
                     {
                         if (m_pageOffset > 0) m_pageOffset--;
@@ -286,7 +289,7 @@ namespace Explorer
 
             GUILayout.Label($"<size=18><b><color=gold>{title}</color></b></size>", null);
 
-            int offset = (m_pageOffset * 20) + index;
+            int offset = (m_pageOffset * m_limitPerPage) + index;
 
             if (offset >= m_cachedMemberFiltered.Length)
             {
@@ -294,7 +297,7 @@ namespace Explorer
                 offset = 0;
             }
 
-            for (int j = offset; j < offset + 20 && j < members.Length; j++)
+            for (int j = offset; j < offset + m_limitPerPage && j < members.Length; j++)
             {
                 var holder = members[j];
 
@@ -314,7 +317,7 @@ namespace Explorer
                 GUILayout.EndHorizontal();
 
                 index++;
-                if (index >= 20) break;
+                if (index >= m_limitPerPage) break;
             }
         }
 

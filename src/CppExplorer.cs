@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using MelonLoader;
+using UnhollowerBaseLib;
 
 namespace Explorer
 {
@@ -12,7 +13,7 @@ namespace Explorer
         // consts
 
         public const string ID = "com.sinai.cppexplorer";
-        public const string VERSION = "1.4.0";
+        public const string VERSION = "1.4.1";
         public const string AUTHOR = "Sinai";
 
         public const string NAME = "CppExplorer"

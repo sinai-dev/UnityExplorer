@@ -20,7 +20,10 @@ namespace Explorer
         public ReflectionWindow.MemberInfoType MemberInfoType { get; set; }
         public Type DeclaringType { get; set; }
         public object DeclaringInstance { get; set; }
+        public string FullName => $"{MemberInfo.DeclaringType.Name}.{MemberInfo.Name}"; 
+        public string ReflectionException;
 
+        // methods
         public abstract void DrawValue(Rect window, float width);
         public abstract void SetValue();
 
@@ -29,73 +32,63 @@ namespace Explorer
             return GetCacheObject(obj, null, null);
         }
 
+        /// <summary>
+        /// Gets the CacheObject subclass for an object or MemberInfo
+        /// </summary>
+        /// <param name="obj">The current value (can be null if memberInfo is not null)</param>
+        /// <param name="memberInfo">The MemberInfo (can be null if obj is not null)</param>
+        /// <param name="declaringInstance">If MemberInfo is not null, the declaring class instance. Can be null if static.</param>
+        /// <returns></returns>
         public static CacheObject GetCacheObject(object obj, MemberInfo memberInfo, object declaringInstance)
         {
             CacheObject holder;
 
             var type = ReflectionHelpers.GetActualType(obj) ?? (memberInfo as FieldInfo)?.FieldType ?? (memberInfo as PropertyInfo)?.PropertyType;
 
-            if (obj is Il2CppSystem.Object || typeof(Il2CppSystem.Object).IsAssignableFrom(type))
+            if ((obj is Il2CppSystem.Object || typeof(Il2CppSystem.Object).IsAssignableFrom(type))
+                && (type.FullName.Contains("UnityEngine.GameObject") || type.FullName.Contains("UnityEngine.Transform")))
             {
-                var name = type.FullName;
-                if (name == "UnityEngine.GameObject" || name == "UnityEngine.Transform")
-                {
-                    holder = new CacheGameObject(obj);
-                }
-                else
-                {
-                    holder = new CacheIl2CppObject();
-                }
+                holder = new CacheGameObject(obj);
+            }
+            else if (type.IsPrimitive || type == typeof(string))
+            {
+                holder = new CachePrimitive(obj);
+            }
+            else if (type.IsEnum)
+            {
+                holder = new CacheEnum(obj);
+            }
+            else if (typeof(System.Collections.IEnumerable).IsAssignableFrom(type) || ReflectionHelpers.IsList(type))
+            {
+                holder = new CacheList(obj);
             }
             else
             {
-                if (type.IsPrimitive || type == typeof(string))
-                {
-                    holder = new CachePrimitive(obj);
-                }
-                else if (type.IsEnum)
-                {
-                    holder = new CacheEnum(obj);
-                }
-                else if (typeof(System.Collections.IEnumerable).IsAssignableFrom(type) || ReflectionHelpers.IsList(type))
-                {
-                    holder = new CacheList(obj);
-                }
-                else if (type.IsValueType)
-                {
-                    holder = new CacheStruct(obj);
-                }
-                else
-                {
-                    holder = new CacheOther();
-                }
-            }
-
-            if (holder == null)
-            {
-                return null;
+                holder = new CacheOther();
             }
 
             if (memberInfo != null)
             {
                 holder.MemberInfo = memberInfo;                
                 holder.DeclaringType = memberInfo.DeclaringType;
-                
-                if (declaringInstance is Il2CppSystem.Object ilInstance && ilInstance.GetType() != memberInfo.DeclaringType)
-                {
-                    try
-                    {
-                        holder.DeclaringInstance = ilInstance.Il2CppCast(holder.DeclaringType);
-                    }
-                    catch
-                    {
-                        holder.DeclaringInstance = declaringInstance;
-                    }
-                }
-                else
-                {
-                    holder.DeclaringInstance = declaringInstance;
-                }
+                holder.DeclaringInstance = declaringInstance;
+
+                //if (declaringInstance is Il2CppSystem.Object ilInstance && ilInstance.GetType() != memberInfo.DeclaringType)
+                //{
+                //    try
+                //    {
+                //        holder.DeclaringInstance = ilInstance.Il2CppCast(holder.DeclaringType);
+                //    }
+                //    catch (Exception e)
+                //    {
+                //        holder.ReflectionException = ReflectionHelpers.ExceptionToString(e);
+                //        holder.DeclaringInstance = declaringInstance;
+                //    }
+                //}
+                //else
+                //{
+                //    holder.DeclaringInstance = declaringInstance;
+                //}
 
                 if (memberInfo.MemberType == MemberTypes.Field)
                 {
@@ -121,14 +114,18 @@ namespace Explorer
         {
             if (MemberInfo != null)
             {
-                GUILayout.Label("<color=cyan>" + MemberInfo.Name + ":</color>", new GUILayoutOption[] { GUILayout.Width(labelWidth) });
+                GUILayout.Label("<color=cyan>" + FullName + ":</color>", new GUILayoutOption[] { GUILayout.Width(labelWidth) });
             }
             else
             {
                 GUILayout.Space(labelWidth);
             }
 
-            if (Value == null)
+            if (!string.IsNullOrEmpty(ReflectionException))
+            {
+                GUILayout.Label("<color=red>Reflection failed!</color> (" + ReflectionException + ")", null);
+            }
+            else if (Value == null)
             {
                 GUILayout.Label("<i>null (" + this.ValueType + ")</i>", null);
             }
@@ -138,9 +135,9 @@ namespace Explorer
             }
         }
 
-        public virtual void UpdateValue(object obj)
+        public virtual void UpdateValue()
         {
-            if (MemberInfo == null)
+            if (MemberInfo == null || !string.IsNullOrEmpty(ReflectionException))
             {
                 return;
             }
@@ -155,12 +152,15 @@ namespace Explorer
                 else if (MemberInfo.MemberType == MemberTypes.Property)
                 {
                     var pi = MemberInfo as PropertyInfo;
-                    Value = pi.GetValue(pi.GetAccessors()[0].IsStatic ? null : DeclaringInstance, null);
+                    bool isStatic = pi.GetAccessors()[0].IsStatic;
+                    var target = isStatic ? null : DeclaringInstance;
+                    Value = pi.GetValue(target, null);
                 }
+                //ReflectionException = null;
             }
-            catch //(Exception e)
+            catch (Exception e)
             {
-                //MelonLogger.Log($"Error updating MemberInfo value | {e.GetType()}: {e.Message}\r\n{e.StackTrace}");
+                ReflectionException = ReflectionHelpers.ExceptionToString(e);
             }
         }
 

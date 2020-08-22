@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Mono.CSharp;
 using UnityEngine;
 
 namespace Explorer
@@ -13,30 +14,56 @@ namespace Explorer
     {
         public bool IsExpanded { get; set; }
         public int ArrayOffset { get; set; }
-        public Type EntryType { get; set; }
+        
+        public Type EntryType 
+        { 
+            get 
+            {
+                if (m_entryType == null)
+                {
+                    m_entryType = Value?.GetType().GetGenericArguments()[0];
+                }
+                return m_entryType;
+            }
+            set
+            {
+                m_entryType = value;
+            } 
+        }
+        private Type m_entryType;
+
+        public IEnumerable Enumerable
+        {
+            get
+            {
+                if (m_enumerable == null && Value != null)
+                {
+                    m_enumerable = Value as IEnumerable ?? CppListToEnumerable(Value);
+                }
+                return m_enumerable;
+            }
+        }
 
         private IEnumerable m_enumerable;
         private CacheObject[] m_cachedEntries;
 
         public CacheList(object obj)
         {
-            GetEnumerable(obj);
-            EntryType = m_enumerable.GetType().GetGenericArguments()[0];
+            if (obj != null)
+            {
+                Value = obj;
+                EntryType = obj.GetType().GetGenericArguments()[0];
+            }
         }
 
-        private void GetEnumerable(object obj)
+        private IEnumerable CppListToEnumerable(object list)
         {
-            if (obj is IEnumerable isEnumerable)
-            {
-                m_enumerable = isEnumerable;
-            }
-            else
-            {
-                var listValueType = obj.GetType().GetGenericArguments()[0];
-                var listType = typeof(Il2CppSystem.Collections.Generic.List<>).MakeGenericType(new Type[] { listValueType });
-                var method = listType.GetMethod("ToArray");
-                m_enumerable = (IEnumerable)method.Invoke(obj, new object[0]);
-            }
+            if (EntryType == null) return null;
+
+            return (IEnumerable)typeof(Il2CppSystem.Collections.Generic.List<>)
+                                .MakeGenericType(new Type[] { EntryType })
+                                .GetMethod("ToArray")
+                                .Invoke(list, new object[0]);
         }
 
         public override void DrawValue(Rect window, float width)
@@ -73,7 +100,7 @@ namespace Explorer
                     GUILayout.EndHorizontal();
                     GUILayout.BeginHorizontal(null);
                     GUILayout.Space(190);
-                    int maxOffset = (int)Mathf.Ceil(count / CppExplorer.ArrayLimit);
+                    int maxOffset = (int)Mathf.Ceil((float)(count / (decimal)CppExplorer.ArrayLimit)) - 1;
                     GUILayout.Label($"Page {ArrayOffset + 1}/{maxOffset + 1}", new GUILayoutOption[] { GUILayout.Width(80) });
                     // prev/next page buttons
                     if (GUILayout.Button("< Prev", null))
@@ -99,7 +126,7 @@ namespace Explorer
                     GUILayout.BeginHorizontal(null);
                     GUILayout.Space(190);
 
-                    if (entry == null)
+                    if (entry.Value == null)
                     {
                         GUILayout.Label("<i><color=grey>null</color></i>", null);
                     }
@@ -108,22 +135,6 @@ namespace Explorer
                         GUILayout.Label(i.ToString(), new GUILayoutOption[] { GUILayout.Width(30) });
 
                         entry.DrawValue(window, window.width - 250);
-
-                        //var lbl = i + ": <color=cyan>" + obj.Value.ToString() + "</color>";
-
-                        //if (EntryType.IsPrimitive || typeof(string).IsAssignableFrom(EntryType))
-                        //{
-                        //    GUILayout.Label(lbl, null);
-                        //}
-                        //else
-                        //{
-                        //    GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-                        //    if (GUILayout.Button(lbl, null))
-                        //    {
-                        //        WindowManager.InspectObject(obj, out _);
-                        //    }
-                        //    GUI.skin.button.alignment = TextAnchor.MiddleCenter;
-                        //}
                     }
                 }
             }
@@ -134,14 +145,20 @@ namespace Explorer
             throw new NotImplementedException("TODO");
         }
 
-        public override void UpdateValue(object obj)
+        /// <summary>
+        /// Called when the user presses the "Update" button, or if AutoUpdate is on.
+        /// </summary>
+        public override void UpdateValue()
         {
-            GetEnumerable(Value);
+            base.UpdateValue();
+
+            if (Value == null) return;
+
+            var enumerator = Enumerable?.GetEnumerator();
+
+            if (enumerator == null) return;
 
             var list = new List<CacheObject>();
-
-            var enumerator = m_enumerable.GetEnumerator();
-
             while (enumerator.MoveNext())
             {
                 list.Add(GetCacheObject(enumerator.Current));

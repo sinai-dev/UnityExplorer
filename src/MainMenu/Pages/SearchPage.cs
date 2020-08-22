@@ -111,7 +111,7 @@ namespace Explorer
                 {
                     // prev/next page buttons
                     GUILayout.BeginHorizontal(null);
-                    int maxOffset = (int)Mathf.Ceil(count / this.m_limit);
+                    int maxOffset = (int)Mathf.Ceil((float)(count / (decimal)m_limit)) - 1;
                     if (GUILayout.Button("< Prev", null))
                     {
                         if (m_pageOffset > 0) m_pageOffset--;
@@ -270,6 +270,7 @@ namespace Explorer
                 {
                     var findType = ReflectionHelpers.GetTypeByName(_type);
                     searchType = Il2CppSystem.Type.GetType(findType.AssemblyQualifiedName);
+                    //MelonLogger.Log("Search type: " + findType.AssemblyQualifiedName);
                 }
                 catch (Exception e)
                 {
@@ -299,8 +300,13 @@ namespace Explorer
 
             var allObjectsOfType = Resources.FindObjectsOfTypeAll(searchType);
 
+            //MelonLogger.Log("Found count: " + allObjectsOfType.Length);
+
+            int i = 0;
             foreach (var obj in allObjectsOfType)
             {
+                if (i >= 2000) break;
+
                 if (_search != "" && !obj.name.ToLower().Contains(_search.ToLower()))
                 {
                     continue;
@@ -322,6 +328,8 @@ namespace Explorer
                 {
                     matches.Add(obj);
                 }
+
+                i++;
             }
 
             return matches;
