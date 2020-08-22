@@ -73,23 +73,6 @@ namespace Explorer
                 holder.DeclaringType = memberInfo.DeclaringType;
                 holder.DeclaringInstance = declaringInstance;
 
-                //if (declaringInstance is Il2CppSystem.Object ilInstance && ilInstance.GetType() != memberInfo.DeclaringType)
-                //{
-                //    try
-                //    {
-                //        holder.DeclaringInstance = ilInstance.Il2CppCast(holder.DeclaringType);
-                //    }
-                //    catch (Exception e)
-                //    {
-                //        holder.ReflectionException = ReflectionHelpers.ExceptionToString(e);
-                //        holder.DeclaringInstance = declaringInstance;
-                //    }
-                //}
-                //else
-                //{
-                //    holder.DeclaringInstance = declaringInstance;
-                //}
-
                 if (memberInfo.MemberType == MemberTypes.Field)
                 {
                     holder.MemberInfoType = ReflectionWindow.MemberInfoType.Field;
