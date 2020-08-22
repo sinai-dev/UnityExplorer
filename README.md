@@ -1,7 +1,7 @@
 # CppExplorer [![Version](https://img.shields.io/badge/MelonLoader-0.2.6-green.svg)]()
 
 <p align="center">
-  <img align="center" src="https://i.imgur.com/1ZoZemW.png">
+  <img align="center" src="https://sinai-dev.github.io/images/thumbs/02.png">
 </p>
 
 <p align="center">
