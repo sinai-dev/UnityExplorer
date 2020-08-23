@@ -56,7 +56,7 @@ In order to fix this problem, you can:
 
 <b>Object Search:</b>
 
-[![](https://i.imgur.com/RJ9FTpt.png)](https://i.imgur.com/RJ9FTpt.png)
+[![](https://i.imgur.com/lK2RthM.png)](https://i.imgur.com/lK2RthM.png)
 
 <b>C# REPL console:</b>
 
