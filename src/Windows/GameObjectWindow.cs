@@ -29,7 +29,7 @@ namespace Explorer
         private float m_rotateAmount = 50f;
         private float m_scaleAmount = 0.1f;
 
-        List<Component> m_cachedDestroyList = new List<Component>();
+        private List<Component> m_cachedDestroyList = new List<Component>();
         //private string m_addComponentInput = "";
 
         private string m_setParentInput = "";
@@ -91,7 +91,7 @@ namespace Explorer
             }
         }
 
-        private void InspectGameObject(GameObject obj)
+        private void InspectGameObject(Transform obj)
         {
             var window = WindowManager.InspectObject(obj, out bool created);
             
@@ -137,7 +137,7 @@ namespace Explorer
             {
                 if (GUILayout.Button("<color=#00FF00>< View in Scene Explorer</color>", new GUILayoutOption[] { GUILayout.Width(230) }))
                 {
-                    ScenePage.Instance.SetTransformTarget(m_object);
+                    ScenePage.Instance.SetTransformTarget(m_object.transform);
                     MainMenu.SetCurrentPage(0);
                 }
             }
@@ -150,7 +150,7 @@ namespace Explorer
             {
                 if (GUILayout.Button("<-", new GUILayoutOption[] { GUILayout.Width(35) }))
                 {
-                    InspectGameObject(m_object.transform.parent.gameObject);
+                    InspectGameObject(m_object.transform.parent);
                 }
             }
             GUILayout.TextArea(pathlabel, null);
@@ -235,18 +235,16 @@ namespace Explorer
             var m_components = new Il2CppSystem.Collections.Generic.List<Component>();
             m_object.GetComponentsInternal(Il2CppType.Of<Component>(), false, false, true, false, m_components);
 
-            var ilTypeOfTransform = Il2CppType.Of<Transform>();
-            var ilTypeOfBehaviour = Il2CppType.Of<Behaviour>();
             foreach (var component in m_components)
             {
                 var ilType = component.GetIl2CppType();
-                if (ilType == ilTypeOfTransform)
+                if (ilType == ReflectionHelpers.TransformType)
                 {
                     continue;
                 }
 
                 GUILayout.BeginHorizontal(null);
-                if (ilTypeOfBehaviour.IsAssignableFrom(ilType))
+                if (ReflectionHelpers.BehaviourType.IsAssignableFrom(ilType))
                 {
                     BehaviourEnabledBtn(component.TryCast<Behaviour>());
                 }
@@ -273,24 +271,6 @@ namespace Explorer
             }
 
             GUILayout.EndScrollView();
-
-            //GUILayout.BeginHorizontal(null);
-            //m_addComponentInput = GUILayout.TextField(m_addComponentInput, new GUILayoutOption[] { GUILayout.Width(m_rect.width / 2 - 150) });
-            //if (GUILayout.Button("Add Component", new GUILayoutOption[] { GUILayout.Width(120) }))
-            //{
-            //    if (HPExplorer.GetType(m_addComponentInput) is Type type && typeof(Component).IsAssignableFrom(type))
-            //    {
-            //        var comp = m_object.AddComponent(type);
-            //        var list = m_components.ToList();
-            //        list.Add(comp);
-            //        m_components = list.ToArray();
-            //    }
-            //    else
-            //    {
-            //        MelonLogger.LogWarning($"Could not get type '{m_addComponentInput}'. If it's not a typo, try the fully qualified name.");
-            //    }
-            //}
-            //GUILayout.EndHorizontal();
 
             GUILayout.EndVertical();
         }

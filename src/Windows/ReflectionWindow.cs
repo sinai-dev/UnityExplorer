@@ -25,7 +25,7 @@ namespace Explorer
         private bool m_autoUpdate = false;
         private string m_search = "";
         public MemberInfoType m_filter = MemberInfoType.Property;
-        private bool m_hideFailedReflection = true;
+        private bool m_hideFailedReflection = false;
 
         public enum MemberInfoType
         {
@@ -135,13 +135,25 @@ namespace Explorer
                     {
                         if (member.Name == "Il2CppType") continue;
 
-                        var name = member.DeclaringType.Name + "." + member.Name;
-                        if (names.Contains(name)) continue;
-                        names.Add(name);
+                        try
+                        {
+                            var name = member.DeclaringType.Name + "." + member.Name;
+                            if (names.Contains(name)) continue;
+                            names.Add(name);
 
-                        var cached = CacheObject.GetCacheObject(null, member, target);
-                        list.Add(cached);
-                        cached.ReflectionException = exception;
+                            var cached = CacheObject.GetCacheObject(null, member, target);
+                            if (cached != null)
+                            {
+                                list.Add(cached);
+                                cached.ReflectionException = exception;
+                            }
+                        }
+                        catch (Exception e) 
+                        {
+                            MelonLogger.Log("Exception caching member!");
+                            MelonLogger.Log(e.GetType() + ", " + e.Message);
+                            MelonLogger.Log(e.StackTrace);
+                        }
                     }
                 }
             }
@@ -160,7 +172,7 @@ namespace Explorer
                 GUILayout.BeginArea(new Rect(5, 25, m_rect.width - 10, m_rect.height - 35), GUI.skin.box);
 
                 GUILayout.BeginHorizontal(null);
-                GUILayout.Label("<b>Type:</b> <color=cyan>" + ObjectType.Name + "</color>", null);
+                GUILayout.Label("<b>Type:</b> <color=cyan>" + ObjectType.FullName + "</color>", null);
 
                 bool unityObj = Target is UnityEngine.Object;
 
@@ -238,6 +250,7 @@ namespace Explorer
                     if (GUILayout.Button("< Prev", null))
                     {
                         if (m_pageOffset > 0) m_pageOffset--;
+                        scroll = Vector2.zero;
                     }
 
                     GUILayout.Label($"Page {m_pageOffset + 1}/{maxOffset + 1}", new GUILayoutOption[] { GUILayout.Width(80) });
@@ -245,6 +258,7 @@ namespace Explorer
                     if (GUILayout.Button("Next >", null))
                     {
                         if (m_pageOffset < maxOffset) m_pageOffset++;
+                        scroll = Vector2.zero;
                     }
                     GUILayout.EndHorizontal();
                 }

@@ -10,21 +10,18 @@ namespace Explorer
 {
     public class CacheEnum : CacheObject
     {
-        private readonly Type m_enumType;
-        private readonly string[] m_names;
+        public Type EnumType;
+        public string[] EnumNames;
 
-        public CacheEnum(object obj)
+        public override void Init()
         {
-            if (obj != null)
-            {
-                m_enumType = obj.GetType();
-                m_names = Enum.GetNames(m_enumType);
-            }
+            EnumType = Value.GetType();
+            EnumNames = Enum.GetNames(EnumType);
         }
 
         public override void DrawValue(Rect window, float width)
         {
-            if (MemberInfo != null)
+            if (CanWrite)
             {
                 if (GUILayout.Button("<", new GUILayoutOption[] { GUILayout.Width(25) }))
                 {
@@ -38,34 +35,18 @@ namespace Explorer
                 }
             }
 
-            GUILayout.Label(Value.ToString(), null);
-        }
-
-        public override void SetValue()
-        {
-            if (MemberInfo == null)
-            {
-                MelonLogger.Log("Trying to SetValue but the MemberInfo is null!");
-                return;
-            }
-
-            if (Enum.Parse(m_enumType, Value.ToString()) is object enumValue && enumValue != null)
-            {
-                Value = enumValue;
-            }
-
-            SetValue(Value, MemberInfo, DeclaringInstance);
+            GUILayout.Label(Value.ToString(), null);// + "<color=yellow><i> (" + ValueType + ")</i></color>", null);
         }
 
         public void SetEnum(ref object value, int change)
         {
-            var names = m_names.ToList();
+            var names = EnumNames.ToList();
 
             int newindex = names.IndexOf(value.ToString()) + change;
 
             if ((change < 0 && newindex >= 0) || (change > 0 && newindex < names.Count))
             {
-                value = Enum.Parse(m_enumType, names[newindex]);
+                value = Enum.Parse(EnumType, names[newindex]);
             }
         }
     }

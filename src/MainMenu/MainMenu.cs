@@ -89,19 +89,6 @@ namespace Explorer
         private void MainHeader()
         {
             GUILayout.BeginHorizontal(null);
-            GUILayout.Label("<b>Options:</b>", new GUILayoutOption[] { GUILayout.Width(70) });
-            GUI.skin.label.alignment = TextAnchor.MiddleRight;
-            GUILayout.Label("Array Limit:", new GUILayoutOption[] { GUILayout.Width(70) });
-            GUI.skin.label.alignment = TextAnchor.UpperLeft;
-            var _input = GUILayout.TextField(CppExplorer.ArrayLimit.ToString(), new GUILayoutOption[] { GUILayout.Width(60) });
-            if (int.TryParse(_input, out int _lim))
-            {
-                CppExplorer.ArrayLimit = _lim;
-            }
-            InspectUnderMouse.EnableInspect = GUILayout.Toggle(InspectUnderMouse.EnableInspect, "Inspect Under Mouse (Shift + RMB)", null);
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal(null);
             for (int i = 0; i < Pages.Count; i++)
             {
                 if (m_currentPage == i)
@@ -115,6 +102,9 @@ namespace Explorer
                 }
             }
             GUILayout.EndHorizontal();
+
+            GUI.color = Color.white;
+            InspectUnderMouse.EnableInspect = GUILayout.Toggle(InspectUnderMouse.EnableInspect, "Inspect Under Mouse (Shift + RMB)", null);
 
             GUILayout.Space(10);
             GUI.color = Color.white;

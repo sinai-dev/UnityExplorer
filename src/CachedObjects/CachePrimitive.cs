@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
 using MelonLoader;
 using UnityEngine;
 
@@ -10,7 +7,7 @@ namespace Explorer
 {
     public class CachePrimitive : CacheObject
     {
-        public enum PrimitiveType
+        public enum PrimitiveTypes
         {
             Bool,
             Double,
@@ -19,69 +16,122 @@ namespace Explorer
             String
         }
 
-        private readonly PrimitiveType m_primitiveType;
+        private string m_valueToString;
 
-        public CachePrimitive(object obj)
+        public PrimitiveTypes PrimitiveType;
+
+        public MethodInfo ParseMethod
         {
-            if (obj == null) return;
+            get
+            {
+                if (m_parseMethod == null)
+                {
+                    Type t = null;
+                    switch (PrimitiveType)
+                    {
+                        case PrimitiveTypes.Bool:
+                            t = typeof(bool); break;
+                        case PrimitiveTypes.Double:
+                            t = typeof(double); break;
+                        case PrimitiveTypes.Float:
+                            t = typeof(float); break;
+                        case PrimitiveTypes.Int:
+                            t = typeof(int); break;
+                        case PrimitiveTypes.String:
+                            t = typeof(string); break;
+                    }
+                    m_parseMethod = t.GetMethod("Parse", new Type[] { typeof(string) });
+                }
+                return m_parseMethod;
+            }
+        }
 
-            if (obj is bool)
+        private MethodInfo m_parseMethod;
+
+        public override void Init()
+        {
+            if (Value == null)
             {
-                m_primitiveType = PrimitiveType.Bool;
+                // this must mean it is a string? no other primitive type should be nullable
+                PrimitiveType = PrimitiveTypes.String;
+                return;
             }
-            else if (obj is double)
+
+            m_valueToString = Value.ToString();
+            var type = Value.GetType();
+
+            if (type == typeof(bool))
             {
-                m_primitiveType = PrimitiveType.Double;
+                PrimitiveType = PrimitiveTypes.Bool;
             }
-            else if (obj is float)
+            else if (type == typeof(double))
             {
-                m_primitiveType = PrimitiveType.Float;
+                PrimitiveType = PrimitiveTypes.Double;
             }
-            else if (obj is int || obj is IntPtr || obj is uint)
+            else if (type == typeof(float))
             {
-                m_primitiveType = PrimitiveType.Int;
+                PrimitiveType = PrimitiveTypes.Float;
             }
-            else if (obj is string)
+            else if (type == typeof(int) || type == typeof(long) || type == typeof(uint) || type == typeof(ulong) || type == typeof(IntPtr))
             {
-                m_primitiveType = PrimitiveType.String;
+                PrimitiveType = PrimitiveTypes.Int;
             }
+            else
+            {
+                if (type != typeof(string))
+                {
+                    MelonLogger.Log("Unsupported primitive: " + type);
+                }
+
+                PrimitiveType = PrimitiveTypes.String;
+            }
+        }
+
+        public override void UpdateValue()
+        {
+            base.UpdateValue();
+
+            m_valueToString = Value?.ToString();
         }
 
         public override void DrawValue(Rect window, float width)
         {
-            if (m_primitiveType == PrimitiveType.Bool && Value is bool b)
+            if (PrimitiveType == PrimitiveTypes.Bool)
             {
+                var b = (bool)Value;
                 var color = "<color=" + (b ? "lime>" : "red>");
-                Value = GUILayout.Toggle((bool)Value, color + Value.ToString() + "</color>", null);
+                b = GUILayout.Toggle(b, color + b.ToString() + "</color>", null);
 
                 if (b != (bool)Value)
                 {
-                    SetValue();
+                    SetValue(m_valueToString);
                 }
             }
             else
             {
-                var toString = Value.ToString();
-                if (toString.Length > 37)
+                GUILayout.Label("<color=yellow><i>" + PrimitiveType + "</i></color>", new GUILayoutOption[] { GUILayout.Width(50) });
+
+                var _width = window.width - 200;
+                if (m_valueToString.Length > 37)
                 {
-                    Value = GUILayout.TextArea(toString, new GUILayoutOption[] { GUILayout.MaxWidth(window.width - 260) });
+                    m_valueToString = GUILayout.TextArea(m_valueToString, new GUILayoutOption[] { GUILayout.MaxWidth(_width) });
                 }
                 else
                 {
-                    Value = GUILayout.TextField(toString, new GUILayoutOption[] { GUILayout.MaxWidth(window.width - 260) });
+                    m_valueToString = GUILayout.TextField(m_valueToString, new GUILayoutOption[] { GUILayout.MaxWidth(_width) });
                 }
-                
-                if (MemberInfo != null)
+
+                if (CanWrite)
                 {
                     if (GUILayout.Button("<color=#00FF00>Apply</color>", new GUILayoutOption[] { GUILayout.Width(60) }))
                     {
-                        SetValue();
+                        SetValue(m_valueToString);
                     }
                 }
             }
         }
 
-        public override void SetValue()
+        public void SetValue(string value)
         {
             if (MemberInfo == null)
             {
@@ -89,19 +139,24 @@ namespace Explorer
                 return;
             }
 
-            switch (m_primitiveType)
+            if (PrimitiveType == PrimitiveTypes.String)
             {
-                case PrimitiveType.Bool:
-                    SetValue(bool.Parse(Value.ToString()), MemberInfo, DeclaringInstance); return;
-                case PrimitiveType.Double:
-                    SetValue(double.Parse(Value.ToString()), MemberInfo, DeclaringInstance); return;
-                case PrimitiveType.Float:
-                    SetValue(float.Parse(Value.ToString()), MemberInfo, DeclaringInstance); return;
-                case PrimitiveType.Int:
-                    SetValue(int.Parse(Value.ToString()), MemberInfo, DeclaringInstance); return;
-                case PrimitiveType.String:
-                    SetValue(Value.ToString(), MemberInfo, DeclaringInstance); return;
+                Value = value;
             }
+            else
+            {
+                try
+                {
+                    var val = ParseMethod.Invoke(null, new object[] { value });
+                    Value = val;                    
+                }
+                catch (Exception e)
+                {
+                    MelonLogger.Log("Exception parsing value: " + e.GetType() + ", " + e.Message);
+                }
+            }
+
+            SetValue();
         }
     }
 }

@@ -22,7 +22,7 @@ namespace Explorer
         }
 
         // helper for drawing a styled button for a GameObject or Transform
-        public static void GameobjButton(GameObject obj, Action<GameObject> specialInspectMethod = null, bool showSmallInspectBtn = true, float width = 380)
+        public static void GameobjButton(GameObject obj, Action<Transform> specialInspectMethod = null, bool showSmallInspectBtn = true, float width = 380)
         {
             bool children = obj.transform.childCount > 0;
 
@@ -52,7 +52,7 @@ namespace Explorer
             FastGameobjButton(obj, color, label, obj.activeSelf, specialInspectMethod, showSmallInspectBtn, width);
         }
 
-        public static void FastGameobjButton(GameObject obj, Color activeColor, string label, bool enabled, Action<GameObject> specialInspectMethod = null, bool showSmallInspectBtn = true, float width = 380)
+        public static void FastGameobjButton(GameObject obj, Color activeColor, string label, bool enabled, Action<Transform> specialInspectMethod = null, bool showSmallInspectBtn = true, float width = 380)
         {
             if (!obj)
             {
@@ -79,7 +79,7 @@ namespace Explorer
             {
                 if (specialInspectMethod != null)
                 {
-                    specialInspectMethod(obj);
+                    specialInspectMethod(obj.transform);
                 }
                 else
                 {
@@ -94,13 +94,18 @@ namespace Explorer
 
             if (showSmallInspectBtn)
             {
-                if (GUILayout.Button("Inspect", null))
-                {
-                    WindowManager.InspectObject(obj, out bool _);
-                }
+                SmallInspectButton(obj);
             }
 
             GUILayout.EndHorizontal();
+        }
+
+        public static void SmallInspectButton(object obj)
+        {
+            if (GUILayout.Button("Inspect", null))
+            {
+                WindowManager.InspectObject(obj, out bool _);
+            }
         }
     }
 }

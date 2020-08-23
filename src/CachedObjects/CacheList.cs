@@ -14,6 +14,7 @@ namespace Explorer
     {
         public bool IsExpanded { get; set; }
         public int ArrayOffset { get; set; }
+        public int ArrayLimit { get; set; } = 20;
         
         public Type EntryType 
         { 
@@ -46,15 +47,6 @@ namespace Explorer
 
         private IEnumerable m_enumerable;
         private CacheObject[] m_cachedEntries;
-
-        public CacheList(object obj)
-        {
-            if (obj != null)
-            {
-                Value = obj;
-                EntryType = obj.GetType().GetGenericArguments()[0];
-            }
-        }
 
         private IEnumerable CppListToEnumerable(object list)
         {
@@ -95,12 +87,12 @@ namespace Explorer
 
             if (IsExpanded)
             {
-                if (count > CppExplorer.ArrayLimit)
+                if (count > ArrayLimit)
                 {
                     GUILayout.EndHorizontal();
                     GUILayout.BeginHorizontal(null);
                     GUILayout.Space(190);
-                    int maxOffset = (int)Mathf.Ceil((float)(count / (decimal)CppExplorer.ArrayLimit)) - 1;
+                    int maxOffset = (int)Mathf.Ceil((float)(count / (decimal)ArrayLimit)) - 1;
                     GUILayout.Label($"Page {ArrayOffset + 1}/{maxOffset + 1}", new GUILayoutOption[] { GUILayout.Width(80) });
                     // prev/next page buttons
                     if (GUILayout.Button("< Prev", null))
@@ -111,13 +103,20 @@ namespace Explorer
                     {
                         if (ArrayOffset < maxOffset) ArrayOffset++;
                     }
+                    GUILayout.Label("Limit: ", new GUILayoutOption[] { GUILayout.Width(50) });
+                    var limit = this.ArrayLimit.ToString();
+                    limit = GUILayout.TextField(limit, new GUILayoutOption[] { GUILayout.Width(50) });
+                    if (limit != ArrayLimit.ToString() && int.TryParse(limit, out int i))
+                    {
+                        ArrayLimit = i;
+                    }
                 }
 
-                int offset = ArrayOffset * CppExplorer.ArrayLimit;
+                int offset = ArrayOffset * ArrayLimit;
 
                 if (offset >= count) offset = 0;
 
-                for (int i = offset; i < offset + CppExplorer.ArrayLimit && i < count; i++)
+                for (int i = offset; i < offset + ArrayLimit && i < count; i++)
                 {
                     var entry = m_cachedEntries[i];
 
@@ -140,11 +139,6 @@ namespace Explorer
             }
         }
 
-        public override void SetValue()
-        {
-            throw new NotImplementedException("TODO");
-        }
-
         /// <summary>
         /// Called when the user presses the "Update" button, or if AutoUpdate is on.
         /// </summary>
@@ -161,7 +155,7 @@ namespace Explorer
             var list = new List<CacheObject>();
             while (enumerator.MoveNext())
             {
-                list.Add(GetCacheObject(enumerator.Current));
+                list.Add(GetCacheObject(enumerator.Current, null, null, this.EntryType));
             }
 
             m_cachedEntries = list.ToArray();

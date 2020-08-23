@@ -14,9 +14,15 @@ namespace Explorer
 
         public override string Name { get => "Scene Explorer"; set => base.Name = value; }
 
-        // ----- Holders for GUI elements ----- //
+        private int m_pageOffset = 0;
+        private int m_limit = 20;
+        private int m_currentTotalCount = 0;
 
-        private string m_currentScene = "";
+        private float m_timeOfLastUpdate = -1f;
+
+    // ----- Holders for GUI elements ----- //
+
+    private string m_currentScene = "";
 
         // gameobject list
         private Transform m_currentTransform;
@@ -37,190 +43,84 @@ namespace Explorer
         public void OnSceneChange()
         {
             m_currentScene = UnityHelpers.ActiveSceneName;
+            SetTransformTarget(null);
+        }
 
-            m_currentTransform = null;
-            CancelSearch();
+        public void CheckOffset(ref int offset, int childCount)
+        {
+            if (offset >= childCount)
+            {
+                offset = 0;
+                m_pageOffset = 0;
+            }
         }
 
         public override void Update()
         {
-            if (!m_searching)
+            if (m_searching) return;
+
+            if (Time.time - m_timeOfLastUpdate < 1f) return;
+            m_timeOfLastUpdate = Time.time;
+
+            m_objectList = new List<GameObjectCache>();
+            int offset = m_pageOffset * m_limit;
+
+            var allTransforms = new List<Transform>();
+
+            // get current list of all transforms (either scene root or our current transform children)
+            if (m_currentTransform)
             {
-                m_objectList = new List<GameObjectCache>();
-                if (m_currentTransform)
+                for (int i = 0; i < m_currentTransform.childCount; i++)
                 {
-                    var endAppend = new List<GameObjectCache>();
-                    for (int i = 0; i < m_currentTransform.childCount; i++)
-                    {
-                        var child = m_currentTransform.GetChild(i);
-
-                        if (child)
-                        {
-                            if (child.childCount > 0)
-                                m_objectList.Add(new GameObjectCache(child.gameObject));
-                            else
-                                endAppend.Add(new GameObjectCache(child.gameObject));
-                        }
-                    }
-                    m_objectList.AddRange(endAppend);
-                    endAppend = null;
+                    allTransforms.Add(m_currentTransform.GetChild(i));
                 }
-                else
+            }
+            else
+            {
+                var scene = SceneManager.GetSceneByName(m_currentScene);
+                var rootObjects = scene.GetRootGameObjects();
+
+                foreach (var obj in rootObjects)
                 {
-                    var scene = SceneManager.GetSceneByName(m_currentScene);
-                    var rootObjects = scene.GetRootGameObjects();
-
-                    // add objects with children first
-                    foreach (var obj in rootObjects.Where(x => x.transform.childCount > 0))
-                    {
-                        m_objectList.Add(new GameObjectCache(obj));
-                    }
-                    foreach (var obj in rootObjects.Where(x => x.transform.childCount == 0))
-                    {
-                        m_objectList.Add(new GameObjectCache(obj));
-                    }
+                    allTransforms.Add(obj.transform);
                 }
+            }
+
+            m_currentTotalCount = allTransforms.Count;
+
+            // make sure offset doesn't exceed count
+            CheckOffset(ref offset, m_currentTotalCount);
+
+            // sort by childcount
+            allTransforms.Sort((a, b) => b.childCount.CompareTo(a.childCount));
+
+            for (int i = offset; i < offset + m_limit && i < m_currentTotalCount; i++)
+            {
+                var child = allTransforms[i];
+                m_objectList.Add(new GameObjectCache(child.gameObject));
             }
         }
 
-        // --------- GUI Draw Functions --------- //        
-
-        public override void DrawWindow()
+        public void SetTransformTarget(Transform t)
         {
-            try
-            {
-                GUILayout.BeginHorizontal(null);
-                // Current Scene label
-                GUILayout.Label("Current Scene:", new GUILayoutOption[] { GUILayout.Width(120) });
-                try
-                {
-                    // Need to do 'ToList()' so the object isn't cleaned up by Il2Cpp GC.
-                    var scenes = SceneManager.GetAllScenes().ToList();
+            m_currentTransform = t;
 
-                    if (scenes.Count > 1)
-                    {
-                        int changeWanted = 0;
-                        if (GUILayout.Button("<", new GUILayoutOption[] { GUILayout.Width(30) }))
-                        {
-                            changeWanted = -1;
-                        }
-                        if (GUILayout.Button(">", new GUILayoutOption[] { GUILayout.Width(30) }))
-                        {
-                            changeWanted = 1;
-                        }
-                        if (changeWanted != 0)
-                        {
-                            int index = scenes.IndexOf(SceneManager.GetSceneByName(m_currentScene));
-                            index += changeWanted;
-                            if (index > scenes.Count - 1)
-                            {
-                                index = 0;
-                            }
-                            else if (index < 0)
-                            {
-                                index = scenes.Count - 1;
-                            }
-                            m_currentScene = scenes[index].name;
-                        }
-                    }
-                }
-                catch { }
-                GUILayout.Label("<color=cyan>" + m_currentScene + "</color>", null); //new GUILayoutOption[] { GUILayout.Width(250) });
+            if (m_searching)
+                CancelSearch();
 
-                GUILayout.EndHorizontal();
-
-                // ----- GameObject Search -----
-                GUILayout.BeginHorizontal(GUI.skin.box, null);
-                GUILayout.Label("<b>Search Scene:</b>", new GUILayoutOption[] { GUILayout.Width(100) });
-                m_searchInput = GUILayout.TextField(m_searchInput, null);
-                if (GUILayout.Button("Search", new GUILayoutOption[] { GUILayout.Width(80) }))
-                {
-                    Search();
-                }
-                GUILayout.EndHorizontal();
-
-                GUILayout.Space(15);
-
-                // ************** GameObject list ***************
-
-                // ----- main explorer ------
-                if (!m_searching)
-                {
-                    if (m_currentTransform != null)
-                    {
-                        GUILayout.BeginHorizontal(null);
-                        if (GUILayout.Button("<-", new GUILayoutOption[] { GUILayout.Width(35) }))
-                        {
-                            TraverseUp();
-                        }
-                        else
-                        {
-                            GUILayout.Label(m_currentTransform.GetGameObjectPath(), null);
-                        }
-                        GUILayout.EndHorizontal();
-                    }
-                    else
-                    {
-                        GUILayout.Label("Scene Root GameObjects:", null);
-                    }
-
-                    if (m_objectList.Count > 0)
-                    {
-                        foreach (var obj in m_objectList)
-                        {
-                            //UIStyles.GameobjButton(obj, SetTransformTarget, true, MainMenu.MainRect.width - 170);
-                            UIHelpers.FastGameobjButton(obj.RefGameObject, obj.EnabledColor, obj.Label, obj.RefGameObject.activeSelf, SetTransformTarget, true, MainMenu.MainRect.width - 170);
-                        }
-                    }
-                }
-                else // ------ Scene Search results ------
-                {
-                    if (GUILayout.Button("<-", new GUILayoutOption[] { GUILayout.Width(35) }))
-                    {
-                        CancelSearch();
-                    }
-
-                    GUILayout.Label("Search Results:", null);
-
-                    if (m_searchResults.Count > 0)
-                    {
-                        foreach (var obj in m_searchResults)
-                        {
-                            //UIStyles.GameobjButton(obj, SetTransformTarget, true, MainMenu.MainRect.width - 170);
-                            UIHelpers.FastGameobjButton(obj.RefGameObject, obj.EnabledColor, obj.Label, obj.RefGameObject.activeSelf, SetTransformTarget, true, MainMenu.MainRect.width - 170);
-                        }
-                    }
-                    else
-                    {
-                        GUILayout.Label("<color=red><i>No results found!</i></color>", null);
-                    }
-                }
-            }
-            catch
-            {
-                m_currentTransform = null;
-            }
-        }
-
-
-
-        // -------- Actual Methods (not drawing GUI) ---------- //
-
-        public void SetTransformTarget(GameObject obj)
-        {
-            m_currentTransform = obj.transform;
-            CancelSearch();
+            m_timeOfLastUpdate = -1f;
+            Update();
         }
 
         public void TraverseUp()
         {
             if (m_currentTransform.parent != null)
             {
-                m_currentTransform = m_currentTransform.parent;
+                SetTransformTarget(m_currentTransform.parent);
             }
             else
             {
-                m_currentTransform = null;
+                SetTransformTarget(null);
             }
         }
 
@@ -228,6 +128,7 @@ namespace Explorer
         {
             m_searchResults = SearchSceneObjects(m_searchInput);
             m_searching = true;
+            m_currentTotalCount = m_searchResults.Count;
         }
 
         public void CancelSearch()
@@ -249,6 +150,220 @@ namespace Explorer
 
             return matches;
         }
+
+        // --------- GUI Draw Function --------- //        
+
+        public override void DrawWindow()
+        {
+            try
+            {
+                DrawHeaderArea();
+
+                GUILayout.BeginVertical(GUI.skin.box, null);
+
+                DrawPageButtons();
+
+                if (!m_searching)
+                {
+                    DrawGameObjectList();
+                }
+                else
+                {
+                    DrawSearchResultsList();
+                }
+
+                GUILayout.EndVertical();
+            }
+            catch (Exception e)
+            {
+                MelonLogger.Log("Exception drawing ScenePage! " + e.GetType() + ", " + e.Message);
+                MelonLogger.Log(e.StackTrace);
+                m_currentTransform = null;
+            }
+        }
+
+        private void DrawHeaderArea()
+        {
+            GUILayout.BeginHorizontal(null);
+
+            // Current Scene label
+            GUILayout.Label("Current Scene:", new GUILayoutOption[] { GUILayout.Width(120) });
+            try
+            {
+                // Need to do 'ToList()' so the object isn't cleaned up by Il2Cpp GC.
+                var scenes = SceneManager.GetAllScenes().ToList();
+
+                if (scenes.Count > 1)
+                {
+                    int changeWanted = 0;
+                    if (GUILayout.Button("<", new GUILayoutOption[] { GUILayout.Width(30) }))
+                    {
+                        changeWanted = -1;
+                    }
+                    if (GUILayout.Button(">", new GUILayoutOption[] { GUILayout.Width(30) }))
+                    {
+                        changeWanted = 1;
+                    }
+                    if (changeWanted != 0)
+                    {
+                        int index = scenes.IndexOf(SceneManager.GetSceneByName(m_currentScene));
+                        index += changeWanted;
+                        if (index > scenes.Count - 1)
+                        {
+                            index = 0;
+                        }
+                        else if (index < 0)
+                        {
+                            index = scenes.Count - 1;
+                        }
+                        m_currentScene = scenes[index].name;
+                    }
+                }
+            }
+            catch { }
+            GUILayout.Label("<color=cyan>" + m_currentScene + "</color>", null); //new GUILayoutOption[] { GUILayout.Width(250) });
+
+            GUILayout.EndHorizontal();
+
+            // ----- GameObject Search -----
+            GUILayout.BeginHorizontal(GUI.skin.box, null);
+            GUILayout.Label("<b>Search Scene:</b>", new GUILayoutOption[] { GUILayout.Width(100) });
+            m_searchInput = GUILayout.TextField(m_searchInput, null);
+            if (GUILayout.Button("Search", new GUILayoutOption[] { GUILayout.Width(80) }))
+            {
+                Search();
+            }
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(5);
+        }
+
+        private void DrawPageButtons()
+        {
+            GUILayout.BeginHorizontal(null);
+
+            GUILayout.Label("Limit per page: ", new GUILayoutOption[] { GUILayout.Width(100) });
+            var limit = m_limit.ToString();
+            limit = GUILayout.TextField(limit, new GUILayoutOption[] { GUILayout.Width(30) });
+            if (int.TryParse(limit, out int lim))
+            {
+                m_limit = lim;
+            }
+
+            // prev/next page buttons
+            if (m_currentTotalCount > m_limit)
+            {
+                int count = m_currentTotalCount;
+                int maxOffset = (int)Mathf.Ceil((float)(count / (decimal)m_limit)) - 1;
+                if (GUILayout.Button("< Prev", null))
+                {
+                    if (m_pageOffset > 0) m_pageOffset--;
+                    m_timeOfLastUpdate = -1f;
+                    Update();
+                }
+
+                GUI.skin.label.alignment = TextAnchor.MiddleCenter;
+                GUILayout.Label($"Page {m_pageOffset + 1}/{maxOffset + 1}", new GUILayoutOption[] { GUILayout.Width(80) });
+
+                if (GUILayout.Button("Next >", null))
+                {
+                    if (m_pageOffset < maxOffset) m_pageOffset++;
+                    m_timeOfLastUpdate = -1f;
+                    Update();
+                }
+            }
+
+            GUILayout.EndHorizontal();
+            GUI.skin.label.alignment = TextAnchor.UpperLeft;
+        }
+
+        private void DrawGameObjectList()
+        {
+            if (m_currentTransform != null)
+            {
+                GUILayout.BeginHorizontal(null);
+                if (GUILayout.Button("<-", new GUILayoutOption[] { GUILayout.Width(35) }))
+                {
+                    TraverseUp();
+                }
+                else
+                {
+                    GUILayout.Label("<color=cyan>" + m_currentTransform.GetGameObjectPath() + "</color>",
+                        new GUILayoutOption[] { GUILayout.Width(MainMenu.MainRect.width - 187f) });
+                }
+
+                UIHelpers.SmallInspectButton(m_currentTransform);
+                
+                GUILayout.EndHorizontal();
+            }
+            else
+            {
+                GUILayout.Label("Scene Root GameObjects:", null);
+            }
+
+            if (m_objectList.Count > 0)
+            {
+                foreach (var obj in m_objectList)
+                {
+                    if (!obj.RefGameObject)
+                    {
+                        string label = "<color=red><i>null";
+
+                        if (obj.RefGameObject != null)
+                        {
+                            label += " (Destroyed)";
+                        }
+
+                        label += "</i></color>";
+                        GUILayout.Label(label, null);
+                    }
+                    else
+                    {
+                        UIHelpers.FastGameobjButton(obj.RefGameObject,
+                        obj.EnabledColor,
+                        obj.Label,
+                        obj.RefGameObject.activeSelf,
+                        SetTransformTarget,
+                        true,
+                        MainMenu.MainRect.width - 170);
+                    }
+                }
+            }
+        }
+
+        private void DrawSearchResultsList()
+        {
+            if (GUILayout.Button("<- Cancel Search", new GUILayoutOption[] { GUILayout.Width(150) }))
+            {
+                CancelSearch();
+            }
+
+            GUILayout.Label("Search Results:", null);
+
+            if (m_searchResults.Count > 0)
+            {
+                int offset = m_pageOffset * m_limit;
+
+                if (offset >= m_searchResults.Count)
+                {
+                    offset = 0;
+                    m_pageOffset = 0;
+                }
+
+                for (int i = offset; i < offset + m_limit && offset < m_searchResults.Count; i++)
+                {
+                    var obj = m_searchResults[i];
+
+                    UIHelpers.FastGameobjButton(obj.RefGameObject, obj.EnabledColor, obj.Label, obj.RefGameObject.activeSelf, SetTransformTarget, true, MainMenu.MainRect.width - 170);
+                }
+            }
+            else
+            {
+                GUILayout.Label("<color=red><i>No results found!</i></color>", null);
+            }
+        }
+
+        // -------- Mini GameObjectCache class ---------- //
     
         public class GameObjectCache
         {

@@ -22,6 +22,7 @@ namespace Explorer
         public static Il2CppSystem.Type TransformType => Il2CppType.Of<Transform>();
         public static Il2CppSystem.Type ObjectType => Il2CppType.Of<UnityEngine.Object>();
         public static Il2CppSystem.Type ComponentType => Il2CppType.Of<Component>();
+        public static Il2CppSystem.Type BehaviourType => Il2CppType.Of<Behaviour>();
 
         private static readonly MethodInfo m_tryCastMethodInfo = typeof(Il2CppObjectBase).GetMethod("TryCast");
 

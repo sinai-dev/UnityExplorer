@@ -104,7 +104,7 @@ namespace Explorer
 
             foreach (var window in Windows)
             {
-                if (obj == window.Target)
+                if (ReferenceEquals(obj, window.Target))
                 {
                     GUI.BringWindowToFront(window.windowID);
                     GUI.FocusWindow(window.windowID);

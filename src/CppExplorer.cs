@@ -13,7 +13,7 @@ namespace Explorer
         // consts
 
         public const string ID = "com.sinai.cppexplorer";
-        public const string VERSION = "1.4.1";
+        public const string VERSION = "1.4.2";
         public const string AUTHOR = "Sinai";
 
         public const string NAME = "CppExplorer"
@@ -29,7 +29,6 @@ namespace Explorer
         // props
 
         public static bool ShowMenu { get; set; } = false;
-        public static int ArrayLimit { get; set; } = 20;
 
         // methods
 

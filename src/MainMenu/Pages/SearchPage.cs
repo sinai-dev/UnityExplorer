@@ -135,7 +135,7 @@ namespace Explorer
                     int offset = m_pageOffset * this.m_limit;
                     if (offset >= count) m_pageOffset = 0;
 
-                    for (int i = offset; i < offset + CppExplorer.ArrayLimit && i < count; i++)
+                    for (int i = offset; i < offset + m_limit && i < count; i++)
                     {
                         m_searchResults[i].Draw(MainMenu.MainRect, 0f);
                         //m_searchResults[i].DrawValue(MainMenu.MainRect);

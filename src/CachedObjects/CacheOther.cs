@@ -58,21 +58,11 @@ namespace Explorer
             }
 
             GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-            if (GUILayout.Button("<color=yellow>" + label + "</color>", new GUILayoutOption[] { GUILayout.MaxWidth(width) }))
+            if (GUILayout.Button("<color=yellow>" + label + "</color>", new GUILayoutOption[] { GUILayout.MaxWidth(width + 40) }))
             {
                 WindowManager.InspectObject(Value, out bool _);
             }
             GUI.skin.button.alignment = TextAnchor.MiddleCenter;
         }
-
-        public override void SetValue()
-        {
-            throw new NotImplementedException("TODO");
-        }
-
-        //public override void UpdateValue(object obj)
-        //{
-            
-        //}
     }
 }

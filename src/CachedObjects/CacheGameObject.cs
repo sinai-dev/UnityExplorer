@@ -10,44 +10,37 @@ namespace Explorer
 {
     public class CacheGameObject : CacheObject
     {
-        private GameObject m_gameObject;
-
-        public CacheGameObject(object obj)
+        private GameObject GameObj
         {
-            if (obj != null)
-                m_gameObject = GetGameObject(obj);
-        }
-
-        private GameObject GetGameObject(object obj)
-        {
-            if (obj is Il2CppSystem.Object ilObj)
+            get 
             {
-                var ilType = ilObj.GetIl2CppType();
-
-                if (ilType == ReflectionHelpers.GameObjectType || ilType == ReflectionHelpers.TransformType)
+                if (m_gameObject == null)
                 {
-                    return ilObj.TryCast<GameObject>() ?? ilObj.TryCast<Transform>()?.gameObject;
-                }
-            }
+                    if (Value is Il2CppSystem.Object ilObj)
+                    {
+                        var ilType = ilObj.GetIl2CppType();
 
-            return null;
+                        if (ilType == ReflectionHelpers.GameObjectType || ilType == ReflectionHelpers.TransformType)
+                        {
+                            m_gameObject = ilObj.TryCast<GameObject>() ?? ilObj.TryCast<Transform>()?.gameObject;
+                        }
+                    }
+                }
+
+                return m_gameObject;
+            }
         }
+
+        private GameObject m_gameObject;
 
         public override void DrawValue(Rect window, float width)
         {
-            UIHelpers.GameobjButton(m_gameObject, null, false, width);
-        }
-
-        public override void SetValue()
-        {
-            throw new NotImplementedException("TODO");
+            UIHelpers.GameobjButton(GameObj, null, false, width);
         }
 
         public override void UpdateValue()
         {
             base.UpdateValue();
-
-            m_gameObject = GetGameObject(Value);
         }
     }
 }
