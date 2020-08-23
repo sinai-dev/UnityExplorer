@@ -52,18 +52,17 @@ In order to fix this problem, you can:
 
 <i>Note: images may be slightly outdated, taken from version 1.2</i>.
 
-Scene explorer, and inspection of a MonoBehaviour object:
+<b>Scene Explorer, GameObject Inspector, and Reflection Inspectors:</b>
 
-[![](https://i.imgur.com/Yxizwcz.png)](https://i.imgur.com/Yxizwcz.png)
+[![](https://i.imgur.com/n8bkxVW.png)](https://i.imgur.com/n8bkxVW.png)
 
-Search feature:
+<b>Object Search:</b>
 
-[![](https://i.imgur.com/F9ZfMvz.png)](https://i.imgur.com/F9ZfMvz.png)
+[![](https://i.imgur.com/RJ9FTpt.png)](https://i.imgur.com/RJ9FTpt.png)
 
+<b>C# REPL console:</b>
 
-C# REPL console:
-
-[![](https://i.imgur.com/14Dbtf8.png)](https://i.imgur.com/14Dbtf8.png)
+[![](https://i.imgur.com/gYTor7C.png)](https://i.imgur.com/gYTor7C.png)
 
 ## Credits
 
