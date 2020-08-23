@@ -50,8 +50,6 @@ In order to fix this problem, you can:
 
 ## Images
 
-<i>Note: images may be slightly outdated, taken from version 1.2</i>.
-
 <b>Scene Explorer, GameObject Inspector, and Reflection Inspectors:</b>
 
 [![](https://i.imgur.com/n8bkxVW.png)](https://i.imgur.com/n8bkxVW.png)
