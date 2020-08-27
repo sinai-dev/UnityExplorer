@@ -42,10 +42,6 @@
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\Il2Cppmscorlib.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Il2CppSystem.Core">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\Il2CppSystem.Core.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="mcs">
       <HintPath>..\lib\mcs.dll</HintPath>
       <Private>False</Private>
@@ -62,10 +58,6 @@
     <Reference Include="System.Xml" />
     <Reference Include="UnhollowerBaseLib">
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnhollowerBaseLib.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnhollowerRuntimeLib">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnhollowerRuntimeLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <!-- Unity 2019 build (InputLegacyModule.dll) -->
@@ -97,10 +89,6 @@
       <HintPath>..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.UIElementsModule" Condition="'$(Configuration)'=='Debug'">
-      <HintPath>..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.UIElementsModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <!-- Unity 2018 build (InputModule.dll) -->
     <Reference Include="UnityEngine" Condition="'$(Configuration)'=='Release_Unity2018'">
       <HintPath>..\..\..\Steam\steamapps\common\VRChat\MelonLoader\Managed\UnityEngine.dll</HintPath>
@@ -128,10 +116,6 @@
     </Reference>
     <Reference Include="UnityEngine.UI" Condition="'$(Configuration)'=='Release_Unity2018'">
       <HintPath>..\..\..\Steam\steamapps\common\VRChat\MelonLoader\Managed\UnityEngine.UI.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.UIElementsModule" Condition="'$(Configuration)'=='Release_Unity2018'">
-      <HintPath>..\..\..\Steam\steamapps\common\VRChat\MelonLoader\Managed\UnityEngine.UIElementsModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

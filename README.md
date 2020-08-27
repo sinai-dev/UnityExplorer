@@ -14,8 +14,10 @@
   <img src="https://img.shields.io/github/downloads/sinai-dev/CppExplorer/total.svg" />
 </p>
 
-### Note
-Most games running on Unity 2017 to 2019 should be supported. If you find that the GUI does not display properly and you get errors in the MelonLoader console about it, then this is likely due to a bug with Il2CppAssemblyUnhollower's unstripping. This bug is known by the developer of the tool and they will fix it as soon as they are able to.
+### Known issue
+Some games are experiencing `MissingMethodException`s or exceptions about failed unstripping, which prevent the CppExplorer menu from showing properly or at all. This is a bug with [Il2CppAssemblyUnhollower](https://github.com/knah/Il2CppAssemblyUnhollower) and there isn't much I can do about it myself. 
+
+If you're familiar with C# and Unity, one possibility for now is making a fork of this repo and manually fixing all the broken methods to ones which aren't broken (if possible). There may be another overload of the same method which wasn't stripped or was unstripped successfully, which you can use instead.
 
 ## Features
 * Scene hierarchy explorer
@@ -38,15 +40,13 @@ Requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be ins
 * Press F7 to show or hide the menu.
 * Simply browse through the scene, search for objects, etc, it's pretty self-explanatory.
 
-### Help! I can't use the mouse!
+### Mouse Control
 
-It is fairly common for games to override mouse control with their own mouse behaviour. Unfortunately, it's not feasible for CppExplorer to handle this due to how differently every game will go about it.
+CppExplorer can force the mouse to be visible and unlocked when the menu is open, if you have enabled "Force Unlock Mouse" (Left-Alt toggle). However, you may also want to prevent the mouse clicking-through onto the game behind CppExplorer, this is possible but it requires specific patches for that game.
 
-In order to fix this problem, you can:
-* Use [VRCExplorerMouseControl](https://github.com/sinaioutlander/VRCExplorerMouseControl) (for VRChat)
-* Use [HPExplorerMouseControl](https://github.com/sinaioutlander/Hellpoint-Mods/tree/master/HPExplorerMouseControl/HPExplorerMouseControl) (for Hellpoint)
-* In general, pressing Escape (to open a menu) will usually give you temporary control over the mouse.
-* Create your own mini-plugin using one of the two plugins above as an example. Usually only 1 or 2 simple Harmony patches are needed to fix the problem.
+* For VRChat, use [VRCExplorerMouseControl](https://github.com/sinaioutlander/VRCExplorerMouseControl)
+* For Hellpoint, use [HPExplorerMouseControl](https://github.com/sinaioutlander/Hellpoint-Mods/tree/master/HPExplorerMouseControl/HPExplorerMouseControl)
+* You can create your own mini-plugin using one of the two plugins above as an example. Usually only 1 or 2 simple Harmony patches are needed to fix the problem (if you want to submit that here, feel free to make a PR to this Readme).
 
 ## Images
 

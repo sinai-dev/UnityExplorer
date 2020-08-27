@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using MelonLoader;
 using Mono.CSharp;
 using UnityEngine;
 
@@ -22,7 +23,15 @@ namespace Explorer
             {
                 if (m_entryType == null)
                 {
-                    m_entryType = Value?.GetType().GetGenericArguments()[0];
+                    switch (this.MemberInfoType)
+                    {
+                        case ReflectionWindow.MemberInfoType.Field:
+                            m_entryType = (MemberInfo as FieldInfo).FieldType.GetGenericArguments()[0];
+                            break;
+                        case ReflectionWindow.MemberInfoType.Property:
+                            m_entryType = (MemberInfo as PropertyInfo).PropertyType.GetGenericArguments()[0];
+                            break;
+                    }
                 }
                 return m_entryType;
             }
@@ -39,7 +48,7 @@ namespace Explorer
             {
                 if (m_enumerable == null && Value != null)
                 {
-                    m_enumerable = Value as IEnumerable ?? CppListToEnumerable(Value);
+                    m_enumerable = Value as IEnumerable ?? CastValueFromList();
                 }
                 return m_enumerable;
             }
@@ -48,14 +57,23 @@ namespace Explorer
         private IEnumerable m_enumerable;
         private CacheObject[] m_cachedEntries;
 
-        private IEnumerable CppListToEnumerable(object list)
+        public MethodInfo GenericToArrayMethod
         {
-            if (EntryType == null) return null;
+            get
+            {
+                if (EntryType == null) return null;
 
-            return (IEnumerable)typeof(Il2CppSystem.Collections.Generic.List<>)
-                                .MakeGenericType(new Type[] { EntryType })
-                                .GetMethod("ToArray")
-                                .Invoke(list, new object[0]);
+                return m_genericToArray ?? 
+                            (m_genericToArray = typeof(Il2CppSystem.Collections.Generic.List<>)
+                            .MakeGenericType(new Type[] { this.EntryType })
+                            .GetMethod("ToArray"));
+            }
+        }
+        private MethodInfo m_genericToArray;
+
+        private IEnumerable CastValueFromList()
+        {
+            return (Value == null) ? null : (IEnumerable)GenericToArrayMethod?.Invoke(Value, new object[0]);
         }
 
         public override void DrawValue(Rect window, float width)

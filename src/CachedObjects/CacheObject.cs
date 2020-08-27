@@ -132,8 +132,18 @@ namespace Explorer
             return holder;
         }
 
+        private const float MAX_WIDTH = 400f;
+
         public void Draw(Rect window, float labelWidth = 215f)
         {
+            if (labelWidth > 0)
+            {
+                float min = (window.width * 0.37f);
+                if (min > MAX_WIDTH) min = MAX_WIDTH;
+
+                labelWidth = Mathf.Clamp(labelWidth, min, MAX_WIDTH);
+            }
+
             if (MemberInfo != null)
             {
                 GUILayout.Label("<color=cyan>" + FullName + "</color>", new GUILayoutOption[] { GUILayout.Width(labelWidth) });

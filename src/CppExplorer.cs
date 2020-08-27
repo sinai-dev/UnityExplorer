@@ -1,19 +1,18 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
+using System.Reflection;
+using Harmony;
 using MelonLoader;
 using UnhollowerBaseLib;
+using UnityEngine;
 
 namespace Explorer
 {
     public class CppExplorer : MelonMod
     {
-        // consts
-
-        public const string ID = "com.sinai.cppexplorer";
-        public const string VERSION = "1.4.2";
+        public const string GUID = "com.sinai.cppexplorer";
+        public const string VERSION = "1.4.5";
         public const string AUTHOR = "Sinai";
 
         public const string NAME = "CppExplorer"
@@ -22,26 +21,52 @@ namespace Explorer
 #endif
         ;
 
-        // fields
+        public static CppExplorer Instance { get; private set; }
 
-        public static CppExplorer Instance;
+        public static bool ShowMenu
+        {
+            get => m_showMenu;
+            set => SetShowMenu(value);
+        }
+        private static bool m_showMenu;
 
-        // props
+        public static bool ForceUnlockMouse
+        {
+            get => m_forceUnlock;
+            set => SetForceUnlock(value);
+        }
+        private static bool m_forceUnlock;
+        private static CursorLockMode m_lastLockMode;
+        private static bool m_lastVisibleState;
+        private static bool m_currentlySettingCursor = false;
 
-        public static bool ShowMenu { get; set; } = false;
+        public static bool ShouldForceMouse => ShowMenu && ForceUnlockMouse;
 
-        // methods
+        private static void SetShowMenu(bool show)
+        {
+            m_showMenu = show;
+            UpdateCursorControl();
+        }
+
+        // ========== MonoBehaviour methods ==========
 
         public override void OnApplicationStart()
         {
-            base.OnApplicationStart();
-
             Instance = this;
 
             new MainMenu();
             new WindowManager();
 
-            ShowMenu = true;
+            // Get current cursor state and enable cursor
+            m_lastLockMode = Cursor.lockState;
+            m_lastVisibleState = Cursor.visible;
+
+            // Enable ShowMenu and ForceUnlockMouse 
+            // (set m_showMenu to not call UpdateCursorState twice)
+            m_showMenu = true;
+            SetForceUnlock(true);
+
+            MelonLogger.Log($"CppExplorer {VERSION} initialized.");
         }
 
         public override void OnLevelWasLoaded(int level)
@@ -52,6 +77,7 @@ namespace Explorer
 
         public override void OnUpdate()
         {
+            // Check main toggle key input
             if (Input.GetKeyDown(KeyCode.F7))
             {
                 ShowMenu = !ShowMenu;
@@ -59,15 +85,14 @@ namespace Explorer
 
             if (ShowMenu)
             {
-                if (!Cursor.visible)
+                // Check Force-Unlock input
+                if (Input.GetKeyDown(KeyCode.LeftAlt))
                 {
-                    Cursor.visible = true;
-                    Cursor.lockState = CursorLockMode.None;
+                    ForceUnlockMouse = !ForceUnlockMouse;
                 }
 
                 MainMenu.Instance.Update();
                 WindowManager.Instance.Update();
-
                 InspectUnderMouse.Update();
             }
         }
@@ -78,8 +103,99 @@ namespace Explorer
 
             MainMenu.Instance.OnGUI();
             WindowManager.Instance.OnGUI();
-
             InspectUnderMouse.OnGUI();
+        }
+
+        // =========== Cursor control ===========
+
+        private static void SetForceUnlock(bool unlock)
+        {
+            m_forceUnlock = unlock;
+            UpdateCursorControl();
+        }
+
+        private static void UpdateCursorControl()
+        {
+            m_currentlySettingCursor = true;
+            if (ShouldForceMouse)
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
+            else
+            {
+                Cursor.lockState = m_lastLockMode;
+                Cursor.visible = m_lastVisibleState;
+            }
+            m_currentlySettingCursor = false;
+        }
+
+        // Force mouse to stay unlocked and visible while UnlockMouse and ShowMenu are true.
+        // Also keep track of when anything else tries to set Cursor state, this will be the
+        // value that we set back to when we close the menu or disable force-unlock.
+
+        [HarmonyPatch(typeof(Cursor), nameof(Cursor.lockState), MethodType.Setter)]
+        public class Cursor_lockState
+        {
+            [HarmonyPrefix]
+            public static void Prefix(ref CursorLockMode value)
+            {
+                if (!m_currentlySettingCursor)
+                {
+                    m_lastLockMode = value;
+
+                    if (ShouldForceMouse)
+                    {
+                        value = CursorLockMode.None;
+                    }
+                }                
+            }
+        }
+
+        [HarmonyPatch(typeof(Cursor), nameof(Cursor.visible), MethodType.Setter)]
+        public class Cursor_set_visible
+        {
+            [HarmonyPrefix]
+            public static void Prefix(ref bool value)
+            {
+                if (!m_currentlySettingCursor)
+                {
+                    m_lastVisibleState = value;
+
+                    if (ShouldForceMouse)
+                    {
+                        value = true;
+                    }
+                }
+            }
+        }
+
+        // Make it appear as though UnlockMouse is disabled to the rest of the application.
+
+        [HarmonyPatch(typeof(Cursor), nameof(Cursor.visible), MethodType.Getter)]
+        public class Cursor_get_visible
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref bool __result)
+            {
+                if (ShouldForceMouse)
+                {
+                    __result = m_lastVisibleState;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(Cursor), nameof(Cursor.lockState), MethodType.Getter)]
+        public class Cursor_get_lockState
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref CursorLockMode __result)
+            {
+                if (ShouldForceMouse)
+                {
+                    __result = m_lastLockMode;
+                }
+            }
         }
     }
 }

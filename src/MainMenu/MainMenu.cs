@@ -103,8 +103,14 @@ namespace Explorer
             }
             GUILayout.EndHorizontal();
 
+            GUILayout.BeginHorizontal(null);
             GUI.color = Color.white;
             InspectUnderMouse.EnableInspect = GUILayout.Toggle(InspectUnderMouse.EnableInspect, "Inspect Under Mouse (Shift + RMB)", null);
+
+            bool mouseState = CppExplorer.ForceUnlockMouse;
+            bool setMouse = GUILayout.Toggle(mouseState, "Force Unlock Mouse (Left Alt)", null);
+            if (setMouse != mouseState) CppExplorer.ForceUnlockMouse = setMouse;
+            GUILayout.EndHorizontal();
 
             GUILayout.Space(10);
             GUI.color = Color.white;

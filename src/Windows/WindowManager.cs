@@ -102,12 +102,24 @@ namespace Explorer
         {
             createdNew = false;
 
+            UnityEngine.Object uObj = null;
+            if (obj is UnityEngine.Object)
+            {
+                uObj = obj as UnityEngine.Object;
+            }
+
             foreach (var window in Windows)
             {
-                if (ReferenceEquals(obj, window.Target))
+                bool equals;
+                equals = ReferenceEquals(obj, window.Target);
+
+                if (!equals && uObj != null && window.Target is UnityEngine.Object uTarget)
                 {
-                    GUI.BringWindowToFront(window.windowID);
-                    GUI.FocusWindow(window.windowID);
+                    equals = uObj.m_CachedPtr == uTarget.m_CachedPtr;
+                }
+
+                if (equals)
+                {                    
                     return window;
                 }
             }
@@ -181,7 +193,10 @@ namespace Explorer
 
                 GUILayout.EndHorizontal();
             }
-            catch { }
+            catch //(Exception e)
+            {
+                //MelonLogger.Log("Exception on GuiResize: " + e.GetType() + ", " + e.Message);
+            }
 
             return _rect;
         }

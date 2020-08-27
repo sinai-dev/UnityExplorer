@@ -86,11 +86,11 @@ MelonLogger.Log(""hello world"");";
             if (!UsingDirectives.Contains(asm))
             {
                 UsingDirectives.Add(asm);
-                Evaluate(AsmToUsing(asm));
+                Evaluate(AsmToUsing(asm), true);
             }
         }
 
-        public object Evaluate(string str)
+        public object Evaluate(string str, bool suppressWarning = false)
         {
             object ret = VoidType.Value;
 
@@ -98,11 +98,19 @@ MelonLogger.Log(""hello world"");";
 
             try
             {
-                compiled?.Invoke(ref ret);
+                if (compiled == null)
+                {
+                    throw new Exception("Mono.Csharp Service was unable to compile the code provided.");
+                }
+
+                compiled.Invoke(ref ret);
             }
             catch (Exception e)
             {
-                MelonLogger.LogWarning(e.ToString());
+                if (!suppressWarning)
+                {
+                    MelonLogger.LogWarning(e.GetType() + ", " + e.Message);
+                }
             }
 
             return ret;
@@ -114,7 +122,7 @@ MelonLogger.Log(""hello world"");";
             GUILayout.Label("<b><size=15><color=cyan>C# REPL Console</color></size></b>", null);
 
             GUILayout.Label("Method:", null);
-            MethodInput = GUILayout.TextArea(MethodInput, new GUILayoutOption[] { GUILayout.Height(300) });
+            MethodInput = GUILayout.TextArea(MethodInput, new GUILayoutOption[] { GUILayout.Height(250) });
 
             if (GUILayout.Button("<color=cyan><b>Execute</b></color>", null))
             {
@@ -144,7 +152,7 @@ MelonLogger.Log(""hello world"");";
                 GUILayout.Label(AsmToUsing(asm, true), null);
             }
             GUILayout.BeginHorizontal(null);
-            GUILayout.Label("Add namespace:", new GUILayoutOption[] { GUILayout.Width(110) });
+            GUILayout.Label("Add namespace:", new GUILayoutOption[] { GUILayout.Width(105) });
             UsingInput = GUILayout.TextField(UsingInput, new GUILayoutOption[] { GUILayout.Width(150) });
             if (GUILayout.Button("<b><color=lime>Add</color></b>", new GUILayoutOption[] { GUILayout.Width(120) }))
             {

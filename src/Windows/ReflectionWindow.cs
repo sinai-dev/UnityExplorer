@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using MelonLoader;
-using Mono.CSharp;
 using UnhollowerBaseLib;
 using UnityEngine;
 
@@ -190,7 +189,9 @@ namespace Explorer
 
                     UIHelpers.InstantiateButton((UnityEngine.Object)Target);
 
-                    if (Target is Component comp && comp.gameObject is GameObject obj)
+                    var comp = (Target as Il2CppSystem.Object).TryCast<Component>();
+
+                    if (comp && comp.gameObject is GameObject obj)
                     {
                         GUI.skin.label.alignment = TextAnchor.MiddleRight;
                         GUILayout.Label("GameObject:", null);

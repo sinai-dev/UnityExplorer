@@ -8,15 +8,12 @@ using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using BF = System.Reflection.BindingFlags;
-using ILBF = Il2CppSystem.Reflection.BindingFlags;
-using MelonLoader;
 
 namespace Explorer
 {
     public class ReflectionHelpers
     {
         public static BF CommonFlags = BF.Public | BF.Instance | BF.NonPublic | BF.Static;
-        public static ILBF CommonFlags_IL = ILBF.Public | ILBF.NonPublic | ILBF.Instance | ILBF.Static;
 
         public static Il2CppSystem.Type GameObjectType => Il2CppType.Of<GameObject>();
         public static Il2CppSystem.Type TransformType => Il2CppType.Of<Transform>();
