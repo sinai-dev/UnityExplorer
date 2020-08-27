@@ -103,13 +103,20 @@ namespace Explorer
             }
             GUI.skin.button.alignment = TextAnchor.MiddleCenter;
 
+            GUILayout.Space(5);
+
             if (IsExpanded)
             {
+                float whitespace = 215;
+                ClampLabelWidth(window, ref whitespace);
+
                 if (count > ArrayLimit)
                 {
                     GUILayout.EndHorizontal();
                     GUILayout.BeginHorizontal(null);
-                    GUILayout.Space(190);
+
+                    GUILayout.Space(whitespace);
+
                     int maxOffset = (int)Mathf.Ceil((float)(count / (decimal)ArrayLimit)) - 1;
                     GUILayout.Label($"Page {ArrayOffset + 1}/{maxOffset + 1}", new GUILayoutOption[] { GUILayout.Width(80) });
                     // prev/next page buttons
@@ -128,11 +135,17 @@ namespace Explorer
                     {
                         ArrayLimit = i;
                     }
+
+                    GUILayout.Space(5);
                 }
 
                 int offset = ArrayOffset * ArrayLimit;
 
-                if (offset >= count) offset = 0;
+                if (offset >= count)
+                {
+                    offset = 0;
+                    ArrayOffset = 0;
+                }
 
                 for (int i = offset; i < offset + ArrayLimit && i < count; i++)
                 {
@@ -141,24 +154,27 @@ namespace Explorer
                     //collapsing the BeginHorizontal called from ReflectionWindow.WindowFunction or previous array entry
                     GUILayout.EndHorizontal();
                     GUILayout.BeginHorizontal(null);
-                    GUILayout.Space(190);
+
+                    GUILayout.Space(whitespace);
 
                     if (entry.Value == null)
                     {
-                        GUILayout.Label("<i><color=grey>null</color></i>", null);
+                        GUILayout.Label(i + "<i><color=grey> (null)</color></i>", null);
                     }
                     else
                     {
-                        GUILayout.Label(i.ToString(), new GUILayoutOption[] { GUILayout.Width(30) });
-
-                        entry.DrawValue(window, window.width - 250);
+                        GUI.skin.label.alignment = TextAnchor.MiddleCenter;
+                        GUILayout.Label($"[{i}]", new GUILayoutOption[] { GUILayout.Width(30) });
+                        entry.DrawValue(window, window.width - (whitespace + 85));
                     }
                 }
+
+                GUI.skin.label.alignment = TextAnchor.UpperLeft;
             }
         }
 
         /// <summary>
-        /// Called when the user presses the "Update" button, or if AutoUpdate is on.
+        /// Called only when the user presses the "Update" button, or if AutoUpdate is on.
         /// </summary>
         public override void UpdateValue()
         {

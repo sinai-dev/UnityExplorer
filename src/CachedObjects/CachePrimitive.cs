@@ -111,14 +111,20 @@ namespace Explorer
             {
                 GUILayout.Label("<color=yellow><i>" + PrimitiveType + "</i></color>", new GUILayoutOption[] { GUILayout.Width(50) });
 
-                var _width = window.width - 200;
-                if (m_valueToString.Length > 37)
+                //var content = new GUIContent(m_valueToString);
+                //var contentSize = GUI.skin.textField.CalcSize(content);
+
+                int dynSize = 25 + (m_valueToString.Length * 15);
+                var maxwidth = window.width - 300f;
+                if (CanWrite) maxwidth -= 60;
+
+                if (dynSize > maxwidth)
                 {
-                    m_valueToString = GUILayout.TextArea(m_valueToString, new GUILayoutOption[] { GUILayout.MaxWidth(_width) });
+                    m_valueToString = GUILayout.TextArea(m_valueToString, new GUILayoutOption[] { GUILayout.MaxWidth(maxwidth) });
                 }
                 else
                 {
-                    m_valueToString = GUILayout.TextField(m_valueToString, new GUILayoutOption[] { GUILayout.MaxWidth(_width) });
+                    m_valueToString = GUILayout.TextField(m_valueToString, new GUILayoutOption[] { GUILayout.MaxWidth(dynSize) });
                 }
 
                 if (CanWrite)
@@ -128,6 +134,8 @@ namespace Explorer
                         SetValue(m_valueToString);
                     }
                 }
+
+                GUILayout.Space(5);
             }
         }
 

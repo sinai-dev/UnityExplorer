@@ -12,7 +12,7 @@ namespace Explorer
 {
     public class ReflectionWindow : UIWindow
     {
-        public override string Name { get => "Object Reflection"; set => Name = value; }
+        public override string Name { get => $"Reflection Inspector ({ObjectType.Name})"; }
 
         public Type ObjectType;
 
@@ -272,7 +272,7 @@ namespace Explorer
 
                 GUILayout.EndScrollView();
 
-                m_rect = WindowManager.ResizeWindow(m_rect, windowID);
+                m_rect = ResizeDrag.ResizeWindow(m_rect, windowID);
 
                 GUILayout.EndArea();
             }

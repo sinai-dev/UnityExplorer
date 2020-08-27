@@ -14,7 +14,7 @@ namespace Explorer
 {
     public abstract class UIWindow
     {
-        public abstract string Name { get; set; }
+        public abstract string Name { get; }
 
         public object Target;
 

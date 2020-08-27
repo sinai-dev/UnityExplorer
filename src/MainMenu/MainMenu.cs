@@ -81,7 +81,7 @@ namespace Explorer
             page.DrawWindow();
             GUILayout.EndScrollView();
 
-            MainRect = WindowManager.ResizeWindow(MainRect, MainWindowID);
+            MainRect = ResizeDrag.ResizeWindow(MainRect, MainWindowID);
 
             GUILayout.EndArea();
         }

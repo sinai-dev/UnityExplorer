@@ -110,8 +110,7 @@ namespace Explorer
 
             foreach (var window in Windows)
             {
-                bool equals;
-                equals = ReferenceEquals(obj, window.Target);
+                bool equals = ReferenceEquals(obj, window.Target);
 
                 if (!equals && uObj != null && window.Target is UnityEngine.Object uTarget)
                 {
@@ -151,56 +150,6 @@ namespace Explorer
             GUI.FocusWindow(new_window.windowID);
 
             return new_window;
-        }
-
-        // ============= Resize Window Helper ============
-
-        // static readonly GUIContent gcDrag = new GUIContent("<->", "drag to resize");
-        private static readonly GUIContent gcDrag = new GUIContent("<->");
-        private static bool isResizing = false;
-        private static Rect m_currentResize;
-        private static int m_currentWindow;
-
-        public static Rect ResizeWindow(Rect _rect, int ID)
-        {
-            try
-            {
-                GUILayout.BeginHorizontal(null);
-                GUILayout.Space(_rect.width - 35);
-
-                GUILayout.Button(gcDrag, GUI.skin.label, new GUILayoutOption[] { GUILayout.Width(25), GUILayout.Height(25) });
-
-                var r = GUILayoutUtility.GetLastRect();
-
-                Vector2 mouse = GUIUtility.ScreenToGUIPoint(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y));
-
-                if (r.Contains(mouse) && Input.GetMouseButtonDown(0))
-                {
-                    isResizing = true;
-                    m_currentWindow = ID;
-                    m_currentResize = new Rect(mouse.x, mouse.y, _rect.width, _rect.height);
-                }
-                else if (!Input.GetMouseButton(0))
-                {
-                    isResizing = false;
-                }
-
-                if (isResizing && ID == m_currentWindow)
-                {
-                    _rect.width = Mathf.Max(100, m_currentResize.width + (mouse.x - m_currentResize.x));
-                    _rect.height = Mathf.Max(100, m_currentResize.height + (mouse.y - m_currentResize.y));
-                    _rect.xMax = Mathf.Min(Screen.width, _rect.xMax);  // modifying xMax affects width, not x
-                    _rect.yMax = Mathf.Min(Screen.height, _rect.yMax);  // modifying yMax affects height, not y
-                }
-
-                GUILayout.EndHorizontal();
-            }
-            catch //(Exception e)
-            {
-                //MelonLogger.Log("Exception on GuiResize: " + e.GetType() + ", " + e.Message);
-            }
-
-            return _rect;
         }
     }
 }

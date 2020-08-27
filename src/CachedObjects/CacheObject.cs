@@ -88,26 +88,26 @@ namespace Explorer
         /// <param name="obj">The current value (can be null if memberInfo is not null)</param>
         /// <param name="memberInfo">The MemberInfo (can be null if obj is not null)</param>
         /// <param name="declaringInstance">If MemberInfo is not null, the declaring class instance. Can be null if static.</param>
-        /// <param name="type">The type of the object or MemberInfo value.</param>
+        /// <param name="valueType">The type of the object or MemberInfo value.</param>
         /// <returns></returns>
-        public static CacheObject GetCacheObject(object obj, MemberInfo memberInfo, object declaringInstance, Type type)
+        public static CacheObject GetCacheObject(object obj, MemberInfo memberInfo, object declaringInstance, Type valueType)
         {
             CacheObject holder;
 
-            if ((obj is Il2CppSystem.Object || typeof(Il2CppSystem.Object).IsAssignableFrom(type))
-                && (type.FullName.Contains("UnityEngine.GameObject") || type.FullName.Contains("UnityEngine.Transform")))
+            if ((obj is Il2CppSystem.Object || typeof(Il2CppSystem.Object).IsAssignableFrom(valueType))
+                && (valueType.FullName.Contains("UnityEngine.GameObject") || valueType.FullName.Contains("UnityEngine.Transform")))
             {
                 holder = new CacheGameObject();
             }
-            else if (type.IsPrimitive || type == typeof(string))
+            else if (valueType.IsPrimitive || valueType == typeof(string))
             {
                 holder = new CachePrimitive();
             }
-            else if (type.IsEnum)
+            else if (valueType.IsEnum)
             {
                 holder = new CacheEnum();
             }
-            else if (typeof(System.Collections.IEnumerable).IsAssignableFrom(type) || ReflectionHelpers.IsList(type))
+            else if (typeof(System.Collections.IEnumerable).IsAssignableFrom(valueType) || ReflectionHelpers.IsList(valueType))
             {
                 holder = new CacheList();
             }
@@ -117,31 +117,37 @@ namespace Explorer
             }
 
             holder.Value = obj;
-            holder.ValueType = type.FullName;
+            holder.ValueType = valueType.FullName;
 
             if (memberInfo != null)
             {
                 holder.MemberInfo = memberInfo;
                 holder.DeclaringType = memberInfo.DeclaringType;
                 holder.DeclaringInstance = declaringInstance;
+
+                holder.UpdateValue();
             }
 
-            holder.UpdateValue();
             holder.Init();
 
             return holder;
         }
 
-        private const float MAX_WIDTH = 400f;
+        public const float MAX_LABEL_WIDTH = 400f;
+
+        public static void ClampLabelWidth(Rect window, ref float labelWidth)
+        {
+            float min = window.width * 0.37f;
+            if (min > MAX_LABEL_WIDTH) min = MAX_LABEL_WIDTH;
+
+            labelWidth = Mathf.Clamp(labelWidth, min, MAX_LABEL_WIDTH);
+        }
 
         public void Draw(Rect window, float labelWidth = 215f)
         {
             if (labelWidth > 0)
             {
-                float min = (window.width * 0.37f);
-                if (min > MAX_WIDTH) min = MAX_WIDTH;
-
-                labelWidth = Mathf.Clamp(labelWidth, min, MAX_WIDTH);
+                ClampLabelWidth(window, ref labelWidth);
             }
 
             if (MemberInfo != null)

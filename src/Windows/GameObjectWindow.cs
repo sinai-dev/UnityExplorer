@@ -6,12 +6,13 @@ using MelonLoader;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using ComponentList = Il2CppSystem.Collections.Generic.List<UnityEngine.Component>;
 
 namespace Explorer
 {
     public class GameObjectWindow : UIWindow
     {
-        public override string Name { get => "GameObject Inspector"; set => Name = value; }
+        public override string Name { get => $"GameObject Inspector ({m_object.name})"; }
 
         public GameObject m_object;
 
@@ -21,18 +22,18 @@ namespace Explorer
 
         private Vector2 m_transformScroll = Vector2.zero;
         private Transform[] m_children;
+        private ComponentList m_components;
 
         private Vector2 m_compScroll = Vector2.zero;
-        //private Component[] m_components;
 
         private float m_translateAmount = 0.3f;
         private float m_rotateAmount = 50f;
         private float m_scaleAmount = 0.1f;
 
-        private List<Component> m_cachedDestroyList = new List<Component>();
+        private readonly List<Component> m_cachedDestroyList = new List<Component>();
         //private string m_addComponentInput = "";
 
-        private string m_setParentInput = "";
+        private string m_setParentInput = "Enter a GameObject name or path";
 
         public bool GetObjectAsGameObject()
         {
@@ -84,11 +85,26 @@ namespace Explorer
 
         public override void Update()
         {
-            if (!m_object && !GetObjectAsGameObject())
+            try
             {
-                MelonLogger.Log("Object is null! Destroying window...");
-                DestroyWindow();
+                if (!m_object && !GetObjectAsGameObject())
+                {
+                    throw new Exception("Object is null!");
+                }
+
+                m_components = new Il2CppSystem.Collections.Generic.List<Component>();
+                m_object.GetComponentsInternal(ReflectionHelpers.ComponentType, false, false, true, false, m_components);
             }
+            catch (Exception e)
+            {
+                DestroyOnException(e);
+            }
+        }
+
+        private void DestroyOnException(Exception e)
+        {
+            MelonLogger.Log($"{e.GetType()}, {e.Message}");
+            DestroyWindow();
         }
 
         private void InspectGameObject(Transform obj)
@@ -125,67 +141,74 @@ namespace Explorer
 
         public override void WindowFunction(int windowID)
         {
-            Header();
-
-            GUILayout.BeginArea(new Rect(5, 25, m_rect.width - 10, m_rect.height - 35), GUI.skin.box);
-
-            scroll = GUILayout.BeginScrollView(scroll, GUI.skin.scrollView);
-
-            GUILayout.BeginHorizontal(null);
-            GUILayout.Label("Scene: <color=cyan>" + (m_scene == "" ? "n/a" : m_scene) + "</color>", null);
-            if (m_scene == UnityHelpers.ActiveSceneName)
+            try
             {
-                if (GUILayout.Button("<color=#00FF00>< View in Scene Explorer</color>", new GUILayoutOption[] { GUILayout.Width(230) }))
-                {
-                    ScenePage.Instance.SetTransformTarget(m_object.transform);
-                    MainMenu.SetCurrentPage(0);
-                }
-            }
-            GUILayout.EndHorizontal();
+                Header();
 
-            GUILayout.BeginHorizontal(null);
-            GUILayout.Label("Path:", new GUILayoutOption[] { GUILayout.Width(50) });
-            string pathlabel = m_object.transform.GetGameObjectPath();
-            if (m_object.transform.parent != null)
+                GUILayout.BeginArea(new Rect(5, 25, m_rect.width - 10, m_rect.height - 35), GUI.skin.box);
+
+                scroll = GUILayout.BeginScrollView(scroll, GUI.skin.scrollView);
+
+                GUILayout.BeginHorizontal(null);
+                GUILayout.Label("Scene: <color=cyan>" + (m_scene == "" ? "n/a" : m_scene) + "</color>", null);
+                if (m_scene == UnityHelpers.ActiveSceneName)
+                {
+                    if (GUILayout.Button("<color=#00FF00>< View in Scene Explorer</color>", new GUILayoutOption[] { GUILayout.Width(230) }))
+                    {
+                        ScenePage.Instance.SetTransformTarget(m_object.transform);
+                        MainMenu.SetCurrentPage(0);
+                    }
+                }
+                GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal(null);
+                GUILayout.Label("Path:", new GUILayoutOption[] { GUILayout.Width(50) });
+                string pathlabel = m_object.transform.GetGameObjectPath();
+                if (m_object.transform.parent != null)
+                {
+                    if (GUILayout.Button("<-", new GUILayoutOption[] { GUILayout.Width(35) }))
+                    {
+                        InspectGameObject(m_object.transform.parent);
+                    }
+                }
+                GUILayout.TextArea(pathlabel, null);
+                GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal(null);
+                GUILayout.Label("Name:", new GUILayoutOption[] { GUILayout.Width(50) });
+                GUILayout.TextArea(m_name, null);
+                GUILayout.EndHorizontal();
+
+                // --- Horizontal Columns section ---
+                GUILayout.BeginHorizontal(null);
+
+                GUILayout.BeginVertical(new GUILayoutOption[] { GUILayout.Width(m_rect.width / 2 - 17) });
+                TransformList();
+                GUILayout.EndVertical();
+
+                GUILayout.BeginVertical(new GUILayoutOption[] { GUILayout.Width(m_rect.width / 2 - 17) });
+                ComponentList();
+                GUILayout.EndVertical();
+
+                GUILayout.EndHorizontal(); // end horiz columns
+
+                GameObjectControls();
+
+                GUILayout.EndScrollView();
+
+                m_rect = ResizeDrag.ResizeWindow(m_rect, windowID);
+
+                GUILayout.EndArea();
+            }
+            catch (Exception e)
             {
-                if (GUILayout.Button("<-", new GUILayoutOption[] { GUILayout.Width(35) }))
-                {
-                    InspectGameObject(m_object.transform.parent);
-                }
+                DestroyOnException(e);
             }
-            GUILayout.TextArea(pathlabel, null);
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal(null);
-            GUILayout.Label("Name:", new GUILayoutOption[] { GUILayout.Width(50) });
-            GUILayout.TextArea(m_name, null);
-            GUILayout.EndHorizontal();
-
-            // --- Horizontal Columns section ---
-            GUILayout.BeginHorizontal(null);
-
-            GUILayout.BeginVertical(new GUILayoutOption[] { GUILayout.Width(m_rect.width / 2 - 17) });
-            TransformList();
-            GUILayout.EndVertical();
-
-            GUILayout.BeginVertical(new GUILayoutOption[] { GUILayout.Width(m_rect.width / 2 - 17) });
-            ComponentList();
-            GUILayout.EndVertical();
-
-            GUILayout.EndHorizontal(); // end horiz columns
-
-            GameObjectControls();
-
-            GUILayout.EndScrollView();
-
-            m_rect = WindowManager.ResizeWindow(m_rect, windowID);
-
-            GUILayout.EndArea();
         }
 
         private void TransformList()
         {
-            GUILayout.BeginVertical(GUI.skin.box, new GUILayoutOption[] { GUILayout.Height(250) });
+            GUILayout.BeginVertical(GUI.skin.box, null); // new GUILayoutOption[] { GUILayout.Height(250) });
             m_transformScroll = GUILayout.BeginScrollView(m_transformScroll, GUI.skin.scrollView);
 
             GUILayout.Label("<b>Children:</b>", null);
@@ -222,7 +245,7 @@ namespace Explorer
 
         private void ComponentList()
         {
-            GUILayout.BeginVertical(GUI.skin.box, new GUILayoutOption[] { GUILayout.Height(250) });
+            GUILayout.BeginVertical(GUI.skin.box, null); // new GUILayoutOption[] { GUILayout.Height(250) });
             m_compScroll = GUILayout.BeginScrollView(m_compScroll, GUI.skin.scrollView);
             GUILayout.Label("<b><size=15>Components</size></b>", null);
 
@@ -232,11 +255,10 @@ namespace Explorer
                 m_cachedDestroyList.Clear();
             }
 
-            var m_components = new Il2CppSystem.Collections.Generic.List<Component>();
-            m_object.GetComponentsInternal(Il2CppType.Of<Component>(), false, false, true, false, m_components);
-
             foreach (var component in m_components)
             {
+                if (!component) continue;
+
                 var ilType = component.GetIl2CppType();
                 if (ilType == ReflectionHelpers.TransformType)
                 {
@@ -248,6 +270,10 @@ namespace Explorer
                 {
                     BehaviourEnabledBtn(component.TryCast<Behaviour>());
                 }
+                else
+                {
+                    GUILayout.Space(26);
+                }
                 if (GUILayout.Button("<color=cyan>" + ilType.Name + "</color>", new GUILayoutOption[] { GUILayout.Width(m_rect.width / 2 - 90) }))
                 {
                     ReflectObject(component);
@@ -258,7 +284,6 @@ namespace Explorer
                 }
                 GUILayout.EndHorizontal();
             }
-
 
             GUI.skin.button.alignment = TextAnchor.MiddleCenter;
             if (m_cachedDestroyList.Count > 0)
@@ -300,7 +325,7 @@ namespace Explorer
 
         private void GameObjectControls()
         {
-            GUILayout.BeginVertical(GUI.skin.box, new GUILayoutOption[] { GUILayout.Width(530) });
+            GUILayout.BeginVertical(GUI.skin.box, new GUILayoutOption[] { GUILayout.Width(520) });
             GUILayout.Label("<b><size=15>GameObject Controls</size></b>", null);
 
             GUILayout.BeginHorizontal(null);
@@ -309,17 +334,18 @@ namespace Explorer
                 new GUILayoutOption[] { GUILayout.Width(80) });
             if (m_object.activeSelf != m_active) { m_object.SetActive(m_active); }
 
-            UIHelpers.InstantiateButton(m_object, 100);            
+            UIHelpers.InstantiateButton(m_object, 100);
+
+            if (GUILayout.Button("Set DontDestroyOnLoad", new GUILayoutOption[] { GUILayout.Width(170) }))
+            {
+                GameObject.DontDestroyOnLoad(m_object);
+                m_object.hideFlags |= HideFlags.DontUnloadUnusedAsset;
+            }
 
             GUILayout.EndHorizontal();
-
             GUILayout.BeginHorizontal(null);
 
-            if (GUILayout.Button("Remove from parent", new GUILayoutOption[] { GUILayout.Width(160) }))
-            {
-                m_object.transform.parent = null;
-            }
-            m_setParentInput = GUILayout.TextField(m_setParentInput, new GUILayoutOption[] { GUILayout.Width(m_rect.width - 280) });
+            m_setParentInput = GUILayout.TextField(m_setParentInput, null);
             if (GUILayout.Button("Set Parent", new GUILayoutOption[] { GUILayout.Width(80) }))
             {
                 if (GameObject.Find(m_setParentInput) is GameObject newparent)
@@ -330,6 +356,11 @@ namespace Explorer
                 {
                     MelonLogger.LogWarning($"Could not find gameobject '{m_setParentInput}'");
                 }
+            }
+
+            if (GUILayout.Button("Detach from parent", new GUILayoutOption[] { GUILayout.Width(160) }))
+            {
+                m_object.transform.parent = null;
             }
             GUILayout.EndHorizontal();
 
@@ -342,7 +373,7 @@ namespace Explorer
 
             GUILayout.EndVertical();
 
-            if (GUILayout.Button("<color=red><b>Destroy</b></color>", null))
+            if (GUILayout.Button("<color=red><b>Destroy</b></color>", new GUILayoutOption[] { GUILayout.Width(120) }))
             {
                 GameObject.Destroy(m_object);
                 DestroyWindow();
