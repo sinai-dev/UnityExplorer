@@ -119,7 +119,9 @@ namespace Explorer
                 }
 
                 if (equals)
-                {                    
+                {
+                    GUI.BringWindowToFront(window.windowID);
+                    GUI.FocusWindow(window.windowID);
                     return window;
                 }
             }
