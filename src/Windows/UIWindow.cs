@@ -7,8 +7,6 @@ using MelonLoader;
 using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.EventSystems;
 
 namespace Explorer
 {
@@ -46,15 +44,7 @@ namespace Explorer
 
         public void DestroyWindow()
         {
-            try
-            {
-                WindowManager.Windows.Remove(this);
-            }
-            catch (Exception e)
-            {
-                MelonLogger.Log("Exception removing Window from WindowManager.Windows list!");
-                MelonLogger.Log($"{e.GetType()} : {e.Message}\r\n{e.StackTrace}");
-            }
+            WindowManager.DestroyWindow(this);
         }
 
         public void OnGUI()
@@ -72,12 +62,10 @@ namespace Explorer
 
         public void Header()
         {
-            if (!WindowManager.TabView || IsTabViewWindow)
-            {
-                GUI.DragWindow(new Rect(0, 0, m_rect.width - 90, 20));
-            }
             if (!WindowManager.TabView)
             {
+                GUI.DragWindow(new Rect(0, 0, m_rect.width - 90, 20));
+            
                 if (GUI.Button(new Rect(m_rect.width - 90, 2, 80, 20), "<color=red><b>X</b></color>"))
                 {
                     DestroyWindow();

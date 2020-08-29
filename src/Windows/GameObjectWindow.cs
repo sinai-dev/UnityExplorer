@@ -12,8 +12,8 @@ namespace Explorer
     public class GameObjectWindow : UIWindow
     {
         public override string Title => WindowManager.TabView
-                                        ? m_object.name
-                                        : $"GameObject Inspector ({m_object.name})";
+            ? $"<color=cyan>[G]</color> {m_object.name}"
+            : $"GameObject Inspector ({m_object.name})";
 
         public GameObject m_object;
 

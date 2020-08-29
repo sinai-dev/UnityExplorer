@@ -22,19 +22,46 @@ namespace Explorer
         public static int CurrentWindowID { get; set; } = 500000;
         private static Rect m_lastWindowRect;
 
+        private static readonly List<UIWindow> m_windowsToDestroy = new List<UIWindow>();
+
         public WindowManager()
         {
             Instance = this;
         }
 
+        public static void DestroyWindow(UIWindow window)
+        {
+            m_windowsToDestroy.Add(window);
+        }
+
         public void Update()
         {
-            for (int i = 0; i < Windows.Count; i++)
+            if (m_windowsToDestroy.Count > 0)
             {
-                var window = Windows[i];
-                if (window != null)
+                foreach (var window in m_windowsToDestroy)
                 {
-                    window.Update();
+                    if (Windows.Contains(window))
+                    {
+                        Windows.Remove(window);
+                    }
+                }
+
+                m_windowsToDestroy.Clear();
+            }
+
+            if (TabView)
+            {
+                TabViewWindow.Instance.Update();
+            }
+            else
+            {
+                for (int i = 0; i < Windows.Count; i++)
+                {
+                    var window = Windows[i];
+                    if (window != null)
+                    {
+                        window.Update();
+                    }
                 }
             }
         }

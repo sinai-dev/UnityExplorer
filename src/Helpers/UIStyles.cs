@@ -69,8 +69,8 @@ namespace Explorer
             var newSkin = Object.Instantiate(GUI.skin);
             Object.DontDestroyOnLoad(newSkin);
 
-            m_nofocusTex = MakeTex(550, 700, new Color(0.1f, 0.1f, 0.1f, 0.7f));
-            m_focusTex = MakeTex(550, 700, new Color(0.3f, 0.3f, 0.3f, 1f));
+            m_nofocusTex = MakeTex(1, 1, new Color(0.1f, 0.1f, 0.1f, 0.7f));
+            m_focusTex = MakeTex(1, 1, new Color(0.3f, 0.3f, 0.3f, 1f));
 
             newSkin.window.normal.background = m_nofocusTex;
             newSkin.window.onNormal.background = m_focusTex;

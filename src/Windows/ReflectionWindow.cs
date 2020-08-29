@@ -13,13 +13,13 @@ namespace Explorer
     public class ReflectionWindow : UIWindow
     {
         public override string Title => WindowManager.TabView
-                                        ? ObjectType.Name
-                                        : $"Reflection Inspector ({ObjectType.Name})";
+            ? $"<color=cyan>[R]</color> {ObjectType.Name}" 
+            : $"Reflection Inspector ({ObjectType.Name})";
 
         public Type ObjectType;
 
-        private CacheObjectBase[] m_cachedMembers;
-        private CacheObjectBase[] m_cachedMemberFiltered;
+        private CacheObjectBase[] m_allCachedMembers;
+        private CacheObjectBase[] m_cachedMembersFiltered;
         private int m_pageOffset;
         private int m_limitPerPage = 20;
 
@@ -72,7 +72,7 @@ namespace Explorer
 
         public override void Update()
         {
-            m_cachedMemberFiltered = m_cachedMembers.Where(x => ShouldProcessMember(x)).ToArray();
+            m_cachedMembersFiltered = m_allCachedMembers.Where(x => ShouldProcessMember(x)).ToArray();
 
             if (m_autoUpdate)
             {
@@ -82,7 +82,7 @@ namespace Explorer
 
         private void UpdateValues()
         {
-            foreach (var member in m_cachedMemberFiltered)
+            foreach (var member in m_cachedMembersFiltered)
             {
                 member.UpdateValue();
             }
@@ -140,7 +140,7 @@ namespace Explorer
                 {
                     if (member.MemberType == MemberTypes.Field || member.MemberType == MemberTypes.Property || member.MemberType == MemberTypes.Method)
                     {
-                        if (member.Name.Contains("Il2CppType") || member.Name.StartsWith("get_")) 
+                        if (member.Name.Contains("Il2CppType") || member.Name.StartsWith("get_") || member.Name.StartsWith("set_")) 
                             continue;
 
                         try
@@ -165,7 +165,7 @@ namespace Explorer
                 }
             }
 
-            m_cachedMembers = list.ToArray();
+            m_allCachedMembers = list.ToArray();
         }
 
         // =========== GUI DRAW =========== //
@@ -174,6 +174,8 @@ namespace Explorer
         {
             try
             {
+                // ====== HEADER ======
+
                 var rect = WindowManager.TabView ? TabViewWindow.Instance.m_rect : this.m_rect;
 
                 if (!WindowManager.TabView)
@@ -241,18 +243,17 @@ namespace Explorer
 
                 GUILayout.Space(10);
 
-
                 // prev/next page buttons
                 GUILayout.BeginHorizontal(null);
                 GUILayout.Label("<b>Limit per page:</b>", new GUILayoutOption[] { GUILayout.Width(125) });
                 var limitString = m_limitPerPage.ToString();
                 limitString = GUILayout.TextField(limitString, new GUILayoutOption[] { GUILayout.Width(60) });
-                if (int.TryParse(limitString, out int i))
+                if (int.TryParse(limitString, out int lim))
                 {
-                    m_limitPerPage = i;
+                    m_limitPerPage = lim;
                 }
 
-                int count = m_cachedMemberFiltered.Length;
+                int count = m_cachedMembersFiltered.Length;
                 if (count > m_limitPerPage)
                 {
                     int maxOffset = (int)Mathf.Ceil((float)(count / (decimal)m_limitPerPage)) - 1;
@@ -274,12 +275,47 @@ namespace Explorer
                 }
                 GUILayout.EndHorizontal();
 
+                // ====== BODY ======
+
                 scroll = GUILayout.BeginScrollView(scroll, GUI.skin.scrollView);
 
                 GUILayout.Space(10);
 
-                DrawMembers(this.m_cachedMemberFiltered);
+                UIStyles.HorizontalLine(Color.grey);
 
+                GUILayout.BeginVertical(GUI.skin.box, null);
+
+                int index = 0;
+                var members = this.m_cachedMembersFiltered;
+                int offsetIndex = (m_pageOffset * m_limitPerPage) + index;
+
+                if (offsetIndex >= count)
+                {
+                    int maxOffset = (int)Mathf.Ceil((float)(m_cachedMembersFiltered.Length / (decimal)m_limitPerPage)) - 1;
+                    if (m_pageOffset > maxOffset)
+                    {
+                        m_pageOffset = 0;
+                    }
+                }
+
+                for (int j = offsetIndex; (j < offsetIndex + m_limitPerPage && j < members.Length); j++)
+                {
+                    var holder = members[j];
+
+                    GUILayout.BeginHorizontal(new GUILayoutOption[] { GUILayout.Height(25) });
+
+                    try
+                    {
+                        holder.Draw(rect, 180f);
+                    }
+                    catch { }
+
+                    GUILayout.EndHorizontal();
+
+                    index++;
+                }
+
+                GUILayout.EndVertical();
                 GUILayout.EndScrollView();
 
                 if (!WindowManager.TabView)
@@ -289,66 +325,18 @@ namespace Explorer
                     GUILayout.EndArea();
                 }
             }
+            catch (Il2CppException e)
+            {
+                if (!e.Message.Contains("in a group with only"))
+                {
+                    throw;
+                }
+            }
             catch (Exception e)
             {
-                MelonLogger.LogWarning("Exception on window draw. Message: " + e.Message);
+                MelonLogger.LogWarning("Exception drawing ReflectionWindow: " + e.GetType() + ", " + e.Message);
                 DestroyWindow();
                 return;
-            }
-        }
-
-        private void DrawMembers(CacheObjectBase[] members)
-        {
-            // todo pre-cache list based on current search, otherwise this doesnt work.
-
-            int i = 0;
-            DrawMembersInternal("Properties", MemberTypes.Property, members, ref i);
-            DrawMembersInternal("Fields", MemberTypes.Field, members, ref i);
-            DrawMembersInternal("Methods", MemberTypes.Method, members, ref i);
-        }
-
-        private void DrawMembersInternal(string title, MemberTypes filter, CacheObjectBase[] members, ref int index)
-        {
-            if (m_filter != filter && m_filter != MemberTypes.All)
-            {
-                return;
-            }
-
-            var rect = WindowManager.TabView ? TabViewWindow.Instance.m_rect : this.m_rect;
-
-            UIStyles.HorizontalLine(Color.grey);
-
-            GUILayout.Label($"<size=18><b><color=gold>{title}</color></b></size>", null);
-
-            int offset = (m_pageOffset * m_limitPerPage) + index;
-
-            if (offset >= m_cachedMemberFiltered.Length)
-            {
-                m_pageOffset = 0;
-                offset = 0;
-            }
-
-            for (int j = offset; j < offset + m_limitPerPage && j < members.Length; j++)
-            {
-                var holder = members[j];
-
-                if (holder.MemberInfoType != filter || !ShouldProcessMember(holder)) continue;
-
-                GUILayout.BeginHorizontal(new GUILayoutOption[] { GUILayout.Height(25) });
-                try
-                {
-                    holder.Draw(rect, 180f);
-                }
-                catch // (Exception e)
-                {
-                    //MelonLogger.Log("Exception drawing member " + holder.MemberInfo.Name);
-                    //MelonLogger.Log(e.GetType() + ", " + e.Message);
-                    //MelonLogger.Log(e.StackTrace);
-                }
-                GUILayout.EndHorizontal();
-
-                index++;
-                if (index >= m_limitPerPage) break;
             }
         }
 
@@ -365,6 +353,7 @@ namespace Explorer
             if (GUILayout.Button(label, new GUILayoutOption[] { GUILayout.Width(100) }))
             {
                 m_filter = mode;
+                m_pageOffset = 0;
             }
             GUI.color = Color.white;
         }
