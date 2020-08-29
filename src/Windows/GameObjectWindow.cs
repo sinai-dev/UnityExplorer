@@ -11,7 +11,9 @@ namespace Explorer
 {
     public class GameObjectWindow : UIWindow
     {
-        public override string Name { get => $"GameObject Inspector ({m_object.name})"; }
+        public override string Title => WindowManager.TabView
+                                        ? m_object.name
+                                        : $"GameObject Inspector ({m_object.name})";
 
         public GameObject m_object;
 
@@ -144,9 +146,13 @@ namespace Explorer
         {
             try
             {
-                Header();
+                var rect = WindowManager.TabView ? TabViewWindow.Instance.m_rect : this.m_rect;
 
-                GUILayout.BeginArea(new Rect(5, 25, m_rect.width - 10, m_rect.height - 35), GUI.skin.box);
+                if (!WindowManager.TabView)
+                {
+                    Header();
+                    GUILayout.BeginArea(new Rect(5, 25, rect.width - 10, rect.height - 35), GUI.skin.box);
+                }
 
                 scroll = GUILayout.BeginScrollView(scroll, GUI.skin.scrollView);
 
@@ -183,12 +189,12 @@ namespace Explorer
                 // --- Horizontal Columns section ---
                 GUILayout.BeginHorizontal(null);
 
-                GUILayout.BeginVertical(new GUILayoutOption[] { GUILayout.Width(m_rect.width / 2 - 17) });
-                TransformList();
+                GUILayout.BeginVertical(new GUILayoutOption[] { GUILayout.Width(rect.width / 2 - 17) });
+                TransformList(rect);
                 GUILayout.EndVertical();
 
-                GUILayout.BeginVertical(new GUILayoutOption[] { GUILayout.Width(m_rect.width / 2 - 17) });
-                ComponentList();
+                GUILayout.BeginVertical(new GUILayoutOption[] { GUILayout.Width(rect.width / 2 - 17) });
+                ComponentList(rect);
                 GUILayout.EndVertical();
 
                 GUILayout.EndHorizontal(); // end horiz columns
@@ -197,9 +203,12 @@ namespace Explorer
 
                 GUILayout.EndScrollView();
 
-                m_rect = ResizeDrag.ResizeWindow(m_rect, windowID);
+                if (!WindowManager.TabView)
+                {
+                    m_rect = ResizeDrag.ResizeWindow(rect, windowID);
 
-                GUILayout.EndArea();
+                    GUILayout.EndArea();
+                }
             }
             catch (Exception e)
             {
@@ -207,7 +216,7 @@ namespace Explorer
             }
         }
 
-        private void TransformList()
+        private void TransformList(Rect m_rect)
         {
             GUILayout.BeginVertical(GUI.skin.box, null); // new GUILayoutOption[] { GUILayout.Height(250) });
             m_transformScroll = GUILayout.BeginScrollView(m_transformScroll, GUI.skin.scrollView);
@@ -222,7 +231,7 @@ namespace Explorer
                         GUILayout.Label("null", null);
                         continue;
                     }
-                    UIHelpers.GameobjButton(obj.gameObject, InspectGameObject, false, this.m_rect.width / 2 - 60);
+                    UIHelpers.GameobjButton(obj.gameObject, InspectGameObject, false, m_rect.width / 2 - 60);
                 }
                 foreach (var obj in m_children.Where(x => x.childCount == 0))
                 {
@@ -231,7 +240,7 @@ namespace Explorer
                         GUILayout.Label("null", null);
                         continue;
                     }
-                    UIHelpers.GameobjButton(obj.gameObject, InspectGameObject, false, this.m_rect.width / 2 - 60);
+                    UIHelpers.GameobjButton(obj.gameObject, InspectGameObject, false, m_rect.width / 2 - 60);
                 }
             }
             else
@@ -244,7 +253,7 @@ namespace Explorer
         }
 
 
-        private void ComponentList()
+        private void ComponentList(Rect m_rect)
         {
             GUILayout.BeginVertical(GUI.skin.box, null); // new GUILayoutOption[] { GUILayout.Height(250) });
             m_compScroll = GUILayout.BeginScrollView(m_compScroll, GUI.skin.scrollView);

@@ -14,7 +14,7 @@ namespace Explorer
 {
     public abstract class UIWindow
     {
-        public abstract string Name { get; }
+        public abstract string Title { get; }
 
         public object Target;
 
@@ -22,6 +22,8 @@ namespace Explorer
         public Rect m_rect = new Rect(0, 0, 550, 700);
 
         public Vector2 scroll = Vector2.zero;
+
+        public virtual bool IsTabViewWindow => false;
 
         public abstract void Init();
         public abstract void WindowFunction(int windowID);
@@ -62,7 +64,7 @@ namespace Explorer
                 var origSkin = GUI.skin;
 
                 GUI.skin = UIStyles.WindowSkin;
-                m_rect = GUI.Window(windowID, m_rect, (GUI.WindowFunction)WindowFunction, Name);
+                m_rect = GUI.Window(windowID, m_rect, (GUI.WindowFunction)WindowFunction, Title);
 
                 GUI.skin = origSkin;
             }
@@ -70,12 +72,17 @@ namespace Explorer
 
         public void Header()
         {
-            GUI.DragWindow(new Rect(0, 0, m_rect.width - 90, 20));
-
-            if (GUI.Button(new Rect(m_rect.width - 90, 2, 80, 20), "<color=red><b>X</b></color>"))
+            if (!WindowManager.TabView || IsTabViewWindow)
             {
-                DestroyWindow();
-                return;
+                GUI.DragWindow(new Rect(0, 0, m_rect.width - 90, 20));
+            }
+            if (!WindowManager.TabView)
+            {
+                if (GUI.Button(new Rect(m_rect.width - 90, 2, 80, 20), "<color=red><b>X</b></color>"))
+                {
+                    DestroyWindow();
+                    return;
+                }
             }
         }
     }

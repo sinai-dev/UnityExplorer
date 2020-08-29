@@ -110,6 +110,8 @@ namespace Explorer
             bool mouseState = CppExplorer.ForceUnlockMouse;
             bool setMouse = GUILayout.Toggle(mouseState, "Force Unlock Mouse (Left Alt)", null);
             if (setMouse != mouseState) CppExplorer.ForceUnlockMouse = setMouse;
+
+            WindowManager.TabView = GUILayout.Toggle(WindowManager.TabView, "Tab View", null);
             GUILayout.EndHorizontal();
 
             GUILayout.Space(10);

@@ -12,7 +12,9 @@ namespace Explorer
 {
     public class ReflectionWindow : UIWindow
     {
-        public override string Name { get => $"Reflection Inspector ({ObjectType.Name})"; }
+        public override string Title => WindowManager.TabView
+                                        ? ObjectType.Name
+                                        : $"Reflection Inspector ({ObjectType.Name})";
 
         public Type ObjectType;
 
@@ -172,12 +174,16 @@ namespace Explorer
         {
             try
             {
-                Header();
+                var rect = WindowManager.TabView ? TabViewWindow.Instance.m_rect : this.m_rect;
 
-                GUILayout.BeginArea(new Rect(5, 25, m_rect.width - 10, m_rect.height - 35), GUI.skin.box);
+                if (!WindowManager.TabView)
+                {
+                    Header();
+                    GUILayout.BeginArea(new Rect(5, 25, rect.width - 10, rect.height - 35), GUI.skin.box);
+                }
 
                 GUILayout.BeginHorizontal(null);
-                GUILayout.Label("<b>Type:</b> <color=cyan>" + ObjectType.FullName + "</color>", null);
+                GUILayout.Label("<b>Type:</b> <color=cyan>" + ObjectType.FullName + "</color>", new GUILayoutOption[] { GUILayout.Width(245f) });
                 if (m_uObj)
                 {
                     GUILayout.Label("Name: " + m_uObj.name, null);
@@ -192,8 +198,11 @@ namespace Explorer
                     if (m_component && m_component.gameObject is GameObject obj)
                     {
                         GUI.skin.label.alignment = TextAnchor.MiddleRight;
-                        GUILayout.Label("GameObject:", null);
-                        if (GUILayout.Button("<color=#00FF00>" + obj.name + "</color>", new GUILayoutOption[] { GUILayout.MaxWidth(m_rect.width - 350) }))
+                        GUILayout.Label("GameObject:", new GUILayoutOption[] { GUILayout.Width(135) });
+                        var charWidth = obj.name.Length * 15;
+                        var maxWidth = rect.width - 350;
+                        var labelWidth = charWidth < maxWidth ? charWidth : maxWidth; 
+                        if (GUILayout.Button("<color=#00FF00>" + obj.name + "</color>", new GUILayoutOption[] { GUILayout.Width(labelWidth) }))
                         {
                             WindowManager.InspectObject(obj, out bool _);
                         }
@@ -206,14 +215,7 @@ namespace Explorer
 
                 GUILayout.BeginHorizontal(null);
                 GUILayout.Label("<b>Search:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
-                m_search = GUILayout.TextField(m_search, null);
-                GUILayout.Label("<b>Limit per page:</b>", new GUILayoutOption[] { GUILayout.Width(125) });
-                var limitString = m_limitPerPage.ToString();
-                limitString = GUILayout.TextField(limitString, new GUILayoutOption[] { GUILayout.Width(60) });
-                if (int.TryParse(limitString, out int i))
-                {
-                    m_limitPerPage = i;
-                }
+                m_search = GUILayout.TextField(m_search, null);                
                 GUILayout.EndHorizontal();
 
                 GUILayout.BeginHorizontal(null);
@@ -239,28 +241,38 @@ namespace Explorer
 
                 GUILayout.Space(10);
 
-                int count = m_cachedMemberFiltered.Length;
 
+                // prev/next page buttons
+                GUILayout.BeginHorizontal(null);
+                GUILayout.Label("<b>Limit per page:</b>", new GUILayoutOption[] { GUILayout.Width(125) });
+                var limitString = m_limitPerPage.ToString();
+                limitString = GUILayout.TextField(limitString, new GUILayoutOption[] { GUILayout.Width(60) });
+                if (int.TryParse(limitString, out int i))
+                {
+                    m_limitPerPage = i;
+                }
+
+                int count = m_cachedMemberFiltered.Length;
                 if (count > m_limitPerPage)
                 {
-                    // prev/next page buttons
-                    GUILayout.BeginHorizontal(null);
                     int maxOffset = (int)Mathf.Ceil((float)(count / (decimal)m_limitPerPage)) - 1;
-                    if (GUILayout.Button("< Prev", null))
+                    if (GUILayout.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(80) }))
                     {
                         if (m_pageOffset > 0) m_pageOffset--;
                         scroll = Vector2.zero;
                     }
 
+                    GUI.skin.label.alignment = TextAnchor.MiddleCenter;
                     GUILayout.Label($"Page {m_pageOffset + 1}/{maxOffset + 1}", new GUILayoutOption[] { GUILayout.Width(80) });
+                    GUI.skin.label.alignment = TextAnchor.UpperLeft;
 
-                    if (GUILayout.Button("Next >", null))
+                    if (GUILayout.Button("Next >", new GUILayoutOption[] { GUILayout.Width(80) }))
                     {
                         if (m_pageOffset < maxOffset) m_pageOffset++;
                         scroll = Vector2.zero;
                     }
-                    GUILayout.EndHorizontal();
                 }
+                GUILayout.EndHorizontal();
 
                 scroll = GUILayout.BeginScrollView(scroll, GUI.skin.scrollView);
 
@@ -270,9 +282,12 @@ namespace Explorer
 
                 GUILayout.EndScrollView();
 
-                m_rect = ResizeDrag.ResizeWindow(m_rect, windowID);
+                if (!WindowManager.TabView)
+                {
+                    m_rect = ResizeDrag.ResizeWindow(rect, windowID);
 
-                GUILayout.EndArea();
+                    GUILayout.EndArea();
+                }
             }
             catch (Exception e)
             {
@@ -299,6 +314,8 @@ namespace Explorer
                 return;
             }
 
+            var rect = WindowManager.TabView ? TabViewWindow.Instance.m_rect : this.m_rect;
+
             UIStyles.HorizontalLine(Color.grey);
 
             GUILayout.Label($"<size=18><b><color=gold>{title}</color></b></size>", null);
@@ -320,7 +337,7 @@ namespace Explorer
                 GUILayout.BeginHorizontal(new GUILayoutOption[] { GUILayout.Height(25) });
                 try
                 {
-                    holder.Draw(this.m_rect, 180f);
+                    holder.Draw(rect, 180f);
                 }
                 catch // (Exception e)
                 {

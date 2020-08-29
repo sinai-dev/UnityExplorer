@@ -9,18 +9,55 @@ using MelonLoader;
 
 namespace Explorer
 {
+    // TODO implement methods with primitive arguments
+
     public class CacheMethod : CacheObjectBase
     {
         private bool m_evaluated = false;
         private CacheObjectBase m_cachedReturnValue;
 
+        public bool HasParameters
+        {
+            get
+            {
+                if (m_hasParams == null)
+                {
+                    m_hasParams = (MemberInfo as MethodInfo).GetParameters().Length > 0;
+                }
+                return (bool)m_hasParams;
+            }
+        }
+        private bool? m_hasParams;
+
+        // ======= TODO =======
+        private bool m_isEvaluating;
+        private string[] m_argumentNames;
+        private Type[] m_argumentTypes;
+        private string[] m_argumentInput;
+        // =====================
+
         public static bool CanEvaluate(MethodInfo mi)
         {
-            if (mi.GetParameters().Length > 0 || mi.GetGenericArguments().Length > 0)
+            // generic type args not supported yet
+            if (mi.GetGenericArguments().Length > 0)
             {
-                // Currently methods with arguments are not supported (no good way to input them).
                 return false;
             }
+
+            // TODO primitive params (commented out impl below)
+            if (mi.GetParameters().Length > 0)
+            {
+                return false;
+            }
+
+            //// only primitive and string args supported
+            //foreach (var param in mi.GetParameters())
+            //{
+            //    if (!param.ParameterType.IsPrimitive && param.ParameterType != typeof(string))
+            //    {
+            //        return false;
+            //    }
+            //}
 
             return true;
         }
@@ -28,11 +65,15 @@ namespace Explorer
         public override void Init()
         {
             base.Init();
+
+            // TODO cache params
         }
 
         public override void UpdateValue()
         {
             base.UpdateValue();
+
+            // TODO update params (?)
         }
 
         private void Evaluate()
@@ -40,7 +81,18 @@ namespace Explorer
             m_evaluated = true;
 
             var mi = MemberInfo as MethodInfo;
-            var ret = mi.Invoke(mi.IsStatic ? null : DeclaringInstance, new object[0]);
+
+            object ret;
+
+            if (!HasParameters)
+            {
+                ret = mi.Invoke(mi.IsStatic ? null : DeclaringInstance, new object[0]);
+            }
+            else
+            {
+                // TODO parse params, invoke if valid
+                throw new NotImplementedException("TODO");
+            }
 
             if (ret != null)
             {
@@ -65,7 +117,14 @@ namespace Explorer
             GUILayout.BeginHorizontal(null);
             if (GUILayout.Button("Evaluate", new GUILayoutOption[] { GUILayout.Width(70) }))
             {
-                Evaluate();
+                if (HasParameters)
+                {
+                    throw new NotImplementedException("TODO");
+                }
+                else
+                {
+                    Evaluate();
+                }
             }
             GUI.skin.label.wordWrap = false;
             GUILayout.Label($"<color=yellow>{ValueType}</color>", null);

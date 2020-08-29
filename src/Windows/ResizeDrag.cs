@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using MelonLoader;
+using UnhollowerBaseLib;
 
 namespace Explorer
 {
@@ -20,6 +21,8 @@ namespace Explorer
         public static Rect ResizeWindow(Rect _rect, int ID)
         {
             if (RESIZE_FAILED) return _rect;
+
+            var origRect = _rect;
 
             try
             {
@@ -53,10 +56,16 @@ namespace Explorer
 
                 GUILayout.EndHorizontal();
             }
+            catch (Il2CppException e) when (e.Message.StartsWith("System.ArgumentException")) 
+            {
+                // suppress
+                return origRect;
+            }
             catch (Exception e)
             {
                 RESIZE_FAILED = true;
                 MelonLogger.Log("Exception on GuiResize: " + e.GetType() + ", " + e.Message);
+                return origRect;
             }
 
             GUI.skin.label.alignment = TextAnchor.UpperLeft;

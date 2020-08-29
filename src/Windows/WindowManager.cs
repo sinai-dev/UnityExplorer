@@ -16,6 +16,8 @@ namespace Explorer
     {
         public static WindowManager Instance;
 
+        public static bool TabView = true;
+
         public static List<UIWindow> Windows = new List<UIWindow>();
         public static int CurrentWindowID { get; set; } = 500000;
         private static Rect m_lastWindowRect;
@@ -27,17 +29,31 @@ namespace Explorer
 
         public void Update()
         {
-            foreach (var window in Windows)
+            for (int i = 0; i < Windows.Count; i++)
             {
-                window.Update();
+                var window = Windows[i];
+                if (window != null)
+                {
+                    window.Update();
+                }
             }
         }
 
         public void OnGUI()
         {
-            foreach (var window in Windows)
+            if (TabView)
             {
-                window.OnGUI();
+                if (Windows.Count > 0)
+                {
+                    TabViewWindow.Instance.OnGUI();
+                }
+            }
+            else
+            {
+                foreach (var window in Windows)
+                {
+                    window.OnGUI();
+                }
             }
         }
 
@@ -119,8 +135,7 @@ namespace Explorer
 
                 if (equals)
                 {
-                    GUI.BringWindowToFront(window.windowID);
-                    GUI.FocusWindow(window.windowID);
+                    FocusWindow(window);
                     return window;
                 }
             }
@@ -136,10 +151,23 @@ namespace Explorer
             }
         }
 
+        private static void FocusWindow(UIWindow window)
+        {
+            if (!TabView)
+            {
+                GUI.BringWindowToFront(window.windowID);
+                GUI.FocusWindow(window.windowID);
+            }
+            else
+            {
+                TabViewWindow.Instance.TargetTabID = Windows.IndexOf(window);
+            }
+        }
+
         private static UIWindow InspectGameObject(GameObject obj)
         {
             var new_window = UIWindow.CreateWindow<GameObjectWindow>(obj);
-            GUI.FocusWindow(new_window.windowID);
+            FocusWindow(new_window);
 
             return new_window;
         }
@@ -147,7 +175,7 @@ namespace Explorer
         public static UIWindow InspectReflection(object obj)
         {
             var new_window = UIWindow.CreateWindow<ReflectionWindow>(obj);
-            GUI.FocusWindow(new_window.windowID);
+            FocusWindow(new_window);
 
             return new_window;
         }

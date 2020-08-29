@@ -136,6 +136,7 @@
     <Compile Include="MainMenu\InspectUnderMouse.cs" />
     <Compile Include="CachedObjects\CacheObjectBase.cs" />
     <Compile Include="Windows\ResizeDrag.cs" />
+    <Compile Include="Windows\TabViewWindow.cs" />
     <Compile Include="Windows\UIWindow.cs" />
     <Compile Include="MainMenu\Pages\ConsolePage.cs" />
     <Compile Include="MainMenu\Pages\Console\REPL.cs" />
