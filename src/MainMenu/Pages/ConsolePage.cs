@@ -121,7 +121,9 @@ MelonLogger.Log(""hello world"");";
         {
             GUILayout.Label("<b><size=15><color=cyan>C# REPL Console</color></size></b>", null);
 
-            GUILayout.Label("Method:", null);
+            GUI.skin.label.alignment = TextAnchor.UpperLeft;
+
+            GUILayout.Label("Enter code here as though it is a method body:", null);
             MethodInput = GUILayout.TextArea(MethodInput, new GUILayoutOption[] { GUILayout.Height(250) });
 
             if (GUILayout.Button("<color=cyan><b>Execute</b></color>", null))
@@ -147,10 +149,7 @@ MelonLogger.Log(""hello world"");";
             }
 
             GUILayout.Label("<b>Using directives:</b>", null);
-            foreach (var asm in UsingDirectives)
-            {
-                GUILayout.Label(AsmToUsing(asm, true), null);
-            }
+
             GUILayout.BeginHorizontal(null);
             GUILayout.Label("Add namespace:", new GUILayoutOption[] { GUILayout.Width(105) });
             UsingInput = GUILayout.TextField(UsingInput, new GUILayoutOption[] { GUILayout.Width(150) });
@@ -163,6 +162,11 @@ MelonLogger.Log(""hello world"");";
                 ResetConsole();
             }
             GUILayout.EndHorizontal();
+
+            foreach (var asm in UsingDirectives)
+            {
+                GUILayout.Label(AsmToUsing(asm, true), null);
+            }            
         }
 
         public override void Update() { }

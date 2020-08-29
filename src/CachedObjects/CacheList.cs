@@ -3,34 +3,40 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using MelonLoader;
-using Mono.CSharp;
 using UnityEngine;
 
 namespace Explorer
 {
-    public partial class CacheList : CacheObject
+    public partial class CacheList : CacheObjectBase
     {
         public bool IsExpanded { get; set; }
         public int ArrayOffset { get; set; }
         public int ArrayLimit { get; set; } = 20;
-        
+
+        public float WhiteSpace = 215f;
+        public float ButtonWidthOffset = 290f;
+
         public Type EntryType 
         { 
             get 
             {
                 if (m_entryType == null)
                 {
-                    switch (this.MemberInfoType)
+                    if (this.MemberInfo != null)
                     {
-                        case ReflectionWindow.MemberInfoType.Field:
-                            m_entryType = (MemberInfo as FieldInfo).FieldType.GetGenericArguments()[0];
-                            break;
-                        case ReflectionWindow.MemberInfoType.Property:
-                            m_entryType = (MemberInfo as PropertyInfo).PropertyType.GetGenericArguments()[0];
-                            break;
+                        switch (this.MemberInfoType)
+                        {
+                            case MemberTypes.Field:
+                                m_entryType = (MemberInfo as FieldInfo).FieldType.GetGenericArguments()[0];
+                                break;
+                            case MemberTypes.Property:
+                                m_entryType = (MemberInfo as PropertyInfo).PropertyType.GetGenericArguments()[0];
+                                break;
+                        }
+                    }
+                    else if (Value != null)
+                    {
+                        m_entryType = Value.GetType().GetGenericArguments()[0];
                     }
                 }
                 return m_entryType;
@@ -55,7 +61,7 @@ namespace Explorer
         }
 
         private IEnumerable m_enumerable;
-        private CacheObject[] m_cachedEntries;
+        private CacheObjectBase[] m_cachedEntries;
 
         public MethodInfo GenericToArrayMethod
         {
@@ -97,7 +103,7 @@ namespace Explorer
 
             GUI.skin.button.alignment = TextAnchor.MiddleLeft;
             string btnLabel = "<color=yellow>[" + count + "] " + EntryType + "</color>";
-            if (GUILayout.Button(btnLabel, new GUILayoutOption[] { GUILayout.MaxWidth(window.width - 260) }))
+            if (GUILayout.Button(btnLabel, new GUILayoutOption[] { GUILayout.MaxWidth(window.width - ButtonWidthOffset) }))
             {
                 WindowManager.InspectObject(Value, out bool _);
             }
@@ -107,8 +113,12 @@ namespace Explorer
 
             if (IsExpanded)
             {
-                float whitespace = 215;
-                ClampLabelWidth(window, ref whitespace);
+                float whitespace = WhiteSpace;
+                
+                if (whitespace > 0)
+                {
+                    ClampLabelWidth(window, ref whitespace);
+                }
 
                 if (count > ArrayLimit)
                 {
@@ -120,11 +130,11 @@ namespace Explorer
                     int maxOffset = (int)Mathf.Ceil((float)(count / (decimal)ArrayLimit)) - 1;
                     GUILayout.Label($"Page {ArrayOffset + 1}/{maxOffset + 1}", new GUILayoutOption[] { GUILayout.Width(80) });
                     // prev/next page buttons
-                    if (GUILayout.Button("< Prev", null))
+                    if (GUILayout.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(60) }))
                     {
                         if (ArrayOffset > 0) ArrayOffset--;
                     }
-                    if (GUILayout.Button("Next >", null))
+                    if (GUILayout.Button("Next >", new GUILayoutOption[] { GUILayout.Width(60) }))
                     {
                         if (ArrayOffset < maxOffset) ArrayOffset++;
                     }
@@ -186,7 +196,7 @@ namespace Explorer
 
             if (enumerator == null) return;
 
-            var list = new List<CacheObject>();
+            var list = new List<CacheObjectBase>();
             while (enumerator.MoveNext())
             {
                 list.Add(GetCacheObject(enumerator.Current, null, null, this.EntryType));

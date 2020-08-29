@@ -59,6 +59,8 @@ namespace Explorer
                 MelonLogger.Log("Exception on GuiResize: " + e.GetType() + ", " + e.Message);
             }
 
+            GUI.skin.label.alignment = TextAnchor.UpperLeft;
+
             return _rect;
         }
     }

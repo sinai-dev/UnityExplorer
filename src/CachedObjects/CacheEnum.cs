@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Explorer
 {
-    public class CacheEnum : CacheObject
+    public class CacheEnum : CacheObjectBase
     {
         public Type EnumType;
         public string[] EnumNames;

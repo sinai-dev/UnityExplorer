@@ -10,14 +10,13 @@ using UnityEngine;
 
 namespace Explorer
 {
-    public abstract class CacheObject
+    public abstract class CacheObjectBase
     {
         public object Value;
         public string ValueType;
 
         // Reflection window only
         public MemberInfo MemberInfo { get; set; }
-        // public ReflectionWindow.MemberInfoType MemberInfoType { get; set; }
         public Type DeclaringType { get; set; }
         public object DeclaringInstance { get; set; }
         public string FullName => $"{MemberInfo.DeclaringType.Name}.{MemberInfo.Name}"; 
@@ -42,14 +41,14 @@ namespace Explorer
             }
         }
 
-        public ReflectionWindow.MemberInfoType MemberInfoType
+        public MemberTypes MemberInfoType
         {
             get
             {
-                if (MemberInfo is FieldInfo) return ReflectionWindow.MemberInfoType.Field;
-                if (MemberInfo is PropertyInfo) return ReflectionWindow.MemberInfoType.Property;
-                if (MemberInfo is MethodInfo) return ReflectionWindow.MemberInfoType.Method;
-                return ReflectionWindow.MemberInfoType.All;
+                if (MemberInfo is FieldInfo) return MemberTypes.Field;
+                if (MemberInfo is PropertyInfo) return MemberTypes.Property;
+                if (MemberInfo is MethodInfo) return MemberTypes.Method;
+                return MemberTypes.All;
             }
         }
 
@@ -57,7 +56,7 @@ namespace Explorer
         public virtual void Init() { }
         public abstract void DrawValue(Rect window, float width);
 
-        public static CacheObject GetCacheObject(object obj)
+        public static CacheObjectBase GetCacheObject(object obj)
         {
             return GetCacheObject(obj, null, null);
         }
@@ -69,13 +68,39 @@ namespace Explorer
         /// <param name="memberInfo">The MemberInfo (can be null if obj is not null)</param>
         /// <param name="declaringInstance">If MemberInfo is not null, the declaring class instance. Can be null if static.</param>
         /// <returns></returns>
-        public static CacheObject GetCacheObject(object obj, MemberInfo memberInfo, object declaringInstance)
+        public static CacheObjectBase GetCacheObject(object obj, MemberInfo memberInfo, object declaringInstance)
         {
-            var type = ReflectionHelpers.GetActualType(obj) ?? (memberInfo as FieldInfo)?.FieldType ?? (memberInfo as PropertyInfo)?.PropertyType;
+            //var type = ReflectionHelpers.GetActualType(obj) ?? (memberInfo as FieldInfo)?.FieldType ?? (memberInfo as PropertyInfo)?.PropertyType;
+
+            Type type = null;
+
+            if (obj != null)
+            {
+                type = ReflectionHelpers.GetActualType(obj);
+            }
+            else if (memberInfo != null)
+            {
+                if (memberInfo is FieldInfo fi)
+                {
+                    type = fi.FieldType;
+                }
+                else if (memberInfo is PropertyInfo pi)
+                {
+                    type = pi.PropertyType;
+                }
+                else if (memberInfo is MethodInfo mi)
+                {
+                    type = mi.ReturnType;
+                }
+            }
 
             if (type == null)
             {
                 MelonLogger.Log("Could not get type for object or memberinfo!");
+                if (memberInfo is MethodInfo)
+                {
+                    MelonLogger.Log("is it void?");
+                }
                 return null;
             }
 
@@ -90,12 +115,22 @@ namespace Explorer
         /// <param name="declaringInstance">If MemberInfo is not null, the declaring class instance. Can be null if static.</param>
         /// <param name="valueType">The type of the object or MemberInfo value.</param>
         /// <returns></returns>
-        public static CacheObject GetCacheObject(object obj, MemberInfo memberInfo, object declaringInstance, Type valueType)
+        public static CacheObjectBase GetCacheObject(object obj, MemberInfo memberInfo, object declaringInstance, Type valueType)
         {
-            CacheObject holder;
+            CacheObjectBase holder;
 
-            if ((obj is Il2CppSystem.Object || typeof(Il2CppSystem.Object).IsAssignableFrom(valueType))
-                && (valueType.FullName.Contains("UnityEngine.GameObject") || valueType.FullName.Contains("UnityEngine.Transform")))
+            if (memberInfo is MethodInfo mi)
+            {
+                if (CacheMethod.CanEvaluate(mi))
+                {
+                    holder = new CacheMethod();
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            else if (valueType == typeof(GameObject) || valueType == typeof(Transform))
             {
                 holder = new CacheGameObject();
             }
@@ -107,9 +142,13 @@ namespace Explorer
             {
                 holder = new CacheEnum();
             }
-            else if (typeof(System.Collections.IEnumerable).IsAssignableFrom(valueType) || ReflectionHelpers.IsList(valueType))
+            else if (ReflectionHelpers.IsArray(valueType) || ReflectionHelpers.IsList(valueType))
             {
                 holder = new CacheList();
+            }
+            else if (ReflectionHelpers.IsDictionary(valueType))
+            {
+                holder = new CacheDictionary();
             }
             else
             {
@@ -163,7 +202,7 @@ namespace Explorer
             {
                 GUILayout.Label("<color=red>Reflection failed!</color> (" + ReflectionException + ")", null);
             }
-            else if (Value == null)
+            else if (Value == null && MemberInfoType != MemberTypes.Method)
             {
                 GUILayout.Label("<i>null (" + ValueType + ")</i>", null);
             }

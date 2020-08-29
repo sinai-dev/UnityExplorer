@@ -120,11 +120,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CachedObjects\CacheDictionary.cs" />
     <Compile Include="CachedObjects\CacheEnum.cs" />
     <Compile Include="CachedObjects\CacheGameObject.cs" />
     <Compile Include="CachedObjects\CacheList.cs" />
     <Compile Include="CachedObjects\CachePrimitive.cs" />
     <Compile Include="CachedObjects\CacheOther.cs" />
+    <Compile Include="CachedObjects\CacheMethod.cs" />
     <Compile Include="CppExplorer.cs" />
     <Compile Include="Extensions\ReflectionExtensions.cs" />
     <Compile Include="Extensions\UnityExtensions.cs" />
@@ -132,7 +134,7 @@
     <Compile Include="Helpers\UIHelpers.cs" />
     <Compile Include="Helpers\UnityHelpers.cs" />
     <Compile Include="MainMenu\InspectUnderMouse.cs" />
-    <Compile Include="CachedObjects\CacheObject.cs" />
+    <Compile Include="CachedObjects\CacheObjectBase.cs" />
     <Compile Include="Windows\ResizeDrag.cs" />
     <Compile Include="Windows\UIWindow.cs" />
     <Compile Include="MainMenu\Pages\ConsolePage.cs" />

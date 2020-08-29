@@ -6,7 +6,6 @@ using MelonLoader;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using ComponentList = Il2CppSystem.Collections.Generic.List<UnityEngine.Component>;
 
 namespace Explorer
 {
@@ -22,7 +21,7 @@ namespace Explorer
 
         private Vector2 m_transformScroll = Vector2.zero;
         private Transform[] m_children;
-        private ComponentList m_components;
+        private Component[] m_components;
 
         private Vector2 m_compScroll = Vector2.zero;
 
@@ -69,11 +68,9 @@ namespace Explorer
             }
 
             m_name = m_object.name;
-            m_scene = m_object.scene == null ? "null" : m_object.scene.name;
-
-            //var listComps = new Il2CppSystem.Collections.Generic.List<Component>();
-            //m_object.GetComponents(listComps);
-            //m_components = listComps.ToArray();
+            m_scene = string.IsNullOrEmpty(m_object.scene.name) 
+                ? "None" 
+                : m_object.scene.name;
 
             var list = new List<Transform>();
             for (int i = 0; i < m_object.transform.childCount; i++)
@@ -92,8 +89,12 @@ namespace Explorer
                     throw new Exception("Object is null!");
                 }
 
-                m_components = new Il2CppSystem.Collections.Generic.List<Component>();
-                m_object.GetComponentsInternal(ReflectionHelpers.ComponentType, false, false, true, false, m_components);
+                var list = new List<Component>();
+                foreach (var comp in m_object.GetComponents(ReflectionHelpers.ComponentType))
+                {
+                    list.Add(comp);
+                }
+                m_components = list.ToArray();
             }
             catch (Exception e)
             {
@@ -255,34 +256,37 @@ namespace Explorer
                 m_cachedDestroyList.Clear();
             }
 
-            foreach (var component in m_components)
+            if (m_components != null)
             {
-                if (!component) continue;
+                foreach (var component in m_components)
+                {
+                    if (!component) continue;
 
-                var ilType = component.GetIl2CppType();
-                if (ilType == ReflectionHelpers.TransformType)
-                {
-                    continue;
-                }
+                    var ilType = component.GetIl2CppType();
+                    if (ilType == ReflectionHelpers.TransformType)
+                    {
+                        continue;
+                    }
 
-                GUILayout.BeginHorizontal(null);
-                if (ReflectionHelpers.BehaviourType.IsAssignableFrom(ilType))
-                {
-                    BehaviourEnabledBtn(component.TryCast<Behaviour>());
+                    GUILayout.BeginHorizontal(null);
+                    if (ReflectionHelpers.BehaviourType.IsAssignableFrom(ilType))
+                    {
+                        BehaviourEnabledBtn(component.TryCast<Behaviour>());
+                    }
+                    else
+                    {
+                        GUILayout.Space(26);
+                    }
+                    if (GUILayout.Button("<color=cyan>" + ilType.Name + "</color>", new GUILayoutOption[] { GUILayout.Width(m_rect.width / 2 - 90) }))
+                    {
+                        ReflectObject(component);
+                    }
+                    if (GUILayout.Button("<color=red>-</color>", new GUILayoutOption[] { GUILayout.Width(20) }))
+                    {
+                        m_cachedDestroyList.Add(component);
+                    }
+                    GUILayout.EndHorizontal();
                 }
-                else
-                {
-                    GUILayout.Space(26);
-                }
-                if (GUILayout.Button("<color=cyan>" + ilType.Name + "</color>", new GUILayoutOption[] { GUILayout.Width(m_rect.width / 2 - 90) }))
-                {
-                    ReflectObject(component);
-                }
-                if (GUILayout.Button("<color=red>-</color>", new GUILayoutOption[] { GUILayout.Width(20) }))
-                {
-                    m_cachedDestroyList.Add(component);
-                }
-                GUILayout.EndHorizontal();
             }
 
             GUI.skin.button.alignment = TextAnchor.MiddleCenter;

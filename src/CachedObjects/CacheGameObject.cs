@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Explorer
 {
-    public class CacheGameObject : CacheObject
+    public class CacheGameObject : CacheObjectBase
     {
         private GameObject GameObj
         {

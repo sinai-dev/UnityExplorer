@@ -45,7 +45,6 @@ Requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be ins
 CppExplorer can force the mouse to be visible and unlocked when the menu is open, if you have enabled "Force Unlock Mouse" (Left-Alt toggle). However, you may also want to prevent the mouse clicking-through onto the game behind CppExplorer, this is possible but it requires specific patches for that game.
 
 * For VRChat, use [VRCExplorerMouseControl](https://github.com/sinaioutlander/VRCExplorerMouseControl)
-* For Hellpoint, use [HPExplorerMouseControl](https://github.com/sinaioutlander/Hellpoint-Mods/tree/master/HPExplorerMouseControl/HPExplorerMouseControl)
 * You can create your own mini-plugin using one of the two plugins above as an example. Usually only 1 or 2 simple Harmony patches are needed to fix the problem (if you want to submit that here, feel free to make a PR to this Readme).
 
 ## Images

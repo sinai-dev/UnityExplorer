@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using MelonLoader;
 using UnityEngine;
 
 namespace Explorer
 {
-    public class CachePrimitive : CacheObject
+    public class CachePrimitive : CacheObjectBase
     {
         public enum PrimitiveTypes
         {
@@ -13,7 +14,8 @@ namespace Explorer
             Double,
             Float,
             Int,
-            String
+            String,
+            Char
         }
 
         private string m_valueToString;
@@ -37,10 +39,10 @@ namespace Explorer
                             t = typeof(float); break;
                         case PrimitiveTypes.Int:
                             t = typeof(int); break;
-                        case PrimitiveTypes.String:
-                            t = typeof(string); break;
+                        case PrimitiveTypes.Char:
+                            t = typeof(char); break;
                     }
-                    m_parseMethod = t.GetMethod("Parse", new Type[] { typeof(string) });
+                    m_parseMethod = t?.GetMethod("Parse", new Type[] { typeof(string) });
                 }
                 return m_parseMethod;
             }
@@ -52,7 +54,7 @@ namespace Explorer
         {
             if (Value == null)
             {
-                // this must mean it is a string? no other primitive type should be nullable
+                // this must mean it is a string. No other primitive type should be nullable.
                 PrimitiveType = PrimitiveTypes.String;
                 return;
             }
@@ -72,20 +74,38 @@ namespace Explorer
             {
                 PrimitiveType = PrimitiveTypes.Float;
             }
-            else if (type == typeof(int) || type == typeof(long) || type == typeof(uint) || type == typeof(ulong) || type == typeof(IntPtr))
+            else if (IsInteger(type))
             {
                 PrimitiveType = PrimitiveTypes.Int;
             }
+            else if (type == typeof(char))
+            {
+                PrimitiveType = PrimitiveTypes.Char;
+            }
             else
             {
-                if (type != typeof(string))
-                {
-                    MelonLogger.Log("Unsupported primitive: " + type);
-                }
-
                 PrimitiveType = PrimitiveTypes.String;
             }
         }
+
+        private static bool IsInteger(Type type)
+        {
+            // For our purposes, all types of int can be treated the same, including IntPtr.
+            return _integerTypes.Contains(type);
+        }
+
+        private static readonly HashSet<Type> _integerTypes = new HashSet<Type>
+        {
+            typeof(int),
+            typeof(uint),
+            typeof(short),
+            typeof(ushort),
+            typeof(long),
+            typeof(ulong),
+            typeof(byte),
+            typeof(sbyte),
+            typeof(IntPtr)
+        };
 
         public override void UpdateValue()
         {
@@ -99,20 +119,25 @@ namespace Explorer
             if (PrimitiveType == PrimitiveTypes.Bool)
             {
                 var b = (bool)Value;
-                var color = "<color=" + (b ? "lime>" : "red>");
-                b = GUILayout.Toggle(b, color + b.ToString() + "</color>", null);
+                var color = $"<color={(b ? "lime>" : "red>")}";
+                var label = $"{color}{b}</color>";
 
-                if (b != (bool)Value)
+                if (CanWrite)
                 {
-                    SetValue(m_valueToString);
+                    b = GUILayout.Toggle(b, label, null);
+                    if (b != (bool)Value)
+                    {
+                        SetValue(m_valueToString);
+                    }
+                }
+                else
+                {
+                    GUILayout.Label(label, null);
                 }
             }
             else
             {
                 GUILayout.Label("<color=yellow><i>" + PrimitiveType + "</i></color>", new GUILayoutOption[] { GUILayout.Width(50) });
-
-                //var content = new GUIContent(m_valueToString);
-                //var contentSize = GUI.skin.textField.CalcSize(content);
 
                 int dynSize = 25 + (m_valueToString.Length * 15);
                 var maxwidth = window.width - 300f;

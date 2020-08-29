@@ -170,32 +170,34 @@ namespace Explorer
             }
         }
 
-        // Make it appear as though UnlockMouse is disabled to the rest of the application.
+        // Temporarily disabled this because I don't think it's actually useful, and may in fact cause problems instead
 
-        [HarmonyPatch(typeof(Cursor), nameof(Cursor.visible), MethodType.Getter)]
-        public class Cursor_get_visible
-        {
-            [HarmonyPostfix]
-            public static void Postfix(ref bool __result)
-            {
-                if (ShouldForceMouse)
-                {
-                    __result = m_lastVisibleState;
-                }
-            }
-        }
+        //// Make it appear as though UnlockMouse is disabled to the rest of the application.
 
-        [HarmonyPatch(typeof(Cursor), nameof(Cursor.lockState), MethodType.Getter)]
-        public class Cursor_get_lockState
-        {
-            [HarmonyPostfix]
-            public static void Postfix(ref CursorLockMode __result)
-            {
-                if (ShouldForceMouse)
-                {
-                    __result = m_lastLockMode;
-                }
-            }
-        }
+        //[HarmonyPatch(typeof(Cursor), nameof(Cursor.visible), MethodType.Getter)]
+        //public class Cursor_get_visible
+        //{
+        //    [HarmonyPostfix]
+        //    public static void Postfix(ref bool __result)
+        //    {
+        //        if (ShouldForceMouse)
+        //        {
+        //            __result = m_lastVisibleState;
+        //        }
+        //    }
+        //}
+
+        //[HarmonyPatch(typeof(Cursor), nameof(Cursor.lockState), MethodType.Getter)]
+        //public class Cursor_get_lockState
+        //{
+        //    [HarmonyPostfix]
+        //    public static void Postfix(ref CursorLockMode __result)
+        //    {
+        //        if (ShouldForceMouse)
+        //        {
+        //            __result = m_lastLockMode;
+        //        }
+        //    }
+        //}
     }
 }

@@ -26,7 +26,7 @@ namespace Explorer
         //private List<object> m_searchResults = new List<object>();
         private Vector2 resultsScroll = Vector2.zero;
 
-        private List<CacheObject> m_searchResults = new List<CacheObject>();
+        private List<CacheObjectBase> m_searchResults = new List<CacheObjectBase>();
 
         public SceneFilter SceneMode = SceneFilter.Any;
         public TypeFilter TypeMode = TypeFilter.Object;
@@ -64,7 +64,7 @@ namespace Explorer
 
         private void CacheResults(IEnumerable results)
         {
-            m_searchResults = new List<CacheObject>();
+            m_searchResults = new List<CacheObjectBase>();
 
             foreach (var obj in results)
             {
@@ -75,7 +75,7 @@ namespace Explorer
                     toCache = ilObject.TryCast<GameObject>() ?? ilObject.TryCast<Transform>()?.gameObject ?? ilObject;
                 }
 
-                var cache = CacheObject.GetCacheObject(toCache);
+                var cache = CacheObjectBase.GetCacheObject(toCache);
                 m_searchResults.Add(cache);
             }
         }

@@ -16,30 +16,27 @@ namespace Explorer
 
         public Type ObjectType;
 
-        private CacheObject[] m_cachedMembers;
-        private CacheObject[] m_cachedMemberFiltered;
+        private CacheObjectBase[] m_cachedMembers;
+        private CacheObjectBase[] m_cachedMemberFiltered;
         private int m_pageOffset;
         private int m_limitPerPage = 20;
 
         private bool m_autoUpdate = false;
         private string m_search = "";
-        public MemberInfoType m_filter = MemberInfoType.Property;
+        public MemberTypes m_filter = MemberTypes.Property;
         private bool m_hideFailedReflection = false;
 
-        public enum MemberInfoType
-        {
-            Field,
-            Property,
-            Method,
-            All
-        }
+        // some extra caching
+        private UnityEngine.Object m_uObj;
+        private Component m_component;
 
         public override void Init()
         {
             var type = ReflectionHelpers.GetActualType(Target);
             if (type == null)
             {
-                MelonLogger.Log("Could not get underlying type for object. ToString(): " + Target.ToString());
+                MelonLogger.Log($"Could not get underlying type for object..? Type: {Target?.GetType().Name}, ToString: {Target?.ToString()}");
+                DestroyWindow();
                 return;
             }
 
@@ -48,10 +45,27 @@ namespace Explorer
             var types = ReflectionHelpers.GetAllBaseTypes(Target);
             CacheMembers(types);
 
-            m_filter = MemberInfoType.All;
-            m_cachedMemberFiltered = m_cachedMembers.Where(x => ShouldProcessMember(x)).ToArray();
-            UpdateValues();
-            m_filter = MemberInfoType.Property;
+            if (Target is Il2CppSystem.Object ilObject)
+            {
+                var unityObj = ilObject.TryCast<UnityEngine.Object>();
+                if (unityObj)
+                {
+                    m_uObj = unityObj;
+
+                    var component = ilObject.TryCast<Component>();
+                    if (component)
+                    {
+                        m_component = component;
+                    }
+                }
+            }
+
+            m_filter = MemberTypes.All;
+            m_autoUpdate = true;
+            Update();
+
+            m_autoUpdate = false;
+            m_filter = MemberTypes.Property;
         }
 
         public override void Update()
@@ -66,20 +80,15 @@ namespace Explorer
 
         private void UpdateValues()
         {
-            UpdateMembers();
-        }
-
-        private void UpdateMembers()
-        {
             foreach (var member in m_cachedMemberFiltered)
             {
                 member.UpdateValue();
             }
         }
 
-        private bool ShouldProcessMember(CacheObject holder)
+        private bool ShouldProcessMember(CacheObjectBase holder)
         {
-            if (m_filter != MemberInfoType.All && m_filter != holder.MemberInfoType) return false;
+            if (m_filter != MemberTypes.All && m_filter != holder.MemberInfoType) return false;
 
             if (!string.IsNullOrEmpty(holder.ReflectionException) && m_hideFailedReflection) return false;
 
@@ -92,16 +101,13 @@ namespace Explorer
 
         private void CacheMembers(Type[] types)
         {
-            var list = new List<CacheObject>();
+            var list = new List<CacheObjectBase>();
 
             var names = new List<string>();
 
             foreach (var declaringType in types)
             {
-                if (declaringType == typeof(Il2CppObjectBase)) continue;
-
                 MemberInfo[] infos;
-
                 string exception = null;
 
                 try
@@ -114,8 +120,8 @@ namespace Explorer
                     continue;
                 }
 
-                //object value = null;
                 object target = Target;
+
                 if (target is Il2CppSystem.Object ilObject)
                 {
                     try
@@ -130,9 +136,10 @@ namespace Explorer
 
                 foreach (var member in infos)
                 {
-                    if (member.MemberType == MemberTypes.Field || member.MemberType == MemberTypes.Property)
+                    if (member.MemberType == MemberTypes.Field || member.MemberType == MemberTypes.Property || member.MemberType == MemberTypes.Method)
                     {
-                        if (member.Name == "Il2CppType") continue;
+                        if (member.Name.Contains("Il2CppType") || member.Name.StartsWith("get_")) 
+                            continue;
 
                         try
                         {
@@ -140,7 +147,7 @@ namespace Explorer
                             if (names.Contains(name)) continue;
                             names.Add(name);
 
-                            var cached = CacheObject.GetCacheObject(null, member, target);
+                            var cached = CacheObjectBase.GetCacheObject(null, member, target);
                             if (cached != null)
                             {
                                 list.Add(cached);
@@ -149,9 +156,8 @@ namespace Explorer
                         }
                         catch (Exception e) 
                         {
-                            MelonLogger.Log("Exception caching member!");
-                            MelonLogger.Log(e.GetType() + ", " + e.Message);
-                            MelonLogger.Log(e.StackTrace);
+                            MelonLogger.LogWarning($"Exception caching member {declaringType.Name}.{member.Name}!");
+                            MelonLogger.Log(e.ToString());
                         }
                     }
                 }
@@ -172,26 +178,18 @@ namespace Explorer
 
                 GUILayout.BeginHorizontal(null);
                 GUILayout.Label("<b>Type:</b> <color=cyan>" + ObjectType.FullName + "</color>", null);
-
-                bool unityObj = Target is UnityEngine.Object;
-
-                if (unityObj)
+                if (m_uObj)
                 {
-                    GUILayout.Label("Name: " + (Target as UnityEngine.Object).name, null);
+                    GUILayout.Label("Name: " + m_uObj.name, null);
                 }
                 GUILayout.EndHorizontal();
 
-                if (unityObj)
+                if (m_uObj)
                 {
                     GUILayout.BeginHorizontal(null);
-
                     GUILayout.Label("<b>Tools:</b>", new GUILayoutOption[] { GUILayout.Width(80) });
-
-                    UIHelpers.InstantiateButton((UnityEngine.Object)Target);
-
-                    var comp = (Target as Il2CppSystem.Object).TryCast<Component>();
-
-                    if (comp && comp.gameObject is GameObject obj)
+                    UIHelpers.InstantiateButton(m_uObj);
+                    if (m_component && m_component.gameObject is GameObject obj)
                     {
                         GUI.skin.label.alignment = TextAnchor.MiddleRight;
                         GUILayout.Label("GameObject:", null);
@@ -201,7 +199,6 @@ namespace Explorer
                         }
                         GUI.skin.label.alignment = TextAnchor.UpperLeft;
                     }
-
                     GUILayout.EndHorizontal();
                 }
 
@@ -221,9 +218,10 @@ namespace Explorer
 
                 GUILayout.BeginHorizontal(null);
                 GUILayout.Label("<b>Filter:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
-                FilterToggle(MemberInfoType.All, "All");
-                FilterToggle(MemberInfoType.Property, "Properties");
-                FilterToggle(MemberInfoType.Field, "Fields");
+                FilterToggle(MemberTypes.All, "All");
+                FilterToggle(MemberTypes.Property, "Properties");
+                FilterToggle(MemberTypes.Field, "Fields");
+                FilterToggle(MemberTypes.Method, "Methods");
                 GUILayout.EndHorizontal();
 
                 GUILayout.BeginHorizontal(null);
@@ -284,18 +282,19 @@ namespace Explorer
             }
         }
 
-        private void DrawMembers(CacheObject[] members)
+        private void DrawMembers(CacheObjectBase[] members)
         {
             // todo pre-cache list based on current search, otherwise this doesnt work.
 
             int i = 0;
-            DrawMembersInternal("Properties", MemberInfoType.Property, members, ref i);
-            DrawMembersInternal("Fields", MemberInfoType.Field, members, ref i);
+            DrawMembersInternal("Properties", MemberTypes.Property, members, ref i);
+            DrawMembersInternal("Fields", MemberTypes.Field, members, ref i);
+            DrawMembersInternal("Methods", MemberTypes.Method, members, ref i);
         }
 
-        private void DrawMembersInternal(string title, MemberInfoType filter, CacheObject[] members, ref int index)
+        private void DrawMembersInternal(string title, MemberTypes filter, CacheObjectBase[] members, ref int index)
         {
-            if (m_filter != filter && m_filter != MemberInfoType.All)
+            if (m_filter != filter && m_filter != MemberTypes.All)
             {
                 return;
             }
@@ -336,7 +335,7 @@ namespace Explorer
             }
         }
 
-        private void FilterToggle(MemberInfoType mode, string label)
+        private void FilterToggle(MemberTypes mode, string label)
         {
             if (m_filter == mode)
             {

@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Explorer
 {
-    public class CacheOther : CacheObject
+    public class CacheOther : CacheObjectBase
     {
         private MethodInfo m_toStringMethod;
         private bool m_triedToGetMethod;

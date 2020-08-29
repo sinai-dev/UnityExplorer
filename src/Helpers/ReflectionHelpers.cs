@@ -72,11 +72,23 @@ namespace Explorer
                 return false;
         }
 
+        public static bool IsArray(Type t)
+        {
+            return typeof(System.Collections.IEnumerable).IsAssignableFrom(t);
+        }
+
         public static bool IsList(Type t)
         {
             return t.IsGenericType
                 && t.GetGenericTypeDefinition() is Type typeDef
                 && (typeDef.IsAssignableFrom(typeof(List<>)) || typeDef.IsAssignableFrom(typeof(Il2CppSystem.Collections.Generic.List<>)));
+        }
+
+        public static bool IsDictionary(Type t)
+        {
+            return t.IsGenericType
+                && t.GetGenericTypeDefinition() is Type typeDef
+                && typeDef.IsAssignableFrom(typeof(Il2CppSystem.Collections.Generic.Dictionary<,>));
         }
 
         public static Type GetTypeByName(string typeName)
