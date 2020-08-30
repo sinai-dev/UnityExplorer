@@ -9,8 +9,6 @@ using MelonLoader;
 
 namespace Explorer
 {
-    // TODO implement methods with primitive arguments
-
     public class CacheMethod : CacheObjectBase
     {
         private bool m_evaluated = false;
