@@ -41,17 +41,6 @@ namespace Explorer
             }
         }
 
-        public MemberTypes MemberInfoType
-        {
-            get
-            {
-                if (MemberInfo is FieldInfo) return MemberTypes.Field;
-                if (MemberInfo is PropertyInfo) return MemberTypes.Property;
-                if (MemberInfo is MethodInfo) return MemberTypes.Method;
-                return MemberTypes.All;
-            }
-        }
-
         // methods
         public virtual void Init() { }
         public abstract void DrawValue(Rect window, float width);
@@ -202,7 +191,7 @@ namespace Explorer
             {
                 GUILayout.Label("<color=red>Reflection failed!</color> (" + ReflectionException + ")", null);
             }
-            else if (Value == null && MemberInfoType != MemberTypes.Method)
+            else if (Value == null && MemberInfo?.MemberType != MemberTypes.Method)
             {
                 GUILayout.Label("<i>null (" + ValueType + ")</i>", null);
             }

@@ -152,8 +152,6 @@ namespace Explorer
 
         private void Evaluate()
         {
-            m_evaluated = true;
-
             var mi = MemberInfo as MethodInfo;
 
             object ret = null;
@@ -161,6 +159,7 @@ namespace Explorer
             if (!HasParameters)
             {
                 ret = mi.Invoke(mi.IsStatic ? null : DeclaringInstance, new object[0]);
+                m_evaluated = true;
             }
             else
             {
@@ -199,6 +198,7 @@ namespace Explorer
                 if (arguments.Count == m_arguments.Length)
                 {
                     ret = mi.Invoke(mi.IsStatic ? null : DeclaringInstance, arguments.ToArray());
+                    m_evaluated = true;
                 }
                 else
                 {

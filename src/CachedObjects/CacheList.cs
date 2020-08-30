@@ -24,7 +24,7 @@ namespace Explorer
                 {
                     if (this.MemberInfo != null)
                     {
-                        switch (this.MemberInfoType)
+                        switch (this.MemberInfo.MemberType)
                         {
                             case MemberTypes.Field:
                                 m_entryType = (MemberInfo as FieldInfo).FieldType.GetGenericArguments()[0];

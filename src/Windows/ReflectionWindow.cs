@@ -90,7 +90,7 @@ namespace Explorer
 
         private bool ShouldProcessMember(CacheObjectBase holder)
         {
-            if (m_filter != MemberTypes.All && m_filter != holder.MemberInfoType) return false;
+            if (m_filter != MemberTypes.All && m_filter != holder.MemberInfo?.MemberType) return false;
 
             if (!string.IsNullOrEmpty(holder.ReflectionException) && m_hideFailedReflection) return false;
 
