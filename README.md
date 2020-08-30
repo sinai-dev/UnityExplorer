@@ -43,15 +43,15 @@ Requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be ins
 ### Scene Explorer
 
 * A simple menu which allows you to traverse the Transform heirarchy of the scene.
-* Click on a GameObject to set it as the current path, or <b>Inspect</b> it to send it to the Inspector window.
+* Click on a GameObject to set it as the current path, or <b>Inspect</b> it to send it to an Inspector Window.
 
 [![](https://i.imgur.com/2b0q0jL.png)](https://i.imgur.com/2b0q0jL.png)
 
 ### Inspectors
 
-CppExplorer has two main inspector modes: GameObject Inspector, and Reflection Inspector.
+CppExplorer has two main inspector modes: <b>GameObject Inspector</b>, and <b>Reflection Inspector</b>.
 
-<b>Tip:</b> when in Tab View, GameObjects are denoted by a [G] prefix, and Reflection objects are denoted by a [R] symbol.
+<b>Tip:</b> when in Tab View, GameObjects are denoted by a [G] prefix, and Reflection objects are denoted by a [R] prefix.
 
 ### GameObject Inspector
 
