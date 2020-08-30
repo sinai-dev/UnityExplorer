@@ -85,11 +85,6 @@ namespace Explorer
 
             if (type == null)
             {
-                MelonLogger.Log("Could not get type for object or memberinfo!");
-                if (memberInfo is MethodInfo)
-                {
-                    MelonLogger.Log("is it void?");
-                }
                 return null;
             }
 

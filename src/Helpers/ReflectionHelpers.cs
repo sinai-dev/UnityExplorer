@@ -115,7 +115,14 @@ namespace Explorer
             if (m_object is Il2CppSystem.Object ilObject)
             {
                 var iltype = ilObject.GetIl2CppType();
-                return Type.GetType(iltype.AssemblyQualifiedName);
+                if (Type.GetType(iltype.AssemblyQualifiedName) is Type type)
+                {
+                    return type;
+                }
+                else
+                {
+                    return ilObject.GetType();
+                }
             }
             else
             {

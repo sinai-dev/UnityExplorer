@@ -37,7 +37,7 @@ namespace Explorer
             var type = ReflectionHelpers.GetActualType(Target);
             if (type == null)
             {
-                MelonLogger.Log($"Could not get underlying type for object..? Type: {Target?.GetType().Name}, ToString: {Target?.ToString()}");
+                MelonLogger.Log($"Could not get underlying type for object! Type: {Target?.GetType().AssemblyQualifiedName}, Value ToString: {Target?.ToString()}");
                 DestroyWindow();
                 return;
             }
