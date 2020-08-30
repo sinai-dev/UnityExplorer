@@ -38,28 +38,63 @@ Requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be ins
 ## How to use
 
 * Press F7 to show or hide the menu.
-* Simply browse through the scene, search for objects, etc, it's pretty self-explanatory.
+* Simply browse through the scene, search for objects, etc, most of it is pretty self-explanatory.
+
+### Scene Explorer
+
+* A simple menu which allows you to traverse the Transform heirarchy of the scene.
+* Click on a GameObject to set it as the current path, or <b>Inspect</b> it to send it to the Inspector window.
+
+[![](https://i.imgur.com/2b0q0jL.png)](https://i.imgur.com/2b0q0jL.png)
+
+### Inspectors
+
+CppExplorer has two main inspector modes: GameObject Inspector, and Reflection Inspector.
+
+<b>Tip:</b> when in Tab View, GameObjects are denoted by a [G] prefix, and Reflection objects are denoted by a [R] symbol.
+
+### GameObject Inspector
+
+* Allows you to see the children and components on a GameObject.
+* Can use some basic GameObject Controls such as translating and rotating the object, destroy it, clone it, etc.
+
+[![](https://i.imgur.com/JTxqlx4.png)](https://i.imgur.com/JTxqlx4.png)
+
+### Reflection Inspector
+
+* The Reflection Inspector is used for all other supported objects.
+* Allows you to inspect Properties, Fields and basic Methods, as well as set primitive values and evaluate primitive methods.
+* Can search and filter members for the ones you are interested in.
+
+[![](https://i.imgur.com/eFVTQdh.png)](https://i.imgur.com/eFVTQdh.png)
+
+### Object Search
+
+* You can search for an `UnityEngine.Object` with the Object Search feature.
+* Filter by name, type, etc.
+* For GameObjects and Transforms you can filter which scene they are found in too.
+
+[![](https://i.imgur.com/lK2RthM.png)](https://i.imgur.com/lK2RthM.png)
+
+### C# REPL console
+
+* A simple C# REPL console, allows you to execute a method body on the fly.
+
+[![](https://i.imgur.com/5U4D1a8.png)](https://i.imgur.com/5U4D1a8.png)
+
+### Inspect-under-mouse
+
+* Press Shift+RMB (Right Mouse Button) while the CppExplorer menu is open to begin Inspect-Under-Mouse.
+* Hover over your desired object, if you see the name appear then you can click on it to inspect it.
+* Only objects with Colliders are supported.
 
 ### Mouse Control
 
 CppExplorer can force the mouse to be visible and unlocked when the menu is open, if you have enabled "Force Unlock Mouse" (Left-Alt toggle). However, you may also want to prevent the mouse clicking-through onto the game behind CppExplorer, this is possible but it requires specific patches for that game.
 
-* For VRChat, use [VRCExplorerMouseControl](https://github.com/sinaioutlander/VRCExplorerMouseControl)
-* You can create your own mini-plugin using one of the two plugins above as an example. Usually only 1 or 2 simple Harmony patches are needed to fix the problem (if you want to submit that here, feel free to make a PR to this Readme).
-
-## Images
-
-<b>Scene Explorer, GameObject Inspector, and Reflection Inspectors:</b>
-
-[![](https://i.imgur.com/n8bkxVW.png)](https://i.imgur.com/n8bkxVW.png)
-
-<b>Object Search:</b>
-
-[![](https://i.imgur.com/lK2RthM.png)](https://i.imgur.com/lK2RthM.png)
-
-<b>C# REPL console:</b>
-
-[![](https://i.imgur.com/gYTor7C.png)](https://i.imgur.com/gYTor7C.png)
+* For VRChat, use [VRCExplorerMouseControl](https://github.com/sinai-dev/VRCExplorerMouseControl)
+* For Hellpoint, use [HPExplorerMouseControl](https://github.com/sinai-dev/Hellpoint-Mods/tree/master/HPExplorerMouseControl/HPExplorerMouseControl)
+* You can create your own plugin using one of the two plugins above as an example. Usually only a few simple Harmony patches are needed to fix the problem.
 
 ## Credits
 
