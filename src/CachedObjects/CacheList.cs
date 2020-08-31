@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using MelonLoader;
 using UnityEngine;
 
 namespace Explorer
@@ -16,74 +17,216 @@ namespace Explorer
         public float WhiteSpace = 215f;
         public float ButtonWidthOffset = 290f;
 
+        private CacheObjectBase[] m_cachedEntries;
+
+        // Type of Entries in the Array
         public Type EntryType 
-        { 
-            get 
-            {
-                if (m_entryType == null)
-                {
-                    if (this.MemberInfo != null)
-                    {
-                        switch (this.MemberInfo.MemberType)
-                        {
-                            case MemberTypes.Field:
-                                m_entryType = (MemberInfo as FieldInfo).FieldType.GetGenericArguments()[0];
-                                break;
-                            case MemberTypes.Property:
-                                m_entryType = (MemberInfo as PropertyInfo).PropertyType.GetGenericArguments()[0];
-                                break;
-                        }
-                    }
-                    else if (Value != null)
-                    {
-                        m_entryType = Value.GetType().GetGenericArguments()[0];
-                    }
-                }
-                return m_entryType;
-            }
-            set
-            {
-                m_entryType = value;
-            } 
+        {
+            get => GetEntryType();
+            set => m_entryType = value;
         }
         private Type m_entryType;
 
+        // Cached IEnumerable object
         public IEnumerable Enumerable
         {
-            get
-            {
-                if (m_enumerable == null && Value != null)
-                {
-                    m_enumerable = Value as IEnumerable ?? CastValueFromList();
-                }
-                return m_enumerable;
-            }
+            get => GetEnumerable();
         }
-
         private IEnumerable m_enumerable;
-        private CacheObjectBase[] m_cachedEntries;
 
+        // Generic Type Definition for Lists
+        public Type GenericTypeDef
+        {
+            get => GetGenericTypeDef();
+        }
+        private Type m_genericTypeDef;
+
+        // Cached ToArray method for Lists
         public MethodInfo GenericToArrayMethod
         {
-            get
-            {
-                if (EntryType == null) return null;
-
-                return m_genericToArray ?? 
-                            (m_genericToArray = typeof(Il2CppSystem.Collections.Generic.List<>)
-                            .MakeGenericType(new Type[] { this.EntryType })
-                            .GetMethod("ToArray"));
-            }
+            get => GetGenericToArrayMethod();
         }
         private MethodInfo m_genericToArray;
 
+        // Cached Item Property for ILists
+        public PropertyInfo ItemProperty
+        {
+            get => GetItemProperty();
+        }
+        private PropertyInfo m_itemProperty;
+
+        // ========== Methods ==========
+
+        private IEnumerable GetEnumerable()
+        {
+            if (m_enumerable == null && Value != null)
+            {
+                m_enumerable = Value as IEnumerable ?? CastValueFromList();
+            }
+            return m_enumerable;
+        }
+
+        private Type GetGenericTypeDef()
+        {
+            if (m_genericTypeDef == null && Value != null)
+            {
+                var type = Value.GetType();
+                if (type.IsGenericType)
+                {
+                    m_genericTypeDef = type.GetGenericTypeDefinition();
+                }
+            }
+            return m_genericTypeDef;
+        }
+
+        private MethodInfo GetGenericToArrayMethod()
+        {
+            if (GenericTypeDef == null) return null;
+
+            if (m_genericToArray == null)
+            {
+                m_genericToArray = GenericTypeDef
+                                    .MakeGenericType(new Type[] { this.EntryType })
+                                    .GetMethod("ToArray");
+            }
+            return m_genericToArray;
+        }
+
+        private PropertyInfo GetItemProperty()
+        {
+            if (m_itemProperty == null)
+            {
+                m_itemProperty = Value?.GetType().GetProperty("Item");
+            }
+            return m_itemProperty;
+        }
+
         private IEnumerable CastValueFromList()
         {
-            return (Value == null) ? null : (IEnumerable)GenericToArrayMethod?.Invoke(Value, new object[0]);
+            if (Value == null) return null;
+
+            if (GenericTypeDef == typeof(Il2CppSystem.Collections.Generic.List<>))
+            {
+                return (IEnumerable)GenericToArrayMethod?.Invoke(Value, new object[0]);
+            }
+            else
+            {
+                return CastFromIList();
+            }
         }
+
+        private IList CastFromIList()
+        {
+            try
+            {
+                var genericType = typeof(List<>).MakeGenericType(new Type[] { this.EntryType });
+                var list = (IList)Activator.CreateInstance(genericType);
+
+                for (int i = 0; ; i++)
+                {
+                    try
+                    {
+                        var itm = ItemProperty.GetValue(Value, new object[] { i });
+                        list.Add(itm);
+                    }
+                    catch { break; }
+                }
+
+                return list;
+            }
+            catch (Exception e)
+            {
+                MelonLogger.Log("Exception casting IList to Array: " + e.GetType() + ", " + e.Message);
+                return null;
+            }
+        }
+
+        private Type GetEntryType()
+        {
+            if (m_entryType == null)
+            {
+                if (this.MemberInfo != null)
+                {
+                    Type memberType = null;
+                    switch (this.MemberInfo.MemberType)
+                    {
+                        case MemberTypes.Field:
+                            memberType = (MemberInfo as FieldInfo).FieldType;
+                            break;
+                        case MemberTypes.Property:
+                            memberType = (MemberInfo as PropertyInfo).PropertyType;
+                            break;
+                    }
+
+                    if (memberType != null && memberType.IsGenericType)
+                    {
+                        m_entryType = memberType.GetGenericArguments()[0];
+                    }
+                }
+                else if (Value != null)
+                {
+                    var type = Value.GetType();
+                    if (type.IsGenericType)
+                    {
+                        m_entryType = type.GetGenericArguments()[0];
+                    }
+                }
+            }
+
+            // IList probably won't be able to get any EntryType.
+            if (m_entryType == null)
+            {
+                m_entryType = typeof(object);
+            }
+
+            return m_entryType;
+        }
+
+        public override void UpdateValue()
+        {
+            base.UpdateValue();
+
+            if (Value == null)
+            {
+                return;
+            }
+
+            var enumerator = Enumerable?.GetEnumerator();
+
+            if (enumerator == null)
+            {
+                return;
+            }
+
+            var list = new List<CacheObjectBase>();
+            while (enumerator.MoveNext())
+            {
+                var obj = enumerator.Current;
+                var type = ReflectionHelpers.GetActualType(obj);
+
+                if (obj is Il2CppSystem.Object iObj)
+                {
+                    obj = iObj.Il2CppCast(type);
+                }
+
+                var cached = GetCacheObject(obj, null, null, type);
+                cached.UpdateValue();
+
+                list.Add(cached);
+            }
+            m_cachedEntries = list.ToArray();
+        }
+
+        // ============= GUI Draw =============
 
         public override void DrawValue(Rect window, float width)
         {
+            if (m_cachedEntries == null)
+            {
+                GUILayout.Label("m_cachedEntries is null!", null);
+                return;
+            }
+
             int count = m_cachedEntries.Length;
 
             if (!IsExpanded)
@@ -181,28 +324,6 @@ namespace Explorer
 
                 GUI.skin.label.alignment = TextAnchor.UpperLeft;
             }
-        }
-
-        /// <summary>
-        /// Called only when the user presses the "Update" button, or if AutoUpdate is on.
-        /// </summary>
-        public override void UpdateValue()
-        {
-            base.UpdateValue();
-
-            if (Value == null) return;
-
-            var enumerator = Enumerable?.GetEnumerator();
-
-            if (enumerator == null) return;
-
-            var list = new List<CacheObjectBase>();
-            while (enumerator.MoveNext())
-            {
-                list.Add(GetCacheObject(enumerator.Current, null, null, this.EntryType));
-            }
-
-            m_cachedEntries = list.ToArray();
         }
     }
 }

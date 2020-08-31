@@ -12,7 +12,7 @@ namespace Explorer
     public class CppExplorer : MelonMod
     {
         public const string GUID = "com.sinai.cppexplorer";
-        public const string VERSION = "1.4.6";
+        public const string VERSION = "1.4.7";
         public const string AUTHOR = "Sinai";
 
         public const string NAME = "CppExplorer"

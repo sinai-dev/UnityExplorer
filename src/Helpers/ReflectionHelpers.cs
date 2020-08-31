@@ -79,9 +79,16 @@ namespace Explorer
 
         public static bool IsList(Type t)
         {
-            return t.IsGenericType
-                && t.GetGenericTypeDefinition() is Type typeDef
-                && (typeDef.IsAssignableFrom(typeof(List<>)) || typeDef.IsAssignableFrom(typeof(Il2CppSystem.Collections.Generic.List<>)));
+            if (t.IsGenericType)
+            {
+                return t.GetGenericTypeDefinition() is Type typeDef
+                    && (typeDef.IsAssignableFrom(typeof(Il2CppSystem.Collections.Generic.List<>))
+                        || typeDef.IsAssignableFrom(typeof(Il2CppSystem.Collections.Generic.IList<>)));
+            }
+            else
+            {
+                return t.IsAssignableFrom(typeof(Il2CppSystem.Collections.IList));
+            }
         }
 
         public static bool IsDictionary(Type t)

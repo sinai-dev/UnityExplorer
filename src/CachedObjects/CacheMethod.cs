@@ -63,7 +63,7 @@ namespace Explorer
 
         public override void UpdateValue()
         {
-            base.UpdateValue();
+            //base.UpdateValue();
         }        
 
         public override void DrawValue(Rect window, float width)
