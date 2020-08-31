@@ -28,21 +28,7 @@ namespace Explorer
             {
                 if (m_parseMethod == null)
                 {
-                    Type t = null;
-                    switch (PrimitiveType)
-                    {
-                        case PrimitiveTypes.Bool:
-                            t = typeof(bool); break;
-                        case PrimitiveTypes.Double:
-                            t = typeof(double); break;
-                        case PrimitiveTypes.Float:
-                            t = typeof(float); break;
-                        case PrimitiveTypes.Int:
-                            t = typeof(int); break;
-                        case PrimitiveTypes.Char:
-                            t = typeof(char); break;
-                    }
-                    m_parseMethod = t?.GetMethod("Parse", new Type[] { typeof(string) });
+                    m_parseMethod = Value.GetType().GetMethod("Parse", new Type[] { typeof(string) });
                 }
                 return m_parseMethod;
             }

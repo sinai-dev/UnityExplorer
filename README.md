@@ -1,4 +1,4 @@
-# CppExplorer [![Version](https://img.shields.io/badge/MelonLoader-0.2.7-green.svg)]()
+# CppExplorer [![Version](https://img.shields.io/badge/MelonLoader-0.2.7.1-green.svg)]()
 
 <p align="center">
   <img align="center" src="https://sinai-dev.github.io/images/thumbs/02.png">

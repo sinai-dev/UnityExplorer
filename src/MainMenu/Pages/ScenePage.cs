@@ -350,11 +350,24 @@ namespace Explorer
                     m_pageOffset = 0;
                 }
 
-                for (int i = offset; i < offset + m_limit && offset < m_searchResults.Count; i++)
+                for (int i = offset; i < offset + m_limit && i < m_searchResults.Count; i++)
                 {
                     var obj = m_searchResults[i];
 
-                    UIHelpers.FastGameobjButton(obj.RefGameObject, obj.EnabledColor, obj.Label, obj.RefGameObject.activeSelf, SetTransformTarget, true, MainMenu.MainRect.width - 170);
+                    if (obj.RefGameObject)
+                    {
+                        UIHelpers.FastGameobjButton(obj.RefGameObject,
+                        obj.EnabledColor,
+                        obj.Label,
+                        obj.RefGameObject.activeSelf,
+                        SetTransformTarget,
+                        true,
+                        MainMenu.MainRect.width - 170);
+                    }
+                    else
+                    {
+                        GUILayout.Label("<i><color=red>Null or destroyed!</color></i>", null);
+                    }
                 }
             }
             else
