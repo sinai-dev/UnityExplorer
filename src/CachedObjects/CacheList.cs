@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Explorer
 {
-    public partial class CacheList : CacheObjectBase
+    public class CacheList : CacheObjectBase
     {
         public bool IsExpanded { get; set; }
         public int ArrayOffset { get; set; }
@@ -61,7 +61,7 @@ namespace Explorer
         {
             if (m_enumerable == null && Value != null)
             {
-                m_enumerable = Value as IEnumerable ?? CastValueFromList();
+                m_enumerable = Value as IEnumerable ?? GetEnumerableFromIl2CppList();
             }
             return m_enumerable;
         }
@@ -101,7 +101,7 @@ namespace Explorer
             return m_itemProperty;
         }
 
-        private IEnumerable CastValueFromList()
+        private IEnumerable GetEnumerableFromIl2CppList()
         {
             if (Value == null) return null;
 
@@ -111,11 +111,11 @@ namespace Explorer
             }
             else
             {
-                return CastFromIList();
+                return ConvertIListToMono();
             }
         }
 
-        private IList CastFromIList()
+        private IList ConvertIListToMono()
         {
             try
             {
@@ -136,7 +136,7 @@ namespace Explorer
             }
             catch (Exception e)
             {
-                MelonLogger.Log("Exception casting IList to Array: " + e.GetType() + ", " + e.Message);
+                MelonLogger.Log("Exception converting Il2Cpp IList to Mono IList: " + e.GetType() + ", " + e.Message);
                 return null;
             }
         }
@@ -186,13 +186,12 @@ namespace Explorer
         {
             base.UpdateValue();
 
-            if (Value == null)
+            if (Value == null || Enumerable == null)
             {
                 return;
             }
 
-            var enumerator = Enumerable?.GetEnumerator();
-
+            var enumerator = Enumerable.GetEnumerator();
             if (enumerator == null)
             {
                 return;
@@ -214,6 +213,7 @@ namespace Explorer
 
                 list.Add(cached);
             }
+
             m_cachedEntries = list.ToArray();
         }
 

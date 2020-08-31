@@ -66,7 +66,7 @@ CppExplorer has two main inspector modes: <b>GameObject Inspector</b>, and <b>Re
 * Allows you to inspect Properties, Fields and basic Methods, as well as set primitive values and evaluate primitive methods.
 * Can search and filter members for the ones you are interested in.
 
-[![](https://i.imgur.com/eFVTQdh.png)](https://i.imgur.com/eFVTQdh.png)
+[![](https://i.imgur.com/iq92m0l.png)](https://i.imgur.com/iq92m0l.png)
 
 ### Object Search
 

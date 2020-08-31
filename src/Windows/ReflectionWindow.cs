@@ -96,9 +96,9 @@ namespace Explorer
 
             if (m_search == "" || holder.MemberInfo == null) return true;
 
-            return holder.FullName
-                .ToLower()
-                .Contains(m_search.ToLower());
+            var name = holder.MemberInfo.DeclaringType.Name + "." + holder.MemberInfo.Name;
+
+            return name.ToLower().Contains(m_search.ToLower());
         }
 
         private void CacheMembers(Type[] types)
@@ -140,25 +140,38 @@ namespace Explorer
                 {
                     if (member.MemberType == MemberTypes.Field || member.MemberType == MemberTypes.Property || member.MemberType == MemberTypes.Method)
                     {
+                        // ignore these
                         if (member.Name.Contains("Il2CppType") || member.Name.StartsWith("get_") || member.Name.StartsWith("set_")) 
                             continue;
 
+                        var name = member.DeclaringType.Name + "." + member.Name;
+                        if (member is MethodInfo mi)
+                        {
+                            name += " (";
+                            foreach (var param in mi.GetParameters())
+                            {
+                                name += param.ParameterType.Name + ", ";
+                            }
+                            name += ")";
+                        }
+                        if (names.Contains(name))
+                        {
+                            continue;
+                        }
+
                         try
                         {
-                            var name = member.DeclaringType.Name + "." + member.Name;
-                            if (names.Contains(name)) continue;
-                            names.Add(name);
-
                             var cached = CacheObjectBase.GetCacheObject(null, member, target);
                             if (cached != null)
                             {
+                                names.Add(name);
                                 list.Add(cached);
                                 cached.ReflectionException = exception;
                             }
                         }
                         catch (Exception e) 
                         {
-                            MelonLogger.LogWarning($"Exception caching member {declaringType.Name}.{member.Name}!");
+                            MelonLogger.LogWarning($"Exception caching member {name}!");
                             MelonLogger.Log(e.ToString());
                         }
                     }

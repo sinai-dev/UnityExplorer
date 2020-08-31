@@ -19,7 +19,20 @@ namespace Explorer
         public MemberInfo MemberInfo { get; set; }
         public Type DeclaringType { get; set; }
         public object DeclaringInstance { get; set; }
-        public string FullName => $"{MemberInfo.DeclaringType.Name}.{MemberInfo.Name}"; 
+        
+        public string RichTextName 
+        {
+            get 
+            {
+                if (m_richTextName == null)
+                {
+                    GetRichTextName();
+                }
+                return m_richTextName;
+            }
+        }
+        private string m_richTextName;
+
         public string ReflectionException;
 
         public bool CanWrite
@@ -156,45 +169,7 @@ namespace Explorer
             return holder;
         }
 
-        public const float MAX_LABEL_WIDTH = 400f;
-
-        public static void ClampLabelWidth(Rect window, ref float labelWidth)
-        {
-            float min = window.width * 0.37f;
-            if (min > MAX_LABEL_WIDTH) min = MAX_LABEL_WIDTH;
-
-            labelWidth = Mathf.Clamp(labelWidth, min, MAX_LABEL_WIDTH);
-        }
-
-        public void Draw(Rect window, float labelWidth = 215f)
-        {
-            if (labelWidth > 0)
-            {
-                ClampLabelWidth(window, ref labelWidth);
-            }
-
-            if (MemberInfo != null)
-            {
-                GUILayout.Label("<color=cyan>" + FullName + "</color>", new GUILayoutOption[] { GUILayout.Width(labelWidth) });
-            }
-            else
-            {
-                GUILayout.Space(labelWidth);
-            }
-
-            if (!string.IsNullOrEmpty(ReflectionException))
-            {
-                GUILayout.Label("<color=red>Reflection failed!</color> (" + ReflectionException + ")", null);
-            }
-            else if (Value == null && MemberInfo?.MemberType != MemberTypes.Method)
-            {
-                GUILayout.Label("<i>null (" + ValueType + ")</i>", null);
-            }
-            else
-            {
-                DrawValue(window, window.width - labelWidth - 90);
-            }
-        }
+        // ======== Updating and Setting Value (memberinfo only) =========
 
         public virtual void UpdateValue()
         {
@@ -243,6 +218,80 @@ namespace Explorer
             catch (Exception e)
             {
                 MelonLogger.LogWarning($"Error setting value: {e.GetType()}, {e.Message}");
+            }
+        }
+
+        // ========= Gui Draw ==========
+
+        public const float MAX_LABEL_WIDTH = 400f;
+
+        public static void ClampLabelWidth(Rect window, ref float labelWidth)
+        {
+            float min = window.width * 0.37f;
+            if (min > MAX_LABEL_WIDTH) min = MAX_LABEL_WIDTH;
+
+            labelWidth = Mathf.Clamp(labelWidth, min, MAX_LABEL_WIDTH);
+        }
+
+        public void Draw(Rect window, float labelWidth = 215f)
+        {
+            if (labelWidth > 0)
+            {
+                ClampLabelWidth(window, ref labelWidth);
+            }
+
+            if (MemberInfo != null)
+            {
+
+
+                GUILayout.Label(RichTextName, new GUILayoutOption[] { GUILayout.Width(labelWidth) });
+            }
+            else
+            {
+                GUILayout.Space(labelWidth);
+            }
+
+            if (!string.IsNullOrEmpty(ReflectionException))
+            {
+                GUILayout.Label("<color=red>Reflection failed!</color> (" + ReflectionException + ")", null);
+            }
+            else if (Value == null && MemberInfo?.MemberType != MemberTypes.Method)
+            {
+                GUILayout.Label("<i>null (" + ValueType + ")</i>", null);
+            }
+            else
+            {
+                DrawValue(window, window.width - labelWidth - 90);
+            }
+        }
+
+        private void GetRichTextName()
+        {
+            string memberColor = "";
+            switch (MemberInfo.MemberType)
+            {
+                case MemberTypes.Field:
+                    memberColor = "#c266ff"; break;
+                case MemberTypes.Property:
+                    memberColor = "#72a6a6"; break;
+                case MemberTypes.Method:
+                    memberColor = "#ff8000"; break;
+            };
+
+            m_richTextName = $"<color=#2df7b2>{MemberInfo.DeclaringType.Name}</color>.<color={memberColor}>{MemberInfo.Name}</color>";
+
+            if (MemberInfo is MethodInfo mi)
+            {
+                m_richTextName += "(";
+                var _params = "";
+                foreach (var param in mi.GetParameters())
+                {
+                    if (_params != "") _params += ", ";
+
+                    _params += $"<color=#a6e9e9>{param.Name}</color>";
+                }
+                m_richTextName += _params;
+                m_richTextName += ")";
             }
         }
     }

@@ -113,7 +113,7 @@ namespace Explorer
                     b = GUILayout.Toggle(b, label, null);
                     if (b != (bool)Value)
                     {
-                        SetValue(m_valueToString);
+                        SetValueFromInput(b.ToString());
                     }
                 }
                 else
@@ -142,7 +142,7 @@ namespace Explorer
                 {
                     if (GUILayout.Button("<color=#00FF00>Apply</color>", new GUILayoutOption[] { GUILayout.Width(60) }))
                     {
-                        SetValue(m_valueToString);
+                        SetValueFromInput(m_valueToString);
                     }
                 }
 
@@ -150,7 +150,7 @@ namespace Explorer
             }
         }
 
-        public void SetValue(string value)
+        public void SetValueFromInput(string value)
         {
             if (MemberInfo == null)
             {
