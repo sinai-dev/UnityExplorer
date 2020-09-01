@@ -13,10 +13,10 @@ namespace Explorer
     public class ReflectionWindow : UIWindow
     {
         public override string Title => WindowManager.TabView
-            ? $"<color=cyan>[R]</color> {ObjectType.Name}" 
-            : $"Reflection Inspector ({ObjectType.Name})";
+            ? $"<color=cyan>[R]</color> {TargetType.Name}" 
+            : $"Reflection Inspector ({TargetType.Name})";
 
-        public Type ObjectType;
+        public Type TargetType;
 
         private CacheObjectBase[] m_allCachedMembers;
         private CacheObjectBase[] m_cachedMembersFiltered;
@@ -35,16 +35,11 @@ namespace Explorer
         public override void Init()
         {
             var type = ReflectionHelpers.GetActualType(Target);
-            if (type == null)
-            {
-                MelonLogger.Log($"Could not get underlying type for object! Type: {Target?.GetType().AssemblyQualifiedName}, Value ToString: {Target?.ToString()}");
-                DestroyWindow();
-                return;
-            }
 
-            ObjectType = type;
+            TargetType = type;
 
             var types = ReflectionHelpers.GetAllBaseTypes(Target);
+
             CacheMembers(types);
 
             if (Target is Il2CppSystem.Object ilObject)
@@ -90,13 +85,13 @@ namespace Explorer
 
         private bool ShouldProcessMember(CacheObjectBase holder)
         {
-            if (m_filter != MemberTypes.All && m_filter != holder.MemberInfo?.MemberType) return false;
+            if (m_filter != MemberTypes.All && m_filter != holder.MemInfo?.MemberType) return false;
 
             if (!string.IsNullOrEmpty(holder.ReflectionException) && m_hideFailedReflection) return false;
 
-            if (m_search == "" || holder.MemberInfo == null) return true;
+            if (m_search == "" || holder.MemInfo == null) return true;
 
-            var name = holder.MemberInfo.DeclaringType.Name + "." + holder.MemberInfo.Name;
+            var name = holder.MemInfo.DeclaringType.Name + "." + holder.MemInfo.Name;
 
             return name.ToLower().Contains(m_search.ToLower());
         }
@@ -118,7 +113,7 @@ namespace Explorer
                 }
                 catch 
                 {
-                    MelonLogger.Log("Exception getting members for type: " + declaringType.Name);
+                    MelonLogger.Log($"Exception getting members for type: {declaringType.FullName}");
                     continue;
                 }
 
@@ -140,11 +135,14 @@ namespace Explorer
                 {
                     if (member.MemberType == MemberTypes.Field || member.MemberType == MemberTypes.Property || member.MemberType == MemberTypes.Method)
                     {
-                        // ignore these
-                        if (member.Name.Contains("Il2CppType") || member.Name.StartsWith("get_") || member.Name.StartsWith("set_")) 
-                            continue;
+                        var name = $"{member.DeclaringType.Name}.{member.Name}";
 
-                        var name = member.DeclaringType.Name + "." + member.Name;
+                        // blacklist (should probably make a proper implementation)
+                        if (name == "Type.DeclaringMethod" || member.Name.Contains("Il2CppType") || member.Name.StartsWith("get_") || member.Name.StartsWith("set_"))
+                        {
+                            continue;
+                        }
+
                         if (member is MethodInfo mi)
                         {
                             name += " (";
@@ -161,7 +159,7 @@ namespace Explorer
 
                         try
                         {
-                            var cached = CacheObjectBase.GetCacheObject(null, member, target);
+                            var cached = CacheObjectBase.GetCacheObject(member, target);
                             if (cached != null)
                             {
                                 names.Add(name);
@@ -198,7 +196,7 @@ namespace Explorer
                 }
 
                 GUILayout.BeginHorizontal(null);
-                GUILayout.Label("<b>Type:</b> <color=cyan>" + ObjectType.FullName + "</color>", new GUILayoutOption[] { GUILayout.Width(245f) });
+                GUILayout.Label("<b>Type:</b> <color=cyan>" + TargetType.FullName + "</color>", new GUILayoutOption[] { GUILayout.Width(245f) });
                 if (m_uObj)
                 {
                     GUILayout.Label("Name: " + m_uObj.name, null);
@@ -298,11 +296,10 @@ namespace Explorer
 
                 GUILayout.BeginVertical(GUI.skin.box, null);
 
-                int index = 0;
                 var members = this.m_cachedMembersFiltered;
-                int offsetIndex = (m_pageOffset * m_limitPerPage) + index;
+                int start = m_pageOffset * m_limitPerPage;
 
-                if (offsetIndex >= count)
+                if (start >= count)
                 {
                     int maxOffset = (int)Mathf.Ceil((float)(m_cachedMembersFiltered.Length / (decimal)m_limitPerPage)) - 1;
                     if (m_pageOffset > maxOffset)
@@ -311,21 +308,25 @@ namespace Explorer
                     }
                 }
 
-                for (int j = offsetIndex; (j < offsetIndex + m_limitPerPage && j < members.Length); j++)
+                for (int j = start; (j < start + m_limitPerPage && j < members.Length); j++)
                 {
                     var holder = members[j];
 
                     GUILayout.BeginHorizontal(new GUILayoutOption[] { GUILayout.Height(25) });
-
-                    try
-                    {
+                    try 
+                    { 
                         holder.Draw(rect, 180f);
+                    } 
+                    catch 
+                    {
+                        GUILayout.EndHorizontal();
+                        continue;
                     }
-                    catch { }
-
                     GUILayout.EndHorizontal();
 
-                    index++;
+                    // if not last element
+                    if (!(j == (start + m_limitPerPage - 1) || j == (members.Length - 1)))
+                        UIStyles.HorizontalLine(new Color(0.07f, 0.07f, 0.07f), true);
                 }
 
                 GUILayout.EndVertical();

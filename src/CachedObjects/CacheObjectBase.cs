@@ -13,67 +13,70 @@ namespace Explorer
     public abstract class CacheObjectBase
     {
         public object Value;
-        public string ValueType;
+        public string ValueTypeName;
 
-        // Reflection window only
-        public MemberInfo MemberInfo { get; set; }
+        // Reflection Inspector only
+        public MemberInfo MemInfo { get; set; }
         public Type DeclaringType { get; set; }
         public object DeclaringInstance { get; set; }
-        
-        public string RichTextName 
-        {
-            get 
-            {
-                if (m_richTextName == null)
-                {
-                    GetRichTextName();
-                }
-                return m_richTextName;
-            }
-        }
-        private string m_richTextName;
+        public string ReflectionException { get; set; }
 
-        public string ReflectionException;
+        public int PropertyIndex { get; private set; }
+        private string m_propertyIndexInput = "0";
+
+        public string RichTextName => m_richTextName ?? GetRichTextName();
+        private string m_richTextName;
 
         public bool CanWrite
         {
             get
             {
-                if (MemberInfo is FieldInfo fi)
-                {
+                if (MemInfo is FieldInfo fi)
                     return !(fi.IsLiteral && !fi.IsInitOnly);
-                }
-                else if (MemberInfo is PropertyInfo pi)
-                {
+                else if (MemInfo is PropertyInfo pi)
                     return pi.CanWrite;
-                }
                 else
-                {
                     return false;
-                }
             }
         }
 
-        // methods
+        // ===== Abstract/Virtual Methods ===== //
+
         public virtual void Init() { }
+
         public abstract void DrawValue(Rect window, float width);
 
+        // ===== Static Methods ===== //
+
+        /// <summary>
+        /// Get CacheObject from only an object instance
+        /// Calls GetCacheObject(obj, memberInfo, declaringInstance) with (obj, null, null)</summary>
         public static CacheObjectBase GetCacheObject(object obj)
         {
             return GetCacheObject(obj, null, null);
         }
 
         /// <summary>
-        /// Gets the CacheObject subclass for an object or MemberInfo
-        /// </summary>
-        /// <param name="obj">The current value (can be null if memberInfo is not null)</param>
-        /// <param name="memberInfo">The MemberInfo (can be null if obj is not null)</param>
-        /// <param name="declaringInstance">If MemberInfo is not null, the declaring class instance. Can be null if static.</param>
-        /// <returns></returns>
+        /// Get CacheObject from an object instance and provide the value type
+        /// Calls GetCacheObjectImpl directly</summary>
+        public static CacheObjectBase GetCacheObject(object obj, Type valueType)
+        {
+            return GetCacheObjectImpl(obj, null, null, valueType);
+        }
+
+        /// <summary>
+        /// Get CacheObject from only a MemberInfo and declaring instance
+        /// Calls GetCacheObject(obj, memberInfo, declaringInstance) with (null, memberInfo, declaringInstance)</summary>
+        public static CacheObjectBase GetCacheObject(MemberInfo memberInfo, object declaringInstance)
+        {
+            return GetCacheObject(null, memberInfo, declaringInstance);
+        }
+
+        /// <summary>
+        /// Get CacheObject from either an object or MemberInfo, and don't provide the type.
+        /// This gets the type and then calls GetCacheObjectImpl</summary>
         public static CacheObjectBase GetCacheObject(object obj, MemberInfo memberInfo, object declaringInstance)
         {
-            //var type = ReflectionHelpers.GetActualType(obj) ?? (memberInfo as FieldInfo)?.FieldType ?? (memberInfo as PropertyInfo)?.PropertyType;
-
             Type type = null;
 
             if (obj != null)
@@ -101,18 +104,13 @@ namespace Explorer
                 return null;
             }
 
-            return GetCacheObject(obj, memberInfo, declaringInstance, type);
+            return GetCacheObjectImpl(obj, memberInfo, declaringInstance, type);
         }
 
         /// <summary>
-        /// Gets the CacheObject subclass for an object or MemberInfo
+        /// Actual GetCacheObject implementation (private)
         /// </summary>
-        /// <param name="obj">The current value (can be null if memberInfo is not null)</param>
-        /// <param name="memberInfo">The MemberInfo (can be null if obj is not null)</param>
-        /// <param name="declaringInstance">If MemberInfo is not null, the declaring class instance. Can be null if static.</param>
-        /// <param name="valueType">The type of the object or MemberInfo value.</param>
-        /// <returns></returns>
-        public static CacheObjectBase GetCacheObject(object obj, MemberInfo memberInfo, object declaringInstance, Type valueType)
+        private static CacheObjectBase GetCacheObjectImpl(object obj, MemberInfo memberInfo, object declaringInstance, Type valueType)
         {
             CacheObjectBase holder;
 
@@ -153,11 +151,11 @@ namespace Explorer
             }
 
             holder.Value = obj;
-            holder.ValueType = valueType.FullName;
+            holder.ValueTypeName = valueType.FullName;
 
             if (memberInfo != null)
             {
-                holder.MemberInfo = memberInfo;
+                holder.MemInfo = memberInfo;
                 holder.DeclaringType = memberInfo.DeclaringType;
                 holder.DeclaringInstance = declaringInstance;
 
@@ -169,30 +167,40 @@ namespace Explorer
             return holder;
         }
 
-        // ======== Updating and Setting Value (memberinfo only) =========
+        // ======== Instance Methods =========
 
         public virtual void UpdateValue()
         {
-            if (MemberInfo == null || !string.IsNullOrEmpty(ReflectionException))
+            if (MemInfo == null || !string.IsNullOrEmpty(ReflectionException))
             {
                 return;
             }
 
             try
             {
-                if (MemberInfo.MemberType == MemberTypes.Field)
+                if (MemInfo.MemberType == MemberTypes.Field)
                 {
-                    var fi = MemberInfo as FieldInfo;
+                    var fi = MemInfo as FieldInfo;
                     Value = fi.GetValue(fi.IsStatic ? null : DeclaringInstance);
                 }
-                else if (MemberInfo.MemberType == MemberTypes.Property)
+                else if (MemInfo.MemberType == MemberTypes.Property)
                 {
-                    var pi = MemberInfo as PropertyInfo;
+                    var pi = MemInfo as PropertyInfo;
                     bool isStatic = pi.GetAccessors()[0].IsStatic;
                     var target = isStatic ? null : DeclaringInstance;
-                    Value = pi.GetValue(target, null);
+
+                    if (pi.GetIndexParameters().Length > 0)
+                    {
+                        var indexes = new object[] { PropertyIndex };
+                        Value = pi.GetValue(target, indexes);
+                    }
+                    else
+                    {
+                        Value = pi.GetValue(target, null);
+                    }
                 }
-                //ReflectionException = null;
+
+                ReflectionException = null;
             }
             catch (Exception e)
             {
@@ -204,15 +212,24 @@ namespace Explorer
         {
             try
             {
-                if (MemberInfo.MemberType == MemberTypes.Field)
+                if (MemInfo.MemberType == MemberTypes.Field)
                 {
-                    var fi = MemberInfo as FieldInfo;
+                    var fi = MemInfo as FieldInfo;
                     fi.SetValue(fi.IsStatic ? null : DeclaringInstance, Value);
                 }
-                else if (MemberInfo.MemberType == MemberTypes.Property)
+                else if (MemInfo.MemberType == MemberTypes.Property)
                 {
-                    var pi = MemberInfo as PropertyInfo;
-                    pi.SetValue(pi.GetAccessors()[0].IsStatic ? null : DeclaringInstance, Value);
+                    var pi = MemInfo as PropertyInfo;
+
+                    if (pi.GetIndexParameters().Length > 0)
+                    {
+                        var indexes = new object[] { PropertyIndex };
+                        pi.SetValue(pi.GetAccessors()[0].IsStatic ? null : DeclaringInstance, Value, indexes);
+                    }
+                    else
+                    {
+                        pi.SetValue(pi.GetAccessors()[0].IsStatic ? null : DeclaringInstance, Value);
+                    }
                 }
             }
             catch (Exception e)
@@ -221,7 +238,7 @@ namespace Explorer
             }
         }
 
-        // ========= Gui Draw ==========
+        // ========= Instance Gui Draw ==========
 
         public const float MAX_LABEL_WIDTH = 400f;
 
@@ -240,11 +257,15 @@ namespace Explorer
                 ClampLabelWidth(window, ref labelWidth);
             }
 
-            if (MemberInfo != null)
+            if (MemInfo != null)
             {
+                var name = RichTextName;
+                if (MemInfo is PropertyInfo pi && pi.GetIndexParameters().Length > 0)
+                {
+                    name += $"[{PropertyIndex}]";
+                }
 
-
-                GUILayout.Label(RichTextName, new GUILayoutOption[] { GUILayout.Width(labelWidth) });
+                GUILayout.Label(name, new GUILayoutOption[] { GUILayout.Width(labelWidth) });
             }
             else
             {
@@ -255,20 +276,44 @@ namespace Explorer
             {
                 GUILayout.Label("<color=red>Reflection failed!</color> (" + ReflectionException + ")", null);
             }
-            else if (Value == null && MemberInfo?.MemberType != MemberTypes.Method)
+            else if (Value == null && MemInfo?.MemberType != MemberTypes.Method)
             {
-                GUILayout.Label("<i>null (" + ValueType + ")</i>", null);
+                GUILayout.Label("<i>null (" + ValueTypeName + ")</i>", null);
             }
             else
             {
+                if (MemInfo is PropertyInfo pi && pi.GetIndexParameters().Length > 0)
+                {
+                    GUILayout.Label("index:", new GUILayoutOption[] { GUILayout.Width(50) });
+
+                    m_propertyIndexInput = GUILayout.TextField(m_propertyIndexInput, new GUILayoutOption[] { GUILayout.Width(100) });
+                    if (GUILayout.Button("Set", new GUILayoutOption[] { GUILayout.Width(60) }))
+                    {
+                        if (int.TryParse(m_propertyIndexInput, out int i))
+                        {
+                            PropertyIndex = i;
+                            UpdateValue();
+                        }
+                        else
+                        {
+                            MelonLogger.Log($"Could not parse '{m_propertyIndexInput}' to an int!");
+                        }
+                    }
+
+                    // new line and space
+                    GUILayout.EndHorizontal();
+                    GUILayout.BeginHorizontal(null);
+                    GUILayout.Space(labelWidth);
+                }
+
                 DrawValue(window, window.width - labelWidth - 90);
             }
         }
 
-        private void GetRichTextName()
+        private string GetRichTextName()
         {
             string memberColor = "";
-            switch (MemberInfo.MemberType)
+            switch (MemInfo.MemberType)
             {
                 case MemberTypes.Field:
                     memberColor = "#c266ff"; break;
@@ -278,9 +323,9 @@ namespace Explorer
                     memberColor = "#ff8000"; break;
             };
 
-            m_richTextName = $"<color=#2df7b2>{MemberInfo.DeclaringType.Name}</color>.<color={memberColor}>{MemberInfo.Name}</color>";
+            m_richTextName = $"<color=#2df7b2>{MemInfo.DeclaringType.Name}</color>.<color={memberColor}>{MemInfo.Name}</color>";
 
-            if (MemberInfo is MethodInfo mi)
+            if (MemInfo is MethodInfo mi)
             {
                 m_richTextName += "(";
                 var _params = "";
@@ -293,6 +338,8 @@ namespace Explorer
                 m_richTextName += _params;
                 m_richTextName += ")";
             }
+
+            return m_richTextName;
         }
     }
 }

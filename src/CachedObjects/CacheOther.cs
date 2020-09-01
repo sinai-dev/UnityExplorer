@@ -12,33 +12,25 @@ namespace Explorer
     public class CacheOther : CacheObjectBase
     {
         private MethodInfo m_toStringMethod;
-        private bool m_triedToGetMethod;
 
         public MethodInfo ToStringMethod
         {
             get
             {
-                if (m_toStringMethod == null && !m_triedToGetMethod)
+                if (m_toStringMethod == null)
                 {
-                    if (Value == null) return null;
-
-                    m_triedToGetMethod = true;
-
                     try
                     {
-                        var methods = ReflectionHelpers.GetActualType(Value)
-                                .GetMethods(ReflectionHelpers.CommonFlags)
-                                .Where(x => x.Name == "ToString")
-                                .GetEnumerator();
+                        m_toStringMethod = ReflectionHelpers.GetActualType(Value).GetMethod("ToString", new Type[0]) 
+                                           ?? typeof(object).GetMethod("ToString", new Type[0]);
 
-                        while (methods.MoveNext())
-                        {
-                            // just get the first (top-most level) method, then break.
-                            m_toStringMethod = methods.Current;
-                            break;
-                        }
+                        // test invoke
+                        m_toStringMethod.Invoke(Value, null);
                     }
-                    catch { }
+                    catch
+                    {
+                        m_toStringMethod = typeof(object).GetMethod("ToString", new Type[0]);
+                    }
                 }
                 return m_toStringMethod;
             }
@@ -48,9 +40,9 @@ namespace Explorer
         {
             string label = (string)ToStringMethod?.Invoke(Value, null) ?? Value.ToString();
             
-            if (!label.Contains(ValueType))
+            if (!label.Contains(ValueTypeName))
             {
-                label += $" ({ValueType})";
+                label += $" ({ValueTypeName})";
             }
             if (Value is UnityEngine.Object unityObj && !label.Contains(unityObj.name))
             {
@@ -58,7 +50,7 @@ namespace Explorer
             }
 
             GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-            if (GUILayout.Button("<color=yellow>" + label + "</color>", new GUILayoutOption[] { GUILayout.MaxWidth(width + 40) }))
+            if (GUILayout.Button("<color=yellow>" + label + "</color>", new GUILayoutOption[] { GUILayout.Width(width) }))
             {
                 WindowManager.InspectObject(Value, out bool _);
             }

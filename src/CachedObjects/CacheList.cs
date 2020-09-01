@@ -145,16 +145,16 @@ namespace Explorer
         {
             if (m_entryType == null)
             {
-                if (this.MemberInfo != null)
+                if (this.MemInfo != null)
                 {
                     Type memberType = null;
-                    switch (this.MemberInfo.MemberType)
+                    switch (this.MemInfo.MemberType)
                     {
                         case MemberTypes.Field:
-                            memberType = (MemberInfo as FieldInfo).FieldType;
+                            memberType = (MemInfo as FieldInfo).FieldType;
                             break;
                         case MemberTypes.Property:
-                            memberType = (MemberInfo as PropertyInfo).PropertyType;
+                            memberType = (MemInfo as PropertyInfo).PropertyType;
                             break;
                     }
 
@@ -201,17 +201,47 @@ namespace Explorer
             while (enumerator.MoveNext())
             {
                 var obj = enumerator.Current;
-                var type = ReflectionHelpers.GetActualType(obj);
 
-                if (obj is Il2CppSystem.Object iObj)
+                if (obj != null && ReflectionHelpers.GetActualType(obj) is Type t)
                 {
-                    obj = iObj.Il2CppCast(type);
+                    if (obj is Il2CppSystem.Object iObj)
+                    {
+                        try
+                        {
+                            var cast = iObj.Il2CppCast(t);
+                            if (cast != null)
+                            {
+                                obj = cast;
+                            }
+                        }
+                        catch { }
+                    }
+
+                    if (GetCacheObject(obj, t) is CacheObjectBase cached)
+                    {
+                        list.Add(cached);
+                    }
+                    else
+                    {
+                        list.Add(null);
+                    }
+                }
+                else
+                {
+                    list.Add(null);
                 }
 
-                var cached = GetCacheObject(obj, null, null, type);
-                cached.UpdateValue();
+                //var type = ReflectionHelpers.GetActualType(obj);
 
-                list.Add(cached);
+                //if (obj is Il2CppSystem.Object iObj)
+                //{
+                //    obj = iObj.Il2CppCast(type);
+                //}
+
+                //var cached = GetCacheObject(obj, null, null, type);
+                //cached.UpdateValue();
+
+                //list.Add(cached);
             }
 
             m_cachedEntries = list.ToArray();
@@ -310,16 +340,18 @@ namespace Explorer
 
                     GUILayout.Space(whitespace);
 
-                    if (entry.Value == null)
+                    if (entry == null || entry.Value == null)
                     {
-                        GUILayout.Label(i + "<i><color=grey> (null)</color></i>", null);
+                        GUILayout.Label($"[{i}] <i><color=grey>(null)</color></i>", null);
                     }
                     else
                     {
                         GUI.skin.label.alignment = TextAnchor.MiddleCenter;
                         GUILayout.Label($"[{i}]", new GUILayoutOption[] { GUILayout.Width(30) });
-                        entry.DrawValue(window, window.width - (whitespace + 85));
+
+                        entry.DrawValue(window, window.width - (whitespace + 85));                        
                     }
+                    
                 }
 
                 GUI.skin.label.alignment = TextAnchor.UpperLeft;

@@ -86,61 +86,6 @@ namespace Explorer
 
         // ========= Public Helpers =========
 
-        public static bool IsMouseInWindow
-        {
-            get
-            {
-                if (!CppExplorer.ShowMenu)
-                {
-                    return false;
-                }
-
-                foreach (var window in Windows)
-                {
-                    if (RectContainsMouse(window.m_rect))
-                    {
-                        return true;
-                    }
-                }
-                return RectContainsMouse(MainMenu.MainRect);
-            }
-        }
-
-        private static bool RectContainsMouse(Rect rect)
-        {
-            return rect.Contains(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y));
-        }
-
-        public static int NextWindowID()
-        {
-            return CurrentWindowID++;
-        }
-
-        public static Rect GetNewWindowRect()
-        {
-            return GetNewWindowRect(ref m_lastWindowRect);
-        }
-
-        public static Rect GetNewWindowRect(ref Rect lastRect)
-        {
-            Rect rect = new Rect(0, 0, 550, 700);
-
-            var mainrect = MainMenu.MainRect;
-            if (mainrect.x <= (Screen.width - mainrect.width - 100))
-            {
-                rect = new Rect(mainrect.x + mainrect.width + 20, mainrect.y, rect.width, rect.height);
-            }
-
-            if (lastRect.x == rect.x)
-            {
-                rect = new Rect(rect.x + 25, rect.y + 25, rect.width, rect.height);
-            }
-
-            lastRect = rect;
-
-            return rect;
-        }
-
         public static UIWindow InspectObject(object obj, out bool createdNew)
         {
             createdNew = false;
@@ -205,6 +150,63 @@ namespace Explorer
             FocusWindow(new_window);
 
             return new_window;
+        }
+
+        // === Misc Helpers ===
+
+        public static bool IsMouseInWindow
+        {
+            get
+            {
+                if (!CppExplorer.ShowMenu)
+                {
+                    return false;
+                }
+
+                foreach (var window in Windows)
+                {
+                    if (RectContainsMouse(window.m_rect))
+                    {
+                        return true;
+                    }
+                }
+                return RectContainsMouse(MainMenu.MainRect);
+            }
+        }
+
+        private static bool RectContainsMouse(Rect rect)
+        {
+            return rect.Contains(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y));
+        }
+
+        public static int NextWindowID()
+        {
+            return CurrentWindowID++;
+        }
+
+        public static Rect GetNewWindowRect()
+        {
+            return GetNewWindowRect(ref m_lastWindowRect);
+        }
+
+        public static Rect GetNewWindowRect(ref Rect lastRect)
+        {
+            Rect rect = new Rect(0, 0, 550, 700);
+
+            var mainrect = MainMenu.MainRect;
+            if (mainrect.x <= (Screen.width - mainrect.width - 100))
+            {
+                rect = new Rect(mainrect.x + mainrect.width + 20, mainrect.y, rect.width, rect.height);
+            }
+
+            if (lastRect.x == rect.x)
+            {
+                rect = new Rect(rect.x + 25, rect.y + 25, rect.width, rect.height);
+            }
+
+            lastRect = rect;
+
+            return rect;
         }
     }
 }

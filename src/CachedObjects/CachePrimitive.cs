@@ -152,7 +152,7 @@ namespace Explorer
 
         public void SetValueFromInput(string value)
         {
-            if (MemberInfo == null)
+            if (MemInfo == null)
             {
                 MelonLogger.Log("Trying to SetValue but the MemberInfo is null!");
                 return;

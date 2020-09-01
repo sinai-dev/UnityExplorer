@@ -8,6 +8,7 @@ using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using BF = System.Reflection.BindingFlags;
+using MelonLoader;
 
 namespace Explorer
 {
@@ -27,8 +28,9 @@ namespace Explorer
         {
             if (!typeof(Il2CppSystem.Object).IsAssignableFrom(castTo)) return obj;
 
-            var generic = m_tryCastMethodInfo.MakeGenericMethod(castTo);
-            return generic.Invoke(obj, null);
+            return m_tryCastMethodInfo
+                    .MakeGenericMethod(castTo)
+                    .Invoke(obj, null);
         }
 
         public static string ExceptionToString(Exception e)
@@ -81,9 +83,10 @@ namespace Explorer
         {
             if (t.IsGenericType)
             {
-                return t.GetGenericTypeDefinition() is Type typeDef
-                    && (typeDef.IsAssignableFrom(typeof(Il2CppSystem.Collections.Generic.List<>))
-                        || typeDef.IsAssignableFrom(typeof(Il2CppSystem.Collections.Generic.IList<>)));
+                var generic = t.GetGenericTypeDefinition();
+
+                return generic.IsAssignableFrom(typeof(Il2CppSystem.Collections.Generic.List<>))
+                    || generic.IsAssignableFrom(typeof(Il2CppSystem.Collections.Generic.IList<>));
             }
             else
             {
@@ -115,58 +118,36 @@ namespace Explorer
             return null;
         }
 
-        public static Type GetActualType(object m_object)
+        public static Type GetActualType(object obj)
         {
-            if (m_object == null) return null;
+            if (obj == null) return null;
 
-            if (m_object is Il2CppSystem.Object ilObject)
+            if (obj is Il2CppSystem.Object ilObject)
             {
-                var iltype = ilObject.GetIl2CppType();
-                if (Type.GetType(iltype.AssemblyQualifiedName) is Type type)
+                var ilTypeName = ilObject.GetIl2CppType().AssemblyQualifiedName;
+
+                if (Type.GetType(ilTypeName) is Type t && !t.FullName.Contains("System.RuntimeType"))
                 {
-                    return type;
+                    return t;
                 }
-                else
-                {
-                    return ilObject.GetType();
-                }
+
+                return ilObject.GetType();
             }
-            else
-            {
-                return m_object.GetType();
-            }
+
+            return obj.GetType();
         }
 
-        public static Type[] GetAllBaseTypes(object m_object)
+        public static Type[] GetAllBaseTypes(object obj)
         {
             var list = new List<Type>();
 
-            if (m_object is Il2CppSystem.Object ilObject)
-            {
-                var ilType = ilObject.GetIl2CppType();
-                if (Type.GetType(ilType.AssemblyQualifiedName) is Type ilTypeToManaged)
-                {
-                    list.Add(ilTypeToManaged);
+            var type = GetActualType(obj);
+            list.Add(type);
 
-                    while (ilType.BaseType != null)
-                    {
-                        ilType = ilType.BaseType;
-                        if (Type.GetType(ilType.AssemblyQualifiedName) is Type ilBaseTypeToManaged)
-                        {
-                            list.Add(ilBaseTypeToManaged);
-                        }
-                    }
-                }
-            }
-            else
+            while (type.BaseType != null)
             {
-                var type = m_object.GetType();
+                type = type.BaseType;
                 list.Add(type);
-                while (type.BaseType != null)
-                {
-                    type = type.BaseType;
-                    list.Add(type);
-                }
             }
 
             return list.ToArray();

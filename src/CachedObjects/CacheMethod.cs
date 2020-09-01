@@ -24,7 +24,7 @@ namespace Explorer
             {
                 if (m_hasParams == null)
                 {
-                    m_hasParams = (MemberInfo as MethodInfo).GetParameters().Length > 0;
+                    m_hasParams = (MemInfo as MethodInfo).GetParameters().Length > 0;
                 }
                 return (bool)m_hasParams;
             }
@@ -55,7 +55,7 @@ namespace Explorer
         {
             base.Init();
 
-            var mi = MemberInfo as MethodInfo;
+            var mi = MemInfo as MethodInfo;
 
             m_arguments = mi.GetParameters();
             m_argumentInput = new string[m_arguments.Length];
@@ -136,12 +136,12 @@ namespace Explorer
                 }
                 else
                 {
-                    GUILayout.Label($"null (<color=yellow>{ValueType}</color>)", null);
+                    GUILayout.Label($"null (<color=yellow>{ValueTypeName}</color>)", null);
                 }
             }
             else
             {
-                GUILayout.Label($"<color=grey><i>Not yet evaluated</i></color> (<color=yellow>{ValueType}</color>)", null);
+                GUILayout.Label($"<color=grey><i>Not yet evaluated</i></color> (<color=yellow>{ValueTypeName}</color>)", null);
             }
             GUILayout.EndHorizontal();
 
@@ -150,7 +150,7 @@ namespace Explorer
 
         private void Evaluate()
         {
-            var mi = MemberInfo as MethodInfo;
+            var mi = MemInfo as MethodInfo;
 
             object ret = null;
 

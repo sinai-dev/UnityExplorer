@@ -133,7 +133,7 @@ namespace Explorer
         // value that we set back to when we close the menu or disable force-unlock.
 
         [HarmonyPatch(typeof(Cursor), nameof(Cursor.lockState), MethodType.Setter)]
-        public class Cursor_lockState
+        public class Cursor_set_lockState
         {
             [HarmonyPrefix]
             public static void Prefix(ref CursorLockMode value)
@@ -170,19 +170,6 @@ namespace Explorer
 
         // Make it appear as though UnlockMouse is disabled to the rest of the application.
 
-        [HarmonyPatch(typeof(Cursor), nameof(Cursor.visible), MethodType.Getter)]
-        public class Cursor_get_visible
-        {
-            [HarmonyPostfix]
-            public static void Postfix(ref bool __result)
-            {
-                if (ShouldForceMouse)
-                {
-                    __result = m_lastVisibleState;
-                }
-            }
-        }
-
         [HarmonyPatch(typeof(Cursor), nameof(Cursor.lockState), MethodType.Getter)]
         public class Cursor_get_lockState
         {
@@ -192,6 +179,19 @@ namespace Explorer
                 if (ShouldForceMouse)
                 {
                     __result = m_lastLockMode;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(Cursor), nameof(Cursor.visible), MethodType.Getter)]
+        public class Cursor_get_visible
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref bool __result)
+            {
+                if (ShouldForceMouse)
+                {
+                    __result = m_lastVisibleState;
                 }
             }
         }

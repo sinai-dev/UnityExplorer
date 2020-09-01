@@ -33,20 +33,20 @@ namespace Explorer
             }
         }
 
-        public static void HorizontalLine(Color color)
+        public static void HorizontalLine(Color _color, bool small = false)
         {
-            var c = GUI.color;
-            GUI.color = color;
-            GUILayout.Box(GUIContent.none, HorizontalBar, null);
-            GUI.color = c;
+            var orig = GUI.color;
+
+            GUI.color = _color;
+            GUILayout.Box(GUIContent.none, !small ? HorizontalBar : HorizontalBarSmall, null);
+
+            GUI.color = orig;
         }
 
         private static GUISkin _customSkin;
 
         public static Texture2D m_nofocusTex;
         public static Texture2D m_focusTex;
-
-        private static GUIStyle _horizBarStyle;
 
         private static GUIStyle HorizontalBar
         {
@@ -63,6 +63,24 @@ namespace Explorer
                 return _horizBarStyle;
             }
         }
+        private static GUIStyle _horizBarStyle;
+
+        private static GUIStyle HorizontalBarSmall
+        {
+            get
+            {
+                if (_horizBarSmallStyle == null)
+                {
+                    _horizBarSmallStyle = new GUIStyle();
+                    _horizBarSmallStyle.normal.background = Texture2D.whiteTexture;
+                    _horizBarSmallStyle.margin = new RectOffset(0, 0, 2, 2);
+                    _horizBarSmallStyle.fixedHeight = 1;
+                }
+
+                return _horizBarSmallStyle;
+            }
+        }
+        private static GUIStyle _horizBarSmallStyle;
 
         private static GUISkin CreateWindowSkin()
         {

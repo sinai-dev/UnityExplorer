@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
 using MelonLoader;
 using UnityEngine;
 
@@ -15,8 +16,23 @@ namespace Explorer
 
         public override void Init()
         {
-            EnumType = Value.GetType();
-            EnumNames = Enum.GetNames(EnumType);
+            try
+            {
+                EnumType = Value.GetType();
+            }
+            catch
+            {
+                EnumType = (MemInfo as FieldInfo)?.FieldType ?? (MemInfo as PropertyInfo).PropertyType;
+            }
+
+            if (EnumType != null)
+            {
+                EnumNames = Enum.GetNames(EnumType);
+            }
+            else
+            {
+                ReflectionException = "Unknown, could not get Enum names.";
+            }
         }
 
         public override void DrawValue(Rect window, float width)
