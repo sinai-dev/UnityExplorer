@@ -51,7 +51,9 @@ Requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be ins
 
 CppExplorer has two main inspector modes: <b>GameObject Inspector</b>, and <b>Reflection Inspector</b>.
 
-<b>Tip:</b> when in Tab View, GameObjects are denoted by a [G] prefix, and Reflection objects are denoted by a [R] prefix.
+<b>Tips:</b> 
+* When in Tab View, GameObjects are denoted by a [G] prefix, and Reflection objects are denoted by a [R] prefix.
+* Hold <b>Left Shift</b> when you click the Inspect button to force Reflection mode for GameObjects and Transforms.
 
 ### GameObject Inspector
 
