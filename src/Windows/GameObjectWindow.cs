@@ -21,11 +21,13 @@ namespace Explorer
         private string m_name;
         private string m_scene;
 
-        private Vector2 m_transformScroll = Vector2.zero;
         private Transform[] m_children;
-        private Component[] m_components;
+        private Vector2 m_transformScroll = Vector2.zero;
+        private PageHelper ChildPages = new PageHelper();
 
+        private Component[] m_components;
         private Vector2 m_compScroll = Vector2.zero;
+        private PageHelper CompPages = new PageHelper();
 
         private float m_translateAmount = 0.3f;
         private float m_rotateAmount = 50f;
@@ -74,12 +76,7 @@ namespace Explorer
                 ? "None" 
                 : m_object.scene.name;
 
-            var list = new List<Transform>();
-            for (int i = 0; i < m_object.transform.childCount; i++)
-            {
-                list.Add(m_object.transform.GetChild(i));
-            }
-            m_children = list.ToArray();
+            Update();
         }
 
         public override void Update()
@@ -91,12 +88,30 @@ namespace Explorer
                     throw new Exception("Object is null!");
                 }
 
-                var list = new List<Component>();
+                var list = new List<Transform>();
+                for (int i = 0; i < m_object.transform.childCount; i++)
+                {
+                    list.Add(m_object.transform.GetChild(i));
+                }
+                list.Sort((a, b) => b.childCount.CompareTo(a.childCount));
+                m_children = list.ToArray();
+
+                ChildPages.Count = m_children.Length;
+
+                var list2 = new List<Component>();
                 foreach (var comp in m_object.GetComponents(ReflectionHelpers.ComponentType))
                 {
-                    list.Add(comp);
+                    var ilType = comp.GetIl2CppType();
+                    if (ilType == ReflectionHelpers.TransformType)
+                    {
+                        continue;
+                    }
+
+                    list2.Add(comp);
                 }
-                m_components = list.ToArray();
+                m_components = list2.ToArray();
+
+                CompPages.Count = m_components.Length;
             }
             catch (Exception e)
             {
@@ -221,26 +236,46 @@ namespace Explorer
             GUILayout.BeginVertical(GUI.skin.box, null); // new GUILayoutOption[] { GUILayout.Height(250) });
             m_transformScroll = GUILayout.BeginScrollView(m_transformScroll, GUI.skin.scrollView);
 
-            GUILayout.Label("<b>Children:</b>", null);
+            GUILayout.Label("<b><size=15>Children</size></b>", null);
+
+            GUILayout.BeginHorizontal(null);
+            ChildPages.DrawLimitInputArea();
+
+            if (ChildPages.Count > ChildPages.PageLimit)
+            {
+                ChildPages.CalculateMaxOffset();
+
+                ChildPages.CurrentPageLabel();
+
+                GUILayout.EndHorizontal();
+                GUILayout.BeginHorizontal(null);
+
+                if (GUILayout.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(80) }))
+                {
+                    ChildPages.TurnPage(Turn.Left, ref this.m_transformScroll);
+                }
+                if (GUILayout.Button("Next >", new GUILayoutOption[] { GUILayout.Width(80) }))
+                {
+                    ChildPages.TurnPage(Turn.Right, ref this.m_transformScroll);
+                }
+            }
+            GUILayout.EndHorizontal();
+
             if (m_children != null && m_children.Length > 0)
             {
-                foreach (var obj in m_children.Where(x => x.childCount > 0))
+                int start = ChildPages.CalculateOffsetIndex();
+
+                for (int j = start; (j < start + ChildPages.PageLimit && j < ChildPages.Count); j++)
                 {
+                    var obj = m_children[j];
+
                     if (!obj)
                     {
                         GUILayout.Label("null", null);
                         continue;
                     }
-                    UIHelpers.GameobjButton(obj.gameObject, InspectGameObject, false, m_rect.width / 2 - 60);
-                }
-                foreach (var obj in m_children.Where(x => x.childCount == 0))
-                {
-                    if (!obj)
-                    {
-                        GUILayout.Label("null", null);
-                        continue;
-                    }
-                    UIHelpers.GameobjButton(obj.gameObject, InspectGameObject, false, m_rect.width / 2 - 60);
+
+                    UIHelpers.GameobjButton(obj.gameObject, InspectGameObject, false, m_rect.width / 2 - 80);
                 }
             }
             else
@@ -252,12 +287,34 @@ namespace Explorer
             GUILayout.EndVertical();
         }
 
-
         private void ComponentList(Rect m_rect)
         {
             GUILayout.BeginVertical(GUI.skin.box, null); // new GUILayoutOption[] { GUILayout.Height(250) });
             m_compScroll = GUILayout.BeginScrollView(m_compScroll, GUI.skin.scrollView);
             GUILayout.Label("<b><size=15>Components</size></b>", null);
+
+            GUILayout.BeginHorizontal(null);
+            CompPages.DrawLimitInputArea();
+
+            if (CompPages.Count > CompPages.PageLimit)
+            {
+                CompPages.CalculateMaxOffset();
+
+                CompPages.CurrentPageLabel();
+
+                GUILayout.EndHorizontal();
+                GUILayout.BeginHorizontal(null);
+
+                if (GUILayout.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(80) }))
+                {
+                    CompPages.TurnPage(Turn.Left, ref this.m_compScroll);
+                }
+                if (GUILayout.Button("Next >", new GUILayoutOption[] { GUILayout.Width(80) }))
+                {
+                    CompPages.TurnPage(Turn.Right, ref this.m_compScroll);
+                }
+            }
+            GUILayout.EndHorizontal();
 
             GUI.skin.button.alignment = TextAnchor.MiddleLeft;
             if (m_cachedDestroyList.Count > 0)
@@ -267,15 +324,15 @@ namespace Explorer
 
             if (m_components != null)
             {
-                foreach (var component in m_components)
+                int start = CompPages.CalculateOffsetIndex();
+
+                for (int j = start; (j < start + CompPages.PageLimit && j < CompPages.Count); j++)
                 {
+                    var component = m_components[j];
+
                     if (!component) continue;
 
                     var ilType = component.GetIl2CppType();
-                    if (ilType == ReflectionHelpers.TransformType)
-                    {
-                        continue;
-                    }
 
                     GUILayout.BeginHorizontal(null);
                     if (ReflectionHelpers.BehaviourType.IsAssignableFrom(ilType))
@@ -286,7 +343,7 @@ namespace Explorer
                     {
                         GUILayout.Space(26);
                     }
-                    if (GUILayout.Button("<color=cyan>" + ilType.Name + "</color>", new GUILayoutOption[] { GUILayout.Width(m_rect.width / 2 - 90) }))
+                    if (GUILayout.Button("<color=cyan>" + ilType.Name + "</color>", new GUILayoutOption[] { GUILayout.Width(m_rect.width / 2 - 100) }))
                     {
                         ReflectObject(component);
                     }

@@ -20,8 +20,10 @@ namespace Explorer
 
         private CacheObjectBase[] m_allCachedMembers;
         private CacheObjectBase[] m_cachedMembersFiltered;
-        private int m_pageOffset;
-        private int m_limitPerPage = 20;
+
+        public PageHelper Pages = new PageHelper();
+        //private int m_pageOffset;
+        //private int m_limitPerPage = 20;
 
         private bool m_autoUpdate = false;
         private string m_search = "";
@@ -138,7 +140,7 @@ namespace Explorer
                         var name = $"{member.DeclaringType.Name}.{member.Name}";
 
                         // blacklist (should probably make a proper implementation)
-                        if (name == "Type.DeclaringMethod" || member.Name.Contains("Il2CppType") || member.Name.StartsWith("get_") || member.Name.StartsWith("set_"))
+                        if (name == "Type.DeclaringMethod" || member.Name.StartsWith("get_") || member.Name.StartsWith("set_")) //|| member.Name.Contains("Il2CppType")
                         {
                             continue;
                         }
@@ -254,34 +256,27 @@ namespace Explorer
 
                 GUILayout.Space(10);
 
+                Pages.Count = m_cachedMembersFiltered.Length;
+
                 // prev/next page buttons
                 GUILayout.BeginHorizontal(null);
-                GUILayout.Label("<b>Limit per page:</b>", new GUILayoutOption[] { GUILayout.Width(125) });
-                var limitString = m_limitPerPage.ToString();
-                limitString = GUILayout.TextField(limitString, new GUILayoutOption[] { GUILayout.Width(60) });
-                if (int.TryParse(limitString, out int lim))
-                {
-                    m_limitPerPage = lim;
-                }
 
-                int count = m_cachedMembersFiltered.Length;
-                if (count > m_limitPerPage)
+                Pages.DrawLimitInputArea();
+
+                if (Pages.Count > Pages.PageLimit)
                 {
-                    int maxOffset = (int)Mathf.Ceil((float)(count / (decimal)m_limitPerPage)) - 1;
+                    Pages.CalculateMaxOffset();
+
                     if (GUILayout.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(80) }))
                     {
-                        if (m_pageOffset > 0) m_pageOffset--;
-                        scroll = Vector2.zero;
+                        Pages.TurnPage(Turn.Left, ref this.scroll);
                     }
 
-                    GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-                    GUILayout.Label($"Page {m_pageOffset + 1}/{maxOffset + 1}", new GUILayoutOption[] { GUILayout.Width(80) });
-                    GUI.skin.label.alignment = TextAnchor.UpperLeft;
+                    Pages.CurrentPageLabel();
 
                     if (GUILayout.Button("Next >", new GUILayoutOption[] { GUILayout.Width(80) }))
                     {
-                        if (m_pageOffset < maxOffset) m_pageOffset++;
-                        scroll = Vector2.zero;
+                        Pages.TurnPage(Turn.Right, ref this.scroll);
                     }
                 }
                 GUILayout.EndHorizontal();
@@ -297,18 +292,9 @@ namespace Explorer
                 GUILayout.BeginVertical(GUI.skin.box, null);
 
                 var members = this.m_cachedMembersFiltered;
-                int start = m_pageOffset * m_limitPerPage;
+                int start = Pages.CalculateOffsetIndex();
 
-                if (start >= count)
-                {
-                    int maxOffset = (int)Mathf.Ceil((float)(m_cachedMembersFiltered.Length / (decimal)m_limitPerPage)) - 1;
-                    if (m_pageOffset > maxOffset)
-                    {
-                        m_pageOffset = 0;
-                    }
-                }
-
-                for (int j = start; (j < start + m_limitPerPage && j < members.Length); j++)
+                for (int j = start; (j < start + Pages.PageLimit && j < members.Length); j++)
                 {
                     var holder = members[j];
 
@@ -325,7 +311,7 @@ namespace Explorer
                     GUILayout.EndHorizontal();
 
                     // if not last element
-                    if (!(j == (start + m_limitPerPage - 1) || j == (members.Length - 1)))
+                    if (!(j == (start + Pages.PageLimit - 1) || j == (members.Length - 1)))
                         UIStyles.HorizontalLine(new Color(0.07f, 0.07f, 0.07f), true);
                 }
 
@@ -367,7 +353,8 @@ namespace Explorer
             if (GUILayout.Button(label, new GUILayoutOption[] { GUILayout.Width(100) }))
             {
                 m_filter = mode;
-                m_pageOffset = 0;
+                Pages.PageOffset = 0;
+                scroll = Vector2.zero;
             }
             GUI.color = Color.white;
         }

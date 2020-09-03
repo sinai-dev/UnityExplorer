@@ -11,8 +11,7 @@ namespace Explorer
     public class CacheList : CacheObjectBase
     {
         public bool IsExpanded { get; set; }
-        public int ArrayOffset { get; set; }
-        public int ArrayLimit { get; set; } = 20;
+        public PageHelper Pages = new PageHelper();
 
         public float WhiteSpace = 215f;
         public float ButtonWidthOffset = 290f;
@@ -230,18 +229,6 @@ namespace Explorer
                 {
                     list.Add(null);
                 }
-
-                //var type = ReflectionHelpers.GetActualType(obj);
-
-                //if (obj is Il2CppSystem.Object iObj)
-                //{
-                //    obj = iObj.Il2CppCast(type);
-                //}
-
-                //var cached = GetCacheObject(obj, null, null, type);
-                //cached.UpdateValue();
-
-                //list.Add(cached);
             }
 
             m_cachedEntries = list.ToArray();
@@ -286,51 +273,51 @@ namespace Explorer
 
             if (IsExpanded)
             {
-                float whitespace = WhiteSpace;
-                
+                float whitespace = WhiteSpace;                
                 if (whitespace > 0)
                 {
                     ClampLabelWidth(window, ref whitespace);
                 }
 
-                if (count > ArrayLimit)
+                Pages.Count = count;
+
+                if (count > Pages.PageLimit)
                 {
                     GUILayout.EndHorizontal();
                     GUILayout.BeginHorizontal(null);
 
                     GUILayout.Space(whitespace);
 
-                    int maxOffset = (int)Mathf.Ceil((float)(count / (decimal)ArrayLimit)) - 1;
-                    GUILayout.Label($"Page {ArrayOffset + 1}/{maxOffset + 1}", new GUILayoutOption[] { GUILayout.Width(80) });
+                    //int maxOffset = (int)Mathf.Ceil((float)(count / (decimal)ArrayLimit)) - 1;
+                    Pages.CalculateMaxOffset();
+
+                    //GUILayout.Label($"Page {PH.ArrayOffset + 1}/{maxOffset + 1}", new GUILayoutOption[] { GUILayout.Width(80) });                    
+                    Pages.CurrentPageLabel();
+
                     // prev/next page buttons
                     if (GUILayout.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(60) }))
                     {
-                        if (ArrayOffset > 0) ArrayOffset--;
+                        Pages.TurnPage(Turn.Left);
                     }
                     if (GUILayout.Button("Next >", new GUILayoutOption[] { GUILayout.Width(60) }))
                     {
-                        if (ArrayOffset < maxOffset) ArrayOffset++;
+                        Pages.TurnPage(Turn.Right);
                     }
-                    GUILayout.Label("Limit: ", new GUILayoutOption[] { GUILayout.Width(50) });
-                    var limit = this.ArrayLimit.ToString();
-                    limit = GUILayout.TextField(limit, new GUILayoutOption[] { GUILayout.Width(50) });
-                    if (limit != ArrayLimit.ToString() && int.TryParse(limit, out int i))
-                    {
-                        ArrayLimit = i;
-                    }
+
+                    Pages.DrawLimitInputArea();
 
                     GUILayout.Space(5);
                 }
 
-                int offset = ArrayOffset * ArrayLimit;
+                //int offset = ArrayOffset * ArrayLimit;
+                //if (offset >= count)
+                //{
+                //    offset = 0;
+                //    ArrayOffset = 0;
+                //}
+                int offset = Pages.CalculateOffsetIndex();
 
-                if (offset >= count)
-                {
-                    offset = 0;
-                    ArrayOffset = 0;
-                }
-
-                for (int i = offset; i < offset + ArrayLimit && i < count; i++)
+                for (int i = offset; i < offset + Pages.PageLimit && i < count; i++)
                 {
                     var entry = m_cachedEntries[i];
 

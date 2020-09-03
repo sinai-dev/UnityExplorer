@@ -5,11 +5,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using System.Reflection;
-using UnityEngine.SceneManagement;
-using Object = UnityEngine.Object;
-using UnhollowerRuntimeLib;
 using MelonLoader;
-using UnhollowerBaseLib;
 
 namespace Explorer
 {
@@ -21,10 +17,10 @@ namespace Explorer
 
         private string m_searchInput = "";
         private string m_typeInput = "";
-        private int m_limit = 20;
-        private int m_pageOffset = 0;
-        //private List<object> m_searchResults = new List<object>();
+
         private Vector2 resultsScroll = Vector2.zero;
+
+        public PageHelper Pages = new PageHelper();
 
         private List<CacheObjectBase> m_searchResults = new List<CacheObjectBase>();
 
@@ -55,7 +51,7 @@ namespace Explorer
         public void OnSceneChange()
         {
             m_searchResults.Clear();
-            m_pageOffset = 0;
+            Pages.PageOffset = 0;
         }
 
         public override void Update() 
@@ -78,6 +74,9 @@ namespace Explorer
                 var cache = CacheObjectBase.GetCacheObject(toCache);
                 m_searchResults.Add(cache);
             }
+
+            Pages.Count = m_searchResults.Count; 
+            Pages.PageOffset = 0;
         }
 
         public override void DrawWindow()
@@ -90,8 +89,7 @@ namespace Explorer
                 if (GUILayout.Button("Find Static Instances", new GUILayoutOption[] { GUILayout.Width(180) }))
                 {
                     //m_searchResults = GetInstanceClassScanner().ToList();
-                    CacheResults(GetInstanceClassScanner());
-                    m_pageOffset = 0;
+                    CacheResults(GetInstanceClassScanner());                    
                 }
                 GUILayout.EndHorizontal();
 
@@ -106,25 +104,33 @@ namespace Explorer
                 GUI.skin.label.alignment = TextAnchor.UpperLeft;
 
                 int count = m_searchResults.Count;
+                Pages.CalculateMaxOffset();
 
-                if (count > this.m_limit)
+                GUILayout.BeginHorizontal(null);
+
+                Pages.DrawLimitInputArea();
+
+                if (count > Pages.PageLimit)
                 {
                     // prev/next page buttons
-                    GUILayout.BeginHorizontal(null);
-                    int maxOffset = (int)Mathf.Ceil((float)(count / (decimal)m_limit)) - 1;
-                    if (GUILayout.Button("< Prev", null))
-                    {
-                        if (m_pageOffset > 0) m_pageOffset--;
-                    }
 
-                    GUILayout.Label($"Page {m_pageOffset + 1}/{maxOffset + 1}", new GUILayoutOption[] { GUILayout.Width(80) });
-
-                    if (GUILayout.Button("Next >", null))
+                    if (Pages.Count > Pages.PageLimit)
                     {
-                        if (m_pageOffset < maxOffset) m_pageOffset++;
+                        if (GUILayout.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(80) }))
+                        {
+                            Pages.TurnPage(Turn.Left, ref this.resultsScroll);
+                        }
+
+                        Pages.CurrentPageLabel();
+
+                        if (GUILayout.Button("Next >", new GUILayoutOption[] { GUILayout.Width(80) }))
+                        {
+                            Pages.TurnPage(Turn.Right, ref this.resultsScroll);
+                        }
                     }
-                    GUILayout.EndHorizontal();
                 }
+
+                GUILayout.EndHorizontal();
 
                 resultsScroll = GUILayout.BeginScrollView(resultsScroll, GUI.skin.scrollView);
 
@@ -132,10 +138,11 @@ namespace Explorer
 
                 if (m_searchResults.Count > 0)
                 {
-                    int offset = m_pageOffset * this.m_limit;
-                    if (offset >= count) m_pageOffset = 0;
+                    //int offset = m_pageOffset * this.m_limit;
+                    //if (offset >= count) m_pageOffset = 0;
+                    int offset = Pages.CalculateOffsetIndex();
 
-                    for (int i = offset; i < offset + m_limit && i < count; i++)
+                    for (int i = offset; i < offset + Pages.PageLimit && i < count; i++)
                     {
                         m_searchResults[i].Draw(MainMenu.MainRect, 0f);
                         //m_searchResults[i].DrawValue(MainMenu.MainRect);
@@ -169,15 +176,15 @@ namespace Explorer
             GUILayout.Label("Name Contains:", new GUILayoutOption[] { GUILayout.Width(100) });
             m_searchInput = GUILayout.TextField(m_searchInput, new GUILayoutOption[] { GUILayout.Width(200) });
 
-            GUI.skin.label.alignment = TextAnchor.MiddleRight;
-            GUILayout.Label("Results per page:", new GUILayoutOption[] { GUILayout.Width(120) });
-            var resultinput = m_limit.ToString();
-            resultinput = GUILayout.TextField(resultinput, new GUILayoutOption[] { GUILayout.Width(55) });
-            if (int.TryParse(resultinput, out int _i) && _i > 0)
-            {
-                m_limit = _i;
-            }
-            GUI.skin.label.alignment = TextAnchor.UpperLeft;
+            //GUI.skin.label.alignment = TextAnchor.MiddleRight;
+            //GUILayout.Label("Results per page:", new GUILayoutOption[] { GUILayout.Width(120) });
+            //var resultinput = m_limit.ToString();
+            //resultinput = GUILayout.TextField(resultinput, new GUILayoutOption[] { GUILayout.Width(55) });
+            //if (int.TryParse(resultinput, out int _i) && _i > 0)
+            //{
+            //    m_limit = _i;
+            //}
+            //GUI.skin.label.alignment = TextAnchor.UpperLeft;
 
             GUILayout.EndHorizontal();
 
@@ -256,7 +263,7 @@ namespace Explorer
 
         private void Search()
         {
-            m_pageOffset = 0;
+            Pages.PageOffset = 0;
             CacheResults(FindAllObjectsOfType(m_searchInput, m_typeInput));
         }
 

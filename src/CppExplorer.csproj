@@ -60,9 +60,7 @@
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnhollowerBaseLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
-
     <!-- Unity 2019 build (InputLegacyModule.dll) -->
-
     <Reference Include="UnityEngine" Condition="'$(Configuration)'=='Debug'">
       <HintPath>..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
@@ -91,9 +89,7 @@
       <HintPath>..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
-
     <!-- Unity 2018 build (InputModule.dll) -->
-
     <Reference Include="UnityEngine" Condition="'$(Configuration)'=='Release_Unity2018'">
       <HintPath>..\..\..\Steam\steamapps\common\VRChat\MelonLoader\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
@@ -122,7 +118,6 @@
       <HintPath>..\..\..\Steam\steamapps\common\VRChat\MelonLoader\Managed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
-
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CachedObjects\CacheDictionary.cs" />
@@ -135,6 +130,7 @@
     <Compile Include="CppExplorer.cs" />
     <Compile Include="Extensions\ReflectionExtensions.cs" />
     <Compile Include="Extensions\UnityExtensions.cs" />
+    <Compile Include="Helpers\PageHelper.cs" />
     <Compile Include="Helpers\ReflectionHelpers.cs" />
     <Compile Include="Helpers\UIHelpers.cs" />
     <Compile Include="Helpers\UnityHelpers.cs" />

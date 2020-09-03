@@ -14,9 +14,7 @@ namespace Explorer
 
         public override string Name { get => "Scene Explorer"; set => base.Name = value; }
 
-        private int m_pageOffset = 0;
-        private int m_limit = 20;
-        private int m_currentTotalCount = 0;
+        public PageHelper Pages = new PageHelper();
 
         private float m_timeOfLastUpdate = -1f;
 
@@ -46,14 +44,14 @@ namespace Explorer
             SetTransformTarget(null);
         }
 
-        public void CheckOffset(ref int offset, int childCount)
-        {
-            if (offset >= childCount)
-            {
-                offset = 0;
-                m_pageOffset = 0;
-            }
-        }
+        //public void CheckOffset(ref int offset, int childCount)
+        //{
+        //    if (offset >= childCount)
+        //    {
+        //        offset = 0;
+        //        m_pageOffset = 0;
+        //    }
+        //}
 
         public override void Update()
         {
@@ -63,7 +61,6 @@ namespace Explorer
             m_timeOfLastUpdate = Time.time;
 
             m_objectList = new List<GameObjectCache>();
-            int offset = m_pageOffset * m_limit;
 
             var allTransforms = new List<Transform>();
 
@@ -86,15 +83,14 @@ namespace Explorer
                 }
             }
 
-            m_currentTotalCount = allTransforms.Count;
+            Pages.Count = allTransforms.Count;
 
-            // make sure offset doesn't exceed count
-            CheckOffset(ref offset, m_currentTotalCount);
+            int offset = Pages.CalculateOffsetIndex();
 
             // sort by childcount
             allTransforms.Sort((a, b) => b.childCount.CompareTo(a.childCount));
 
-            for (int i = offset; i < offset + m_limit && i < m_currentTotalCount; i++)
+            for (int i = offset; i < offset + Pages.PageLimit && i < Pages.Count; i++)
             {
                 var child = allTransforms[i];
                 m_objectList.Add(new GameObjectCache(child.gameObject));
@@ -128,7 +124,7 @@ namespace Explorer
         {
             m_searchResults = SearchSceneObjects(m_searchInput);
             m_searching = true;
-            m_currentTotalCount = m_searchResults.Count;
+            Pages.Count = m_searchResults.Count;
         }
 
         public void CancelSearch()
@@ -242,33 +238,21 @@ namespace Explorer
         {
             GUILayout.BeginHorizontal(null);
 
-            GUILayout.Label("Limit per page: ", new GUILayoutOption[] { GUILayout.Width(100) });
-            var limit = m_limit.ToString();
-            limit = GUILayout.TextField(limit, new GUILayoutOption[] { GUILayout.Width(30) });
-            if (int.TryParse(limit, out int lim))
-            {
-                m_limit = lim;
-            }
+            Pages.DrawLimitInputArea();
 
-            // prev/next page buttons
-            if (m_currentTotalCount > m_limit)
+            if (Pages.Count > Pages.PageLimit)
             {
-                int count = m_currentTotalCount;
-                int maxOffset = (int)Mathf.Ceil((float)(count / (decimal)m_limit)) - 1;
-                if (GUILayout.Button("< Prev", null))
+                if (GUILayout.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(80) }))
                 {
-                    if (m_pageOffset > 0) m_pageOffset--;
-                    m_timeOfLastUpdate = -1f;
+                    Pages.TurnPage(Turn.Left, ref this.scroll);
                     Update();
                 }
 
-                GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-                GUILayout.Label($"Page {m_pageOffset + 1}/{maxOffset + 1}", new GUILayoutOption[] { GUILayout.Width(80) });
+                Pages.CurrentPageLabel();
 
-                if (GUILayout.Button("Next >", null))
+                if (GUILayout.Button("Next >", new GUILayoutOption[] { GUILayout.Width(80) }))
                 {
-                    if (m_pageOffset < maxOffset) m_pageOffset++;
-                    m_timeOfLastUpdate = -1f;
+                    Pages.TurnPage(Turn.Right, ref this.scroll);
                     Update();
                 }
             }
@@ -342,15 +326,9 @@ namespace Explorer
 
             if (m_searchResults.Count > 0)
             {
-                int offset = m_pageOffset * m_limit;
+                int offset = Pages.CalculateOffsetIndex();
 
-                if (offset >= m_searchResults.Count)
-                {
-                    offset = 0;
-                    m_pageOffset = 0;
-                }
-
-                for (int i = offset; i < offset + m_limit && i < m_searchResults.Count; i++)
+                for (int i = offset; i < offset + Pages.PageLimit && i < m_searchResults.Count; i++)
                 {
                     var obj = m_searchResults[i];
 
