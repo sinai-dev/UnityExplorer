@@ -10,6 +10,35 @@ namespace Explorer
 {
     public class UIHelpers
     {
+        private static bool ScrollUnstrippingFailed = false;
+
+        public static Vector2 BeginScrollView(Vector2 scroll) => BeginScrollView(scroll, null);
+
+        public static Vector2 BeginScrollView(Vector2 scroll, GUIStyle style, params GUILayoutOption[] layoutOptions)
+        {
+            if (ScrollUnstrippingFailed) return scroll;
+
+            try
+            {
+                if (style != null)
+                    return GUILayout.BeginScrollView(scroll, style, layoutOptions);
+                else
+                    return GUILayout.BeginScrollView(scroll, layoutOptions);
+            }
+            catch 
+            { 
+                ScrollUnstrippingFailed = true;
+                return scroll;
+            }
+        }
+
+        public static void EndScrollView()
+        {
+            if (ScrollUnstrippingFailed) return;
+
+            GUILayout.EndScrollView();
+        }
+
         // helper for "Instantiate" button on UnityEngine.Objects
         public static void InstantiateButton(Object obj, float width = 100)
         {

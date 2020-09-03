@@ -132,7 +132,7 @@ namespace Explorer
 
                 GUILayout.EndHorizontal();
 
-                resultsScroll = GUILayout.BeginScrollView(resultsScroll, GUI.skin.scrollView);
+                resultsScroll = UIHelpers.BeginScrollView(resultsScroll);
 
                 var _temprect = new Rect(MainMenu.MainRect.x, MainMenu.MainRect.y, MainMenu.MainRect.width + 160, MainMenu.MainRect.height);
 
@@ -153,7 +153,7 @@ namespace Explorer
                     GUILayout.Label("<color=red><i>No results found!</i></color>", null);
                 }
 
-                GUILayout.EndScrollView();
+                UIHelpers.EndScrollView();
                 GUILayout.EndVertical();
             }
             catch

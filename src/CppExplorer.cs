@@ -12,7 +12,7 @@ namespace Explorer
     public class CppExplorer : MelonMod
     {
         public const string GUID = "com.sinai.cppexplorer";
-        public const string VERSION = "1.5.2";
+        public const string VERSION = "1.5.3";
         public const string AUTHOR = "Sinai";
 
         public const string NAME = "CppExplorer"
@@ -99,6 +99,8 @@ namespace Explorer
 
         public override void OnGUI()
         {
+            if (!ShowMenu) return;
+
             MainMenu.Instance.OnGUI();
             WindowManager.Instance.OnGUI();
             InspectUnderMouse.OnGUI();

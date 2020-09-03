@@ -51,15 +51,12 @@ namespace Explorer
 
         public void OnGUI()
         {
-            if (CppExplorer.ShowMenu)
-            {
-                var origSkin = GUI.skin;
-                GUI.skin = UIStyles.WindowSkin;
+            var origSkin = GUI.skin;
+            GUI.skin = UIStyles.WindowSkin;
 
-                MainRect = GUI.Window(MainWindowID, MainRect, (GUI.WindowFunction)MainWindow, CppExplorer.NAME);
+            MainRect = GUI.Window(MainWindowID, MainRect, (GUI.WindowFunction)MainWindow, CppExplorer.NAME);
 
-                GUI.skin = origSkin;
-            }
+            GUI.skin = origSkin;
         }
 
         private void MainWindow(int id)
@@ -77,9 +74,12 @@ namespace Explorer
             MainHeader();
 
             var page = Pages[m_currentPage];
-            page.scroll = GUILayout.BeginScrollView(page.scroll, GUI.skin.scrollView);
+
+            page.scroll = UIHelpers.BeginScrollView(page.scroll);
+
             page.DrawWindow();
-            GUILayout.EndScrollView();
+
+            UIHelpers.EndScrollView();
 
             MainRect = ResizeDrag.ResizeWindow(MainRect, MainWindowID);
 

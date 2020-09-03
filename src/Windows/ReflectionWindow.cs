@@ -283,7 +283,7 @@ namespace Explorer
 
                 // ====== BODY ======
 
-                scroll = GUILayout.BeginScrollView(scroll, GUI.skin.scrollView);
+                scroll = UIHelpers.BeginScrollView(scroll);
 
                 GUILayout.Space(10);
 
@@ -316,7 +316,7 @@ namespace Explorer
                 }
 
                 GUILayout.EndVertical();
-                GUILayout.EndScrollView();
+                UIHelpers.EndScrollView();
 
                 if (!WindowManager.TabView)
                 {

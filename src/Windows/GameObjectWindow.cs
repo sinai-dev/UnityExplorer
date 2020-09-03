@@ -73,8 +73,8 @@ namespace Explorer
 
             m_name = m_object.name;
             m_scene = string.IsNullOrEmpty(m_object.scene.name) 
-                ? "None" 
-                : m_object.scene.name;
+                        ? "None" 
+                        : m_object.scene.name;
 
             Update();
         }
@@ -121,7 +121,7 @@ namespace Explorer
 
         private void DestroyOnException(Exception e)
         {
-            MelonLogger.Log($"{e.GetType()}, {e.Message}");
+            MelonLogger.Log($"Exception drawing GameObject Window: {e.GetType()}, {e.Message}");
             DestroyWindow();
         }
 
@@ -169,7 +169,7 @@ namespace Explorer
                     GUILayout.BeginArea(new Rect(5, 25, rect.width - 10, rect.height - 35), GUI.skin.box);
                 }
 
-                scroll = GUILayout.BeginScrollView(scroll, GUI.skin.scrollView);
+                scroll = UIHelpers.BeginScrollView(scroll);
 
                 GUILayout.BeginHorizontal(null);
                 GUILayout.Label("Scene: <color=cyan>" + (m_scene == "" ? "n/a" : m_scene) + "</color>", null);
@@ -220,7 +220,7 @@ namespace Explorer
 
                 GameObjectControls();
 
-                GUILayout.EndScrollView();
+                UIHelpers.EndScrollView();
 
                 if (!WindowManager.TabView)
                 {
@@ -237,8 +237,8 @@ namespace Explorer
 
         private void TransformList(Rect m_rect)
         {
-            GUILayout.BeginVertical(GUI.skin.box, null); // new GUILayoutOption[] { GUILayout.Height(250) });
-            m_transformScroll = GUILayout.BeginScrollView(m_transformScroll, GUI.skin.scrollView);
+            GUILayout.BeginVertical(GUI.skin.box, null);
+            m_transformScroll = UIHelpers.BeginScrollView(m_transformScroll);
 
             GUILayout.Label("<b><size=15>Children</size></b>", null);
 
@@ -287,14 +287,14 @@ namespace Explorer
                 GUILayout.Label("<i>None</i>", null);
             }
 
-            GUILayout.EndScrollView();
+            UIHelpers.EndScrollView();
             GUILayout.EndVertical();
         }
 
         private void ComponentList(Rect m_rect)
         {
-            GUILayout.BeginVertical(GUI.skin.box, null); // new GUILayoutOption[] { GUILayout.Height(250) });
-            m_compScroll = GUILayout.BeginScrollView(m_compScroll, GUI.skin.scrollView);
+            GUILayout.BeginVertical(GUI.skin.box, null);
+            m_compScroll = UIHelpers.BeginScrollView(m_compScroll);
             GUILayout.Label("<b><size=15>Components</size></b>", null);
 
             GUILayout.BeginHorizontal(null);
@@ -369,7 +369,7 @@ namespace Explorer
                 }
             }
 
-            GUILayout.EndScrollView();
+            UIHelpers.EndScrollView();
 
             GUILayout.EndVertical();
         }
