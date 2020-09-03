@@ -175,11 +175,15 @@ namespace Explorer
                 GUILayout.Label("Scene: <color=cyan>" + (m_scene == "" ? "n/a" : m_scene) + "</color>", null);
                 if (m_scene == UnityHelpers.ActiveSceneName)
                 {
-                    if (GUILayout.Button("<color=#00FF00>< View in Scene Explorer</color>", new GUILayoutOption[] { GUILayout.Width(230) }))
+                    if (GUILayout.Button("<color=#00FF00>Send to Scene View</color>", new GUILayoutOption[] { GUILayout.Width(150) }))
                     {
                         ScenePage.Instance.SetTransformTarget(m_object.transform);
                         MainMenu.SetCurrentPage(0);
                     }
+                }
+                if (GUILayout.Button("Reflection Inspect", new GUILayoutOption[] { GUILayout.Width(150) }))
+                {
+                    WindowManager.InspectObject(Target, out _, true);
                 }
                 GUILayout.EndHorizontal();
 

@@ -22,8 +22,10 @@ namespace Explorer
         }
 
         // helper for drawing a styled button for a GameObject or Transform
-        public static void GameobjButton(GameObject obj, Action<Transform> specialInspectMethod = null, bool showSmallInspectBtn = true, float width = 380)
+        public static void GameobjButton(object _obj, Action<Transform> specialInspectMethod = null, bool showSmallInspectBtn = true, float width = 380)
         {
+            var obj = (_obj as GameObject) ?? (_obj as Transform).gameObject;
+
             bool children = obj.transform.childCount > 0;
 
             string label = children ? "[" + obj.transform.childCount + " children] " : "";
@@ -49,11 +51,13 @@ namespace Explorer
                 color = Color.red;
             }
 
-            FastGameobjButton(obj, color, label, obj.activeSelf, specialInspectMethod, showSmallInspectBtn, width);
+            FastGameobjButton(_obj, color, label, obj.activeSelf, specialInspectMethod, showSmallInspectBtn, width);
         }
 
-        public static void FastGameobjButton(GameObject obj, Color activeColor, string label, bool enabled, Action<Transform> specialInspectMethod = null, bool showSmallInspectBtn = true, float width = 380)
+        public static void FastGameobjButton(object _obj, Color activeColor, string label, bool enabled, Action<Transform> specialInspectMethod = null, bool showSmallInspectBtn = true, float width = 380)
         {
+            var obj = _obj as GameObject ?? (_obj as Transform).gameObject;
+
             if (!obj)
             {
                 GUILayout.Label("<i><color=red>null</color></i>", null);
@@ -83,7 +87,7 @@ namespace Explorer
                 }
                 else
                 {
-                    WindowManager.InspectObject(obj, out bool _);
+                    WindowManager.InspectObject(_obj, out bool _);
                 }
             }
 
@@ -94,7 +98,7 @@ namespace Explorer
 
             if (showSmallInspectBtn)
             {
-                SmallInspectButton(obj);
+                SmallInspectButton(_obj);
             }
 
             GUILayout.EndHorizontal();

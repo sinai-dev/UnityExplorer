@@ -86,34 +86,50 @@ namespace Explorer
 
         // ========= Public Helpers =========
 
-        public static UIWindow InspectObject(object obj, out bool createdNew)
+        public static UIWindow InspectObject(object obj, out bool createdNew, bool forceReflection = false)
         {
             createdNew = false;
 
-            UnityEngine.Object uObj = null;
-            if (obj is UnityEngine.Object)
+            if (Input.GetKey(KeyCode.LeftShift))
             {
-                uObj = obj as UnityEngine.Object;
+                forceReflection = true;
+            }
+            
+            Il2CppSystem.Object iObj = null;
+            if (obj is Il2CppSystem.Object isObj)
+            {
+                iObj = isObj;
             }
 
-            foreach (var window in Windows)
+            if (!forceReflection)
             {
-                bool equals = ReferenceEquals(obj, window.Target);
-
-                if (!equals && uObj != null && window.Target is UnityEngine.Object uTarget)
+                foreach (var window in Windows)
                 {
-                    equals = uObj.m_CachedPtr == uTarget.m_CachedPtr;
-                }
+                    bool equals = ReferenceEquals(obj, window.Target);
 
-                if (equals)
-                {
-                    FocusWindow(window);
-                    return window;
+                    if (!equals && iObj is Il2CppSystem.Object iCurrent && window.Target is Il2CppSystem.Object iTarget)
+                    {
+                        if (iCurrent.GetIl2CppType() != iTarget.GetIl2CppType())
+                        {
+                            if (iCurrent is Transform transform)
+                            {
+                                iCurrent = transform.gameObject;
+                            }
+                        }
+
+                        equals = iCurrent.Pointer == iTarget.Pointer;
+                    }
+
+                    if (equals)
+                    {
+                        FocusWindow(window);
+                        return window;
+                    }
                 }
             }
 
             createdNew = true;
-            if (obj is GameObject || obj is Transform)
+            if (!forceReflection && (obj is GameObject || obj is Transform))
             {
                 return InspectGameObject(obj as GameObject ?? (obj as Transform).gameObject);
             }
@@ -144,7 +160,7 @@ namespace Explorer
             return new_window;
         }
 
-        public static UIWindow InspectReflection(object obj)
+        private static UIWindow InspectReflection(object obj)
         {
             var new_window = UIWindow.CreateWindow<ReflectionWindow>(obj);
             FocusWindow(new_window);
