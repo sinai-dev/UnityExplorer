@@ -256,17 +256,15 @@ namespace Explorer
 
                 GUILayout.Space(10);
 
-                Pages.Count = m_cachedMembersFiltered.Length;
+                Pages.ItemCount = m_cachedMembersFiltered.Length;
 
                 // prev/next page buttons
                 GUILayout.BeginHorizontal(null);
 
                 Pages.DrawLimitInputArea();
 
-                if (Pages.Count > Pages.PageLimit)
+                if (Pages.ItemCount > Pages.ItemsPerPage)
                 {
-                    Pages.CalculateMaxOffset();
-
                     if (GUILayout.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(80) }))
                     {
                         Pages.TurnPage(Turn.Left, ref this.scroll);
@@ -283,7 +281,7 @@ namespace Explorer
 
                 // ====== BODY ======
 
-                scroll = UIHelpers.BeginScrollView(scroll);
+                scroll = GUIUnstrip.BeginScrollView(scroll);
 
                 GUILayout.Space(10);
 
@@ -294,7 +292,7 @@ namespace Explorer
                 var members = this.m_cachedMembersFiltered;
                 int start = Pages.CalculateOffsetIndex();
 
-                for (int j = start; (j < start + Pages.PageLimit && j < members.Length); j++)
+                for (int j = start; (j < start + Pages.ItemsPerPage && j < members.Length); j++)
                 {
                     var holder = members[j];
 
@@ -311,12 +309,12 @@ namespace Explorer
                     GUILayout.EndHorizontal();
 
                     // if not last element
-                    if (!(j == (start + Pages.PageLimit - 1) || j == (members.Length - 1)))
+                    if (!(j == (start + Pages.ItemsPerPage - 1) || j == (members.Length - 1)))
                         UIStyles.HorizontalLine(new Color(0.07f, 0.07f, 0.07f), true);
                 }
 
                 GUILayout.EndVertical();
-                UIHelpers.EndScrollView();
+                GUIUnstrip.EndScrollView();
 
                 if (!WindowManager.TabView)
                 {

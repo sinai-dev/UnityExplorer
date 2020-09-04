@@ -75,7 +75,7 @@ namespace Explorer
                 m_searchResults.Add(cache);
             }
 
-            Pages.Count = m_searchResults.Count; 
+            Pages.ItemCount = m_searchResults.Count; 
             Pages.PageOffset = 0;
         }
 
@@ -104,17 +104,16 @@ namespace Explorer
                 GUI.skin.label.alignment = TextAnchor.UpperLeft;
 
                 int count = m_searchResults.Count;
-                Pages.CalculateMaxOffset();
 
                 GUILayout.BeginHorizontal(null);
 
                 Pages.DrawLimitInputArea();
 
-                if (count > Pages.PageLimit)
+                if (count > Pages.ItemsPerPage)
                 {
                     // prev/next page buttons
 
-                    if (Pages.Count > Pages.PageLimit)
+                    if (Pages.ItemCount > Pages.ItemsPerPage)
                     {
                         if (GUILayout.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(80) }))
                         {
@@ -132,7 +131,7 @@ namespace Explorer
 
                 GUILayout.EndHorizontal();
 
-                resultsScroll = UIHelpers.BeginScrollView(resultsScroll);
+                resultsScroll = GUIUnstrip.BeginScrollView(resultsScroll);
 
                 var _temprect = new Rect(MainMenu.MainRect.x, MainMenu.MainRect.y, MainMenu.MainRect.width + 160, MainMenu.MainRect.height);
 
@@ -142,7 +141,7 @@ namespace Explorer
                     //if (offset >= count) m_pageOffset = 0;
                     int offset = Pages.CalculateOffsetIndex();
 
-                    for (int i = offset; i < offset + Pages.PageLimit && i < count; i++)
+                    for (int i = offset; i < offset + Pages.ItemsPerPage && i < count; i++)
                     {
                         m_searchResults[i].Draw(MainMenu.MainRect, 0f);
                         //m_searchResults[i].DrawValue(MainMenu.MainRect);
@@ -153,7 +152,7 @@ namespace Explorer
                     GUILayout.Label("<color=red><i>No results found!</i></color>", null);
                 }
 
-                UIHelpers.EndScrollView();
+                GUIUnstrip.EndScrollView();
                 GUILayout.EndVertical();
             }
             catch

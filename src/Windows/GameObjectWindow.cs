@@ -96,7 +96,7 @@ namespace Explorer
                 list.Sort((a, b) => b.childCount.CompareTo(a.childCount));
                 m_children = list.ToArray();
 
-                ChildPages.Count = m_children.Length;
+                ChildPages.ItemCount = m_children.Length;
 
                 var list2 = new List<Component>();
                 foreach (var comp in m_object.GetComponents(ReflectionHelpers.ComponentType))
@@ -111,7 +111,7 @@ namespace Explorer
                 }
                 m_components = list2.ToArray();
 
-                CompPages.Count = m_components.Length;
+                CompPages.ItemCount = m_components.Length;
             }
             catch (Exception e)
             {
@@ -169,7 +169,7 @@ namespace Explorer
                     GUILayout.BeginArea(new Rect(5, 25, rect.width - 10, rect.height - 35), GUI.skin.box);
                 }
 
-                scroll = UIHelpers.BeginScrollView(scroll);
+                scroll = GUIUnstrip.BeginScrollView(scroll);
 
                 GUILayout.BeginHorizontal(null);
                 GUILayout.Label("Scene: <color=cyan>" + (m_scene == "" ? "n/a" : m_scene) + "</color>", null);
@@ -220,7 +220,7 @@ namespace Explorer
 
                 GameObjectControls();
 
-                UIHelpers.EndScrollView();
+                GUIUnstrip.EndScrollView();
 
                 if (!WindowManager.TabView)
                 {
@@ -238,17 +238,15 @@ namespace Explorer
         private void TransformList(Rect m_rect)
         {
             GUILayout.BeginVertical(GUI.skin.box, null);
-            m_transformScroll = UIHelpers.BeginScrollView(m_transformScroll);
+            m_transformScroll = GUIUnstrip.BeginScrollView(m_transformScroll);
 
             GUILayout.Label("<b><size=15>Children</size></b>", null);
 
             GUILayout.BeginHorizontal(null);
             ChildPages.DrawLimitInputArea();
 
-            if (ChildPages.Count > ChildPages.PageLimit)
+            if (ChildPages.ItemCount > ChildPages.ItemsPerPage)
             {
-                ChildPages.CalculateMaxOffset();
-
                 ChildPages.CurrentPageLabel();
 
                 GUILayout.EndHorizontal();
@@ -269,7 +267,7 @@ namespace Explorer
             {
                 int start = ChildPages.CalculateOffsetIndex();
 
-                for (int j = start; (j < start + ChildPages.PageLimit && j < ChildPages.Count); j++)
+                for (int j = start; (j < start + ChildPages.ItemsPerPage && j < ChildPages.ItemCount); j++)
                 {
                     var obj = m_children[j];
 
@@ -279,7 +277,7 @@ namespace Explorer
                         continue;
                     }
 
-                    UIHelpers.GameobjButton(obj.gameObject, InspectGameObject, false, m_rect.width / 2 - 80);
+                    UIHelpers.GOButton(obj.gameObject, InspectGameObject, false, m_rect.width / 2 - 80);
                 }
             }
             else
@@ -287,23 +285,21 @@ namespace Explorer
                 GUILayout.Label("<i>None</i>", null);
             }
 
-            UIHelpers.EndScrollView();
+            GUIUnstrip.EndScrollView();
             GUILayout.EndVertical();
         }
 
         private void ComponentList(Rect m_rect)
         {
             GUILayout.BeginVertical(GUI.skin.box, null);
-            m_compScroll = UIHelpers.BeginScrollView(m_compScroll);
+            m_compScroll = GUIUnstrip.BeginScrollView(m_compScroll);
             GUILayout.Label("<b><size=15>Components</size></b>", null);
 
             GUILayout.BeginHorizontal(null);
             CompPages.DrawLimitInputArea();
 
-            if (CompPages.Count > CompPages.PageLimit)
+            if (CompPages.ItemCount > CompPages.ItemsPerPage)
             {
-                CompPages.CalculateMaxOffset();
-
                 CompPages.CurrentPageLabel();
 
                 GUILayout.EndHorizontal();
@@ -330,7 +326,7 @@ namespace Explorer
             {
                 int start = CompPages.CalculateOffsetIndex();
 
-                for (int j = start; (j < start + CompPages.PageLimit && j < CompPages.Count); j++)
+                for (int j = start; (j < start + CompPages.ItemsPerPage && j < CompPages.ItemCount); j++)
                 {
                     var component = m_components[j];
 
@@ -369,7 +365,7 @@ namespace Explorer
                 }
             }
 
-            UIHelpers.EndScrollView();
+            GUIUnstrip.EndScrollView();
 
             GUILayout.EndVertical();
         }

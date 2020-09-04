@@ -31,7 +31,8 @@ namespace Explorer
                     GUI.skin.label.alignment = TextAnchor.MiddleCenter;
                     GUILayout.Button(gcDrag, GUI.skin.label, new GUILayoutOption[] { GUILayout.Height(15) });
 
-                    var r = GUILayoutUtility.GetLastRect();
+                    //var r = GUILayoutUtility.GetLastRect();
+                    var r = GUIUnstrip.GetLastRect();
 
                     Vector2 mouse = GUIUtility.ScreenToGUIPoint(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y));
 
@@ -65,6 +66,7 @@ namespace Explorer
                 {
                     RESIZE_FAILED = true;
                     MelonLogger.Log("Exception on GuiResize: " + e.GetType() + ", " + e.Message);
+                    MelonLogger.Log(e.StackTrace);
                     return origRect;
                 }
 

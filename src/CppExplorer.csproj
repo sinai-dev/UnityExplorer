@@ -18,8 +18,8 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\Release\</OutputPath>
-    <DefineConstants>DEBUG</DefineConstants>
+    <OutputPath>..\Release\2019\</OutputPath>
+    <DefineConstants>Release_2019</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x64</PlatformTarget>
@@ -30,7 +30,7 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\Release\</OutputPath>
+    <OutputPath>..\Release\2018\</OutputPath>
     <DefineConstants>Release_Unity2018</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -44,7 +44,7 @@
     </Reference>
     <Reference Include="mcs">
       <HintPath>..\lib\mcs.dll</HintPath>
-      <Private>False</Private>
+      <Private>True</Private>
     </Reference>
     <Reference Include="MelonLoader.ModHandler">
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\MelonLoader.ModHandler.dll</HintPath>
@@ -129,6 +129,8 @@
     <Compile Include="CachedObjects\CacheMethod.cs" />
     <Compile Include="CppExplorer.cs" />
     <Compile Include="Extensions\ReflectionExtensions.cs" />
+    <Compile Include="Unstripping\GUIUnstrip.cs" />
+    <Compile Include="Unstripping\ScrollViewStateUnstrip.cs" />
     <Compile Include="Extensions\UnityExtensions.cs" />
     <Compile Include="Helpers\PageHelper.cs" />
     <Compile Include="Helpers\ReflectionHelpers.cs" />
@@ -136,6 +138,8 @@
     <Compile Include="Helpers\UnityHelpers.cs" />
     <Compile Include="MainMenu\InspectUnderMouse.cs" />
     <Compile Include="CachedObjects\CacheObjectBase.cs" />
+    <Compile Include="Unstripping\SliderHandlerUnstrip.cs" />
+    <Compile Include="Unstripping\UnstripExtensions.cs" />
     <Compile Include="Windows\ResizeDrag.cs" />
     <Compile Include="Windows\TabViewWindow.cs" />
     <Compile Include="Windows\UIWindow.cs" />

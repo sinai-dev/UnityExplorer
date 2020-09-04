@@ -12,7 +12,7 @@ namespace Explorer
     {
         public override void DrawValue(Rect window, float width)
         {
-            UIHelpers.GameobjButton(Value, null, false, width);
+            UIHelpers.GOButton(Value, null, false, width);
         }
 
         public override void UpdateValue()

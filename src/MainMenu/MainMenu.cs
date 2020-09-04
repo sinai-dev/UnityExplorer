@@ -75,11 +75,11 @@ namespace Explorer
 
             var page = Pages[m_currentPage];
 
-            page.scroll = UIHelpers.BeginScrollView(page.scroll);
+            page.scroll = GUIUnstrip.BeginScrollView(page.scroll);
 
             page.DrawWindow();
 
-            UIHelpers.EndScrollView();
+            GUIUnstrip.EndScrollView();
 
             MainRect = ResizeDrag.ResizeWindow(MainRect, MainWindowID);
 

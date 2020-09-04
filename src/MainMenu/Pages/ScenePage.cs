@@ -83,14 +83,14 @@ namespace Explorer
                 }
             }
 
-            Pages.Count = allTransforms.Count;
+            Pages.ItemCount = allTransforms.Count;            
 
             int offset = Pages.CalculateOffsetIndex();
 
             // sort by childcount
             allTransforms.Sort((a, b) => b.childCount.CompareTo(a.childCount));
 
-            for (int i = offset; i < offset + Pages.PageLimit && i < Pages.Count; i++)
+            for (int i = offset; i < offset + Pages.ItemsPerPage && i < Pages.ItemCount; i++)
             {
                 var child = allTransforms[i];
                 m_objectList.Add(new GameObjectCache(child.gameObject));
@@ -124,7 +124,7 @@ namespace Explorer
         {
             m_searchResults = SearchSceneObjects(m_searchInput);
             m_searching = true;
-            Pages.Count = m_searchResults.Count;
+            Pages.ItemCount = m_searchResults.Count;
         }
 
         public void CancelSearch()
@@ -240,11 +240,13 @@ namespace Explorer
 
             Pages.DrawLimitInputArea();
 
-            if (Pages.Count > Pages.PageLimit)
+            if (Pages.ItemCount > Pages.ItemsPerPage)
             {
                 if (GUILayout.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(80) }))
                 {
                     Pages.TurnPage(Turn.Left, ref this.scroll);
+
+                    m_timeOfLastUpdate = -1f;
                     Update();
                 }
 
@@ -253,6 +255,8 @@ namespace Explorer
                 if (GUILayout.Button("Next >", new GUILayoutOption[] { GUILayout.Width(80) }))
                 {
                     Pages.TurnPage(Turn.Right, ref this.scroll);
+
+                    m_timeOfLastUpdate = -1f;
                     Update();
                 }
             }
@@ -303,7 +307,7 @@ namespace Explorer
                     }
                     else
                     {
-                        UIHelpers.FastGameobjButton(obj.RefGameObject,
+                        UIHelpers.GOButton_Impl(obj.RefGameObject,
                         obj.EnabledColor,
                         obj.Label,
                         obj.RefGameObject.activeSelf,
@@ -328,13 +332,13 @@ namespace Explorer
             {
                 int offset = Pages.CalculateOffsetIndex();
 
-                for (int i = offset; i < offset + Pages.PageLimit && i < m_searchResults.Count; i++)
+                for (int i = offset; i < offset + Pages.ItemsPerPage && i < m_searchResults.Count; i++)
                 {
                     var obj = m_searchResults[i];
 
                     if (obj.RefGameObject)
                     {
-                        UIHelpers.FastGameobjButton(obj.RefGameObject,
+                        UIHelpers.GOButton_Impl(obj.RefGameObject,
                         obj.EnabledColor,
                         obj.Label,
                         obj.RefGameObject.activeSelf,

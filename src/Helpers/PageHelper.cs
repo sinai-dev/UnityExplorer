@@ -16,13 +16,23 @@ namespace Explorer
     public class PageHelper
     {
         public int PageOffset { get; set; }
-        public int PageLimit { get; set; } = 20;
-        public int Count { get; set; }
-        public int MaxOffset { get; set; } = -1;
-
-        public int CalculateMaxOffset()
+        public int ItemsPerPage { get; set; } = 20;
+        public int ItemCount 
         {
-            return MaxOffset = (int)Mathf.Ceil((float)(Count / (decimal)PageLimit)) - 1;
+            get => m_count;
+            set
+            {
+                m_count = value;
+                CalculateMaxOffset();
+            }
+        }
+        private int m_count;
+
+        public int MaxPageOffset { get; private set; } = -1;
+
+        private int CalculateMaxOffset()
+        {
+            return MaxPageOffset = (int)Mathf.Ceil((float)(ItemCount / (decimal)ItemsPerPage)) - 1;
         }
 
         public void CurrentPageLabel()
@@ -30,7 +40,7 @@ namespace Explorer
             var orig = GUI.skin.label.alignment;
             GUI.skin.label.alignment = TextAnchor.MiddleCenter;
 
-            GUILayout.Label($"Page {PageOffset + 1}/{MaxOffset + 1}", new GUILayoutOption[] { GUILayout.Width(80) });
+            GUILayout.Label($"Page {PageOffset + 1}/{MaxPageOffset + 1}", new GUILayoutOption[] { GUILayout.Width(80) });
 
             GUI.skin.label.alignment = orig;
         }
@@ -53,7 +63,7 @@ namespace Explorer
             }
             else
             {
-                if (PageOffset < MaxOffset)
+                if (PageOffset < MaxPageOffset)
                 {
                     PageOffset++;
                     scroll = Vector2.zero;
@@ -63,9 +73,9 @@ namespace Explorer
 
         public int CalculateOffsetIndex()
         {
-            int offset = PageOffset * PageLimit;
+            int offset = PageOffset * ItemsPerPage;
 
-            if (offset >= Count)
+            if (offset >= ItemCount)
             {
                 offset = 0;
                 PageOffset = 0;
@@ -77,11 +87,11 @@ namespace Explorer
         public void DrawLimitInputArea()
         {
             GUILayout.Label("Limit: ", new GUILayoutOption[] { GUILayout.Width(50) });
-            var limit = this.PageLimit.ToString();
+            var limit = this.ItemsPerPage.ToString();
             limit = GUILayout.TextField(limit, new GUILayoutOption[] { GUILayout.Width(50) });
-            if (limit != PageLimit.ToString() && int.TryParse(limit, out int i))
+            if (limit != ItemsPerPage.ToString() && int.TryParse(limit, out int i))
             {
-                PageLimit = i;
+                ItemsPerPage = i;
             }
         }
     }

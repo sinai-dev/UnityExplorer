@@ -279,19 +279,15 @@ namespace Explorer
                     ClampLabelWidth(window, ref whitespace);
                 }
 
-                Pages.Count = count;
+                Pages.ItemCount = count;
 
-                if (count > Pages.PageLimit)
+                if (count > Pages.ItemsPerPage)
                 {
                     GUILayout.EndHorizontal();
                     GUILayout.BeginHorizontal(null);
 
                     GUILayout.Space(whitespace);
-
-                    //int maxOffset = (int)Mathf.Ceil((float)(count / (decimal)ArrayLimit)) - 1;
-                    Pages.CalculateMaxOffset();
-
-                    //GUILayout.Label($"Page {PH.ArrayOffset + 1}/{maxOffset + 1}", new GUILayoutOption[] { GUILayout.Width(80) });                    
+                 
                     Pages.CurrentPageLabel();
 
                     // prev/next page buttons
@@ -317,7 +313,7 @@ namespace Explorer
                 //}
                 int offset = Pages.CalculateOffsetIndex();
 
-                for (int i = offset; i < offset + Pages.PageLimit && i < count; i++)
+                for (int i = offset; i < offset + Pages.ItemsPerPage && i < count; i++)
                 {
                     var entry = m_cachedEntries[i];
 
