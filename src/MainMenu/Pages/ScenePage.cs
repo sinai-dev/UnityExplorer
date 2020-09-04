@@ -75,9 +75,14 @@ namespace Explorer
             else
             {
                 var scene = SceneManager.GetSceneByName(m_currentScene);
-                var rootObjects = scene.GetRootGameObjects();
 
-                foreach (var obj in rootObjects)
+                var list = new Il2CppSystem.Collections.Generic.List<GameObject>
+                {
+                    Capacity = scene.rootCount
+                };
+                Scene.GetRootGameObjectsInternal(scene.handle, list);
+
+                foreach (var obj in list)
                 {
                     allTransforms.Add(obj.transform);
                 }

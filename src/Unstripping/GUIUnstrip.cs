@@ -13,13 +13,10 @@ using Harmony;
 
 namespace Explorer
 {
-    // This is a manual unstrip of UnityEngine.GUI and UnityEngine.GUILayout methods.
-    // This code is provided "as-is".
+    // This is a copy+paste of UnityEngine source code, fixed for Il2Cpp.
     // Taken from dnSpy output using Unity 2018.4.20.
 
-    // "Unity", Unity logos, and other Unity trademarks are trademarks or 
-    // registered trademarks of Unity Technologies or its affiliates in the 
-    // U.S. and elsewhere. 
+    // Subject to Unity's License and ToS.
     // https://unity3d.com/legal/terms-of-service
     // https://unity3d.com/legal/terms-of-service/software
 
@@ -45,7 +42,7 @@ namespace Explorer
         // ======= public methods ======= //   
 
         // Fix for GUILayoutUtility.GetLastRect().
-        // Calls UnstripExtensions.GetLastUnstripped.
+        // Calls UnstripExtensions.GetLastUnstripped().
 
         public static Rect GetLastRect()
         {
@@ -62,24 +59,24 @@ namespace Explorer
             return last;
         }
 
-        // Fix for GUILayout.Scroller and GUILayout.ScrollerRepeatButton, just calling fixed implementations.
-
-        public static float Scroller(Rect position, float value, float size, float leftValue, float rightValue, GUIStyle slider, GUIStyle thumb, GUIStyle leftButton, GUIStyle rightButton, bool horiz)
-            => Scroller_Impl(position, value, size, leftValue, rightValue, slider, thumb, leftButton, rightButton, horiz);
-
-        public static bool ScrollerRepeatButton(int scrollerID, Rect rect, GUIStyle style)
-            => ScrollerRepeatButton_Impl(scrollerID, rect, style);
-
         // Simple unstrips for HorizontalScrollbar and VerticalScrollbar, they just call the Scroller unstrip.
 
         public static float HorizontalScrollbar(Rect position, float value, float size, float leftValue, float rightValue, GUIStyle style)
         {
-            return Scroller(position, value, size, leftValue, rightValue, style, GUI.skin.GetStyle(style.name + "thumb"), GUI.skin.GetStyle(style.name + "leftbutton"), GUI.skin.GetStyle(style.name + "rightbutton"), true);
+            return Scroller_Impl(position, value, size, leftValue, rightValue, style, 
+                GUI.skin.GetStyle(style.name + "thumb"), 
+                GUI.skin.GetStyle(style.name + "leftbutton"), 
+                GUI.skin.GetStyle(style.name + "rightbutton"), 
+                true);
         }
 
         public static float VerticalScrollbar(Rect position, float value, float size, float topValue, float bottomValue, GUIStyle style)
         {
-            return Scroller(position, value, size, topValue, bottomValue, style, GUI.skin.GetStyle(style.name + "thumb"), GUI.skin.GetStyle(style.name + "upbutton"), GUI.skin.GetStyle(style.name + "downbutton"), false);
+            return Scroller_Impl(position, value, size, topValue, bottomValue, style, 
+                GUI.skin.GetStyle(style.name + "thumb"), 
+                GUI.skin.GetStyle(style.name + "upbutton"), 
+                GUI.skin.GetStyle(style.name + "downbutton"), 
+                false);
         }
 
         // Fix for BeginScrollView.
@@ -106,7 +103,7 @@ namespace Explorer
             {
                 try
                 {
-                    return BeginScrollView_Impl(scroll, false, false, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.scrollView, options);
+                    return BeginScrollView_ImplLayout(scroll, false, false, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.scrollView, options);
                 }
                 catch (Exception e)
                 {
@@ -141,16 +138,13 @@ namespace Explorer
 
         // Actual unstrip of GUILayout.BeginScrollView()
 
-        private static Vector2 BeginScrollView_Impl(Vector2 scrollPosition, bool alwaysShowHorizontal, bool alwaysShowVertical, GUIStyle horizontalScrollbar,
-            GUIStyle verticalScrollbar, GUIStyle background, params GUILayoutOption[] options)
+        private static Vector2 BeginScrollView_ImplLayout(Vector2 scrollPosition, bool alwaysShowHorizontal, bool alwaysShowVertical, 
+            GUIStyle horizontalScrollbar, GUIStyle verticalScrollbar, GUIStyle background, params GUILayoutOption[] options)
         {
             GUIUtility.CheckOnGUI();
 
-            var guiscrollGroup = (GUIScrollGroup)GUILayoutUtility.BeginLayoutGroup(
-                background,
-                null,
-                Il2CppType.Of<GUIScrollGroup>()
-            ).Il2CppCast(typeof(GUIScrollGroup));
+            var guiscrollGroup = GUILayoutUtility.BeginLayoutGroup(background, null, Il2CppType.Of<GUIScrollGroup>())
+                                .TryCast<GUIScrollGroup>();
 
             EventType type = Event.current.type;
             if (type == EventType.Layout)
@@ -177,16 +171,16 @@ namespace Explorer
             );
         }
 
-        // Actual unstrip of GUI.BeginScrollView() -- note: not GUILayout.
+        // Actual unstrip of GUI.BeginScrollView()
 
-        private static Vector2 BeginScrollView_Impl(Rect position, Vector2 scrollPosition, Rect viewRect, bool alwaysShowHorizontal, bool alwaysShowVertical,
-            GUIStyle horizontalScrollbar, GUIStyle verticalScrollbar, GUIStyle background)
+        private static Vector2 BeginScrollView_Impl(Rect position, Vector2 scrollPosition, Rect viewRect, bool alwaysShowHorizontal, 
+            bool alwaysShowVertical, GUIStyle horizontalScrollbar, GUIStyle verticalScrollbar, GUIStyle background)
         {
             GUIUtility.CheckOnGUI();
 
             int controlID = GUIUtility.GetControlID(GUI.s_ScrollviewHash, FocusType.Passive);
 
-            var scrollViewState = (ScrollViewState)GUIUtility.GetStateObject(Il2CppType.Of<ScrollViewState>(), controlID).Il2CppCast(typeof(ScrollViewState));
+            var scrollViewState = GUIUtility.GetStateObject(Il2CppType.Of<ScrollViewState>(), controlID).TryCast<ScrollViewState>();
 
             var scrollExt = ScrollViewStateUnstrip.FromPointer(scrollViewState.Pointer);
 
@@ -310,16 +304,13 @@ namespace Explorer
 
             if (ScrollStack.Count <= 0) return;
 
-            //ScrollViewState scrollViewState = (ScrollViewState)GUI.s_ScrollViewStates.Peek();
-            var state = (ScrollViewState)ScrollStack.Peek().Il2CppCast(typeof(ScrollViewState));
-            //ScrollViewExtensions.Dict.TryGetValue(state.Pointer, out ScrollViewExtensions scrollExt);
+            var state = ScrollStack.Peek().TryCast<ScrollViewState>();
             var scrollExt = ScrollViewStateUnstrip.FromPointer(state.Pointer);
 
             if (scrollExt == null) throw new Exception("Could not get scrollExt!");
 
             GUIClip.Pop();
 
-            //GUI.s_ScrollViewStates.Pop();
             ScrollStack.Pop();
 
             var position = scrollExt.position;
@@ -339,7 +330,6 @@ namespace Explorer
                     pos.y = 0f;
                 }
 
-                // state.apply = true;
                 scrollExt.apply = true;
 
                 Event.current.Use();
@@ -368,7 +358,6 @@ namespace Explorer
                 rect2 = new Rect(position.x, position.yMax - rightButton.fixedHeight, position.width, rightButton.fixedHeight);
             }
 
-            //value = GUI.Slider(position2, value, size, leftValue, rightValue, slider, thumb, horiz, controlID);
             value = Slider(position2, value, size, leftValue, rightValue, slider, thumb, horiz, controlID);
 
             bool flag = Event.current.type == EventType.MouseUp;
@@ -382,8 +371,7 @@ namespace Explorer
             }
             if (flag && Event.current.type == EventType.Used)
             {
-                //GUI.s_ScrollControlId = 0;
-                GUIUnstrip.s_ScrollControlId = 0;
+                s_ScrollControlId = 0;
             }
             if (leftValue < rightValue)
             {
@@ -400,7 +388,6 @@ namespace Explorer
 
         public static float Slider(Rect position, float value, float size, float start, float end, GUIStyle slider, GUIStyle thumb, bool horiz, int id)
         {
-            //GUIUtility.CheckOnGUI();
             if (id == 0)
             {
                 id = GUIUtility.GetControlID(GUI.s_SliderHash, FocusType.Passive, position);
@@ -416,11 +403,8 @@ namespace Explorer
             bool result = false;
             if (GUI.DoRepeatButton(rect, GUIContent.none, style, FocusType.Passive))
             {
-                //bool flag = GUI.s_ScrollControlId != scrollerID;
-                //GUI.s_ScrollControlId = scrollerID;
-
-                bool flag = GUIUnstrip.s_ScrollControlId != scrollerID;
-                GUIUnstrip.s_ScrollControlId = scrollerID;
+                bool flag = s_ScrollControlId != scrollerID;
+                s_ScrollControlId = scrollerID;
 
                 if (flag)
                 {

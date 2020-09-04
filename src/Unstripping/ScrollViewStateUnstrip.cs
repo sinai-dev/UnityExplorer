@@ -8,14 +8,11 @@ using MelonLoader;
 using UnityEngine;
 
 namespace Explorer
-{    
-    // This is a manual unstrip of UnityEngine.ScrollViewState.
-    // This code is provided "as-is".
+{
+    // This is a copy+paste of UnityEngine source code, fixed for Il2Cpp.
     // Taken from dnSpy output using Unity 2018.4.20.
 
-    // "Unity", Unity logos, and other Unity trademarks are trademarks or 
-    // registered trademarks of Unity Technologies or its affiliates in the 
-    // U.S. and elsewhere. 
+    // Subject to Unity's License and ToS.
     // https://unity3d.com/legal/terms-of-service
     // https://unity3d.com/legal/terms-of-service/software
 
