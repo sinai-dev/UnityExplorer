@@ -27,6 +27,9 @@ namespace Explorer
         public Vector2 scrollPosition;
         public bool apply;
 
+        // The code below is not unstripped. 
+        // This is a custom dictionary to allow for the manual implementation.
+
         public static Dictionary<IntPtr, ScrollViewStateUnstrip> Dict = new Dictionary<IntPtr, ScrollViewStateUnstrip>();
 
         public static ScrollViewStateUnstrip FromPointer(IntPtr ptr)

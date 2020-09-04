@@ -43,9 +43,9 @@ namespace Explorer
         }
 
         // ======= public methods ======= //   
-        
+
         // Fix for GUILayoutUtility.GetLastRect().
-        // Calls UnstripExtensions.GetLastRectUnstripped.
+        // Calls UnstripExtensions.GetLastUnstripped.
 
         public static Rect GetLastRect()
         {
