@@ -8,13 +8,6 @@ using UnhollowerRuntimeLib;
 
 namespace Explorer
 {
-	// This is a copy+paste of UnityEngine source code, fixed for Il2Cpp.
-	// Taken from dnSpy output using Unity 2018.4.20.
-
-	// Subject to Unity's License and ToS.
-	// https://unity3d.com/legal/terms-of-service
-	// https://unity3d.com/legal/terms-of-service/software
-
 	public struct SliderHandlerUnstrip
 	{
 		private readonly Rect position;

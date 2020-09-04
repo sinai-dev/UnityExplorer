@@ -7,18 +7,8 @@ using UnityEngine;
 
 namespace Explorer
 {
-    // This is a copy+paste of UnityEngine source code, fixed for Il2Cpp.
-    // Taken from dnSpy output using Unity 2018.4.20.
-
-    // Subject to Unity's License and ToS.
-    // https://unity3d.com/legal/terms-of-service
-    // https://unity3d.com/legal/terms-of-service/software
-
     public static class UnstripExtensions
     {
-        // This is a manual unstrip of GUILayoutGroup.GetLast().
-        // I'm using it as an Extension because it's easier this way.
-
         public static Rect GetLastUnstripped(this GUILayoutGroup group)
         {
             Rect result;

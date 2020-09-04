@@ -13,13 +13,6 @@ using Harmony;
 
 namespace Explorer
 {
-    // This is a copy+paste of UnityEngine source code, fixed for Il2Cpp.
-    // Taken from dnSpy output using Unity 2018.4.20.
-
-    // Subject to Unity's License and ToS.
-    // https://unity3d.com/legal/terms-of-service
-    // https://unity3d.com/legal/terms-of-service/software
-
     public class GUIUnstrip
     {
         public static int s_ScrollControlId;
@@ -41,9 +34,6 @@ namespace Explorer
 
         // ======= public methods ======= //   
 
-        // Fix for GUILayoutUtility.GetLastRect().
-        // Calls UnstripExtensions.GetLastUnstripped().
-
         public static Rect GetLastRect()
         {
             EventType type = Event.current.type;
@@ -58,8 +48,6 @@ namespace Explorer
             }
             return last;
         }
-
-        // Simple unstrips for HorizontalScrollbar and VerticalScrollbar, they just call the Scroller unstrip.
 
         public static float HorizontalScrollbar(Rect position, float value, float size, float leftValue, float rightValue, GUIStyle style)
         {
@@ -80,7 +68,6 @@ namespace Explorer
         }
 
         // Fix for BeginScrollView.
-        // Uses several manually unstripped methods.
 
         public static Vector2 BeginScrollView(Vector2 scroll, params GUILayoutOption[] options)
         {
@@ -98,7 +85,7 @@ namespace Explorer
                 }
             }
 
-            // Try manual unstripping implementation.
+            // Try manual implementation.
             if (!ManualUnstripFailed)
             {
                 try
@@ -107,7 +94,7 @@ namespace Explorer
                 }
                 catch (Exception e)
                 {
-                    MelonLogger.Log("Exception on GUIUnstrip.BeginScrollView_Impl: " + e.GetType() + ", " + e.Message + "\r\n" + e.StackTrace);
+                    MelonLogger.Log("Exception on GUIUnstrip.BeginScrollView_ImplLayout: " + e.GetType() + ", " + e.Message + "\r\n" + e.StackTrace);
 
                     ManualUnstripFailed = true;
                     return scroll;
@@ -135,8 +122,6 @@ namespace Explorer
         }
 
         // ======= private methods ======= //
-
-        // Actual unstrip of GUILayout.BeginScrollView()
 
         private static Vector2 BeginScrollView_ImplLayout(Vector2 scrollPosition, bool alwaysShowHorizontal, bool alwaysShowVertical, 
             GUIStyle horizontalScrollbar, GUIStyle verticalScrollbar, GUIStyle background, params GUILayoutOption[] options)
@@ -170,8 +155,6 @@ namespace Explorer
                 background
             );
         }
-
-        // Actual unstrip of GUI.BeginScrollView()
 
         private static Vector2 BeginScrollView_Impl(Rect position, Vector2 scrollPosition, Rect viewRect, bool alwaysShowHorizontal, 
             bool alwaysShowVertical, GUIStyle horizontalScrollbar, GUIStyle verticalScrollbar, GUIStyle background)
@@ -296,8 +279,6 @@ namespace Explorer
             return scrollPosition;
         }
 
-        // Actual unstrip of GUI.EndScrollView()
-
         private static void EndScrollView_Impl(bool handleScrollWheel)
         {
             GUIUtility.CheckOnGUI();
@@ -335,8 +316,6 @@ namespace Explorer
                 Event.current.Use();
             }
         }
-
-        // Actual unstrip of GUI.Scroller
 
         private static float Scroller_Impl(Rect position, float value, float size, float leftValue, float rightValue, GUIStyle slider, GUIStyle thumb, GUIStyle leftButton, GUIStyle rightButton, bool horiz)
         {
@@ -384,8 +363,6 @@ namespace Explorer
             return value;
         }
 
-        // Actual unstrip of GUI.Slider
-
         public static float Slider(Rect position, float value, float size, float start, float end, GUIStyle slider, GUIStyle thumb, bool horiz, int id)
         {
             if (id == 0)
@@ -395,8 +372,6 @@ namespace Explorer
             var sliderHandler = new SliderHandlerUnstrip(position, value, size, start, end, slider, thumb, horiz, id);
             return sliderHandler.Handle();
         }
-
-        // Actual unstrip of GUI.ScrollerRepeatButton
 
         private static bool ScrollerRepeatButton_Impl(int scrollerID, Rect rect, GUIStyle style)
         {

@@ -129,8 +129,8 @@
     <Compile Include="CachedObjects\CacheMethod.cs" />
     <Compile Include="CppExplorer.cs" />
     <Compile Include="Extensions\ReflectionExtensions.cs" />
-    <Compile Include="Unstripping\GUIUnstrip.cs" />
-    <Compile Include="Unstripping\ScrollViewStateUnstrip.cs" />
+    <Compile Include="UnstripFixes\GUIUnstrip.cs" />
+    <Compile Include="UnstripFixes\ScrollViewStateUnstrip.cs" />
     <Compile Include="Extensions\UnityExtensions.cs" />
     <Compile Include="Helpers\PageHelper.cs" />
     <Compile Include="Helpers\ReflectionHelpers.cs" />
@@ -138,8 +138,8 @@
     <Compile Include="Helpers\UnityHelpers.cs" />
     <Compile Include="MainMenu\InspectUnderMouse.cs" />
     <Compile Include="CachedObjects\CacheObjectBase.cs" />
-    <Compile Include="Unstripping\SliderHandlerUnstrip.cs" />
-    <Compile Include="Unstripping\UnstripExtensions.cs" />
+    <Compile Include="UnstripFixes\SliderHandlerUnstrip.cs" />
+    <Compile Include="UnstripFixes\UnstripExtensions.cs" />
     <Compile Include="Windows\ResizeDrag.cs" />
     <Compile Include="Windows\TabViewWindow.cs" />
     <Compile Include="Windows\UIWindow.cs" />
