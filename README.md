@@ -15,9 +15,9 @@
 </p>
 
 ### Known issue
-Some games are experiencing `MissingMethodException`s or exceptions about failed unstripping, which prevent the CppExplorer menu from showing properly or at all. This is a bug with [Il2CppAssemblyUnhollower](https://github.com/knah/Il2CppAssemblyUnhollower) and there isn't much I can do about it myself. 
+Due to limitations with [Il2CppAssemblyUnhollower](https://github.com/knah/Il2CppAssemblyUnhollower)'s Unstripping, CppExplorer may encounter a `MissingMethodException` when trying to use certain UnityEngine methods.
 
-If you're familiar with C# and Unity, one possibility for now is making a fork of this repo and manually fixing all the broken methods to ones which aren't broken (if possible). There may be another overload of the same method which wasn't stripped or was unstripped successfully, which you can use instead.
+Since version [1.5.4](https://github.com/sinai-dev/CppExplorer/releases/tag/1.5.4), CppExplorer manually unstrips most of these methods itself. If you encounter more methods which failed unstripping, please let me know by opening an issue and I will do my best to fix it.
 
 ## Features
 * Scene hierarchy explorer
