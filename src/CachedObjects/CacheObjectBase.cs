@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Explorer.CachedObjects;
 using MelonLoader;
 using UnhollowerBaseLib;
 using UnityEngine;
@@ -136,6 +137,22 @@ namespace Explorer
             else if (valueType.IsEnum)
             {
                 holder = new CacheEnum();
+            }
+            else if (valueType == typeof(Vector2) || valueType == typeof(Vector3) || valueType == typeof(Vector4))
+            {
+                holder = new CacheVector();
+            }
+            else if (valueType == typeof(Quaternion))
+            {
+                holder = new CacheQuaternion();
+            }
+            else if (valueType == typeof(Color))
+            {
+                holder = new CacheColor();
+            }
+            else if (valueType == typeof(Rect))
+            {
+                holder = new CacheRect();
             }
             else if (ReflectionHelpers.IsArray(valueType) || ReflectionHelpers.IsList(valueType))
             {

@@ -120,13 +120,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CachedObjects\CacheDictionary.cs" />
-    <Compile Include="CachedObjects\CacheEnum.cs" />
-    <Compile Include="CachedObjects\CacheGameObject.cs" />
-    <Compile Include="CachedObjects\CacheList.cs" />
-    <Compile Include="CachedObjects\CachePrimitive.cs" />
-    <Compile Include="CachedObjects\CacheOther.cs" />
-    <Compile Include="CachedObjects\CacheMethod.cs" />
+    <Compile Include="CachedObjects\Struct\CacheColor.cs" />
+    <Compile Include="CachedObjects\Object\CacheDictionary.cs" />
+    <Compile Include="CachedObjects\Struct\CacheEnum.cs" />
+    <Compile Include="CachedObjects\Object\CacheGameObject.cs" />
+    <Compile Include="CachedObjects\Object\CacheList.cs" />
+    <Compile Include="CachedObjects\Struct\CachePrimitive.cs" />
+    <Compile Include="CachedObjects\Other\CacheOther.cs" />
+    <Compile Include="CachedObjects\Other\CacheMethod.cs" />
+    <Compile Include="CachedObjects\Struct\CacheQuaternion.cs" />
+    <Compile Include="CachedObjects\Struct\CacheVector.cs" />
+    <Compile Include="CachedObjects\Struct\CacheRect.cs" />
     <Compile Include="CppExplorer.cs" />
     <Compile Include="Extensions\ReflectionExtensions.cs" />
     <Compile Include="UnstripFixes\GUIUnstrip.cs" />

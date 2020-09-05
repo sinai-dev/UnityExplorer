@@ -29,9 +29,17 @@ namespace Explorer
         private Vector2 m_compScroll = Vector2.zero;
         private PageHelper CompPages = new PageHelper();
 
+        private readonly Vector3[] m_cachedInput = new Vector3[3];
         private float m_translateAmount = 0.3f;
         private float m_rotateAmount = 50f;
         private float m_scaleAmount = 0.1f;
+        private bool m_freeze;
+        private Vector3 m_frozenPosition;
+        private Quaternion m_frozenRotation;
+        private Vector3 m_frozenScale;
+        private bool m_autoApplyTransform;
+        private bool m_autoUpdateTransform;
+        private bool m_localContext;
 
         private readonly List<Component> m_cachedDestroyList = new List<Component>();
         //private string m_addComponentInput = "";
@@ -73,10 +81,27 @@ namespace Explorer
 
             m_name = m_object.name;
             m_scene = string.IsNullOrEmpty(m_object.scene.name) 
-                        ? "None" 
+                        ? "None (Asset/Resource)" 
                         : m_object.scene.name;
 
+            CacheTransformValues();
+
             Update();
+        }
+
+        private void CacheTransformValues()
+        {
+            if (m_localContext)
+            {
+                m_cachedInput[0] = m_object.transform.localPosition;
+                m_cachedInput[1] = m_object.transform.localEulerAngles;
+            }
+            else
+            {
+                m_cachedInput[0] = m_object.transform.position;
+                m_cachedInput[1] = m_object.transform.eulerAngles;
+            }
+            m_cachedInput[2] = m_object.transform.localScale;
         }
 
         public override void Update()
@@ -86,6 +111,21 @@ namespace Explorer
                 if (!m_object && !GetObjectAsGameObject())
                 {
                     throw new Exception("Object is null!");
+                }
+
+                if (m_freeze)
+                {
+                    if (m_localContext)
+                    {
+                        m_object.transform.localPosition = m_frozenPosition;
+                        m_object.transform.localRotation = m_frozenRotation;
+                    }
+                    else
+                    {
+                        m_object.transform.position = m_frozenPosition;
+                        m_object.transform.rotation = m_frozenRotation;
+                    }
+                    m_object.transform.localScale = m_frozenScale;
                 }
 
                 var list = new List<Transform>();
@@ -412,6 +452,16 @@ namespace Explorer
                 m_object.hideFlags |= HideFlags.DontUnloadUnusedAsset;
             }
 
+            var lbl = m_freeze ? "<color=lime>Unfreeze</color>" : "<color=orange>Freeze Pos/Rot</color>";
+            if (GUILayout.Button(lbl, new GUILayoutOption[] { GUILayout.Width(110) }))
+            {
+                m_freeze = !m_freeze;
+                if (m_freeze)
+                {
+                    UpdateFreeze();
+                }
+            }
+
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal(null);
 
@@ -436,10 +486,52 @@ namespace Explorer
 
             GUILayout.BeginVertical(GUI.skin.box, null);
 
-            var t = m_object.transform;
-            TranslateControl(t, TranslateType.Position, ref m_translateAmount,  false);
-            TranslateControl(t, TranslateType.Rotation, ref m_rotateAmount,     true);
-            TranslateControl(t, TranslateType.Scale,    ref m_scaleAmount,      false);
+            m_cachedInput[0] = TranslateControl(TranslateType.Position, ref m_translateAmount,  false);
+            m_cachedInput[1] = TranslateControl(TranslateType.Rotation, ref m_rotateAmount,     true);
+            m_cachedInput[2] = TranslateControl(TranslateType.Scale,    ref m_scaleAmount,      false);
+
+            GUILayout.BeginHorizontal(null);
+            if (GUILayout.Button("<color=lime>Apply to Transform</color>", null) || m_autoApplyTransform)
+            {
+                if (m_localContext)
+                {
+                    m_object.transform.localPosition = m_cachedInput[0];
+                    m_object.transform.localEulerAngles = m_cachedInput[1];
+                }
+                else
+                {
+                    m_object.transform.position = m_cachedInput[0];
+                    m_object.transform.eulerAngles = m_cachedInput[1];
+                }
+                m_object.transform.localScale = m_cachedInput[2];
+
+                if (m_freeze)
+                {
+                    UpdateFreeze();
+                }
+            }
+            if (GUILayout.Button("<color=lime>Update from Transform</color>", null) || m_autoUpdateTransform)
+            {
+                CacheTransformValues();
+            }
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal(null);
+            BoolToggle(ref m_autoApplyTransform, "Auto-apply to Transform?");
+            BoolToggle(ref m_autoUpdateTransform, "Auto-update from transform?");
+            GUILayout.EndHorizontal();
+
+            bool b = m_localContext;
+            b = GUILayout.Toggle(b, "<color=" + (b ? "lime" : "red") + ">Use local transform values?</color>", null);
+            if (b != m_localContext)
+            {
+                m_localContext = b;
+                CacheTransformValues();
+                if (m_freeze)
+                {
+                    UpdateFreeze();
+                }
+            }
 
             GUILayout.EndVertical();
 
@@ -453,6 +545,30 @@ namespace Explorer
             GUILayout.EndVertical();
         }
 
+        private void UpdateFreeze()
+        {
+            if (m_localContext)
+            {
+                m_frozenPosition = m_object.transform.localPosition;
+                m_frozenRotation = m_object.transform.localRotation;
+            }
+            else
+            {
+                m_frozenPosition = m_object.transform.position;
+                m_frozenRotation = m_object.transform.rotation;
+            }
+            m_frozenScale = m_object.transform.localScale;
+        }
+
+        private void BoolToggle(ref bool value, string message)
+        {
+            string lbl = "<color=";
+            lbl += value ? "lime" : "red";
+            lbl += $">{message}</color>";
+
+            value = GUILayout.Toggle(value, lbl, null);
+        }
+
         public enum TranslateType
         {
             Position,
@@ -460,50 +576,55 @@ namespace Explorer
             Scale
         }
 
-        private void TranslateControl(Transform transform, TranslateType mode, ref float amount, bool multByTime)
+        private Vector3 TranslateControl(TranslateType mode, ref float amount, bool multByTime)
         {
             GUILayout.BeginHorizontal(null);
-            GUILayout.Label("<color=cyan><b>" + mode + "</b></color>:", new GUILayoutOption[] { GUILayout.Width(65) });
+            GUILayout.Label($"<color=cyan><b>{(m_localContext ? "Local " : "")} {mode}</b></color>:", 
+                new GUILayoutOption[] { GUILayout.Width(m_localContext ? 110 : 65) });
 
-            Vector3 vector = Vector3.zero;
+            var transform = m_object.transform;
             switch (mode)
             {
-                case TranslateType.Position: vector = transform.localPosition; break;
-                case TranslateType.Rotation: vector = transform.localRotation.eulerAngles; break;
-                case TranslateType.Scale:    vector = transform.localScale; break;
+                case TranslateType.Position:
+                    var pos = m_localContext ? transform.localPosition : transform.position;
+                    GUILayout.Label(pos.ToString(), new GUILayoutOption[] { GUILayout.Width(250) });
+                    break;
+                case TranslateType.Rotation:
+                    var rot = m_localContext ? transform.localEulerAngles : transform.eulerAngles;
+                    GUILayout.Label(rot.ToString(), new GUILayoutOption[] { GUILayout.Width(250) });
+                    break;
+                case TranslateType.Scale:
+                    GUILayout.Label(transform.localScale.ToString(), new GUILayoutOption[] { GUILayout.Width(250) });
+                    break;
             }
-            GUILayout.Label(vector.ToString(), new GUILayoutOption[] { GUILayout.Width(250)  });
             GUILayout.EndHorizontal();
+
+            Vector3 input = m_cachedInput[(int)mode];
 
             GUILayout.BeginHorizontal(null);
             GUI.skin.label.alignment = TextAnchor.MiddleRight;
 
             GUILayout.Label("<color=cyan>X:</color>", new GUILayoutOption[] { GUILayout.Width(20) });
-            PlusMinusFloat(ref vector.x, amount, multByTime);
+            PlusMinusFloat(ref input.x, amount, multByTime);
 
             GUILayout.Label("<color=cyan>Y:</color>", new GUILayoutOption[] { GUILayout.Width(20) });
-            PlusMinusFloat(ref vector.y, amount, multByTime);
+            PlusMinusFloat(ref input.y, amount, multByTime);
 
             GUILayout.Label("<color=cyan>Z:</color>", new GUILayoutOption[] { GUILayout.Width(20) });
-            PlusMinusFloat(ref vector.z, amount, multByTime);
-
-            switch (mode)
-            {
-                case TranslateType.Position: transform.localPosition = vector; break;
-                case TranslateType.Rotation: transform.localRotation = Quaternion.Euler(vector); break;
-                case TranslateType.Scale:    transform.localScale = vector; break;
-            }
+            PlusMinusFloat(ref input.z, amount, multByTime);            
 
             GUILayout.Label("+/-:", new GUILayoutOption[] { GUILayout.Width(30) });
-            var input = amount.ToString("F3");
-            input = GUILayout.TextField(input, new GUILayoutOption[] { GUILayout.Width(40) });
-            if (float.TryParse(input, out float f))
+            var amountInput = amount.ToString("F3");
+            amountInput = GUILayout.TextField(amountInput, new GUILayoutOption[] { GUILayout.Width(60) });
+            if (float.TryParse(amountInput, out float f))
             {
                 amount = f;
             }
 
             GUI.skin.label.alignment = TextAnchor.UpperLeft;
             GUILayout.EndHorizontal();
+
+            return input;
         }
 
         private void PlusMinusFloat(ref float f, float amount, bool multByTime)
@@ -523,7 +644,5 @@ namespace Explorer
                 f += multByTime ? amount * Time.deltaTime : amount;
             }
         }
-
-        
     }
 }

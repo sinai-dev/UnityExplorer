@@ -187,7 +187,7 @@ namespace Explorer
 
             ScrollStack.Push(scrollViewState);
 
-            Rect screenRect = new Rect(position);
+            Rect screenRect = new Rect(position.x, position.y, position.width, position.height);
             EventType type = Event.current.type;
             if (type != EventType.Layout)
             {

@@ -17,14 +17,17 @@ namespace Explorer
         public PageHelper Pages = new PageHelper();
 
         private float m_timeOfLastUpdate = -1f;
+        private static int PASSIVE_UPDATE_INTERVAL = 1;
 
-    // ----- Holders for GUI elements ----- //
+        private static bool m_getRootObjectsFailed = false;
 
-    private string m_currentScene = "";
+        // ----- Holders for GUI elements ----- //
+
+        private static string m_currentScene = "";
 
         // gameobject list
         private Transform m_currentTransform;
-        private List<GameObjectCache> m_objectList = new List<GameObjectCache>();
+        private readonly List<GameObjectCache> m_objectList = new List<GameObjectCache>();
 
         // search bar
         private bool m_searching = false;
@@ -44,64 +47,6 @@ namespace Explorer
             SetTransformTarget(null);
         }
 
-        //public void CheckOffset(ref int offset, int childCount)
-        //{
-        //    if (offset >= childCount)
-        //    {
-        //        offset = 0;
-        //        m_pageOffset = 0;
-        //    }
-        //}
-
-        public override void Update()
-        {
-            if (m_searching) return;
-
-            if (Time.time - m_timeOfLastUpdate < 1f) return;
-            m_timeOfLastUpdate = Time.time;
-
-            m_objectList = new List<GameObjectCache>();
-
-            var allTransforms = new List<Transform>();
-
-            // get current list of all transforms (either scene root or our current transform children)
-            if (m_currentTransform)
-            {
-                for (int i = 0; i < m_currentTransform.childCount; i++)
-                {
-                    allTransforms.Add(m_currentTransform.GetChild(i));
-                }
-            }
-            else
-            {
-                var scene = SceneManager.GetSceneByName(m_currentScene);
-
-                var list = new Il2CppSystem.Collections.Generic.List<GameObject>
-                {
-                    Capacity = scene.rootCount
-                };
-                Scene.GetRootGameObjectsInternal(scene.handle, list);
-
-                foreach (var obj in list)
-                {
-                    allTransforms.Add(obj.transform);
-                }
-            }
-
-            Pages.ItemCount = allTransforms.Count;            
-
-            int offset = Pages.CalculateOffsetIndex();
-
-            // sort by childcount
-            allTransforms.Sort((a, b) => b.childCount.CompareTo(a.childCount));
-
-            for (int i = offset; i < offset + Pages.ItemsPerPage && i < Pages.ItemCount; i++)
-            {
-                var child = allTransforms[i];
-                m_objectList.Add(new GameObjectCache(child.gameObject));
-            }
-        }
-
         public void SetTransformTarget(Transform t)
         {
             m_currentTransform = t;
@@ -109,8 +54,7 @@ namespace Explorer
             if (m_searching)
                 CancelSearch();
 
-            m_timeOfLastUpdate = -1f;
-            Update();
+            Update_Impl();
         }
 
         public void TraverseUp()
@@ -135,6 +79,11 @@ namespace Explorer
         public void CancelSearch()
         {
             m_searching = false;
+
+            if (m_getRootObjectsFailed && !m_currentTransform)
+            {
+                GetRootObjectsManual_Impl();
+            }
         }
 
         public List<GameObjectCache> SearchSceneObjects(string _search)
@@ -150,6 +99,80 @@ namespace Explorer
             }
 
             return matches;
+        }
+
+        public override void Update()
+        {
+            if (m_searching) return;
+
+            if (Time.time - m_timeOfLastUpdate < PASSIVE_UPDATE_INTERVAL) return;
+            m_timeOfLastUpdate = Time.time;
+
+            Update_Impl();
+        }
+
+        private void Update_Impl()
+        {
+            var allTransforms = new List<Transform>();
+
+            // get current list of all transforms (either scene root or our current transform children)
+            if (m_currentTransform)
+            {
+                for (int i = 0; i < m_currentTransform.childCount; i++)
+                {
+                    allTransforms.Add(m_currentTransform.GetChild(i));
+                }
+            }
+            else
+            {
+                if (!m_getRootObjectsFailed)
+                {
+                    try
+                    {
+                        var list = SceneManager.GetActiveScene().GetRootGameObjects().ToArray();
+
+                        foreach (var obj in list)
+                        {
+                            allTransforms.Add(obj.transform);
+                        }
+                    }
+                    catch
+                    {
+                        m_getRootObjectsFailed = true;
+                        PASSIVE_UPDATE_INTERVAL = 2;
+
+                        allTransforms = GetRootObjectsManual_Impl();
+                    }
+                }
+                else
+                {
+                    allTransforms = GetRootObjectsManual_Impl();
+                }
+            }
+
+            Pages.ItemCount = allTransforms.Count;
+
+            int offset = Pages.CalculateOffsetIndex();
+
+            // sort by childcount
+            allTransforms.Sort((a, b) => b.childCount.CompareTo(a.childCount));
+
+            m_objectList.Clear();
+
+            for (int i = offset; i < offset + Pages.ItemsPerPage && i < Pages.ItemCount; i++)
+            {
+                var child = allTransforms[i];
+                m_objectList.Add(new GameObjectCache(child.gameObject));
+            }
+        }
+
+        private List<Transform> GetRootObjectsManual_Impl()
+        {
+            var allTransforms = Resources.FindObjectsOfTypeAll<Transform>()
+                       .Where(x => x.parent == null && x.gameObject.scene.name == m_currentScene)
+                       .ToList();
+
+            return allTransforms;
         }
 
         // --------- GUI Draw Function --------- //        
@@ -251,8 +274,7 @@ namespace Explorer
                 {
                     Pages.TurnPage(Turn.Left, ref this.scroll);
 
-                    m_timeOfLastUpdate = -1f;
-                    Update();
+                    Update_Impl();
                 }
 
                 Pages.CurrentPageLabel();
@@ -261,8 +283,7 @@ namespace Explorer
                 {
                     Pages.TurnPage(Turn.Right, ref this.scroll);
 
-                    m_timeOfLastUpdate = -1f;
-                    Update();
+                    Update_Impl();
                 }
             }
 
@@ -296,8 +317,12 @@ namespace Explorer
 
             if (m_objectList.Count > 0)
             {
-                foreach (var obj in m_objectList)
+                for (int i = 0; i < m_objectList.Count; i++)
                 {
+                    var obj = m_objectList[i];
+
+                    if (obj == null) continue;
+
                     if (!obj.RefGameObject)
                     {
                         string label = "<color=red><i>null";
