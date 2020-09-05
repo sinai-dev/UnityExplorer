@@ -12,12 +12,14 @@ namespace Explorer
     {
         public static ScenePage Instance;
 
-        public override string Name { get => "Scene Explorer"; set => base.Name = value; }
+        public override string Name { get => "Scene Explorer"; }
 
         public PageHelper Pages = new PageHelper();
 
         private float m_timeOfLastUpdate = -1f;
         private const int PASSIVE_UPDATE_INTERVAL = 1;
+
+        private static bool m_getRootObjectsFailed;
 
         // ----- Holders for GUI elements ----- //
 
