@@ -14,10 +14,9 @@
   <img src="https://img.shields.io/github/downloads/sinai-dev/CppExplorer/total.svg" />
 </p>
 
-### Known issue
-Due to limitations with [Il2CppAssemblyUnhollower](https://github.com/knah/Il2CppAssemblyUnhollower)'s Unstripping, CppExplorer may encounter a `MissingMethodException` when trying to use certain UnityEngine methods.
-
-Since version [1.5.4](https://github.com/sinai-dev/CppExplorer/releases/tag/1.5.4), CppExplorer manually unstrips most of these methods itself. If you encounter more methods which failed unstripping, please let me know by opening an issue and I will do my best to fix it.
+### Known issues
+* CppExplorer may experience a `MissingMethodException` when trying to use certain UnityEngine methods. If you experience this, please open an issue and I will do my best to fix it.
+* Scrolling with mouse wheel in the CppExplorer menu may not work on all games at the moment.
 
 ## Features
 * Scene hierarchy explorer
@@ -45,7 +44,7 @@ Requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be ins
 * A simple menu which allows you to traverse the Transform heirarchy of the scene.
 * Click on a GameObject to set it as the current path, or <b>Inspect</b> it to send it to an Inspector Window.
 
-[![](https://i.imgur.com/2b0q0jL.png)](https://i.imgur.com/2b0q0jL.png)
+[![](https://i.imgur.com/BzTOCvp.png)](https://i.imgur.com/BzTOCvp.png)
 
 ### Inspectors
 
@@ -60,7 +59,7 @@ CppExplorer has two main inspector modes: <b>GameObject Inspector</b>, and <b>Re
 * Allows you to see the children and components on a GameObject.
 * Can use some basic GameObject Controls such as translating and rotating the object, destroy it, clone it, etc.
 
-[![](https://i.imgur.com/JTxqlx4.png)](https://i.imgur.com/JTxqlx4.png)
+[![](https://i.imgur.com/DiDvl0Q.png)](https://i.imgur.com/DiDvl0Q.png)
 
 ### Reflection Inspector
 
@@ -68,7 +67,7 @@ CppExplorer has two main inspector modes: <b>GameObject Inspector</b>, and <b>Re
 * Allows you to inspect Properties, Fields and basic Methods, as well as set primitive values and evaluate primitive methods.
 * Can search and filter members for the ones you are interested in.
 
-[![](https://i.imgur.com/iq92m0l.png)](https://i.imgur.com/iq92m0l.png)
+[![](https://i.imgur.com/Pq127XD.png)](https://i.imgur.com/Pq127XD.png)
 
 ### Object Search
 
