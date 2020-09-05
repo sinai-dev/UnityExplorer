@@ -13,7 +13,7 @@ namespace Explorer
     {
         public static SearchPage Instance;
 
-        public override string Name { get => "Object Search"; set => base.Name = value; }
+        public override string Name { get => "Object Search"; }
 
         private string m_searchInput = "";
         private string m_typeInput = "";
@@ -318,7 +318,8 @@ namespace Explorer
                     continue;
                 }
 
-                if (searchType == ReflectionHelpers.ComponentType && ReflectionHelpers.TransformType.IsAssignableFrom(obj.GetIl2CppType()))
+                if (searchType.FullName == ReflectionHelpers.ComponentType.FullName
+                    && ReflectionHelpers.TransformType.IsAssignableFrom(obj.GetIl2CppType()))
                 {
                     // Transforms shouldn't really be counted as Components, skip them.
                     // They're more akin to GameObjects.

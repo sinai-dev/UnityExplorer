@@ -14,7 +14,7 @@ namespace Explorer
 {
     public class ConsolePage : WindowPage
     {
-        public override string Name { get => "C# Console"; set => base.Name = value; }
+        public override string Name { get => "C# Console"; }
 
         private ScriptEvaluator _evaluator;
         private readonly StringBuilder _sb = new StringBuilder();

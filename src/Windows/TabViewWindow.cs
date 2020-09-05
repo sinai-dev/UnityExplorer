@@ -26,6 +26,7 @@ namespace Explorer
         }
 
         public override void Init() { }
+
         public override void Update() 
         {
             while (TargetTabID >= WindowManager.Windows.Count)

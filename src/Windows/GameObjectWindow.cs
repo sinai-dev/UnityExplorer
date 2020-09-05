@@ -128,28 +128,22 @@ namespace Explorer
                     m_object.transform.localScale = m_frozenScale;
                 }
 
-                var list = new List<Transform>();
+                // update child objects
+                var childList = new List<Transform>();
                 for (int i = 0; i < m_object.transform.childCount; i++)
                 {
-                    list.Add(m_object.transform.GetChild(i));
+                    childList.Add(m_object.transform.GetChild(i));
                 }
-                list.Sort((a, b) => b.childCount.CompareTo(a.childCount));
-                m_children = list.ToArray();
+                childList.Sort((a, b) => b.childCount.CompareTo(a.childCount));
+                m_children = childList.ToArray();
 
                 ChildPages.ItemCount = m_children.Length;
 
-                var list2 = new List<Component>();
-                foreach (var comp in m_object.GetComponents(ReflectionHelpers.ComponentType))
-                {
-                    var ilType = comp.GetIl2CppType();
-                    if (ilType == ReflectionHelpers.TransformType)
-                    {
-                        continue;
-                    }
+                // update components
+                var compList = new Il2CppSystem.Collections.Generic.List<Component>();
+                m_object.GetComponentsInternal(ReflectionHelpers.ComponentType, true, false, true, false, compList);
 
-                    list2.Add(comp);
-                }
-                m_components = list2.ToArray();
+                m_components = compList.ToArray();
 
                 CompPages.ItemCount = m_components.Length;
             }

@@ -9,7 +9,7 @@ namespace Explorer
 {
     public abstract class WindowPage
     {
-        public virtual string Name { get; set; }
+        public virtual string Name { get; }
 
         public Vector2 scroll = Vector2.zero;
 

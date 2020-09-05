@@ -109,7 +109,7 @@ namespace Explorer
 
                     if (!equals && iObj is Il2CppSystem.Object iCurrent && window.Target is Il2CppSystem.Object iTarget)
                     {
-                        if (iCurrent.GetIl2CppType() != iTarget.GetIl2CppType())
+                        if (iCurrent.GetIl2CppType().FullName != iTarget.GetIl2CppType().FullName)
                         {
                             if (iCurrent is Transform transform)
                             {
