@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Explorer.CachedObjects
+namespace Explorer
 {
     public class CacheColor : CacheObjectBase
     {
@@ -79,7 +79,8 @@ namespace Explorer.CachedObjects
                 && float.TryParse(b, out float fB)
                 && float.TryParse(a, out float fA))
             {
-                Value = new Color(fR, fB, fG, fA);                
+                Value = new Color(fR, fB, fG, fA);
+                SetValue();
             }
         }
     }

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Explorer.CachedObjects
+namespace Explorer
 {
     public class CacheRect : CacheObjectBase
     {

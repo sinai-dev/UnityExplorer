@@ -9,8 +9,6 @@ namespace Explorer
 {
     public class CacheQuaternion : CacheObjectBase
     {
-        private Vector3 EulerAngle = Vector3.zero;
-
         private string x = "0";
         private string y = "0";
         private string z = "0";
@@ -19,11 +17,11 @@ namespace Explorer
         {
             base.UpdateValue();
 
-            EulerAngle = ((Quaternion)Value).eulerAngles;
+            var euler = ((Quaternion)Value).eulerAngles;
 
-            x = EulerAngle.x.ToString();
-            y = EulerAngle.y.ToString();
-            z = EulerAngle.z.ToString();
+            x = euler.x.ToString();
+            y = euler.y.ToString();
+            z = euler.z.ToString();
         }
 
         public override void DrawValue(Rect window, float width)

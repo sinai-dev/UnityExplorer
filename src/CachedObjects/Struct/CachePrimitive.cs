@@ -8,7 +8,7 @@ namespace Explorer
 {
     public class CachePrimitive : CacheObjectBase
     {
-        public enum PrimitiveTypes
+        public enum Types
         {
             Bool,
             Double,
@@ -20,20 +20,9 @@ namespace Explorer
 
         private string m_valueToString;
 
-        public PrimitiveTypes PrimitiveType;
+        public Types PrimitiveType;
 
-        public MethodInfo ParseMethod
-        {
-            get
-            {
-                if (m_parseMethod == null)
-                {
-                    m_parseMethod = Value.GetType().GetMethod("Parse", new Type[] { typeof(string) });
-                }
-                return m_parseMethod;
-            }
-        }
-
+        public MethodInfo ParseMethod => m_parseMethod ?? (m_parseMethod = Value.GetType().GetMethod("Parse", new Type[] { typeof(string) }));
         private MethodInfo m_parseMethod;
 
         public override void Init()
@@ -41,57 +30,38 @@ namespace Explorer
             if (Value == null)
             {
                 // this must mean it is a string. No other primitive type should be nullable.
-                PrimitiveType = PrimitiveTypes.String;
+                PrimitiveType = Types.String;
                 return;
             }
 
             m_valueToString = Value.ToString();
-            var type = Value.GetType();
 
+            var type = Value.GetType();
             if (type == typeof(bool))
             {
-                PrimitiveType = PrimitiveTypes.Bool;
+                PrimitiveType = Types.Bool;
             }
             else if (type == typeof(double))
             {
-                PrimitiveType = PrimitiveTypes.Double;
+                PrimitiveType = Types.Double;
             }
             else if (type == typeof(float))
             {
-                PrimitiveType = PrimitiveTypes.Float;
-            }
-            else if (IsInteger(type))
-            {
-                PrimitiveType = PrimitiveTypes.Int;
+                PrimitiveType = Types.Float;
             }
             else if (type == typeof(char))
             {
-                PrimitiveType = PrimitiveTypes.Char;
+                PrimitiveType = Types.Char;
+            }
+            else if (typeof(int).IsAssignableFrom(type))
+            {
+                PrimitiveType = Types.Int;
             }
             else
             {
-                PrimitiveType = PrimitiveTypes.String;
+                PrimitiveType = Types.String;
             }
         }
-
-        private static bool IsInteger(Type type)
-        {
-            // For our purposes, all types of int can be treated the same, including IntPtr.
-            return _integerTypes.Contains(type);
-        }
-
-        private static readonly HashSet<Type> _integerTypes = new HashSet<Type>
-        {
-            typeof(int),
-            typeof(uint),
-            typeof(short),
-            typeof(ushort),
-            typeof(long),
-            typeof(ulong),
-            typeof(byte),
-            typeof(sbyte),
-            typeof(IntPtr)
-        };
 
         public override void UpdateValue()
         {
@@ -102,11 +72,10 @@ namespace Explorer
 
         public override void DrawValue(Rect window, float width)
         {
-            if (PrimitiveType == PrimitiveTypes.Bool)
+            if (PrimitiveType == Types.Bool)
             {
                 var b = (bool)Value;
-                var color = $"<color={(b ? "lime>" : "red>")}";
-                var label = $"{color}{b}</color>";
+                var label = $"<color={(b ? "lime" : "red")}>{b}</color>";
 
                 if (CanWrite)
                 {
@@ -150,7 +119,7 @@ namespace Explorer
             }
         }
 
-        public void SetValueFromInput(string value)
+        public void SetValueFromInput(string valueString)
         {
             if (MemInfo == null)
             {
@@ -158,16 +127,15 @@ namespace Explorer
                 return;
             }
 
-            if (PrimitiveType == PrimitiveTypes.String)
+            if (PrimitiveType == Types.String)
             {
-                Value = value;
+                Value = valueString;
             }
             else
             {
                 try
                 {
-                    var val = ParseMethod.Invoke(null, new object[] { value });
-                    Value = val;                    
+                    Value = ParseMethod.Invoke(null, new object[] { valueString });
                 }
                 catch (Exception e)
                 {
