@@ -129,7 +129,9 @@ namespace Explorer
                 {
                     try
                     {
-                        var list = SceneManager.GetActiveScene().GetRootGameObjects().ToArray();
+                        var list = SceneManager.GetSceneByName(m_currentScene)
+                                    .GetRootGameObjects()
+                                    .ToArray();
 
                         foreach (var obj in list)
                         {
@@ -169,7 +171,8 @@ namespace Explorer
         private List<Transform> GetRootObjectsManual_Impl()
         {
             var allTransforms = Resources.FindObjectsOfTypeAll<Transform>()
-                       .Where(x => x.parent == null && x.gameObject.scene.name == m_currentScene)
+                       .Where(x => x.parent == null 
+                            && x.gameObject.scene.name == m_currentScene)
                        .ToList();
 
             return allTransforms;
