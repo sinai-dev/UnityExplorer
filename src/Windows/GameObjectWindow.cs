@@ -579,7 +579,7 @@ namespace Explorer
         private Vector3 TranslateControl(TranslateType mode, ref float amount, bool multByTime)
         {
             GUILayout.BeginHorizontal(null);
-            GUILayout.Label($"<color=cyan><b>{(m_localContext ? "Local " : "")} {mode}</b></color>:", 
+            GUILayout.Label($"<color=cyan><b>{(m_localContext ? "Local " : "")}{mode}</b></color>:", 
                 new GUILayoutOption[] { GUILayout.Width(m_localContext ? 110 : 65) });
 
             var transform = m_object.transform;

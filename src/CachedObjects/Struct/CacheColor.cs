@@ -28,7 +28,7 @@ namespace Explorer.CachedObjects
 
         public override void DrawValue(Rect window, float width)
         {
-            GUILayout.Label($"<color=yellow>Color</color>: {(Color)Value}", null);
+            GUILayout.Label($"<color=yellow>Color</color>: {((Color)Value).ToString()}", null);
 
             if (CanWrite)
             {
@@ -38,31 +38,31 @@ namespace Explorer.CachedObjects
                 GUILayout.BeginHorizontal(null);
                 GUILayout.Space(whitespace);
                 GUILayout.Label("R:", new GUILayoutOption[] { GUILayout.Width(30) });
-                r = GUILayout.TextField(r, new GUILayoutOption[] { GUILayout.Width(70) });
+                r = GUILayout.TextField(r, new GUILayoutOption[] { GUILayout.Width(120) });
                 GUILayout.EndHorizontal();
 
                 GUILayout.BeginHorizontal(null);
                 GUILayout.Space(whitespace);
                 GUILayout.Label("G:", new GUILayoutOption[] { GUILayout.Width(30) });
-                g = GUILayout.TextField(g, new GUILayoutOption[] { GUILayout.Width(70) });
+                g = GUILayout.TextField(g, new GUILayoutOption[] { GUILayout.Width(120) });
                 GUILayout.EndHorizontal();
 
                 GUILayout.BeginHorizontal(null);
                 GUILayout.Space(whitespace);
                 GUILayout.Label("B:", new GUILayoutOption[] { GUILayout.Width(30) });
-                b = GUILayout.TextField(b, new GUILayoutOption[] { GUILayout.Width(70) });
+                b = GUILayout.TextField(b, new GUILayoutOption[] { GUILayout.Width(120) });
                 GUILayout.EndHorizontal();
 
                 GUILayout.BeginHorizontal(null);
                 GUILayout.Space(whitespace);
                 GUILayout.Label("A:", new GUILayoutOption[] { GUILayout.Width(30) });
-                a = GUILayout.TextField(a, new GUILayoutOption[] { GUILayout.Width(70) });
+                a = GUILayout.TextField(a, new GUILayoutOption[] { GUILayout.Width(120) });
                 GUILayout.EndHorizontal();
 
                 // draw set value button
                 GUILayout.BeginHorizontal(null);
                 GUILayout.Space(whitespace);
-                if (GUILayout.Button("<color=lime>Apply</color>", new GUILayoutOption[] { GUILayout.Width(130) }))
+                if (GUILayout.Button("<color=lime>Apply</color>", new GUILayoutOption[] { GUILayout.Width(155) }))
                 {
                     SetValueFromInput();
                 }
