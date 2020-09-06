@@ -172,16 +172,6 @@ namespace Explorer
             GUILayout.Label("Name Contains:", new GUILayoutOption[] { GUILayout.Width(100) });
             m_searchInput = GUILayout.TextField(m_searchInput, new GUILayoutOption[] { GUILayout.Width(200) });
 
-            //GUI.skin.label.alignment = TextAnchor.MiddleRight;
-            //GUILayout.Label("Results per page:", new GUILayoutOption[] { GUILayout.Width(120) });
-            //var resultinput = m_limit.ToString();
-            //resultinput = GUILayout.TextField(resultinput, new GUILayoutOption[] { GUILayout.Width(55) });
-            //if (int.TryParse(resultinput, out int _i) && _i > 0)
-            //{
-            //    m_limit = _i;
-            //}
-            //GUI.skin.label.alignment = TextAnchor.UpperLeft;
-
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal(null);
@@ -263,7 +253,7 @@ namespace Explorer
             CacheResults(FindAllObjectsOfType(m_searchInput, m_typeInput));
         }
 
-        private List<object> FindAllObjectsOfType(string _search, string _type)
+        private List<object> FindAllObjectsOfType(string searchQuery, string typeName)
         {
             Il2CppSystem.Type searchType = null;
 
@@ -271,13 +261,18 @@ namespace Explorer
             {
                 try
                 {
-                    var findType = ReflectionHelpers.GetTypeByName(_type);
-                    searchType = Il2CppSystem.Type.GetType(findType.AssemblyQualifiedName);
-                    //MelonLogger.Log("Search type: " + findType.AssemblyQualifiedName);
+                    if (ReflectionHelpers.GetTypeByName(typeName) is Type t)
+                    {
+                        searchType = Il2CppSystem.Type.GetType(t.AssemblyQualifiedName);
+                    }
+                    else
+                    {
+                        throw new Exception($"Could not find a Type by the name of '{typeName}'!");
+                    }
                 }
                 catch (Exception e)
                 {
-                    MelonLogger.Log("Exception: " + e.GetType() + ", " + e.Message + "\r\n" + e.StackTrace);
+                    MelonLogger.Log("Exception getting Search Type: " + e.GetType() + ", " + e.Message);
                 }
             }
             else if (TypeMode == TypeFilter.Object)
@@ -295,7 +290,10 @@ namespace Explorer
 
             if (!ReflectionHelpers.ObjectType.IsAssignableFrom(searchType))
             {
-                MelonLogger.LogError("Your Custom Class Type must inherit from UnityEngine.Object!");
+                if (searchType != null)
+                {
+                    MelonLogger.LogWarning("Your Custom Class Type must inherit from UnityEngine.Object!");
+                }
                 return new List<object>();
             }
 
@@ -310,7 +308,7 @@ namespace Explorer
             {
                 if (i >= 2000) break;
 
-                if (_search != "" && !obj.name.ToLower().Contains(_search.ToLower()))
+                if (searchQuery != "" && !obj.name.ToLower().Contains(searchQuery.ToLower()))
                 {
                     continue;
                 }
@@ -387,7 +385,7 @@ namespace Explorer
         public static IEnumerable<object> GetInstanceClassScanner()
         {
             var query = AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(GetTypesSafe)
+                .SelectMany(ReflectionHelpers.GetTypesSafe)
                 .Where(t => t.IsClass && !t.IsAbstract && !t.ContainsGenericParameters);
 
             var flags = BindingFlags.Public | BindingFlags.Static;
@@ -430,7 +428,7 @@ namespace Explorer
                 {
                     var t = ReflectionHelpers.GetActualType(obj);
 
-                    if (!FilterName(t.FullName) || ReflectionHelpers.IsArray(t) || ReflectionHelpers.IsList(t))
+                    if (!FilterName(t.FullName) || ReflectionHelpers.IsEnumerable(t) || ReflectionHelpers.IsCppList(t))
                     {
                         continue;
                     }
@@ -438,13 +436,6 @@ namespace Explorer
                     yield return obj;
                 }
             }
-        }
-
-        public static IEnumerable<Type> GetTypesSafe(Assembly asm)
-        {
-            try { return asm.GetTypes(); }
-            catch (ReflectionTypeLoadException e) { return e.Types.Where(x => x != null); }
-            catch { return Enumerable.Empty<Type>(); }
         }
     }
 }

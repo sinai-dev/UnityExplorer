@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -12,7 +13,7 @@ namespace Explorer
     public class CppExplorer : MelonMod
     {
         public const string GUID = "com.sinai.cppexplorer";
-        public const string VERSION = "1.5.8";
+        public const string VERSION = "1.5.9";
         public const string AUTHOR = "Sinai";
 
         public const string NAME = "CppExplorer"

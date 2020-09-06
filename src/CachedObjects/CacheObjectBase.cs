@@ -115,6 +115,11 @@ namespace Explorer
         {
             CacheObjectBase holder;
 
+            // This is pretty ugly, could probably make a cleaner implementation.
+            // However, the only cleaner ways I can think of are slower and probably not worth it. 
+
+            // Note: the order is somewhat important.
+
             if (memberInfo is MethodInfo mi)
             {
                 if (CacheMethod.CanEvaluate(mi))
@@ -154,13 +159,14 @@ namespace Explorer
             {
                 holder = new CacheRect();
             }
-            else if (ReflectionHelpers.IsArray(valueType) || ReflectionHelpers.IsList(valueType))
-            {
-                holder = new CacheList();
-            }
+            // must check this before IsEnumerable
             else if (ReflectionHelpers.IsDictionary(valueType))
             {
                 holder = new CacheDictionary();
+            }
+            else if (ReflectionHelpers.IsEnumerable(valueType) || ReflectionHelpers.IsCppList(valueType))
+            {
+                holder = new CacheList();
             }
             else
             {

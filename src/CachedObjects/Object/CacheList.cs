@@ -218,6 +218,7 @@ namespace Explorer
 
                     if (GetCacheObject(obj, t) is CacheObjectBase cached)
                     {
+                        cached.UpdateValue();
                         list.Add(cached);
                     }
                     else
@@ -262,7 +263,7 @@ namespace Explorer
             }
 
             GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-            string btnLabel = "<color=yellow>[" + count + "] " + EntryType + "</color>";
+            string btnLabel = "<color=yellow>[" + count + "] " + EntryType.FullName + "</color>";
             if (GUILayout.Button(btnLabel, new GUILayoutOption[] { GUILayout.MaxWidth(window.width - ButtonWidthOffset) }))
             {
                 WindowManager.InspectObject(Value, out bool _);
@@ -305,12 +306,6 @@ namespace Explorer
                     GUILayout.Space(5);
                 }
 
-                //int offset = ArrayOffset * ArrayLimit;
-                //if (offset >= count)
-                //{
-                //    offset = 0;
-                //    ArrayOffset = 0;
-                //}
                 int offset = Pages.CalculateOffsetIndex();
 
                 for (int i = offset; i < offset + Pages.ItemsPerPage && i < count; i++)

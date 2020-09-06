@@ -74,12 +74,13 @@ namespace Explorer
                 return false;
         }
 
-        public static bool IsArray(Type t)
+        public static bool IsEnumerable(Type t)
         {
             return typeof(System.Collections.IEnumerable).IsAssignableFrom(t);
         }
 
-        public static bool IsList(Type t)
+        // Only Il2Cpp List needs this check. C# List is IEnumerable.
+        public static bool IsCppList(Type t)
         {
             if (t.IsGenericType)
             {
@@ -98,21 +99,21 @@ namespace Explorer
         {
             return t.IsGenericType
                 && t.GetGenericTypeDefinition() is Type typeDef
-                && typeDef.IsAssignableFrom(typeof(Il2CppSystem.Collections.Generic.Dictionary<,>));
+                && (typeDef.IsAssignableFrom(typeof(Il2CppSystem.Collections.Generic.Dictionary<,>))
+                    || typeDef.IsAssignableFrom(typeof(Dictionary<,>)));
         }
 
         public static Type GetTypeByName(string typeName)
         {
             foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
             {
-                try
+                foreach (var type in GetTypesSafe(asm))
                 {
-                    if (asm.GetType(typeName) is Type type)
+                    if (type.FullName == typeName)
                     {
                         return type;
                     }
                 }
-                catch { }
             }
 
             return null;
@@ -135,6 +136,13 @@ namespace Explorer
             }
 
             return obj.GetType();
+        }
+
+        public static IEnumerable<Type> GetTypesSafe(Assembly asm)
+        {
+            try { return asm.GetTypes(); }
+            catch (ReflectionTypeLoadException e) { return e.Types.Where(x => x != null); }
+            catch { return Enumerable.Empty<Type>(); }
         }
 
         public static Type[] GetAllBaseTypes(object obj)
