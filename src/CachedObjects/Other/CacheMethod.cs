@@ -212,6 +212,11 @@ namespace Explorer
                     cacheList.WhiteSpace = 0f;
                     cacheList.ButtonWidthOffset += 70f;
                 }
+                else if (m_cachedReturnValue is CacheDictionary cacheDict)
+                {
+                    cacheDict.WhiteSpace = 0f;
+                    cacheDict.ButtonWidthOffset += 70f;
+                }
                 m_cachedReturnValue.UpdateValue();
             }
             else

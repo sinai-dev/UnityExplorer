@@ -55,14 +55,14 @@ namespace Explorer
 
             // make generic dictionary from key and value type
             var dict = (IDictionary)Activator.CreateInstance(typeof(Dictionary<,>)
-                                            .MakeGenericType(TypeOfKeys, TypeOfValues));
+                                             .MakeGenericType(TypeOfKeys, TypeOfValues));
 
             // get keys and values
             var keys   = ValueType.GetProperty("Keys")  .GetValue(Value);
             var values = ValueType.GetProperty("Values").GetValue(Value);
 
-            // create a list to hold them
-            var keyList = new List<object>();
+            // create lists to hold them
+            var keyList   = new List<object>();
             var valueList = new List<object>();
 
             // get keys enumerator and store keys

@@ -56,7 +56,10 @@ namespace Explorer
                 {
                     _horizBarStyle = new GUIStyle();
                     _horizBarStyle.normal.background = Texture2D.whiteTexture;
-                    _horizBarStyle.margin = new RectOffset(0, 0, 4, 4);
+                    var rectOffset = new RectOffset();
+                    rectOffset.top = 4;
+                    rectOffset.bottom = 4;
+                    _horizBarStyle.margin = rectOffset;
                     _horizBarStyle.fixedHeight = 2;
                 }
 
@@ -73,7 +76,10 @@ namespace Explorer
                 {
                     _horizBarSmallStyle = new GUIStyle();
                     _horizBarSmallStyle.normal.background = Texture2D.whiteTexture;
-                    _horizBarSmallStyle.margin = new RectOffset(0, 0, 2, 2);
+                    var rectOffset = new RectOffset();
+                    rectOffset.top = 2;
+                    rectOffset.bottom = 2;
+                    _horizBarSmallStyle.margin = rectOffset;
                     _horizBarSmallStyle.fixedHeight = 1;
                 }
 
