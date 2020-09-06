@@ -16,7 +16,18 @@ namespace Explorer
     public class PageHelper
     {
         public int PageOffset { get; set; }
-        public int ItemsPerPage { get; set; } = 20;
+
+        public int ItemsPerPage
+        {
+            get => m_itemsPerPage;
+            set
+            {
+                m_itemsPerPage = value;
+                CalculateMaxOffset();
+            }
+        }
+        private int m_itemsPerPage = 20;
+
         public int ItemCount 
         {
             get => m_count;

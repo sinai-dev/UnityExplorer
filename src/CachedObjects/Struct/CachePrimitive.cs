@@ -8,58 +8,34 @@ namespace Explorer
 {
     public class CachePrimitive : CacheObjectBase
     {
-        public enum Types
-        {
-            Bool,
-            Double,
-            Float,
-            Int,
-            String,
-            Char
-        }
+        private bool m_isBool;
+        private bool m_isString;
 
         private string m_valueToString;
-
-        public Types PrimitiveType;
 
         public MethodInfo ParseMethod => m_parseMethod ?? (m_parseMethod = Value.GetType().GetMethod("Parse", new Type[] { typeof(string) }));
         private MethodInfo m_parseMethod;
 
         public override void Init()
         {
-            if (Value == null)
+            if (ValueType == null)
             {
-                // this must mean it is a string. No other primitive type should be nullable.
-                PrimitiveType = Types.String;
-                return;
+                ValueType = Value?.GetType();
+
+                // has to be a string at this point
+                if (ValueType == null)
+                {
+                    ValueType = typeof(string);
+                }
             }
 
-            m_valueToString = Value.ToString();
-
-            var type = Value.GetType();
-            if (type == typeof(bool))
+            if (ValueType == typeof(string))
             {
-                PrimitiveType = Types.Bool;
+                m_isString = true;
             }
-            else if (type == typeof(double))
+            else if (ValueType == typeof(bool))
             {
-                PrimitiveType = Types.Double;
-            }
-            else if (type == typeof(float))
-            {
-                PrimitiveType = Types.Float;
-            }
-            else if (type == typeof(char))
-            {
-                PrimitiveType = Types.Char;
-            }
-            else if (typeof(int).IsAssignableFrom(type))
-            {
-                PrimitiveType = Types.Int;
-            }
-            else
-            {
-                PrimitiveType = Types.String;
+                m_isBool = true;
             }
         }
 
@@ -72,7 +48,7 @@ namespace Explorer
 
         public override void DrawValue(Rect window, float width)
         {
-            if (PrimitiveType == Types.Bool)
+            if (m_isBool)
             {
                 var b = (bool)Value;
                 var label = $"<color={(b ? "lime" : "red")}>{b}</color>";
@@ -92,7 +68,8 @@ namespace Explorer
             }
             else
             {
-                GUILayout.Label("<color=yellow><i>" + PrimitiveType + "</i></color>", new GUILayoutOption[] { GUILayout.Width(50) });
+                // using ValueType.Name instead of ValueTypeName, because we only want the short name.
+                GUILayout.Label("<color=yellow><i>" + ValueType.Name + "</i></color>", new GUILayoutOption[] { GUILayout.Width(50) });
 
                 int dynSize = 25 + (m_valueToString.Length * 15);
                 var maxwidth = window.width - 300f;
@@ -127,7 +104,7 @@ namespace Explorer
                 return;
             }
 
-            if (PrimitiveType == Types.String)
+            if (m_isString)
             {
                 Value = valueString;
             }

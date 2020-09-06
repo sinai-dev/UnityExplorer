@@ -24,13 +24,23 @@ namespace Explorer
         {
             get
             {
-#if Release_2019
-                return GUI.scrollViewStates;
-#else 
-                return GUI.s_ScrollViewStates;
-#endif
+                if (m_scrollViewStatesInfo == null)
+                {
+                    try
+                    {
+                        m_scrollViewStatesInfo = typeof(GUI).GetProperty("scrollViewStates");
+                        if (m_scrollViewStatesInfo == null) throw new Exception();
+                    }
+                    catch
+                    {
+                        m_scrollViewStatesInfo = typeof(GUI).GetProperty("s_scrollViewStates");
+                    }
+                }
+
+                return (GenericStack)m_scrollViewStatesInfo?.GetValue(null, null);
             }
         }
+        private static PropertyInfo m_scrollViewStatesInfo;
 
         // ======= public methods ======= //   
 
@@ -47,24 +57,6 @@ namespace Explorer
                 last = GUILayoutUtility.kDummyRect;
             }
             return last;
-        }
-
-        public static float HorizontalScrollbar(Rect position, float value, float size, float leftValue, float rightValue, GUIStyle style)
-        {
-            return Scroller_Impl(position, value, size, leftValue, rightValue, style, 
-                GUI.skin.GetStyle(style.name + "thumb"), 
-                GUI.skin.GetStyle(style.name + "leftbutton"), 
-                GUI.skin.GetStyle(style.name + "rightbutton"), 
-                true);
-        }
-
-        public static float VerticalScrollbar(Rect position, float value, float size, float topValue, float bottomValue, GUIStyle style)
-        {
-            return Scroller_Impl(position, value, size, topValue, bottomValue, style, 
-                GUI.skin.GetStyle(style.name + "thumb"), 
-                GUI.skin.GetStyle(style.name + "upbutton"), 
-                GUI.skin.GetStyle(style.name + "downbutton"), 
-                false);
         }
 
         // Fix for BeginScrollView.
@@ -221,7 +213,7 @@ namespace Explorer
                     }
                     if (flag2 && horizontalScrollbar != GUIStyle.none)
                     {
-                        scrollPosition.x = HorizontalScrollbar(
+                        scrollPosition.x = HorizBar_Impl(
                             new Rect(
                                 position.x,
                                 position.yMax - horizontalScrollbar.fixedHeight,
@@ -243,7 +235,7 @@ namespace Explorer
                     }
                     if (flag && verticalScrollbar != GUIStyle.none)
                     {
-                        scrollPosition.y = VerticalScrollbar(
+                        scrollPosition.y = VertBar_Impl(
                             new Rect(
                                 screenRect.xMax + (float)verticalScrollbar.margin.left,
                                 screenRect.y,
@@ -277,6 +269,24 @@ namespace Explorer
             GUIClip.Push(screenRect, new Vector2(Mathf.Round(-scrollPosition.x - viewRect.x), Mathf.Round(-scrollPosition.y - viewRect.y)), Vector2.zero, false);
 
             return scrollPosition;
+        }
+
+        public static float HorizBar_Impl(Rect position, float value, float size, float leftValue, float rightValue, GUIStyle style)
+        {
+            return Scroller_Impl(position, value, size, leftValue, rightValue, style,
+                GUI.skin.GetStyle(style.name + "thumb"),
+                GUI.skin.GetStyle(style.name + "leftbutton"),
+                GUI.skin.GetStyle(style.name + "rightbutton"),
+                true);
+        }
+
+        public static float VertBar_Impl(Rect position, float value, float size, float topValue, float bottomValue, GUIStyle style)
+        {
+            return Scroller_Impl(position, value, size, topValue, bottomValue, style,
+                GUI.skin.GetStyle(style.name + "thumb"),
+                GUI.skin.GetStyle(style.name + "upbutton"),
+                GUI.skin.GetStyle(style.name + "downbutton"),
+                false);
         }
 
         private static void EndScrollView_Impl(bool handleScrollWheel)
@@ -337,7 +347,7 @@ namespace Explorer
                 rect2 = new Rect(position.x, position.yMax - rightButton.fixedHeight, position.width, rightButton.fixedHeight);
             }
 
-            value = Slider(position2, value, size, leftValue, rightValue, slider, thumb, horiz, controlID);
+            value = Slider_Impl(position2, value, size, leftValue, rightValue, slider, thumb, horiz, controlID);
 
             bool flag = Event.current.type == EventType.MouseUp;
             if (ScrollerRepeatButton_Impl(controlID, rect, leftButton))
@@ -363,7 +373,7 @@ namespace Explorer
             return value;
         }
 
-        public static float Slider(Rect position, float value, float size, float start, float end, GUIStyle slider, GUIStyle thumb, bool horiz, int id)
+        public static float Slider_Impl(Rect position, float value, float size, float start, float end, GUIStyle slider, GUIStyle thumb, bool horiz, int id)
         {
             if (id == 0)
             {

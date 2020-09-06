@@ -137,14 +137,11 @@ namespace Explorer
 
                 if (m_searchResults.Count > 0)
                 {
-                    //int offset = m_pageOffset * this.m_limit;
-                    //if (offset >= count) m_pageOffset = 0;
                     int offset = Pages.CalculateOffsetIndex();
 
                     for (int i = offset; i < offset + Pages.ItemsPerPage && i < count; i++)
                     {
                         m_searchResults[i].Draw(MainMenu.MainRect, 0f);
-                        //m_searchResults[i].DrawValue(MainMenu.MainRect);
                     }
                 }
                 else
@@ -377,33 +374,67 @@ namespace Explorer
 
         // ====== other ========
 
+        private static bool FilterName(string name)
+        {
+            // Don't really want these instances.
+            return !name.StartsWith("Mono") 
+                && !name.StartsWith("System") 
+                && !name.StartsWith("Il2CppSystem") 
+                && !name.StartsWith("Iced");
+        }
+
         // credit: ManlyMarco (RuntimeUnityEditor)
         public static IEnumerable<object> GetInstanceClassScanner()
         {
             var query = AppDomain.CurrentDomain.GetAssemblies()
-                .Where(x => !x.FullName.StartsWith("Mono"))
                 .SelectMany(GetTypesSafe)
                 .Where(t => t.IsClass && !t.IsAbstract && !t.ContainsGenericParameters);
+
+            var flags = BindingFlags.Public | BindingFlags.Static;
+            var flatFlags = flags | BindingFlags.FlattenHierarchy;
 
             foreach (var type in query)
             {
                 object obj = null;
                 try
                 {
-                    obj = type.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)?.GetValue(null, null);
-                }
-                catch
-                {
-                    try
+                    var pi = type.GetProperty("Instance", flags);
+
+                    if (pi == null)
                     {
-                        obj = type.GetField("Instance", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)?.GetValue(null);
+                        pi = type.GetProperty("Instance", flatFlags);
                     }
-                    catch
+
+                    if (pi != null)
                     {
+                        obj = pi.GetValue(null);
+                    }
+                    else
+                    {
+                        var fi = type.GetField("Instance", flags);
+
+                        if (fi == null)
+                        {
+                            fi = type.GetField("Instance", flatFlags);
+                        }
+
+                        if (fi != null)
+                        {
+                            obj = fi.GetValue(null);
+                        }
                     }
                 }
-                if (obj != null && !obj.ToString().StartsWith("Mono"))
+                catch { }
+
+                if (obj != null)
                 {
+                    var t = ReflectionHelpers.GetActualType(obj);
+
+                    if (!FilterName(t.FullName) || ReflectionHelpers.IsArray(t) || ReflectionHelpers.IsList(t))
+                    {
+                        continue;
+                    }
+
                     yield return obj;
                 }
             }

@@ -21,8 +21,6 @@ namespace Explorer
 
         private static bool m_getRootObjectsFailed;
 
-        // ----- Holders for GUI elements ----- //
-
         private static string m_currentScene = "";
 
         // gameobject list
@@ -33,8 +31,6 @@ namespace Explorer
         private bool m_searching = false;
         private string m_searchInput = "";
         private List<GameObjectCache> m_searchResults = new List<GameObjectCache>();
-
-        // ------------ Init and Update ------------ //
 
         public override void Init()
         {
@@ -126,9 +122,7 @@ namespace Explorer
             }
             else
             {
-                if (!manual && m_getRootObjectsFailed) return;
-
-                if (!manual)
+                if (!m_getRootObjectsFailed)
                 {
                     try
                     {
@@ -139,12 +133,19 @@ namespace Explorer
                     }
                     catch
                     {
+                        MelonLogger.Log("Exception getting root scene objects, falling back to backup method...");
+
                         m_getRootObjectsFailed = true;
                         allTransforms.AddRange(GetRootObjectsManual_Impl());
                     }
                 }
                 else
                 {
+                    if (!manual)
+                    {
+                        return;
+                    }
+
                     allTransforms.AddRange(GetRootObjectsManual_Impl());
                 }
             }

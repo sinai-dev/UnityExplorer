@@ -14,6 +14,7 @@ namespace Explorer
     {
         public object Value;
         public string ValueTypeName;
+        public Type ValueType;
 
         // Reflection Inspector only
         public MemberInfo MemInfo { get; set; }
@@ -79,11 +80,7 @@ namespace Explorer
         {
             Type type = null;
 
-            if (obj != null)
-            {
-                type = ReflectionHelpers.GetActualType(obj);
-            }
-            else if (memberInfo != null)
+            if (memberInfo != null)
             {
                 if (memberInfo is FieldInfo fi)
                 {
@@ -97,6 +94,10 @@ namespace Explorer
                 {
                     type = mi.ReturnType;
                 }
+            }
+            else if (obj != null)
+            {
+                type = ReflectionHelpers.GetActualType(obj);
             }
 
             if (type == null)
@@ -167,6 +168,7 @@ namespace Explorer
             }
 
             holder.Value = obj;
+            holder.ValueType = valueType;
             holder.ValueTypeName = valueType.FullName;
 
             if (memberInfo != null)
