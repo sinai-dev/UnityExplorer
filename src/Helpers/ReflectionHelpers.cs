@@ -113,13 +113,13 @@ namespace Explorer
             }
         }
 
-        public static Type GetTypeByName(string typeName)
+        public static Type GetTypeByName(string fullName)
         {
             foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
             {
                 foreach (var type in GetTypesSafe(asm))
                 {
-                    if (type.FullName == typeName)
+                    if (type.FullName == fullName)
                     {
                         return type;
                     }

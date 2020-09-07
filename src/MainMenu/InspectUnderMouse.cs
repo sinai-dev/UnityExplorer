@@ -17,7 +17,7 @@ namespace Explorer
         {
             if (CppExplorer.ShowMenu)
             {
-                if (Input.GetKey(KeyCode.LeftShift) && Input.GetMouseButtonDown(1))
+                if (InputHelper.GetKey(KeyCode.LeftShift) && InputHelper.GetMouseButtonDown(1))
                 {
                     EnableInspect = !EnableInspect;
                 }
@@ -35,7 +35,10 @@ namespace Explorer
 
         public static void InspectRaycast()
         {
-            Ray ray = UnityHelpers.MainCamera.ScreenPointToRay(Input.mousePosition);
+            if (!UnityHelpers.MainCamera)
+                return;
+
+            var ray = UnityHelpers.MainCamera.ScreenPointToRay(InputHelper.mousePosition);
 
             if (Physics.Raycast(ray, out RaycastHit hit, 1000f))
             {
@@ -43,7 +46,7 @@ namespace Explorer
 
                 m_objUnderMouseName = obj.transform.GetGameObjectPath();
 
-                if (Input.GetMouseButtonDown(0))
+                if (InputHelper.GetMouseButtonDown(0))
                 {
                     EnableInspect = false;
                     m_objUnderMouseName = "";
@@ -63,7 +66,7 @@ namespace Explorer
             {
                 if (m_objUnderMouseName != "")
                 {
-                    var pos = Input.mousePosition;
+                    var pos = InputHelper.mousePosition;
                     var rect = new Rect(
                         pos.x - (Screen.width / 2), // x
                         Screen.height - pos.y - 50, // y

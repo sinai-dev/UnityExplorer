@@ -172,80 +172,22 @@ namespace Explorer
         {
             try
             {
-                //var ilTypes = new List<Il2CppSystem.Type>();
-                var monoTypes = new Type[] { TypeOfKeys, TypeOfValues };
+                return Check(TypeOfKeys) && Check(TypeOfValues);
 
-                foreach (var type in monoTypes)
+                bool Check(Type type)
                 {
-                    var generic = typeof(Il2CppClassPointerStore<>).MakeGenericType(type);
-                    if (generic == null) return false;
+                    var ptr = (IntPtr)typeof(Il2CppClassPointerStore<>)
+                        .MakeGenericType(type)
+                        .GetField("NativeClassPtr")
+                        .GetValue(null);
 
-                    var genericPtr = (IntPtr)generic.GetField("NativeClassPtr").GetValue(null);
-                    if (genericPtr == null) return false;
-
-                    var classPtr = IL2CPP.il2cpp_class_get_type(genericPtr);
-                    if (classPtr == null) return false;
-
-                    var internalType = Il2CppSystem.Type.internal_from_handle(classPtr);
-                    if (internalType == null) return false;
-
-                    //ilTypes.Add(internalType);
+                    return Il2CppSystem.Type.internal_from_handle(IL2CPP.il2cpp_class_get_type(ptr)) is Il2CppSystem.Type;
                 }
             }
             catch 
             { 
                 return false; 
             }
-
-            // Should be fine if we got this far, but I'll leave the rest below commented out just in case.
-            return true;
-
-            //MelonLogger.Log("Got both generic types, continuing...");
-
-            //var dictIlClass = IL2CPP.GetIl2CppClass("mscorlib.dll", "System.Collections.Generic", "Dictionary`2");
-            //if (dictIlClass == null) return;
-
-            //MelonLogger.Log("Got base dictionary Il2Cpp type");
-
-            //var ilClassFromType = IL2CPP.il2cpp_class_get_type(dictIlClass);
-            //if (ilClassFromType == null) return;
-
-            //MelonLogger.Log("got IntPtr from base dictionary type");
-
-            //var internalHandle = Il2CppSystem.Type.internal_from_handle(ilClassFromType);
-            //if (internalHandle == null) return;
-
-            //var generic = internalHandle.MakeGenericType(new Il2CppReferenceArray<Il2CppSystem.Type>(new Il2CppSystem.Type[]
-            //{
-            //        ilTypes[0], ilTypes[1]
-            //}));
-            //if (generic == null) return;
-
-            //MelonLogger.Log("Made generic handle for our entry types");
-
-            //var nativeClassPtr = generic.TypeHandle.value;
-            //if (nativeClassPtr == null) return;
-
-            //MelonLogger.Log("Got the actual nativeClassPtr for the handle");
-
-            //var dictType = typeof(Il2CppSystem.Collections.Generic.Dictionary<,>).MakeGenericType(TypeOfKeys, TypeOfValues);
-            //if (dictType == null) return;
-
-            //MelonLogger.Log("Made the generic type for the dictionary");
-
-            //var pointerStoreType = typeof(Il2CppClassPointerStore<>).MakeGenericType(dictType);
-            //if (pointerStoreType == null) return;
-
-            //MelonLogger.Log("Made the generic PointerStoreType for our dict");
-
-            //var ptrToSet = IL2CPP.il2cpp_class_from_type(nativeClassPtr);
-            //if (ptrToSet == null) return;
-
-            //MelonLogger.Log("Got class from nativeClassPtr, setting value...");
-
-            //pointerStoreType.GetField("NativeClassPtr").SetValue(null, ptrToSet);
-
-            //MelonLogger.Log("Ok");
         }
 
         // ============= GUI Draw =============

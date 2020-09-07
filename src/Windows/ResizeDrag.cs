@@ -34,15 +34,17 @@ namespace Explorer
                     //var r = GUILayoutUtility.GetLastRect();
                     var r = GUIUnstrip.GetLastRect();
 
-                    Vector2 mouse = GUIUtility.ScreenToGUIPoint(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y));
+                    var mousePos = InputHelper.mousePosition;
 
-                    if (r.Contains(mouse) && Input.GetMouseButtonDown(0))
+                    Vector2 mouse = GUIUtility.ScreenToGUIPoint(new Vector2(mousePos.x, Screen.height - mousePos.y));
+
+                    if (r.Contains(mouse) && InputHelper.GetMouseButtonDown(0))
                     {
                         isResizing = true;
                         m_currentWindow = ID;
                         m_currentResize = new Rect(mouse.x, mouse.y, _rect.width, _rect.height);
                     }
-                    else if (!Input.GetMouseButton(0))
+                    else if (!InputHelper.GetMouseButton(0))
                     {
                         isResizing = false;
                     }

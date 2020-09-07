@@ -12,15 +12,10 @@ namespace Explorer
 {
     public class CppExplorer : MelonMod
     {
-        public const string GUID = "com.sinai.cppexplorer";
-        public const string VERSION = "1.6.2";
-        public const string AUTHOR = "Sinai";
-
-        public const string NAME = "CppExplorer"
-#if Release_Unity2018
-        + " (Unity 2018)"
-#endif
-        ;
+        public const string NAME    = "CppExplorer";
+        public const string VERSION = "1.6.3";
+        public const string AUTHOR  = "Sinai";
+        public const string GUID    = "com.sinai.cppexplorer";
 
         public static CppExplorer Instance { get; private set; }
 
@@ -79,7 +74,7 @@ namespace Explorer
         public override void OnUpdate()
         {
             // Check main toggle key input
-            if (Input.GetKeyDown(KeyCode.F7))
+            if (InputHelper.GetKeyDown(KeyCode.F7))
             {
                 ShowMenu = !ShowMenu;
             }
@@ -87,7 +82,7 @@ namespace Explorer
             if (ShowMenu)
             {
                 // Check Force-Unlock input
-                if (Input.GetKeyDown(KeyCode.LeftAlt))
+                if (InputHelper.GetKeyDown(KeyCode.LeftAlt))
                 {
                     ForceUnlockMouse = !ForceUnlockMouse;
                 }

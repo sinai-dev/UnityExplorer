@@ -15,7 +15,7 @@ namespace Explorer
         {
             get
             {
-                if (m_mainCamera == null)
+                if (!m_mainCamera)
                 {
                     m_mainCamera = Camera.main;
                 }
