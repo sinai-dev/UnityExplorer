@@ -19,6 +19,8 @@ namespace Explorer
         private ScriptEvaluator _evaluator;
         private readonly StringBuilder _sb = new StringBuilder();
 
+        private Vector2 inputAreaScroll;
+
         private string MethodInput = "";
         private string UsingInput = "";
 
@@ -124,7 +126,12 @@ MelonLogger.Log(""hello world"");";
             GUI.skin.label.alignment = TextAnchor.UpperLeft;
 
             GUILayout.Label("Enter code here as though it is a method body:", null);
-            MethodInput = GUILayout.TextArea(MethodInput, new GUILayoutOption[] { GUILayout.Height(250) });
+
+            inputAreaScroll = GUIUnstrip.BeginScrollView(inputAreaScroll, new GUILayoutOption[] { GUILayout.Height(250) });
+
+            MethodInput = GUILayout.TextArea(MethodInput, new GUILayoutOption[] { GUILayout.ExpandHeight(true) });
+
+            GUIUnstrip.EndScrollView();
 
             if (GUILayout.Button("<color=cyan><b>Execute</b></color>", null))
             {
