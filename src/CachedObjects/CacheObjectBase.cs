@@ -16,14 +16,13 @@ namespace Explorer
         public string ValueTypeName;
         public Type ValueType;
 
-        // Reflection Inspector only
         public MemberInfo MemInfo { get; set; }
         public Type DeclaringType { get; set; }
         public object DeclaringInstance { get; set; }
-        public string ReflectionException { get; set; }
-
         public int PropertyIndex { get; private set; }
         private string m_propertyIndexInput = "0";
+
+        public string ReflectionException { get; set; }
 
         public string RichTextName => m_richTextName ?? GetRichTextName();
         private string m_richTextName;

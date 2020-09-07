@@ -22,8 +22,6 @@ namespace Explorer
         private CacheObjectBase[] m_cachedMembersFiltered;
 
         public PageHelper Pages = new PageHelper();
-        //private int m_pageOffset;
-        //private int m_limitPerPage = 20;
 
         private bool m_autoUpdate = false;
         private string m_search = "";
@@ -69,6 +67,20 @@ namespace Explorer
 
         public override void Update()
         {
+            if (Target == null)
+            {
+                DestroyWindow();
+                return;
+            }
+            else if (Target is UnityEngine.Object uObj)
+            {
+                if (!uObj)
+                {
+                    DestroyWindow();
+                    return;
+                }
+            }
+
             m_cachedMembersFiltered = m_allCachedMembers.Where(x => ShouldProcessMember(x)).ToArray();
 
             if (m_autoUpdate)

@@ -48,12 +48,6 @@ namespace Explorer
 
         public bool GetObjectAsGameObject()
         {
-            if (Target == null)
-            {
-                MelonLogger.Log("Target is null!");
-                return false;
-            }
-
             var targetType = Target.GetType();
 
             if (targetType == typeof(GameObject))
@@ -108,6 +102,22 @@ namespace Explorer
         {
             try
             {
+                if (Target == null)
+                {
+                    MelonLogger.Log("Target is null!");
+                    DestroyWindow();
+                    return;
+                }
+                else if (Target is UnityEngine.Object uObj)
+                {
+                    if (!uObj)
+                    {
+                        MelonLogger.Log("Target was destroyed!");
+                        DestroyWindow();
+                        return;
+                    }
+                }
+
                 if (!m_object && !GetObjectAsGameObject())
                 {
                     throw new Exception("Object is null!");

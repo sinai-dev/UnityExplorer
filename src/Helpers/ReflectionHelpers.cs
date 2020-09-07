@@ -9,6 +9,8 @@ using UnhollowerRuntimeLib;
 using UnityEngine;
 using BF = System.Reflection.BindingFlags;
 using MelonLoader;
+using System.Collections;
+using Mono.CSharp;
 
 namespace Explorer
 {
@@ -76,31 +78,39 @@ namespace Explorer
 
         public static bool IsEnumerable(Type t)
         {
-            return typeof(System.Collections.IEnumerable).IsAssignableFrom(t);
+            return typeof(IEnumerable).IsAssignableFrom(t);
         }
 
         // Only Il2Cpp List needs this check. C# List is IEnumerable.
         public static bool IsCppList(Type t)
         {
-            if (t.IsGenericType)
+            if (t.IsGenericType && t.GetGenericTypeDefinition() is Type g)
             {
-                var generic = t.GetGenericTypeDefinition();
-
-                return generic.IsAssignableFrom(typeof(Il2CppSystem.Collections.Generic.List<>))
-                    || generic.IsAssignableFrom(typeof(Il2CppSystem.Collections.Generic.IList<>));
+                return typeof(Il2CppSystem.Collections.Generic.List<>).IsAssignableFrom(g)
+                    || typeof(Il2CppSystem.Collections.Generic.IList<>).IsAssignableFrom(g);
             }
             else
             {
-                return t.IsAssignableFrom(typeof(Il2CppSystem.Collections.IList));
+                return typeof(Il2CppSystem.Collections.IList).IsAssignableFrom(t);
             }
         }
 
         public static bool IsDictionary(Type t)
         {
-            return t.IsGenericType
-                && t.GetGenericTypeDefinition() is Type typeDef
-                && (typeDef.IsAssignableFrom(typeof(Il2CppSystem.Collections.Generic.Dictionary<,>))
-                    || typeDef.IsAssignableFrom(typeof(Dictionary<,>)));
+            if (typeof(IDictionary).IsAssignableFrom(t))
+            {
+                return true;
+            }
+
+            if (t.IsGenericType && t.GetGenericTypeDefinition() is Type g)
+            {
+                return typeof(Il2CppSystem.Collections.Generic.Dictionary<,>).IsAssignableFrom(g)
+                    || typeof(Il2CppSystem.Collections.Generic.IDictionary<,>).IsAssignableFrom(g);
+            }
+            else
+            {
+                return typeof(Il2CppSystem.Collections.IDictionary).IsAssignableFrom(t);
+            }
         }
 
         public static Type GetTypeByName(string typeName)

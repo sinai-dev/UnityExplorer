@@ -10,13 +10,13 @@ using System.Reflection;
 
 namespace Explorer
 {
-    public class CacheDictionary : CacheObjectBase
+    public class CacheDictionary : CacheObjectBase, IExpandHeight
     {
         public bool IsExpanded { get; set; }
-        public PageHelper Pages = new PageHelper();
+        public float WhiteSpace { get; set; } = 215f;
+        public float ButtonWidthOffset { get; set; } = 290f;
 
-        public float WhiteSpace = 215f;
-        public float ButtonWidthOffset = 290f;
+        public PageHelper Pages = new PageHelper();
 
         private CacheObjectBase[] m_cachedKeys;
         private CacheObjectBase[] m_cachedValues;
@@ -47,6 +47,8 @@ namespace Explorer
             set => m_iDictionary = value;
         }
         private IDictionary m_iDictionary;
+
+        // ========== Methods ==========
 
         // This is a bit janky due to Il2Cpp Dictionary not implementing IDictionary.
         private IDictionary Il2CppDictionaryToMono()
@@ -94,43 +96,36 @@ namespace Explorer
             return dict;
         }
 
-        // ========== Methods ==========
-
         private void GetGenericArguments()
         {
-            if (m_keysType == null || m_valuesType == null)
+            if (this.MemInfo != null)
             {
-                if (this.MemInfo != null)
+                Type memberType = null;
+                switch (this.MemInfo.MemberType)
                 {
-                    Type memberType = null;
-                    switch (this.MemInfo.MemberType)
-                    {
-                        case MemberTypes.Field:
-                            memberType = (MemInfo as FieldInfo).FieldType;
-                            break;
-                        case MemberTypes.Property:
-                            memberType = (MemInfo as PropertyInfo).PropertyType;
-                            break;
-                    }
-
-                    if (memberType != null && memberType.IsGenericType)
-                    {
-                        m_keysType = memberType.GetGenericArguments()[0];
-                        m_valuesType = memberType.GetGenericArguments()[1];
-                    }
+                    case MemberTypes.Field:
+                        memberType = (MemInfo as FieldInfo).FieldType;
+                        break;
+                    case MemberTypes.Property:
+                        memberType = (MemInfo as PropertyInfo).PropertyType;
+                        break;
                 }
-                else if (Value != null)
+
+                if (memberType != null && memberType.IsGenericType)
                 {
-                    var type = Value.GetType();
-                    if (type.IsGenericType)
-                    {
-                        m_keysType = type.GetGenericArguments()[0];
-                        m_valuesType = type.GetGenericArguments()[1];
-                    }
+                    m_keysType = memberType.GetGenericArguments()[0];
+                    m_valuesType = memberType.GetGenericArguments()[1];
                 }
             }
-
-            return;
+            else if (Value != null)
+            {
+                var type = Value.GetType();
+                if (type.IsGenericType)
+                {
+                    m_keysType = type.GetGenericArguments()[0];
+                    m_valuesType = type.GetGenericArguments()[1];
+                }
+            }
         }
 
         public override void UpdateValue()
@@ -258,15 +253,11 @@ namespace Explorer
                         GUI.skin.label.alignment = TextAnchor.MiddleCenter;
                         GUILayout.Label($"[{i}]", new GUILayoutOption[] { GUILayout.Width(30) });
 
-                        GUILayout.BeginHorizontal(new GUILayoutOption[] { GUILayout.MinWidth((window.width / 3) - 60f) });
                         GUILayout.Label("Key:", new GUILayoutOption[] { GUILayout.Width(40) });
                         key.DrawValue(window, (window.width / 2) - 30f);
-                        GUILayout.EndHorizontal();
 
-                        GUILayout.BeginHorizontal(null);
                         GUILayout.Label("Value:", new GUILayoutOption[] { GUILayout.Width(40) });
                         val.DrawValue(window, (window.width / 2) - 30f);
-                        GUILayout.EndHorizontal();
                     }
 
                 }

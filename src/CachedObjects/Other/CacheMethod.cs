@@ -18,28 +18,17 @@ namespace Explorer
         private ParameterInfo[] m_arguments;
         private string[] m_argumentInput;
 
-        public bool HasParameters
-        {
-            get
-            {
-                if (m_hasParams == null)
-                {
-                    m_hasParams = (MemInfo as MethodInfo).GetParameters().Length > 0;
-                }
-                return (bool)m_hasParams;
-            }
-        }
-        private bool? m_hasParams;
+        public bool HasParameters => m_arguments != null && m_arguments.Length > 0;
 
         public static bool CanEvaluate(MethodInfo mi)
         {
-            // generic type args not supported yet
+            // TODO generic args
             if (mi.GetGenericArguments().Length > 0)
             {
                 return false;
             }
 
-            // only primitive and string args supported
+            // primitive and string args supported
             foreach (var param in mi.GetParameters())
             {
                 if (!param.ParameterType.IsPrimitive && param.ParameterType != typeof(string))
@@ -64,7 +53,84 @@ namespace Explorer
         public override void UpdateValue()
         {
             //base.UpdateValue();
-        }        
+        }
+
+        private void Evaluate()
+        {
+            var mi = MemInfo as MethodInfo;
+
+            object ret = null;
+
+            if (!HasParameters)
+            {
+                ret = mi.Invoke(mi.IsStatic ? null : DeclaringInstance, new object[0]);
+                m_evaluated = true;
+            }
+            else
+            {
+                var parsedArgs = new List<object>();
+                for (int i = 0; i < m_arguments.Length; i++)
+                {
+                    var input = m_argumentInput[i];
+                    var type = m_arguments[i].ParameterType;
+
+                    if (type == typeof(string))
+                    {
+                        parsedArgs.Add(input);
+                    }
+                    else
+                    {
+                        try
+                        {
+                            if (type.GetMethod("Parse", new Type[] { typeof(string) }).Invoke(null, new object[] { input }) is object parsed)
+                            {
+                                parsedArgs.Add(parsed);
+                            }
+                            else
+                            {
+                                // try add a null arg i guess
+                                parsedArgs.Add(null);
+                            }
+
+                        }
+                        catch
+                        {
+                            MelonLogger.Log($"Unable to parse '{input}' to type '{type.Name}'");
+                            break;
+                        }
+                    }
+                }
+
+                try
+                {
+                    ret = mi.Invoke(mi.IsStatic ? null : DeclaringInstance, parsedArgs.ToArray());
+                    m_evaluated = true;
+                }
+                catch (Exception e)
+                {
+                    MelonLogger.Log($"Exception evaluating: {e.GetType()}, {e.Message}");
+                }
+            }
+
+            if (ret != null)
+            {
+                m_cachedReturnValue = GetCacheObject(ret);
+
+                if (m_cachedReturnValue is IExpandHeight expander)
+                {
+                    expander.WhiteSpace = 0f;
+                    expander.ButtonWidthOffset += 70f;
+                }
+
+                m_cachedReturnValue.UpdateValue();
+            }
+            else
+            {
+                m_cachedReturnValue = null;
+            }
+        }
+
+        // ==== GUI DRAW ====
 
         public override void DrawValue(Rect window, float width)
         {
@@ -124,15 +190,7 @@ namespace Explorer
             {
                 if (m_cachedReturnValue != null)
                 {
-                    try
-                    {
-                        m_cachedReturnValue.DrawValue(window, width);
-                    }
-                    catch (Exception e)
-                    {
-                        MelonLogger.Log("Exception drawing m_cachedReturnValue!");
-                        MelonLogger.Log(e.ToString());
-                    }
+                    m_cachedReturnValue.DrawValue(window, width);
                 }
                 else
                 {
@@ -146,83 +204,6 @@ namespace Explorer
             GUILayout.EndHorizontal();
 
             GUILayout.EndVertical();
-        }
-
-        private void Evaluate()
-        {
-            var mi = MemInfo as MethodInfo;
-
-            object ret = null;
-
-            if (!HasParameters)
-            {
-                ret = mi.Invoke(mi.IsStatic ? null : DeclaringInstance, new object[0]);
-                m_evaluated = true;
-            }
-            else
-            {
-                var arguments = new List<object>();
-                for (int i = 0; i < m_arguments.Length; i++)
-                {
-                    var input = m_argumentInput[i];
-                    var type = m_arguments[i].ParameterType;
-
-                    if (type == typeof(string))
-                    {
-                        arguments.Add(input);
-                    }
-                    else
-                    {
-                        try
-                        {
-                            if (type.GetMethod("Parse", new Type[] { typeof(string) }).Invoke(null, new object[] { input }) is object parsed)
-                            {
-                                arguments.Add(parsed);
-                            }
-                            else
-                            {
-                                throw new Exception();
-                            }
-
-                        }
-                        catch
-                        {
-                            MelonLogger.Log($"Unable to parse '{input}' to type '{type.Name}'");
-                            break;
-                        }
-                    }
-                }
-
-                if (arguments.Count == m_arguments.Length)
-                {
-                    ret = mi.Invoke(mi.IsStatic ? null : DeclaringInstance, arguments.ToArray());
-                    m_evaluated = true;
-                }
-                else
-                {
-                    MelonLogger.Log($"Did not invoke because {m_arguments.Length - arguments.Count} arguments could not be parsed!");
-                }
-            }
-
-            if (ret != null)
-            {
-                m_cachedReturnValue = GetCacheObject(ret);
-                if (m_cachedReturnValue is CacheList cacheList)
-                {
-                    cacheList.WhiteSpace = 0f;
-                    cacheList.ButtonWidthOffset += 70f;
-                }
-                else if (m_cachedReturnValue is CacheDictionary cacheDict)
-                {
-                    cacheDict.WhiteSpace = 0f;
-                    cacheDict.ButtonWidthOffset += 70f;
-                }
-                m_cachedReturnValue.UpdateValue();
-            }
-            else
-            {
-                m_cachedReturnValue = null;
-            }
         }
     }
 }

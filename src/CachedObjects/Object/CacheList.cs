@@ -8,13 +8,13 @@ using UnityEngine;
 
 namespace Explorer
 {
-    public class CacheList : CacheObjectBase
+    public class CacheList : CacheObjectBase, IExpandHeight
     {
         public bool IsExpanded { get; set; }
-        public PageHelper Pages = new PageHelper();
+        public float WhiteSpace { get; set; } = 215f;
+        public float ButtonWidthOffset { get; set; } = 290f;
 
-        public float WhiteSpace = 215f;
-        public float ButtonWidthOffset = 290f;
+        public PageHelper Pages = new PageHelper();
 
         private CacheObjectBase[] m_cachedEntries;
 
@@ -52,6 +52,7 @@ namespace Explorer
         {
             get => GetItemProperty();
         }
+
         private PropertyInfo m_itemProperty;
 
         // ========== Methods ==========
