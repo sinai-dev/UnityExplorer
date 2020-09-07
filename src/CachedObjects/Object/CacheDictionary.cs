@@ -56,10 +56,6 @@ namespace Explorer
         {
             // note: "ValueType" is the Dictionary itself, TypeOfValues is the 'Dictionary.Values' type.
 
-            // make generic dictionary from key and value type
-            var dict = (IDictionary)Activator.CreateInstance(typeof(Dictionary<,>)
-                                             .MakeGenericType(TypeOfKeys, TypeOfValues));
-
             // get keys and values
             var keys   = ValueType.GetProperty("Keys")  .GetValue(Value);
             var values = ValueType.GetProperty("Values").GetValue(Value);
@@ -68,33 +64,37 @@ namespace Explorer
             var keyList   = new List<object>();
             var valueList = new List<object>();
 
-            // get keys enumerator and store keys
-            var keyEnumerator = keys.GetType().GetMethod("GetEnumerator").Invoke(keys, null);
-            var keyCollectionType = keyEnumerator.GetType();
-            var keyMoveNext = keyCollectionType.GetMethod("MoveNext");
-            var keyCurrent = keyCollectionType.GetProperty("Current");
-            while ((bool)keyMoveNext.Invoke(keyEnumerator, null))
-            {
-                keyList.Add(keyCurrent.GetValue(keyEnumerator));
-            }
+            // store entries with reflection
+            EnumerateWithReflection(keys, keyList);
+            EnumerateWithReflection(values, valueList);
 
-            // get values enumerator and store values
-            var valueEnumerator = values.GetType().GetMethod("GetEnumerator").Invoke(values, null);
-            var valueCollectionType = valueEnumerator.GetType();
-            var valueMoveNext = valueCollectionType.GetMethod("MoveNext");
-            var valueCurrent = valueCollectionType.GetProperty("Current");
-            while ((bool)valueMoveNext.Invoke(valueEnumerator, null))
-            {
-                valueList.Add(valueCurrent.GetValue(valueEnumerator));
-            }
+            // make actual mono dictionary
+            var dict = (IDictionary)Activator.CreateInstance(typeof(Dictionary<,>)
+                                             .MakeGenericType(TypeOfKeys, TypeOfValues));
 
-            // finally iterate into actual dictionary
+            // finally iterate into dictionary
             for (int i = 0; i < keyList.Count; i++)
             {
                 dict.Add(keyList[i], valueList[i]);
             }
 
             return dict;
+        }
+
+        private void EnumerateWithReflection(object collection, List<object> list)
+        {
+            // invoke GetEnumerator
+            var enumerator = collection.GetType().GetMethod("GetEnumerator").Invoke(collection, null);
+            // get the type of it
+            var enumeratorType = enumerator.GetType();
+            // reflect MoveNext and Current
+            var moveNext = enumeratorType.GetMethod("MoveNext");
+            var current = enumeratorType.GetProperty("Current");
+            // iterate
+            while ((bool)moveNext.Invoke(enumerator, null))
+            {
+                list.Add(current.GetValue(enumerator));
+            }
         }
 
         private void GetGenericArguments()

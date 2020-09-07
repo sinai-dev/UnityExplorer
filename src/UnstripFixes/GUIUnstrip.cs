@@ -41,8 +41,7 @@ namespace Explorer
             }
         }
         private static PropertyInfo m_scrollViewStatesInfo;
-
-        // ======= public methods ======= //   
+        
 
         public static Rect GetLastRect()
         {
@@ -73,7 +72,6 @@ namespace Explorer
                 catch
                 {
                     ScrollFailed = true;
-                    return scroll;
                 }
             }
 
@@ -86,10 +84,8 @@ namespace Explorer
                 }
                 catch (Exception e)
                 {
-                    MelonLogger.Log("Exception on GUIUnstrip.BeginScrollView_ImplLayout: " + e.GetType() + ", " + e.Message + "\r\n" + e.StackTrace);
-
+                    MelonLogger.Log("Exception on manual BeginScrollView: " + e.GetType() + ", " + e.Message + "\r\n" + e.StackTrace);
                     ManualUnstripFailed = true;
-                    return scroll;
                 }
             }
 
@@ -112,8 +108,6 @@ namespace Explorer
                 EndScrollView_Impl(handleScrollWheel);
             }
         }
-
-        // ======= private methods ======= //
 
         private static Vector2 BeginScrollView_ImplLayout(Vector2 scrollPosition, bool alwaysShowHorizontal, bool alwaysShowVertical, 
             GUIStyle horizontalScrollbar, GUIStyle verticalScrollbar, GUIStyle background, params GUILayoutOption[] options)

@@ -50,7 +50,7 @@ namespace Explorer
             }
 
             GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-            if (GUILayout.Button("<color=yellow>" + label + "</color>", new GUILayoutOption[] { GUILayout.Width(width) }))
+            if (GUILayout.Button("<color=yellow>" + label + "</color>", new GUILayoutOption[] { GUILayout.Width(width - 15) }))
             {
                 WindowManager.InspectObject(Value, out bool _);
             }
