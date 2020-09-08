@@ -39,12 +39,14 @@ Requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be ins
 * Press F7 to show or hide the menu.
 * Simply browse through the scene, search for objects, etc, most of it is pretty self-explanatory.
 
+[![](img.png)](img.png)
+
+* <i>An overview of the different CppExplorer menus.</i>
+
 ### Scene Explorer
 
 * A simple menu which allows you to traverse the Transform heirarchy of the scene.
 * Click on a GameObject to set it as the current path, or <b>Inspect</b> it to send it to an Inspector Window.
-
-[![](https://i.imgur.com/BzTOCvp.png)](https://i.imgur.com/BzTOCvp.png)
 
 ### Inspectors
 
@@ -59,15 +61,11 @@ CppExplorer has two main inspector modes: <b>GameObject Inspector</b>, and <b>Re
 * Allows you to see the children and components on a GameObject.
 * Can use some basic GameObject Controls such as translating and rotating the object, destroy it, clone it, etc.
 
-[![](https://i.imgur.com/DiDvl0Q.png)](https://i.imgur.com/DiDvl0Q.png)
-
 ### Reflection Inspector
 
 * The Reflection Inspector is used for all other supported objects.
 * Allows you to inspect Properties, Fields and basic Methods, as well as set primitive values and evaluate primitive methods.
 * Can search and filter members for the ones you are interested in.
-
-[![](https://i.imgur.com/Pq127XD.png)](https://i.imgur.com/Pq127XD.png)
 
 ### Object Search
 
@@ -75,13 +73,9 @@ CppExplorer has two main inspector modes: <b>GameObject Inspector</b>, and <b>Re
 * Filter by name, type, etc.
 * For GameObjects and Transforms you can filter which scene they are found in too.
 
-[![](https://i.imgur.com/lK2RthM.png)](https://i.imgur.com/lK2RthM.png)
-
 ### C# REPL console
 
 * A simple C# REPL console, allows you to execute a method body on the fly.
-
-[![](https://i.imgur.com/5U4D1a8.png)](https://i.imgur.com/5U4D1a8.png)
 
 ### Inspect-under-mouse
 

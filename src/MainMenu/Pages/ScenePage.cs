@@ -192,7 +192,7 @@ namespace Explorer
             }
         }
 
-        // --------- GUI Draw Function --------- //        
+        // --------- GUI Draw Function --------- //
 
         public override void DrawWindow()
         {
@@ -215,11 +215,9 @@ namespace Explorer
 
                 GUILayout.EndVertical();
             }
-            catch (Exception e)
+            catch
             {
-                MelonLogger.Log("Exception drawing ScenePage! " + e.GetType() + ", " + e.Message);
-                MelonLogger.Log(e.StackTrace);
-                m_currentTransform = null;
+                // supress
             }
         }
 
@@ -229,39 +227,7 @@ namespace Explorer
 
             // Current Scene label
             GUILayout.Label("Current Scene:", new GUILayoutOption[] { GUILayout.Width(120) });
-            try
-            {
-                // Need to do 'ToList()' so the object isn't cleaned up by Il2Cpp GC.
-                var scenes = SceneManager.GetAllScenes().ToList();
-
-                if (scenes.Count > 1)
-                {
-                    int changeWanted = 0;
-                    if (GUILayout.Button("<", new GUILayoutOption[] { GUILayout.Width(30) }))
-                    {
-                        changeWanted = -1;
-                    }
-                    if (GUILayout.Button(">", new GUILayoutOption[] { GUILayout.Width(30) }))
-                    {
-                        changeWanted = 1;
-                    }
-                    if (changeWanted != 0)
-                    {
-                        int index = scenes.IndexOf(SceneManager.GetSceneByName(m_currentScene));
-                        index += changeWanted;
-                        if (index > scenes.Count - 1)
-                        {
-                            index = 0;
-                        }
-                        else if (index < 0)
-                        {
-                            index = scenes.Count - 1;
-                        }
-                        m_currentScene = scenes[index].name;
-                    }
-                }
-            }
-            catch { }
+            SceneChangeButtons();
             GUILayout.Label("<color=cyan>" + m_currentScene + "</color>", null); //new GUILayoutOption[] { GUILayout.Width(250) });
 
             GUILayout.EndHorizontal();
@@ -269,7 +235,9 @@ namespace Explorer
             // ----- GameObject Search -----
             GUILayout.BeginHorizontal(GUI.skin.box, null);
             GUILayout.Label("<b>Search Scene:</b>", new GUILayoutOption[] { GUILayout.Width(100) });
+
             m_searchInput = GUILayout.TextField(m_searchInput, null);
+
             if (GUILayout.Button("Search", new GUILayoutOption[] { GUILayout.Width(80) }))
             {
                 Search();
@@ -277,6 +245,39 @@ namespace Explorer
             GUILayout.EndHorizontal();
 
             GUILayout.Space(5);
+        }
+
+        private void SceneChangeButtons()
+        {
+            // Need to do 'ToList()' so the object isn't cleaned up by Il2Cpp GC.
+            var scenes = SceneManager.GetAllScenes().ToList();
+
+            if (scenes.Count > 1)
+            {
+                int changeWanted = 0;
+                if (GUILayout.Button("<", new GUILayoutOption[] { GUILayout.Width(30) }))
+                {
+                    changeWanted = -1;
+                }
+                if (GUILayout.Button(">", new GUILayoutOption[] { GUILayout.Width(30) }))
+                {
+                    changeWanted = 1;
+                }
+                if (changeWanted != 0)
+                {
+                    int index = scenes.IndexOf(SceneManager.GetSceneByName(m_currentScene));
+                    index += changeWanted;
+                    if (index > scenes.Count - 1)
+                    {
+                        index = 0;
+                    }
+                    else if (index < 0)
+                    {
+                        index = scenes.Count - 1;
+                    }
+                    m_currentScene = scenes[index].name;
+                }
+            }
         }
 
         private void DrawPageButtons()

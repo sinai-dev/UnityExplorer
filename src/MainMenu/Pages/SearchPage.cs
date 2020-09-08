@@ -385,8 +385,8 @@ namespace Explorer
         public static IEnumerable<object> GetInstanceClassScanner()
         {
             var query = AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(ReflectionHelpers.GetTypesSafe)
-                .Where(t => t.IsClass && !t.IsAbstract && !t.ContainsGenericParameters);
+                        .SelectMany(t => t.TryGetTypes())
+                        .Where(t => t.IsClass && !t.IsAbstract && !t.ContainsGenericParameters);
 
             var flags = BindingFlags.Public | BindingFlags.Static;
             var flatFlags = flags | BindingFlags.FlattenHierarchy;
