@@ -97,12 +97,11 @@ CppExplorer can force the mouse to be visible and unlocked when the menu is open
 If you'd like to build this yourself, everything you need (other than MelonLoader) is included with this repository, there is no need for recursive cloning etc.
 
 1. Install MelonLoader for your game.
-2. Download this repository and open the `CppExplorer.sln` file in the `src` folder.
-3. In Visual Studio, right-click the CppExplorer C# Project in the solution browser and click "Unload Project".
-4. Right-click the "CppExplorer (unloaded)" and select "Edit Project File".
-5. Scroll down until you see the `<ItemGroup>` containing the References.
-6. Fix all of the paths in the `..\Steam\` directory for your game (use the full path if you need to).
-7. Reload the project and everything should be working, you can now build and run it.
+2. Open the `src\CppExplorer.csproj` file in a text editor.
+3. Scroll down until you see the `<ItemGroup>` containing the References.
+4. Fix all of the paths in the `..\Steam\` directory for your game (use the full path if you need to).
+5. Open the `src\CppExplorer.sln` project and build it.
+6. The dll is built to the `Release\` folder in the root of the repository.
 
 ## Credits
 
@@ -110,4 +109,4 @@ Written by Sinai.
 
 Thanks to:
 * [ManlyMarco](https://github.com/ManlyMarco) for their [Runtime Unity Editor](https://github.com/ManlyMarco/RuntimeUnityEditor), which I used for the REPL Console and the "Find instances" snippet, and the UI style.
-* [denikson](https://github.com/denikson) for [mcs-unity](https://github.com/denikson/mcs-unity). I commented out the `SkipVisibilityExt` constructor in `mcs.dll` since it was causing an exception with the Hook it attempted.
+* [denikson](https://github.com/denikson) for [mcs-unity](https://github.com/denikson/mcs-unity). I commented out the `SkipVisibilityExt` constructor since it was causing an exception with the Hook it attempted.
