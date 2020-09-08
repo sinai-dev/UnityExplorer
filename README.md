@@ -16,7 +16,7 @@
 
 ### Known issues
 * CppExplorer may experience a `MissingMethodException` when trying to use certain UnityEngine methods. If you experience this, please open an issue and I will do my best to fix it.
-* Reflection may fail with certain types (eg `Nullable<T>`, some Dictionary types, etc). Please see [Il2CppAssemblyUnhollower](https://github.com/knah/Il2CppAssemblyUnhollower#known-issues) for more details.
+* Reflection may fail with certain types (eg. `Nullable<T>`, some Dictionary types, etc). Please see [Il2CppAssemblyUnhollower](https://github.com/knah/Il2CppAssemblyUnhollower#known-issues) for more details.
 * Scrolling with mouse wheel in the CppExplorer menu may not work on all games at the moment.
 
 ## How to install
