@@ -9,6 +9,8 @@ namespace Explorer
 {
     public class CacheQuaternion : CacheObjectBase
     {
+        private bool IsExpanded;
+
         private string x = "0";
         private string y = "0";
         private string z = "0";
@@ -26,9 +28,27 @@ namespace Explorer
 
         public override void DrawValue(Rect window, float width)
         {
+            if (CanWrite)
+            {
+                if (!IsExpanded)
+                {
+                    if (GUILayout.Button("v", new GUILayoutOption[] { GUILayout.Width(25) }))
+                    {
+                        IsExpanded = true;
+                    }
+                }
+                else
+                {
+                    if (GUILayout.Button("^", new GUILayoutOption[] { GUILayout.Width(25) }))
+                    {
+                        IsExpanded = false;
+                    }
+                }
+            }
+
             GUILayout.Label($"<color=yellow>Quaternion</color>: {((Quaternion)Value).eulerAngles.ToString()}", null);
 
-            if (CanWrite)
+            if (CanWrite && IsExpanded)
             {
                 GUILayout.EndHorizontal();
                 var whitespace = window.width - width - 90;

@@ -9,6 +9,8 @@ namespace Explorer
 {
     public class CacheColor : CacheObjectBase
     {
+        private bool IsExpanded;
+
         private string r = "0";
         private string g = "0";
         private string b = "0";
@@ -28,9 +30,30 @@ namespace Explorer
 
         public override void DrawValue(Rect window, float width)
         {
-            GUILayout.Label($"<color=yellow>Color</color>: {((Color)Value).ToString()}", null);
-
             if (CanWrite)
+            {
+                if (!IsExpanded)
+                {
+                    if (GUILayout.Button("v", new GUILayoutOption[] { GUILayout.Width(25) }))
+                    {
+                        IsExpanded = true;
+                    }
+                }
+                else
+                {
+                    if (GUILayout.Button("^", new GUILayoutOption[] { GUILayout.Width(25) }))
+                    {
+                        IsExpanded = false;
+                    }
+                }
+            }
+
+            var c = (Color)Value;
+            GUI.color = c;
+            GUILayout.Label($"<color=yellow>Color:</color> {c.ToString()}", null);
+            GUI.color = Color.white;
+
+            if (CanWrite && IsExpanded)
             {
                 GUILayout.EndHorizontal();
                 var whitespace = window.width - width - 90;

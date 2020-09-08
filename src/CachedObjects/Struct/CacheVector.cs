@@ -10,6 +10,8 @@ namespace Explorer
 {
     public class CacheVector : CacheObjectBase
     {
+        private bool IsExpanded;
+
         public int VectorSize = 2;
 
         private string x = "0";
@@ -63,9 +65,27 @@ namespace Explorer
 
         public override void DrawValue(Rect window, float width)
         {
+            if (CanWrite)
+            {
+                if (!IsExpanded)
+                {
+                    if (GUILayout.Button("v", new GUILayoutOption[] { GUILayout.Width(25) }))
+                    {
+                        IsExpanded = true;
+                    }
+                }
+                else
+                {
+                    if (GUILayout.Button("^", new GUILayoutOption[] { GUILayout.Width(25) }))
+                    {
+                        IsExpanded = false;
+                    }
+                }
+            }
+
             GUILayout.Label($"<color=yellow>Vector{VectorSize}</color>: {(string)m_toStringMethod.Invoke(Value, new object[0])}", null);            
 
-            if (CanWrite)
+            if (CanWrite && IsExpanded)
             {
                 GUILayout.EndHorizontal();
                 var whitespace = window.width - width - 90;

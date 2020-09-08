@@ -13,7 +13,7 @@ namespace Explorer
     public class CppExplorer : MelonMod
     {
         public const string NAME    = "CppExplorer";
-        public const string VERSION = "1.6.4";
+        public const string VERSION = "1.6.5";
         public const string AUTHOR  = "Sinai";
         public const string GUID    = "com.sinai.cppexplorer";
 
@@ -50,7 +50,7 @@ namespace Explorer
         {
             Instance = this;
 
-            InputHelper.CheckInput();
+            InputHelper.Init();
 
             new MainMenu();
             new WindowManager();
