@@ -94,7 +94,7 @@ CppExplorer can force the mouse to be visible and unlocked when the menu is open
 
 ## Building
 
-Everything you need (other than MelonLoader) is included with this repository, there is no need for recursive cloning etc.
+If you'd like to build this yourself, everything you need (other than MelonLoader) is included with this repository, there is no need for recursive cloning etc.
 
 1. Install MelonLoader for your game.
 2. Download this repository and open the `CppExplorer.sln` file in the `src` folder.
