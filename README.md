@@ -19,12 +19,6 @@
 * Scrolling with mouse wheel in the CppExplorer menu may not work on all games at the moment.
 
 ## Features
-* Scene hierarchy explorer
-* Search loaded assets with filters
-* Traverse and manipulate GameObjects
-* Generic Reflection inspector
-* C# REPL Console
-* Inspect-under-mouse
 
 ## How to install
 
@@ -39,9 +33,17 @@ Requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be ins
 * Press F7 to show or hide the menu.
 * Simply browse through the scene, search for objects, etc, most of it is pretty self-explanatory.
 
+### Features
 [![](img.png)](img.png)
 
-* <i>An overview of the different CppExplorer menus.</i>
+<i>An overview of the different CppExplorer menus.</i>
+
+* Scene hierarchy explorer
+* Search loaded assets with filters
+* Traverse and manipulate GameObjects
+* Generic Reflection inspector
+* C# REPL Console
+* Inspect-under-mouse
 
 ### Scene Explorer
 
