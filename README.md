@@ -18,8 +18,6 @@
 * CppExplorer may experience a `MissingMethodException` when trying to use certain UnityEngine methods. If you experience this, please open an issue and I will do my best to fix it.
 * Scrolling with mouse wheel in the CppExplorer menu may not work on all games at the moment.
 
-## Features
-
 ## How to install
 
 Requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be installed for your game.
