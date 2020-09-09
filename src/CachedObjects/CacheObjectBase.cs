@@ -19,8 +19,12 @@ namespace Explorer
         public MemberInfo MemInfo { get; set; }
         public Type DeclaringType { get; set; }
         public object DeclaringInstance { get; set; }
-        public int PropertyIndex { get; private set; }
-        private string m_propertyIndexInput = "0";
+
+        public bool HasParameters => m_arguments != null && m_arguments.Length > 0;
+        public bool m_evaluated = false;
+        public bool m_isEvaluating;
+        public ParameterInfo[] m_arguments = new ParameterInfo[0];
+        public string[] m_argumentInput = new string[0];
 
         public string ReflectionException { get; set; }
 
@@ -43,7 +47,6 @@ namespace Explorer
         // ===== Abstract/Virtual Methods ===== //
 
         public virtual void Init() { }
-
         public abstract void DrawValue(Rect window, float width);
 
         // ===== Static Methods ===== //
@@ -114,12 +117,21 @@ namespace Explorer
         {
             CacheObjectBase holder;
 
+            var pi = memberInfo as PropertyInfo;
+            var mi = memberInfo as MethodInfo;
+
+            // if PropertyInfo, check if can process args
+            if (pi != null && !CanProcessArgs(pi.GetIndexParameters()))
+            {
+                return null;
+            }
+
             // This is pretty ugly, could probably make a cleaner implementation.
             // However, the only cleaner ways I can think of are slower and probably not worth it. 
 
             // Note: the order is somewhat important.
 
-            if (memberInfo is MethodInfo mi)
+            if (mi != null)
             {
                 if (CacheMethod.CanEvaluate(mi))
                 {
@@ -181,7 +193,21 @@ namespace Explorer
                 holder.MemInfo = memberInfo;
                 holder.DeclaringType = memberInfo.DeclaringType;
                 holder.DeclaringInstance = declaringInstance;
+            }
 
+            if (pi != null)
+            {
+                holder.m_arguments = pi.GetIndexParameters();
+            }
+            else if (mi != null)
+            {
+                holder.m_arguments = mi.GetParameters();
+            }
+
+            holder.m_argumentInput = new string[holder.m_arguments.Length];
+
+            if (!holder.HasParameters)
+            {
                 holder.UpdateValue();
             }
 
@@ -190,11 +216,57 @@ namespace Explorer
             return holder;
         }
 
+        public static bool CanProcessArgs(ParameterInfo[] parameters)
+        {
+            foreach (var param in parameters)
+            {
+                if (!param.ParameterType.IsPrimitive && param.ParameterType != typeof(string))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         // ======== Instance Methods =========
+
+        public object[] ParseArguments()
+        {
+            var parsedArgs = new List<object>();
+            for (int i = 0; i < m_arguments.Length; i++)
+            {
+                var input = m_argumentInput[i];
+                var type = m_arguments[i].ParameterType;
+
+                if (type == typeof(string))
+                {
+                    parsedArgs.Add(input);
+                }
+                else
+                {
+                    try
+                    {
+                        parsedArgs.Add(type.GetMethod("Parse", new Type[] { typeof(string) }).Invoke(null, new object[] { input }));
+                    }
+                    catch
+                    {
+                        //MelonLogger.Log($"Unable to parse '{input}' to type '{type.Name}'");
+
+                        // try add a null arg i guess
+                        parsedArgs.Add(null);
+
+                        //break;
+                    }
+                }
+            }
+
+            return parsedArgs.ToArray();
+        }
 
         public virtual void UpdateValue()
         {
-            if (MemInfo == null || !string.IsNullOrEmpty(ReflectionException))
+            if (MemInfo == null)
             {
                 return;
             }
@@ -209,13 +281,11 @@ namespace Explorer
                 else if (MemInfo.MemberType == MemberTypes.Property)
                 {
                     var pi = MemInfo as PropertyInfo;
-                    bool isStatic = pi.GetAccessors()[0].IsStatic;
-                    var target = isStatic ? null : DeclaringInstance;
+                    var target = pi.GetAccessors()[0].IsStatic ? null : DeclaringInstance;
 
-                    if (pi.GetIndexParameters().Length > 0)
+                    if (HasParameters)
                     {
-                        var indexes = new object[] { PropertyIndex };
-                        Value = pi.GetValue(target, indexes);
+                        Value = pi.GetValue(target, ParseArguments());
                     }
                     else
                     {
@@ -224,6 +294,8 @@ namespace Explorer
                 }
 
                 ReflectionException = null;
+                m_evaluated = true;
+                m_isEvaluating = false;
             }
             catch (Exception e)
             {
@@ -244,10 +316,9 @@ namespace Explorer
                 {
                     var pi = MemInfo as PropertyInfo;
 
-                    if (pi.GetIndexParameters().Length > 0)
+                    if (HasParameters)
                     {
-                        var indexes = new object[] { PropertyIndex };
-                        pi.SetValue(pi.GetAccessors()[0].IsStatic ? null : DeclaringInstance, Value, indexes);
+                        pi.SetValue(pi.GetAccessors()[0].IsStatic ? null : DeclaringInstance, Value, ParseArguments());
                     }
                     else
                     {
@@ -264,6 +335,7 @@ namespace Explorer
         // ========= Instance Gui Draw ==========
 
         public const float MAX_LABEL_WIDTH = 400f;
+        public const string EVALUATE_LABEL = "<color=lime>Evaluate</color>";
 
         public static void ClampLabelWidth(Rect window, ref float labelWidth)
         {
@@ -282,16 +354,83 @@ namespace Explorer
 
             if (MemInfo != null)
             {
-                var name = RichTextName;
-                if (MemInfo is PropertyInfo pi && pi.GetIndexParameters().Length > 0)
-                {
-                    name += $"[{PropertyIndex}]";
-                }
-
-                GUILayout.Label(name, new GUILayoutOption[] { GUILayout.Width(labelWidth) });
+                GUILayout.Label(RichTextName, new GUILayoutOption[] { GUILayout.Width(labelWidth) });
             }
             else
             {
+                GUILayout.Space(labelWidth);
+            }
+
+            var cm = this as CacheMethod;
+
+            if (HasParameters)
+            {
+                GUILayout.BeginVertical(null);
+
+                if (m_isEvaluating)
+                {
+                    for (int i = 0; i < m_arguments.Length; i++)
+                    {
+                        var name = m_arguments[i].Name;
+                        var input = m_argumentInput[i];
+                        var type = m_arguments[i].ParameterType.Name;
+
+                        GUILayout.BeginHorizontal(null);
+                        GUILayout.Label(i.ToString(), new GUILayoutOption[] { GUILayout.Width(30) });
+                        m_argumentInput[i] = GUILayout.TextField(input, new GUILayoutOption[] { GUILayout.Width(150) });
+                        GUILayout.Label("<color=#2df7b2>" + type + "</color> <color=cyan>" + name + "</color>", null);
+                        GUILayout.EndHorizontal();
+                    }
+
+                    GUILayout.BeginHorizontal(null);
+                    if (cm != null)
+                    {
+                        if (GUILayout.Button(EVALUATE_LABEL, new GUILayoutOption[] { GUILayout.Width(70) }))
+                        {
+                            cm.Evaluate();
+                        }
+                    }
+                    else
+                    {
+                        if (GUILayout.Button(EVALUATE_LABEL, new GUILayoutOption[] { GUILayout.Width(70) }))
+                        {
+                            UpdateValue();
+                        }
+                    }
+                    
+                    if (GUILayout.Button("Cancel", new GUILayoutOption[] { GUILayout.Width(70) }))
+                    {
+                        m_isEvaluating = false;
+                    }
+                    GUILayout.EndHorizontal();
+                }
+                else
+                {
+                    if (GUILayout.Button($"Evaluate ({m_arguments.Length} params)", new GUILayoutOption[] { GUILayout.Width(150) }))
+                    {
+                        m_isEvaluating = true;
+                    }
+                }
+
+                GUILayout.EndVertical();
+
+                // new line and space
+                GUILayout.EndHorizontal();
+                GUILayout.BeginHorizontal(null);
+                GUILayout.Space(labelWidth);
+            }
+            else if (cm != null)
+            {
+                //GUILayout.BeginHorizontal(null);
+
+                if (GUILayout.Button(EVALUATE_LABEL, new GUILayoutOption[] { GUILayout.Width(70) }))
+                {
+                    cm.Evaluate();
+                }
+
+                // new line and space
+                GUILayout.EndHorizontal();
+                GUILayout.BeginHorizontal(null);
                 GUILayout.Space(labelWidth);
             }
 
@@ -305,30 +444,6 @@ namespace Explorer
             }
             else
             {
-                if (MemInfo is PropertyInfo pi && pi.GetIndexParameters().Length > 0)
-                {
-                    GUILayout.Label("index:", new GUILayoutOption[] { GUILayout.Width(50) });
-
-                    m_propertyIndexInput = GUILayout.TextField(m_propertyIndexInput, new GUILayoutOption[] { GUILayout.Width(100) });
-                    if (GUILayout.Button("Set", new GUILayoutOption[] { GUILayout.Width(60) }))
-                    {
-                        if (int.TryParse(m_propertyIndexInput, out int i))
-                        {
-                            PropertyIndex = i;
-                            UpdateValue();
-                        }
-                        else
-                        {
-                            MelonLogger.Log($"Could not parse '{m_propertyIndexInput}' to an int!");
-                        }
-                    }
-
-                    // new line and space
-                    GUILayout.EndHorizontal();
-                    GUILayout.BeginHorizontal(null);
-                    GUILayout.Space(labelWidth);
-                }
-
                 DrawValue(window, window.width - labelWidth - 90);
             }
         }
@@ -348,15 +463,15 @@ namespace Explorer
 
             m_richTextName = $"<color=#2df7b2>{MemInfo.DeclaringType.Name}</color>.<color={memberColor}>{MemInfo.Name}</color>";
 
-            if (MemInfo is MethodInfo mi)
+            if (m_arguments.Length > 0)
             {
                 m_richTextName += "(";
                 var _params = "";
-                foreach (var param in mi.GetParameters())
+                foreach (var param in m_arguments)
                 {
                     if (_params != "") _params += ", ";
 
-                    _params += $"<color=#a6e9e9>{param.Name}</color>";
+                    _params += $"<color=#2df7b2>{param.ParameterType.Name}</color> <color=#a6e9e9>{param.Name}</color>";
                 }
                 m_richTextName += _params;
                 m_richTextName += ")";

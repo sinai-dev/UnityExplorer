@@ -8,10 +8,8 @@ using UnityEngine;
 
 namespace Explorer
 {
-    public class CacheVector : CacheObjectBase
+    public class CacheVector : CacheObjectBase, IExpandHeight
     {
-        private bool IsExpanded;
-
         public int VectorSize = 2;
 
         private string x = "0";
@@ -20,6 +18,10 @@ namespace Explorer
         private string w = "0";
 
         private MethodInfo m_toStringMethod;
+
+        public bool IsExpanded { get; set; }
+        public float WhiteSpace { get; set; } = 215f;
+        public float ButtonWidthOffset { get; set; } = 290f;
 
         public override void Init()
         {
@@ -83,12 +85,16 @@ namespace Explorer
                 }
             }
 
-            GUILayout.Label($"<color=yellow>Vector{VectorSize}</color>: {(string)m_toStringMethod.Invoke(Value, new object[0])}", null);            
+            GUILayout.Label($"<color=#2df7b2>Vector{VectorSize}</color>: {(string)m_toStringMethod.Invoke(Value, new object[0])}", null);            
 
             if (CanWrite && IsExpanded)
             {
                 GUILayout.EndHorizontal();
-                var whitespace = window.width - width - 90;
+                float whitespace = WhiteSpace;
+                if (whitespace > 0)
+                {
+                    ClampLabelWidth(window, ref whitespace);
+                }
 
                 // always draw x and y
                 GUILayout.BeginHorizontal(null);

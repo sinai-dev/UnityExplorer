@@ -42,15 +42,20 @@ namespace Explorer
             
             if (!label.Contains(ValueTypeName))
             {
-                label += $" ({ValueTypeName})";
+                label += $" (<color=#2df7b2>{ValueTypeName}</color>)";
             }
+            else
+            {
+                label = label.Replace(ValueTypeName, $"<color=#2df7b2>{ValueTypeName}</color>");
+            }
+
             if (Value is UnityEngine.Object unityObj && !label.Contains(unityObj.name))
             {
                 label = unityObj.name + " | " + label;
             }
 
             GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-            if (GUILayout.Button("<color=yellow>" + label + "</color>", new GUILayoutOption[] { GUILayout.Width(width - 15) }))
+            if (GUILayout.Button(label, new GUILayoutOption[] { GUILayout.Width(width - 15) }))
             {
                 WindowManager.InspectObject(Value, out bool _);
             }

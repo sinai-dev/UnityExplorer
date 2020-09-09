@@ -7,14 +7,16 @@ using UnityEngine;
 
 namespace Explorer
 {
-    public class CacheRect : CacheObjectBase
+    public class CacheRect : CacheObjectBase, IExpandHeight
     {
-        private bool IsExpanded;
-
         private string x = "0";
         private string y = "0";
         private string w = "0";
         private string h = "0";
+
+        public bool IsExpanded { get; set; }
+        public float WhiteSpace { get; set; } = 215f;
+        public float ButtonWidthOffset { get; set; } = 290f;
 
         public override void UpdateValue()
         {
@@ -48,12 +50,17 @@ namespace Explorer
                 }
             }
 
-            GUILayout.Label($"<color=yellow>Rect</color>: {((Rect)Value).ToString()}", null);
+            GUILayout.Label($"<color=#2df7b2>Rect</color>: {((Rect)Value).ToString()}", null);
 
             if (CanWrite && IsExpanded)
             {
                 GUILayout.EndHorizontal();
-                var whitespace = window.width - width - 90;
+
+                float whitespace = WhiteSpace;
+                if (whitespace > 0)
+                {
+                    ClampLabelWidth(window, ref whitespace);
+                }
 
                 GUILayout.BeginHorizontal(null);
                 GUILayout.Space(whitespace);

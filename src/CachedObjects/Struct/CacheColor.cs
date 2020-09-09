@@ -7,14 +7,16 @@ using UnityEngine;
 
 namespace Explorer
 {
-    public class CacheColor : CacheObjectBase
+    public class CacheColor : CacheObjectBase, IExpandHeight
     {
-        private bool IsExpanded;
-
         private string r = "0";
         private string g = "0";
         private string b = "0";
         private string a = "0";
+
+        public bool IsExpanded { get; set; }
+        public float WhiteSpace { get; set; } = 215f;
+        public float ButtonWidthOffset { get; set; } = 290f;
 
         public override void UpdateValue()
         {
@@ -50,13 +52,18 @@ namespace Explorer
 
             var c = (Color)Value;
             GUI.color = c;
-            GUILayout.Label($"<color=yellow>Color:</color> {c.ToString()}", null);
+            GUILayout.Label($"<color=#2df7b2>Color:</color> {c.ToString()}", null);
             GUI.color = Color.white;
 
             if (CanWrite && IsExpanded)
             {
                 GUILayout.EndHorizontal();
-                var whitespace = window.width - width - 90;
+
+                float whitespace = WhiteSpace;
+                if (whitespace > 0)
+                {
+                    ClampLabelWidth(window, ref whitespace);
+                }
 
                 GUILayout.BeginHorizontal(null);
                 GUILayout.Space(whitespace);

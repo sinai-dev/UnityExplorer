@@ -162,10 +162,20 @@ namespace Explorer
                             name += " (";
                             foreach (var param in mi.GetParameters())
                             {
-                                name += param.ParameterType.Name + ", ";
+                                name += $"{param.ParameterType.Name} {param.Name}, ";
                             }
                             name += ")";
                         }
+                        else if (member is PropertyInfo pi)
+                        {
+                            name += " (";
+                            foreach (var param in pi.GetIndexParameters())
+                            {
+                                name += $"{param.ParameterType.Name} {param.Name}, ";
+                            }
+                            name += ")";
+                        }
+
                         if (names.Contains(name))
                         {
                             continue;

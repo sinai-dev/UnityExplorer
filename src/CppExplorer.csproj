@@ -88,6 +88,7 @@
     <Compile Include="CppExplorer.cs" />
     <Compile Include="Extensions\ReflectionExtensions.cs" />
     <Compile Include="Helpers\InputHelper.cs" />
+    <Compile Include="Tests\TestClass.cs" />
     <Compile Include="UnstripFixes\GUIUnstrip.cs" />
     <Compile Include="UnstripFixes\ScrollViewStateUnstrip.cs" />
     <Compile Include="Extensions\UnityExtensions.cs" />

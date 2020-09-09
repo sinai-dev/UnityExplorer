@@ -15,7 +15,7 @@ namespace Explorer
     {
         public bool IsExpanded { get; set; }
         public float WhiteSpace { get; set; } = 215f;
-        public float ButtonWidthOffset { get; set; } = 290f;
+        public float ButtonWidthOffset { get; set; } = 350f;
 
         public PageHelper Pages = new PageHelper();
 
@@ -152,7 +152,6 @@ namespace Explorer
             foreach (var key in IDict.Keys)
             {
                 var cache = GetCacheObject(key, TypeOfKeys);
-                cache.UpdateValue();
                 keys.Add(cache);
             }
 
@@ -160,7 +159,6 @@ namespace Explorer
             foreach (var val in IDict.Values)
             {
                 var cache = GetCacheObject(val, TypeOfValues);
-                cache.UpdateValue();
                 values.Add(cache);
             }
 
@@ -170,6 +168,11 @@ namespace Explorer
 
         private bool EnsureDictionaryIsSupported()
         {
+            if (typeof(IDictionary).IsAssignableFrom(ValueType))
+            {
+                return true;
+            }
+
             try
             {
                 return Check(TypeOfKeys) && Check(TypeOfValues);
@@ -200,6 +203,12 @@ namespace Explorer
                 return;
             }
 
+            float whitespace = WhiteSpace;
+            if (whitespace > 0)
+            {
+                ClampLabelWidth(window, ref whitespace);
+            }
+
             int count = m_cachedKeys.Length;
 
             if (!IsExpanded)
@@ -217,9 +226,11 @@ namespace Explorer
                 }
             }
 
+            var negativeWhitespace = window.width - (whitespace + 100f);
+
             GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-            string btnLabel = $"<color=yellow>[{count}] Dictionary<{TypeOfKeys.FullName}, {TypeOfValues.FullName}></color>";
-            if (GUILayout.Button(btnLabel, new GUILayoutOption[] { GUILayout.MaxWidth(window.width - ButtonWidthOffset) }))
+            string btnLabel = $"<color=#2df7b2>[{count}] Dictionary<{TypeOfKeys.FullName}, {TypeOfValues.FullName}></color>";
+            if (GUILayout.Button(btnLabel, new GUILayoutOption[] { GUILayout.Width(negativeWhitespace) }))
             {
                 WindowManager.InspectObject(Value, out bool _);
             }
@@ -229,12 +240,6 @@ namespace Explorer
 
             if (IsExpanded)
             {
-                float whitespace = WhiteSpace;
-                if (whitespace > 0)
-                {
-                    ClampLabelWidth(window, ref whitespace);
-                }
-
                 Pages.ItemCount = count;
 
                 if (count > Pages.ItemsPerPage)

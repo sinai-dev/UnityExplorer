@@ -219,7 +219,6 @@ namespace Explorer
 
                     if (GetCacheObject(obj, t) is CacheObjectBase cached)
                     {
-                        cached.UpdateValue();
                         list.Add(cached);
                     }
                     else
@@ -246,6 +245,12 @@ namespace Explorer
                 return;
             }
 
+            float whitespace = WhiteSpace;
+            if (whitespace > 0)
+            {
+                ClampLabelWidth(window, ref whitespace);
+            }
+
             int count = m_cachedEntries.Length;
 
             if (!IsExpanded)
@@ -263,9 +268,11 @@ namespace Explorer
                 }
             }
 
+            var negativeWhitespace = window.width - (whitespace + 100f);
+
             GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-            string btnLabel = "<color=yellow>[" + count + "] " + EntryType.FullName + "</color>";
-            if (GUILayout.Button(btnLabel, new GUILayoutOption[] { GUILayout.MaxWidth(window.width - ButtonWidthOffset) }))
+            string btnLabel = $"[{count}] <color=#2df7b2>{EntryType.FullName}</color>";
+            if (GUILayout.Button(btnLabel, new GUILayoutOption[] { GUILayout.MaxWidth(negativeWhitespace) }))
             {
                 WindowManager.InspectObject(Value, out bool _);
             }
@@ -275,12 +282,6 @@ namespace Explorer
 
             if (IsExpanded)
             {
-                float whitespace = WhiteSpace;                
-                if (whitespace > 0)
-                {
-                    ClampLabelWidth(window, ref whitespace);
-                }
-
                 Pages.ItemCount = count;
 
                 if (count > Pages.ItemsPerPage)

@@ -69,10 +69,10 @@ namespace Explorer
             else
             {
                 // using ValueType.Name instead of ValueTypeName, because we only want the short name.
-                GUILayout.Label("<color=yellow><i>" + ValueType.Name + "</i></color>", new GUILayoutOption[] { GUILayout.Width(50) });
+                GUILayout.Label("<color=#2df7b2><i>" + ValueType.Name + "</i></color>", new GUILayoutOption[] { GUILayout.Width(50) });
 
                 int dynSize = 25 + (m_valueToString.Length * 15);
-                var maxwidth = window.width - 300f;
+                var maxwidth = window.width - 310f;
                 if (CanWrite) maxwidth -= 60;
 
                 if (dynSize > maxwidth)
@@ -92,7 +92,7 @@ namespace Explorer
                     }
                 }
 
-                GUILayout.Space(5);
+                GUILayout.Space(10);
             }
         }
 
