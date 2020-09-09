@@ -33,7 +33,7 @@ Requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be ins
 * Simply browse through the scene, search for objects, etc, most of it is pretty self-explanatory.
 
 ### Features
-[![](img.png)](img.png)
+[![](overview.png)](overview.png)
 
 <i>An overview of the different CppExplorer menus.</i>
 
