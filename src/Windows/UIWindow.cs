@@ -17,7 +17,7 @@ namespace Explorer
         public object Target;
 
         public int windowID;
-        public Rect m_rect = new Rect(Vector2.zero, ModConfig.Instance.Default_Window_Size);
+        public Rect m_rect = new Rect(0,0, ModConfig.Instance.Default_Window_Size.x,ModConfig.Instance.Default_Window_Size.y);
 
         public Vector2 scroll = Vector2.zero;
 
