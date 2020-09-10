@@ -27,8 +27,9 @@ namespace Explorer
             }
         }
 
-        public const int MainWindowID = 10;
-        public static Rect MainRect = new Rect(5, 5, 550, 700);
+        public const int MainWindowID = 5000;
+        public static Rect MainRect = new Rect(new Vector2(5,5), ModConfig.Instance.Default_Window_Size);
+
         private static readonly List<WindowPage> Pages = new List<WindowPage>();
         private static int m_currentPage = 0;
 
@@ -63,7 +64,7 @@ namespace Explorer
         {
             GUI.DragWindow(new Rect(0, 0, MainRect.width - 90, 20));
 
-            if (GUI.Button(new Rect(MainRect.width - 90, 2, 80, 20), "Hide (F7)"))
+            if (GUI.Button(new Rect(MainRect.width - 90, 2, 80, 20), $"Hide ({ModConfig.Instance.Main_Menu_Toggle})"))
             {
                 CppExplorer.ShowMenu = false;
                 return;

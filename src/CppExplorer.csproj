@@ -85,6 +85,7 @@
     <Compile Include="CachedObjects\Struct\CacheQuaternion.cs" />
     <Compile Include="CachedObjects\Struct\CacheVector.cs" />
     <Compile Include="CachedObjects\Struct\CacheRect.cs" />
+    <Compile Include="Config\ModConfig.cs" />
     <Compile Include="CppExplorer.cs" />
     <Compile Include="Extensions\ReflectionExtensions.cs" />
     <Compile Include="Helpers\InputHelper.cs" />

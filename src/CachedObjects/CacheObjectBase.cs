@@ -244,30 +244,41 @@ namespace Explorer
                 var input = m_argumentInput[i];
                 var type = m_arguments[i].ParameterType;
 
-                if (type == typeof(string))
+                // First, try parse the input and use that.
+                if (!string.IsNullOrEmpty(input))
                 {
-                    parsedArgs.Add(input);
+                    // strings can obviously just be used directly
+                    if (type == typeof(string))
+                    {
+                        parsedArgs.Add(input);
+                        continue;
+                    }
+                    else
+                    {
+                        // try to invoke the parse method and use that.
+                        try
+                        {
+                            parsedArgs.Add(type.GetMethod("Parse", new Type[] { typeof(string) })
+                                               .Invoke(null, new object[] { input }));
+
+                            continue;
+                        }
+                        catch
+                        {
+                            MelonLogger.Log($"Argument #{i} '{m_arguments[i].Name}' ({type.Name}), could not parse input '{input}'.");
+                        }
+                    }
                 }
-                else
+
+                // Didn't use input, see if there is a default value.
+                if (m_arguments[i].HasDefaultValue)
                 {
-                    try
-                    {
-                        parsedArgs.Add(type.GetMethod("Parse", new Type[] { typeof(string) })
-                                           .Invoke(null, new object[] { input }));
-                    }
-                    catch
-                    {
-                        if (m_arguments[i].HasDefaultValue)
-                        {
-                            parsedArgs.Add(m_arguments[i].DefaultValue);
-                        }
-                        else
-                        {
-                            // Try add a null arg I guess
-                            parsedArgs.Add(null);
-                        }
-                    }
+                    parsedArgs.Add(m_arguments[i].DefaultValue);
+                    continue;
                 }
+
+                // Try add a null arg I guess
+                parsedArgs.Add(null);
             }
 
             return parsedArgs.ToArray();

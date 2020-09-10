@@ -13,7 +13,7 @@ namespace Explorer
     public class CppExplorer : MelonMod
     {
         public const string NAME    = "CppExplorer";
-        public const string VERSION = "1.6.7";
+        public const string VERSION = "1.6.8";
         public const string AUTHOR  = "Sinai";
         public const string GUID    = "com.sinai.cppexplorer";
 
@@ -54,6 +54,8 @@ namespace Explorer
         {
             Instance = this;
 
+            ModConfig.OnLoad();
+
             InputHelper.Init();
 
             new MainMenu();
@@ -80,7 +82,7 @@ namespace Explorer
         public override void OnUpdate()
         {
             // Check main toggle key input
-            if (InputHelper.GetKeyDown(KeyCode.F7))
+            if (InputHelper.GetKeyDown(ModConfig.Instance.Main_Menu_Toggle))
             {
                 ShowMenu = !ShowMenu;
             }
