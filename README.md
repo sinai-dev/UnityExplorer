@@ -34,9 +34,9 @@ Requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be ins
 
 ### Mod Config
 
-* There is a simple Mod Config for the CppExplorer, which is generated the first time you run it.
-* This config is generated to `Mods\CppExplorer\config.xml`.
-* Edit the config while the game is closed if you wish to change it.
+There is a simple Mod Config for the CppExplorer, which is generated the first time you run it.
+
+This config is generated to `Mods\CppExplorer\config.xml`. Edit the config while the game is closed if you wish to change it.
 
 `Main_Menu_Toggle` (KeyCode)
 * Sets the keybinding for the Main Menu toggle (show/hide all CppExplorer windows)
