@@ -49,10 +49,10 @@ namespace Explorer
                 }
             }
 
-            var c = (Color)Value;
-            GUI.color = c;
-            GUILayout.Label($"<color=#2df7b2>Color:</color> {c.ToString()}", null);
-            GUI.color = Color.white;
+            //var c = (Color)Value;
+            //GUI.color = c;
+            GUILayout.Label($"<color=#2df7b2>Color:</color> {((Color)Value).ToString()}", null);
+            //GUI.color = Color.white;
 
             if (CanWrite && IsExpanded)
             {

@@ -28,25 +28,31 @@ namespace Explorer
                 Directory.CreateDirectory(EXPLORER_FOLDER);
             }
 
-            if (File.Exists(SETTINGS_PATH))
-            {
-                LoadSettings(false);
-            }
-            else
-            {
-                Instance = new ModConfig();
-                SaveSettings(false);
-            }
+            if (LoadSettings()) return;
+
+            Instance = new ModConfig();
+            SaveSettings();
         }
 
-        public static void LoadSettings(bool checkExist = true)
+        // returns true if settings successfully loaded
+        public static bool LoadSettings(bool checkExist = true)
         {
             if (checkExist && !File.Exists(SETTINGS_PATH))
-                return;
+                return false;
 
-            var file = File.OpenRead(SETTINGS_PATH);
-            Instance = (ModConfig)Serializer.Deserialize(file);
-            file.Close();
+            try
+            {
+                using (var file = File.OpenRead(SETTINGS_PATH))
+                {
+                    Instance = (ModConfig)Serializer.Deserialize(file);
+                }
+            }
+            catch 
+            {
+                return false;
+            }
+
+            return Instance != null;
         }
 
         public static void SaveSettings(bool checkExist = true)
@@ -54,9 +60,10 @@ namespace Explorer
             if (checkExist && File.Exists(SETTINGS_PATH))
                 File.Delete(SETTINGS_PATH);
 
-            FileStream file = File.Create(SETTINGS_PATH);
-            Serializer.Serialize(file, Instance);
-            file.Close();
+            using (var file = File.Create(SETTINGS_PATH))
+            {
+                Serializer.Serialize(file, Instance);
+            }
         }
     }
 }

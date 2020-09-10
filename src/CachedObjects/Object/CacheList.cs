@@ -40,7 +40,7 @@ namespace Explorer
         private Type m_genericTypeDef;
 
         // Cached ToArray method for Lists
-        public MethodInfo GenericToArrayMethod
+        public MethodInfo CppListToArrayMethod
         {
             get => GetGenericToArrayMethod();
         }
@@ -60,7 +60,7 @@ namespace Explorer
         {
             if (m_enumerable == null && Value != null)
             {
-                m_enumerable = Value as IEnumerable ?? GetEnumerableFromIl2CppList();
+                m_enumerable = Value as IEnumerable ?? EnumerateWithReflection();
             }
             return m_enumerable;
         }
@@ -100,21 +100,45 @@ namespace Explorer
             return m_itemProperty;
         }
 
-        private IEnumerable GetEnumerableFromIl2CppList()
+        private IEnumerable EnumerateWithReflection()
         {
             if (Value == null) return null;
 
             if (GenericTypeDef == typeof(Il2CppSystem.Collections.Generic.List<>))
             {
-                return (IEnumerable)GenericToArrayMethod?.Invoke(Value, new object[0]);
+                return (IEnumerable)CppListToArrayMethod?.Invoke(Value, new object[0]);
+            }
+            else if (GenericTypeDef == typeof(Il2CppSystem.Collections.Generic.HashSet<>))
+            {
+                return CppHashSetToMono();
             }
             else
             {
-                return ConvertIListToMono();
+                return CppIListToMono();
             }
         }
 
-        private IList ConvertIListToMono()
+        private IEnumerable CppHashSetToMono()
+        {
+            var set = new HashSet<object>();
+
+            // invoke GetEnumerator
+            var enumerator = Value.GetType().GetMethod("GetEnumerator").Invoke(Value, null);
+            // get the type of it
+            var enumeratorType = enumerator.GetType();
+            // reflect MoveNext and Current
+            var moveNext = enumeratorType.GetMethod("MoveNext");
+            var current = enumeratorType.GetProperty("Current");
+            // iterate
+            while ((bool)moveNext.Invoke(enumerator, null))
+            {
+                set.Add(current.GetValue(enumerator));
+            }
+
+            return set;
+        }
+
+        private IList CppIListToMono()
         {
             try
             {

@@ -228,7 +228,7 @@ namespace Explorer
             var negativeWhitespace = window.width - (whitespace + 100f);
 
             GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-            string btnLabel = $"<color=#2df7b2>[{count}] Dictionary<{TypeOfKeys.FullName}, {TypeOfValues.FullName}></color>";
+            string btnLabel = $"[{count}] <color=#2df7b2>Dictionary<{TypeOfKeys.FullName}, {TypeOfValues.FullName}></color>";
             if (GUILayout.Button(btnLabel, new GUILayoutOption[] { GUILayout.Width(negativeWhitespace) }))
             {
                 WindowManager.InspectObject(Value, out bool _);

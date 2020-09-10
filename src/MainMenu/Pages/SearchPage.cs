@@ -428,7 +428,7 @@ namespace Explorer
                 {
                     var t = ReflectionHelpers.GetActualType(obj);
 
-                    if (!FilterName(t.FullName) || ReflectionHelpers.IsEnumerable(t) || ReflectionHelpers.IsCppList(t))
+                    if (!FilterName(t.FullName) || ReflectionHelpers.IsEnumerable(t) || ReflectionHelpers.IsCppEnumerable(t))
                     {
                         continue;
                     }

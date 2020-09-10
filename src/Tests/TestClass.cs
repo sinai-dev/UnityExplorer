@@ -14,6 +14,25 @@ namespace Explorer.Tests
         public static TestClass Instance => m_instance ?? (m_instance = new TestClass());
         private static TestClass m_instance;
 
+        public TestClass()
+        {
+            ILHashSetTest = new Il2CppSystem.Collections.Generic.HashSet<string>();
+            ILHashSetTest.Add("1");
+            ILHashSetTest.Add("2");
+            ILHashSetTest.Add("3");
+        }
+
+        // test HashSets
+
+        public static HashSet<string> HashSetTest = new HashSet<string>
+        {
+            "One",
+            "Two",
+            "Three"
+        };
+
+        public static Il2CppSystem.Collections.Generic.HashSet<string> ILHashSetTest;
+
         // Test indexed parameter
 
         public string this[int arg0, string arg1]

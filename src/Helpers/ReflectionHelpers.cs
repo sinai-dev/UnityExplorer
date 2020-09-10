@@ -37,13 +37,14 @@ namespace Explorer
             return typeof(IEnumerable).IsAssignableFrom(t);
         }
 
-        // Only Il2Cpp List needs this check. C# List is IEnumerable.
-        public static bool IsCppList(Type t)
+        // Checks for Il2Cpp List or HashSet.
+        public static bool IsCppEnumerable(Type t)
         {
             if (t.IsGenericType && t.GetGenericTypeDefinition() is Type g)
             {
                 return typeof(Il2CppSystem.Collections.Generic.List<>).IsAssignableFrom(g)
-                    || typeof(Il2CppSystem.Collections.Generic.IList<>).IsAssignableFrom(g);
+                    || typeof(Il2CppSystem.Collections.Generic.IList<>).IsAssignableFrom(g)
+                    || typeof(Il2CppSystem.Collections.Generic.HashSet<>).IsAssignableFrom(g);
             }
             else
             {
@@ -89,18 +90,20 @@ namespace Explorer
         {
             if (obj == null) return null;
 
+            // Need to use GetIl2CppType for Il2CppSystem Objects
             if (obj is Il2CppSystem.Object ilObject)
             {
-                var ilTypeName = ilObject.GetIl2CppType().AssemblyQualifiedName;
-
-                if (Type.GetType(ilTypeName) is Type t && !t.FullName.Contains("System.RuntimeType"))
+                // Prevent weird behaviour when inspecting an Il2CppSystem.Type object.
+                if (ilObject is ILType)
                 {
-                    return t;
+                    return typeof(ILType);
                 }
 
-                return ilObject.GetType();
+                // Get the System.Type using the qualified name, or fallback to GetType.
+                return Type.GetType(ilObject.GetIl2CppType().AssemblyQualifiedName) ?? obj.GetType();
             }
 
+            // It's a normal object, this is fine
             return obj.GetType();
         }
 
@@ -109,12 +112,11 @@ namespace Explorer
             var list = new List<Type>();
 
             var type = GetActualType(obj);
-            list.Add(type);
 
-            while (type.BaseType != null)
+            while (type != null)
             {
-                type = type.BaseType;
                 list.Add(type);
+                type = type.BaseType;
             }
 
             return list.ToArray();

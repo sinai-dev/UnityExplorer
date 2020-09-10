@@ -32,10 +32,14 @@ namespace Explorer
         private UnityEngine.Object m_uObj;
         private Component m_component;
 
-        private static readonly HashSet<string> _memberBlacklist = new HashSet<string>
+        private static readonly HashSet<string> _typeAndMemberBlacklist = new HashSet<string>
         {
             // Causes a crash
             "Type.DeclaringMethod",
+        };
+
+        private static readonly HashSet<string> _methodStartsWithBlacklist = new HashSet<string>
+        {
             // Pointless (handled by Properties)
             "get_",
             "set_"
@@ -157,7 +161,11 @@ namespace Explorer
                         continue;
 
                     // check blacklisted members
-                    if (_memberBlacklist.Any(it => member.Name.StartsWith(it)))
+                    var name = member.DeclaringType.Name + "." + member.Name;
+                    if (_typeAndMemberBlacklist.Any(it => it == name))
+                        continue;
+
+                    if (_methodStartsWithBlacklist.Any(it => member.Name.StartsWith(it)))
                         continue;
 
                     // compare signature to already cached members
