@@ -28,7 +28,7 @@ namespace Explorer
         }
 
         public const int MainWindowID = 5000;
-        public static Rect MainRect = new Rect(new Vector2(5,5), ModConfig.Instance.Default_Window_Size);
+        public static Rect MainRect = new Rect(5,5, ModConfig.Instance.Default_Window_Size.x,ModConfig.Instance.Default_Window_Size.y);
 
         private static readonly List<WindowPage> Pages = new List<WindowPage>();
         private static int m_currentPage = 0;

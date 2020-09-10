@@ -26,7 +26,7 @@
   <ItemGroup>
     <!-- Replace the '..\Steam\..` references with ones from your game (make sure to use the 'MelonLoader\' folder) -->
     <Reference Include="Il2Cppmscorlib">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\Il2Cppmscorlib.dll</HintPath>
+      <HintPath>G:\SteamGames\steamapps\common\VRChat\MelonLoader\Managed\Il2Cppmscorlib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="mcs">
@@ -34,7 +34,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="MelonLoader.ModHandler">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\MelonLoader.ModHandler.dll</HintPath>
+      <HintPath>G:\SteamGames\steamapps\common\VRChat\MelonLoader\MelonLoader.ModHandler.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -44,31 +44,31 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="UnhollowerBaseLib">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnhollowerBaseLib.dll</HintPath>
+      <HintPath>G:\SteamGames\steamapps\common\VRChat\MelonLoader\Managed\UnhollowerBaseLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.dll</HintPath>
+      <HintPath>G:\SteamGames\steamapps\common\VRChat\MelonLoader\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>G:\SteamGames\steamapps\common\VRChat\MelonLoader\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>G:\SteamGames\steamapps\common\VRChat\MelonLoader\Managed\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+      <HintPath>G:\SteamGames\steamapps\common\VRChat\MelonLoader\Managed\UnityEngine.PhysicsModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>G:\SteamGames\steamapps\common\VRChat\MelonLoader\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\..\..\Steam\steamapps\common\Hellpoint\MelonLoader\Managed\UnityEngine.UI.dll</HintPath>
+      <HintPath>G:\SteamGames\steamapps\common\VRChat\MelonLoader\Managed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
