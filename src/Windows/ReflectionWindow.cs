@@ -28,20 +28,26 @@ namespace Explorer
         public MemberTypes m_filter = MemberTypes.Property;
         private bool m_hideFailedReflection = false;
 
-        // some extra caching
+        // some extra cast-caching
         private UnityEngine.Object m_uObj;
         private Component m_component;
 
+        private static readonly HashSet<string> _memberBlacklist = new HashSet<string>
+        {
+            // Causes a crash
+            "Type.DeclaringMethod",
+            // Pointless (handled by Properties)
+            "get_",
+            "set_"
+        };
+
         public override void Init()
         {
-            var type = ReflectionHelpers.GetActualType(Target);
+            TargetType = ReflectionHelpers.GetActualType(Target);
 
-            TargetType = type;
+            CacheMembers(ReflectionHelpers.GetAllBaseTypes(Target));
 
-            var types = ReflectionHelpers.GetAllBaseTypes(Target);
-
-            CacheMembers(types);
-
+            // cache the extra cast-caching
             if (Target is Il2CppSystem.Object ilObject)
             {
                 var unityObj = ilObject.TryCast<UnityEngine.Object>();
@@ -56,13 +62,6 @@ namespace Explorer
                     }
                 }
             }
-
-            m_filter = MemberTypes.All;
-            m_autoUpdate = true;
-            Update();
-
-            m_autoUpdate = false;
-            m_filter = MemberTypes.Property;
         }
 
         public override void Update()
@@ -99,28 +98,32 @@ namespace Explorer
 
         private bool ShouldProcessMember(CacheObjectBase holder)
         {
-            if (m_filter != MemberTypes.All && m_filter != holder.MemInfo?.MemberType) return false;
+            // check MemberTypes filter
+            if (m_filter != MemberTypes.All && m_filter != holder.MemInfo?.MemberType) 
+                return false;
 
-            if (!string.IsNullOrEmpty(holder.ReflectionException) && m_hideFailedReflection) return false;
+            // hide failed reflection
+            if (!string.IsNullOrEmpty(holder.ReflectionException) && m_hideFailedReflection) 
+                return false;
 
-            if (m_search == "" || holder.MemInfo == null) return true;
+            // see if we should do name search
+            if (m_search == "" || holder.MemInfo == null) 
+                return true;
 
-            var name = holder.MemInfo.DeclaringType.Name + "." + holder.MemInfo.Name;
-
-            return name.ToLower().Contains(m_search.ToLower());
+            // ok do name search
+            return (holder.MemInfo.DeclaringType.Name + "." + holder.MemInfo.Name)
+                    .ToLower()
+                    .Contains(m_search.ToLower());
         }
 
         private void CacheMembers(Type[] types)
         {
             var list = new List<CacheObjectBase>();
-
-            var names = new List<string>();
+            var cachedSigs = new List<string>();
 
             foreach (var declaringType in types)
             {
                 MemberInfo[] infos;
-                string exception = null;
-
                 try
                 {
                     infos = declaringType.GetMembers(ReflectionHelpers.CommonFlags);
@@ -132,6 +135,7 @@ namespace Explorer
                 }
 
                 object target = Target;
+                string exception = null;
 
                 if (target is Il2CppSystem.Object ilObject)
                 {
@@ -147,55 +151,55 @@ namespace Explorer
 
                 foreach (var member in infos)
                 {
-                    if (member.MemberType == MemberTypes.Field || member.MemberType == MemberTypes.Property || member.MemberType == MemberTypes.Method)
+                    // make sure member type is Field, Method of Property (4 / 8 / 16)
+                    int m = (int)member.MemberType;
+                    if (m < 4 || m > 16)
+                        continue;
+
+                    // check blacklisted members
+                    if (_memberBlacklist.Any(it => member.Name.StartsWith(it)))
+                        continue;
+
+                    // compare signature to already cached members
+                    var signature = $"{member.DeclaringType.Name}.{member.Name}";
+                    if (member is MethodInfo mi)
                     {
-                        var name = $"{member.DeclaringType.Name}.{member.Name}";
+                        AppendParams(mi.GetParameters());
+                    }
+                    else if (member is PropertyInfo pi)
+                    {
+                        AppendParams(pi.GetIndexParameters());
+                    }
 
-                        // blacklist (should probably make a proper implementation)
-                        if (name == "Type.DeclaringMethod" || member.Name.StartsWith("get_") || member.Name.StartsWith("set_")) //|| member.Name.Contains("Il2CppType")
+                    void AppendParams(ParameterInfo[] _args)
+                    {
+                        signature += " (";
+                        foreach (var param in _args)
                         {
-                            continue;
+                            signature += $"{param.ParameterType.Name} {param.Name}, ";
                         }
+                        signature += ")";
+                    }
 
-                        if (member is MethodInfo mi)
-                        {
-                            name += " (";
-                            foreach (var param in mi.GetParameters())
-                            {
-                                name += $"{param.ParameterType.Name} {param.Name}, ";
-                            }
-                            name += ")";
-                        }
-                        else if (member is PropertyInfo pi)
-                        {
-                            name += " (";
-                            foreach (var param in pi.GetIndexParameters())
-                            {
-                                name += $"{param.ParameterType.Name} {param.Name}, ";
-                            }
-                            name += ")";
-                        }
+                    if (cachedSigs.Contains(signature))
+                    {
+                        continue;
+                    }
 
-                        if (names.Contains(name))
+                    try
+                    {
+                        var cached = CacheObjectBase.GetCacheObject(member, target);
+                        if (cached != null)
                         {
-                            continue;
+                            cachedSigs.Add(signature);
+                            list.Add(cached);
+                            cached.ReflectionException = exception;
                         }
-
-                        try
-                        {
-                            var cached = CacheObjectBase.GetCacheObject(member, target);
-                            if (cached != null)
-                            {
-                                names.Add(name);
-                                list.Add(cached);
-                                cached.ReflectionException = exception;
-                            }
-                        }
-                        catch (Exception e) 
-                        {
-                            MelonLogger.LogWarning($"Exception caching member {name}!");
-                            MelonLogger.Log(e.ToString());
-                        }
+                    }
+                    catch (Exception e)
+                    {
+                        MelonLogger.LogWarning($"Exception caching member {signature}!");
+                        MelonLogger.Log(e.ToString());
                     }
                 }
             }

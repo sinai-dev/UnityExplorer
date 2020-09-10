@@ -15,7 +15,6 @@ namespace Explorer
     {
         public bool IsExpanded { get; set; }
         public float WhiteSpace { get; set; } = 215f;
-        public float ButtonWidthOffset { get; set; } = 350f;
 
         public PageHelper Pages = new PageHelper();
 
@@ -126,6 +125,10 @@ namespace Explorer
                     m_keysType = type.GetGenericArguments()[0];
                     m_valuesType = type.GetGenericArguments()[1];
                 }
+                else
+                {
+                    MelonLogger.Log("TODO? Dictionary is of type: " + Value.GetType().FullName);
+                }
             }
         }
 
@@ -203,11 +206,7 @@ namespace Explorer
                 return;
             }
 
-            float whitespace = WhiteSpace;
-            if (whitespace > 0)
-            {
-                ClampLabelWidth(window, ref whitespace);
-            }
+            var whitespace = CalcWhitespace(window);
 
             int count = m_cachedKeys.Length;
 

@@ -44,12 +44,9 @@ namespace Explorer
             }
         }
 
-        // ===== Abstract/Virtual Methods ===== //
-
         public virtual void Init() { }
-        public abstract void DrawValue(Rect window, float width);
 
-        // ===== Static Methods ===== //
+        public abstract void DrawValue(Rect window, float width);
 
         /// <summary>
         /// Get CacheObject from only an object instance
@@ -205,11 +202,8 @@ namespace Explorer
             }
 
             holder.m_argumentInput = new string[holder.m_arguments.Length];
-
-            if (!holder.HasParameters)
-            {
-                holder.UpdateValue();
-            }
+            
+            holder.UpdateValue();
 
             holder.Init();
 
@@ -229,7 +223,18 @@ namespace Explorer
             return true;
         }
 
-        // ======== Instance Methods =========
+        public float CalcWhitespace(Rect window)
+        {
+            if (!(this is IExpandHeight)) return 0f;
+
+            float whitespace = (this as IExpandHeight).WhiteSpace;
+            if (whitespace > 0)
+            {
+                ClampLabelWidth(window, ref whitespace);
+            }
+
+            return whitespace;
+        }
 
         public object[] ParseArguments()
         {
@@ -247,16 +252,20 @@ namespace Explorer
                 {
                     try
                     {
-                        parsedArgs.Add(type.GetMethod("Parse", new Type[] { typeof(string) }).Invoke(null, new object[] { input }));
+                        parsedArgs.Add(type.GetMethod("Parse", new Type[] { typeof(string) })
+                                           .Invoke(null, new object[] { input }));
                     }
                     catch
                     {
-                        //MelonLogger.Log($"Unable to parse '{input}' to type '{type.Name}'");
-
-                        // try add a null arg i guess
-                        parsedArgs.Add(null);
-
-                        //break;
+                        if (m_arguments[i].HasDefaultValue)
+                        {
+                            parsedArgs.Add(m_arguments[i].DefaultValue);
+                        }
+                        else
+                        {
+                            // Try add a null arg I guess
+                            parsedArgs.Add(null);
+                        }
                     }
                 }
             }
@@ -268,6 +277,12 @@ namespace Explorer
         {
             if (MemInfo == null)
             {
+                return;
+            }
+
+            if (HasParameters && !m_isEvaluating)
+            {
+                // Need to enter parameters first
                 return;
             }
 
@@ -332,7 +347,7 @@ namespace Explorer
             }
         }
 
-        // ========= Instance Gui Draw ==========
+        // ========= Gui Draw ==========
 
         public const float MAX_LABEL_WIDTH = 400f;
         public const string EVALUATE_LABEL = "<color=lime>Evaluate</color>";
@@ -375,10 +390,18 @@ namespace Explorer
                         var input = m_argumentInput[i];
                         var type = m_arguments[i].ParameterType.Name;
 
+                        var label = "<color=#2df7b2>" + type + "</color> <color=#a6e9e9>" + name + "</color>";
+                        if (m_arguments[i].HasDefaultValue)
+                        {
+                            label = $"<i>[{label} = {m_arguments[i].DefaultValue}]</i>";
+                        }
+
                         GUILayout.BeginHorizontal(null);
-                        GUILayout.Label(i.ToString(), new GUILayoutOption[] { GUILayout.Width(30) });
+
+                        GUILayout.Label(i.ToString(), new GUILayoutOption[] { GUILayout.Width(20) });
                         m_argumentInput[i] = GUILayout.TextField(input, new GUILayoutOption[] { GUILayout.Width(150) });
-                        GUILayout.Label("<color=#2df7b2>" + type + "</color> <color=cyan>" + name + "</color>", null);
+                        GUILayout.Label(label, null);
+
                         GUILayout.EndHorizontal();
                     }
 
@@ -438,7 +461,11 @@ namespace Explorer
             {
                 GUILayout.Label("<color=red>Reflection failed!</color> (" + ReflectionException + ")", null);
             }
-            else if (Value == null && MemInfo?.MemberType != MemberTypes.Method)
+            else if ((HasParameters || this is CacheMethod) && !m_evaluated)
+            {
+                GUILayout.Label($"<color=grey><i>Not yet evaluated</i></color> (<color=#2df7b2>{ValueTypeName}</color>)", null);
+            }
+            else if (Value == null && !(this is CacheMethod))
             {
                 GUILayout.Label("<i>null (" + ValueTypeName + ")</i>", null);
             }
@@ -463,7 +490,7 @@ namespace Explorer
 
             m_richTextName = $"<color=#2df7b2>{MemInfo.DeclaringType.Name}</color>.<color={memberColor}>{MemInfo.Name}</color>";
 
-            if (m_arguments.Length > 0)
+            if (m_arguments.Length > 0 || this is CacheMethod)
             {
                 m_richTextName += "(";
                 var _params = "";

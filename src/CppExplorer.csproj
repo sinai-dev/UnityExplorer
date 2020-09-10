@@ -73,7 +73,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Helpers\IExpandHeight.cs" />
+    <Compile Include="CachedObjects\IExpandHeight.cs" />
     <Compile Include="CachedObjects\Struct\CacheColor.cs" />
     <Compile Include="CachedObjects\Object\CacheDictionary.cs" />
     <Compile Include="CachedObjects\Struct\CacheEnum.cs" />

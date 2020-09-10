@@ -13,7 +13,7 @@ namespace Explorer
     public class CppExplorer : MelonMod
     {
         public const string NAME    = "CppExplorer";
-        public const string VERSION = "1.6.5";
+        public const string VERSION = "1.6.7";
         public const string AUTHOR  = "Sinai";
         public const string GUID    = "com.sinai.cppexplorer";
 
@@ -44,7 +44,11 @@ namespace Explorer
             UpdateCursorControl();
         }
 
-        // ========== MonoBehaviour methods ==========
+        private static void SetForceUnlock(bool unlock)
+        {
+            m_forceUnlock = unlock;
+            UpdateCursorControl();
+        }
 
         public override void OnApplicationStart()
         {
@@ -60,9 +64,9 @@ namespace Explorer
             m_lastVisibleState = Cursor.visible;
 
             // Enable ShowMenu and ForceUnlockMouse 
-            // (set m_showMenu to not call UpdateCursorState twice)
+            // (set m_showMenu directly to not call UpdateCursorState twice)
             m_showMenu = true;
-            SetForceUnlock(true);
+            ForceUnlockMouse = true;
 
             MelonLogger.Log($"CppExplorer {VERSION} initialized.");
         }
@@ -102,14 +106,6 @@ namespace Explorer
             MainMenu.Instance.OnGUI();
             WindowManager.Instance.OnGUI();
             InspectUnderMouse.OnGUI();
-        }
-
-        // =========== Cursor control ===========
-
-        private static void SetForceUnlock(bool unlock)
-        {
-            m_forceUnlock = unlock;
-            UpdateCursorControl();
         }
 
         private static void UpdateCursorControl()

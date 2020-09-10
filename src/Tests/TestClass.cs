@@ -14,21 +14,7 @@ namespace Explorer.Tests
         public static TestClass Instance => m_instance ?? (m_instance = new TestClass());
         private static TestClass m_instance;
 
-        public string this[int index]
-        {
-            get
-            {
-                return $"int indexer: {index}";
-            }
-        }
-
-        public string this[string stringIndex]
-        {
-            get
-            {
-                return $"string indexer: {stringIndex}";
-            }
-        }
+        // Test indexed parameter
 
         public string this[int arg0, string arg1]
         {
@@ -38,6 +24,8 @@ namespace Explorer.Tests
             }
         }
 
+        // Test basic list
+
         public static List<string> TestList = new List<string>
         {
             "1",
@@ -46,29 +34,48 @@ namespace Explorer.Tests
             "etc..."
         };
 
-        public static Dictionary<int, List<string>> NestedDictionary = new Dictionary<int, List<string>>
+        // Test a nested dictionary
+
+        public static Dictionary<int, Dictionary<string, int>> NestedDictionary = new Dictionary<int, Dictionary<string, int>>
         {
             {
-                123,
-                new List<string>
+                1,
+                new  Dictionary<string, int>
                 {
-                    "One",
-                    "Two"
+                    {
+                        "Sub 1", 123
+                    },
+                    {
+                        "Sub 2", 456
+                    },
                 }
             },
             {
-                567,
-                new List<string>
+                2,
+                new  Dictionary<string, int>
                 {
-                    "One",
-                    "Two"
+                    {
+                        "Sub 3", 789
+                    },
+                    {
+                        "Sub 4", 000
+                    },
                 }
             },
         };
 
+        // Test a basic method
+
         public static Color TestMethod(float r, float g, float b, float a)
         {
             return new Color(r, g, b, a);
+        }
+
+        // A method with default arguments
+
+        public static Vector3 TestDefaultArgs(float arg0, float arg1, float arg2 = 5.0f)
+        {
+            return new Vector3(arg0, arg1, arg2);
         }
     }
 }

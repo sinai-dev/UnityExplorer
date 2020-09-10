@@ -44,11 +44,9 @@ namespace Explorer
             }
             else
             {
-                var parsedArgs = ParseArguments();
-
                 try
                 {
-                    ret = mi.Invoke(mi.IsStatic ? null : DeclaringInstance, parsedArgs.ToArray());
+                    ret = mi.Invoke(mi.IsStatic ? null : DeclaringInstance, ParseArguments());
                     m_evaluated = true;
                 }
                 catch (Exception e)

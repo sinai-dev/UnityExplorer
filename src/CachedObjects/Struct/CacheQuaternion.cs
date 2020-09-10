@@ -15,7 +15,6 @@ namespace Explorer
 
         public bool IsExpanded { get; set; }
         public float WhiteSpace { get; set; } = 215f;
-        public float ButtonWidthOffset { get; set; } = 290f;
 
         public override void UpdateValue()
         {
@@ -54,11 +53,7 @@ namespace Explorer
             {
                 GUILayout.EndHorizontal();
 
-                float whitespace = WhiteSpace;
-                if (whitespace > 0)
-                {
-                    ClampLabelWidth(window, ref whitespace);
-                }
+                var whitespace = CalcWhitespace(window);
 
                 GUILayout.BeginHorizontal(null);
                 GUILayout.Space(whitespace);
