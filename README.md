@@ -32,6 +32,22 @@ Requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be ins
 * Press F7 to show or hide the menu.
 * Simply browse through the scene, search for objects, etc, most of it is pretty self-explanatory.
 
+### Mod Config
+
+* There is a simple Mod Config for the CppExplorer, which is generated the first time you run it.
+* This config is generated to `Mods\CppExplorer\config.xml`.
+* Edit the config while the game is closed if you wish to change it.
+
+`Main_Menu_Toggle` (KeyCode)
+* Sets the keybinding for the Main Menu toggle (show/hide all CppExplorer windows)
+* See [this article](https://docs.unity3d.com/ScriptReference/KeyCode.html) for a full list of all accepted KeyCodes.
+* Default: `F7`
+
+`Default_Window_Size` (Vector2)
+* Sets the default width and height for all CppExplorer windows when created.
+* `x` is width, `y` is height.
+* Default: `<x>550</x> <y>700</y>`
+
 ### Features
 [![](overview.png)](overview.png)
 
