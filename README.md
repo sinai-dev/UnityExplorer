@@ -30,7 +30,8 @@ Requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be ins
 ## How to use
 
 * Press F7 to show or hide the menu.
-* Simply browse through the scene, search for objects, etc, most of it is pretty self-explanatory.
+* Use the Scene Explorer or the Object Search to start Exploring, or the C# Console to test some code.
+* See below for more specific details.
 
 ### Mod Config
 
@@ -48,17 +49,10 @@ This config is generated to `Mods\CppExplorer\config.xml`. Edit the config while
 * `x` is width, `y` is height.
 * Default: `<x>550</x> <y>700</y>`
 
-### Features
+## Features
 [![](overview.png)](overview.png)
 
 <i>An overview of the different CppExplorer menus.</i>
-
-* Scene hierarchy explorer
-* Search loaded assets with filters
-* Traverse and manipulate GameObjects
-* Generic Reflection inspector
-* C# REPL Console
-* Inspect-under-mouse
 
 ### Scene Explorer
 
