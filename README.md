@@ -25,7 +25,7 @@
 
 Requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be installed for your game.
 
-1. Download <b>CppExplorer.zip</b> from [Releases](https://github.com/sinaioutlander/CppExplorer/releases).
+1. Download <b>CppExplorer.zip</b> from [Releases](https://github.com/sinai-dev/CppExplorer/releases).
 2. Unzip the file into the `Mods` folder in your game's installation directory, created by MelonLoader.
 3. Make sure it's not in a sub-folder, `CppExplorer.dll` and `mcs.dll` should be directly in the `Mods\` folder.
 
