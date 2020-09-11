@@ -13,7 +13,7 @@ namespace Explorer
     public class CppExplorer : MelonMod
     {
         public const string NAME    = "CppExplorer";
-        public const string VERSION = "1.6.8";
+        public const string VERSION = "1.6.9";
         public const string AUTHOR  = "Sinai";
         public const string GUID    = "com.sinai.cppexplorer";
 
@@ -24,51 +24,30 @@ namespace Explorer
             get => m_showMenu;
             set => SetShowMenu(value);
         }
-        private static bool m_showMenu;
-
-        public static bool ForceUnlockMouse
-        {
-            get => m_forceUnlock;
-            set => SetForceUnlock(value);
-        }
-        private static bool m_forceUnlock;
-        private static CursorLockMode m_lastLockMode;
-        private static bool m_lastVisibleState;
-        private static bool m_currentlySettingCursor = false;
-
-        public static bool ShouldForceMouse => ShowMenu && ForceUnlockMouse;
+        public static bool m_showMenu;        
 
         private static void SetShowMenu(bool show)
         {
             m_showMenu = show;
-            UpdateCursorControl();
-        }
-
-        private static void SetForceUnlock(bool unlock)
-        {
-            m_forceUnlock = unlock;
-            UpdateCursorControl();
+            CursorControl.UpdateCursorControl();
         }
 
         public override void OnApplicationStart()
         {
             Instance = this;
 
+            // First, load config
             ModConfig.OnLoad();
 
+            // Setup InputHelper class (UnityEngine.Input)
             InputHelper.Init();
 
+            // Create CppExplorer modules
             new MainMenu();
             new WindowManager();
 
-            // Get current cursor state and enable cursor
-            m_lastLockMode = Cursor.lockState;
-            m_lastVisibleState = Cursor.visible;
-
-            // Enable ShowMenu and ForceUnlockMouse 
-            // (set m_showMenu directly to not call UpdateCursorState twice)
-            m_showMenu = true;
-            ForceUnlockMouse = true;
+            // Init cursor control
+            CursorControl.Init();
 
             MelonLogger.Log($"CppExplorer {VERSION} initialized.");
         }
@@ -89,15 +68,11 @@ namespace Explorer
 
             if (ShowMenu)
             {
-                // Check Force-Unlock input
-                if (InputHelper.GetKeyDown(KeyCode.LeftAlt))
-                {
-                    ForceUnlockMouse = !ForceUnlockMouse;
-                }
+                CursorControl.Update();
+                InspectUnderMouse.Update();
 
                 MainMenu.Instance.Update();
                 WindowManager.Instance.Update();
-                InspectUnderMouse.Update();
             }
         }
 
@@ -105,93 +80,14 @@ namespace Explorer
         {
             if (!ShowMenu) return;
 
+            var origSkin = GUI.skin;
+            GUI.skin = UIStyles.WindowSkin;
+
             MainMenu.Instance.OnGUI();
             WindowManager.Instance.OnGUI();
             InspectUnderMouse.OnGUI();
-        }
 
-        private static void UpdateCursorControl()
-        {
-            m_currentlySettingCursor = true;
-            if (ShouldForceMouse)
-            {
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
-            }
-            else
-            {
-                Cursor.lockState = m_lastLockMode;
-                Cursor.visible = m_lastVisibleState;
-            }
-            m_currentlySettingCursor = false;
-        }
-
-        // Force mouse to stay unlocked and visible while UnlockMouse and ShowMenu are true.
-        // Also keep track of when anything else tries to set Cursor state, this will be the
-        // value that we set back to when we close the menu or disable force-unlock.
-
-        [HarmonyPatch(typeof(Cursor), nameof(Cursor.lockState), MethodType.Setter)]
-        public class Cursor_set_lockState
-        {
-            [HarmonyPrefix]
-            public static void Prefix(ref CursorLockMode value)
-            {
-                if (!m_currentlySettingCursor)
-                {
-                    m_lastLockMode = value;
-
-                    if (ShouldForceMouse)
-                    {
-                        value = CursorLockMode.None;
-                    }
-                }                
-            }
-        }
-
-        [HarmonyPatch(typeof(Cursor), nameof(Cursor.visible), MethodType.Setter)]
-        public class Cursor_set_visible
-        {
-            [HarmonyPrefix]
-            public static void Prefix(ref bool value)
-            {
-                if (!m_currentlySettingCursor)
-                {
-                    m_lastVisibleState = value;
-
-                    if (ShouldForceMouse)
-                    {
-                        value = true;
-                    }
-                }
-            }
-        }
-
-        // Make it appear as though UnlockMouse is disabled to the rest of the application.
-
-        [HarmonyPatch(typeof(Cursor), nameof(Cursor.lockState), MethodType.Getter)]
-        public class Cursor_get_lockState
-        {
-            [HarmonyPostfix]
-            public static void Postfix(ref CursorLockMode __result)
-            {
-                if (ShouldForceMouse)
-                {
-                    __result = m_lastLockMode;
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(Cursor), nameof(Cursor.visible), MethodType.Getter)]
-        public class Cursor_get_visible
-        {
-            [HarmonyPostfix]
-            public static void Postfix(ref bool __result)
-            {
-                if (ShouldForceMouse)
-                {
-                    __result = m_lastVisibleState;
-                }
-            }
+            GUI.skin = origSkin;
         }
     }
 }

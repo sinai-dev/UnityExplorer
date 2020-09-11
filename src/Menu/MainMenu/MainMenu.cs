@@ -52,12 +52,7 @@ namespace Explorer
 
         public void OnGUI()
         {
-            var origSkin = GUI.skin;
-            GUI.skin = UIStyles.WindowSkin;
-
             MainRect = GUI.Window(MainWindowID, MainRect, (GUI.WindowFunction)MainWindow, CppExplorer.NAME);
-
-            GUI.skin = origSkin;
         }
 
         private void MainWindow(int id)
@@ -108,9 +103,9 @@ namespace Explorer
             GUI.color = Color.white;
             InspectUnderMouse.EnableInspect = GUILayout.Toggle(InspectUnderMouse.EnableInspect, "Inspect Under Mouse (Shift + RMB)", null);
 
-            bool mouseState = CppExplorer.ForceUnlockMouse;
+            bool mouseState = CursorControl.ForceUnlockMouse;
             bool setMouse = GUILayout.Toggle(mouseState, "Force Unlock Mouse (Left Alt)", null);
-            if (setMouse != mouseState) CppExplorer.ForceUnlockMouse = setMouse;
+            if (setMouse != mouseState) CursorControl.ForceUnlockMouse = setMouse;
 
             WindowManager.TabView = GUILayout.Toggle(WindowManager.TabView, "Tab View", null);
             GUILayout.EndHorizontal();

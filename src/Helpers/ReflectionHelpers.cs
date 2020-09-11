@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.IO;
+using MelonLoader;
 using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
 using UnityEngine;
@@ -120,6 +122,23 @@ namespace Explorer
             }
 
             return list.ToArray();
+        }
+
+        public static bool LoadModule(string module)
+        {
+            var path = $@"MelonLoader\Managed\{module}";
+            if (!File.Exists(path)) return false;
+
+            try
+            {
+                Assembly.Load(File.ReadAllBytes(path));
+                return true;
+            }
+            catch (Exception e)
+            {
+                MelonLogger.Log(e.GetType() + ", " + e.Message);
+                return false;
+            }
         }
 
         public static string ExceptionToString(Exception e)

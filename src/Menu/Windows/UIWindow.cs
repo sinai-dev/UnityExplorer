@@ -49,15 +49,7 @@ namespace Explorer
 
         public void OnGUI()
         {
-            if (CppExplorer.ShowMenu)
-            {
-                var origSkin = GUI.skin;
-
-                GUI.skin = UIStyles.WindowSkin;
-                m_rect = GUI.Window(windowID, m_rect, (GUI.WindowFunction)WindowFunction, Title);
-
-                GUI.skin = origSkin;
-            }
+            m_rect = GUI.Window(windowID, m_rect, (GUI.WindowFunction)WindowFunction, Title);
         }
 
         public void Header()

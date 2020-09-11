@@ -88,7 +88,8 @@ namespace Explorer
         {
             MelonLogger.Log("UnityEngine.Input is null, trying to load manually....");
 
-            if ((TryLoad("UnityEngine.InputLegacyModule.dll") || TryLoad("UnityEngine.CoreModule.dll")) && Input != null)
+            if ((ReflectionHelpers.LoadModule("UnityEngine.InputLegacyModule.dll") || ReflectionHelpers.LoadModule("UnityEngine.CoreModule.dll")) 
+                && Input != null)
             {
                 MelonLogger.Log("Ok!");
                 return true;
@@ -97,23 +98,6 @@ namespace Explorer
             {
                 MelonLogger.Log("Could not load Input module!");
                 return false;
-            }
-
-            bool TryLoad(string module)
-            {
-                var path = $@"MelonLoader\Managed\{module}";
-                if (!File.Exists(path)) return false;
-
-                try
-                {
-                    Assembly.Load(File.ReadAllBytes(path));
-                    return true;
-                }
-                catch (Exception e)
-                {
-                    MelonLogger.Log(e.GetType() + ", " + e.Message);
-                    return false;
-                }
             }
         }
     }
