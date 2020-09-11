@@ -182,7 +182,7 @@ namespace Explorer
 
         private void ReflectObject(Il2CppSystem.Object obj)
         {
-            var window = WindowManager.InspectObject(obj, out bool created);
+            var window = WindowManager.InspectObject(obj, out bool created, true);
 
             if (created)
             {
