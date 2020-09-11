@@ -58,7 +58,9 @@ MelonLogger.Log(""hello world"");";
             }
             catch (Exception e)
             {
-                MelonLogger.Log($"Error setting up console!\r\nMessage: {e.Message}\r\nStack: {e.StackTrace}");
+                MelonLogger.Log($"Error setting up console!\r\nMessage: {e.Message}");
+                MainMenu.SetCurrentPage(0);
+                MainMenu.Pages.Remove(this);
             }
         }
 

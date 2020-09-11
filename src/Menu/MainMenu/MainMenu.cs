@@ -21,8 +21,9 @@ namespace Explorer
             Pages.Add(new SearchPage());
             Pages.Add(new ConsolePage());
 
-            foreach (var page in Pages)
+            for (int i = 0; i < Pages.Count; i++)
             {
+                var page = Pages[i];
                 page.Init();
             }
         }
@@ -30,7 +31,7 @@ namespace Explorer
         public const int MainWindowID = 5000;
         public static Rect MainRect = new Rect(5,5, ModConfig.Instance.Default_Window_Size.x,ModConfig.Instance.Default_Window_Size.y);
 
-        private static readonly List<WindowPage> Pages = new List<WindowPage>();
+        public static readonly List<WindowPage> Pages = new List<WindowPage>();
         private static int m_currentPage = 0;
 
         public static void SetCurrentPage(int index)

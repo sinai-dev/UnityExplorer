@@ -12,6 +12,8 @@
   </a>
  
   <img src="https://img.shields.io/github/downloads/sinai-dev/CppExplorer/total.svg" />
+  
+  [Looking for a Mono version?](https://github.com/sinai-dev/MonoExplorer)
 </p>
 
 ### Known issues
