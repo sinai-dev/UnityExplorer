@@ -24,16 +24,19 @@ namespace Explorer
 
         public static bool ShouldForceMouse => CppExplorer.ShowMenu && ForceUnlockMouse;
 
+        private static Type CursorType => m_cursorType ?? (m_cursorType = ReflectionHelpers.GetTypeByName("UnityEngine.Cursor"));
+        private static Type m_cursorType;
+
         public static void Init()
         {
             try
             {
                 // Check if Cursor class is loaded
-                if (ReflectionHelpers.GetTypeByName("UnityEngine.Cursor") == null)
+                if (CursorType == null)
                 {
                     MelonLogger.Log("Trying to manually load Cursor module...");
 
-                    if (ReflectionHelpers.LoadModule("UnityEngine.CoreModule"))
+                    if (ReflectionHelpers.LoadModule("UnityEngine.CoreModule") && CursorType != null)
                     {
                         MelonLogger.Log("Ok!");
                     }
@@ -47,11 +50,12 @@ namespace Explorer
                 m_lastLockMode = Cursor.lockState;
                 m_lastVisibleState = Cursor.visible;
 
-                TryPatch("lockState", new HarmonyMethod(typeof(CursorControl).GetMethod(nameof(Prefix_set_lockState))), false, false);
-                TryPatch("visible", new HarmonyMethod(typeof(CursorControl).GetMethod(nameof(Prefix_set_visible))), false, false);
+                // Setup Harmony Patches
+                TryPatch("lockState", new HarmonyMethod(typeof(CursorControl).GetMethod(nameof(Prefix_set_lockState))), true);
+                TryPatch("lockState", new HarmonyMethod(typeof(CursorControl).GetMethod(nameof(Postfix_get_lockState))), false);
 
-                TryPatch("lockState", new HarmonyMethod(typeof(CursorControl).GetMethod(nameof(Postfix_get_lockState))), true, true);
-                TryPatch("visible", new HarmonyMethod(typeof(CursorControl).GetMethod(nameof(Postfix_get_visible))), true, true);
+                TryPatch("visible", new HarmonyMethod(typeof(CursorControl).GetMethod(nameof(Prefix_set_visible))), true);
+                TryPatch("visible", new HarmonyMethod(typeof(CursorControl).GetMethod(nameof(Postfix_get_visible))), false);
             }
             catch (Exception e)
             {
@@ -64,18 +68,23 @@ namespace Explorer
             ForceUnlockMouse = true;
         }
 
-        private static void TryPatch(string property, HarmonyMethod patch, bool getter = true, bool postfix = false)
+        private static void TryPatch(string property, HarmonyMethod patch, bool setter)
         {
-            // Setup Harmony Patches
             try
             {
                 var harmony = CppExplorer.Instance.harmonyInstance;
-
                 var prop = typeof(Cursor).GetProperty(property);
 
-                harmony.Patch(getter  ? prop.GetGetMethod() : prop.GetSetMethod(), 
-                              postfix ? null  : patch, 
-                              postfix ? patch : null);
+                if (setter)
+                {
+                    // setter is prefix
+                    harmony.Patch(prop.GetSetMethod(), patch);
+                }
+                else
+                {
+                    // getter is postfix
+                    harmony.Patch(prop.GetGetMethod(), null, patch);
+                }
             }
             catch (Exception e)
             {
@@ -170,69 +179,5 @@ namespace Explorer
                 __result = m_lastVisibleState;
             }
         }
-
-        //[HarmonyPatch(typeof(Cursor), nameof(Cursor.lockState), MethodType.Setter)]
-        //public class Cursor_set_lockState
-        //{
-        //    [HarmonyPrefix]
-        //    public static void Prefix(ref CursorLockMode value)
-        //    {
-        //        if (!m_currentlySettingCursor)
-        //        {
-        //            m_lastLockMode = value;
-
-        //            if (ShouldForceMouse)
-        //            {
-        //                value = CursorLockMode.None;
-        //            }
-        //        }
-        //    }
-        //}
-
-        //[HarmonyPatch(typeof(Cursor), nameof(Cursor.visible), MethodType.Setter)]
-        //public class Cursor_set_visible
-        //{
-        //    [HarmonyPrefix]
-        //    public static void Prefix(ref bool value)
-        //    {
-        //        if (!m_currentlySettingCursor)
-        //        {
-        //            m_lastVisibleState = value;
-
-        //            if (ShouldForceMouse)
-        //            {
-        //                value = true;
-        //            }
-        //        }
-        //    }
-        //}
-
-        //// Make it appear as though UnlockMouse is disabled to the rest of the application.
-
-        //[HarmonyPatch(typeof(Cursor), nameof(Cursor.lockState), MethodType.Getter)]
-        //public class Cursor_get_lockState
-        //{
-        //    [HarmonyPostfix]
-        //    public static void Postfix(ref CursorLockMode __result)
-        //    {
-        //        if (ShouldForceMouse)
-        //        {
-        //            __result = m_lastLockMode;
-        //        }
-        //    }
-        //}
-
-        //[HarmonyPatch(typeof(Cursor), nameof(Cursor.visible), MethodType.Getter)]
-        //public class Cursor_get_visible
-        //{
-        //    [HarmonyPostfix]
-        //    public static void Postfix(ref bool __result)
-        //    {
-        //        if (ShouldForceMouse)
-        //        {
-        //            __result = m_lastVisibleState;
-        //        }
-        //    }
-        //}
     }
 }

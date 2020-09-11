@@ -96,13 +96,14 @@
     <Compile Include="Menu\CursorControl.cs" />
     <Compile Include="Tests\TestClass.cs" />
     <Compile Include="UnstripFixes\GUIUnstrip.cs" />
+    <Compile Include="UnstripFixes\LayoutUtilityUnstrip.cs" />
     <Compile Include="UnstripFixes\ScrollViewStateUnstrip.cs" />
     <Compile Include="Extensions\UnityExtensions.cs" />
     <Compile Include="Helpers\PageHelper.cs" />
     <Compile Include="Helpers\ReflectionHelpers.cs" />
     <Compile Include="Helpers\UIHelpers.cs" />
     <Compile Include="Helpers\UnityHelpers.cs" />
-    <Compile Include="Menu\MainMenu\InspectUnderMouse.cs" />
+    <Compile Include="Menu\InspectUnderMouse.cs" />
     <Compile Include="CachedObjects\CacheObjectBase.cs" />
     <Compile Include="UnstripFixes\SliderHandlerUnstrip.cs" />
     <Compile Include="UnstripFixes\UnstripExtensions.cs" />

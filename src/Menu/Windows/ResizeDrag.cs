@@ -32,7 +32,7 @@ namespace Explorer
                     GUILayout.Button(gcDrag, GUI.skin.label, new GUILayoutOption[] { GUILayout.Height(15) });
 
                     //var r = GUILayoutUtility.GetLastRect();
-                    var r = GUIUnstrip.GetLastRect();
+                    var r = LayoutUtilityUnstrip.GetLastRect();
 
                     var mousePos = InputHelper.mousePosition;
 

@@ -244,7 +244,7 @@ namespace Explorer
             }
             GUILayout.EndHorizontal();
 
-            GUILayout.Space(5);
+            GUIUnstrip.Space(5);
         }
 
         private void SceneChangeButtons()

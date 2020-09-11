@@ -92,7 +92,7 @@ namespace Explorer
                     }
                 }
 
-                GUILayout.Space(10);
+                GUIUnstrip.Space(10);
             }
         }
 

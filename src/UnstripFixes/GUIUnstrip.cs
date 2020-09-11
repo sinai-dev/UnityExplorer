@@ -42,20 +42,20 @@ namespace Explorer
         }
         private static PropertyInfo m_scrollViewStatesInfo;
         
-
-        public static Rect GetLastRect()
+        public static void Space(float pixels)
         {
-            EventType type = Event.current.type;
-            Rect last;
-            if (type != EventType.Layout && type != EventType.Used)
-            {
-                last = GUILayoutUtility.current.topLevel.GetLastUnstripped();
-            }
+            GUIUtility.CheckOnGUI();
+
+            if (GUILayoutUtility.current.topLevel.isVertical)
+
+                LayoutUtilityUnstrip.GetRect(0, pixels, GUILayoutUtility.spaceStyle, new GUILayoutOption[] { GUILayout.Height(pixels) });
             else
+                LayoutUtilityUnstrip.GetRect(pixels, 0, GUILayoutUtility.spaceStyle, new GUILayoutOption[] { GUILayout.Width(pixels) });
+
+            if (Event.current.type == EventType.Layout)
             {
-                last = GUILayoutUtility.kDummyRect;
+                GUILayoutUtility.current.topLevel.entries[GUILayoutUtility.current.topLevel.entries.Count - 1].consideredForMargin = false;
             }
-            return last;
         }
 
         // Fix for BeginScrollView.

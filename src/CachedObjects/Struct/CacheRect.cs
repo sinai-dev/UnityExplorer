@@ -58,32 +58,32 @@ namespace Explorer
                 var whitespace = CalcWhitespace(window);
 
                 GUILayout.BeginHorizontal(null);
-                GUILayout.Space(whitespace);
+                GUIUnstrip.Space(whitespace);
                 GUILayout.Label("X:", new GUILayoutOption[] { GUILayout.Width(30) });
                 x = GUILayout.TextField(x, new GUILayoutOption[] { GUILayout.Width(120) });
                 GUILayout.EndHorizontal();
 
                 GUILayout.BeginHorizontal(null);
-                GUILayout.Space(whitespace);
+                GUIUnstrip.Space(whitespace);
                 GUILayout.Label("Y:", new GUILayoutOption[] { GUILayout.Width(30) });
                 y = GUILayout.TextField(y, new GUILayoutOption[] { GUILayout.Width(120) });
                 GUILayout.EndHorizontal();
 
                 GUILayout.BeginHorizontal(null);
-                GUILayout.Space(whitespace);
+                GUIUnstrip.Space(whitespace);
                 GUILayout.Label("W:", new GUILayoutOption[] { GUILayout.Width(30) });
                 w = GUILayout.TextField(w, new GUILayoutOption[] { GUILayout.Width(120) });
                 GUILayout.EndHorizontal();
 
                 GUILayout.BeginHorizontal(null);
-                GUILayout.Space(whitespace);
+                GUIUnstrip.Space(whitespace);
                 GUILayout.Label("H:", new GUILayoutOption[] { GUILayout.Width(30) });
                 h = GUILayout.TextField(h, new GUILayoutOption[] { GUILayout.Width(120) });
                 GUILayout.EndHorizontal();
 
                 // draw set value button
                 GUILayout.BeginHorizontal(null);
-                GUILayout.Space(whitespace);
+                GUIUnstrip.Space(whitespace);
                 if (GUILayout.Button("<color=lime>Apply</color>", new GUILayoutOption[] { GUILayout.Width(155) }))
                 {
                     SetValueFromInput();

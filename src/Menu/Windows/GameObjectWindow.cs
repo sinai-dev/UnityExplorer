@@ -385,7 +385,7 @@ namespace Explorer
                     }
                     else
                     {
-                        GUILayout.Space(26);
+                        GUIUnstrip.Space(26);
                     }
                     if (GUILayout.Button("<color=cyan>" + ilType.Name + "</color>", new GUILayoutOption[] { GUILayout.Width(m_rect.width / 2 - 100) }))
                     {

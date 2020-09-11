@@ -110,7 +110,9 @@ namespace Explorer
             WindowManager.TabView = GUILayout.Toggle(WindowManager.TabView, "Tab View", null);
             GUILayout.EndHorizontal();
 
-            GUILayout.Space(10);
+            //GUIUnstrip.Space(10);
+            GUIUnstrip.Space(10);
+
             GUI.color = Color.white;
         }
     }

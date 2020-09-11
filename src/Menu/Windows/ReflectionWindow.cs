@@ -288,7 +288,7 @@ namespace Explorer
                 GUI.color = Color.white;
                 GUILayout.EndHorizontal();
 
-                GUILayout.Space(10);
+                GUIUnstrip.Space(10);
 
                 Pages.ItemCount = m_cachedMembersFiltered.Length;
 
@@ -317,7 +317,7 @@ namespace Explorer
 
                 scroll = GUIUnstrip.BeginScrollView(scroll);
 
-                GUILayout.Space(10);
+                GUIUnstrip.Space(10);
 
                 UIStyles.HorizontalLine(Color.grey);
 

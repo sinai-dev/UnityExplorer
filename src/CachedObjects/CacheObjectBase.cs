@@ -384,7 +384,7 @@ namespace Explorer
             }
             else
             {
-                GUILayout.Space(labelWidth);
+                GUIUnstrip.Space(labelWidth);
             }
 
             var cm = this as CacheMethod;
@@ -451,7 +451,7 @@ namespace Explorer
                 // new line and space
                 GUILayout.EndHorizontal();
                 GUILayout.BeginHorizontal(null);
-                GUILayout.Space(labelWidth);
+                GUIUnstrip.Space(labelWidth);
             }
             else if (cm != null)
             {
@@ -465,7 +465,7 @@ namespace Explorer
                 // new line and space
                 GUILayout.EndHorizontal();
                 GUILayout.BeginHorizontal(null);
-                GUILayout.Space(labelWidth);
+                GUIUnstrip.Space(labelWidth);
             }
 
             if (!string.IsNullOrEmpty(ReflectionException))

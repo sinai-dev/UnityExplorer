@@ -297,7 +297,7 @@ namespace Explorer
             }
             GUI.skin.button.alignment = TextAnchor.MiddleCenter;
 
-            GUILayout.Space(5);
+            GUIUnstrip.Space(5);
 
             if (IsExpanded)
             {
@@ -308,7 +308,7 @@ namespace Explorer
                     GUILayout.EndHorizontal();
                     GUILayout.BeginHorizontal(null);
 
-                    GUILayout.Space(whitespace);
+                    GUIUnstrip.Space(whitespace);
                  
                     Pages.CurrentPageLabel();
 
@@ -324,7 +324,7 @@ namespace Explorer
 
                     Pages.DrawLimitInputArea();
 
-                    GUILayout.Space(5);
+                    GUIUnstrip.Space(5);
                 }
 
                 int offset = Pages.CalculateOffsetIndex();
@@ -337,7 +337,7 @@ namespace Explorer
                     GUILayout.EndHorizontal();
                     GUILayout.BeginHorizontal(null);
 
-                    GUILayout.Space(whitespace);
+                    GUIUnstrip.Space(whitespace);
 
                     if (entry == null || entry.Value == null)
                     {
