@@ -20,28 +20,36 @@ namespace Explorer
         public static bool ScrollFailed = false;
         public static bool ManualUnstripFailed = false;
 
-        private static GenericStack ScrollStack
-        {
-            get
-            {
-                if (m_scrollViewStatesInfo == null)
-                {
-                    try
-                    {
-                        m_scrollViewStatesInfo = typeof(GUI).GetProperty("scrollViewStates");
-                        if (m_scrollViewStatesInfo == null) throw new Exception();
-                    }
-                    catch
-                    {
-                        m_scrollViewStatesInfo = typeof(GUI).GetProperty("s_scrollViewStates");
-                    }
-                }
-
-                return (GenericStack)m_scrollViewStatesInfo?.GetValue(null, null);
-            }
-        }
+        private static GenericStack ScrollStack => m_scrollStack ?? GetScrollStack();
         private static PropertyInfo m_scrollViewStatesInfo;
-        
+        private static GenericStack m_scrollStack;
+
+        private static GenericStack GetScrollStack()
+        {
+            if (m_scrollViewStatesInfo == null)
+            {
+                if (typeof(GUI).GetProperty("scrollViewStates", ReflectionHelpers.CommonFlags) is PropertyInfo scrollStatesInfo)
+                {
+                    m_scrollViewStatesInfo = scrollStatesInfo;
+                }
+                else if (typeof(GUI).GetProperty("s_ScrollViewStates", ReflectionHelpers.CommonFlags) is PropertyInfo s_scrollStatesInfo)
+                {
+                    m_scrollViewStatesInfo = s_scrollStatesInfo;
+                }
+            }
+
+            if (m_scrollViewStatesInfo?.GetValue(null, null) is GenericStack stack)
+            {
+                m_scrollStack = stack;
+            }
+            else
+            {
+                m_scrollStack = new GenericStack();
+            }
+
+            return m_scrollStack;
+        }
+
         public static void Space(float pixels)
         {
             GUIUtility.CheckOnGUI();
@@ -145,7 +153,7 @@ namespace Explorer
         private static Vector2 BeginScrollView_Impl(Rect position, Vector2 scrollPosition, Rect viewRect, bool alwaysShowHorizontal, 
             bool alwaysShowVertical, GUIStyle horizontalScrollbar, GUIStyle verticalScrollbar, GUIStyle background)
         {
-            GUIUtility.CheckOnGUI();
+            // GUIUtility.CheckOnGUI();
 
             int controlID = GUIUtility.GetControlID(GUI.s_ScrollviewHash, FocusType.Passive);
 
