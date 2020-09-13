@@ -56,7 +56,6 @@ namespace Explorer
 
         public override void OnUpdate()
         {
-            // Check main toggle key input
             if (InputHelper.GetKeyDown(ModConfig.Instance.Main_Menu_Toggle))
             {
                 ShowMenu = !ShowMenu;

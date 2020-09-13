@@ -12,10 +12,12 @@ namespace Explorer
     public class GameObjectWindow : UIWindow
     {
         public override string Title => WindowManager.TabView
-            ? $"<color=cyan>[G]</color> {m_object.name}"
-            : $"GameObject Inspector ({m_object.name})";
+            ? $"<color=cyan>[G]</color> {TargetGO.name}"
+            : $"GameObject Inspector ({TargetGO.name})";
 
-        public GameObject m_object;
+        public GameObject TargetGO;
+
+        private bool m_hideControls;
 
         // gui element holders
         private string m_name;
@@ -23,11 +25,11 @@ namespace Explorer
 
         private Transform[] m_children;
         private Vector2 m_transformScroll = Vector2.zero;
-        private PageHelper ChildPages = new PageHelper();
+        private readonly PageHelper ChildPages = new PageHelper();
 
         private Component[] m_components;
         private Vector2 m_compScroll = Vector2.zero;
-        private PageHelper CompPages = new PageHelper();
+        private readonly PageHelper CompPages = new PageHelper();
 
         private readonly Vector3[] m_cachedInput = new Vector3[3];
         private float m_translateAmount = 0.3f;
@@ -42,7 +44,7 @@ namespace Explorer
         private bool m_localContext;
 
         private readonly List<Component> m_cachedDestroyList = new List<Component>();
-        //private string m_addComponentInput = "";
+        private string m_addComponentInput = "";
 
         private string m_setParentInput = "Enter a GameObject name or path";
 
@@ -52,12 +54,12 @@ namespace Explorer
 
             if (targetType == typeof(GameObject))
             {
-                m_object = Target as GameObject;
+                TargetGO = Target as GameObject;
                 return true;
             }
             else if (targetType == typeof(Transform))
             {
-                m_object = (Target as Transform).gameObject;
+                TargetGO = (Target as Transform).gameObject;
                 return true;
             }
 
@@ -73,10 +75,10 @@ namespace Explorer
                 return;
             }
 
-            m_name = m_object.name;
-            m_scene = string.IsNullOrEmpty(m_object.scene.name) 
+            m_name = TargetGO.name;
+            m_scene = string.IsNullOrEmpty(TargetGO.scene.name) 
                         ? "None (Asset/Resource)" 
-                        : m_object.scene.name;
+                        : TargetGO.scene.name;
 
             CacheTransformValues();
 
@@ -87,15 +89,15 @@ namespace Explorer
         {
             if (m_localContext)
             {
-                m_cachedInput[0] = m_object.transform.localPosition;
-                m_cachedInput[1] = m_object.transform.localEulerAngles;
+                m_cachedInput[0] = TargetGO.transform.localPosition;
+                m_cachedInput[1] = TargetGO.transform.localEulerAngles;
             }
             else
             {
-                m_cachedInput[0] = m_object.transform.position;
-                m_cachedInput[1] = m_object.transform.eulerAngles;
+                m_cachedInput[0] = TargetGO.transform.position;
+                m_cachedInput[1] = TargetGO.transform.eulerAngles;
             }
-            m_cachedInput[2] = m_object.transform.localScale;
+            m_cachedInput[2] = TargetGO.transform.localScale;
         }
 
         public override void Update()
@@ -118,7 +120,7 @@ namespace Explorer
                     }
                 }
 
-                if (!m_object && !GetObjectAsGameObject())
+                if (!TargetGO && !GetObjectAsGameObject())
                 {
                     throw new Exception("Object is null!");
                 }
@@ -127,22 +129,22 @@ namespace Explorer
                 {
                     if (m_localContext)
                     {
-                        m_object.transform.localPosition = m_frozenPosition;
-                        m_object.transform.localRotation = m_frozenRotation;
+                        TargetGO.transform.localPosition = m_frozenPosition;
+                        TargetGO.transform.localRotation = m_frozenRotation;
                     }
                     else
                     {
-                        m_object.transform.position = m_frozenPosition;
-                        m_object.transform.rotation = m_frozenRotation;
+                        TargetGO.transform.position = m_frozenPosition;
+                        TargetGO.transform.rotation = m_frozenRotation;
                     }
-                    m_object.transform.localScale = m_frozenScale;
+                    TargetGO.transform.localScale = m_frozenScale;
                 }
 
                 // update child objects
                 var childList = new List<Transform>();
-                for (int i = 0; i < m_object.transform.childCount; i++)
+                for (int i = 0; i < TargetGO.transform.childCount; i++)
                 {
-                    childList.Add(m_object.transform.GetChild(i));
+                    childList.Add(TargetGO.transform.GetChild(i));
                 }
                 childList.Sort((a, b) => b.childCount.CompareTo(a.childCount));
                 m_children = childList.ToArray();
@@ -151,7 +153,7 @@ namespace Explorer
 
                 // update components
                 var compList = new Il2CppSystem.Collections.Generic.List<Component>();
-                m_object.GetComponentsInternal(ReflectionHelpers.ComponentType, true, false, true, false, compList);
+                TargetGO.GetComponentsInternal(ReflectionHelpers.ComponentType, true, false, true, false, compList);
 
                 m_components = compList.ToArray();
 
@@ -221,7 +223,7 @@ namespace Explorer
                 {
                     if (GUILayout.Button("<color=#00FF00>Send to Scene View</color>", new GUILayoutOption[] { GUILayout.Width(150) }))
                     {
-                        ScenePage.Instance.SetTransformTarget(m_object.transform);
+                        ScenePage.Instance.SetTransformTarget(TargetGO.transform);
                         MainMenu.SetCurrentPage(0);
                     }
                 }
@@ -233,12 +235,12 @@ namespace Explorer
 
                 GUILayout.BeginHorizontal(null);
                 GUILayout.Label("Path:", new GUILayoutOption[] { GUILayout.Width(50) });
-                string pathlabel = m_object.transform.GetGameObjectPath();
-                if (m_object.transform.parent != null)
+                string pathlabel = TargetGO.transform.GetGameObjectPath();
+                if (TargetGO.transform.parent != null)
                 {
                     if (GUILayout.Button("<-", new GUILayoutOption[] { GUILayout.Width(35) }))
                     {
-                        InspectGameObject(m_object.transform.parent);
+                        InspectGameObject(TargetGO.transform.parent);
                     }
                 }
                 GUILayout.TextArea(pathlabel, null);
@@ -360,6 +362,28 @@ namespace Explorer
             }
             GUILayout.EndHorizontal();
 
+            GUILayout.BeginHorizontal(null);
+            m_addComponentInput = GUILayout.TextField(m_addComponentInput, new GUILayoutOption[] { GUILayout.Width(130) });
+            if (GUILayout.Button("Add Comp", null))
+            {
+                if (ReflectionHelpers.GetTypeByName(m_addComponentInput) is Type compType)
+                {
+                    if (typeof(Component).IsAssignableFrom(compType))
+                    {
+                        TargetGO.AddComponent(Il2CppType.From(compType));
+                    }
+                    else
+                    {
+                        MelonLogger.LogWarning($"Type '{compType.Name}' is not assignable from Component!");
+                    }
+                }
+                else
+                {
+                    MelonLogger.LogWarning($"Could not find a type by the name of '{m_addComponentInput}'!");
+                }
+            }
+            GUILayout.EndHorizontal();
+
             GUI.skin.button.alignment = TextAnchor.MiddleLeft;
             if (m_cachedDestroyList.Count > 0)
             {
@@ -439,21 +463,41 @@ namespace Explorer
 
         private void GameObjectControls()
         {
+            if (m_hideControls)
+            {
+                GUILayout.BeginHorizontal(null);
+                GUILayout.Label("<b><size=15>GameObject Controls</size></b>", new GUILayoutOption[] { GUILayout.Width(200) });
+                if (GUILayout.Button("^ Show ^", new GUILayoutOption[] { GUILayout.Width(75) }))
+                {
+                    m_hideControls = false;
+                }
+                GUILayout.EndHorizontal();
+
+                return;
+            }
+
             GUILayout.BeginVertical(GUI.skin.box, new GUILayoutOption[] { GUILayout.Width(520) });
-            GUILayout.Label("<b><size=15>GameObject Controls</size></b>", null);
 
             GUILayout.BeginHorizontal(null);
-            bool m_active = m_object.activeSelf;
+            GUILayout.Label("<b><size=15>GameObject Controls</size></b>", new GUILayoutOption[] { GUILayout.Width(200) });
+            if (GUILayout.Button("v Hide v", new GUILayoutOption[] { GUILayout.Width(75) }))
+            {
+                m_hideControls = true;
+            }
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal(null);
+            bool m_active = TargetGO.activeSelf;
             m_active = GUILayout.Toggle(m_active, (m_active ? "<color=lime>Enabled " : "<color=red>Disabled") + "</color>",
                 new GUILayoutOption[] { GUILayout.Width(80) });
-            if (m_object.activeSelf != m_active) { m_object.SetActive(m_active); }
+            if (TargetGO.activeSelf != m_active) { TargetGO.SetActive(m_active); }
 
-            UIHelpers.InstantiateButton(m_object, 100);
+            UIHelpers.InstantiateButton(TargetGO, 100);
 
             if (GUILayout.Button("Set DontDestroyOnLoad", new GUILayoutOption[] { GUILayout.Width(170) }))
             {
-                GameObject.DontDestroyOnLoad(m_object);
-                m_object.hideFlags |= HideFlags.DontUnloadUnusedAsset;
+                GameObject.DontDestroyOnLoad(TargetGO);
+                TargetGO.hideFlags |= HideFlags.DontUnloadUnusedAsset;
             }
 
             var lbl = m_freeze ? "<color=lime>Unfreeze</color>" : "<color=orange>Freeze Pos/Rot</color>";
@@ -474,7 +518,7 @@ namespace Explorer
             {
                 if (GameObject.Find(m_setParentInput) is GameObject newparent)
                 {
-                    m_object.transform.parent = newparent.transform;
+                    TargetGO.transform.parent = newparent.transform;
                 }
                 else
                 {
@@ -484,7 +528,7 @@ namespace Explorer
 
             if (GUILayout.Button("Detach from parent", new GUILayoutOption[] { GUILayout.Width(160) }))
             {
-                m_object.transform.parent = null;
+                TargetGO.transform.parent = null;
             }
             GUILayout.EndHorizontal();
 
@@ -499,15 +543,15 @@ namespace Explorer
             {
                 if (m_localContext)
                 {
-                    m_object.transform.localPosition = m_cachedInput[0];
-                    m_object.transform.localEulerAngles = m_cachedInput[1];
+                    TargetGO.transform.localPosition = m_cachedInput[0];
+                    TargetGO.transform.localEulerAngles = m_cachedInput[1];
                 }
                 else
                 {
-                    m_object.transform.position = m_cachedInput[0];
-                    m_object.transform.eulerAngles = m_cachedInput[1];
+                    TargetGO.transform.position = m_cachedInput[0];
+                    TargetGO.transform.eulerAngles = m_cachedInput[1];
                 }
-                m_object.transform.localScale = m_cachedInput[2];
+                TargetGO.transform.localScale = m_cachedInput[2];
 
                 if (m_freeze)
                 {
@@ -541,7 +585,7 @@ namespace Explorer
 
             if (GUILayout.Button("<color=red><b>Destroy</b></color>", new GUILayoutOption[] { GUILayout.Width(120) }))
             {
-                GameObject.Destroy(m_object);
+                GameObject.Destroy(TargetGO);
                 DestroyWindow();
                 return;
             }
@@ -553,15 +597,15 @@ namespace Explorer
         {
             if (m_localContext)
             {
-                m_frozenPosition = m_object.transform.localPosition;
-                m_frozenRotation = m_object.transform.localRotation;
+                m_frozenPosition = TargetGO.transform.localPosition;
+                m_frozenRotation = TargetGO.transform.localRotation;
             }
             else
             {
-                m_frozenPosition = m_object.transform.position;
-                m_frozenRotation = m_object.transform.rotation;
+                m_frozenPosition = TargetGO.transform.position;
+                m_frozenRotation = TargetGO.transform.rotation;
             }
-            m_frozenScale = m_object.transform.localScale;
+            m_frozenScale = TargetGO.transform.localScale;
         }
 
         private void BoolToggle(ref bool value, string message)
@@ -586,7 +630,7 @@ namespace Explorer
             GUILayout.Label($"<color=cyan><b>{(m_localContext ? "Local " : "")}{mode}</b></color>:", 
                 new GUILayoutOption[] { GUILayout.Width(m_localContext ? 110 : 65) });
 
-            var transform = m_object.transform;
+            var transform = TargetGO.transform;
             switch (mode)
             {
                 case TranslateType.Position:

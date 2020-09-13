@@ -17,7 +17,7 @@ namespace Explorer
     {
         public static int s_ScrollControlId;
 
-        public static bool ScrollFailed = true;
+        public static bool ScrollFailed = false;
         public static bool ManualUnstripFailed = false;
 
         private static GenericStack ScrollStack => m_scrollStack ?? GetScrollStack();

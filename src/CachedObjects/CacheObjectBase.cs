@@ -416,21 +416,17 @@ namespace Explorer
                     }
 
                     GUILayout.BeginHorizontal(null);
-                    if (cm != null)
+                    if (GUILayout.Button(EVALUATE_LABEL, new GUILayoutOption[] { GUILayout.Width(70) }))
                     {
-                        if (GUILayout.Button(EVALUATE_LABEL, new GUILayoutOption[] { GUILayout.Width(70) }))
+                        if (cm != null)
                         {
                             cm.Evaluate();
                         }
-                    }
-                    else
-                    {
-                        if (GUILayout.Button(EVALUATE_LABEL, new GUILayoutOption[] { GUILayout.Width(70) }))
+                        else
                         {
                             UpdateValue();
                         }
                     }
-                    
                     if (GUILayout.Button("Cancel", new GUILayoutOption[] { GUILayout.Width(70) }))
                     {
                         m_isEvaluating = false;
