@@ -36,13 +36,15 @@ namespace Explorer
         {
             // Causes a crash
             "Type.DeclaringMethod",
+            // Causes a crash
+            "Rigidbody2D.Cast",
         };
 
         private static readonly HashSet<string> _methodStartsWithBlacklist = new HashSet<string>
         {
             // Pointless (handled by Properties)
             "get_",
-            "set_"
+            "set_",
         };
 
         public override void Init()
@@ -193,6 +195,8 @@ namespace Explorer
                     {
                         continue;
                     }
+
+                    // MelonLogger.Log($"Trying to cache member {signature}...");
 
                     try
                     {
