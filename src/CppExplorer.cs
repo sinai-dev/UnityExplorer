@@ -13,7 +13,7 @@ namespace Explorer
     public class CppExplorer : MelonMod
     {
         public const string NAME    = "CppExplorer";
-        public const string VERSION = "1.7.0";
+        public const string VERSION = "1.7.1";
         public const string AUTHOR  = "Sinai";
         public const string GUID    = "com.sinai.cppexplorer";
 
@@ -36,17 +36,13 @@ namespace Explorer
         {
             Instance = this;
 
-            // First, load config
             ModConfig.OnLoad();
 
-            // Setup InputHelper class (UnityEngine.Input)
             InputHelper.Init();
 
-            // Create CppExplorer modules
             new MainMenu();
             new WindowManager();
 
-            // Init cursor control
             CursorControl.Init();
 
             MelonLogger.Log($"CppExplorer {VERSION} initialized.");

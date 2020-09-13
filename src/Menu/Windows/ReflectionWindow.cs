@@ -228,7 +228,7 @@ namespace Explorer
                 if (!WindowManager.TabView)
                 {
                     Header();
-                    GUILayout.BeginArea(new Rect(5, 25, rect.width - 10, rect.height - 35), GUI.skin.box);
+                    GUIUnstrip.BeginArea(new Rect(5, 25, rect.width - 10, rect.height - 35), GUI.skin.box);
                 }
 
                 GUILayout.BeginHorizontal(null);
@@ -354,7 +354,7 @@ namespace Explorer
                 {
                     m_rect = ResizeDrag.ResizeWindow(rect, windowID);
 
-                    GUILayout.EndArea();
+                    GUIUnstrip.EndArea();
                 }
             }
             catch (Il2CppException e)

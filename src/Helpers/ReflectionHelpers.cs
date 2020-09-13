@@ -101,7 +101,6 @@ namespace Explorer
                     return typeof(ILType);
                 }
 
-                // Get the System.Type using the qualified name, or fallback to GetType.
                 return Type.GetType(ilObject.GetIl2CppType().AssemblyQualifiedName) ?? obj.GetType();
             }
 

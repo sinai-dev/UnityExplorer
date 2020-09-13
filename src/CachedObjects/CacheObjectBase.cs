@@ -244,7 +244,6 @@ namespace Explorer
                 var input = m_argumentInput[i];
                 var type = m_arguments[i].ParameterType;
 
-                // First, try parse the input and use that.
                 if (!string.IsNullOrEmpty(input))
                 {
                     // strings can obviously just be used directly

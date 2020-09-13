@@ -210,7 +210,7 @@ namespace Explorer
                 if (!WindowManager.TabView)
                 {
                     Header();
-                    GUILayout.BeginArea(new Rect(5, 25, rect.width - 10, rect.height - 35), GUI.skin.box);
+                    GUIUnstrip.BeginArea(new Rect(5, 25, rect.width - 10, rect.height - 35), GUI.skin.box);
                 }
 
                 scroll = GUIUnstrip.BeginScrollView(scroll);
@@ -270,7 +270,7 @@ namespace Explorer
                 {
                     m_rect = ResizeDrag.ResizeWindow(rect, windowID);
 
-                    GUILayout.EndArea();
+                    GUIUnstrip.EndArea();
                 }
             }
             catch (Exception e)

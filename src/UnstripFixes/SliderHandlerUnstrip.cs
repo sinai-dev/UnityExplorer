@@ -81,7 +81,7 @@ namespace Explorer
 					if (this.SupportsPageMovements())
 					{
 						this.SliderState().isDragging = false;
-						GUI.nextScrollStepTime = SystemClock.now.AddMilliseconds(250.0);
+						GUIUnstrip.nextScrollStepTime = DateTime.Now.AddMilliseconds(250.0);
 						GUI.scrollTroughSide = this.CurrentScrollTroughSide();
 						result = this.PageMovementValue();
 					}
@@ -155,7 +155,7 @@ namespace Explorer
 			else
 			{
 				GUI.InternalRepaintEditorWindow();
-				if (SystemClock.now < GUI.nextScrollStepTime)
+				if (DateTime.Now < GUIUnstrip.nextScrollStepTime)
 				{
 					result = this.currentValue;
 				}
@@ -165,7 +165,7 @@ namespace Explorer
 				}
 				else
 				{
-					GUI.nextScrollStepTime = SystemClock.now.AddMilliseconds(30.0);
+					GUIUnstrip.nextScrollStepTime = DateTime.Now.AddMilliseconds(30.0);
 					if (this.SupportsPageMovements())
 					{
 						this.SliderState().isDragging = false;

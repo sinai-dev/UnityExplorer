@@ -17,12 +17,14 @@ namespace Explorer
     {
         public static int s_ScrollControlId;
 
-        public static bool ScrollFailed = false;
+        public static bool ScrollFailed = true;
         public static bool ManualUnstripFailed = false;
 
         private static GenericStack ScrollStack => m_scrollStack ?? GetScrollStack();
         private static PropertyInfo m_scrollViewStatesInfo;
         private static GenericStack m_scrollStack;
+
+        public static DateTime nextScrollStepTime;
 
         private static GenericStack GetScrollStack()
         {
@@ -55,7 +57,6 @@ namespace Explorer
             GUIUtility.CheckOnGUI();
 
             if (GUILayoutUtility.current.topLevel.isVertical)
-
                 LayoutUtilityUnstrip.GetRect(0, pixels, GUILayoutUtility.spaceStyle, new GUILayoutOption[] { GUILayout.Height(pixels) });
             else
                 LayoutUtilityUnstrip.GetRect(pixels, 0, GUILayoutUtility.spaceStyle, new GUILayoutOption[] { GUILayout.Width(pixels) });
@@ -64,6 +65,78 @@ namespace Explorer
             {
                 GUILayoutUtility.current.topLevel.entries[GUILayoutUtility.current.topLevel.entries.Count - 1].consideredForMargin = false;
             }
+        }
+
+        // Fix for BeginArea
+
+        static public void BeginArea(Rect screenRect) { BeginArea(screenRect, GUIContent.none, GUIStyle.none); }
+        static public void BeginArea(Rect screenRect, string text) { BeginArea(screenRect, GUIContent.Temp(text), GUIStyle.none); }
+        static public void BeginArea(Rect screenRect, Texture image) { BeginArea(screenRect, GUIContent.Temp(image), GUIStyle.none); }
+        static public void BeginArea(Rect screenRect, GUIContent content) { BeginArea(screenRect, content, GUIStyle.none); }
+        static public void BeginArea(Rect screenRect, GUIStyle style) { BeginArea(screenRect, GUIContent.none, style); }
+        static public void BeginArea(Rect screenRect, string text, GUIStyle style) { BeginArea(screenRect, GUIContent.Temp(text), style); }
+        static public void BeginArea(Rect screenRect, Texture image, GUIStyle style) { BeginArea(screenRect, GUIContent.Temp(image), style); }
+
+        // Begin a GUILayout block of GUI controls in a fixed screen area.
+        static public void BeginArea(Rect screenRect, GUIContent content, GUIStyle style)
+        {
+            GUILayoutGroup g = GUILayoutUtility.BeginLayoutArea(style, Il2CppType.Of<GUILayoutGroup>());
+            if (Event.current.type == EventType.Layout)
+            {
+                g.resetCoords = true;
+                g.minWidth = g.maxWidth = screenRect.width;
+                g.minHeight = g.maxHeight = screenRect.height;
+                g.rect = Rect.MinMaxRect(screenRect.xMin, screenRect.yMin, g.rect.xMax, g.rect.yMax);
+            }
+
+            GUI.BeginGroup(g.rect, content, style);
+        }
+
+        // Close a GUILayout block started with BeginArea
+        static public void EndArea()
+        {
+            if (Event.current.type == EventType.Used)
+                return;
+            GUILayoutUtility.current.layoutGroups.Pop();
+            GUILayoutUtility.current.topLevel = GUILayoutUtility.current.layoutGroups.Peek().TryCast<GUILayoutGroup>();
+            GUI.EndGroup();
+        }
+
+        // Fix for BeginGroup
+
+        public static void BeginGroup(Rect position) { BeginGroup(position, GUIContent.none, GUIStyle.none); }
+        public static void BeginGroup(Rect position, string text) { BeginGroup(position, GUIContent.Temp(text), GUIStyle.none); }
+        public static void BeginGroup(Rect position, Texture image) { BeginGroup(position, GUIContent.Temp(image), GUIStyle.none); }
+        public static void BeginGroup(Rect position, GUIContent content) { BeginGroup(position, content, GUIStyle.none); }
+        public static void BeginGroup(Rect position, GUIStyle style) { BeginGroup(position, GUIContent.none, style); }
+        public static void BeginGroup(Rect position, string text, GUIStyle style) { BeginGroup(position, GUIContent.Temp(text), style); }
+        public static void BeginGroup(Rect position, Texture image, GUIStyle style) { BeginGroup(position, GUIContent.Temp(image), style); }
+
+        public static void BeginGroup(Rect position, GUIContent content, GUIStyle style) { BeginGroup(position, content, style, Vector2.zero); }
+
+        internal static void BeginGroup(Rect position, GUIContent content, GUIStyle style, Vector2 scrollOffset)
+        {
+            int id = GUIUtility.GetControlID(GUI.s_BeginGroupHash, FocusType.Passive);
+
+            if (content != GUIContent.none || style != GUIStyle.none)
+            {
+                switch (Event.current.type)
+                {
+                    case EventType.Repaint:
+                        style.Draw(position, content, id);
+                        break;
+                    default:
+                        if (position.Contains(Event.current.mousePosition))
+                            GUIUtility.mouseUsed = true;
+                        break;
+                }
+            }
+            GUIClip.Push(position, scrollOffset, Vector2.zero, false);
+        }
+
+        public static void EndGroup()
+        {
+            GUIClip.Internal_Pop();
         }
 
         // Fix for BeginScrollView.
@@ -120,8 +193,6 @@ namespace Explorer
         private static Vector2 BeginScrollView_ImplLayout(Vector2 scrollPosition, bool alwaysShowHorizontal, bool alwaysShowVertical, 
             GUIStyle horizontalScrollbar, GUIStyle verticalScrollbar, GUIStyle background, params GUILayoutOption[] options)
         {
-            GUIUtility.CheckOnGUI();
-
             var guiscrollGroup = GUILayoutUtility.BeginLayoutGroup(background, null, Il2CppType.Of<GUIScrollGroup>())
                                 .TryCast<GUIScrollGroup>();
 
@@ -396,12 +467,12 @@ namespace Explorer
                 if (flag)
                 {
                     result = true;
-                    GUI.nextScrollStepTime = Il2CppSystem.DateTime.Now.AddMilliseconds(250.0);
+                    nextScrollStepTime = DateTime.Now.AddMilliseconds(250.0);
                 }
-                else if (Il2CppSystem.DateTime.Now >= GUI.nextScrollStepTime)
+                else if (DateTime.Now >= nextScrollStepTime)
                 {
                     result = true;
-                    GUI.nextScrollStepTime = Il2CppSystem.DateTime.Now.AddMilliseconds(30.0);
+                    nextScrollStepTime = DateTime.Now.AddMilliseconds(30.0);
                 }
                 if (Event.current.type == EventType.Repaint)
                 {

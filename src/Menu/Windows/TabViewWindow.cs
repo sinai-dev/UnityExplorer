@@ -65,7 +65,7 @@ namespace Explorer
                     return;
                 }
 
-                GUILayout.BeginArea(new Rect(5, 25, m_rect.width - 10, m_rect.height - 35), GUI.skin.box);
+                GUIUnstrip.BeginArea(new Rect(5, 25, m_rect.width - 10, m_rect.height - 35), GUI.skin.box);
 
                 GUILayout.BeginVertical(GUI.skin.box, null);
                 GUILayout.BeginHorizontal(null);
@@ -109,7 +109,7 @@ namespace Explorer
                 }
                 catch { }
 
-                GUILayout.EndArea();
+                GUIUnstrip.EndArea();
             }
             catch { }
         }

@@ -64,7 +64,7 @@ namespace Explorer
                 return;
             }
 
-            GUILayout.BeginArea(new Rect(5, 25, MainRect.width - 10, MainRect.height - 35), GUI.skin.box);
+            GUIUnstrip.BeginArea(new Rect(5, 25, MainRect.width - 10, MainRect.height - 35), GUI.skin.box);
 
             MainHeader();
 
@@ -78,7 +78,7 @@ namespace Explorer
 
             MainRect = ResizeDrag.ResizeWindow(MainRect, MainWindowID);
 
-            GUILayout.EndArea();
+            GUIUnstrip.EndArea();
         }
 
         private void MainHeader()
