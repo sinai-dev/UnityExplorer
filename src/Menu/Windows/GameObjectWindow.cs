@@ -17,7 +17,7 @@ namespace Explorer
 
         public GameObject TargetGO;
 
-        private bool m_hideControls;
+        private static bool m_hideControls;
 
         // gui element holders
         private string m_name;
@@ -218,37 +218,37 @@ namespace Explorer
                 scroll = GUIUnstrip.BeginScrollView(scroll);
 
                 GUIUnstrip.BeginHorizontal();
-                GUILayout.Label("Scene: <color=cyan>" + (m_scene == "" ? "n/a" : m_scene) + "</color>", null);
+                GUIUnstrip.Label("Scene: <color=cyan>" + (m_scene == "" ? "n/a" : m_scene) + "</color>");
                 if (m_scene == UnityHelpers.ActiveSceneName)
                 {
-                    if (GUILayout.Button("<color=#00FF00>Send to Scene View</color>", new GUILayoutOption[] { GUILayout.Width(150) }))
+                    if (GUIUnstrip.Button("<color=#00FF00>Send to Scene View</color>", new GUILayoutOption[] { GUILayout.Width(150) }))
                     {
                         ScenePage.Instance.SetTransformTarget(TargetGO.transform);
                         MainMenu.SetCurrentPage(0);
                     }
                 }
-                if (GUILayout.Button("Reflection Inspect", new GUILayoutOption[] { GUILayout.Width(150) }))
+                if (GUIUnstrip.Button("Reflection Inspect", new GUILayoutOption[] { GUILayout.Width(150) }))
                 {
                     WindowManager.InspectObject(Target, out _, true);
                 }
                 GUIUnstrip.EndHorizontal();
 
                 GUIUnstrip.BeginHorizontal();
-                GUILayout.Label("Path:", new GUILayoutOption[] { GUILayout.Width(50) });
+                GUIUnstrip.Label("Path:", new GUILayoutOption[] { GUILayout.Width(50) });
                 string pathlabel = TargetGO.transform.GetGameObjectPath();
                 if (TargetGO.transform.parent != null)
                 {
-                    if (GUILayout.Button("<-", new GUILayoutOption[] { GUILayout.Width(35) }))
+                    if (GUIUnstrip.Button("<-", new GUILayoutOption[] { GUILayout.Width(35) }))
                     {
                         InspectGameObject(TargetGO.transform.parent);
                     }
                 }
-                GUILayout.TextArea(pathlabel, null);
+                GUIUnstrip.TextArea(pathlabel);
                 GUIUnstrip.EndHorizontal();
 
                 GUIUnstrip.BeginHorizontal();
-                GUILayout.Label("Name:", new GUILayoutOption[] { GUILayout.Width(50) });
-                GUILayout.TextArea(m_name, null);
+                GUIUnstrip.Label("Name:", new GUILayoutOption[] { GUILayout.Width(50) });
+                GUIUnstrip.TextArea(m_name);
                 GUIUnstrip.EndHorizontal();
 
                 // --- Horizontal Columns section ---
@@ -286,7 +286,7 @@ namespace Explorer
             GUIUnstrip.BeginVertical(GUI.skin.box, null);
             m_transformScroll = GUIUnstrip.BeginScrollView(m_transformScroll);
 
-            GUILayout.Label("<b><size=15>Children</size></b>", null);
+            GUIUnstrip.Label("<b><size=15>Children</size></b>");
 
             GUIUnstrip.BeginHorizontal();
             ChildPages.DrawLimitInputArea();
@@ -298,11 +298,11 @@ namespace Explorer
                 GUIUnstrip.EndHorizontal();
                 GUIUnstrip.BeginHorizontal();
 
-                if (GUILayout.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(80) }))
+                if (GUIUnstrip.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(80) }))
                 {
                     ChildPages.TurnPage(Turn.Left, ref this.m_transformScroll);
                 }
-                if (GUILayout.Button("Next >", new GUILayoutOption[] { GUILayout.Width(80) }))
+                if (GUIUnstrip.Button("Next >", new GUILayoutOption[] { GUILayout.Width(80) }))
                 {
                     ChildPages.TurnPage(Turn.Right, ref this.m_transformScroll);
                 }
@@ -319,7 +319,7 @@ namespace Explorer
 
                     if (!obj)
                     {
-                        GUILayout.Label("null", null);
+                        GUIUnstrip.Label("null");
                         continue;
                     }
 
@@ -328,7 +328,7 @@ namespace Explorer
             }
             else
             {
-                GUILayout.Label("<i>None</i>", null);
+                GUIUnstrip.Label("<i>None</i>");
             }
 
             GUIUnstrip.EndScrollView();
@@ -339,7 +339,7 @@ namespace Explorer
         {
             GUIUnstrip.BeginVertical(GUI.skin.box, null);
             m_compScroll = GUIUnstrip.BeginScrollView(m_compScroll);
-            GUILayout.Label("<b><size=15>Components</size></b>", null);
+            GUIUnstrip.Label("<b><size=15>Components</size></b>");
 
             GUIUnstrip.BeginHorizontal();
             CompPages.DrawLimitInputArea();
@@ -351,11 +351,11 @@ namespace Explorer
                 GUIUnstrip.EndHorizontal();
                 GUIUnstrip.BeginHorizontal();
 
-                if (GUILayout.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(80) }))
+                if (GUIUnstrip.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(80) }))
                 {
                     CompPages.TurnPage(Turn.Left, ref this.m_compScroll);
                 }
-                if (GUILayout.Button("Next >", new GUILayoutOption[] { GUILayout.Width(80) }))
+                if (GUIUnstrip.Button("Next >", new GUILayoutOption[] { GUILayout.Width(80) }))
                 {
                     CompPages.TurnPage(Turn.Right, ref this.m_compScroll);
                 }
@@ -363,8 +363,9 @@ namespace Explorer
             GUIUnstrip.EndHorizontal();
 
             GUIUnstrip.BeginHorizontal();
-            m_addComponentInput = GUILayout.TextField(m_addComponentInput, new GUILayoutOption[] { GUILayout.Width(130) });
-            if (GUILayout.Button("Add Comp", null))
+            var width = m_rect.width / 2 - 115f;
+            m_addComponentInput = GUIUnstrip.TextField(m_addComponentInput, new GUILayoutOption[] { GUILayout.Width(width) });
+            if (GUIUnstrip.Button("Add Comp"))
             {
                 if (ReflectionHelpers.GetTypeByName(m_addComponentInput) is Type compType)
                 {
@@ -411,11 +412,11 @@ namespace Explorer
                     {
                         GUIUnstrip.Space(26);
                     }
-                    if (GUILayout.Button("<color=cyan>" + ilType.Name + "</color>", new GUILayoutOption[] { GUILayout.Width(m_rect.width / 2 - 100) }))
+                    if (GUIUnstrip.Button("<color=cyan>" + ilType.Name + "</color>", new GUILayoutOption[] { GUILayout.Width(m_rect.width / 2 - 100) }))
                     {
                         ReflectObject(component);
                     }
-                    if (GUILayout.Button("<color=red>-</color>", new GUILayoutOption[] { GUILayout.Width(20) }))
+                    if (GUIUnstrip.Button("<color=red>-</color>", new GUILayoutOption[] { GUILayout.Width(20) }))
                     {
                         m_cachedDestroyList.Add(component);
                     }
@@ -453,7 +454,7 @@ namespace Explorer
 
             // ------ toggle active button ------
 
-            _enabled = GUILayout.Toggle(_enabled, "", new GUILayoutOption[] { GUILayout.Width(18) });
+            _enabled = GUIUnstrip.Toggle(_enabled, "", new GUILayoutOption[] { GUILayout.Width(18) });
             if (obj.enabled != _enabled)
             {
                 obj.enabled = _enabled;
@@ -466,8 +467,8 @@ namespace Explorer
             if (m_hideControls)
             {
                 GUIUnstrip.BeginHorizontal();
-                GUILayout.Label("<b><size=15>GameObject Controls</size></b>", new GUILayoutOption[] { GUILayout.Width(200) });
-                if (GUILayout.Button("^ Show ^", new GUILayoutOption[] { GUILayout.Width(75) }))
+                GUIUnstrip.Label("<b><size=15>GameObject Controls</size></b>", new GUILayoutOption[] { GUILayout.Width(200) });
+                if (GUIUnstrip.Button("^ Show ^", new GUILayoutOption[] { GUILayout.Width(75) }))
                 {
                     m_hideControls = false;
                 }
@@ -479,8 +480,8 @@ namespace Explorer
             GUIUnstrip.BeginVertical(GUI.skin.box, new GUILayoutOption[] { GUILayout.Width(520) });
 
             GUIUnstrip.BeginHorizontal();
-            GUILayout.Label("<b><size=15>GameObject Controls</size></b>", new GUILayoutOption[] { GUILayout.Width(200) });
-            if (GUILayout.Button("v Hide v", new GUILayoutOption[] { GUILayout.Width(75) }))
+            GUIUnstrip.Label("<b><size=15>GameObject Controls</size></b>", new GUILayoutOption[] { GUILayout.Width(200) });
+            if (GUIUnstrip.Button("v Hide v", new GUILayoutOption[] { GUILayout.Width(75) }))
             {
                 m_hideControls = true;
             }
@@ -488,20 +489,20 @@ namespace Explorer
 
             GUIUnstrip.BeginHorizontal();
             bool m_active = TargetGO.activeSelf;
-            m_active = GUILayout.Toggle(m_active, (m_active ? "<color=lime>Enabled " : "<color=red>Disabled") + "</color>",
+            m_active = GUIUnstrip.Toggle(m_active, (m_active ? "<color=lime>Enabled " : "<color=red>Disabled") + "</color>",
                 new GUILayoutOption[] { GUILayout.Width(80) });
             if (TargetGO.activeSelf != m_active) { TargetGO.SetActive(m_active); }
 
             UIHelpers.InstantiateButton(TargetGO, 100);
 
-            if (GUILayout.Button("Set DontDestroyOnLoad", new GUILayoutOption[] { GUILayout.Width(170) }))
+            if (GUIUnstrip.Button("Set DontDestroyOnLoad", new GUILayoutOption[] { GUILayout.Width(170) }))
             {
                 GameObject.DontDestroyOnLoad(TargetGO);
                 TargetGO.hideFlags |= HideFlags.DontUnloadUnusedAsset;
             }
 
             var lbl = m_freeze ? "<color=lime>Unfreeze</color>" : "<color=orange>Freeze Pos/Rot</color>";
-            if (GUILayout.Button(lbl, new GUILayoutOption[] { GUILayout.Width(110) }))
+            if (GUIUnstrip.Button(lbl, new GUILayoutOption[] { GUILayout.Width(110) }))
             {
                 m_freeze = !m_freeze;
                 if (m_freeze)
@@ -513,8 +514,8 @@ namespace Explorer
             GUIUnstrip.EndHorizontal();
             GUIUnstrip.BeginHorizontal();
 
-            m_setParentInput = GUILayout.TextField(m_setParentInput, null);
-            if (GUILayout.Button("Set Parent", new GUILayoutOption[] { GUILayout.Width(80) }))
+            m_setParentInput = GUIUnstrip.TextField(m_setParentInput);
+            if (GUIUnstrip.Button("Set Parent", new GUILayoutOption[] { GUILayout.Width(80) }))
             {
                 if (GameObject.Find(m_setParentInput) is GameObject newparent)
                 {
@@ -526,7 +527,7 @@ namespace Explorer
                 }
             }
 
-            if (GUILayout.Button("Detach from parent", new GUILayoutOption[] { GUILayout.Width(160) }))
+            if (GUIUnstrip.Button("Detach from parent", new GUILayoutOption[] { GUILayout.Width(160) }))
             {
                 TargetGO.transform.parent = null;
             }
@@ -539,7 +540,7 @@ namespace Explorer
             m_cachedInput[2] = TranslateControl(TranslateType.Scale,    ref m_scaleAmount,      false);
 
             GUIUnstrip.BeginHorizontal();
-            if (GUILayout.Button("<color=lime>Apply to Transform</color>", null) || m_autoApplyTransform)
+            if (GUIUnstrip.Button("<color=lime>Apply to Transform</color>") || m_autoApplyTransform)
             {
                 if (m_localContext)
                 {
@@ -558,7 +559,7 @@ namespace Explorer
                     UpdateFreeze();
                 }
             }
-            if (GUILayout.Button("<color=lime>Update from Transform</color>", null) || m_autoUpdateTransform)
+            if (GUIUnstrip.Button("<color=lime>Update from Transform</color>") || m_autoUpdateTransform)
             {
                 CacheTransformValues();
             }
@@ -570,7 +571,7 @@ namespace Explorer
             GUIUnstrip.EndHorizontal();
 
             bool b = m_localContext;
-            b = GUILayout.Toggle(b, "<color=" + (b ? "lime" : "red") + ">Use local transform values?</color>", null);
+            b = GUIUnstrip.Toggle(b, "<color=" + (b ? "lime" : "red") + ">Use local transform values?</color>");
             if (b != m_localContext)
             {
                 m_localContext = b;
@@ -583,7 +584,7 @@ namespace Explorer
 
             GUIUnstrip.EndVertical();
 
-            if (GUILayout.Button("<color=red><b>Destroy</b></color>", new GUILayoutOption[] { GUILayout.Width(120) }))
+            if (GUIUnstrip.Button("<color=red><b>Destroy</b></color>", new GUILayoutOption[] { GUILayout.Width(120) }))
             {
                 GameObject.Destroy(TargetGO);
                 DestroyWindow();
@@ -614,7 +615,7 @@ namespace Explorer
             lbl += value ? "lime" : "red";
             lbl += $">{message}</color>";
 
-            value = GUILayout.Toggle(value, lbl, null);
+            value = GUIUnstrip.Toggle(value, lbl);
         }
 
         public enum TranslateType
@@ -627,7 +628,7 @@ namespace Explorer
         private Vector3 TranslateControl(TranslateType mode, ref float amount, bool multByTime)
         {
             GUIUnstrip.BeginHorizontal();
-            GUILayout.Label($"<color=cyan><b>{(m_localContext ? "Local " : "")}{mode}</b></color>:", 
+            GUIUnstrip.Label($"<color=cyan><b>{(m_localContext ? "Local " : "")}{mode}</b></color>:", 
                 new GUILayoutOption[] { GUILayout.Width(m_localContext ? 110 : 65) });
 
             var transform = TargetGO.transform;
@@ -635,14 +636,14 @@ namespace Explorer
             {
                 case TranslateType.Position:
                     var pos = m_localContext ? transform.localPosition : transform.position;
-                    GUILayout.Label(pos.ToString(), new GUILayoutOption[] { GUILayout.Width(250) });
+                    GUIUnstrip.Label(pos.ToString(), new GUILayoutOption[] { GUILayout.Width(250) });
                     break;
                 case TranslateType.Rotation:
                     var rot = m_localContext ? transform.localEulerAngles : transform.eulerAngles;
-                    GUILayout.Label(rot.ToString(), new GUILayoutOption[] { GUILayout.Width(250) });
+                    GUIUnstrip.Label(rot.ToString(), new GUILayoutOption[] { GUILayout.Width(250) });
                     break;
                 case TranslateType.Scale:
-                    GUILayout.Label(transform.localScale.ToString(), new GUILayoutOption[] { GUILayout.Width(250) });
+                    GUIUnstrip.Label(transform.localScale.ToString(), new GUILayoutOption[] { GUILayout.Width(250) });
                     break;
             }
             GUIUnstrip.EndHorizontal();
@@ -652,18 +653,18 @@ namespace Explorer
             GUIUnstrip.BeginHorizontal();
             GUI.skin.label.alignment = TextAnchor.MiddleRight;
 
-            GUILayout.Label("<color=cyan>X:</color>", new GUILayoutOption[] { GUILayout.Width(20) });
+            GUIUnstrip.Label("<color=cyan>X:</color>", new GUILayoutOption[] { GUILayout.Width(20) });
             PlusMinusFloat(ref input.x, amount, multByTime);
 
-            GUILayout.Label("<color=cyan>Y:</color>", new GUILayoutOption[] { GUILayout.Width(20) });
+            GUIUnstrip.Label("<color=cyan>Y:</color>", new GUILayoutOption[] { GUILayout.Width(20) });
             PlusMinusFloat(ref input.y, amount, multByTime);
 
-            GUILayout.Label("<color=cyan>Z:</color>", new GUILayoutOption[] { GUILayout.Width(20) });
+            GUIUnstrip.Label("<color=cyan>Z:</color>", new GUILayoutOption[] { GUILayout.Width(20) });
             PlusMinusFloat(ref input.z, amount, multByTime);            
 
-            GUILayout.Label("+/-:", new GUILayoutOption[] { GUILayout.Width(30) });
+            GUIUnstrip.Label("+/-:", new GUILayoutOption[] { GUILayout.Width(30) });
             var amountInput = amount.ToString("F3");
-            amountInput = GUILayout.TextField(amountInput, new GUILayoutOption[] { GUILayout.Width(60) });
+            amountInput = GUIUnstrip.TextField(amountInput, new GUILayoutOption[] { GUILayout.Width(60) });
             if (float.TryParse(amountInput, out float f))
             {
                 amount = f;
@@ -678,16 +679,16 @@ namespace Explorer
         private void PlusMinusFloat(ref float f, float amount, bool multByTime)
         {
             string s = f.ToString("F3");
-            s = GUILayout.TextField(s, new GUILayoutOption[] { GUILayout.Width(60) });
+            s = GUIUnstrip.TextField(s, new GUILayoutOption[] { GUILayout.Width(60) });
             if (float.TryParse(s, out float f2))
             {
                 f = f2;
             }
-            if (GUILayout.RepeatButton("-", new GUILayoutOption[] { GUILayout.Width(20) }))
+            if (GUIUnstrip.RepeatButton("-", new GUILayoutOption[] { GUILayout.Width(20) }))
             {
                 f -= multByTime ? amount * Time.deltaTime : amount;
             }
-            if (GUILayout.RepeatButton("+", new GUILayoutOption[] { GUILayout.Width(20) }))
+            if (GUIUnstrip.RepeatButton("+", new GUILayoutOption[] { GUILayout.Width(20) }))
             {
                 f += multByTime ? amount * Time.deltaTime : amount;
             }

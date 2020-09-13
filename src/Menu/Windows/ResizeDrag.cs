@@ -29,14 +29,14 @@ namespace Explorer
                     GUIUnstrip.BeginHorizontal(GUI.skin.box, null);
 
                     GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-                    GUILayout.Button(gcDrag, GUI.skin.label, new GUILayoutOption[] { GUILayout.Height(15) });
+                    GUIUnstrip.Button(gcDrag, GUI.skin.label, new GUILayoutOption[] { GUILayout.Height(15) });
 
                     //var r = GUILayoutUtility.GetLastRect();
                     var r = LayoutUtilityUnstrip.GetLastRect();
 
                     var mousePos = InputHelper.mousePosition;
 
-                    Vector2 mouse = GUIUtility.ScreenToGUIPoint(new Vector2(mousePos.x, Screen.height - mousePos.y));
+                    var mouse = GUIUnstrip.ScreenToGUIPoint(new Vector2(mousePos.x, Screen.height - mousePos.y));
 
                     if (r.Contains(mouse) && InputHelper.GetMouseButtonDown(0))
                     {
@@ -78,24 +78,24 @@ namespace Explorer
             {
                 GUIUnstrip.BeginHorizontal(GUI.skin.box, null);
 
-                GUILayout.Label("Resize window:", new GUILayoutOption[] { GUILayout.Width(100) });
+                GUIUnstrip.Label("Resize window:", new GUILayoutOption[] { GUILayout.Width(100) });
 
                 GUI.skin.label.alignment = TextAnchor.MiddleRight;
-                GUILayout.Label("<color=cyan>Width:</color>", new GUILayoutOption[] { GUILayout.Width(60) });
-                if (GUILayout.RepeatButton("-", new GUILayoutOption[] { GUILayout.Width(20) }))
+                GUIUnstrip.Label("<color=cyan>Width:</color>", new GUILayoutOption[] { GUILayout.Width(60) });
+                if (GUIUnstrip.RepeatButton("-", new GUILayoutOption[] { GUILayout.Width(20) }))
                 {
                     _rect.width -= 5f;
                 }
-                if (GUILayout.RepeatButton("+", new GUILayoutOption[] { GUILayout.Width(20) }))
+                if (GUIUnstrip.RepeatButton("+", new GUILayoutOption[] { GUILayout.Width(20) }))
                 {
                     _rect.width += 5f;
                 }
-                GUILayout.Label("<color=cyan>Height:</color>", new GUILayoutOption[] { GUILayout.Width(60) });
-                if (GUILayout.RepeatButton("-", new GUILayoutOption[] { GUILayout.Width(20) }))
+                GUIUnstrip.Label("<color=cyan>Height:</color>", new GUILayoutOption[] { GUILayout.Width(60) });
+                if (GUIUnstrip.RepeatButton("-", new GUILayoutOption[] { GUILayout.Width(20) }))
                 {
                     _rect.height -= 5f;
                 }
-                if (GUILayout.RepeatButton("+", new GUILayoutOption[] { GUILayout.Width(20) }))
+                if (GUIUnstrip.RepeatButton("+", new GUILayoutOption[] { GUILayout.Width(20) }))
                 {
                     _rect.height += 5f;
                 }

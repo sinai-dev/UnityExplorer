@@ -52,6 +52,19 @@ namespace Explorer
             return m_scrollStack;
         }
 
+        // ======== Fix for GUIUtility.ScreenToGuiPoint ========
+
+        public static Vector2 ScreenToGUIPoint(Vector2 screenPoint)
+        {
+            return GUIClip.ClipToWindow(InternalScreenToWindowPoint(screenPoint));
+        }
+
+        private static Vector2 InternalScreenToWindowPoint(Vector2 screenPoint)
+        {
+            GUIUtility.InternalScreenToWindowPoint_Injected(ref screenPoint, out Vector2 result);
+            return result;
+        }
+
         // ================= Fix for Space =================
 
         public static void Space(float pixels)
@@ -220,7 +233,7 @@ namespace Explorer
         // Make a repeating button. The button returns true as long as the user holds down the mouse
         static public bool RepeatButton(GUIContent content, GUIStyle style, params GUILayoutOption[] options) { return DoRepeatButton(content, style, options); }
         static bool DoRepeatButton(GUIContent content, GUIStyle style, GUILayoutOption[] options)
-        { return GUI.RepeatButton(LayoutUtilityUnstrip.GetRect(content, style, options), content, style); }
+        { return RepeatButton(LayoutUtilityUnstrip.GetRect(content, style, options), content, style); }
 
         public static string TextField(string text, params GUILayoutOption[] options) { return DoTextField(text, -1, false, GUI.skin.textField, options); }
         public static string TextField(string text, int maxLength, params GUILayoutOption[] options) { return DoTextField(text, maxLength, false, GUI.skin.textField, options); }
@@ -262,6 +275,72 @@ namespace Explorer
         static bool DoToggle(bool value, GUIContent content, GUIStyle style, GUILayoutOption[] options)
         { return GUI.Toggle(LayoutUtilityUnstrip.GetRect(content, style, options), value, content, style); }
 
+        // =========== Fix for GUI.RepeatButton (not GUILayout) ===========
+
+        public static bool RepeatButton(Rect position, string text)
+        {
+            return DoRepeatButton(position, GUIContent.Temp(text), GUI.s_Skin.button, FocusType.Passive);
+        }
+
+        public static bool RepeatButton(Rect position, Texture image)
+        {
+            return DoRepeatButton(position, GUIContent.Temp(image), GUI.s_Skin.button, FocusType.Passive);
+        }
+
+        public static bool RepeatButton(Rect position, GUIContent content)
+        {
+            return DoRepeatButton(position, content, GUI.s_Skin.button, FocusType.Passive);
+        }
+
+        public static bool RepeatButton(Rect position, string text, GUIStyle style)
+        {
+            return DoRepeatButton(position, GUIContent.Temp(text), style, FocusType.Passive);
+        }
+
+        public static bool RepeatButton(Rect position, Texture image, GUIStyle style)
+        {
+            return DoRepeatButton(position, GUIContent.Temp(image), style, FocusType.Passive);
+        }
+
+        public static bool RepeatButton(Rect position, GUIContent content, GUIStyle style)
+        {
+            return DoRepeatButton(position, content, style, FocusType.Passive);
+        }
+
+        private static bool DoRepeatButton(Rect position, GUIContent content, GUIStyle style, FocusType focusType)
+        {
+            int id = GUIUtility.GetControlID(GUI.s_RepeatButtonHash, focusType, position);
+            switch (Event.current.GetTypeForControl(id))
+            {
+                case EventType.MouseDown:
+                    // If the mouse is inside the button, we say that we're the hot control
+                    if (position.Contains(Event.current.mousePosition))
+                    {
+                        GUIUtility.hotControl = id;
+                        Event.current.Use();
+                    }
+                    return false;
+                case EventType.MouseUp:
+                    if (GUIUtility.hotControl == id)
+                    {
+                        GUIUtility.hotControl = 0;
+
+                        // If we got the mousedown, the mouseup is ours as well
+                        // (no matter if the click was in the button or not)
+                        Event.current.Use();
+
+                        // But we only return true if the button was actually clicked
+                        return position.Contains(Event.current.mousePosition);
+                    }
+                    return false;
+                case EventType.Repaint:
+                    style.Draw(position, content, id, false, position.Contains(Event.current.mousePosition));
+                    return id == GUIUtility.hotControl && position.Contains(Event.current.mousePosition);
+            }
+            return false;
+        }
+
+
         // ================= Fix for BeginScrollView. =======================
 
         public static Vector2 BeginScrollView(Vector2 scroll, params GUILayoutOption[] options)
@@ -271,7 +350,7 @@ namespace Explorer
             {
                 try
                 {
-                    return GUILayout.BeginScrollView(scroll, options);
+                    return GUIUnstrip.BeginScrollView(scroll, options);
                 }
                 catch
                 {
@@ -303,7 +382,7 @@ namespace Explorer
 
             if (!ScrollFailed)
             {
-                GUILayout.EndScrollView();
+                GUIUnstrip.EndScrollView();
             }
             else if (!ManualUnstripFailed)
             {

@@ -51,7 +51,7 @@ namespace Explorer
             var orig = GUI.skin.label.alignment;
             GUI.skin.label.alignment = TextAnchor.MiddleCenter;
 
-            GUILayout.Label($"Page {PageOffset + 1}/{MaxPageOffset + 1}", new GUILayoutOption[] { GUILayout.Width(80) });
+            GUIUnstrip.Label($"Page {PageOffset + 1}/{MaxPageOffset + 1}", new GUILayoutOption[] { GUILayout.Width(80) });
 
             GUI.skin.label.alignment = orig;
         }
@@ -97,9 +97,9 @@ namespace Explorer
 
         public void DrawLimitInputArea()
         {
-            GUILayout.Label("Limit: ", new GUILayoutOption[] { GUILayout.Width(50) });
+            GUIUnstrip.Label("Limit: ", new GUILayoutOption[] { GUILayout.Width(50) });
             var limit = this.ItemsPerPage.ToString();
-            limit = GUILayout.TextField(limit, new GUILayoutOption[] { GUILayout.Width(50) });
+            limit = GUIUnstrip.TextField(limit, new GUILayoutOption[] { GUILayout.Width(50) });
             if (limit != ItemsPerPage.ToString() && int.TryParse(limit, out int i))
             {
                 ItemsPerPage = i;

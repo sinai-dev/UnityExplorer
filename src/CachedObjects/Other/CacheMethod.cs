@@ -78,12 +78,12 @@ namespace Explorer
                 }
                 else
                 {
-                    GUILayout.Label($"null (<color=#2df7b2>{ValueTypeName}</color>)", null);
+                    GUIUnstrip.Label($"null (<color=#2df7b2>{ValueTypeName}</color>)");
                 }
             }
             else
             {
-                GUILayout.Label($"<color=grey><i>Not yet evaluated</i></color> (<color=#2df7b2>{ValueTypeName}</color>)", null);
+                GUIUnstrip.Label($"<color=grey><i>Not yet evaluated</i></color> (<color=#2df7b2>{ValueTypeName}</color>)");
             }
         }
     }

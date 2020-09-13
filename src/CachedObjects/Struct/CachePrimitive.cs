@@ -55,7 +55,7 @@ namespace Explorer
 
                 if (CanWrite)
                 {
-                    b = GUILayout.Toggle(b, label, null);
+                    b = GUIUnstrip.Toggle(b, label);
                     if (b != (bool)Value)
                     {
                         SetValueFromInput(b.ToString());
@@ -63,13 +63,13 @@ namespace Explorer
                 }
                 else
                 {
-                    GUILayout.Label(label, null);
+                    GUIUnstrip.Label(label);
                 }
             }
             else
             {
                 // using ValueType.Name instead of ValueTypeName, because we only want the short name.
-                GUILayout.Label("<color=#2df7b2><i>" + ValueType.Name + "</i></color>", new GUILayoutOption[] { GUILayout.Width(50) });
+                GUIUnstrip.Label("<color=#2df7b2><i>" + ValueType.Name + "</i></color>", new GUILayoutOption[] { GUILayout.Width(50) });
 
                 int dynSize = 25 + (m_valueToString.Length * 15);
                 var maxwidth = window.width - 310f;
@@ -77,16 +77,16 @@ namespace Explorer
 
                 if (dynSize > maxwidth)
                 {
-                    m_valueToString = GUILayout.TextArea(m_valueToString, new GUILayoutOption[] { GUILayout.MaxWidth(maxwidth) });
+                    m_valueToString = GUIUnstrip.TextArea(m_valueToString, new GUILayoutOption[] { GUILayout.MaxWidth(maxwidth) });
                 }
                 else
                 {
-                    m_valueToString = GUILayout.TextField(m_valueToString, new GUILayoutOption[] { GUILayout.MaxWidth(dynSize) });
+                    m_valueToString = GUIUnstrip.TextField(m_valueToString, new GUILayoutOption[] { GUILayout.MaxWidth(dynSize) });
                 }
 
                 if (CanWrite)
                 {
-                    if (GUILayout.Button("<color=#00FF00>Apply</color>", new GUILayoutOption[] { GUILayout.Width(60) }))
+                    if (GUIUnstrip.Button("<color=#00FF00>Apply</color>", new GUILayoutOption[] { GUILayout.Width(60) }))
                     {
                         SetValueFromInput(m_valueToString);
                     }

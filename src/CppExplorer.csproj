@@ -101,7 +101,7 @@
     <Compile Include="Extensions\UnityExtensions.cs" />
     <Compile Include="Helpers\PageHelper.cs" />
     <Compile Include="Helpers\ReflectionHelpers.cs" />
-    <Compile Include="Helpers\UIHelpers.cs" />
+    <Compile Include="Menu\UIHelpers.cs" />
     <Compile Include="Helpers\UnityHelpers.cs" />
     <Compile Include="Menu\InspectUnderMouse.cs" />
     <Compile Include="CachedObjects\CacheObjectBase.cs" />

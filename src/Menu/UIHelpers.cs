@@ -15,7 +15,7 @@ namespace Explorer
         // helper for "Instantiate" button on UnityEngine.Objects
         public static void InstantiateButton(Object obj, float width = 100)
         {
-            if (GUILayout.Button("Instantiate", new GUILayoutOption[] { GUILayout.Width(width) }))
+            if (GUIUnstrip.Button("Instantiate", new GUILayoutOption[] { GUILayout.Width(width) }))
             {
                 var newobj = Object.Instantiate(obj);
 
@@ -62,7 +62,7 @@ namespace Explorer
 
             if (!obj)
             {
-                GUILayout.Label("<i><color=red>null</color></i>", null);
+                GUIUnstrip.Label("<i><color=red>null</color></i>");
                 return;
             }
 
@@ -73,7 +73,7 @@ namespace Explorer
 
             GUI.color = activeColor;
 
-            enabled = GUILayout.Toggle(enabled, "", new GUILayoutOption[] { GUILayout.Width(18) });
+            enabled = GUIUnstrip.Toggle(enabled, "", new GUILayoutOption[] { GUILayout.Width(18) });
             if (obj.activeSelf != enabled)
             {
                 obj.SetActive(enabled);
@@ -81,7 +81,7 @@ namespace Explorer
 
             // ------- actual button ---------
 
-            if (GUILayout.Button(label, new GUILayoutOption[] { GUILayout.Height(22), GUILayout.Width(width) }))
+            if (GUIUnstrip.Button(label, new GUILayoutOption[] { GUILayout.Height(22), GUILayout.Width(width) }))
             {
                 if (specialInspectMethod != null)
                 {
@@ -108,7 +108,7 @@ namespace Explorer
 
         public static void SmallInspectButton(object obj)
         {
-            if (GUILayout.Button("Inspect", null))
+            if (GUIUnstrip.Button("Inspect"))
             {
                 WindowManager.InspectObject(obj, out bool _);
             }

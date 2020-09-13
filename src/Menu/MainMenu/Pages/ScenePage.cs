@@ -226,19 +226,19 @@ namespace Explorer
             GUIUnstrip.BeginHorizontal();
 
             // Current Scene label
-            GUILayout.Label("Current Scene:", new GUILayoutOption[] { GUILayout.Width(120) });
+            GUIUnstrip.Label("Current Scene:", new GUILayoutOption[] { GUILayout.Width(120) });
             SceneChangeButtons();
-            GUILayout.Label("<color=cyan>" + m_currentScene + "</color>", null); //new GUILayoutOption[] { GUILayout.Width(250) });
+            GUIUnstrip.Label("<color=cyan>" + m_currentScene + "</color>");
 
             GUIUnstrip.EndHorizontal();
 
             // ----- GameObject Search -----
             GUIUnstrip.BeginHorizontal(GUI.skin.box, null);
-            GUILayout.Label("<b>Search Scene:</b>", new GUILayoutOption[] { GUILayout.Width(100) });
+            GUIUnstrip.Label("<b>Search Scene:</b>", new GUILayoutOption[] { GUILayout.Width(100) });
 
-            m_searchInput = GUILayout.TextField(m_searchInput, null);
+            m_searchInput = GUIUnstrip.TextField(m_searchInput);
 
-            if (GUILayout.Button("Search", new GUILayoutOption[] { GUILayout.Width(80) }))
+            if (GUIUnstrip.Button("Search", new GUILayoutOption[] { GUILayout.Width(80) }))
             {
                 Search();
             }
@@ -255,11 +255,11 @@ namespace Explorer
             if (scenes.Count > 1)
             {
                 int changeWanted = 0;
-                if (GUILayout.Button("<", new GUILayoutOption[] { GUILayout.Width(30) }))
+                if (GUIUnstrip.Button("<", new GUILayoutOption[] { GUILayout.Width(30) }))
                 {
                     changeWanted = -1;
                 }
-                if (GUILayout.Button(">", new GUILayoutOption[] { GUILayout.Width(30) }))
+                if (GUIUnstrip.Button(">", new GUILayoutOption[] { GUILayout.Width(30) }))
                 {
                     changeWanted = 1;
                 }
@@ -288,7 +288,7 @@ namespace Explorer
 
             if (Pages.ItemCount > Pages.ItemsPerPage)
             {
-                if (GUILayout.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(80) }))
+                if (GUIUnstrip.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(80) }))
                 {
                     Pages.TurnPage(Turn.Left, ref this.scroll);
 
@@ -297,7 +297,7 @@ namespace Explorer
 
                 Pages.CurrentPageLabel();
 
-                if (GUILayout.Button("Next >", new GUILayoutOption[] { GUILayout.Width(80) }))
+                if (GUIUnstrip.Button("Next >", new GUILayoutOption[] { GUILayout.Width(80) }))
                 {
                     Pages.TurnPage(Turn.Right, ref this.scroll);
 
@@ -314,13 +314,13 @@ namespace Explorer
             if (m_currentTransform != null)
             {
                 GUIUnstrip.BeginHorizontal();
-                if (GUILayout.Button("<-", new GUILayoutOption[] { GUILayout.Width(35) }))
+                if (GUIUnstrip.Button("<-", new GUILayoutOption[] { GUILayout.Width(35) }))
                 {
                     TraverseUp();
                 }
                 else
                 {
-                    GUILayout.Label("<color=cyan>" + m_currentTransform.GetGameObjectPath() + "</color>",
+                    GUIUnstrip.Label("<color=cyan>" + m_currentTransform.GetGameObjectPath() + "</color>",
                         new GUILayoutOption[] { GUILayout.Width(MainMenu.MainRect.width - 187f) });
                 }
 
@@ -330,11 +330,11 @@ namespace Explorer
             }
             else
             {
-                GUILayout.Label("Scene Root GameObjects:", null);
+                GUIUnstrip.Label("Scene Root GameObjects:");
 
                 if (m_getRootObjectsFailed)
                 {
-                    if (GUILayout.Button("Update Root Object List (auto-update failed!)", null))
+                    if (GUIUnstrip.Button("Update Root Object List (auto-update failed!)"))
                     {
                         Update_Impl(true);
                     }
@@ -359,7 +359,7 @@ namespace Explorer
                         }
 
                         label += "</i></color>";
-                        GUILayout.Label(label, null);
+                        GUIUnstrip.Label(label);
                     }
                     else
                     {
@@ -377,12 +377,12 @@ namespace Explorer
 
         private void DrawSearchResultsList()
         {
-            if (GUILayout.Button("<- Cancel Search", new GUILayoutOption[] { GUILayout.Width(150) }))
+            if (GUIUnstrip.Button("<- Cancel Search", new GUILayoutOption[] { GUILayout.Width(150) }))
             {
                 CancelSearch();
             }
 
-            GUILayout.Label("Search Results:", null);
+            GUIUnstrip.Label("Search Results:");
 
             if (m_searchResults.Count > 0)
             {
@@ -404,13 +404,13 @@ namespace Explorer
                     }
                     else
                     {
-                        GUILayout.Label("<i><color=red>Null or destroyed!</color></i>", null);
+                        GUIUnstrip.Label("<i><color=red>Null or destroyed!</color></i>");
                     }
                 }
             }
             else
             {
-                GUILayout.Label("<color=red><i>No results found!</i></color>", null);
+                GUIUnstrip.Label("<color=red><i>No results found!</i></color>");
             }
         }
 

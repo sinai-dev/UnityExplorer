@@ -123,19 +123,19 @@ MelonLogger.Log(""hello world"");";
 
         public override void DrawWindow()
         {
-            GUILayout.Label("<b><size=15><color=cyan>C# REPL Console</color></size></b>", null);
+            GUIUnstrip.Label("<b><size=15><color=cyan>C# REPL Console</color></size></b>");
 
             GUI.skin.label.alignment = TextAnchor.UpperLeft;
 
-            GUILayout.Label("Enter code here as though it is a method body:", null);
+            GUIUnstrip.Label("Enter code here as though it is a method body:");
 
             inputAreaScroll = GUIUnstrip.BeginScrollView(inputAreaScroll, new GUILayoutOption[] { GUILayout.Height(250) });
 
-            MethodInput = GUILayout.TextArea(MethodInput, new GUILayoutOption[] { GUILayout.ExpandHeight(true) });
+            MethodInput = GUIUnstrip.TextArea(MethodInput, new GUILayoutOption[] { GUILayout.ExpandHeight(true) });
 
             GUIUnstrip.EndScrollView();
 
-            if (GUILayout.Button("<color=cyan><b>Execute</b></color>", null))
+            if (GUIUnstrip.Button("<color=cyan><b>Execute</b></color>"))
             {
                 try
                 {
@@ -157,16 +157,16 @@ MelonLogger.Log(""hello world"");";
                 }
             }
 
-            GUILayout.Label("<b>Using directives:</b>", null);
+            GUIUnstrip.Label("<b>Using directives:</b>");
 
             GUIUnstrip.BeginHorizontal();
-            GUILayout.Label("Add namespace:", new GUILayoutOption[] { GUILayout.Width(105) });
-            UsingInput = GUILayout.TextField(UsingInput, new GUILayoutOption[] { GUILayout.Width(150) });
-            if (GUILayout.Button("<b><color=lime>Add</color></b>", new GUILayoutOption[] { GUILayout.Width(120) }))
+            GUIUnstrip.Label("Add namespace:", new GUILayoutOption[] { GUILayout.Width(105) });
+            UsingInput = GUIUnstrip.TextField(UsingInput, new GUILayoutOption[] { GUILayout.Width(150) });
+            if (GUIUnstrip.Button("<b><color=lime>Add</color></b>", new GUILayoutOption[] { GUILayout.Width(120) }))
             {
                 AddUsing(UsingInput);
             }
-            if (GUILayout.Button("<b><color=red>Clear All</color></b>", new GUILayoutOption[] { GUILayout.Width(120) }))
+            if (GUIUnstrip.Button("<b><color=red>Clear All</color></b>", new GUILayoutOption[] { GUILayout.Width(120) }))
             {
                 ResetConsole();
             }
@@ -174,7 +174,7 @@ MelonLogger.Log(""hello world"");";
 
             foreach (var asm in UsingDirectives)
             {
-                GUILayout.Label(AsmToUsing(asm, true), null);
+                GUIUnstrip.Label(AsmToUsing(asm, true));
             }            
         }
 

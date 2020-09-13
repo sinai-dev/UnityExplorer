@@ -264,7 +264,7 @@ namespace Explorer
         {
             if (m_cachedEntries == null)
             {
-                GUILayout.Label("m_cachedEntries is null!", null);
+                GUIUnstrip.Label("m_cachedEntries is null!");
                 return;
             }
 
@@ -274,14 +274,14 @@ namespace Explorer
 
             if (!IsExpanded)
             {
-                if (GUILayout.Button("v", new GUILayoutOption[] { GUILayout.Width(25) }))
+                if (GUIUnstrip.Button("v", new GUILayoutOption[] { GUILayout.Width(25) }))
                 {
                     IsExpanded = true;
                 }
             }
             else
             {
-                if (GUILayout.Button("^", new GUILayoutOption[] { GUILayout.Width(25) }))
+                if (GUIUnstrip.Button("^", new GUILayoutOption[] { GUILayout.Width(25) }))
                 {
                     IsExpanded = false;
                 }
@@ -291,7 +291,7 @@ namespace Explorer
 
             GUI.skin.button.alignment = TextAnchor.MiddleLeft;
             string btnLabel = $"[{count}] <color=#2df7b2>{EntryType.FullName}</color>";
-            if (GUILayout.Button(btnLabel, new GUILayoutOption[] { GUILayout.MaxWidth(negativeWhitespace) }))
+            if (GUIUnstrip.Button(btnLabel, new GUILayoutOption[] { GUILayout.MaxWidth(negativeWhitespace) }))
             {
                 WindowManager.InspectObject(Value, out bool _);
             }
@@ -313,11 +313,11 @@ namespace Explorer
                     Pages.CurrentPageLabel();
 
                     // prev/next page buttons
-                    if (GUILayout.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(60) }))
+                    if (GUIUnstrip.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(60) }))
                     {
                         Pages.TurnPage(Turn.Left);
                     }
-                    if (GUILayout.Button("Next >", new GUILayoutOption[] { GUILayout.Width(60) }))
+                    if (GUIUnstrip.Button("Next >", new GUILayoutOption[] { GUILayout.Width(60) }))
                     {
                         Pages.TurnPage(Turn.Right);
                     }
@@ -341,12 +341,12 @@ namespace Explorer
 
                     if (entry == null || entry.Value == null)
                     {
-                        GUILayout.Label($"[{i}] <i><color=grey>(null)</color></i>", null);
+                        GUIUnstrip.Label($"[{i}] <i><color=grey>(null)</color></i>");
                     }
                     else
                     {
                         GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-                        GUILayout.Label($"[{i}]", new GUILayoutOption[] { GUILayout.Width(30) });
+                        GUIUnstrip.Label($"[{i}]", new GUILayoutOption[] { GUILayout.Width(30) });
 
                         entry.DrawValue(window, window.width - (whitespace + 85));                        
                     }

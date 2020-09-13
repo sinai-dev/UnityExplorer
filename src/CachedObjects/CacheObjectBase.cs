@@ -379,7 +379,7 @@ namespace Explorer
 
             if (MemInfo != null)
             {
-                GUILayout.Label(RichTextName, new GUILayoutOption[] { GUILayout.Width(labelWidth) });
+                GUIUnstrip.Label(RichTextName, new GUILayoutOption[] { GUILayout.Width(labelWidth) });
             }
             else
             {
@@ -408,15 +408,15 @@ namespace Explorer
 
                         GUIUnstrip.BeginHorizontal();
 
-                        GUILayout.Label(i.ToString(), new GUILayoutOption[] { GUILayout.Width(20) });
-                        m_argumentInput[i] = GUILayout.TextField(input, new GUILayoutOption[] { GUILayout.Width(150) });
-                        GUILayout.Label(label, null);
+                        GUIUnstrip.Label(i.ToString(), new GUILayoutOption[] { GUILayout.Width(20) });
+                        m_argumentInput[i] = GUIUnstrip.TextField(input, new GUILayoutOption[] { GUILayout.Width(150) });
+                        GUIUnstrip.Label(label);
 
                         GUIUnstrip.EndHorizontal();
                     }
 
                     GUIUnstrip.BeginHorizontal();
-                    if (GUILayout.Button(EVALUATE_LABEL, new GUILayoutOption[] { GUILayout.Width(70) }))
+                    if (GUIUnstrip.Button(EVALUATE_LABEL, new GUILayoutOption[] { GUILayout.Width(70) }))
                     {
                         if (cm != null)
                         {
@@ -427,7 +427,7 @@ namespace Explorer
                             UpdateValue();
                         }
                     }
-                    if (GUILayout.Button("Cancel", new GUILayoutOption[] { GUILayout.Width(70) }))
+                    if (GUIUnstrip.Button("Cancel", new GUILayoutOption[] { GUILayout.Width(70) }))
                     {
                         m_isEvaluating = false;
                     }
@@ -435,7 +435,7 @@ namespace Explorer
                 }
                 else
                 {
-                    if (GUILayout.Button($"Evaluate ({m_arguments.Length} params)", new GUILayoutOption[] { GUILayout.Width(150) }))
+                    if (GUIUnstrip.Button($"Evaluate ({m_arguments.Length} params)", new GUILayoutOption[] { GUILayout.Width(150) }))
                     {
                         m_isEvaluating = true;
                     }
@@ -452,7 +452,7 @@ namespace Explorer
             {
                 //GUIUnstrip.BeginHorizontal();
 
-                if (GUILayout.Button(EVALUATE_LABEL, new GUILayoutOption[] { GUILayout.Width(70) }))
+                if (GUIUnstrip.Button(EVALUATE_LABEL, new GUILayoutOption[] { GUILayout.Width(70) }))
                 {
                     cm.Evaluate();
                 }
@@ -465,15 +465,15 @@ namespace Explorer
 
             if (!string.IsNullOrEmpty(ReflectionException))
             {
-                GUILayout.Label("<color=red>Reflection failed!</color> (" + ReflectionException + ")", null);
+                GUIUnstrip.Label("<color=red>Reflection failed!</color> (" + ReflectionException + ")");
             }
             else if ((HasParameters || this is CacheMethod) && !m_evaluated)
             {
-                GUILayout.Label($"<color=grey><i>Not yet evaluated</i></color> (<color=#2df7b2>{ValueTypeName}</color>)", null);
+                GUIUnstrip.Label($"<color=grey><i>Not yet evaluated</i></color> (<color=#2df7b2>{ValueTypeName}</color>)");
             }
             else if (Value == null && !(this is CacheMethod))
             {
-                GUILayout.Label("<i>null (" + ValueTypeName + ")</i>", null);
+                GUIUnstrip.Label("<i>null (" + ValueTypeName + ")</i>");
             }
             else
             {

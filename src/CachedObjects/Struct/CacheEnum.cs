@@ -39,19 +39,19 @@ namespace Explorer
         {
             if (CanWrite)
             {
-                if (GUILayout.Button("<", new GUILayoutOption[] { GUILayout.Width(25) }))
+                if (GUIUnstrip.Button("<", new GUILayoutOption[] { GUILayout.Width(25) }))
                 {
                     SetEnum(ref Value, -1);
                     SetValue();
                 }
-                if (GUILayout.Button(">", new GUILayoutOption[] { GUILayout.Width(25) }))
+                if (GUIUnstrip.Button(">", new GUILayoutOption[] { GUILayout.Width(25) }))
                 {
                     SetEnum(ref Value, 1);
                     SetValue();
                 }
             }
 
-            GUILayout.Label(Value.ToString() + "<color=#2df7b2><i> (" + ValueType + ")</i></color>", null);
+            GUIUnstrip.Label(Value.ToString() + "<color=#2df7b2><i> (" + ValueType + ")</i></color>");
         }
 
         public void SetEnum(ref object value, int change)

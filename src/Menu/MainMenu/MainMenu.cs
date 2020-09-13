@@ -91,7 +91,7 @@ namespace Explorer
                 else
                     GUI.color = Color.white;
 
-                if (GUILayout.Button(Pages[i].Name, null))
+                if (GUIUnstrip.Button(Pages[i].Name))
                 {
                     m_currentPage = i;
                 }
@@ -100,13 +100,13 @@ namespace Explorer
 
             GUIUnstrip.BeginHorizontal();
             GUI.color = Color.white;
-            InspectUnderMouse.EnableInspect = GUILayout.Toggle(InspectUnderMouse.EnableInspect, "Inspect Under Mouse (Shift + RMB)", null);
+            InspectUnderMouse.EnableInspect = GUIUnstrip.Toggle(InspectUnderMouse.EnableInspect, "Inspect Under Mouse (Shift + RMB)");
 
             bool mouseState = CursorControl.ForceUnlockMouse;
-            bool setMouse = GUILayout.Toggle(mouseState, "Force Unlock Mouse (Left Alt)", null);
+            bool setMouse = GUIUnstrip.Toggle(mouseState, "Force Unlock Mouse (Left Alt)");
             if (setMouse != mouseState) CursorControl.ForceUnlockMouse = setMouse;
 
-            WindowManager.TabView = GUILayout.Toggle(WindowManager.TabView, "Tab View", null);
+            WindowManager.TabView = GUIUnstrip.Toggle(WindowManager.TabView, "Tab View");
             GUIUnstrip.EndHorizontal();
 
             //GUIUnstrip.Space(10);

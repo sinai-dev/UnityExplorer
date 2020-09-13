@@ -55,7 +55,7 @@ namespace Explorer
             }
 
             GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-            if (GUILayout.Button(label, new GUILayoutOption[] { GUILayout.Width(width - 15) }))
+            if (GUIUnstrip.Button(label, new GUILayoutOption[] { GUILayout.Width(width - 15) }))
             {
                 WindowManager.InspectObject(Value, out bool _);
             }

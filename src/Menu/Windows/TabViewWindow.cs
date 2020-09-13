@@ -87,11 +87,11 @@ namespace Explorer
                     GUI.color = focused ? Color.green : Color.white;
 
                     var window = WindowManager.Windows[i];
-                    if (GUILayout.Button(color + window.Title + "</color>", new GUILayoutOption[] { GUILayout.Width(200) }))
+                    if (GUIUnstrip.Button(color + window.Title + "</color>", new GUILayoutOption[] { GUILayout.Width(200) }))
                     {
                         TargetTabID = i;
                     }
-                    if (GUILayout.Button("<color=red><b>X</b></color>", new GUILayoutOption[] { GUILayout.Width(22) }))
+                    if (GUIUnstrip.Button("<color=red><b>X</b></color>", new GUILayoutOption[] { GUILayout.Width(22) }))
                     {
                         window.DestroyWindow();
                     }

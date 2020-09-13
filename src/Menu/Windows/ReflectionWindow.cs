@@ -236,26 +236,26 @@ namespace Explorer
                 }
 
                 GUIUnstrip.BeginHorizontal();
-                GUILayout.Label("<b>Type:</b> <color=cyan>" + TargetType.FullName + "</color>", new GUILayoutOption[] { GUILayout.Width(245f) });
+                GUIUnstrip.Label("<b>Type:</b> <color=cyan>" + TargetType.FullName + "</color>", new GUILayoutOption[] { GUILayout.Width(245f) });
                 if (m_uObj)
                 {
-                    GUILayout.Label("Name: " + m_uObj.name, null);
+                    GUIUnstrip.Label("Name: " + m_uObj.name);
                 }
                 GUIUnstrip.EndHorizontal();
 
                 if (m_uObj)
                 {
                     GUIUnstrip.BeginHorizontal();
-                    GUILayout.Label("<b>Tools:</b>", new GUILayoutOption[] { GUILayout.Width(80) });
+                    GUIUnstrip.Label("<b>Tools:</b>", new GUILayoutOption[] { GUILayout.Width(80) });
                     UIHelpers.InstantiateButton(m_uObj);
                     if (m_component && m_component.gameObject is GameObject obj)
                     {
                         GUI.skin.label.alignment = TextAnchor.MiddleRight;
-                        GUILayout.Label("GameObject:", new GUILayoutOption[] { GUILayout.Width(135) });
+                        GUIUnstrip.Label("GameObject:", new GUILayoutOption[] { GUILayout.Width(135) });
                         var charWidth = obj.name.Length * 15;
                         var maxWidth = rect.width - 350;
                         var labelWidth = charWidth < maxWidth ? charWidth : maxWidth; 
-                        if (GUILayout.Button("<color=#00FF00>" + obj.name + "</color>", new GUILayoutOption[] { GUILayout.Width(labelWidth) }))
+                        if (GUIUnstrip.Button("<color=#00FF00>" + obj.name + "</color>", new GUILayoutOption[] { GUILayout.Width(labelWidth) }))
                         {
                             WindowManager.InspectObject(obj, out bool _);
                         }
@@ -267,12 +267,12 @@ namespace Explorer
                 UIStyles.HorizontalLine(Color.grey);
 
                 GUIUnstrip.BeginHorizontal();
-                GUILayout.Label("<b>Search:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
-                m_search = GUILayout.TextField(m_search, null);                
+                GUIUnstrip.Label("<b>Search:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
+                m_search = GUIUnstrip.TextField(m_search);                
                 GUIUnstrip.EndHorizontal();
 
                 GUIUnstrip.BeginHorizontal();
-                GUILayout.Label("<b>Filter:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
+                GUIUnstrip.Label("<b>Filter:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
                 FilterToggle(MemberTypes.All, "All");
                 FilterToggle(MemberTypes.Property, "Properties");
                 FilterToggle(MemberTypes.Field, "Fields");
@@ -280,15 +280,15 @@ namespace Explorer
                 GUIUnstrip.EndHorizontal();
 
                 GUIUnstrip.BeginHorizontal();
-                GUILayout.Label("<b>Values:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
-                if (GUILayout.Button("Update", new GUILayoutOption[] { GUILayout.Width(100) }))
+                GUIUnstrip.Label("<b>Values:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
+                if (GUIUnstrip.Button("Update", new GUILayoutOption[] { GUILayout.Width(100) }))
                 {
                     UpdateValues();
                 }
                 GUI.color = m_autoUpdate ? Color.green : Color.red;
-                m_autoUpdate = GUILayout.Toggle(m_autoUpdate, "Auto-update?", new GUILayoutOption[] { GUILayout.Width(100) });
+                m_autoUpdate = GUIUnstrip.Toggle(m_autoUpdate, "Auto-update?", new GUILayoutOption[] { GUILayout.Width(100) });
                 GUI.color = m_hideFailedReflection ? Color.green : Color.red;
-                m_hideFailedReflection = GUILayout.Toggle(m_hideFailedReflection, "Hide failed Reflection?", new GUILayoutOption[] { GUILayout.Width(150) });
+                m_hideFailedReflection = GUIUnstrip.Toggle(m_hideFailedReflection, "Hide failed Reflection?", new GUILayoutOption[] { GUILayout.Width(150) });
                 GUI.color = Color.white;
                 GUIUnstrip.EndHorizontal();
 
@@ -303,14 +303,14 @@ namespace Explorer
 
                 if (Pages.ItemCount > Pages.ItemsPerPage)
                 {
-                    if (GUILayout.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(80) }))
+                    if (GUIUnstrip.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(80) }))
                     {
                         Pages.TurnPage(Turn.Left, ref this.scroll);
                     }
 
                     Pages.CurrentPageLabel();
 
-                    if (GUILayout.Button("Next >", new GUILayoutOption[] { GUILayout.Width(80) }))
+                    if (GUIUnstrip.Button("Next >", new GUILayoutOption[] { GUILayout.Width(80) }))
                     {
                         Pages.TurnPage(Turn.Right, ref this.scroll);
                     }
@@ -386,7 +386,7 @@ namespace Explorer
             {
                 GUI.color = Color.white;
             }
-            if (GUILayout.Button(label, new GUILayoutOption[] { GUILayout.Width(100) }))
+            if (GUIUnstrip.Button(label, new GUILayoutOption[] { GUILayout.Width(100) }))
             {
                 m_filter = mode;
                 Pages.PageOffset = 0;

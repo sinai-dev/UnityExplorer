@@ -35,21 +35,21 @@ namespace Explorer
             {
                 if (!IsExpanded)
                 {
-                    if (GUILayout.Button("v", new GUILayoutOption[] { GUILayout.Width(25) }))
+                    if (GUIUnstrip.Button("v", new GUILayoutOption[] { GUILayout.Width(25) }))
                     {
                         IsExpanded = true;
                     }
                 }
                 else
                 {
-                    if (GUILayout.Button("^", new GUILayoutOption[] { GUILayout.Width(25) }))
+                    if (GUIUnstrip.Button("^", new GUILayoutOption[] { GUILayout.Width(25) }))
                     {
                         IsExpanded = false;
                     }
                 }
             }
 
-            GUILayout.Label($"<color=#2df7b2>Rect</color>: {((Rect)Value).ToString()}", null);
+            GUIUnstrip.Label($"<color=#2df7b2>Rect</color>: {((Rect)Value).ToString()}");
 
             if (CanWrite && IsExpanded)
             {
@@ -59,32 +59,32 @@ namespace Explorer
 
                 GUIUnstrip.BeginHorizontal();
                 GUIUnstrip.Space(whitespace);
-                GUILayout.Label("X:", new GUILayoutOption[] { GUILayout.Width(30) });
-                x = GUILayout.TextField(x, new GUILayoutOption[] { GUILayout.Width(120) });
+                GUIUnstrip.Label("X:", new GUILayoutOption[] { GUILayout.Width(30) });
+                x = GUIUnstrip.TextField(x, new GUILayoutOption[] { GUILayout.Width(120) });
                 GUIUnstrip.EndHorizontal();
 
                 GUIUnstrip.BeginHorizontal();
                 GUIUnstrip.Space(whitespace);
-                GUILayout.Label("Y:", new GUILayoutOption[] { GUILayout.Width(30) });
-                y = GUILayout.TextField(y, new GUILayoutOption[] { GUILayout.Width(120) });
+                GUIUnstrip.Label("Y:", new GUILayoutOption[] { GUILayout.Width(30) });
+                y = GUIUnstrip.TextField(y, new GUILayoutOption[] { GUILayout.Width(120) });
                 GUIUnstrip.EndHorizontal();
 
                 GUIUnstrip.BeginHorizontal();
                 GUIUnstrip.Space(whitespace);
-                GUILayout.Label("W:", new GUILayoutOption[] { GUILayout.Width(30) });
-                w = GUILayout.TextField(w, new GUILayoutOption[] { GUILayout.Width(120) });
+                GUIUnstrip.Label("W:", new GUILayoutOption[] { GUILayout.Width(30) });
+                w = GUIUnstrip.TextField(w, new GUILayoutOption[] { GUILayout.Width(120) });
                 GUIUnstrip.EndHorizontal();
 
                 GUIUnstrip.BeginHorizontal();
                 GUIUnstrip.Space(whitespace);
-                GUILayout.Label("H:", new GUILayoutOption[] { GUILayout.Width(30) });
-                h = GUILayout.TextField(h, new GUILayoutOption[] { GUILayout.Width(120) });
+                GUIUnstrip.Label("H:", new GUILayoutOption[] { GUILayout.Width(30) });
+                h = GUIUnstrip.TextField(h, new GUILayoutOption[] { GUILayout.Width(120) });
                 GUIUnstrip.EndHorizontal();
 
                 // draw set value button
                 GUIUnstrip.BeginHorizontal();
                 GUIUnstrip.Space(whitespace);
-                if (GUILayout.Button("<color=lime>Apply</color>", new GUILayoutOption[] { GUILayout.Width(155) }))
+                if (GUIUnstrip.Button("<color=lime>Apply</color>", new GUILayoutOption[] { GUILayout.Width(155) }))
                 {
                     SetValueFromInput();
                 }
