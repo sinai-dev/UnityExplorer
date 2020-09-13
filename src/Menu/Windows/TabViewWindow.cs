@@ -67,8 +67,8 @@ namespace Explorer
 
                 GUIUnstrip.BeginArea(new Rect(5, 25, m_rect.width - 10, m_rect.height - 35), GUI.skin.box);
 
-                GUILayout.BeginVertical(GUI.skin.box, null);
-                GUILayout.BeginHorizontal(null);
+                GUIUnstrip.BeginVertical(GUI.skin.box, null);
+                GUIUnstrip.BeginHorizontal();
                 GUI.skin.button.alignment = TextAnchor.MiddleLeft;
                 int tabPerRow = Mathf.FloorToInt((float)((decimal)m_rect.width / 238));
                 int rowCount = 0;
@@ -77,8 +77,8 @@ namespace Explorer
                     if (rowCount >= tabPerRow)
                     {
                         rowCount = 0;
-                        GUILayout.EndHorizontal();
-                        GUILayout.BeginHorizontal(null);
+                        GUIUnstrip.EndHorizontal();
+                        GUIUnstrip.BeginHorizontal();
                     }
                     rowCount++;
 
@@ -97,8 +97,8 @@ namespace Explorer
                     }
                 }
                 GUI.color = Color.white;
-                GUILayout.EndHorizontal();
-                GUILayout.EndVertical();
+                GUIUnstrip.EndHorizontal();
+                GUIUnstrip.EndVertical();
                 GUI.skin.button.alignment = TextAnchor.MiddleCenter;
 
                 m_targetWindow.WindowFunction(m_targetWindow.windowID);

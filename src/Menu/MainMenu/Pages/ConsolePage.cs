@@ -159,7 +159,7 @@ MelonLogger.Log(""hello world"");";
 
             GUILayout.Label("<b>Using directives:</b>", null);
 
-            GUILayout.BeginHorizontal(null);
+            GUIUnstrip.BeginHorizontal();
             GUILayout.Label("Add namespace:", new GUILayoutOption[] { GUILayout.Width(105) });
             UsingInput = GUILayout.TextField(UsingInput, new GUILayoutOption[] { GUILayout.Width(150) });
             if (GUILayout.Button("<b><color=lime>Add</color></b>", new GUILayoutOption[] { GUILayout.Width(120) }))
@@ -170,7 +170,7 @@ MelonLogger.Log(""hello world"");";
             {
                 ResetConsole();
             }
-            GUILayout.EndHorizontal();
+            GUIUnstrip.EndHorizontal();
 
             foreach (var asm in UsingDirectives)
             {

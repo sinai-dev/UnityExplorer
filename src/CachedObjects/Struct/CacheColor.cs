@@ -56,44 +56,44 @@ namespace Explorer
 
             if (CanWrite && IsExpanded)
             {
-                GUILayout.EndHorizontal();
+                GUIUnstrip.EndHorizontal();
 
                 var whitespace = CalcWhitespace(window);
 
-                GUILayout.BeginHorizontal(null);
+                GUIUnstrip.BeginHorizontal();
                 GUIUnstrip.Space(whitespace);
                 GUILayout.Label("R:", new GUILayoutOption[] { GUILayout.Width(30) });
                 r = GUILayout.TextField(r, new GUILayoutOption[] { GUILayout.Width(120) });
-                GUILayout.EndHorizontal();
+                GUIUnstrip.EndHorizontal();
 
-                GUILayout.BeginHorizontal(null);
+                GUIUnstrip.BeginHorizontal();
                 GUIUnstrip.Space(whitespace);
                 GUILayout.Label("G:", new GUILayoutOption[] { GUILayout.Width(30) });
                 g = GUILayout.TextField(g, new GUILayoutOption[] { GUILayout.Width(120) });
-                GUILayout.EndHorizontal();
+                GUIUnstrip.EndHorizontal();
 
-                GUILayout.BeginHorizontal(null);
+                GUIUnstrip.BeginHorizontal();
                 GUIUnstrip.Space(whitespace);
                 GUILayout.Label("B:", new GUILayoutOption[] { GUILayout.Width(30) });
                 b = GUILayout.TextField(b, new GUILayoutOption[] { GUILayout.Width(120) });
-                GUILayout.EndHorizontal();
+                GUIUnstrip.EndHorizontal();
 
-                GUILayout.BeginHorizontal(null);
+                GUIUnstrip.BeginHorizontal();
                 GUIUnstrip.Space(whitespace);
                 GUILayout.Label("A:", new GUILayoutOption[] { GUILayout.Width(30) });
                 a = GUILayout.TextField(a, new GUILayoutOption[] { GUILayout.Width(120) });
-                GUILayout.EndHorizontal();
+                GUIUnstrip.EndHorizontal();
 
                 // draw set value button
-                GUILayout.BeginHorizontal(null);
+                GUIUnstrip.BeginHorizontal();
                 GUIUnstrip.Space(whitespace);
                 if (GUILayout.Button("<color=lime>Apply</color>", new GUILayoutOption[] { GUILayout.Width(155) }))
                 {
                     SetValueFromInput();
                 }
-                GUILayout.EndHorizontal();
+                GUIUnstrip.EndHorizontal();
 
-                GUILayout.BeginHorizontal(null);
+                GUIUnstrip.BeginHorizontal();
             }
         }
 

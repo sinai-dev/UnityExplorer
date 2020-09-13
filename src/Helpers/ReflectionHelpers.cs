@@ -36,6 +36,9 @@ namespace Explorer
 
         public static bool IsEnumerable(Type t)
         {
+            // Not needed for Il2Cpp at the moment. Don't want these to behave as Enumerables.
+            //if (typeof(Transform).IsAssignableFrom(t)) return false;
+
             return typeof(IEnumerable).IsAssignableFrom(t);
         }
 

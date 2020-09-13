@@ -26,7 +26,7 @@ namespace Explorer
 
                 try
                 {
-                    GUILayout.BeginHorizontal(GUI.skin.box, null);
+                    GUIUnstrip.BeginHorizontal(GUI.skin.box, null);
 
                     GUI.skin.label.alignment = TextAnchor.MiddleCenter;
                     GUILayout.Button(gcDrag, GUI.skin.label, new GUILayoutOption[] { GUILayout.Height(15) });
@@ -57,7 +57,7 @@ namespace Explorer
                         _rect.yMax = Mathf.Min(Screen.height, _rect.yMax);  // modifying yMax affects height, not y
                     }
 
-                    GUILayout.EndHorizontal();
+                    GUIUnstrip.EndHorizontal();
                 }
                 catch (Il2CppException e) when (e.Message.StartsWith("System.ArgumentException"))
                 {
@@ -76,7 +76,7 @@ namespace Explorer
             }
             else
             {
-                GUILayout.BeginHorizontal(GUI.skin.box, null);
+                GUIUnstrip.BeginHorizontal(GUI.skin.box, null);
 
                 GUILayout.Label("Resize window:", new GUILayoutOption[] { GUILayout.Width(100) });
 
@@ -100,7 +100,7 @@ namespace Explorer
                     _rect.height += 5f;
                 }
 
-                GUILayout.EndHorizontal();
+                GUIUnstrip.EndHorizontal();
                 GUI.skin.label.alignment = TextAnchor.UpperLeft;
             }
 

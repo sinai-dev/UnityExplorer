@@ -68,7 +68,7 @@ namespace Explorer
 
             // ------ toggle active button ------
 
-            GUILayout.BeginHorizontal(null);
+            GUIUnstrip.BeginHorizontal();
             GUI.skin.button.alignment = TextAnchor.UpperLeft;
 
             GUI.color = activeColor;
@@ -103,7 +103,7 @@ namespace Explorer
                 SmallInspectButton(_obj);
             }
 
-            GUILayout.EndHorizontal();
+            GUIUnstrip.EndHorizontal();
         }
 
         public static void SmallInspectButton(object obj)

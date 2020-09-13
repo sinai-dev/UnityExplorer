@@ -390,7 +390,7 @@ namespace Explorer
 
             if (HasParameters)
             {
-                GUILayout.BeginVertical(null);
+                GUIUnstrip.BeginVertical();
 
                 if (m_isEvaluating)
                 {
@@ -406,16 +406,16 @@ namespace Explorer
                             label = $"<i>[{label} = {m_arguments[i].DefaultValue}]</i>";
                         }
 
-                        GUILayout.BeginHorizontal(null);
+                        GUIUnstrip.BeginHorizontal();
 
                         GUILayout.Label(i.ToString(), new GUILayoutOption[] { GUILayout.Width(20) });
                         m_argumentInput[i] = GUILayout.TextField(input, new GUILayoutOption[] { GUILayout.Width(150) });
                         GUILayout.Label(label, null);
 
-                        GUILayout.EndHorizontal();
+                        GUIUnstrip.EndHorizontal();
                     }
 
-                    GUILayout.BeginHorizontal(null);
+                    GUIUnstrip.BeginHorizontal();
                     if (GUILayout.Button(EVALUATE_LABEL, new GUILayoutOption[] { GUILayout.Width(70) }))
                     {
                         if (cm != null)
@@ -431,7 +431,7 @@ namespace Explorer
                     {
                         m_isEvaluating = false;
                     }
-                    GUILayout.EndHorizontal();
+                    GUIUnstrip.EndHorizontal();
                 }
                 else
                 {
@@ -441,16 +441,16 @@ namespace Explorer
                     }
                 }
 
-                GUILayout.EndVertical();
+                GUIUnstrip.EndVertical();
 
                 // new line and space
-                GUILayout.EndHorizontal();
-                GUILayout.BeginHorizontal(null);
+                GUIUnstrip.EndHorizontal();
+                GUIUnstrip.BeginHorizontal();
                 GUIUnstrip.Space(labelWidth);
             }
             else if (cm != null)
             {
-                //GUILayout.BeginHorizontal(null);
+                //GUIUnstrip.BeginHorizontal();
 
                 if (GUILayout.Button(EVALUATE_LABEL, new GUILayoutOption[] { GUILayout.Width(70) }))
                 {
@@ -458,8 +458,8 @@ namespace Explorer
                 }
 
                 // new line and space
-                GUILayout.EndHorizontal();
-                GUILayout.BeginHorizontal(null);
+                GUIUnstrip.EndHorizontal();
+                GUIUnstrip.BeginHorizontal();
                 GUIUnstrip.Space(labelWidth);
             }
 

@@ -83,7 +83,7 @@ namespace Explorer
 
         private void MainHeader()
         {
-            GUILayout.BeginHorizontal(null);
+            GUIUnstrip.BeginHorizontal();
             for (int i = 0; i < Pages.Count; i++)
             {
                 if (m_currentPage == i)
@@ -96,9 +96,9 @@ namespace Explorer
                     m_currentPage = i;
                 }
             }
-            GUILayout.EndHorizontal();
+            GUIUnstrip.EndHorizontal();
 
-            GUILayout.BeginHorizontal(null);
+            GUIUnstrip.BeginHorizontal();
             GUI.color = Color.white;
             InspectUnderMouse.EnableInspect = GUILayout.Toggle(InspectUnderMouse.EnableInspect, "Inspect Under Mouse (Shift + RMB)", null);
 
@@ -107,7 +107,7 @@ namespace Explorer
             if (setMouse != mouseState) CursorControl.ForceUnlockMouse = setMouse;
 
             WindowManager.TabView = GUILayout.Toggle(WindowManager.TabView, "Tab View", null);
-            GUILayout.EndHorizontal();
+            GUIUnstrip.EndHorizontal();
 
             //GUIUnstrip.Space(10);
             GUIUnstrip.Space(10);

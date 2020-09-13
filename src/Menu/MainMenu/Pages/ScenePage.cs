@@ -200,7 +200,7 @@ namespace Explorer
             {
                 DrawHeaderArea();
 
-                GUILayout.BeginVertical(GUI.skin.box, null);
+                GUIUnstrip.BeginVertical(GUI.skin.box, null);
 
                 DrawPageButtons();
 
@@ -213,7 +213,7 @@ namespace Explorer
                     DrawSearchResultsList();
                 }
 
-                GUILayout.EndVertical();
+                GUIUnstrip.EndVertical();
             }
             catch
             {
@@ -223,17 +223,17 @@ namespace Explorer
 
         private void DrawHeaderArea()
         {
-            GUILayout.BeginHorizontal(null);
+            GUIUnstrip.BeginHorizontal();
 
             // Current Scene label
             GUILayout.Label("Current Scene:", new GUILayoutOption[] { GUILayout.Width(120) });
             SceneChangeButtons();
             GUILayout.Label("<color=cyan>" + m_currentScene + "</color>", null); //new GUILayoutOption[] { GUILayout.Width(250) });
 
-            GUILayout.EndHorizontal();
+            GUIUnstrip.EndHorizontal();
 
             // ----- GameObject Search -----
-            GUILayout.BeginHorizontal(GUI.skin.box, null);
+            GUIUnstrip.BeginHorizontal(GUI.skin.box, null);
             GUILayout.Label("<b>Search Scene:</b>", new GUILayoutOption[] { GUILayout.Width(100) });
 
             m_searchInput = GUILayout.TextField(m_searchInput, null);
@@ -242,7 +242,7 @@ namespace Explorer
             {
                 Search();
             }
-            GUILayout.EndHorizontal();
+            GUIUnstrip.EndHorizontal();
 
             GUIUnstrip.Space(5);
         }
@@ -282,7 +282,7 @@ namespace Explorer
 
         private void DrawPageButtons()
         {
-            GUILayout.BeginHorizontal(null);
+            GUIUnstrip.BeginHorizontal();
 
             Pages.DrawLimitInputArea();
 
@@ -305,7 +305,7 @@ namespace Explorer
                 }
             }
 
-            GUILayout.EndHorizontal();
+            GUIUnstrip.EndHorizontal();
             GUI.skin.label.alignment = TextAnchor.UpperLeft;
         }
 
@@ -313,7 +313,7 @@ namespace Explorer
         {
             if (m_currentTransform != null)
             {
-                GUILayout.BeginHorizontal(null);
+                GUIUnstrip.BeginHorizontal();
                 if (GUILayout.Button("<-", new GUILayoutOption[] { GUILayout.Width(35) }))
                 {
                     TraverseUp();
@@ -326,7 +326,7 @@ namespace Explorer
 
                 UIHelpers.SmallInspectButton(m_currentTransform);
                 
-                GUILayout.EndHorizontal();
+                GUIUnstrip.EndHorizontal();
             }
             else
             {

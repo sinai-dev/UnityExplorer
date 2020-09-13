@@ -243,8 +243,8 @@ namespace Explorer
 
                 if (count > Pages.ItemsPerPage)
                 {
-                    GUILayout.EndHorizontal();
-                    GUILayout.BeginHorizontal(null);
+                    GUIUnstrip.EndHorizontal();
+                    GUIUnstrip.BeginHorizontal();
 
                     GUIUnstrip.Space(whitespace);
 
@@ -273,8 +273,8 @@ namespace Explorer
                     var val = m_cachedValues[i];
 
                     //collapsing the BeginHorizontal called from ReflectionWindow.WindowFunction or previous array entry
-                    GUILayout.EndHorizontal();
-                    GUILayout.BeginHorizontal(null);
+                    GUIUnstrip.EndHorizontal();
+                    GUIUnstrip.BeginHorizontal();
 
                     //GUIUnstrip.Space(whitespace);
 

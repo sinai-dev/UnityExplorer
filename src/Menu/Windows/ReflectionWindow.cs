@@ -235,17 +235,17 @@ namespace Explorer
                     GUIUnstrip.BeginArea(new Rect(5, 25, rect.width - 10, rect.height - 35), GUI.skin.box);
                 }
 
-                GUILayout.BeginHorizontal(null);
+                GUIUnstrip.BeginHorizontal();
                 GUILayout.Label("<b>Type:</b> <color=cyan>" + TargetType.FullName + "</color>", new GUILayoutOption[] { GUILayout.Width(245f) });
                 if (m_uObj)
                 {
                     GUILayout.Label("Name: " + m_uObj.name, null);
                 }
-                GUILayout.EndHorizontal();
+                GUIUnstrip.EndHorizontal();
 
                 if (m_uObj)
                 {
-                    GUILayout.BeginHorizontal(null);
+                    GUIUnstrip.BeginHorizontal();
                     GUILayout.Label("<b>Tools:</b>", new GUILayoutOption[] { GUILayout.Width(80) });
                     UIHelpers.InstantiateButton(m_uObj);
                     if (m_component && m_component.gameObject is GameObject obj)
@@ -261,25 +261,25 @@ namespace Explorer
                         }
                         GUI.skin.label.alignment = TextAnchor.UpperLeft;
                     }
-                    GUILayout.EndHorizontal();
+                    GUIUnstrip.EndHorizontal();
                 }
 
                 UIStyles.HorizontalLine(Color.grey);
 
-                GUILayout.BeginHorizontal(null);
+                GUIUnstrip.BeginHorizontal();
                 GUILayout.Label("<b>Search:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
                 m_search = GUILayout.TextField(m_search, null);                
-                GUILayout.EndHorizontal();
+                GUIUnstrip.EndHorizontal();
 
-                GUILayout.BeginHorizontal(null);
+                GUIUnstrip.BeginHorizontal();
                 GUILayout.Label("<b>Filter:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
                 FilterToggle(MemberTypes.All, "All");
                 FilterToggle(MemberTypes.Property, "Properties");
                 FilterToggle(MemberTypes.Field, "Fields");
                 FilterToggle(MemberTypes.Method, "Methods");
-                GUILayout.EndHorizontal();
+                GUIUnstrip.EndHorizontal();
 
-                GUILayout.BeginHorizontal(null);
+                GUIUnstrip.BeginHorizontal();
                 GUILayout.Label("<b>Values:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
                 if (GUILayout.Button("Update", new GUILayoutOption[] { GUILayout.Width(100) }))
                 {
@@ -290,14 +290,14 @@ namespace Explorer
                 GUI.color = m_hideFailedReflection ? Color.green : Color.red;
                 m_hideFailedReflection = GUILayout.Toggle(m_hideFailedReflection, "Hide failed Reflection?", new GUILayoutOption[] { GUILayout.Width(150) });
                 GUI.color = Color.white;
-                GUILayout.EndHorizontal();
+                GUIUnstrip.EndHorizontal();
 
                 GUIUnstrip.Space(10);
 
                 Pages.ItemCount = m_cachedMembersFiltered.Length;
 
                 // prev/next page buttons
-                GUILayout.BeginHorizontal(null);
+                GUIUnstrip.BeginHorizontal();
 
                 Pages.DrawLimitInputArea();
 
@@ -315,7 +315,7 @@ namespace Explorer
                         Pages.TurnPage(Turn.Right, ref this.scroll);
                     }
                 }
-                GUILayout.EndHorizontal();
+                GUIUnstrip.EndHorizontal();
 
                 // ====== BODY ======
 
@@ -325,7 +325,7 @@ namespace Explorer
 
                 UIStyles.HorizontalLine(Color.grey);
 
-                GUILayout.BeginVertical(GUI.skin.box, null);
+                GUIUnstrip.BeginVertical(GUI.skin.box, null);
 
                 var members = this.m_cachedMembersFiltered;
                 int start = Pages.CalculateOffsetIndex();
@@ -334,24 +334,24 @@ namespace Explorer
                 {
                     var holder = members[j];
 
-                    GUILayout.BeginHorizontal(new GUILayoutOption[] { GUILayout.Height(25) });
+                    GUIUnstrip.BeginHorizontal(new GUILayoutOption[] { GUILayout.Height(25) });
                     try 
                     { 
                         holder.Draw(rect, 180f);
                     } 
                     catch 
                     {
-                        GUILayout.EndHorizontal();
+                        GUIUnstrip.EndHorizontal();
                         continue;
                     }
-                    GUILayout.EndHorizontal();
+                    GUIUnstrip.EndHorizontal();
 
                     // if not last element
                     if (!(j == (start + Pages.ItemsPerPage - 1) || j == (members.Length - 1)))
                         UIStyles.HorizontalLine(new Color(0.07f, 0.07f, 0.07f), true);
                 }
 
-                GUILayout.EndVertical();
+                GUIUnstrip.EndVertical();
                 GUIUnstrip.EndScrollView();
 
                 if (!WindowManager.TabView)
