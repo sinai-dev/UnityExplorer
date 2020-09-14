@@ -235,87 +235,87 @@ namespace Explorer
                     GUIUnstrip.BeginArea(new Rect(5, 25, rect.width - 10, rect.height - 35), GUI.skin.box);
                 }
 
-                GUIUnstrip.BeginHorizontal();
-                GUIUnstrip.Label("<b>Type:</b> <color=cyan>" + TargetType.FullName + "</color>", new GUILayoutOption[] { GUILayout.Width(245f) });
+                GUILayout.BeginHorizontal(null);
+                GUILayout.Label("<b>Type:</b> <color=cyan>" + TargetType.FullName + "</color>", new GUILayoutOption[] { GUILayout.Width(245f) });
                 if (m_uObj)
                 {
-                    GUIUnstrip.Label("Name: " + m_uObj.name);
+                    GUILayout.Label("Name: " + m_uObj.name, null);
                 }
-                GUIUnstrip.EndHorizontal();
+                GUILayout.EndHorizontal();
 
                 if (m_uObj)
                 {
-                    GUIUnstrip.BeginHorizontal();
-                    GUIUnstrip.Label("<b>Tools:</b>", new GUILayoutOption[] { GUILayout.Width(80) });
+                    GUILayout.BeginHorizontal(null);
+                    GUILayout.Label("<b>Tools:</b>", new GUILayoutOption[] { GUILayout.Width(80) });
                     UIHelpers.InstantiateButton(m_uObj);
                     if (m_component && m_component.gameObject is GameObject obj)
                     {
                         GUI.skin.label.alignment = TextAnchor.MiddleRight;
-                        GUIUnstrip.Label("GameObject:", new GUILayoutOption[] { GUILayout.Width(135) });
+                        GUILayout.Label("GameObject:", new GUILayoutOption[] { GUILayout.Width(135) });
                         var charWidth = obj.name.Length * 15;
                         var maxWidth = rect.width - 350;
                         var labelWidth = charWidth < maxWidth ? charWidth : maxWidth; 
-                        if (GUIUnstrip.Button("<color=#00FF00>" + obj.name + "</color>", new GUILayoutOption[] { GUILayout.Width(labelWidth) }))
+                        if (GUILayout.Button("<color=#00FF00>" + obj.name + "</color>", new GUILayoutOption[] { GUILayout.Width(labelWidth) }))
                         {
                             WindowManager.InspectObject(obj, out bool _);
                         }
                         GUI.skin.label.alignment = TextAnchor.UpperLeft;
                     }
-                    GUIUnstrip.EndHorizontal();
+                    GUILayout.EndHorizontal();
                 }
 
                 UIStyles.HorizontalLine(Color.grey);
 
-                GUIUnstrip.BeginHorizontal();
-                GUIUnstrip.Label("<b>Search:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
-                m_search = GUIUnstrip.TextField(m_search);                
-                GUIUnstrip.EndHorizontal();
+                GUILayout.BeginHorizontal(null);
+                GUILayout.Label("<b>Search:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
+                m_search = GUILayout.TextField(m_search, null);                
+                GUILayout.EndHorizontal();
 
-                GUIUnstrip.BeginHorizontal();
-                GUIUnstrip.Label("<b>Filter:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
+                GUILayout.BeginHorizontal(null);
+                GUILayout.Label("<b>Filter:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
                 FilterToggle(MemberTypes.All, "All");
                 FilterToggle(MemberTypes.Property, "Properties");
                 FilterToggle(MemberTypes.Field, "Fields");
                 FilterToggle(MemberTypes.Method, "Methods");
-                GUIUnstrip.EndHorizontal();
+                GUILayout.EndHorizontal();
 
-                GUIUnstrip.BeginHorizontal();
-                GUIUnstrip.Label("<b>Values:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
-                if (GUIUnstrip.Button("Update", new GUILayoutOption[] { GUILayout.Width(100) }))
+                GUILayout.BeginHorizontal(null);
+                GUILayout.Label("<b>Values:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
+                if (GUILayout.Button("Update", new GUILayoutOption[] { GUILayout.Width(100) }))
                 {
                     UpdateValues();
                 }
                 GUI.color = m_autoUpdate ? Color.green : Color.red;
-                m_autoUpdate = GUIUnstrip.Toggle(m_autoUpdate, "Auto-update?", new GUILayoutOption[] { GUILayout.Width(100) });
+                m_autoUpdate = GUILayout.Toggle(m_autoUpdate, "Auto-update?", new GUILayoutOption[] { GUILayout.Width(100) });
                 GUI.color = m_hideFailedReflection ? Color.green : Color.red;
-                m_hideFailedReflection = GUIUnstrip.Toggle(m_hideFailedReflection, "Hide failed Reflection?", new GUILayoutOption[] { GUILayout.Width(150) });
+                m_hideFailedReflection = GUILayout.Toggle(m_hideFailedReflection, "Hide failed Reflection?", new GUILayoutOption[] { GUILayout.Width(150) });
                 GUI.color = Color.white;
-                GUIUnstrip.EndHorizontal();
+                GUILayout.EndHorizontal();
 
                 GUIUnstrip.Space(10);
 
                 Pages.ItemCount = m_cachedMembersFiltered.Length;
 
                 // prev/next page buttons
-                GUIUnstrip.BeginHorizontal();
+                GUILayout.BeginHorizontal(null);
 
                 Pages.DrawLimitInputArea();
 
                 if (Pages.ItemCount > Pages.ItemsPerPage)
                 {
-                    if (GUIUnstrip.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(80) }))
+                    if (GUILayout.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(80) }))
                     {
                         Pages.TurnPage(Turn.Left, ref this.scroll);
                     }
 
                     Pages.CurrentPageLabel();
 
-                    if (GUIUnstrip.Button("Next >", new GUILayoutOption[] { GUILayout.Width(80) }))
+                    if (GUILayout.Button("Next >", new GUILayoutOption[] { GUILayout.Width(80) }))
                     {
                         Pages.TurnPage(Turn.Right, ref this.scroll);
                     }
                 }
-                GUIUnstrip.EndHorizontal();
+                GUILayout.EndHorizontal();
 
                 // ====== BODY ======
 
@@ -325,7 +325,7 @@ namespace Explorer
 
                 UIStyles.HorizontalLine(Color.grey);
 
-                GUIUnstrip.BeginVertical(GUI.skin.box, null);
+                GUILayout.BeginVertical(GUI.skin.box, null);
 
                 var members = this.m_cachedMembersFiltered;
                 int start = Pages.CalculateOffsetIndex();
@@ -334,24 +334,24 @@ namespace Explorer
                 {
                     var holder = members[j];
 
-                    GUIUnstrip.BeginHorizontal(new GUILayoutOption[] { GUILayout.Height(25) });
+                    GUILayout.BeginHorizontal(new GUILayoutOption[] { GUILayout.Height(25) });
                     try 
                     { 
                         holder.Draw(rect, 180f);
                     } 
                     catch 
                     {
-                        GUIUnstrip.EndHorizontal();
+                        GUILayout.EndHorizontal();
                         continue;
                     }
-                    GUIUnstrip.EndHorizontal();
+                    GUILayout.EndHorizontal();
 
                     // if not last element
                     if (!(j == (start + Pages.ItemsPerPage - 1) || j == (members.Length - 1)))
                         UIStyles.HorizontalLine(new Color(0.07f, 0.07f, 0.07f), true);
                 }
 
-                GUIUnstrip.EndVertical();
+                GUILayout.EndVertical();
                 GUIUnstrip.EndScrollView();
 
                 if (!WindowManager.TabView)
@@ -386,7 +386,7 @@ namespace Explorer
             {
                 GUI.color = Color.white;
             }
-            if (GUIUnstrip.Button(label, new GUILayoutOption[] { GUILayout.Width(100) }))
+            if (GUILayout.Button(label, new GUILayoutOption[] { GUILayout.Width(100) }))
             {
                 m_filter = mode;
                 Pages.PageOffset = 0;

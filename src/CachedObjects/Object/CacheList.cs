@@ -264,7 +264,7 @@ namespace Explorer
         {
             if (m_cachedEntries == null)
             {
-                GUIUnstrip.Label("m_cachedEntries is null!");
+                GUILayout.Label("m_cachedEntries is null!", null);
                 return;
             }
 
@@ -274,14 +274,14 @@ namespace Explorer
 
             if (!IsExpanded)
             {
-                if (GUIUnstrip.Button("v", new GUILayoutOption[] { GUILayout.Width(25) }))
+                if (GUILayout.Button("v", new GUILayoutOption[] { GUILayout.Width(25) }))
                 {
                     IsExpanded = true;
                 }
             }
             else
             {
-                if (GUIUnstrip.Button("^", new GUILayoutOption[] { GUILayout.Width(25) }))
+                if (GUILayout.Button("^", new GUILayoutOption[] { GUILayout.Width(25) }))
                 {
                     IsExpanded = false;
                 }
@@ -291,7 +291,7 @@ namespace Explorer
 
             GUI.skin.button.alignment = TextAnchor.MiddleLeft;
             string btnLabel = $"[{count}] <color=#2df7b2>{EntryType.FullName}</color>";
-            if (GUIUnstrip.Button(btnLabel, new GUILayoutOption[] { GUILayout.MaxWidth(negativeWhitespace) }))
+            if (GUILayout.Button(btnLabel, new GUILayoutOption[] { GUILayout.MaxWidth(negativeWhitespace) }))
             {
                 WindowManager.InspectObject(Value, out bool _);
             }
@@ -305,19 +305,19 @@ namespace Explorer
 
                 if (count > Pages.ItemsPerPage)
                 {
-                    GUIUnstrip.EndHorizontal();
-                    GUIUnstrip.BeginHorizontal();
+                    GUILayout.EndHorizontal();
+                    GUILayout.BeginHorizontal(null);
 
                     GUIUnstrip.Space(whitespace);
                  
                     Pages.CurrentPageLabel();
 
                     // prev/next page buttons
-                    if (GUIUnstrip.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(60) }))
+                    if (GUILayout.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(60) }))
                     {
                         Pages.TurnPage(Turn.Left);
                     }
-                    if (GUIUnstrip.Button("Next >", new GUILayoutOption[] { GUILayout.Width(60) }))
+                    if (GUILayout.Button("Next >", new GUILayoutOption[] { GUILayout.Width(60) }))
                     {
                         Pages.TurnPage(Turn.Right);
                     }
@@ -334,19 +334,19 @@ namespace Explorer
                     var entry = m_cachedEntries[i];
 
                     //collapsing the BeginHorizontal called from ReflectionWindow.WindowFunction or previous array entry
-                    GUIUnstrip.EndHorizontal();
-                    GUIUnstrip.BeginHorizontal();
+                    GUILayout.EndHorizontal();
+                    GUILayout.BeginHorizontal(null);
 
                     GUIUnstrip.Space(whitespace);
 
                     if (entry == null || entry.Value == null)
                     {
-                        GUIUnstrip.Label($"[{i}] <i><color=grey>(null)</color></i>");
+                        GUILayout.Label($"[{i}] <i><color=grey>(null)</color></i>", null);
                     }
                     else
                     {
                         GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-                        GUIUnstrip.Label($"[{i}]", new GUILayoutOption[] { GUILayout.Width(30) });
+                        GUILayout.Label($"[{i}]", new GUILayoutOption[] { GUILayout.Width(30) });
 
                         entry.DrawValue(window, window.width - (whitespace + 85));                        
                     }

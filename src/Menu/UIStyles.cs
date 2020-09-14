@@ -38,7 +38,7 @@ namespace Explorer
             var orig = GUI.color;
 
             GUI.color = _color;
-            GUIUnstrip.Box(GUIContent.none, !small ? HorizontalBar : HorizontalBarSmall, null);
+            GUILayout.Box(GUIContent.none, !small ? HorizontalBar : HorizontalBarSmall, null);
 
             GUI.color = orig;
         }

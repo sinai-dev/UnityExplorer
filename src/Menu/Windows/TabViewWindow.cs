@@ -67,8 +67,8 @@ namespace Explorer
 
                 GUIUnstrip.BeginArea(new Rect(5, 25, m_rect.width - 10, m_rect.height - 35), GUI.skin.box);
 
-                GUIUnstrip.BeginVertical(GUI.skin.box, null);
-                GUIUnstrip.BeginHorizontal();
+                GUILayout.BeginVertical(GUI.skin.box, null);
+                GUILayout.BeginHorizontal(null);
                 GUI.skin.button.alignment = TextAnchor.MiddleLeft;
                 int tabPerRow = Mathf.FloorToInt((float)((decimal)m_rect.width / 238));
                 int rowCount = 0;
@@ -77,8 +77,8 @@ namespace Explorer
                     if (rowCount >= tabPerRow)
                     {
                         rowCount = 0;
-                        GUIUnstrip.EndHorizontal();
-                        GUIUnstrip.BeginHorizontal();
+                        GUILayout.EndHorizontal();
+                        GUILayout.BeginHorizontal(null);
                     }
                     rowCount++;
 
@@ -87,18 +87,18 @@ namespace Explorer
                     GUI.color = focused ? Color.green : Color.white;
 
                     var window = WindowManager.Windows[i];
-                    if (GUIUnstrip.Button(color + window.Title + "</color>", new GUILayoutOption[] { GUILayout.Width(200) }))
+                    if (GUILayout.Button(color + window.Title + "</color>", new GUILayoutOption[] { GUILayout.Width(200) }))
                     {
                         TargetTabID = i;
                     }
-                    if (GUIUnstrip.Button("<color=red><b>X</b></color>", new GUILayoutOption[] { GUILayout.Width(22) }))
+                    if (GUILayout.Button("<color=red><b>X</b></color>", new GUILayoutOption[] { GUILayout.Width(22) }))
                     {
                         window.DestroyWindow();
                     }
                 }
                 GUI.color = Color.white;
-                GUIUnstrip.EndHorizontal();
-                GUIUnstrip.EndVertical();
+                GUILayout.EndHorizontal();
+                GUILayout.EndVertical();
                 GUI.skin.button.alignment = TextAnchor.MiddleCenter;
 
                 m_targetWindow.WindowFunction(m_targetWindow.windowID);

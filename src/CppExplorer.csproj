@@ -107,7 +107,7 @@
     <Compile Include="CachedObjects\CacheObjectBase.cs" />
     <Compile Include="UnstripFixes\SliderHandlerUnstrip.cs" />
     <Compile Include="UnstripFixes\UnstripExtensions.cs" />
-    <Compile Include="Menu\Windows\ResizeDrag.cs" />
+    <Compile Include="Menu\ResizeDrag.cs" />
     <Compile Include="Menu\Windows\TabViewWindow.cs" />
     <Compile Include="Menu\Windows\UIWindow.cs" />
     <Compile Include="Menu\MainMenu\Pages\ConsolePage.cs" />

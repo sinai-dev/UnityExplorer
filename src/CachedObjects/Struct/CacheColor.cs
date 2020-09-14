@@ -35,14 +35,14 @@ namespace Explorer
             {
                 if (!IsExpanded)
                 {
-                    if (GUIUnstrip.Button("v", new GUILayoutOption[] { GUILayout.Width(25) }))
+                    if (GUILayout.Button("v", new GUILayoutOption[] { GUILayout.Width(25) }))
                     {
                         IsExpanded = true;
                     }
                 }
                 else
                 {
-                    if (GUIUnstrip.Button("^", new GUILayoutOption[] { GUILayout.Width(25) }))
+                    if (GUILayout.Button("^", new GUILayoutOption[] { GUILayout.Width(25) }))
                     {
                         IsExpanded = false;
                     }
@@ -51,49 +51,49 @@ namespace Explorer
 
             //var c = (Color)Value;
             //GUI.color = c;
-            GUIUnstrip.Label($"<color=#2df7b2>Color:</color> {((Color)Value).ToString()}");
+            GUILayout.Label($"<color=#2df7b2>Color:</color> {((Color)Value).ToString()}", null);
             //GUI.color = Color.white;
 
             if (CanWrite && IsExpanded)
             {
-                GUIUnstrip.EndHorizontal();
+                GUILayout.EndHorizontal();
 
                 var whitespace = CalcWhitespace(window);
 
-                GUIUnstrip.BeginHorizontal();
+                GUILayout.BeginHorizontal(null);
                 GUIUnstrip.Space(whitespace);
-                GUIUnstrip.Label("R:", new GUILayoutOption[] { GUILayout.Width(30) });
-                r = GUIUnstrip.TextField(r, new GUILayoutOption[] { GUILayout.Width(120) });
-                GUIUnstrip.EndHorizontal();
+                GUILayout.Label("R:", new GUILayoutOption[] { GUILayout.Width(30) });
+                r = GUILayout.TextField(r, new GUILayoutOption[] { GUILayout.Width(120) });
+                GUILayout.EndHorizontal();
 
-                GUIUnstrip.BeginHorizontal();
+                GUILayout.BeginHorizontal(null);
                 GUIUnstrip.Space(whitespace);
-                GUIUnstrip.Label("G:", new GUILayoutOption[] { GUILayout.Width(30) });
-                g = GUIUnstrip.TextField(g, new GUILayoutOption[] { GUILayout.Width(120) });
-                GUIUnstrip.EndHorizontal();
+                GUILayout.Label("G:", new GUILayoutOption[] { GUILayout.Width(30) });
+                g = GUILayout.TextField(g, new GUILayoutOption[] { GUILayout.Width(120) });
+                GUILayout.EndHorizontal();
 
-                GUIUnstrip.BeginHorizontal();
+                GUILayout.BeginHorizontal(null);
                 GUIUnstrip.Space(whitespace);
-                GUIUnstrip.Label("B:", new GUILayoutOption[] { GUILayout.Width(30) });
-                b = GUIUnstrip.TextField(b, new GUILayoutOption[] { GUILayout.Width(120) });
-                GUIUnstrip.EndHorizontal();
+                GUILayout.Label("B:", new GUILayoutOption[] { GUILayout.Width(30) });
+                b = GUILayout.TextField(b, new GUILayoutOption[] { GUILayout.Width(120) });
+                GUILayout.EndHorizontal();
 
-                GUIUnstrip.BeginHorizontal();
+                GUILayout.BeginHorizontal(null);
                 GUIUnstrip.Space(whitespace);
-                GUIUnstrip.Label("A:", new GUILayoutOption[] { GUILayout.Width(30) });
-                a = GUIUnstrip.TextField(a, new GUILayoutOption[] { GUILayout.Width(120) });
-                GUIUnstrip.EndHorizontal();
+                GUILayout.Label("A:", new GUILayoutOption[] { GUILayout.Width(30) });
+                a = GUILayout.TextField(a, new GUILayoutOption[] { GUILayout.Width(120) });
+                GUILayout.EndHorizontal();
 
                 // draw set value button
-                GUIUnstrip.BeginHorizontal();
+                GUILayout.BeginHorizontal(null);
                 GUIUnstrip.Space(whitespace);
-                if (GUIUnstrip.Button("<color=lime>Apply</color>", new GUILayoutOption[] { GUILayout.Width(155) }))
+                if (GUILayout.Button("<color=lime>Apply</color>", new GUILayoutOption[] { GUILayout.Width(155) }))
                 {
                     SetValueFromInput();
                 }
-                GUIUnstrip.EndHorizontal();
+                GUILayout.EndHorizontal();
 
-                GUIUnstrip.BeginHorizontal();
+                GUILayout.BeginHorizontal(null);
             }
         }
 

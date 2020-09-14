@@ -52,21 +52,6 @@ namespace Explorer
             return m_scrollStack;
         }
 
-        // ======== Fix for GUIUtility.ScreenToGuiPoint ========
-
-        public static Vector2 ScreenToGUIPoint(Vector2 screenPoint)
-        {
-            return GUIClip.ClipToWindow(InternalScreenToWindowPoint(screenPoint));
-        }
-
-        private static Vector2 InternalScreenToWindowPoint(Vector2 screenPoint)
-        {
-            GUIUtility.InternalScreenToWindowPoint_Injected(ref screenPoint, out Vector2 result);
-            return result;
-        }
-
-        // ================= Fix for Space =================
-
         public static void Space(float pixels)
         {
             GUIUtility.CheckOnGUI();
@@ -82,7 +67,19 @@ namespace Explorer
             }
         }
 
-        // ================= Fix for BeginArea =================
+        // fix for repeatbutton
+
+        static public bool RepeatButton(Texture image, params GUILayoutOption[] options) { return DoRepeatButton(GUIContent.Temp(image), GUI.skin.button, options); }
+        static public bool RepeatButton(string text, params GUILayoutOption[] options) { return DoRepeatButton(GUIContent.Temp(text), GUI.skin.button, options); }
+        static public bool RepeatButton(GUIContent content, params GUILayoutOption[] options) { return DoRepeatButton(content, GUI.skin.button, options); }
+        static public bool RepeatButton(Texture image, GUIStyle style, params GUILayoutOption[] options) { return DoRepeatButton(GUIContent.Temp(image), style, options); }
+        static public bool RepeatButton(string text, GUIStyle style, params GUILayoutOption[] options) { return DoRepeatButton(GUIContent.Temp(text), style, options); }
+        // Make a repeating button. The button returns true as long as the user holds down the mouse
+        static public bool RepeatButton(GUIContent content, GUIStyle style, params GUILayoutOption[] options) { return DoRepeatButton(content, style, options); }
+        static bool DoRepeatButton(GUIContent content, GUIStyle style, GUILayoutOption[] options)
+        { return GUI.RepeatButton(LayoutUtilityUnstrip.GetRect(content, style, options), content, style); }
+
+        // Fix for BeginArea
 
         static public void BeginArea(Rect screenRect) { BeginArea(screenRect, GUIContent.none, GUIStyle.none); }
         static public void BeginArea(Rect screenRect, string text) { BeginArea(screenRect, GUIContent.Temp(text), GUIStyle.none); }
@@ -92,6 +89,7 @@ namespace Explorer
         static public void BeginArea(Rect screenRect, string text, GUIStyle style) { BeginArea(screenRect, GUIContent.Temp(text), style); }
         static public void BeginArea(Rect screenRect, Texture image, GUIStyle style) { BeginArea(screenRect, GUIContent.Temp(image), style); }
 
+        // Begin a GUILayout block of GUI controls in a fixed screen area.
         static public void BeginArea(Rect screenRect, GUIContent content, GUIStyle style)
         {
             GUILayoutGroup g = GUILayoutUtility.BeginLayoutArea(style, Il2CppType.Of<GUILayoutGroup>());
@@ -106,6 +104,7 @@ namespace Explorer
             GUI.BeginGroup(g.rect, content, style);
         }
 
+        // Close a GUILayout block started with BeginArea
         static public void EndArea()
         {
             if (Event.current.type == EventType.Used)
@@ -115,7 +114,7 @@ namespace Explorer
             GUI.EndGroup();
         }
 
-        // ================= Fix for BeginGroup =================
+        // Fix for BeginGroup
 
         public static void BeginGroup(Rect position) { BeginGroup(position, GUIContent.none, GUIStyle.none); }
         public static void BeginGroup(Rect position, string text) { BeginGroup(position, GUIContent.Temp(text), GUIStyle.none); }
@@ -152,196 +151,7 @@ namespace Explorer
             GUIClip.Internal_Pop();
         }
 
-        // ================= Fix for BeginVertical =================
-
-        public static void BeginVertical(params GUILayoutOption[] options) { BeginVertical(GUIContent.none, GUIStyle.none, options); }
-        public static void BeginVertical(GUIStyle style, params GUILayoutOption[] options) { BeginVertical(GUIContent.none, style, options); }
-        public static void BeginVertical(string text, GUIStyle style, params GUILayoutOption[] options) { BeginVertical(GUIContent.Temp(text), style, options); }
-        public static void BeginVertical(Texture image, GUIStyle style, params GUILayoutOption[] options) { BeginVertical(GUIContent.Temp(image), style, options); }
-
-        public static void BeginVertical(GUIContent content, GUIStyle style, params GUILayoutOption[] options)
-        {
-            var g = GUILayoutUtility.BeginLayoutGroup(style, options, Il2CppType.Of<GUILayoutGroup>());
-            g.isVertical = true;
-            if (style != GUIStyle.none || content != GUIContent.none)
-                GUI.Box(g.rect, content, style);
-        }
-
-        public static void EndVertical()
-        {
-            GUILayoutUtility.EndLayoutGroup();
-        }
-
-        // ================= Fix for BeginHorizontal ==================
-
-        public static void BeginHorizontal(params GUILayoutOption[] options) { BeginHorizontal(GUIContent.none, GUIStyle.none, options); }
-        public static void BeginHorizontal(GUIStyle style, params GUILayoutOption[] options) { BeginHorizontal(GUIContent.none, style, options); }
-        public static void BeginHorizontal(string text, GUIStyle style, params GUILayoutOption[] options) { BeginHorizontal(GUIContent.Temp(text), style, options); }
-
-        public static void BeginHorizontal(Texture image, GUIStyle style, params GUILayoutOption[] options)
-        { BeginHorizontal(GUIContent.Temp(image), style, options); }
-        public static void BeginHorizontal(GUIContent content, GUIStyle style, params GUILayoutOption[] options)
-        {
-            GUILayoutGroup g = GUILayoutUtility.BeginLayoutGroup(style, options, Il2CppType.Of<GUILayoutGroup>());
-            g.isVertical = false;
-            if (style != GUIStyle.none || content != GUIContent.none)
-                GUI.Box(g.rect, content, style);
-        }
-
-        public static void EndHorizontal()
-        {
-            GUILayoutUtility.EndLayoutGroup();
-        }
-
-        // =========== Fix for GUI elements =============
-
-        static public void Label(Texture image, params GUILayoutOption[] options) { DoLabel(GUIContent.Temp(image), GUI.skin.label, options); }
-        static public void Label(string text, params GUILayoutOption[] options) { DoLabel(GUIContent.Temp(text), GUI.skin.label, options); }
-        static public void Label(GUIContent content, params GUILayoutOption[] options) { DoLabel(content, GUI.skin.label, options); }
-        static public void Label(Texture image, GUIStyle style, params GUILayoutOption[] options) { DoLabel(GUIContent.Temp(image), style, options); }
-        static public void Label(string text, GUIStyle style, params GUILayoutOption[] options) { DoLabel(GUIContent.Temp(text), style, options); }
-        // Make an auto-layout label.
-        static public void Label(GUIContent content, GUIStyle style, params GUILayoutOption[] options) { DoLabel(content, style, options); }
-        static void DoLabel(GUIContent content, GUIStyle style, GUILayoutOption[] options)
-        { GUI.Label(LayoutUtilityUnstrip.GetRect(content, style, options), content, style); }
-
-        static public void Box(Texture image, params GUILayoutOption[] options) { DoBox(GUIContent.Temp(image), GUI.skin.box, options); }
-        static public void Box(string text, params GUILayoutOption[] options) { DoBox(GUIContent.Temp(text), GUI.skin.box, options); }
-        static public void Box(GUIContent content, params GUILayoutOption[] options) { DoBox(content, GUI.skin.box, options); }
-        static public void Box(Texture image, GUIStyle style, params GUILayoutOption[] options) { DoBox(GUIContent.Temp(image), style, options); }
-        static public void Box(string text, GUIStyle style, params GUILayoutOption[] options) { DoBox(GUIContent.Temp(text), style, options); }
-        // Make an auto-layout box.
-        static public void Box(GUIContent content, GUIStyle style, params GUILayoutOption[] options) { DoBox(content, style, options); }
-        static void DoBox(GUIContent content, GUIStyle style, GUILayoutOption[] options)
-        { GUI.Box(LayoutUtilityUnstrip.GetRect(content, style, options), content, style); }
-
-        static public bool Button(Texture image, params GUILayoutOption[] options) { return DoButton(GUIContent.Temp(image), GUI.skin.button, options); }
-        static public bool Button(string text, params GUILayoutOption[] options) { return DoButton(GUIContent.Temp(text), GUI.skin.button, options); }
-        static public bool Button(GUIContent content, params GUILayoutOption[] options) { return DoButton(content, GUI.skin.button, options); }
-        static public bool Button(Texture image, GUIStyle style, params GUILayoutOption[] options) { return DoButton(GUIContent.Temp(image), style, options); }
-        static public bool Button(string text, GUIStyle style, params GUILayoutOption[] options) { return DoButton(GUIContent.Temp(text), style, options); }
-        // Make a single press button. The user clicks them and something happens immediately.
-        static public bool Button(GUIContent content, GUIStyle style, params GUILayoutOption[] options) { return DoButton(content, style, options); }
-        static bool DoButton(GUIContent content, GUIStyle style, GUILayoutOption[] options)
-        { return GUI.Button(LayoutUtilityUnstrip.GetRect(content, style, options), content, style); }
-
-        static public bool RepeatButton(Texture image, params GUILayoutOption[] options) { return DoRepeatButton(GUIContent.Temp(image), GUI.skin.button, options); }
-        static public bool RepeatButton(string text, params GUILayoutOption[] options) { return DoRepeatButton(GUIContent.Temp(text), GUI.skin.button, options); }
-        static public bool RepeatButton(GUIContent content, params GUILayoutOption[] options) { return DoRepeatButton(content, GUI.skin.button, options); }
-        static public bool RepeatButton(Texture image, GUIStyle style, params GUILayoutOption[] options) { return DoRepeatButton(GUIContent.Temp(image), style, options); }
-        static public bool RepeatButton(string text, GUIStyle style, params GUILayoutOption[] options) { return DoRepeatButton(GUIContent.Temp(text), style, options); }
-        // Make a repeating button. The button returns true as long as the user holds down the mouse
-        static public bool RepeatButton(GUIContent content, GUIStyle style, params GUILayoutOption[] options) { return DoRepeatButton(content, style, options); }
-        static bool DoRepeatButton(GUIContent content, GUIStyle style, GUILayoutOption[] options)
-        { return RepeatButton(LayoutUtilityUnstrip.GetRect(content, style, options), content, style); }
-
-        public static string TextField(string text, params GUILayoutOption[] options) { return DoTextField(text, -1, false, GUI.skin.textField, options); }
-        public static string TextField(string text, int maxLength, params GUILayoutOption[] options) { return DoTextField(text, maxLength, false, GUI.skin.textField, options); }
-        public static string TextField(string text, GUIStyle style, params GUILayoutOption[] options) { return DoTextField(text, -1, false, style, options); }
-        // Make a single-line text field where the user can edit a string.
-        public static string TextField(string text, int maxLength, GUIStyle style, params GUILayoutOption[] options) { return DoTextField(text, maxLength, false, style, options); }
-
-        public static string TextArea(string text, params GUILayoutOption[] options) { return DoTextField(text, -1, true, GUI.skin.textArea, options); }
-        public static string TextArea(string text, int maxLength, params GUILayoutOption[] options) { return DoTextField(text, maxLength, true, GUI.skin.textArea, options); }
-        public static string TextArea(string text, GUIStyle style, params GUILayoutOption[] options) { return DoTextField(text, -1, true, style, options); }
-        // Make a multi-line text field where the user can edit a string.
-        public static string TextArea(string text, int maxLength, GUIStyle style, params GUILayoutOption[] options) { return DoTextField(text, maxLength, true, style, options); }
-
-        static string DoTextField(string text, int maxLength, bool multiline, GUIStyle style, GUILayoutOption[] options)
-        {
-            int id = GUIUtility.GetControlID(FocusType.Keyboard);
-            GUIContent content;
-            Rect r;
-            if (GUIUtility.keyboardControl != id)
-                content = GUIContent.Temp(text);
-            else
-                content = GUIContent.Temp(text + GUIUtility.compositionString);
-
-            r = LayoutUtilityUnstrip.GetRect(content, style, options);
-            if (GUIUtility.keyboardControl == id)
-                content = GUIContent.Temp(text);
-            GUI.DoTextField(r, id, content, multiline, maxLength, style);
-            return content.text;
-        }
-
-        static public bool Toggle(bool value, Texture image, params GUILayoutOption[] options) { return DoToggle(value, GUIContent.Temp(image), GUI.skin.toggle, options); }
-        static public bool Toggle(bool value, string text, params GUILayoutOption[] options) { return DoToggle(value, GUIContent.Temp(text), GUI.skin.toggle, options); }
-        static public bool Toggle(bool value, GUIContent content, params GUILayoutOption[] options) { return DoToggle(value, content, GUI.skin.toggle, options); }
-        static public bool Toggle(bool value, Texture image, GUIStyle style, params GUILayoutOption[] options) { return DoToggle(value, GUIContent.Temp(image), style, options); }
-        static public bool Toggle(bool value, string text, GUIStyle style, params GUILayoutOption[] options) { return DoToggle(value, GUIContent.Temp(text), style, options); }
-        // Make an on/off toggle button.
-        static public bool Toggle(bool value, GUIContent content, GUIStyle style, params GUILayoutOption[] options) { return DoToggle(value, content, style, options); }
-
-        static bool DoToggle(bool value, GUIContent content, GUIStyle style, GUILayoutOption[] options)
-        { return GUI.Toggle(LayoutUtilityUnstrip.GetRect(content, style, options), value, content, style); }
-
-        // =========== Fix for GUI.RepeatButton (not GUILayout) ===========
-
-        public static bool RepeatButton(Rect position, string text)
-        {
-            return DoRepeatButton(position, GUIContent.Temp(text), GUI.s_Skin.button, FocusType.Passive);
-        }
-
-        public static bool RepeatButton(Rect position, Texture image)
-        {
-            return DoRepeatButton(position, GUIContent.Temp(image), GUI.s_Skin.button, FocusType.Passive);
-        }
-
-        public static bool RepeatButton(Rect position, GUIContent content)
-        {
-            return DoRepeatButton(position, content, GUI.s_Skin.button, FocusType.Passive);
-        }
-
-        public static bool RepeatButton(Rect position, string text, GUIStyle style)
-        {
-            return DoRepeatButton(position, GUIContent.Temp(text), style, FocusType.Passive);
-        }
-
-        public static bool RepeatButton(Rect position, Texture image, GUIStyle style)
-        {
-            return DoRepeatButton(position, GUIContent.Temp(image), style, FocusType.Passive);
-        }
-
-        public static bool RepeatButton(Rect position, GUIContent content, GUIStyle style)
-        {
-            return DoRepeatButton(position, content, style, FocusType.Passive);
-        }
-
-        private static bool DoRepeatButton(Rect position, GUIContent content, GUIStyle style, FocusType focusType)
-        {
-            int id = GUIUtility.GetControlID(GUI.s_RepeatButtonHash, focusType, position);
-            switch (Event.current.GetTypeForControl(id))
-            {
-                case EventType.MouseDown:
-                    // If the mouse is inside the button, we say that we're the hot control
-                    if (position.Contains(Event.current.mousePosition))
-                    {
-                        GUIUtility.hotControl = id;
-                        Event.current.Use();
-                    }
-                    return false;
-                case EventType.MouseUp:
-                    if (GUIUtility.hotControl == id)
-                    {
-                        GUIUtility.hotControl = 0;
-
-                        // If we got the mousedown, the mouseup is ours as well
-                        // (no matter if the click was in the button or not)
-                        Event.current.Use();
-
-                        // But we only return true if the button was actually clicked
-                        return position.Contains(Event.current.mousePosition);
-                    }
-                    return false;
-                case EventType.Repaint:
-                    style.Draw(position, content, id, false, position.Contains(Event.current.mousePosition));
-                    return id == GUIUtility.hotControl && position.Contains(Event.current.mousePosition);
-            }
-            return false;
-        }
-
-
-        // ================= Fix for BeginScrollView. =======================
+        // Fix for BeginScrollView.
 
         public static Vector2 BeginScrollView(Vector2 scroll, params GUILayoutOption[] options)
         {
@@ -350,7 +160,7 @@ namespace Explorer
             {
                 try
                 {
-                    return GUIUnstrip.BeginScrollView(scroll, options);
+                    return GUILayout.BeginScrollView(scroll, options);
                 }
                 catch
                 {
@@ -382,7 +192,7 @@ namespace Explorer
 
             if (!ScrollFailed)
             {
-                GUIUnstrip.EndScrollView();
+                GUILayout.EndScrollView();
             }
             else if (!ManualUnstripFailed)
             {

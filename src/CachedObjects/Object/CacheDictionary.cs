@@ -202,7 +202,7 @@ namespace Explorer
         {
             if (m_cachedKeys == null || m_cachedValues == null)
             {
-                GUIUnstrip.Label("Cached keys or values is null!");
+                GUILayout.Label("Cached keys or values is null!", null);
                 return;
             }
 
@@ -212,14 +212,14 @@ namespace Explorer
 
             if (!IsExpanded)
             {
-                if (GUIUnstrip.Button("v", new GUILayoutOption[] { GUILayout.Width(25) }))
+                if (GUILayout.Button("v", new GUILayoutOption[] { GUILayout.Width(25) }))
                 {
                     IsExpanded = true;
                 }
             }
             else
             {
-                if (GUIUnstrip.Button("^", new GUILayoutOption[] { GUILayout.Width(25) }))
+                if (GUILayout.Button("^", new GUILayoutOption[] { GUILayout.Width(25) }))
                 {
                     IsExpanded = false;
                 }
@@ -229,7 +229,7 @@ namespace Explorer
 
             GUI.skin.button.alignment = TextAnchor.MiddleLeft;
             string btnLabel = $"[{count}] <color=#2df7b2>Dictionary<{TypeOfKeys.FullName}, {TypeOfValues.FullName}></color>";
-            if (GUIUnstrip.Button(btnLabel, new GUILayoutOption[] { GUILayout.Width(negativeWhitespace) }))
+            if (GUILayout.Button(btnLabel, new GUILayoutOption[] { GUILayout.Width(negativeWhitespace) }))
             {
                 WindowManager.InspectObject(Value, out bool _);
             }
@@ -243,19 +243,19 @@ namespace Explorer
 
                 if (count > Pages.ItemsPerPage)
                 {
-                    GUIUnstrip.EndHorizontal();
-                    GUIUnstrip.BeginHorizontal();
+                    GUILayout.EndHorizontal();
+                    GUILayout.BeginHorizontal(null);
 
                     GUIUnstrip.Space(whitespace);
 
                     Pages.CurrentPageLabel();
 
                     // prev/next page buttons
-                    if (GUIUnstrip.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(60) }))
+                    if (GUILayout.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(60) }))
                     {
                         Pages.TurnPage(Turn.Left);
                     }
-                    if (GUIUnstrip.Button("Next >", new GUILayoutOption[] { GUILayout.Width(60) }))
+                    if (GUILayout.Button("Next >", new GUILayoutOption[] { GUILayout.Width(60) }))
                     {
                         Pages.TurnPage(Turn.Right);
                     }
@@ -273,24 +273,24 @@ namespace Explorer
                     var val = m_cachedValues[i];
 
                     //collapsing the BeginHorizontal called from ReflectionWindow.WindowFunction or previous array entry
-                    GUIUnstrip.EndHorizontal();
-                    GUIUnstrip.BeginHorizontal();
+                    GUILayout.EndHorizontal();
+                    GUILayout.BeginHorizontal(null);
 
                     //GUIUnstrip.Space(whitespace);
 
                     if (key == null || val == null)
                     {
-                        GUIUnstrip.Label($"[{i}] <i><color=grey>(null)</color></i>");
+                        GUILayout.Label($"[{i}] <i><color=grey>(null)</color></i>", null);
                     }
                     else
                     {
                         GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-                        GUIUnstrip.Label($"[{i}]", new GUILayoutOption[] { GUILayout.Width(30) });
+                        GUILayout.Label($"[{i}]", new GUILayoutOption[] { GUILayout.Width(30) });
 
-                        GUIUnstrip.Label("Key:", new GUILayoutOption[] { GUILayout.Width(40) });
+                        GUILayout.Label("Key:", new GUILayoutOption[] { GUILayout.Width(40) });
                         key.DrawValue(window, (window.width / 2) - 30f);
 
-                        GUIUnstrip.Label("Value:", new GUILayoutOption[] { GUILayout.Width(40) });
+                        GUILayout.Label("Value:", new GUILayoutOption[] { GUILayout.Width(40) });
                         val.DrawValue(window, (window.width / 2) - 30f);
                     }
 

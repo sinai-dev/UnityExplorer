@@ -15,7 +15,7 @@ namespace Explorer
         // helper for "Instantiate" button on UnityEngine.Objects
         public static void InstantiateButton(Object obj, float width = 100)
         {
-            if (GUIUnstrip.Button("Instantiate", new GUILayoutOption[] { GUILayout.Width(width) }))
+            if (GUILayout.Button("Instantiate", new GUILayoutOption[] { GUILayout.Width(width) }))
             {
                 var newobj = Object.Instantiate(obj);
 
@@ -62,18 +62,18 @@ namespace Explorer
 
             if (!obj)
             {
-                GUIUnstrip.Label("<i><color=red>null</color></i>");
+                GUILayout.Label("<i><color=red>null</color></i>", null);
                 return;
             }
 
             // ------ toggle active button ------
 
-            GUIUnstrip.BeginHorizontal();
+            GUILayout.BeginHorizontal(null);
             GUI.skin.button.alignment = TextAnchor.UpperLeft;
 
             GUI.color = activeColor;
 
-            enabled = GUIUnstrip.Toggle(enabled, "", new GUILayoutOption[] { GUILayout.Width(18) });
+            enabled = GUILayout.Toggle(enabled, "", new GUILayoutOption[] { GUILayout.Width(18) });
             if (obj.activeSelf != enabled)
             {
                 obj.SetActive(enabled);
@@ -81,7 +81,7 @@ namespace Explorer
 
             // ------- actual button ---------
 
-            if (GUIUnstrip.Button(label, new GUILayoutOption[] { GUILayout.Height(22), GUILayout.Width(width) }))
+            if (GUILayout.Button(label, new GUILayoutOption[] { GUILayout.Height(22), GUILayout.Width(width) }))
             {
                 if (specialInspectMethod != null)
                 {
@@ -103,12 +103,12 @@ namespace Explorer
                 SmallInspectButton(_obj);
             }
 
-            GUIUnstrip.EndHorizontal();
+            GUILayout.EndHorizontal();
         }
 
         public static void SmallInspectButton(object obj)
         {
-            if (GUIUnstrip.Button("Inspect"))
+            if (GUILayout.Button("Inspect", null))
             {
                 WindowManager.InspectObject(obj, out bool _);
             }
