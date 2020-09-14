@@ -117,6 +117,23 @@ CppExplorer can force the mouse to be visible and unlocked when the menu is open
 * For Hellpoint, use [HPExplorerMouseControl](https://github.com/sinai-dev/Hellpoint-Mods/tree/master/HPExplorerMouseControl/HPExplorerMouseControl)
 * You can create your own plugin using one of the two plugins above as an example. Usually only a few simple Harmony patches are needed to fix the problem.
 
+For example:
+```csharp
+using Explorer;
+using Harmony;
+// ...
+[HarmonyPatch(typeof(MyGame.MenuClass), nameof(MyGame.MenuClass.CursorUpdate)]
+public class MenuClass_CursorUpdate 
+{
+	[HarmonyPrefix]
+	public static bool Prefix()
+	{
+		// prevent method running if menu open, let it run if not.
+		return !CppExplorer.ShowMenu;
+	}
+}
+```
+
 ## Building
 
 If you'd like to build this yourself, everything you need (other than MelonLoader) is included with this repository, there is no need for recursive cloning etc.
