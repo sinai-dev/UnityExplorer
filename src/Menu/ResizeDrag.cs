@@ -58,7 +58,11 @@ namespace Explorer
                             _rect.yMax = Mathf.Min(Screen.height, _rect.yMax);  // modifying yMax affects height, not y
                         }
                     }
-                    catch { }
+                    catch 
+                    {
+                        // throw safe Managed exception
+                        throw new Exception("");
+                    }
 
                     GUILayout.EndHorizontal();
                 }
