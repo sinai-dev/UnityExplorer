@@ -17,9 +17,21 @@
   <a href="https://github.com/sinai-dev/MonoExplorer">Looking for a Mono version?</a>
 </p>
 
-### Known issues
-* CppExplorer may experience a `MissingMethodException` when trying to use certain UnityEngine methods. If you experience this, please open an issue and I will do my best to fix it.
-* Reflection may fail with certain types (eg. `Nullable<T>`, some Dictionary types, etc). Please see [Il2CppAssemblyUnhollower](https://github.com/knah/Il2CppAssemblyUnhollower#known-issues) for more details.
+- [Known issues](#known-issues)
+- [How to install](#how-to-install)
+- [How to use](#how-to-use)
+  - [Mod Config](#mod-config)
+- [Features](#features)
+  - [Mouse Control](#mouse-control)
+- [Building](#building)
+- [Credits](#credits)
+
+## Known issues
+As of version 1.7+, CppExplorer has reached a fairly stable state for most Il2Cpp games.
+
+* .NET 3.5 is not currently supported (Unity 5.6.1 and older), this might change in the future.
+* Some methods may still fail with a `MissingMethodException`, please let me know if you experience this (with full MelonLoader log please).
+* Reflection may fail with certain types, see [here](https://github.com/knah/Il2CppAssemblyUnhollower#known-issues) for more details.
 * Scrolling with mouse wheel in the CppExplorer menu may not work on all games at the moment.
 
 ## How to install
