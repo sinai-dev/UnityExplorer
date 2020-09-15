@@ -98,37 +98,16 @@ namespace Explorer
 
         private void GetGenericArguments()
         {
-            if (this.MemInfo != null)
+            if (ValueType.IsGenericType)
             {
-                Type memberType = null;
-                switch (this.MemInfo.MemberType)
-                {
-                    case MemberTypes.Field:
-                        memberType = (MemInfo as FieldInfo).FieldType;
-                        break;
-                    case MemberTypes.Property:
-                        memberType = (MemInfo as PropertyInfo).PropertyType;
-                        break;
-                }
-
-                if (memberType != null && memberType.IsGenericType)
-                {
-                    m_keysType = memberType.GetGenericArguments()[0];
-                    m_valuesType = memberType.GetGenericArguments()[1];
-                }
+                m_keysType = ValueType.GetGenericArguments()[0];
+                m_valuesType = ValueType.GetGenericArguments()[1];
             }
-            else if (Value != null)
+            else
             {
-                var type = Value.GetType();
-                if (type.IsGenericType)
-                {
-                    m_keysType = type.GetGenericArguments()[0];
-                    m_valuesType = type.GetGenericArguments()[1];
-                }
-                else
-                {
-                    MelonLogger.Log("TODO? Dictionary is of type: " + Value.GetType().FullName);
-                }
+                // It's non-generic, just use System.Object to allow for anything.
+                m_keysType = typeof(object);
+                m_valuesType = typeof(object);
             }
         }
 
@@ -288,10 +267,10 @@ namespace Explorer
                         GUILayout.Label($"[{i}]", new GUILayoutOption[] { GUILayout.Width(30) });
 
                         GUILayout.Label("Key:", new GUILayoutOption[] { GUILayout.Width(40) });
-                        key.DrawValue(window, (window.width / 2) - 30f);
+                        key.DrawValue(window, (window.width / 2) - 80f);
 
                         GUILayout.Label("Value:", new GUILayoutOption[] { GUILayout.Width(40) });
-                        val.DrawValue(window, (window.width / 2) - 30f);
+                        val.DrawValue(window, (window.width / 2) - 80f);
                     }
 
                 }

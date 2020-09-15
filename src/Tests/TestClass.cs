@@ -22,6 +22,30 @@ namespace Explorer.Tests
             ILHashSetTest.Add("3");
         }
 
+        // test a non-generic dictionary
+
+        public Hashtable TestNonGenericDict()
+        {
+            return new Hashtable
+            {
+                { "One",   1 },
+                { "Two",   2 },
+                { "Three", 3 },
+            };
+        }
+
+        // IL2CPP HASHTABLE NOT SUPPORTED! Cannot assign Il2CppSystem.Object from primitive struct / string.
+        // Technically they are "supported" but if they contain System types they will not work.
+
+        //public Il2CppSystem.Collections.Hashtable TestIl2CppNonGenericDict()
+        //{
+        //    var table = new Il2CppSystem.Collections.Hashtable();
+        //    table.Add("One", 1);
+        //    table.Add("One", 2);
+        //    table.Add("One", 3);
+        //    return table;
+        //}
+
         // test HashSets
 
         public static HashSet<string> HashSetTest = new HashSet<string>

@@ -36,7 +36,7 @@ namespace Explorer
 
         public static bool IsEnumerable(Type t)
         {
-            return typeof(IEnumerable).IsAssignableFrom(t);
+            return typeof(IEnumerable).IsAssignableFrom(t) || IsCppEnumerable(t);
         }
 
         // Checks for Il2Cpp List or HashSet.
@@ -68,7 +68,8 @@ namespace Explorer
             }
             else
             {
-                return typeof(Il2CppSystem.Collections.IDictionary).IsAssignableFrom(t);
+                return typeof(Il2CppSystem.Collections.IDictionary).IsAssignableFrom(t)
+                    || typeof(Il2CppSystem.Collections.Hashtable).IsAssignableFrom(t);
             }
         }
 

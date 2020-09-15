@@ -172,7 +172,7 @@ namespace Explorer
             {
                 holder = new CacheDictionary();
             }
-            else if (ReflectionHelpers.IsEnumerable(valueType) || ReflectionHelpers.IsCppEnumerable(valueType))
+            else if (ReflectionHelpers.IsEnumerable(valueType))
             {
                 holder = new CacheList();
             }
