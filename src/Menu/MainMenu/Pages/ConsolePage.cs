@@ -43,7 +43,7 @@ namespace Explorer
 
             try
             {
-                MethodInput = @"// This is a basic C# REPL console. 
+                MethodInput = @"// This is a basic C# console. 
 // Some common using directives are added by default, you can add more below.
 // If you want to return some output, MelonLogger.Log() it.
 
@@ -123,7 +123,7 @@ MelonLogger.Log(""hello world"");";
 
         public override void DrawWindow()
         {
-            GUILayout.Label("<b><size=15><color=cyan>C# REPL Console</color></size></b>", null);
+            GUILayout.Label("<b><size=15><color=cyan>C# Console</color></size></b>", null);
 
             GUI.skin.label.alignment = TextAnchor.UpperLeft;
 

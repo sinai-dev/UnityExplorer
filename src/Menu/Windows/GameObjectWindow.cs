@@ -363,7 +363,8 @@ namespace Explorer
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal(null);
-            m_addComponentInput = GUILayout.TextField(m_addComponentInput, new GUILayoutOption[] { GUILayout.Width(130) });
+            var width = m_rect.width / 2 - 115f;
+            m_addComponentInput = GUILayout.TextField(m_addComponentInput, new GUILayoutOption[] { GUILayout.Width(width) });
             if (GUILayout.Button("Add Comp", null))
             {
                 if (ReflectionHelpers.GetTypeByName(m_addComponentInput) is Type compType)

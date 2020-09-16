@@ -11,6 +11,23 @@ namespace Explorer
 {
     public class UIStyles
     {
+        public class Syntax
+        {
+            public const string Field_Static = "#8d8dc6";
+            public const string Field_Instance = "#c266ff";
+
+            public const string Method_Static = "#b55b02";
+            public const string Method_Instance = "#ff8000";
+
+            public const string Prop_Static = "#588075";
+            public const string Prop_Instance = "#55a38e";
+
+            public const string Class_Static = "#3a8d71";
+            public const string Class_Instance = "#2df7b2";
+
+            public const string Local = "#a6e9e9";
+        }
+
         public static Color LightGreen = new Color(Color.green.r - 0.3f, Color.green.g - 0.3f, Color.green.b - 0.3f);
 
         public static GUISkin WindowSkin

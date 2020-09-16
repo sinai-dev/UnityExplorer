@@ -400,10 +400,11 @@ namespace Explorer
                         var input = m_argumentInput[i];
                         var type = m_arguments[i].ParameterType.Name;
 
-                        var label = "<color=#2df7b2>" + type + "</color> <color=#a6e9e9>" + name + "</color>";
+                        var label = $"<color={UIStyles.Syntax.Class_Instance}>{type}</color> ";
+                        label += $"<color={UIStyles.Syntax.Local}>{name}</color>";
                         if (m_arguments[i].HasDefaultValue)
                         {
-                            label = $"<i>[{label} = {m_arguments[i].DefaultValue}]</i>";
+                            label = $"<i>[{label} = {m_arguments[i].DefaultValue ?? "null"}]</i>";
                         }
 
                         GUILayout.BeginHorizontal(null);
@@ -469,7 +470,7 @@ namespace Explorer
             }
             else if ((HasParameters || this is CacheMethod) && !m_evaluated)
             {
-                GUILayout.Label($"<color=grey><i>Not yet evaluated</i></color> (<color=#2df7b2>{ValueTypeName}</color>)", null);
+                GUILayout.Label($"<color=grey><i>Not yet evaluated</i></color> (<color={UIStyles.Syntax.Class_Instance}>{ValueTypeName}</color>)", null);
             }
             else if (Value == null && !(this is CacheMethod))
             {
@@ -484,31 +485,62 @@ namespace Explorer
         private string GetRichTextName()
         {
             string memberColor = "";
-            switch (MemInfo.MemberType)
-            {
-                case MemberTypes.Field:
-                    memberColor = "#c266ff"; break;
-                case MemberTypes.Property:
-                    memberColor = "#72a6a6"; break;
-                case MemberTypes.Method:
-                    memberColor = "#ff8000"; break;
-            };
+            bool isStatic = false;
 
-            m_richTextName = $"<color=#2df7b2>{MemInfo.DeclaringType.Name}</color>.<color={memberColor}>{MemInfo.Name}</color>";
-
-            if (m_arguments.Length > 0 || this is CacheMethod)
+            if (MemInfo is FieldInfo fi)
             {
-                m_richTextName += "(";
-                var _params = "";
-                foreach (var param in m_arguments)
+                if (fi.IsStatic)
                 {
-                    if (_params != "") _params += ", ";
-
-                    _params += $"<color=#2df7b2>{param.ParameterType.Name}</color> <color=#a6e9e9>{param.Name}</color>";
+                    isStatic = true;
+                    memberColor = UIStyles.Syntax.Field_Static;
                 }
-                m_richTextName += _params;
-                m_richTextName += ")";
+                else
+                    memberColor = UIStyles.Syntax.Field_Instance;
             }
+            else if (MemInfo is MethodInfo mi)
+            {
+                if (mi.IsStatic)
+                {
+                    isStatic = true;
+                    memberColor = UIStyles.Syntax.Method_Static;
+                }   
+                else
+                    memberColor = UIStyles.Syntax.Method_Instance;
+            }
+            else if (MemInfo is PropertyInfo pi)
+            {
+                if (pi.GetAccessors()[0].IsStatic)
+                {
+                    isStatic = true;
+                    memberColor = UIStyles.Syntax.Prop_Static;
+                }
+                else
+                    memberColor = UIStyles.Syntax.Prop_Instance;
+            }
+
+            string classColor = MemInfo.DeclaringType.IsAbstract && MemInfo.DeclaringType.IsSealed 
+                ? UIStyles.Syntax.Class_Static
+                : UIStyles.Syntax.Class_Instance;
+
+            m_richTextName = $"<color={classColor}>{MemInfo.DeclaringType.Name}</color>.";
+            if (isStatic) m_richTextName += "<i>";
+            m_richTextName += $"<color={memberColor}>{MemInfo.Name}</color>";
+            if (isStatic) m_richTextName += "</i>";
+
+            //if (m_arguments.Length > 0 || this is CacheMethod)
+            //{
+            //    m_richTextName += "(";
+            //    var args = "";
+            //    foreach (var param in m_arguments)
+            //    {
+            //        if (args != "") args += ", ";
+
+            //        args += $"<color={classColor}>{param.ParameterType.Name}</color> ";
+            //        args += $"<color={UIStyles.Syntax.Local}>{param.Name}</color>";
+            //    }
+            //    m_richTextName += args;
+            //    m_richTextName += ")";
+            //}
 
             return m_richTextName;
         }

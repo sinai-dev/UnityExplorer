@@ -70,6 +70,8 @@ namespace Explorer
 
         public override void DrawValue(Rect window, float width)
         {
+            string typeLabel = $"<color={UIStyles.Syntax.Class_Instance}>{ValueTypeName}</color>";
+
             if (m_evaluated)
             {
                 if (m_cachedReturnValue != null)
@@ -78,12 +80,12 @@ namespace Explorer
                 }
                 else
                 {
-                    GUILayout.Label($"null (<color=#2df7b2>{ValueTypeName}</color>)", null);
+                    GUILayout.Label($"null ({typeLabel})", null);
                 }
             }
             else
             {
-                GUILayout.Label($"<color=grey><i>Not yet evaluated</i></color> (<color=#2df7b2>{ValueTypeName}</color>)", null);
+                GUILayout.Label($"<color=grey><i>Not yet evaluated</i></color> ({typeLabel})", null);
             }
         }
     }

@@ -22,6 +22,10 @@ namespace Explorer.Tests
             ILHashSetTest.Add("3");
         }
 
+        public static int StaticProperty => 5;
+        public static int StaticField = 5;
+        public int NonStaticField;
+
         // test a non-generic dictionary
 
         public Hashtable TestNonGenericDict()
