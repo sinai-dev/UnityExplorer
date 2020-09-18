@@ -114,8 +114,9 @@ namespace Explorer
             var pi = memberInfo as PropertyInfo;
             var mi = memberInfo as MethodInfo;
 
-            // if PropertyInfo, check if can process args
-            if (pi != null && !CanProcessArgs(pi.GetIndexParameters()))
+            // Check if can process args
+            if ((pi != null && !CanProcessArgs(pi.GetIndexParameters())) 
+                || (mi != null && !CanProcessArgs(mi.GetParameters())))
             {
                 return null;
             }
@@ -127,14 +128,7 @@ namespace Explorer
 
             if (mi != null)
             {
-                if (CacheMethod.CanEvaluate(mi))
-                {
-                    holder = new CacheMethod();
-                }
-                else
-                {
-                    return null;
-                }
+                holder = new CacheMethod();
             }
             else if (valueType == typeof(GameObject) || valueType == typeof(Transform))
             {
@@ -211,7 +205,18 @@ namespace Explorer
         {
             foreach (var param in parameters)
             {
-                if (!param.ParameterType.IsPrimitive && param.ParameterType != typeof(string))
+                var pType = param.ParameterType;
+
+                if (pType.IsByRef && pType.HasElementType)
+                {
+                    pType = pType.GetElementType();
+                }
+                
+                if (pType.IsPrimitive || pType == typeof(string))
+                {
+                    continue;
+                }
+                else
                 {
                     return false;
                 }
@@ -240,6 +245,11 @@ namespace Explorer
             {
                 var input = m_argumentInput[i];
                 var type = m_arguments[i].ParameterType;
+
+                if (type.IsByRef)
+                {
+                    type = type.GetElementType();
+                }
 
                 if (!string.IsNullOrEmpty(input))
                 {

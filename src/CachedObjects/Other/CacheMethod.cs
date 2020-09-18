@@ -18,12 +18,6 @@ namespace Explorer
 
         public string[] GenericArgInput = new string[0];
 
-        public static bool CanEvaluate(MethodInfo mi)
-        {
-            // primitive and string args supported
-            return CanProcessArgs(mi.GetParameters());
-        }
-
         public override void Init()
         {
             var mi = (MemInfo as MethodInfo);

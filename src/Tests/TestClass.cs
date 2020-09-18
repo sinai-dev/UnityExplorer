@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 namespace Explorer.Tests
@@ -21,10 +22,16 @@ namespace Explorer.Tests
         public static int StaticField = 5;
         public int NonStaticField;
 
-        // test a generic method
         public static string TestGeneric<C, T>(string arg0) where C : Component
         {
-            return "C: " + typeof(C).FullName + ", T: " + typeof(T).FullName + ", arg0: " + arg0;
+            return $"C: '{typeof(C).FullName}', T: '{typeof(T).FullName}', arg0: '{arg0}'";
+        }
+
+        public static string TestRefInOutGeneric<T>(ref string arg0, in int arg1, out string arg2)
+        {
+            arg2 = "this is arg2";
+
+            return $"T: '{typeof(T).FullName}', ref arg0: '{arg0}', in arg1: '{arg1}', out arg2: '{arg2}'";
         }
 
         //// this type of generic is not supported, due to requiring a non-primitive argument.
