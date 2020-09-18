@@ -56,27 +56,21 @@ namespace Explorer
                 ? UIStyles.Syntax.Class_Static
                 : UIStyles.Syntax.Class_Instance;
 
+            string typeLabel = $"<color={classColor}>{ValueType.FullName}</color>";
+
             if (Value is UnityEngine.Object)
             {
-                int typeStart = label.LastIndexOf("(");                 // get where the '(Type)' starts
-                var newLabel = label.Substring(0, typeStart + 1);       // get just the name and first '('
-                newLabel += $"<color={classColor}>";                    // add color tag
-                newLabel += label.Substring(typeStart + 1);             // add the TypeName back in
-                newLabel = newLabel.Substring(0, newLabel.Length - 1);  // remove the ending ')'
-                newLabel += "</color>)";                                // close color tag and put the ')' back.
-                label = newLabel;
+                label = label.Replace($"({ValueType.FullName})", $"({typeLabel})");
             }
             else
             {
-                string classLabel = $"<color={classColor}>{ValueTypeName}</color>";
-
-                if (!label.Contains(ValueTypeName))
+                if (!label.Contains(ValueType.FullName))
                 {
-                    label += $" ({classLabel})";
+                    label += $" ({typeLabel})";
                 }
                 else
                 {
-                    label = label.Replace(ValueTypeName, $"<color={classColor}>{ValueTypeName}</color>");
+                    label = label.Replace(ValueType.FullName, typeLabel);
                 }
             }
 

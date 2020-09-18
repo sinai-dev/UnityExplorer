@@ -10,7 +10,6 @@ namespace Explorer
     public abstract class CacheObjectBase
     {
         public object Value;
-        public string ValueTypeName;
         public Type ValueType;
 
         public MemberInfo MemInfo { get; set; }
@@ -175,7 +174,6 @@ namespace Explorer
 
             holder.Value = obj;
             holder.ValueType = valueType;
-            holder.ValueTypeName = valueType.FullName;
 
             if (memberInfo != null)
             {
@@ -517,17 +515,19 @@ namespace Explorer
                 GUIUnstrip.Space(labelWidth);
             }
 
+            string typeName = $"<color={UIStyles.Syntax.Class_Instance}>{ValueType.FullName}</color>";
+
             if (!string.IsNullOrEmpty(ReflectionException))
             {
                 GUILayout.Label("<color=red>Reflection failed!</color> (" + ReflectionException + ")", null);
             }
             else if ((HasParameters || this is CacheMethod) && !m_evaluated)
             {
-                GUILayout.Label($"<color=grey><i>Not yet evaluated</i></color> (<color={UIStyles.Syntax.Class_Instance}>{ValueTypeName}</color>)", null);
+                GUILayout.Label($"<color=grey><i>Not yet evaluated</i></color> ({typeName})", null);
             }
             else if (Value == null && !(this is CacheMethod))
             {
-                GUILayout.Label("<i>null (<color=" + UIStyles.Syntax.Class_Instance + ">" + ValueTypeName + "</color>)</i>", null);
+                GUILayout.Label($"<i>null ({typeName})</i>", null);
             }
             else
             {

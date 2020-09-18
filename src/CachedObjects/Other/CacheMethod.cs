@@ -29,7 +29,6 @@ namespace Explorer
             GenericArgInput = new string[GenericArgs.Length];
 
             ValueType = mi.ReturnType;
-            ValueTypeName = ValueType.FullName;
         }
 
         public override void UpdateValue()
@@ -121,7 +120,7 @@ namespace Explorer
 
         public override void DrawValue(Rect window, float width)
         {
-            string typeLabel = $"<color={UIStyles.Syntax.Class_Instance}>{ValueTypeName}</color>";
+            string typeLabel = $"<color={UIStyles.Syntax.Class_Instance}>{ValueType.FullName}</color>";
 
             if (m_evaluated)
             {
