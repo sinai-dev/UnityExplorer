@@ -3,6 +3,14 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 
+// used to test multiple generic constraints
+public class TestGeneric : IComparable<string>
+{
+    public TestGeneric() { }
+
+    public int CompareTo(string other) => throw new NotImplementedException();
+}
+
 namespace Explorer.Tests
 {
     public class TestClass
@@ -22,7 +30,8 @@ namespace Explorer.Tests
         public static int StaticField = 5;
         public int NonStaticField;
 
-        public static string TestGeneric<C, T>(string arg0) where C : Component
+
+        public static string TestGeneric<C, T>(string arg0) where C : Component where T : TestGeneric, IComparable<string>
         {
             return $"C: '{typeof(C).FullName}', T: '{typeof(T).FullName}', arg0: '{arg0}'";
         }

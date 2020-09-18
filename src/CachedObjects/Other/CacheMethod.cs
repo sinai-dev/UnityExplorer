@@ -14,7 +14,7 @@ namespace Explorer
         public override bool HasParameters => base.HasParameters || GenericArgs.Length > 0;
 
         public Type[] GenericArgs { get; private set; }
-        public Type[] GenericConstraints { get; private set; }
+        public Type[][] GenericConstraints { get; private set; }
 
         public string[] GenericArgInput = new string[0];
 
@@ -23,8 +23,7 @@ namespace Explorer
             var mi = (MemInfo as MethodInfo);
             GenericArgs = mi.GetGenericArguments();
 
-            GenericConstraints = GenericArgs.Select(x => x.GetGenericParameterConstraints()
-                                                          .FirstOrDefault())
+            GenericConstraints = GenericArgs.Select(x => x.GetGenericParameterConstraints())
                                             .ToArray();
 
             GenericArgInput = new string[GenericArgs.Length];
@@ -86,21 +85,22 @@ namespace Explorer
                 var input = GenericArgInput[i];
                 if (ReflectionHelpers.GetTypeByName(input) is Type t)
                 {
-                    if (GenericConstraints[i] == null)
+                    if (GenericConstraints[i].Length == 0)
                     {
                         list.Add(t);
                     }
                     else
                     {
-                        if (GenericConstraints[i].IsAssignableFrom(t))
+                        foreach (var constraint in GenericConstraints[i].Where(x => x != null))
                         {
-                            list.Add(t);
+                           if (!constraint.IsAssignableFrom(t))
+                           {
+                                MelonLogger.LogWarning($"Generic argument #{i}, '{input}' is not assignable from the constraint '{constraint}'!");
+                                return null;
+                           }
                         }
-                        else
-                        {
-                            MelonLogger.LogWarning($"Generic argument #{i} '{input}', is not assignable from the generic constraint!");
-                            return null;
-                        }
+
+                        list.Add(t);
                     }
                 }
                 else

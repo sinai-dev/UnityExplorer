@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using MelonLoader;
 using UnityEngine;
@@ -400,9 +401,28 @@ namespace Explorer
 
                         for (int i = 0; i < cm.GenericArgs.Length; i++)
                         {
-                            var type = cm.GenericConstraints[i]?.FullName ?? "Any";
+                            string types = "";
+                            if (cm.GenericConstraints[i].Length > 0)
+                            {
+                                foreach (var constraint in cm.GenericConstraints[i])
+                                {
+                                    if (types != "") types += ", ";
+
+                                    string type;
+
+                                    if (constraint == null)
+                                        type = "Any";
+                                    else
+                                        type = constraint.ToString();
+
+                                    types += $"<color={UIStyles.Syntax.Class_Instance}>{type}</color>";
+                                }
+                            }
+                            else
+                            {
+                                types = $"<color={UIStyles.Syntax.Class_Instance}>Any</color>";
+                            }
                             var input = cm.GenericArgInput[i];
-                            var label = $"<color={UIStyles.Syntax.Class_Instance}>{type}</color>";
 
                             GUILayout.BeginHorizontal(null);
 
@@ -410,7 +430,7 @@ namespace Explorer
                             GUILayout.Label($"<color={UIStyles.Syntax.StructGreen}>{cm.GenericArgs[i].Name}</color>", new GUILayoutOption[] { GUILayout.Width(15) });
                             cm.GenericArgInput[i] = GUILayout.TextField(input, new GUILayoutOption[] { GUILayout.Width(150) });
                             GUI.skin.label.alignment = TextAnchor.MiddleLeft;
-                            GUILayout.Label(label, null);
+                            GUILayout.Label(types, null);
 
                             GUILayout.EndHorizontal();
                         }
