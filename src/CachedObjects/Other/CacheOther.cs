@@ -12,6 +12,13 @@ namespace Explorer
         public MethodInfo ToStringMethod => m_toStringMethod ?? GetToStringMethod();
         private MethodInfo m_toStringMethod;
 
+        public override void UpdateValue()
+        {
+            base.UpdateValue();
+
+            GetButtonLabel();
+        }
+
         public override void DrawValue(Rect window, float width)
         {
             GUI.skin.button.alignment = TextAnchor.MiddleLeft;
@@ -41,6 +48,8 @@ namespace Explorer
 
         private string GetButtonLabel()
         {
+            if (Value == null) return null;
+
             string label = (string)ToStringMethod?.Invoke(Value, null) ?? Value.ToString();
 
             var classColor = ValueType.IsAbstract && ValueType.IsSealed

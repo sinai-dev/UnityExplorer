@@ -305,14 +305,7 @@ namespace Explorer
                     var pi = MemInfo as PropertyInfo;
                     var target = pi.GetAccessors()[0].IsStatic ? null : DeclaringInstance;
 
-                    if (HasParameters)
-                    {
-                        Value = pi.GetValue(target, ParseArguments());
-                    }
-                    else
-                    {
-                        Value = pi.GetValue(target, null);
-                    }
+                    Value = pi.GetValue(target, ParseArguments());
                 }
 
                 ReflectionException = null;
@@ -397,7 +390,7 @@ namespace Explorer
 
                         for (int i = 0; i < cm.GenericArgs.Length; i++)
                         {
-                            var type = cm.GenericConstraints[i]?.FullName ?? "None";
+                            var type = cm.GenericConstraints[i]?.FullName ?? "Any";
                             var input = cm.GenericArgInput[i];
                             var label = $"<color={UIStyles.Syntax.Class_Instance}>{type}</color>";
 
@@ -462,9 +455,9 @@ namespace Explorer
                 else
                 {
                     var lbl = $"Evaluate (";
-                    int args = m_arguments.Length;
-                    if (cm != null) args += cm.GenericArgs.Length;
-                    lbl += args + " params)";
+                    int len = m_arguments.Length;
+                    if (cm != null) len += cm.GenericArgs.Length;
+                    lbl += len + " params)";
 
                     if (GUILayout.Button(lbl, new GUILayoutOption[] { GUILayout.Width(150) }))
                     {
@@ -504,7 +497,7 @@ namespace Explorer
             }
             else if (Value == null && !(this is CacheMethod))
             {
-                GUILayout.Label("<i>null (" + ValueTypeName + ")</i>", null);
+                GUILayout.Label("<i>null (<color=" + UIStyles.Syntax.Class_Instance + ">" + ValueTypeName + "</color>)</i>", null);
             }
             else
             {

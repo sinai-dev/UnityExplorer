@@ -46,66 +46,29 @@ namespace Explorer
 
         public void Evaluate()
         {
-            m_isEvaluating = false;
-
-            var mi = MemInfo as MethodInfo;
-            object ret = null;
-
-            // Parse generic arguments
+            MethodInfo mi;
             if (GenericArgs.Length > 0)
             {
-                var list = new List<Type>();
-                for (int i = 0; i < GenericArgs.Length; i++)
-                {
-                    var input = GenericArgInput[i];
-                    if (ReflectionHelpers.GetTypeByName(input) is Type t)
-                    {
-                        if (GenericConstraints[i] == null)
-                        {
-                            list.Add(t);
-                        }
-                        else
-                        {
-                            if (GenericConstraints[i].IsAssignableFrom(t))
-                            {
-                                list.Add(t);
-                            }
-                            else
-                            {
-                                MelonLogger.Log($"Generic argument #{i} '{input}', is not assignable from the generic constraint!");
-                                return;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        MelonLogger.Log($"Generic argument #{i}, could not get any type by the name of '{input}'!" +
-                            $" Make sure you use the full name, including the NameSpace.");
-                        return;
-                    }
-                }
-
-                // make into a generic with type list
-                mi = mi.MakeGenericMethod(list.ToArray());
-            }
-
-            // Parse arguments
-            if (!HasParameters)
-            {
-                ret = mi.Invoke(mi.IsStatic ? null : DeclaringInstance, new object[0]);
-                m_evaluated = true;
+                mi = MakeGenericMethodFromInput();
+                if (mi == null) return;
             }
             else
             {
-                try
-                {
-                    ret = mi.Invoke(mi.IsStatic ? null : DeclaringInstance, ParseArguments());
-                    m_evaluated = true;
-                }
-                catch (Exception e)
-                {
-                    MelonLogger.Log($"Exception evaluating: {e.GetType()}, {e.Message}");
-                }
+                mi = MemInfo as MethodInfo;
+            }
+
+            object ret = null;
+
+            try
+            {
+                ret = mi.Invoke(mi.IsStatic ? null : DeclaringInstance, ParseArguments());
+                m_evaluated = true;
+                m_isEvaluating = false;
+            }
+            catch (Exception e)
+            {
+                MelonLogger.LogWarning($"Exception evaluating: {e.GetType()}, {e.Message}");
+                ReflectionException = ReflectionHelpers.ExceptionToString(e);
             }
 
             if (ret != null)
@@ -117,6 +80,47 @@ namespace Explorer
             {
                 m_cachedReturnValue = null;
             }
+        }
+
+        private MethodInfo MakeGenericMethodFromInput()
+        {
+            var mi = MemInfo as MethodInfo;
+
+            var list = new List<Type>();
+            for (int i = 0; i < GenericArgs.Length; i++)
+            {
+                var input = GenericArgInput[i];
+                if (ReflectionHelpers.GetTypeByName(input) is Type t)
+                {
+                    if (GenericConstraints[i] == null)
+                    {
+                        list.Add(t);
+                    }
+                    else
+                    {
+                        if (GenericConstraints[i].IsAssignableFrom(t))
+                        {
+                            list.Add(t);
+                        }
+                        else
+                        {
+                            MelonLogger.LogWarning($"Generic argument #{i} '{input}', is not assignable from the generic constraint!");
+                            return null;
+                        }
+                    }
+                }
+                else
+                {
+                    MelonLogger.LogWarning($"Generic argument #{i}, could not get any type by the name of '{input}'!" +
+                        $" Make sure you use the full name, including the NameSpace.");
+                    return null;
+                }
+            }
+
+            // make into a generic with type list
+            mi = mi.MakeGenericMethod(list.ToArray());
+
+            return mi;
         }
 
         // ==== GUI DRAW ====
