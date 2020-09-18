@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 using UnhollowerRuntimeLib;
+using UnityEngine;
 
 namespace Explorer
 {
-	public struct SliderHandlerUnstrip
+    public struct SliderHandlerUnstrip
 	{
 		private readonly Rect position;
 		private readonly float currentValue;
