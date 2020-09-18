@@ -20,7 +20,8 @@ namespace Explorer
         public Type DeclaringType { get; set; }
         public object DeclaringInstance { get; set; }
 
-        public bool HasParameters => m_arguments != null && m_arguments.Length > 0;
+        public virtual bool HasParameters => m_arguments != null && m_arguments.Length > 0;
+
         public bool m_evaluated = false;
         public bool m_isEvaluating;
         public ParameterInfo[] m_arguments = new ParameterInfo[0];
@@ -394,26 +395,54 @@ namespace Explorer
 
                 if (m_isEvaluating)
                 {
-                    for (int i = 0; i < m_arguments.Length; i++)
+                    if (cm != null && cm.GenericArgs.Length > 0)
                     {
-                        var name = m_arguments[i].Name;
-                        var input = m_argumentInput[i];
-                        var type = m_arguments[i].ParameterType.Name;
+                        GUILayout.Label($"<b><color=orange>Generic Arguments:</color></b>", null);
 
-                        var label = $"<color={UIStyles.Syntax.Class_Instance}>{type}</color> ";
-                        label += $"<color={UIStyles.Syntax.Local}>{name}</color>";
-                        if (m_arguments[i].HasDefaultValue)
+                        for (int i = 0; i < cm.GenericArgs.Length; i++)
                         {
-                            label = $"<i>[{label} = {m_arguments[i].DefaultValue ?? "null"}]</i>";
+                            var type = cm.GenericConstraints[i]?.FullName ?? "None";
+                            var input = cm.GenericArgInput[i];
+                            var label = $"<color={UIStyles.Syntax.Class_Instance}>{type}</color>";
+
+                            GUILayout.BeginHorizontal(null);
+
+                            GUI.skin.label.alignment = TextAnchor.MiddleCenter;
+                            GUILayout.Label($"<color={UIStyles.Syntax.StructGreen}>{cm.GenericArgs[i].Name}</color>", new GUILayoutOption[] { GUILayout.Width(15) });
+                            cm.GenericArgInput[i] = GUILayout.TextField(input, new GUILayoutOption[] { GUILayout.Width(150) });
+                            GUI.skin.label.alignment = TextAnchor.MiddleLeft;
+                            GUILayout.Label(label, null);
+
+                            GUILayout.EndHorizontal();
                         }
+                    }
 
-                        GUILayout.BeginHorizontal(null);
+                    if (m_arguments.Length > 0)
+                    {
+                        GUILayout.Label($"<b><color=orange>Arguments:</color></b>", null);
+                        for (int i = 0; i < m_arguments.Length; i++)
+                        {
+                            var name = m_arguments[i].Name;
+                            var input = m_argumentInput[i];
+                            var type = m_arguments[i].ParameterType.Name;
 
-                        GUILayout.Label(i.ToString(), new GUILayoutOption[] { GUILayout.Width(20) });
-                        m_argumentInput[i] = GUILayout.TextField(input, new GUILayoutOption[] { GUILayout.Width(150) });
-                        GUILayout.Label(label, null);
+                            var label = $"<color={UIStyles.Syntax.Class_Instance}>{type}</color> ";
+                            label += $"<color={UIStyles.Syntax.Local}>{name}</color>";
+                            if (m_arguments[i].HasDefaultValue)
+                            {
+                                label = $"<i>[{label} = {m_arguments[i].DefaultValue ?? "null"}]</i>";
+                            }
 
-                        GUILayout.EndHorizontal();
+                            GUILayout.BeginHorizontal(null);
+
+                            GUI.skin.label.alignment = TextAnchor.MiddleCenter;
+                            GUILayout.Label(i.ToString(), new GUILayoutOption[] { GUILayout.Width(15) });
+                            m_argumentInput[i] = GUILayout.TextField(input, new GUILayoutOption[] { GUILayout.Width(150) });
+                            GUI.skin.label.alignment = TextAnchor.MiddleLeft;
+                            GUILayout.Label(label, null);
+
+                            GUILayout.EndHorizontal();
+                        }
                     }
 
                     GUILayout.BeginHorizontal(null);
@@ -436,7 +465,12 @@ namespace Explorer
                 }
                 else
                 {
-                    if (GUILayout.Button($"Evaluate ({m_arguments.Length} params)", new GUILayoutOption[] { GUILayout.Width(150) }))
+                    var lbl = $"Evaluate (";
+                    int args = m_arguments.Length;
+                    if (cm != null) args += cm.GenericArgs.Length;
+                    lbl += args + " params)";
+
+                    if (GUILayout.Button(lbl, new GUILayoutOption[] { GUILayout.Width(150) }))
                     {
                         m_isEvaluating = true;
                     }
@@ -526,6 +560,24 @@ namespace Explorer
             if (isStatic) m_richTextName += "<i>";
             m_richTextName += $"<color={memberColor}>{MemInfo.Name}</color>";
             if (isStatic) m_richTextName += "</i>";
+
+            // generic method args
+            if (this is CacheMethod cm && cm.GenericArgs.Length > 0)
+            {
+                m_richTextName += "<";
+
+                var args = "";
+                for (int i = 0; i < cm.GenericArgs.Length; i++)
+                {
+                    if (args != "") args += ", ";
+                    args += $"<color={UIStyles.Syntax.StructGreen}>{cm.GenericArgs[i].Name}</color>";
+                }
+                m_richTextName += args;
+
+                m_richTextName += ">";
+            }
+
+            // Method / Property arguments
 
             //if (m_arguments.Length > 0 || this is CacheMethod)
             //{

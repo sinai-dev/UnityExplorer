@@ -26,6 +26,8 @@ namespace Explorer
             public const string Class_Instance = "#2df7b2";
 
             public const string Local = "#a6e9e9";
+
+            public const string StructGreen = "#b8d7a3";
         }
 
         public static Color LightGreen = new Color(Color.green.r - 0.3f, Color.green.g - 0.3f, Color.green.b - 0.3f);

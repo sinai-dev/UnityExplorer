@@ -99,9 +99,9 @@ CppExplorer has two main inspector modes: <b>GameObject Inspector</b>, and <b>Re
 * Filter by name, type, etc.
 * For GameObjects and Transforms you can filter which scene they are found in too.
 
-### C# REPL console
+### C# console
 
-* A simple C# REPL console, allows you to execute a method body on the fly.
+* A simple C# console, allows you to execute a method body on the fly.
 
 ### Inspect-under-mouse
 

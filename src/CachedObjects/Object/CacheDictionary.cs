@@ -133,14 +133,16 @@ namespace Explorer
             var keys = new List<CacheObjectBase>();
             foreach (var key in IDict.Keys)
             {
-                var cache = GetCacheObject(key, TypeOfKeys);
+                Type t = ReflectionHelpers.GetActualType(key) ?? TypeOfKeys;
+                var cache = GetCacheObject(key, t);
                 keys.Add(cache);
             }
 
             var values = new List<CacheObjectBase>();
             foreach (var val in IDict.Values)
             {
-                var cache = GetCacheObject(val, TypeOfValues);
+                Type t = ReflectionHelpers.GetActualType(val) ?? TypeOfValues;
+                var cache = GetCacheObject(val, t);
                 values.Add(cache);
             }
 

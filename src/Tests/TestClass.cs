@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MelonLoader;
+using Mono.CSharp.Linq;
 using UnityEngine;
 
 namespace Explorer.Tests
@@ -25,6 +26,18 @@ namespace Explorer.Tests
         public static int StaticProperty => 5;
         public static int StaticField = 5;
         public int NonStaticField;
+
+        // test a generic method
+        public static string TestGeneric<C, T>(string arg0) where C : Component
+        {
+            return "C: " + typeof(C).FullName + ", T: " + typeof(T).FullName + ", arg0: " + arg0;
+        }
+
+        //// this type of generic is not supported, due to requiring a non-primitive argument.
+        //public static T TestDifferentGeneric<T>(T obj) where T : Component
+        //{
+        //    return obj;
+        //}
 
         // test a non-generic dictionary
 
