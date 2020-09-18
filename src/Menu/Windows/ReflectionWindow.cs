@@ -161,15 +161,13 @@ namespace Explorer
                         continue;
 
                     // check blacklisted members
-                    var name = member.DeclaringType.Name + "." + member.Name;
-                    if (_typeAndMemberBlacklist.Any(it => it == name))
+                    var sig = $"{member.DeclaringType.Name}.{member.Name}";
+                    if (_typeAndMemberBlacklist.Any(it => it == sig))
                         continue;
 
                     if (_methodStartsWithBlacklist.Any(it => member.Name.StartsWith(it)))
                         continue;
 
-                    // compare signature to already cached members
-                    var signature = $"{member.DeclaringType.Name}.{member.Name}";
                     if (member is MethodInfo mi)
                     {
                         AppendParams(mi.GetParameters());
@@ -181,15 +179,15 @@ namespace Explorer
 
                     void AppendParams(ParameterInfo[] _args)
                     {
-                        signature += " (";
+                        sig += " (";
                         foreach (var param in _args)
                         {
-                            signature += $"{param.ParameterType.Name} {param.Name}, ";
+                            sig += $"{param.ParameterType.Name} {param.Name}, ";
                         }
-                        signature += ")";
+                        sig += ")";
                     }
 
-                    if (cachedSigs.Contains(signature))
+                    if (cachedSigs.Contains(sig))
                     {
                         continue;
                     }
@@ -201,14 +199,14 @@ namespace Explorer
                         var cached = CacheObjectBase.GetCacheObject(member, target);
                         if (cached != null)
                         {
-                            cachedSigs.Add(signature);
+                            cachedSigs.Add(sig);
                             list.Add(cached);
                             cached.ReflectionException = exception;
                         }
                     }
                     catch (Exception e)
                     {
-                        MelonLogger.LogWarning($"Exception caching member {signature}!");
+                        MelonLogger.LogWarning($"Exception caching member {sig}!");
                         MelonLogger.Log(e.ToString());
                     }
                 }
