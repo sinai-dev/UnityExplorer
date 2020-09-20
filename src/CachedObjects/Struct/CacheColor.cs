@@ -106,7 +106,7 @@ namespace Explorer
                 && float.TryParse(b, out float fB)
                 && float.TryParse(a, out float fA))
             {
-                Value = new Color(fR, fB, fG, fA);
+                Value = new Color(fR, fG, fB, fA);
                 SetValue();
             }
         }
