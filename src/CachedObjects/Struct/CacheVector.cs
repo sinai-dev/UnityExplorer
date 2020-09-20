@@ -24,20 +24,26 @@ namespace Explorer
 
         public override void Init()
         {
-            if (Value is Vector2)
+            if (ValueType == null && Value != null)
+            {
+                ValueType = Value.GetType();
+            }
+
+            if (ValueType == typeof(Vector2))
             {
                 VectorSize = 2;
+                m_toStringMethod = typeof(Vector2).GetMethod("ToString", new Type[0]);
             }
-            else if (Value is Vector3)
+            else if (ValueType == typeof(Vector3))
             {
                 VectorSize = 3;
+                m_toStringMethod = typeof(Vector3).GetMethod("ToString", new Type[0]);
             }
             else
             {
                 VectorSize = 4;
+                m_toStringMethod = typeof(Vector4).GetMethod("ToString", new Type[0]);
             }
-
-            m_toStringMethod = Value.GetType().GetMethod("ToString", new Type[0]);
         }
 
         public override void UpdateValue()

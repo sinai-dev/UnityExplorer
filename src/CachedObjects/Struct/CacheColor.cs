@@ -21,6 +21,8 @@ namespace Explorer
         {
             base.UpdateValue();
 
+            if (Value == null) return;
+
             var color = (Color)Value;
 
             r = color.r.ToString();

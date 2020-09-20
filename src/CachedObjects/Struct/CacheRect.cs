@@ -21,6 +21,8 @@ namespace Explorer
         {
             base.UpdateValue();
 
+            if (Value == null) return;
+
             var rect = (Rect)Value;
 
             x = rect.x.ToString();

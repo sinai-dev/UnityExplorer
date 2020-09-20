@@ -11,23 +11,19 @@ namespace Explorer
 {
     public class CacheEnum : CacheObjectBase
     {
-        public Type EnumType;
+        // public Type EnumType;
         public string[] EnumNames;
 
         public override void Init()
         {
-            try
+            if (ValueType == null && Value != null)
             {
-                EnumType = Value.GetType();
-            }
-            catch
-            {
-                EnumType = (MemInfo as FieldInfo)?.FieldType ?? (MemInfo as PropertyInfo).PropertyType;
+                ValueType = Value.GetType();
             }
 
-            if (EnumType != null)
+            if (ValueType != null)
             {
-                EnumNames = Enum.GetNames(EnumType);
+                EnumNames = Enum.GetNames(ValueType);
             }
             else
             {
@@ -62,7 +58,7 @@ namespace Explorer
 
             if ((change < 0 && newindex >= 0) || (change > 0 && newindex < names.Count))
             {
-                value = Enum.Parse(EnumType, names[newindex]);
+                value = Enum.Parse(ValueType, names[newindex]);
             }
         }
     }

@@ -20,6 +20,8 @@ namespace Explorer
         {
             base.UpdateValue();
 
+            if (Value == null) return;
+
             var euler = ((Quaternion)Value).eulerAngles;
 
             x = euler.x.ToString();
