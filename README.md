@@ -65,7 +65,7 @@ This config is generated to `Mods\CppExplorer\config.xml`. Edit the config while
 * Default: `<x>550</x> <y>700</y>`
 
 ## Features
-[![](overview.png)](overview.png)
+[![](overview.png)](https://raw.githubusercontent.com/sinai-dev/CppExplorer/master/overview.png)
 
 <i>An overview of the different CppExplorer menus.</i>
 
