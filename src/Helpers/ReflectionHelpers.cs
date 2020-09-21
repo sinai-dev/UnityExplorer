@@ -22,15 +22,19 @@ namespace Explorer
         public static ILType ComponentType => Il2CppType.Of<Component>();
         public static ILType BehaviourType => Il2CppType.Of<Behaviour>();
 
-        private static readonly MethodInfo m_tryCastMethodInfo = typeof(Il2CppObjectBase).GetMethod("TryCast");
+        private static readonly MethodInfo tryCastMethodInfo = typeof(Il2CppObjectBase).GetMethod("TryCast");
+        private static readonly Dictionary<Type, MethodInfo> cachedTryCastMethods = new Dictionary<Type, MethodInfo>();
 
         public static object Il2CppCast(object obj, Type castTo)
         {
             if (!typeof(Il2CppSystem.Object).IsAssignableFrom(castTo)) return obj;
 
-            return m_tryCastMethodInfo
-                    .MakeGenericMethod(castTo)
-                    .Invoke(obj, null);
+            if (!cachedTryCastMethods.ContainsKey(castTo))
+            {
+                cachedTryCastMethods.Add(castTo, tryCastMethodInfo.MakeGenericMethod(castTo));
+            }
+
+            return cachedTryCastMethods[castTo].Invoke(obj, null);
         }
 
         public static bool IsEnumerable(Type t)
