@@ -83,6 +83,7 @@
     <Compile Include="CachedObjects\Struct\CacheEnum.cs" />
     <Compile Include="CachedObjects\Object\CacheGameObject.cs" />
     <Compile Include="CachedObjects\Object\CacheList.cs" />
+    <Compile Include="CachedObjects\Struct\CacheEnumFlags.cs" />
     <Compile Include="CachedObjects\Struct\CachePrimitive.cs" />
     <Compile Include="CachedObjects\Other\CacheOther.cs" />
     <Compile Include="CachedObjects\Other\CacheMethod.cs" />

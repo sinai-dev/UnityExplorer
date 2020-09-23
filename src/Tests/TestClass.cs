@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System;
 using UnityEngine;
+using System.Reflection;
+using System.Collections.Specialized;
+using MelonLoader;
 
 // used to test multiple generic constraints
 public class TestGeneric : IComparable<string>
@@ -11,10 +14,33 @@ public class TestGeneric : IComparable<string>
     public int CompareTo(string other) => throw new NotImplementedException();
 }
 
+[Flags]
+public enum TestFlags
+{
+    Red,
+    Green,
+    Blue
+}
+
+// test non-flags weird enum
+public enum WeirdEnum
+{
+    First = 1,
+    Second,
+    Third = 2,
+    Fourth,
+    Fifth
+}
+
 namespace Explorer.Tests
 {
     public class TestClass
     {
+        public static TestFlags testFlags = TestFlags.Blue | TestFlags.Green;
+        public static WeirdEnum testWeird = WeirdEnum.First;
+
+        public static int testBitmask;
+
         public static TestClass Instance => m_instance ?? (m_instance = new TestClass());
         private static TestClass m_instance;
 
@@ -24,12 +50,13 @@ namespace Explorer.Tests
             ILHashSetTest.Add("1");
             ILHashSetTest.Add("2");
             ILHashSetTest.Add("3");
+
+            testBitmask = 1 | 2;
         }
 
         public static int StaticProperty => 5;
         public static int StaticField = 5;
         public int NonStaticField;
-
 
         public static string TestGeneric<C, T>(string arg0) where C : Component where T : TestGeneric, IComparable<string>
         {

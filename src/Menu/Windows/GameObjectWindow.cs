@@ -568,7 +568,7 @@ namespace Explorer
             GUILayout.EndHorizontal();
 
             bool b = m_localContext;
-            b = GUILayout.Toggle(b, "<color=" + (b ? "lime" : "red") + ">Use local transform values?</color>", null);
+            b = GUILayout.Toggle(b, "<color=" + (b ? "lime" : "orange") + ">Use local transform values?</color>", null);
             if (b != m_localContext)
             {
                 m_localContext = b;
@@ -609,7 +609,7 @@ namespace Explorer
         private void BoolToggle(ref bool value, string message)
         {
             string lbl = "<color=";
-            lbl += value ? "lime" : "red";
+            lbl += value ? "lime" : "orange";
             lbl += $">{message}</color>";
 
             value = GUILayout.Toggle(value, lbl, null);

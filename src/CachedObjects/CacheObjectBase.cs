@@ -121,11 +121,6 @@ namespace Explorer
                 return null;
             }
 
-            // This is pretty ugly, could probably make a cleaner implementation.
-            // However, the only cleaner ways I can think of are slower and probably not worth it. 
-
-            // Note: the order is somewhat important.
-
             if (mi != null)
             {
                 holder = new CacheMethod();
@@ -140,7 +135,14 @@ namespace Explorer
             }
             else if (valueType.IsEnum)
             {
-                holder = new CacheEnum();
+                if (valueType.GetCustomAttributes(typeof(FlagsAttribute), false) is object[] attributes && attributes.Length > 0)
+                {
+                    holder = new CacheEnumFlags();
+                }
+                else
+                {
+                    holder = new CacheEnum();
+                }
             }
             else if (valueType == typeof(Vector2) || valueType == typeof(Vector3) || valueType == typeof(Vector4))
             {

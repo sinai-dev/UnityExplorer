@@ -23,7 +23,18 @@ namespace Explorer
 
             if (ValueType != null)
             {
-                EnumNames = Enum.GetNames(ValueType);
+                // using GetValues not GetNames, to catch instances of weird enums (eg CameraClearFlags)
+                var values = Enum.GetValues(ValueType);
+
+                var list = new List<string>();
+                foreach (var value in values)
+                {
+                    var v = value.ToString();
+                    if (list.Contains(v)) continue;
+                    list.Add(v);
+                }
+
+                EnumNames = list.ToArray();
             }
             else
             {
@@ -37,12 +48,12 @@ namespace Explorer
             {
                 if (GUILayout.Button("<", new GUILayoutOption[] { GUILayout.Width(25) }))
                 {
-                    SetEnum(ref Value, -1);
+                    SetEnum(-1);
                     SetValue();
                 }
                 if (GUILayout.Button(">", new GUILayoutOption[] { GUILayout.Width(25) }))
                 {
-                    SetEnum(ref Value, 1);
+                    SetEnum(1);
                     SetValue();
                 }
             }
@@ -50,15 +61,15 @@ namespace Explorer
             GUILayout.Label(Value.ToString() + "<color=#2df7b2><i> (" + ValueType + ")</i></color>", null);
         }
 
-        public void SetEnum(ref object value, int change)
+        public void SetEnum(int change)
         {
             var names = EnumNames.ToList();
 
-            int newindex = names.IndexOf(value.ToString()) + change;
+            int newindex = names.IndexOf(Value.ToString()) + change;
 
-            if ((change < 0 && newindex >= 0) || (change > 0 && newindex < names.Count))
+            if (newindex >= 0 && newindex < names.Count)
             {
-                value = Enum.Parse(ValueType, names[newindex]);
+                Value = Enum.Parse(ValueType, EnumNames[newindex]);
             }
         }
     }
