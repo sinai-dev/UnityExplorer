@@ -135,7 +135,7 @@ namespace Explorer
             }
             else if (valueType.IsEnum)
             {
-                if (valueType.GetCustomAttributes(typeof(FlagsAttribute), false) is object[] attributes && attributes.Length > 0)
+                if (valueType.GetCustomAttributes(typeof(FlagsAttribute), true) is object[] attributes && attributes.Length > 0)
                 {
                     holder = new CacheEnumFlags();
                 }
