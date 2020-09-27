@@ -1,4 +1,6 @@
-# Explorer [![Version](https://img.shields.io/badge/MelonLoader-0.2.7.1-green.svg)](https://github.com/HerpDerpinstine/MelonLoader) [![Version](https://img.shields.io/badge/BepInEx-5.3.0-green.svg)](https://github.com/BepInEx/BepInEx)
+# Explorer 
+
+[![Version](https://img.shields.io/badge/MelonLoader-0.2.7.1-green.svg)](https://github.com/HerpDerpinstine/MelonLoader) [![Version](https://img.shields.io/badge/BepInEx-5.3.0-green.svg)](https://github.com/BepInEx/BepInEx)
 
 <p align="center">
   <img align="center" src="icon.png">
