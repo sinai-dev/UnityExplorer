@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using MelonLoader;
 using UnityEngine;
 
 namespace Explorer
@@ -59,7 +58,7 @@ namespace Explorer
             }
             catch (Exception e)
             {
-                MelonLogger.LogWarning($"Exception evaluating: {e.GetType()}, {e.Message}");
+                ExplorerCore.LogWarning($"Exception evaluating: {e.GetType()}, {e.Message}");
                 ReflectionException = ReflectionHelpers.ExceptionToString(e);
             }
 
@@ -94,7 +93,7 @@ namespace Explorer
                         {
                            if (!constraint.IsAssignableFrom(t))
                            {
-                                MelonLogger.LogWarning($"Generic argument #{i}, '{input}' is not assignable from the constraint '{constraint}'!");
+                                ExplorerCore.LogWarning($"Generic argument #{i}, '{input}' is not assignable from the constraint '{constraint}'!");
                                 return null;
                            }
                         }
@@ -104,7 +103,7 @@ namespace Explorer
                 }
                 else
                 {
-                    MelonLogger.LogWarning($"Generic argument #{i}, could not get any type by the name of '{input}'!" +
+                    ExplorerCore.LogWarning($"Generic argument #{i}, could not get any type by the name of '{input}'!" +
                         $" Make sure you use the full name, including the NameSpace.");
                     return null;
                 }
@@ -130,12 +129,12 @@ namespace Explorer
                 }
                 else
                 {
-                    GUILayout.Label($"null ({typeLabel})", null);
+                    GUILayout.Label($"null ({typeLabel})", new GUILayoutOption[0]);
                 }
             }
             else
             {
-                GUILayout.Label($"<color=grey><i>Not yet evaluated</i></color> ({typeLabel})", null);
+                GUILayout.Label($"<color=grey><i>Not yet evaluated</i></color> ({typeLabel})", new GUILayoutOption[0]);
             }
         }
     }

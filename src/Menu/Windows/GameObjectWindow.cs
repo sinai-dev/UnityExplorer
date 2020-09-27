@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using MelonLoader;
-using UnhollowerRuntimeLib;
 using UnityEngine;
+
+#if CPP
+using UnhollowerRuntimeLib;
+#endif
 
 namespace Explorer
 {
@@ -60,7 +62,7 @@ namespace Explorer
                 return true;
             }
 
-            MelonLogger.Log("Error: Target is null or not a GameObject/Transform!");
+            ExplorerCore.Log("Error: Target is null or not a GameObject/Transform!");
             DestroyWindow();
             return false;
         }
@@ -103,7 +105,7 @@ namespace Explorer
             {
                 if (Target == null)
                 {
-                    MelonLogger.Log("Target is null!");
+                    ExplorerCore.Log("Target is null!");
                     DestroyWindow();
                     return;
                 }
@@ -111,7 +113,7 @@ namespace Explorer
                 {
                     if (!uObj)
                     {
-                        MelonLogger.Log("Target was destroyed!");
+                        ExplorerCore.Log("Target was destroyed!");
                         DestroyWindow();
                         return;
                     }
@@ -149,10 +151,13 @@ namespace Explorer
                 ChildPages.ItemCount = m_children.Length;
 
                 // update components
+#if CPP
                 var compList = new Il2CppSystem.Collections.Generic.List<Component>();
                 TargetGO.GetComponentsInternal(ReflectionHelpers.ComponentType, true, false, true, false, compList);
-
                 m_components = compList.ToArray();
+#else
+                m_components = TargetGO.GetComponents<Component>();
+#endif
 
                 CompPages.ItemCount = m_components.Length;
             }
@@ -164,7 +169,7 @@ namespace Explorer
 
         private void DestroyOnException(Exception e)
         {
-            MelonLogger.Log($"Exception drawing GameObject Window: {e.GetType()}, {e.Message}");
+            ExplorerCore.Log($"Exception drawing GameObject Window: {e.GetType()}, {e.Message}");
             DestroyWindow();
         }
 
@@ -179,8 +184,12 @@ namespace Explorer
             }
         }
 
+#if CPP
         private void ReflectObject(Il2CppSystem.Object obj)
-        {
+#else
+        private void ReflectObject(object obj)
+#endif
+        { 
             var window = WindowManager.InspectObject(obj, out bool created, true);
 
             if (created)
@@ -214,8 +223,8 @@ namespace Explorer
 
                 scroll = GUIUnstrip.BeginScrollView(scroll);
 
-                GUILayout.BeginHorizontal(null);
-                GUILayout.Label("Scene: <color=cyan>" + (m_scene == "" ? "n/a" : m_scene) + "</color>", null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
+                GUILayout.Label("Scene: <color=cyan>" + (m_scene == "" ? "n/a" : m_scene) + "</color>", new GUILayoutOption[0]);
                 if (m_scene == UnityHelpers.ActiveSceneName)
                 {
                     if (GUILayout.Button("<color=#00FF00>Send to Scene View</color>", new GUILayoutOption[] { GUILayout.Width(150) }))
@@ -230,7 +239,7 @@ namespace Explorer
                 }
                 GUILayout.EndHorizontal();
 
-                GUILayout.BeginHorizontal(null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUILayout.Label("Path:", new GUILayoutOption[] { GUILayout.Width(50) });
                 string pathlabel = TargetGO.transform.GetGameObjectPath();
                 if (TargetGO.transform.parent != null)
@@ -240,16 +249,16 @@ namespace Explorer
                         InspectGameObject(TargetGO.transform.parent);
                     }
                 }
-                GUILayout.TextArea(pathlabel, null);
+                GUIUnstrip.TextArea(pathlabel, new GUILayoutOption[0]);
                 GUILayout.EndHorizontal();
 
-                GUILayout.BeginHorizontal(null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUILayout.Label("Name:", new GUILayoutOption[] { GUILayout.Width(50) });
-                GUILayout.TextArea(m_name, null);
+                GUIUnstrip.TextArea(m_name, new GUILayoutOption[0]);
                 GUILayout.EndHorizontal();
 
                 // --- Horizontal Columns section ---
-                GUILayout.BeginHorizontal(null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 
                 GUILayout.BeginVertical(new GUILayoutOption[] { GUILayout.Width(rect.width / 2 - 17) });
                 TransformList(rect);
@@ -280,12 +289,12 @@ namespace Explorer
 
         private void TransformList(Rect m_rect)
         {
-            GUILayout.BeginVertical(GUI.skin.box, null);
+            GUILayout.BeginVertical(GUIContent.none, GUI.skin.box, null);
             m_transformScroll = GUIUnstrip.BeginScrollView(m_transformScroll);
 
-            GUILayout.Label("<b><size=15>Children</size></b>", null);
+            GUILayout.Label("<b><size=15>Children</size></b>", new GUILayoutOption[0]);
 
-            GUILayout.BeginHorizontal(null);
+            GUILayout.BeginHorizontal(new GUILayoutOption[0]);
             ChildPages.DrawLimitInputArea();
 
             if (ChildPages.ItemCount > ChildPages.ItemsPerPage)
@@ -293,7 +302,7 @@ namespace Explorer
                 ChildPages.CurrentPageLabel();
 
                 GUILayout.EndHorizontal();
-                GUILayout.BeginHorizontal(null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 
                 if (GUILayout.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(80) }))
                 {
@@ -316,7 +325,7 @@ namespace Explorer
 
                     if (!obj)
                     {
-                        GUILayout.Label("null", null);
+                        GUILayout.Label("null", new GUILayoutOption[0]);
                         continue;
                     }
 
@@ -325,7 +334,7 @@ namespace Explorer
             }
             else
             {
-                GUILayout.Label("<i>None</i>", null);
+                GUILayout.Label("<i>None</i>", new GUILayoutOption[0]);
             }
 
             GUIUnstrip.EndScrollView();
@@ -334,11 +343,11 @@ namespace Explorer
 
         private void ComponentList(Rect m_rect)
         {
-            GUILayout.BeginVertical(GUI.skin.box, null);
+            GUILayout.BeginVertical(GUIContent.none, GUI.skin.box, null);
             m_compScroll = GUIUnstrip.BeginScrollView(m_compScroll);
-            GUILayout.Label("<b><size=15>Components</size></b>", null);
+            GUILayout.Label("<b><size=15>Components</size></b>", new GUILayoutOption[0]);
 
-            GUILayout.BeginHorizontal(null);
+            GUILayout.BeginHorizontal(new GUILayoutOption[0]);
             CompPages.DrawLimitInputArea();
 
             if (CompPages.ItemCount > CompPages.ItemsPerPage)
@@ -346,7 +355,7 @@ namespace Explorer
                 CompPages.CurrentPageLabel();
 
                 GUILayout.EndHorizontal();
-                GUILayout.BeginHorizontal(null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 
                 if (GUILayout.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(80) }))
                 {
@@ -359,25 +368,29 @@ namespace Explorer
             }
             GUILayout.EndHorizontal();
 
-            GUILayout.BeginHorizontal(null);
+            GUILayout.BeginHorizontal(new GUILayoutOption[0]);
             var width = m_rect.width / 2 - 115f;
             m_addComponentInput = GUILayout.TextField(m_addComponentInput, new GUILayoutOption[] { GUILayout.Width(width) });
-            if (GUILayout.Button("Add Comp", null))
+            if (GUILayout.Button("Add Comp", new GUILayoutOption[0]))
             {
                 if (ReflectionHelpers.GetTypeByName(m_addComponentInput) is Type compType)
                 {
                     if (typeof(Component).IsAssignableFrom(compType))
                     {
+#if CPP
                         TargetGO.AddComponent(Il2CppType.From(compType));
+#else
+                        TargetGO.AddComponent(compType);
+#endif
                     }
                     else
                     {
-                        MelonLogger.LogWarning($"Type '{compType.Name}' is not assignable from Component!");
+                        ExplorerCore.LogWarning($"Type '{compType.Name}' is not assignable from Component!");
                     }
                 }
                 else
                 {
-                    MelonLogger.LogWarning($"Could not find a type by the name of '{m_addComponentInput}'!");
+                    ExplorerCore.LogWarning($"Could not find a type by the name of '{m_addComponentInput}'!");
                 }
             }
             GUILayout.EndHorizontal();
@@ -398,18 +411,26 @@ namespace Explorer
 
                     if (!component) continue;
 
-                    var ilType = component.GetIl2CppType();
-
-                    GUILayout.BeginHorizontal(null);
-                    if (ReflectionHelpers.BehaviourType.IsAssignableFrom(ilType))
+                    var type =
+#if CPP
+                        component.GetIl2CppType();
+#else
+                        component.GetType();
+#endif
+                    GUILayout.BeginHorizontal(new GUILayoutOption[0]);
+                    if (ReflectionHelpers.BehaviourType.IsAssignableFrom(type))
                     {
+#if CPP
                         BehaviourEnabledBtn(component.TryCast<Behaviour>());
+#else
+                        BehaviourEnabledBtn(component as Behaviour);
+#endif
                     }
                     else
                     {
                         GUIUnstrip.Space(26);
                     }
-                    if (GUILayout.Button("<color=cyan>" + ilType.Name + "</color>", new GUILayoutOption[] { GUILayout.Width(m_rect.width / 2 - 100) }))
+                    if (GUILayout.Button("<color=cyan>" + type.Name + "</color>", new GUILayoutOption[] { GUILayout.Width(m_rect.width / 2 - 100) }))
                     {
                         ReflectObject(component);
                     }
@@ -463,7 +484,7 @@ namespace Explorer
         {
             if (m_hideControls)
             {
-                GUILayout.BeginHorizontal(null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUILayout.Label("<b><size=15>GameObject Controls</size></b>", new GUILayoutOption[] { GUILayout.Width(200) });
                 if (GUILayout.Button("^ Show ^", new GUILayoutOption[] { GUILayout.Width(75) }))
                 {
@@ -474,9 +495,9 @@ namespace Explorer
                 return;
             }
 
-            GUILayout.BeginVertical(GUI.skin.box, new GUILayoutOption[] { GUILayout.Width(520) });
+            GUILayout.BeginVertical(GUIContent.none, GUI.skin.box, new GUILayoutOption[] { GUILayout.Width(520) });
 
-            GUILayout.BeginHorizontal(null);
+            GUILayout.BeginHorizontal(new GUILayoutOption[0]);
             GUILayout.Label("<b><size=15>GameObject Controls</size></b>", new GUILayoutOption[] { GUILayout.Width(200) });
             if (GUILayout.Button("v Hide v", new GUILayoutOption[] { GUILayout.Width(75) }))
             {
@@ -484,7 +505,7 @@ namespace Explorer
             }
             GUILayout.EndHorizontal();
 
-            GUILayout.BeginHorizontal(null);
+            GUILayout.BeginHorizontal(new GUILayoutOption[0]);
             bool m_active = TargetGO.activeSelf;
             m_active = GUILayout.Toggle(m_active, (m_active ? "<color=lime>Enabled " : "<color=red>Disabled") + "</color>",
                 new GUILayoutOption[] { GUILayout.Width(80) });
@@ -509,9 +530,9 @@ namespace Explorer
             }
 
             GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal(null);
+            GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 
-            m_setParentInput = GUILayout.TextField(m_setParentInput, null);
+            m_setParentInput = GUILayout.TextField(m_setParentInput, new GUILayoutOption[0]);
             if (GUILayout.Button("Set Parent", new GUILayoutOption[] { GUILayout.Width(80) }))
             {
                 if (GameObject.Find(m_setParentInput) is GameObject newparent)
@@ -520,7 +541,7 @@ namespace Explorer
                 }
                 else
                 {
-                    MelonLogger.LogWarning($"Could not find gameobject '{m_setParentInput}'");
+                    ExplorerCore.LogWarning($"Could not find gameobject '{m_setParentInput}'");
                 }
             }
 
@@ -530,14 +551,14 @@ namespace Explorer
             }
             GUILayout.EndHorizontal();
 
-            GUILayout.BeginVertical(GUI.skin.box, null);
+            GUILayout.BeginVertical(GUIContent.none, GUI.skin.box, null);
 
             m_cachedInput[0] = TranslateControl(TranslateType.Position, ref m_translateAmount,  false);
             m_cachedInput[1] = TranslateControl(TranslateType.Rotation, ref m_rotateAmount,     true);
             m_cachedInput[2] = TranslateControl(TranslateType.Scale,    ref m_scaleAmount,      false);
 
-            GUILayout.BeginHorizontal(null);
-            if (GUILayout.Button("<color=lime>Apply to Transform</color>", null) || m_autoApplyTransform)
+            GUILayout.BeginHorizontal(new GUILayoutOption[0]);
+            if (GUILayout.Button("<color=lime>Apply to Transform</color>", new GUILayoutOption[0]) || m_autoApplyTransform)
             {
                 if (m_localContext)
                 {
@@ -556,19 +577,19 @@ namespace Explorer
                     UpdateFreeze();
                 }
             }
-            if (GUILayout.Button("<color=lime>Update from Transform</color>", null) || m_autoUpdateTransform)
+            if (GUILayout.Button("<color=lime>Update from Transform</color>", new GUILayoutOption[0]) || m_autoUpdateTransform)
             {
                 CacheTransformValues();
             }
             GUILayout.EndHorizontal();
 
-            GUILayout.BeginHorizontal(null);
+            GUILayout.BeginHorizontal(new GUILayoutOption[0]);
             BoolToggle(ref m_autoApplyTransform, "Auto-apply to Transform?");
             BoolToggle(ref m_autoUpdateTransform, "Auto-update from transform?");
             GUILayout.EndHorizontal();
 
             bool b = m_localContext;
-            b = GUILayout.Toggle(b, "<color=" + (b ? "lime" : "orange") + ">Use local transform values?</color>", null);
+            b = GUILayout.Toggle(b, "<color=" + (b ? "lime" : "orange") + ">Use local transform values?</color>", new GUILayoutOption[0]);
             if (b != m_localContext)
             {
                 m_localContext = b;
@@ -612,7 +633,7 @@ namespace Explorer
             lbl += value ? "lime" : "orange";
             lbl += $">{message}</color>";
 
-            value = GUILayout.Toggle(value, lbl, null);
+            value = GUILayout.Toggle(value, lbl, new GUILayoutOption[0]);
         }
 
         public enum TranslateType
@@ -624,7 +645,7 @@ namespace Explorer
 
         private Vector3 TranslateControl(TranslateType mode, ref float amount, bool multByTime)
         {
-            GUILayout.BeginHorizontal(null);
+            GUILayout.BeginHorizontal(new GUILayoutOption[0]);
             GUILayout.Label($"<color=cyan><b>{(m_localContext ? "Local " : "")}{mode}</b></color>:", 
                 new GUILayoutOption[] { GUILayout.Width(m_localContext ? 110 : 65) });
 
@@ -647,7 +668,7 @@ namespace Explorer
 
             Vector3 input = m_cachedInput[(int)mode];
 
-            GUILayout.BeginHorizontal(null);
+            GUILayout.BeginHorizontal(new GUILayoutOption[0]);
             GUI.skin.label.alignment = TextAnchor.MiddleRight;
 
             GUILayout.Label("<color=cyan>X:</color>", new GUILayoutOption[] { GUILayout.Width(20) });

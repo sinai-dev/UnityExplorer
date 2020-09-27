@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using MelonLoader;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -87,7 +86,11 @@ namespace Explorer
 
             foreach (var obj in Resources.FindObjectsOfTypeAll(ReflectionHelpers.GameObjectType))
             {
+#if CPP
                 var go = obj.TryCast<GameObject>();
+#else
+                var go = obj as GameObject;
+#endif
                 if (go.name.ToLower().Contains(_search.ToLower()) && go.scene.name == m_currentScene)
                 {
                     matches.Add(new GameObjectCache(go));
@@ -125,14 +128,22 @@ namespace Explorer
                 {
                     try
                     {
-                        var scene = SceneManager.GetSceneByName(m_currentScene);
+                        for (int i = 0; i < SceneManager.sceneCount; i++)
+                        {
+                            var scene = SceneManager.GetSceneAt(i);
 
-                        allTransforms.AddRange(scene.GetRootGameObjects()
-                                                    .Select(it => it.transform));
+                            if (scene.name == m_currentScene)
+                            {
+                                allTransforms.AddRange(scene.GetRootGameObjects()
+                                                .Select(it => it.transform));
+
+                                break;
+                            }
+                        }
                     }
                     catch
                     {
-                        MelonLogger.Log("Exception getting root scene objects, falling back to backup method...");
+                        ExplorerCore.Log("Exception getting root scene objects, falling back to backup method...");
 
                         m_getRootObjectsFailed = true;
                         allTransforms.AddRange(GetRootObjectsManual_Impl());
@@ -174,7 +185,11 @@ namespace Explorer
                 var list = new List<Transform>();
                 foreach (var obj in array)
                 {
+#if CPP
                     var transform = obj.TryCast<Transform>();
+#else
+                    var transform = obj as Transform;
+#endif
                     if (transform.parent == null && transform.gameObject.scene.name == m_currentScene)
                     {
                         list.Add(transform);
@@ -184,7 +199,7 @@ namespace Explorer
             }
             catch (Exception e)
             {
-                MelonLogger.Log("Exception getting root scene objects (manual): " 
+                ExplorerCore.Log("Exception getting root scene objects (manual): " 
                     + e.GetType() + ", " + e.Message + "\r\n" 
                     + e.StackTrace);
                 return new Transform[0];
@@ -199,7 +214,7 @@ namespace Explorer
             {
                 DrawHeaderArea();
 
-                GUILayout.BeginVertical(GUI.skin.box, null);
+                GUILayout.BeginVertical(GUIContent.none, GUI.skin.box, null);
 
                 DrawPageButtons();
 
@@ -222,20 +237,20 @@ namespace Explorer
 
         private void DrawHeaderArea()
         {
-            GUILayout.BeginHorizontal(null);
+            GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 
             // Current Scene label
             GUILayout.Label("Current Scene:", new GUILayoutOption[] { GUILayout.Width(120) });
             SceneChangeButtons();
-            GUILayout.Label("<color=cyan>" + m_currentScene + "</color>", null); //new GUILayoutOption[] { GUILayout.Width(250) });
+            GUILayout.Label("<color=cyan>" + m_currentScene + "</color>", new GUILayoutOption[0]);
 
             GUILayout.EndHorizontal();
 
             // ----- GameObject Search -----
-            GUILayout.BeginHorizontal(GUI.skin.box, null);
+            GUILayout.BeginHorizontal(GUIContent.none, GUI.skin.box, null);
             GUILayout.Label("<b>Search Scene:</b>", new GUILayoutOption[] { GUILayout.Width(100) });
 
-            m_searchInput = GUILayout.TextField(m_searchInput, null);
+            m_searchInput = GUILayout.TextField(m_searchInput, new GUILayoutOption[0]);
 
             if (GUILayout.Button("Search", new GUILayoutOption[] { GUILayout.Width(80) }))
             {
@@ -248,8 +263,14 @@ namespace Explorer
 
         private void SceneChangeButtons()
         {
-            // Need to do 'ToList()' so the object isn't cleaned up by Il2Cpp GC.
-            var scenes = SceneManager.GetAllScenes().ToList();
+            var scenes = new List<Scene>();
+            var names = new List<string>();
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+            {
+                var scene = SceneManager.GetSceneAt(i);
+                names.Add(scene.name);
+                scenes.Add(scene);
+            }
 
             if (scenes.Count > 1)
             {
@@ -264,7 +285,7 @@ namespace Explorer
                 }
                 if (changeWanted != 0)
                 {
-                    int index = scenes.IndexOf(SceneManager.GetSceneByName(m_currentScene));
+                    int index = names.IndexOf(m_currentScene);
                     index += changeWanted;
                     if (index > scenes.Count - 1)
                     {
@@ -281,7 +302,7 @@ namespace Explorer
 
         private void DrawPageButtons()
         {
-            GUILayout.BeginHorizontal(null);
+            GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 
             Pages.DrawLimitInputArea();
 
@@ -312,7 +333,7 @@ namespace Explorer
         {
             if (m_currentTransform != null)
             {
-                GUILayout.BeginHorizontal(null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 if (GUILayout.Button("<-", new GUILayoutOption[] { GUILayout.Width(35) }))
                 {
                     TraverseUp();
@@ -329,11 +350,11 @@ namespace Explorer
             }
             else
             {
-                GUILayout.Label("Scene Root GameObjects:", null);
+                GUILayout.Label("Scene Root GameObjects:", new GUILayoutOption[0]);
 
                 if (m_getRootObjectsFailed)
                 {
-                    if (GUILayout.Button("Update Root Object List (auto-update failed!)", null))
+                    if (GUILayout.Button("Update Root Object List (auto-update failed!)", new GUILayoutOption[0]))
                     {
                         Update_Impl(true);
                     }
@@ -358,7 +379,7 @@ namespace Explorer
                         }
 
                         label += "</i></color>";
-                        GUILayout.Label(label, null);
+                        GUILayout.Label(label, new GUILayoutOption[0]);
                     }
                     else
                     {
@@ -381,7 +402,7 @@ namespace Explorer
                 CancelSearch();
             }
 
-            GUILayout.Label("Search Results:", null);
+            GUILayout.Label("Search Results:", new GUILayoutOption[0]);
 
             if (m_searchResults.Count > 0)
             {
@@ -403,13 +424,13 @@ namespace Explorer
                     }
                     else
                     {
-                        GUILayout.Label("<i><color=red>Null or destroyed!</color></i>", null);
+                        GUILayout.Label("<i><color=red>Null or destroyed!</color></i>", new GUILayoutOption[0]);
                     }
                 }
             }
             else
             {
-                GUILayout.Label("<color=red><i>No results found!</i></color>", null);
+                GUILayout.Label("<color=red><i>No results found!</i></color>", new GUILayoutOption[0]);
             }
         }
 

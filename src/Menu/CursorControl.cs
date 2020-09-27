@@ -1,7 +1,10 @@
 ﻿using System;
-using Harmony;
-using MelonLoader;
 using UnityEngine;
+#if ML
+using Harmony;
+#else
+using HarmonyLib;
+#endif
 
 namespace Explorer
 {
@@ -17,7 +20,7 @@ namespace Explorer
         private static bool m_lastVisibleState;
         private static bool m_currentlySettingCursor = false;
 
-        public static bool ShouldForceMouse => CppExplorer.ShowMenu && ForceUnlockMouse;
+        public static bool ShouldForceMouse => ExplorerCore.ShowMenu && ForceUnlockMouse;
 
         private static Type CursorType => m_cursorType ?? (m_cursorType = ReflectionHelpers.GetTypeByName("UnityEngine.Cursor"));
         private static Type m_cursorType;
@@ -29,11 +32,11 @@ namespace Explorer
                 // Check if Cursor class is loaded
                 if (CursorType == null)
                 {
-                    MelonLogger.Log("Trying to manually load Cursor module...");
+                    ExplorerCore.Log("Trying to manually load Cursor module...");
 
                     if (ReflectionHelpers.LoadModule("UnityEngine.CoreModule") && CursorType != null)
                     {
-                        MelonLogger.Log("Ok!");
+                        ExplorerCore.Log("Ok!");
                     }
                     else
                     {
@@ -54,12 +57,12 @@ namespace Explorer
             }
             catch (Exception e)
             {
-                MelonLogger.Log($"Exception on CursorControl.Init! {e.GetType()}, {e.Message}");
+                ExplorerCore.Log($"Exception on CursorControl.Init! {e.GetType()}, {e.Message}");
             }
 
             // Enable ShowMenu and ForceUnlockMouse 
             // (set m_showMenu directly to not call UpdateCursorState twice)
-            CppExplorer.m_showMenu = true;
+            ExplorerCore.m_showMenu = true;
             ForceUnlockMouse = true;
         }
 
@@ -67,7 +70,16 @@ namespace Explorer
         {
             try
             {
-                var harmony = CppExplorer.Instance.harmonyInstance;
+                // var harmony = ExplorerCore.Instance.harmonyInstance;
+
+                var harmony =
+#if ML
+                    Explorer_MelonMod.Instance.harmonyInstance;
+#else
+                    Explorer_BepInPlugin.HarmonyInstance;
+#endif
+                ;
+
                 var prop = typeof(Cursor).GetProperty(property);
 
                 if (setter)
@@ -83,7 +95,7 @@ namespace Explorer
             }
             catch (Exception e)
             {
-                MelonLogger.Log($"[NON-FATAL] Couldn't patch a method: {e.Message}");
+                ExplorerCore.Log($"[NON-FATAL] Couldn't patch a method: {e.Message}");
             }
         }
 
@@ -121,7 +133,7 @@ namespace Explorer
             }
             catch (Exception e)
             {
-                MelonLogger.Log($"Exception setting Cursor state: {e.GetType()}, {e.Message}");
+                ExplorerCore.Log($"Exception setting Cursor state: {e.GetType()}, {e.Message}");
             }
         }
 

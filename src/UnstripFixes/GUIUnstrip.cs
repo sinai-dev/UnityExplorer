@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Reflection;
-using MelonLoader;
-using UnhollowerRuntimeLib;
 using UnityEngine;
+#if CPP
 using UnityEngineInternal;
+using UnhollowerRuntimeLib;
+#endif
 
 namespace Explorer
 {
     public class GUIUnstrip
     {
+#if CPP
         public static int s_ScrollControlId;
 
         public static bool ScrollFailed = false;
@@ -19,6 +21,12 @@ namespace Explorer
         private static GenericStack m_scrollStack;
 
         public static DateTime nextScrollStepTime;
+        
+        private static MethodInfo ScreenToGuiPointMethod;
+        private static bool m_screenToGuiAttemped;
+
+        private static MethodInfo m_bringWindowToFrontMethod;
+        private static bool m_bringWindowFrontAttempted;
 
         private static GenericStack GetScrollStack()
         {
@@ -45,11 +53,75 @@ namespace Explorer
 
             return m_scrollStack;
         }
+#endif
+
+        public static Rect Window(int id, Rect rect, GUI.WindowFunction windowFunc, string title)
+        {
+#if CPP
+            return GUI.Window(id, rect, windowFunc, GUIContent.Temp(title), GUI.skin.window);
+#else
+            return GUI.Window(id, rect, windowFunc, title);
+#endif
+        }
+
+        public static bool Button(Rect rect, string title)
+        {
+#if CPP
+            return GUI.Button(rect, GUIContent.Temp(title), GUI.skin.button);
+#else
+            return GUI.Button(rect, title);
+#endif
+        }
+
+        public static string TextArea(string text, params GUILayoutOption[] options)
+        {
+#if CPP
+            return GUILayout.DoTextField(text, -1, true, GUI.skin.textArea, options);
+#else
+            return GUILayout.TextArea(text, options);
+#endif
+        }
+
+        public static void BringWindowToFront(int id)
+        {
+#if CPP
+
+            if (!m_bringWindowFrontAttempted)
+            {
+                m_bringWindowFrontAttempted = true;
+                m_bringWindowToFrontMethod = typeof(GUI).GetMethod("BringWindowToFront");
+            }
+            if (m_bringWindowToFrontMethod == null)
+            {
+                throw new Exception("Couldn't get method 'GUIUtility.BringWindowToFront'!");
+            }
+            m_bringWindowToFrontMethod.Invoke(null, new object[] { id });
+#else
+            GUI.BringWindowToFront(id);
+#endif
+        }
+
+        public static Vector2 ScreenToGUIPoint(Vector2 screenPoint)
+        {
+#if CPP
+            if (!m_screenToGuiAttemped)
+            {
+                m_screenToGuiAttemped = true;
+                ScreenToGuiPointMethod = typeof(GUIUtility).GetMethod("ScreenToGUIPoint");
+            }
+            if (ScreenToGuiPointMethod == null)
+            {
+                throw new Exception("Couldn't get method 'GUIUtility.ScreenToGUIPoint'!");
+            }
+            return (Vector2)ScreenToGuiPointMethod.Invoke(null, new object[] { screenPoint });
+#else
+            return GUIUtility.ScreenToGUIPoint(screenPoint);
+#endif
+        }
 
         public static void Space(float pixels)
         {
-            GUIUtility.CheckOnGUI();
-
+#if CPP
             if (GUILayoutUtility.current.topLevel.isVertical)
                 LayoutUtilityUnstrip.GetRect(0, pixels, GUILayoutUtility.spaceStyle, new GUILayoutOption[] { GUILayout.Height(pixels) });
             else
@@ -59,31 +131,47 @@ namespace Explorer
             {
                 GUILayoutUtility.current.topLevel.entries[GUILayoutUtility.current.topLevel.entries.Count - 1].consideredForMargin = false;
             }
+#else
+            GUILayout.Space(pixels);
+#endif
         }
 
         // fix for repeatbutton
 
+#if CPP
+#if ML
         static public bool RepeatButton(Texture image, params GUILayoutOption[] options) { return DoRepeatButton(GUIContent.Temp(image), GUI.skin.button, options); }
-        static public bool RepeatButton(string text, params GUILayoutOption[] options) { return DoRepeatButton(GUIContent.Temp(text), GUI.skin.button, options); }
         static public bool RepeatButton(GUIContent content, params GUILayoutOption[] options) { return DoRepeatButton(content, GUI.skin.button, options); }
         static public bool RepeatButton(Texture image, GUIStyle style, params GUILayoutOption[] options) { return DoRepeatButton(GUIContent.Temp(image), style, options); }
-        static public bool RepeatButton(string text, GUIStyle style, params GUILayoutOption[] options) { return DoRepeatButton(GUIContent.Temp(text), style, options); }
         // Make a repeating button. The button returns true as long as the user holds down the mouse
+#endif
+        static public bool RepeatButton(string text, params GUILayoutOption[] options) { return DoRepeatButton(GUIContent.Temp(text), GUI.skin.button, options); }
         static public bool RepeatButton(GUIContent content, GUIStyle style, params GUILayoutOption[] options) { return DoRepeatButton(content, style, options); }
         static bool DoRepeatButton(GUIContent content, GUIStyle style, GUILayoutOption[] options)
-        { return GUI.RepeatButton(LayoutUtilityUnstrip.GetRect(content, style, options), content, style); }
+        {
+            return GUI.DoRepeatButton(LayoutUtilityUnstrip.GetRect(content, style, options), content, style, FocusType.Passive);
+        }
+#else // mono
+        public static bool RepeatButton(string text, params GUILayoutOption[] args)
+        {
+            return GUILayout.RepeatButton(text, args);
+        }
+#endif
 
         // Fix for BeginArea
 
+#if CPP
+#if ML
         static public void BeginArea(Rect screenRect) { BeginArea(screenRect, GUIContent.none, GUIStyle.none); }
         static public void BeginArea(Rect screenRect, string text) { BeginArea(screenRect, GUIContent.Temp(text), GUIStyle.none); }
         static public void BeginArea(Rect screenRect, Texture image) { BeginArea(screenRect, GUIContent.Temp(image), GUIStyle.none); }
         static public void BeginArea(Rect screenRect, GUIContent content) { BeginArea(screenRect, content, GUIStyle.none); }
-        static public void BeginArea(Rect screenRect, GUIStyle style) { BeginArea(screenRect, GUIContent.none, style); }
         static public void BeginArea(Rect screenRect, string text, GUIStyle style) { BeginArea(screenRect, GUIContent.Temp(text), style); }
         static public void BeginArea(Rect screenRect, Texture image, GUIStyle style) { BeginArea(screenRect, GUIContent.Temp(image), style); }
+#endif
 
-        // Begin a GUILayout block of GUI controls in a fixed screen area.
+        static public void BeginArea(Rect screenRect, GUIStyle style) { BeginArea(screenRect, GUIContent.none, style); }
+
         static public void BeginArea(Rect screenRect, GUIContent content, GUIStyle style)
         {
             GUILayoutGroup g = GUILayoutUtility.BeginLayoutArea(style, Il2CppType.Of<GUILayoutGroup>());
@@ -97,8 +185,15 @@ namespace Explorer
 
             GUI.BeginGroup(g.rect, content, style);
         }
+#else
+        public static void BeginArea(Rect rect, GUIStyle skin)
+        {
+            GUILayout.BeginArea(rect, skin);
+        }
+#endif
 
         // Close a GUILayout block started with BeginArea
+#if CPP
         static public void EndArea()
         {
             if (Event.current.type == EventType.Used)
@@ -107,9 +202,17 @@ namespace Explorer
             GUILayoutUtility.current.topLevel = GUILayoutUtility.current.layoutGroups.Peek().TryCast<GUILayoutGroup>();
             GUI.EndGroup();
         }
+#else
+        public static void EndArea()
+        {
+            GUILayout.EndArea();
+        }
+#endif
 
         // Fix for BeginGroup
 
+#if CPP
+#if ML
         public static void BeginGroup(Rect position) { BeginGroup(position, GUIContent.none, GUIStyle.none); }
         public static void BeginGroup(Rect position, string text) { BeginGroup(position, GUIContent.Temp(text), GUIStyle.none); }
         public static void BeginGroup(Rect position, Texture image) { BeginGroup(position, GUIContent.Temp(image), GUIStyle.none); }
@@ -117,7 +220,8 @@ namespace Explorer
         public static void BeginGroup(Rect position, GUIStyle style) { BeginGroup(position, GUIContent.none, style); }
         public static void BeginGroup(Rect position, string text, GUIStyle style) { BeginGroup(position, GUIContent.Temp(text), style); }
         public static void BeginGroup(Rect position, Texture image, GUIStyle style) { BeginGroup(position, GUIContent.Temp(image), style); }
-
+        
+#endif
         public static void BeginGroup(Rect position, GUIContent content, GUIStyle style) { BeginGroup(position, content, style, Vector2.zero); }
 
         internal static void BeginGroup(Rect position, GUIContent content, GUIStyle style, Vector2 scrollOffset)
@@ -139,14 +243,28 @@ namespace Explorer
             }
             GUIClip.Push(position, scrollOffset, Vector2.zero, false);
         }
+#else
+        public static void BeginGroup(Rect rect, GUIStyle style)
+        {
+            GUI.BeginGroup(rect, style);
+        }
+#endif
 
+#if CPP
         public static void EndGroup()
         {
             GUIClip.Internal_Pop();
         }
+#else
+        public static void EndGroup()
+        {
+            GUI.EndGroup();
+        }
+#endif
 
         // Fix for BeginScrollView.
 
+#if CPP
         public static Vector2 BeginScrollView(Vector2 scroll, params GUILayoutOption[] options)
         {
             // First, just try normal way, may not have been stripped or was unstripped successfully.
@@ -171,7 +289,7 @@ namespace Explorer
                 }
                 catch (Exception e)
                 {
-                    MelonLogger.Log("Exception on manual BeginScrollView: " + e.GetType() + ", " + e.Message + "\r\n" + e.StackTrace);
+                    ExplorerCore.Log("Exception on manual BeginScrollView: " + e.GetType() + ", " + e.Message + "\r\n" + e.StackTrace);
                     ManualUnstripFailed = true;
                 }
             }
@@ -196,7 +314,7 @@ namespace Explorer
             }
         }
 
-        private static Vector2 BeginScrollView_ImplLayout(Vector2 scrollPosition, bool alwaysShowHorizontal, bool alwaysShowVertical, 
+        private static Vector2 BeginScrollView_ImplLayout(Vector2 scrollPosition, bool alwaysShowHorizontal, bool alwaysShowVertical,
             GUIStyle horizontalScrollbar, GUIStyle verticalScrollbar, GUIStyle background, params GUILayoutOption[] options)
         {
             var guiscrollGroup = GUILayoutUtility.BeginLayoutGroup(background, null, Il2CppType.Of<GUIScrollGroup>())
@@ -227,7 +345,7 @@ namespace Explorer
             );
         }
 
-        private static Vector2 BeginScrollView_Impl(Rect position, Vector2 scrollPosition, Rect viewRect, bool alwaysShowHorizontal, 
+        private static Vector2 BeginScrollView_Impl(Rect position, Vector2 scrollPosition, Rect viewRect, bool alwaysShowHorizontal,
             bool alwaysShowVertical, GUIStyle horizontalScrollbar, GUIStyle verticalScrollbar, GUIStyle background)
         {
             // GUIUtility.CheckOnGUI();
@@ -487,5 +605,16 @@ namespace Explorer
             }
             return result;
         }
+#else
+        public static Vector2 BeginScrollView(Vector2 scroll, params GUILayoutOption[] options)
+        {
+            return GUILayout.BeginScrollView(scroll, options);
+        }
+
+        public static void EndScrollView()
+        {
+            GUILayout.EndScrollView();
+        }
+#endif
     }
 }

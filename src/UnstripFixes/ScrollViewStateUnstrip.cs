@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if CPP
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -25,3 +26,5 @@ namespace Explorer
         }
     }
 }
+
+#endif

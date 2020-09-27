@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using MelonLoader;
 using UnityEngine;
 
 namespace Explorer
@@ -272,13 +271,13 @@ namespace Explorer
                         }
                         catch
                         {
-                            MelonLogger.Log($"Argument #{i} '{m_arguments[i].Name}' ({type.Name}), could not parse input '{input}'.");
+                            ExplorerCore.Log($"Argument #{i} '{m_arguments[i].Name}' ({type.Name}), could not parse input '{input}'.");
                         }
                     }
                 }
 
                 // Didn't use input, see if there is a default value.
-                if (m_arguments[i].HasDefaultValue)
+                if (HasDefaultValue(m_arguments[i]))
                 {
                     parsedArgs.Add(m_arguments[i].DefaultValue);
                     continue;
@@ -289,6 +288,16 @@ namespace Explorer
             }
 
             return parsedArgs.ToArray();
+        }
+
+        public static bool HasDefaultValue(ParameterInfo arg)
+        {
+            return
+#if NET35
+                arg.DefaultValue != null; // rip null default args in NET35
+#else
+                arg.HasDefaultValue;
+#endif
         }
 
         public virtual void UpdateValue()
@@ -348,13 +357,13 @@ namespace Explorer
                     }
                     else
                     {
-                        pi.SetValue(pi.GetAccessors()[0].IsStatic ? null : DeclaringInstance, Value);
+                        pi.SetValue(pi.GetAccessors()[0].IsStatic ? null : DeclaringInstance, Value, null);
                     }
                 }
             }
             catch (Exception e)
             {
-                MelonLogger.LogWarning($"Error setting value: {e.GetType()}, {e.Message}");
+                ExplorerCore.LogWarning($"Error setting value: {e.GetType()}, {e.Message}");
             }
         }
 
@@ -391,13 +400,13 @@ namespace Explorer
 
             if (HasParameters)
             {
-                GUILayout.BeginVertical(null);
+                GUILayout.BeginVertical(new GUILayoutOption[0]);
 
                 if (m_isEvaluating)
                 {
                     if (cm != null && cm.GenericArgs.Length > 0)
                     {
-                        GUILayout.Label($"<b><color=orange>Generic Arguments:</color></b>", null);
+                        GUILayout.Label($"<b><color=orange>Generic Arguments:</color></b>", new GUILayoutOption[0]);
 
                         for (int i = 0; i < cm.GenericArgs.Length; i++)
                         {
@@ -424,13 +433,13 @@ namespace Explorer
                             }
                             var input = cm.GenericArgInput[i];
 
-                            GUILayout.BeginHorizontal(null);
+                            GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 
                             GUI.skin.label.alignment = TextAnchor.MiddleCenter;
                             GUILayout.Label($"<color={UIStyles.Syntax.StructGreen}>{cm.GenericArgs[i].Name}</color>", new GUILayoutOption[] { GUILayout.Width(15) });
                             cm.GenericArgInput[i] = GUILayout.TextField(input, new GUILayoutOption[] { GUILayout.Width(150) });
                             GUI.skin.label.alignment = TextAnchor.MiddleLeft;
-                            GUILayout.Label(types, null);
+                            GUILayout.Label(types, new GUILayoutOption[0]);
 
                             GUILayout.EndHorizontal();
                         }
@@ -438,7 +447,7 @@ namespace Explorer
 
                     if (m_arguments.Length > 0)
                     {
-                        GUILayout.Label($"<b><color=orange>Arguments:</color></b>", null);
+                        GUILayout.Label($"<b><color=orange>Arguments:</color></b>", new GUILayoutOption[0]);
                         for (int i = 0; i < m_arguments.Length; i++)
                         {
                             var name = m_arguments[i].Name;
@@ -447,24 +456,24 @@ namespace Explorer
 
                             var label = $"<color={UIStyles.Syntax.Class_Instance}>{type}</color> ";
                             label += $"<color={UIStyles.Syntax.Local}>{name}</color>";
-                            if (m_arguments[i].HasDefaultValue)
+                            if (HasDefaultValue(m_arguments[i]))
                             {
                                 label = $"<i>[{label} = {m_arguments[i].DefaultValue ?? "null"}]</i>";
                             }
 
-                            GUILayout.BeginHorizontal(null);
+                            GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 
                             GUI.skin.label.alignment = TextAnchor.MiddleCenter;
                             GUILayout.Label(i.ToString(), new GUILayoutOption[] { GUILayout.Width(15) });
                             m_argumentInput[i] = GUILayout.TextField(input, new GUILayoutOption[] { GUILayout.Width(150) });
                             GUI.skin.label.alignment = TextAnchor.MiddleLeft;
-                            GUILayout.Label(label, null);
+                            GUILayout.Label(label, new GUILayoutOption[0]);
 
                             GUILayout.EndHorizontal();
                         }
                     }
 
-                    GUILayout.BeginHorizontal(null);
+                    GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                     if (GUILayout.Button(EVALUATE_LABEL, new GUILayoutOption[] { GUILayout.Width(70) }))
                     {
                         if (cm != null)
@@ -499,7 +508,7 @@ namespace Explorer
 
                 // new line and space
                 GUILayout.EndHorizontal();
-                GUILayout.BeginHorizontal(null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUIUnstrip.Space(labelWidth);
             }
             else if (cm != null)
@@ -513,7 +522,7 @@ namespace Explorer
 
                 // new line and space
                 GUILayout.EndHorizontal();
-                GUILayout.BeginHorizontal(null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUIUnstrip.Space(labelWidth);
             }
 
@@ -521,15 +530,15 @@ namespace Explorer
 
             if (!string.IsNullOrEmpty(ReflectionException))
             {
-                GUILayout.Label("<color=red>Reflection failed!</color> (" + ReflectionException + ")", null);
+                GUILayout.Label("<color=red>Reflection failed!</color> (" + ReflectionException + ")", new GUILayoutOption[0]);
             }
             else if ((HasParameters || this is CacheMethod) && !m_evaluated)
             {
-                GUILayout.Label($"<color=grey><i>Not yet evaluated</i></color> ({typeName})", null);
+                GUILayout.Label($"<color=grey><i>Not yet evaluated</i></color> ({typeName})", new GUILayoutOption[0]);
             }
             else if (Value == null && !(this is CacheMethod))
             {
-                GUILayout.Label($"<i>null ({typeName})</i>", null);
+                GUILayout.Label($"<i>null ({typeName})</i>", new GUILayoutOption[0]);
             }
             else
             {

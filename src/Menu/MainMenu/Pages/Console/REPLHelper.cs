@@ -6,7 +6,9 @@ namespace Explorer
 {
     public class ReplHelper : MonoBehaviour
     {
+#if CPP
         public ReplHelper(IntPtr intPtr) : base(intPtr) { }
+#endif
 
         public T Find<T>() where T : Object
         {

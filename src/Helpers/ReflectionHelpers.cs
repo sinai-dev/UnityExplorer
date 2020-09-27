@@ -3,12 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using MelonLoader;
-using UnhollowerBaseLib;
-using UnhollowerRuntimeLib;
 using UnityEngine;
 using BF = System.Reflection.BindingFlags;
+
+#if CPP
 using ILType = Il2CppSystem.Type;
+using UnhollowerBaseLib;
+using UnhollowerRuntimeLib;
+#endif
 
 namespace Explorer
 {
@@ -16,11 +18,12 @@ namespace Explorer
     {
         public static BF CommonFlags = BF.Public | BF.Instance | BF.NonPublic | BF.Static;
 
-        public static ILType GameObjectType => Il2CppType.Of<GameObject>();
-        public static ILType TransformType => Il2CppType.Of<Transform>();
-        public static ILType ObjectType => Il2CppType.Of<UnityEngine.Object>();
-        public static ILType ComponentType => Il2CppType.Of<Component>();
-        public static ILType BehaviourType => Il2CppType.Of<Behaviour>();
+#if CPP
+        public static ILType GameObjectType =>  Il2CppType.Of<GameObject>();
+        public static ILType TransformType =>   Il2CppType.Of<Transform>();
+        public static ILType ObjectType =>      Il2CppType.Of<UnityEngine.Object>();
+        public static ILType ComponentType =>   Il2CppType.Of<Component>();
+        public static ILType BehaviourType =>   Il2CppType.Of<Behaviour>();
 
         private static readonly MethodInfo tryCastMethodInfo = typeof(Il2CppObjectBase).GetMethod("TryCast");
         private static readonly Dictionary<Type, MethodInfo> cachedTryCastMethods = new Dictionary<Type, MethodInfo>();
@@ -36,15 +39,22 @@ namespace Explorer
 
             return cachedTryCastMethods[castTo].Invoke(obj, null);
         }
+#else
+        public static Type GameObjectType =>    typeof(GameObject);
+        public static Type TransformType =>     typeof(Transform);
+        public static Type ObjectType =>        typeof(UnityEngine.Object);
+        public static Type ComponentType =>     typeof(Component);
+        public static Type BehaviourType =>     typeof(Behaviour);
+#endif
 
         public static bool IsEnumerable(Type t)
         {
-            return typeof(IEnumerable).IsAssignableFrom(t) || IsCppEnumerable(t);
-        }
+            if (typeof(IEnumerable).IsAssignableFrom(t))
+            {
+                return true;
+            }
 
-        // Checks for Il2Cpp List or HashSet.
-        public static bool IsCppEnumerable(Type t)
-        {
+#if CPP
             if (t.IsGenericType && t.GetGenericTypeDefinition() is Type g)
             {
                 return typeof(Il2CppSystem.Collections.Generic.List<>).IsAssignableFrom(g)
@@ -55,6 +65,9 @@ namespace Explorer
             {
                 return typeof(Il2CppSystem.Collections.IList).IsAssignableFrom(t);
             }
+#else
+            return false;
+#endif
         }
 
         public static bool IsDictionary(Type t)
@@ -64,6 +77,7 @@ namespace Explorer
                 return true;
             }
 
+#if CPP
             if (t.IsGenericType && t.GetGenericTypeDefinition() is Type g)
             {
                 return typeof(Il2CppSystem.Collections.Generic.Dictionary<,>).IsAssignableFrom(g)
@@ -74,6 +88,9 @@ namespace Explorer
                 return typeof(Il2CppSystem.Collections.IDictionary).IsAssignableFrom(t)
                     || typeof(Il2CppSystem.Collections.Hashtable).IsAssignableFrom(t);
             }
+#else
+            return false;
+#endif
         }
 
         public static Type GetTypeByName(string fullName)
@@ -96,6 +113,7 @@ namespace Explorer
         {
             if (obj == null) return null;
 
+#if CPP
             // Need to use GetIl2CppType for Il2CppSystem Objects
             if (obj is Il2CppSystem.Object ilObject)
             {
@@ -107,6 +125,7 @@ namespace Explorer
 
                 return Type.GetType(ilObject.GetIl2CppType().AssemblyQualifiedName) ?? obj.GetType();
             }
+#endif
 
             // It's a normal object, this is fine
             return obj.GetType();
@@ -139,13 +158,14 @@ namespace Explorer
             }
             catch (Exception e)
             {
-                MelonLogger.Log(e.GetType() + ", " + e.Message);
+                ExplorerCore.Log(e.GetType() + ", " + e.Message);
                 return false;
             }
         }
 
         public static string ExceptionToString(Exception e)
         {
+#if CPP
             if (IsFailedGeneric(e))
             {
                 return "Unable to initialize this type.";
@@ -154,10 +174,12 @@ namespace Explorer
             {
                 return "Garbage collected in Il2Cpp.";
             }
+#endif
 
             return e.GetType() + ", " + e.Message;
         }
 
+#if CPP
         public static bool IsFailedGeneric(Exception e)
         {
             return IsExceptionOfType(e, typeof(TargetInvocationException)) && IsExceptionOfType(e, typeof(TypeLoadException));
@@ -184,5 +206,6 @@ namespace Explorer
             else
                 return false;
         }
+#endif
     }
 }

@@ -7,6 +7,7 @@ namespace Explorer
 {
     public static class ReflectionExtensions
     {
+#if CPP
         /// <summary>
         /// Extension to allow for easy, non-generic Il2Cpp casting.
         /// The extension is on System.Object, but only Il2Cpp objects would be a valid target.
@@ -15,6 +16,7 @@ namespace Explorer
         {
             return ReflectionHelpers.Il2CppCast(obj, castTo);
         }
+#endif
 
         /// <summary>
         /// Extension to safely try to get all Types from an Assembly, with a fallback for ReflectionTypeLoadException.

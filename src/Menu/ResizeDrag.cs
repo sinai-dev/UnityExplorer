@@ -1,6 +1,7 @@
 ﻿using System;
-using MelonLoader;
+#if CPP
 using UnhollowerBaseLib;
+#endif
 using UnityEngine;
 
 namespace Explorer
@@ -22,10 +23,18 @@ namespace Explorer
 
                 try
                 {
-                    GUILayout.BeginHorizontal(GUI.skin.box, null);
+                    GUILayout.BeginHorizontal(GUIContent.none, GUI.skin.box, null);
 
                     GUI.skin.label.alignment = TextAnchor.MiddleCenter;
+#if CPP
+#if ML
                     GUILayout.Button(gcDrag, GUI.skin.label, new GUILayoutOption[] { GUILayout.Height(15) });
+#else
+                    GUILayout.Button(gcDrag.ToString(), new GUILayoutOption[] { GUILayout.Height(15) });
+#endif
+#else
+                    GUILayout.Button(gcDrag, GUI.skin.label, new GUILayoutOption[] { GUILayout.Height(15) });
+#endif
 
                     //var r = GUILayoutUtility.GetLastRect();
                     var r = LayoutUtilityUnstrip.GetLastRect();
@@ -34,7 +43,7 @@ namespace Explorer
 
                     try
                     {
-                        var mouse = GUIUtility.ScreenToGUIPoint(new Vector2(mousePos.x, Screen.height - mousePos.y));
+                        var mouse = GUIUnstrip.ScreenToGUIPoint(new Vector2(mousePos.x, Screen.height - mousePos.y));
                         if (r.Contains(mouse) && InputHelper.GetMouseButtonDown(0))
                         {
                             isResizing = true;
@@ -62,7 +71,7 @@ namespace Explorer
 
                     GUILayout.EndHorizontal();
                 }
-                catch (Il2CppException e) when (e.Message.StartsWith("System.ArgumentException"))
+                catch (Exception e) when (e.Message.StartsWith("System.ArgumentException"))
                 {
                     // suppress
                     return origRect;
@@ -70,8 +79,8 @@ namespace Explorer
                 catch (Exception e)
                 {
                     RESIZE_FAILED = true;
-                    MelonLogger.Log("Exception on GuiResize: " + e.GetType() + ", " + e.Message);
-                    //MelonLogger.Log(e.StackTrace);
+                    ExplorerCore.Log("Exception on GuiResize: " + e.GetType() + ", " + e.Message);
+                    //ExplorerCore.Log(e.StackTrace);
                     return origRect;
                 }
 
@@ -79,7 +88,7 @@ namespace Explorer
             }
             else
             {
-                GUILayout.BeginHorizontal(GUI.skin.box, null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 
                 GUILayout.Label("Resize window:", new GUILayoutOption[] { GUILayout.Width(100) });
 

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using MelonLoader;
 using Mono.CSharp;
 using UnityEngine;
 
@@ -36,15 +35,16 @@ namespace Explorer
 
         public override void Init()
         {
+#if CPP
             UnhollowerRuntimeLib.ClassInjector.RegisterTypeInIl2Cpp<ReplHelper>();
-
+#endif
             try
             {
                 MethodInput = @"// This is a basic C# console. 
 // Some common using directives are added by default, you can add more below.
-// If you want to return some output, MelonLogger.Log() it.
+// If you want to return some output, Debug.Log() it.
 
-MelonLogger.Log(""hello world"");";
+Debug.Log(""hello world"");";
 
                 ResetConsole();
 
@@ -55,7 +55,7 @@ MelonLogger.Log(""hello world"");";
             }
             catch (Exception e)
             {
-                MelonLogger.Log($"Error setting up console!\r\nMessage: {e.Message}");
+                ExplorerCore.Log($"Error setting up console!\r\nMessage: {e.Message}");
                 MainMenu.SetCurrentPage(0);
                 MainMenu.Pages.Remove(this);
             }
@@ -110,7 +110,7 @@ MelonLogger.Log(""hello world"");";
             {
                 if (!suppressWarning)
                 {
-                    MelonLogger.LogWarning(e.GetType() + ", " + e.Message);
+                    ExplorerCore.LogWarning(e.GetType() + ", " + e.Message);
                 }
             }
 
@@ -120,19 +120,19 @@ MelonLogger.Log(""hello world"");";
 
         public override void DrawWindow()
         {
-            GUILayout.Label("<b><size=15><color=cyan>C# Console</color></size></b>", null);
+            GUILayout.Label("<b><size=15><color=cyan>C# Console</color></size></b>", new GUILayoutOption[0]);
 
             GUI.skin.label.alignment = TextAnchor.UpperLeft;
 
-            GUILayout.Label("Enter code here as though it is a method body:", null);
+            GUILayout.Label("Enter code here as though it is a method body:", new GUILayoutOption[0]);
 
             inputAreaScroll = GUIUnstrip.BeginScrollView(inputAreaScroll, new GUILayoutOption[] { GUILayout.Height(250) });
 
-            MethodInput = GUILayout.TextArea(MethodInput, new GUILayoutOption[] { GUILayout.ExpandHeight(true) });
+            MethodInput = GUIUnstrip.TextArea(MethodInput, new GUILayoutOption[] { GUILayout.ExpandHeight(true) });
 
             GUIUnstrip.EndScrollView();
 
-            if (GUILayout.Button("<color=cyan><b>Execute</b></color>", null))
+            if (GUILayout.Button("<color=cyan><b>Execute</b></color>", new GUILayoutOption[0]))
             {
                 try
                 {
@@ -144,19 +144,19 @@ MelonLogger.Log(""hello world"");";
 
                         if (result != null && !Equals(result, VoidType.Value))
                         {
-                            MelonLogger.Log("[Console Output]\r\n" + result.ToString());
+                            ExplorerCore.Log("[Console Output]\r\n" + result.ToString());
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    MelonLogger.LogError("Exception compiling!\r\nMessage: " + e.Message + "\r\nStack: " + e.StackTrace);
+                    ExplorerCore.LogError("Exception compiling!\r\nMessage: " + e.Message + "\r\nStack: " + e.StackTrace);
                 }
             }
 
-            GUILayout.Label("<b>Using directives:</b>", null);
+            GUILayout.Label("<b>Using directives:</b>", new GUILayoutOption[0]);
 
-            GUILayout.BeginHorizontal(null);
+            GUILayout.BeginHorizontal(new GUILayoutOption[0]);
             GUILayout.Label("Add namespace:", new GUILayoutOption[] { GUILayout.Width(105) });
             UsingInput = GUILayout.TextField(UsingInput, new GUILayoutOption[] { GUILayout.Width(150) });
             if (GUILayout.Button("<b><color=lime>Add</color></b>", new GUILayoutOption[] { GUILayout.Width(120) }))
@@ -171,7 +171,7 @@ MelonLogger.Log(""hello world"");";
 
             foreach (var asm in UsingDirectives)
             {
-                GUILayout.Label(AsmToUsing(asm, true), null);
+                GUILayout.Label(AsmToUsing(asm, true), new GUILayoutOption[0]);
             }            
         }
 

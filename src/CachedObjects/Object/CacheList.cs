@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using MelonLoader;
 using UnityEngine;
 
 namespace Explorer
@@ -103,6 +102,7 @@ namespace Explorer
         {
             if (Value == null) return null;
 
+#if CPP
             if (GenericTypeDef == typeof(Il2CppSystem.Collections.Generic.List<>))
             {
                 return (IEnumerable)CppListToArrayMethod?.Invoke(Value, new object[0]);
@@ -115,8 +115,12 @@ namespace Explorer
             {
                 return CppIListToMono();
             }
+#else
+            return Value as IEnumerable;
+#endif
         }
 
+#if CPP
         private IEnumerable CppHashSetToMono()
         {
             var set = new HashSet<object>();
@@ -158,10 +162,11 @@ namespace Explorer
             }
             catch (Exception e)
             {
-                MelonLogger.Log("Exception converting Il2Cpp IList to Mono IList: " + e.GetType() + ", " + e.Message);
+                ExplorerCore.Log("Exception converting Il2Cpp IList to Mono IList: " + e.GetType() + ", " + e.Message);
                 return null;
             }
         }
+#endif
 
         private Type GetEntryType()
         {
@@ -226,6 +231,7 @@ namespace Explorer
 
                 if (obj != null && ReflectionHelpers.GetActualType(obj) is Type t)
                 {
+#if CPP
                     if (obj is Il2CppSystem.Object iObj)
                     {
                         try
@@ -238,6 +244,7 @@ namespace Explorer
                         }
                         catch { }
                     }
+#endif
 
                     if (GetCacheObject(obj, t) is CacheObjectBase cached)
                     {
@@ -263,7 +270,7 @@ namespace Explorer
         {
             if (m_cachedEntries == null)
             {
-                GUILayout.Label("m_cachedEntries is null!", null);
+                GUILayout.Label("m_cachedEntries is null!", new GUILayoutOption[0]);
                 return;
             }
 
@@ -290,7 +297,7 @@ namespace Explorer
 
             GUI.skin.button.alignment = TextAnchor.MiddleLeft;
             string btnLabel = $"[{count}] <color=#2df7b2>{EntryType.FullName}</color>";
-            if (GUILayout.Button(btnLabel, new GUILayoutOption[] { GUILayout.MaxWidth(negativeWhitespace) }))
+            if (GUILayout.Button(btnLabel, new GUILayoutOption[] { GUILayout.Width(negativeWhitespace) }))
             {
                 WindowManager.InspectObject(Value, out bool _);
             }
@@ -305,7 +312,7 @@ namespace Explorer
                 if (count > Pages.ItemsPerPage)
                 {
                     GUILayout.EndHorizontal();
-                    GUILayout.BeginHorizontal(null);
+                    GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 
                     GUIUnstrip.Space(whitespace);
                  
@@ -334,13 +341,13 @@ namespace Explorer
 
                     //collapsing the BeginHorizontal called from ReflectionWindow.WindowFunction or previous array entry
                     GUILayout.EndHorizontal();
-                    GUILayout.BeginHorizontal(null);
+                    GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 
                     GUIUnstrip.Space(whitespace);
 
                     if (entry == null || entry.Value == null)
                     {
-                        GUILayout.Label($"[{i}] <i><color=grey>(null)</color></i>", null);
+                        GUILayout.Label($"[{i}] <i><color=grey>(null)</color></i>", new GUILayoutOption[0]);
                     }
                     else
                     {

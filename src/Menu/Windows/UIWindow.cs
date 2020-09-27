@@ -42,7 +42,11 @@ namespace Explorer
 
         public void OnGUI()
         {
-            m_rect = GUI.Window(windowID, m_rect, (GUI.WindowFunction)WindowFunction, Title);
+#if CPP
+            m_rect = GUI.Window(windowID, m_rect, (GUI.WindowFunction)WindowFunction, GUIContent.Temp(Title), GUI.skin.window);
+#else
+            m_rect = GUI.Window(windowID, m_rect, WindowFunction, Title);
+#endif
         }
 
         public void Header()
@@ -50,8 +54,12 @@ namespace Explorer
             if (!WindowManager.TabView)
             {
                 GUI.DragWindow(new Rect(0, 0, m_rect.width - 90, 20));
-            
-                if (GUI.Button(new Rect(m_rect.width - 90, 2, 80, 20), "<color=red><b>X</b></color>"))
+
+#if CPP
+                if (GUI.Button(new Rect(m_rect.width - 90, 2, 80, 20), GUIContent.Temp("<color=red><b>X</b></color>"), GUI.skin.button))
+#else
+                if (GUI.Button(new Rect(m_rect.width - 90, 2, 80, 20), "<color=red><b>X</b></color>", GUI.skin.button))
+#endif
                 {
                     DestroyWindow();
                     return;

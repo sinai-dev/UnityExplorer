@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if CPP
+using System;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 
@@ -365,3 +366,4 @@ namespace Explorer
 
 	}
 }
+#endif

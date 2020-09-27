@@ -50,7 +50,7 @@ namespace Explorer
             try
             {
                 GUI.DragWindow(new Rect(0, 0, m_rect.width - 90, 20));
-                if (GUI.Button(new Rect(m_rect.width - 90, 2, 80, 20), "<color=red>Close All</color>"))
+                if (GUIUnstrip.Button(new Rect(m_rect.width - 90, 2, 80, 20), "<color=red>Close All</color>"))
                 {
                     foreach (var window in WindowManager.Windows)
                     {
@@ -61,8 +61,8 @@ namespace Explorer
 
                 GUIUnstrip.BeginArea(new Rect(5, 25, m_rect.width - 10, m_rect.height - 35), GUI.skin.box);
 
-                GUILayout.BeginVertical(GUI.skin.box, null);
-                GUILayout.BeginHorizontal(null);
+                GUILayout.BeginVertical(GUIContent.none, GUI.skin.box, null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUI.skin.button.alignment = TextAnchor.MiddleLeft;
                 int tabPerRow = Mathf.FloorToInt((float)((decimal)m_rect.width / 238));
                 int rowCount = 0;
@@ -72,7 +72,7 @@ namespace Explorer
                     {
                         rowCount = 0;
                         GUILayout.EndHorizontal();
-                        GUILayout.BeginHorizontal(null);
+                        GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                     }
                     rowCount++;
 

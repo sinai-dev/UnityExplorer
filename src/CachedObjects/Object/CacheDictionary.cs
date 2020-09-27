@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnhollowerBaseLib;
 using UnityEngine;
+#if CPP
+using UnhollowerBaseLib;
+#endif
 
 namespace Explorer
 {
@@ -51,8 +53,8 @@ namespace Explorer
             // note: "ValueType" is the Dictionary itself, TypeOfValues is the 'Dictionary.Values' type.
 
             // get keys and values
-            var keys   = ValueType.GetProperty("Keys")  .GetValue(Value);
-            var values = ValueType.GetProperty("Values").GetValue(Value);
+            var keys   = ValueType.GetProperty("Keys")  .GetValue(Value, null);
+            var values = ValueType.GetProperty("Values").GetValue(Value, null);
 
             // create lists to hold them
             var keyList   = new List<object>();
@@ -87,7 +89,7 @@ namespace Explorer
             // iterate
             while ((bool)moveNext.Invoke(enumerator, null))
             {
-                list.Add(current.GetValue(enumerator));
+                list.Add(current.GetValue(enumerator, null));
             }
         }
 
@@ -152,6 +154,7 @@ namespace Explorer
                 return true;
             }
 
+#if CPP
             try
             {
                 return Check(TypeOfKeys) && Check(TypeOfValues);
@@ -170,6 +173,9 @@ namespace Explorer
             { 
                 return false; 
             }
+#else
+            return false;
+#endif
         }
 
         // ============= GUI Draw =============
@@ -178,7 +184,7 @@ namespace Explorer
         {
             if (m_cachedKeys == null || m_cachedValues == null)
             {
-                GUILayout.Label("Cached keys or values is null!", null);
+                GUILayout.Label("Cached keys or values is null!", new GUILayoutOption[0]);
                 return;
             }
 
@@ -220,7 +226,7 @@ namespace Explorer
                 if (count > Pages.ItemsPerPage)
                 {
                     GUILayout.EndHorizontal();
-                    GUILayout.BeginHorizontal(null);
+                    GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 
                     GUIUnstrip.Space(whitespace);
 
@@ -250,13 +256,13 @@ namespace Explorer
 
                     //collapsing the BeginHorizontal called from ReflectionWindow.WindowFunction or previous array entry
                     GUILayout.EndHorizontal();
-                    GUILayout.BeginHorizontal(null);
+                    GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 
                     //GUIUnstrip.Space(whitespace);
 
                     if (key == null || val == null)
                     {
-                        GUILayout.Label($"[{i}] <i><color=grey>(null)</color></i>", null);
+                        GUILayout.Label($"[{i}] <i><color=grey>(null)</color></i>", new GUILayoutOption[0]);
                     }
                     else
                     {

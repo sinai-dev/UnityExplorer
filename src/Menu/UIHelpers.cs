@@ -56,13 +56,13 @@ namespace Explorer
 
             if (!obj)
             {
-                GUILayout.Label("<i><color=red>null</color></i>", null);
+                GUILayout.Label("<i><color=red>null</color></i>", new GUILayoutOption[0]);
                 return;
             }
 
             // ------ toggle active button ------
 
-            GUILayout.BeginHorizontal(null);
+            GUILayout.BeginHorizontal(new GUILayoutOption[0]);
             GUI.skin.button.alignment = TextAnchor.UpperLeft;
 
             GUI.color = activeColor;
@@ -102,7 +102,7 @@ namespace Explorer
 
         public static void SmallInspectButton(object obj)
         {
-            if (GUILayout.Button("Inspect", null))
+            if (GUILayout.Button("Inspect", new GUILayoutOption[0]))
             {
                 WindowManager.InspectObject(obj, out bool _);
             }

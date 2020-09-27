@@ -10,7 +10,7 @@ namespace Explorer
 
         public static void Update()
         {
-            if (CppExplorer.ShowMenu)
+            if (ExplorerCore.ShowMenu)
             {
                 if (InputHelper.GetKey(KeyCode.LeftShift) && InputHelper.GetMouseButtonDown(1))
                 {

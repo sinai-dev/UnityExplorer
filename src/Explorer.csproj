@@ -1,0 +1,301 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Explorer</RootNamespace>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+    <AssemblyName>Explorer</AssemblyName>
+    <IsCpp>true</IsCpp>
+    <IsMelonLoader>true</IsMelonLoader>
+    <IsNet35>false</IsNet35>
+    <!-- Set this to the MelonLoader Il2Cpp Game folder, without the ending '\' character. -->
+    <MLCppGameFolder>D:\Steam\steamapps\common\Hellpoint</MLCppGameFolder>
+
+    <!-- Set this to the MelonLoader Mono Game folder, without the ending '\' character. -->
+    <MLMonoGameFolder>D:\Steam\steamapps\common\Outward</MLMonoGameFolder>
+
+    <!-- Set this to the BepInEx Il2Cpp Game folder, without the ending '\' character. -->
+    <BIECppGameFolder>D:\Steam\steamapps\common\Outward - Il2Cpp</BIECppGameFolder>
+
+    <!-- Set this to the BepInEx Mono Game folder, without the ending '\' character. -->
+    <BIEMonoGameFolder>D:\Steam\steamapps\common\Outward</BIEMonoGameFolder>
+
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_ML_Cpp|AnyCPU' ">
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\Release\ML_Cpp\</OutputPath>
+    <DefineConstants>CPP,ML</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+    <IsCpp>true</IsCpp>
+    <IsMelonLoader>true</IsMelonLoader>
+    <IsNet35>false</IsNet35>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_ML_Mono|AnyCPU' ">
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\Release\ML_Mono\</OutputPath>
+    <DefineConstants>MONO,ML</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+    <IsCpp>false</IsCpp>
+    <IsMelonLoader>true</IsMelonLoader>
+    <IsNet35>false</IsNet35>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_ML_Mono_NET35|AnyCPU' ">
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\Release\ML_Mono_NET35\</OutputPath>
+    <DefineConstants>MONO,ML,NET35</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+    <IsCpp>false</IsCpp>
+    <IsMelonLoader>true</IsMelonLoader>
+    <IsNet35>true</IsNet35>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_BIE_Cpp|AnyCPU' ">
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\Release\BIE_Cpp\</OutputPath>
+    <DefineConstants>CPP,BIE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+    <IsCpp>true</IsCpp>
+    <IsMelonLoader>false</IsMelonLoader>
+    <IsNet35>false</IsNet35>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_BIE_Mono|AnyCPU' ">
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\Release\BIE_Mono\</OutputPath>
+    <DefineConstants>MONO,BIE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+    <IsCpp>false</IsCpp>
+    <IsMelonLoader>false</IsMelonLoader>
+    <IsNet35>false</IsNet35>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_BIE_Mono_NET35|AnyCPU' ">
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\Release\BIE_Mono_NET35\</OutputPath>
+    <DefineConstants>MONO,BIE,NET35</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+    <IsCpp>false</IsCpp>
+    <IsMelonLoader>false</IsMelonLoader>
+    <IsNet35>true</IsNet35>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <!-- MCS Ref -->
+    <Reference Include="mcs" Condition="'$(IsNet35)'=='false'">
+      <HintPath>..\lib\mcs.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="mcs" Condition="'$(IsNet35)'=='true'">
+      <HintPath>..\lib\mcs.NET35.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <!-- MelonLoader Il2Cpp core ref -->
+    <Reference Include="MelonLoader.ModHandler" Condition="'$(IsMelonLoader)|$(IsCpp)'=='true|true'">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\MelonLoader.ModHandler.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <!-- MelonLoader Mono core ref -->
+    <Reference Include="MelonLoader.ModHandler" Condition="'$(IsMelonLoader)|$(IsCpp)'=='true|false'">
+      <HintPath>$(MLMonoGameFolder)\MelonLoader\MelonLoader.ModHandler.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <!-- BepInEx Mono core ref -->
+    <Reference Include="BepInEx" Condition="'$(IsMelonLoader)|$(IsCpp)'=='false|false'">
+      <HintPath>$(BIEMonoGameFolder)\BepInEx\core\BepInEx.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="0Harmony" Condition="'$(IsMelonLoader)|$(IsCpp)'=='false|false'">
+      <HintPath>$(BIEMonoGameFolder)\BepInEx\core\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <!-- BepInEx Il2Cpp core ref -->
+    <Reference Include="BepInEx" Condition="'$(IsMelonLoader)|$(IsCpp)'=='false|true'">
+      <HintPath>$(BIECppGameFolder)\BepInEx\core\BepInEx.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="0Harmony" Condition="'$(IsMelonLoader)|$(IsCpp)'=='false|true'">
+      <HintPath>$(BIECppGameFolder)\BepInEx\core\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BepInEx.IL2CPP" Condition="'$(IsMelonLoader)|$(IsCpp)'=='false|true'">
+      <HintPath>$(BIECppGameFolder)\BepInEx\core\BepInEx.IL2CPP.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <!-- MONO UnityEngine.dll ref -->
+    <Reference Include="UnityEngine" Condition="'$(IsCpp)'=='false'">
+      <HintPath>..\lib\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <!-- MelonLoader Il2Cpp UnityEngine References -->
+    <Reference Include="UnhollowerBaseLib" Condition="'$(IsCpp)|$(IsMelonLoader)'=='true|true'">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnhollowerBaseLib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Il2Cppmscorlib" Condition="'$(IsCpp)|$(IsMelonLoader)'=='true|true'">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\Il2Cppmscorlib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Il2CppSystem.Core" Condition="'$(IsCpp)|$(IsMelonLoader)'=='true|true'">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\Il2CppSystem.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine" Condition="'$(IsCpp)|$(IsMelonLoader)'=='true|true'">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule" Condition="'$(IsCpp)|$(IsMelonLoader)'=='true|true'">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule" Condition="'$(IsCpp)|$(IsMelonLoader)'=='true|true'">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule" Condition="'$(IsCpp)|$(IsMelonLoader)'=='true|true'">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule" Condition="'$(IsCpp)|$(IsMelonLoader)'=='true|true'">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI" Condition="'$(IsCpp)|$(IsMelonLoader)'=='true|true'">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <!-- BepInEx Il2Cpp UnityEngine References -->
+    <Reference Include="UnhollowerBaseLib" Condition="'$(IsCpp)|$(IsMelonLoader)'=='true|false'">
+      <HintPath>$(BIECppGameFolder)\BepInEx\core\UnhollowerBaseLib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Il2Cppmscorlib" Condition="'$(IsCpp)|$(IsMelonLoader)'=='true|false'">
+      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\Il2Cppmscorlib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Il2CppSystem.Core" Condition="'$(IsCpp)|$(IsMelonLoader)'=='true|false'">
+      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\Il2CppSystem.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine" Condition="'$(IsCpp)|$(IsMelonLoader)'=='true|false'">
+      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule" Condition="'$(IsCpp)|$(IsMelonLoader)'=='true|false'">
+      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule" Condition="'$(IsCpp)|$(IsMelonLoader)'=='true|false'">
+      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule" Condition="'$(IsCpp)|$(IsMelonLoader)'=='true|false'">
+      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule" Condition="'$(IsCpp)|$(IsMelonLoader)'=='true|false'">
+      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI" Condition="'$(IsCpp)|$(IsMelonLoader)'=='true|false'">
+      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CachedObjects\IExpandHeight.cs" />
+    <Compile Include="CachedObjects\Struct\CacheColor.cs" />
+    <Compile Include="CachedObjects\Object\CacheDictionary.cs" />
+    <Compile Include="CachedObjects\Struct\CacheEnum.cs" />
+    <Compile Include="CachedObjects\Object\CacheGameObject.cs" />
+    <Compile Include="CachedObjects\Object\CacheList.cs" />
+    <Compile Include="CachedObjects\Struct\CacheEnumFlags.cs" />
+    <Compile Include="CachedObjects\Struct\CachePrimitive.cs" />
+    <Compile Include="CachedObjects\Other\CacheOther.cs" />
+    <Compile Include="CachedObjects\Other\CacheMethod.cs" />
+    <Compile Include="CachedObjects\Struct\CacheQuaternion.cs" />
+    <Compile Include="CachedObjects\Struct\CacheVector.cs" />
+    <Compile Include="CachedObjects\Struct\CacheRect.cs" />
+    <Compile Include="Config\ModConfig.cs" />
+    <Compile Include="ExplorerCore.cs" />
+    <Compile Include="Explorer_BepInPlugin.cs" />
+    <Compile Include="Explorer_MelonMod.cs" />
+    <Compile Include="Extensions\ReflectionExtensions.cs" />
+    <Compile Include="Helpers\InputHelper.cs" />
+    <Compile Include="Menu\CursorControl.cs" />
+    <Compile Include="Tests\TestClass.cs" />
+    <Compile Include="UnstripFixes\GUIUnstrip.cs" />
+    <Compile Include="UnstripFixes\LayoutUtilityUnstrip.cs" />
+    <Compile Include="UnstripFixes\ScrollViewStateUnstrip.cs" />
+    <Compile Include="Extensions\UnityExtensions.cs" />
+    <Compile Include="Helpers\PageHelper.cs" />
+    <Compile Include="Helpers\ReflectionHelpers.cs" />
+    <Compile Include="Menu\UIHelpers.cs" />
+    <Compile Include="Helpers\UnityHelpers.cs" />
+    <Compile Include="Menu\InspectUnderMouse.cs" />
+    <Compile Include="CachedObjects\CacheObjectBase.cs" />
+    <Compile Include="UnstripFixes\SliderHandlerUnstrip.cs" />
+    <Compile Include="UnstripFixes\UnstripExtensions.cs" />
+    <Compile Include="Menu\ResizeDrag.cs" />
+    <Compile Include="Menu\Windows\TabViewWindow.cs" />
+    <Compile Include="Menu\Windows\UIWindow.cs" />
+    <Compile Include="Menu\MainMenu\Pages\ConsolePage.cs" />
+    <Compile Include="Menu\MainMenu\Pages\Console\REPL.cs" />
+    <Compile Include="Menu\MainMenu\Pages\Console\REPLHelper.cs" />
+    <Compile Include="Menu\MainMenu\Pages\WindowPage.cs" />
+    <Compile Include="Menu\Windows\WindowManager.cs" />
+    <Compile Include="Menu\MainMenu\MainMenu.cs" />
+    <Compile Include="Menu\Windows\GameObjectWindow.cs" />
+    <Compile Include="Menu\Windows\ReflectionWindow.cs" />
+    <Compile Include="Menu\MainMenu\Pages\ScenePage.cs" />
+    <Compile Include="Menu\MainMenu\Pages\SearchPage.cs" />
+    <Compile Include="Menu\UIStyles.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

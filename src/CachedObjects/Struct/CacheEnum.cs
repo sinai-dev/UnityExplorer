@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Reflection;
-using MelonLoader;
 using UnityEngine;
 
 namespace Explorer
@@ -58,7 +56,7 @@ namespace Explorer
                 }
             }
 
-            GUILayout.Label(Value.ToString() + "<color=#2df7b2><i> (" + ValueType + ")</i></color>", null);
+            GUILayout.Label(Value.ToString() + "<color=#2df7b2><i> (" + ValueType + ")</i></color>", new GUILayoutOption[0]);
         }
 
         public void SetEnum(int change)

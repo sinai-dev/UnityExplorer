@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using MelonLoader;
 
 namespace Explorer
 {
@@ -36,11 +35,11 @@ namespace Explorer
         {
             if (index < 0 || Pages.Count <= index)
             {
-                MelonLogger.Log("cannot set page " + index);
+                ExplorerCore.Log("cannot set page " + index);
                 return;
             }
             m_currentPage = index;
-            GUI.BringWindowToFront(MainWindowID);
+            GUIUnstrip.BringWindowToFront(MainWindowID);
             GUI.FocusWindow(MainWindowID);
         }
 
@@ -51,16 +50,16 @@ namespace Explorer
 
         public void OnGUI()
         {
-            MainRect = GUI.Window(MainWindowID, MainRect, (GUI.WindowFunction)MainWindow, CppExplorer.NAME);
+            MainRect = GUIUnstrip.Window(MainWindowID, MainRect, (GUI.WindowFunction)MainWindow, ExplorerCore.NAME);
         }
 
         private void MainWindow(int id)
         {
             GUI.DragWindow(new Rect(0, 0, MainRect.width - 90, 20));
 
-            if (GUI.Button(new Rect(MainRect.width - 90, 2, 80, 20), $"Hide ({ModConfig.Instance.Main_Menu_Toggle})"))
+            if (GUIUnstrip.Button(new Rect(MainRect.width - 90, 2, 80, 20), $"Hide ({ModConfig.Instance.Main_Menu_Toggle})"))
             {
-                CppExplorer.ShowMenu = false;
+                ExplorerCore.ShowMenu = false;
                 return;
             }
 
@@ -83,7 +82,7 @@ namespace Explorer
 
         private void MainHeader()
         {
-            GUILayout.BeginHorizontal(null);
+            GUILayout.BeginHorizontal(new GUILayoutOption[0]);
             for (int i = 0; i < Pages.Count; i++)
             {
                 if (m_currentPage == i)
@@ -91,22 +90,22 @@ namespace Explorer
                 else
                     GUI.color = Color.white;
 
-                if (GUILayout.Button(Pages[i].Name, null))
+                if (GUILayout.Button(Pages[i].Name, new GUILayoutOption[0]))
                 {
                     m_currentPage = i;
                 }
             }
             GUILayout.EndHorizontal();
 
-            GUILayout.BeginHorizontal(null);
+            GUILayout.BeginHorizontal(new GUILayoutOption[0]);
             GUI.color = Color.white;
-            InspectUnderMouse.EnableInspect = GUILayout.Toggle(InspectUnderMouse.EnableInspect, "Inspect Under Mouse (Shift + RMB)", null);
+            InspectUnderMouse.EnableInspect = GUILayout.Toggle(InspectUnderMouse.EnableInspect, "Inspect Under Mouse (Shift + RMB)", new GUILayoutOption[0]);
 
             bool mouseState = CursorControl.ForceUnlockMouse;
-            bool setMouse = GUILayout.Toggle(mouseState, "Force Unlock Mouse (Left Alt)", null);
+            bool setMouse = GUILayout.Toggle(mouseState, "Force Unlock Mouse (Left Alt)", new GUILayoutOption[0]);
             if (setMouse != mouseState) CursorControl.ForceUnlockMouse = setMouse;
 
-            WindowManager.TabView = GUILayout.Toggle(WindowManager.TabView, "Tab View", null);
+            WindowManager.TabView = GUILayout.Toggle(WindowManager.TabView, "Tab View", new GUILayoutOption[0]);
             GUILayout.EndHorizontal();
 
             //GUIUnstrip.Space(10);

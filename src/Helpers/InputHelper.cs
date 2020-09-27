@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reflection;
-using MelonLoader;
 using UnityEngine;
 
 namespace Explorer
@@ -48,7 +47,7 @@ namespace Explorer
             get
             {
                 if (NO_INPUT) return Vector3.zero;
-                return (Vector3)_mousePosition.GetValue(null);
+                return (Vector3)_mousePosition.GetValue(null, null);
             }
         }
 #pragma warning restore IDE1006
@@ -81,17 +80,17 @@ namespace Explorer
 
         private static bool TryManuallyLoadInput()
         {
-            MelonLogger.Log("UnityEngine.Input is null, trying to load manually....");
+            ExplorerCore.Log("UnityEngine.Input is null, trying to load manually....");
 
             if ((ReflectionHelpers.LoadModule("UnityEngine.InputLegacyModule.dll") || ReflectionHelpers.LoadModule("UnityEngine.CoreModule.dll")) 
                 && Input != null)
             {
-                MelonLogger.Log("Ok!");
+                ExplorerCore.Log("Ok!");
                 return true;
             }
             else
             {
-                MelonLogger.Log("Could not load Input module!");
+                ExplorerCore.Log("Could not load Input module!");
                 return false;
             }
         }

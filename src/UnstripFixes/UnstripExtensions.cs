@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if CPP
+using UnityEngine;
 
 namespace Explorer
 {
@@ -20,3 +21,4 @@ namespace Explorer
         }
     }
 }
+#endif

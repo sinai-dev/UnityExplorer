@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using MelonLoader;
-using UnhollowerBaseLib;
 using UnityEngine;
+#if CPP
+using UnhollowerBaseLib;
+#endif
 
 namespace Explorer
 {
@@ -52,6 +53,7 @@ namespace Explorer
             CacheMembers(ReflectionHelpers.GetAllBaseTypes(Target));
 
             // cache the extra cast-caching
+#if CPP
             if (Target is Il2CppSystem.Object ilObject)
             {
                 var unityObj = ilObject.TryCast<UnityEngine.Object>();
@@ -66,6 +68,10 @@ namespace Explorer
                     }
                 }
             }
+#else
+            m_uObj = Target as UnityEngine.Object;
+            m_component = Target as Component;
+#endif
         }
 
         public override void Update()
@@ -134,13 +140,14 @@ namespace Explorer
                 }
                 catch 
                 {
-                    MelonLogger.Log($"Exception getting members for type: {declaringType.FullName}");
+                    ExplorerCore.Log($"Exception getting members for type: {declaringType.FullName}");
                     continue;
                 }
 
                 object target = Target;
                 string exception = null;
 
+#if CPP
                 if (target is Il2CppSystem.Object ilObject)
                 {
                     try
@@ -152,6 +159,7 @@ namespace Explorer
                         exception = ReflectionHelpers.ExceptionToString(e);
                     }
                 }
+#endif
 
                 foreach (var member in infos)
                 {
@@ -192,7 +200,7 @@ namespace Explorer
                         continue;
                     }
 
-                    // MelonLogger.Log($"Trying to cache member {signature}...");
+                    // ExplorerCore.Log($"Trying to cache member {signature}...");
 
                     try
                     {
@@ -206,8 +214,8 @@ namespace Explorer
                     }
                     catch (Exception e)
                     {
-                        MelonLogger.LogWarning($"Exception caching member {sig}!");
-                        MelonLogger.Log(e.ToString());
+                        ExplorerCore.LogWarning($"Exception caching member {sig}!");
+                        ExplorerCore.Log(e.ToString());
                     }
                 }
             }
@@ -231,17 +239,17 @@ namespace Explorer
                     GUIUnstrip.BeginArea(new Rect(5, 25, rect.width - 10, rect.height - 35), GUI.skin.box);
                 }
 
-                GUILayout.BeginHorizontal(null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUILayout.Label("<b>Type:</b> <color=cyan>" + TargetType.FullName + "</color>", new GUILayoutOption[] { GUILayout.Width(245f) });
                 if (m_uObj)
                 {
-                    GUILayout.Label("Name: " + m_uObj.name, null);
+                    GUILayout.Label("Name: " + m_uObj.name, new GUILayoutOption[0]);
                 }
                 GUILayout.EndHorizontal();
 
                 if (m_uObj)
                 {
-                    GUILayout.BeginHorizontal(null);
+                    GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                     GUILayout.Label("<b>Tools:</b>", new GUILayoutOption[] { GUILayout.Width(80) });
                     UIHelpers.InstantiateButton(m_uObj);
                     if (m_component && m_component.gameObject is GameObject obj)
@@ -262,12 +270,12 @@ namespace Explorer
 
                 UIStyles.HorizontalLine(Color.grey);
 
-                GUILayout.BeginHorizontal(null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUILayout.Label("<b>Search:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
-                m_search = GUILayout.TextField(m_search, null);                
+                m_search = GUILayout.TextField(m_search, new GUILayoutOption[0]);                
                 GUILayout.EndHorizontal();
 
-                GUILayout.BeginHorizontal(null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUILayout.Label("<b>Filter:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
                 FilterToggle(MemberTypes.All, "All");
                 FilterToggle(MemberTypes.Property, "Properties");
@@ -275,7 +283,7 @@ namespace Explorer
                 FilterToggle(MemberTypes.Method, "Methods");
                 GUILayout.EndHorizontal();
 
-                GUILayout.BeginHorizontal(null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUILayout.Label("<b>Values:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
                 if (GUILayout.Button("Update", new GUILayoutOption[] { GUILayout.Width(100) }))
                 {
@@ -293,7 +301,7 @@ namespace Explorer
                 Pages.ItemCount = m_cachedMembersFiltered.Length;
 
                 // prev/next page buttons
-                GUILayout.BeginHorizontal(null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 
                 Pages.DrawLimitInputArea();
 
@@ -321,7 +329,7 @@ namespace Explorer
 
                 UIStyles.HorizontalLine(Color.grey);
 
-                GUILayout.BeginVertical(GUI.skin.box, null);
+                GUILayout.BeginVertical(GUIContent.none, GUI.skin.box, null);
 
                 var members = this.m_cachedMembersFiltered;
                 int start = Pages.CalculateOffsetIndex();
@@ -357,16 +365,13 @@ namespace Explorer
                     GUIUnstrip.EndArea();
                 }
             }
-            catch (Il2CppException e)
+            catch (Exception e) when (e.Message.Contains("in a group with only"))
             {
-                if (!e.Message.Contains("in a group with only"))
-                {
-                    throw;
-                }
+                // suppress
             }
             catch (Exception e)
             {
-                MelonLogger.LogWarning("Exception drawing ReflectionWindow: " + e.GetType() + ", " + e.Message);
+                ExplorerCore.LogWarning("Exception drawing ReflectionWindow: " + e.GetType() + ", " + e.Message);
                 DestroyWindow();
                 return;
             }

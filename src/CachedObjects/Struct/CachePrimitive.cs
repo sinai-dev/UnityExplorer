@@ -2,8 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using MelonLoader;
+#if CPP
 using UnhollowerRuntimeLib;
+#endif
 using UnityEngine;
 
 namespace Explorer
@@ -77,7 +78,7 @@ namespace Explorer
 
                 if (CanWrite)
                 {
-                    b = GUILayout.Toggle(b, label, null);
+                    b = GUILayout.Toggle(b, label, new GUILayoutOption[0]);
                     if (b != (bool)Value)
                     {
                         SetValueFromInput(b.ToString());
@@ -85,7 +86,7 @@ namespace Explorer
                 }
                 else
                 {
-                    GUILayout.Label(label, null);
+                    GUILayout.Label(label, new GUILayoutOption[0]);
                 }
 
                 return;
@@ -93,9 +94,9 @@ namespace Explorer
 
             // all other non-bool values use TextField
 
-            GUILayout.BeginVertical(null);
+            GUILayout.BeginVertical(new GUILayoutOption[0]);
 
-            GUILayout.BeginHorizontal(null);
+            GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 
             // using ValueType.Name instead of ValueTypeName, because we only want the short name.
             GUILayout.Label("<color=#2df7b2><i>" + ValueType.Name + "</i></color>", new GUILayoutOption[] { GUILayout.Width(50) });
@@ -106,11 +107,11 @@ namespace Explorer
 
             if (dynSize > maxwidth)
             {
-                m_valueToString = GUILayout.TextArea(m_valueToString, new GUILayoutOption[] { GUILayout.MaxWidth(maxwidth) });
+                m_valueToString = GUIUnstrip.TextArea(m_valueToString, new GUILayoutOption[] { GUILayout.Width(maxwidth) });
             }
             else
             {
-                m_valueToString = GUILayout.TextField(m_valueToString, new GUILayoutOption[] { GUILayout.MaxWidth(dynSize) });
+                m_valueToString = GUILayout.TextField(m_valueToString, new GUILayoutOption[] { GUILayout.Width(dynSize) });
             }
 
             if (CanWrite)
@@ -125,7 +126,7 @@ namespace Explorer
             if (m_canBitwiseOperate)
             {
                 bool orig = m_inBitwiseMode;
-                m_inBitwiseMode = GUILayout.Toggle(m_inBitwiseMode, "Bitwise?", null);
+                m_inBitwiseMode = GUILayout.Toggle(m_inBitwiseMode, "Bitwise?", new GUILayoutOption[0]);
                 if (orig != m_inBitwiseMode)
                 {
                     RefreshToString();
@@ -140,7 +141,7 @@ namespace Explorer
             {
                 if (CanWrite)
                 {
-                    GUILayout.BeginHorizontal(null);
+                    GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 
                     GUI.skin.label.alignment = TextAnchor.MiddleRight;
                     GUILayout.Label("RHS:", new GUILayoutOption[] { GUILayout.Width(35) });
@@ -201,9 +202,9 @@ namespace Explorer
                     GUILayout.EndHorizontal();
                 }
 
-                GUILayout.BeginHorizontal(null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUILayout.Label($"<color=cyan>Binary:</color>", new GUILayoutOption[] { GUILayout.Width(60) });
-                GUILayout.TextField(m_bitwiseToString, null);
+                GUILayout.TextField(m_bitwiseToString, new GUILayoutOption[0]);
                 GUILayout.EndHorizontal();
             }
 
@@ -214,7 +215,7 @@ namespace Explorer
         {
             if (MemInfo == null)
             {
-                MelonLogger.Log("Trying to SetValue but the MemberInfo is null!");
+                ExplorerCore.Log("Trying to SetValue but the MemberInfo is null!");
                 return;
             }
 
@@ -240,7 +241,7 @@ namespace Explorer
                 }
                 catch (Exception e)
                 {
-                    MelonLogger.Log("Exception parsing value: " + e.GetType() + ", " + e.Message);
+                    ExplorerCore.Log("Exception parsing value: " + e.GetType() + ", " + e.Message);
                 }
             }
 

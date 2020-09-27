@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Reflection;
 using UnityEngine;
 
@@ -90,7 +89,7 @@ namespace Explorer
                 }
             }
 
-            GUILayout.Label($"<color=#2df7b2>Vector{VectorSize}</color>: {(string)m_toStringMethod.Invoke(Value, new object[0])}", null);            
+            GUILayout.Label($"<color=#2df7b2>Vector{VectorSize}</color>: {(string)m_toStringMethod.Invoke(Value, new object[0])}", new GUILayoutOption[0]);            
 
             if (CanWrite && IsExpanded)
             {
@@ -99,13 +98,13 @@ namespace Explorer
                 var whitespace = CalcWhitespace(window);
 
                 // always draw x and y
-                GUILayout.BeginHorizontal(null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUIUnstrip.Space(whitespace);
                 GUILayout.Label("X:", new GUILayoutOption[] { GUILayout.Width(30) });
                 x = GUILayout.TextField(x, new GUILayoutOption[] { GUILayout.Width(120) });
                 GUILayout.EndHorizontal();
 
-                GUILayout.BeginHorizontal(null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUIUnstrip.Space(whitespace);
                 GUILayout.Label("Y:", new GUILayoutOption[] { GUILayout.Width(30) });
                 y = GUILayout.TextField(y, new GUILayoutOption[] { GUILayout.Width(120) });
@@ -114,7 +113,7 @@ namespace Explorer
                 if (VectorSize > 2)
                 {
                     // draw z
-                    GUILayout.BeginHorizontal(null);
+                    GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                     GUIUnstrip.Space(whitespace);
                     GUILayout.Label("Z:", new GUILayoutOption[] { GUILayout.Width(30) });
                     z = GUILayout.TextField(z, new GUILayoutOption[] { GUILayout.Width(120) });
@@ -123,7 +122,7 @@ namespace Explorer
                 if (VectorSize > 3)
                 {
                     // draw w
-                    GUILayout.BeginHorizontal(null);
+                    GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                     GUIUnstrip.Space(whitespace);
                     GUILayout.Label("W:", new GUILayoutOption[] { GUILayout.Width(30) });
                     w = GUILayout.TextField(w, new GUILayoutOption[] { GUILayout.Width(120) });
@@ -131,7 +130,7 @@ namespace Explorer
                 }
 
                 // draw set value button
-                GUILayout.BeginHorizontal(null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUIUnstrip.Space(whitespace);
                 if (GUILayout.Button("<color=lime>Apply</color>", new GUILayoutOption[] { GUILayout.Width(155) }))
                 {
@@ -139,7 +138,7 @@ namespace Explorer
                 }
                 GUILayout.EndHorizontal();
 
-                GUILayout.BeginHorizontal(null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
             }
         }
 

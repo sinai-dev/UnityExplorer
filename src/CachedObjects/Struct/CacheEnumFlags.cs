@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using MelonLoader;
 using UnityEngine;
 
 namespace Explorer
@@ -69,7 +67,7 @@ namespace Explorer
             }
             catch (Exception e)
             {
-                MelonLogger.Log(e.ToString());
+                ExplorerCore.Log(e.ToString());
             }
         }
 
@@ -94,7 +92,7 @@ namespace Explorer
                 }
             }
 
-            GUILayout.Label(Value.ToString() + "<color=#2df7b2><i> (" + ValueType + ")</i></color>", null);
+            GUILayout.Label(Value.ToString() + "<color=#2df7b2><i> (" + ValueType + ")</i></color>", new GUILayoutOption[0]);
 
             if (IsExpanded)
             {
@@ -104,15 +102,15 @@ namespace Explorer
 
                 for (int i = 0; i < EnumNames.Length; i++)
                 {
-                    GUILayout.BeginHorizontal(null);
+                    GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                     GUIUnstrip.Space(whitespace);
 
-                    m_enabledFlags[i] = GUILayout.Toggle(m_enabledFlags[i], EnumNames[i], null);
+                    m_enabledFlags[i] = GUILayout.Toggle(m_enabledFlags[i], EnumNames[i], new GUILayoutOption[0]);
 
                     GUILayout.EndHorizontal();
                 }
 
-                GUILayout.BeginHorizontal(null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUIUnstrip.Space(whitespace);
                 if (GUILayout.Button("<color=lime>Apply</color>", new GUILayoutOption[] { GUILayout.Width(155) }))
                 {
@@ -120,7 +118,7 @@ namespace Explorer
                 }
                 GUILayout.EndHorizontal();
 
-                GUILayout.BeginHorizontal(null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
             }
         }
     }

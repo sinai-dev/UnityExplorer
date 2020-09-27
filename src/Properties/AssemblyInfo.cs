@@ -2,19 +2,22 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Explorer;
+
+#if ML
 using MelonLoader;
 
-[assembly: MelonInfo(typeof(CppExplorer), CppExplorer.NAME, CppExplorer.VERSION, CppExplorer.AUTHOR)]
+[assembly: MelonInfo(typeof(Explorer_MelonMod), ExplorerCore.NAME, ExplorerCore.VERSION, ExplorerCore.AUTHOR)]
 [assembly: MelonGame(null, null)]
+#endif
 
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle(CppExplorer.NAME)]
+[assembly: AssemblyTitle(ExplorerCore.NAME)]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany(CppExplorer.AUTHOR)]
-[assembly: AssemblyProduct(CppExplorer.NAME)]
+[assembly: AssemblyCompany(ExplorerCore.AUTHOR)]
+[assembly: AssemblyProduct(ExplorerCore.NAME)]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

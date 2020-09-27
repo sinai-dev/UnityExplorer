@@ -4,6 +4,7 @@ namespace Explorer
 {
     public class LayoutUtilityUnstrip
     {
+#if CPP
         public static Rect GetRect(float width, float height) { return DoGetRect(width, width, height, height, GUIStyle.none, null); }
         public static Rect GetRect(float width, float height, GUIStyle style) { return DoGetRect(width, width, height, height, style, null); }
         public static Rect GetRect(float width, float height, params GUILayoutOption[] options) { return DoGetRect(width, width, height, height, GUIStyle.none, options); }
@@ -102,6 +103,12 @@ namespace Explorer
                 last = GUILayoutUtility.kDummyRect;
             }
             return last;
+        }    
+#else
+        public static Rect GetLastRect()
+        {
+            return GUILayoutUtility.GetLastRect();
         }
+#endif
     }
 }

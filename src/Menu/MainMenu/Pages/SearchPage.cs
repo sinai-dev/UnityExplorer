@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using MelonLoader;
 using UnityEngine;
 
 namespace Explorer
@@ -65,10 +64,17 @@ namespace Explorer
             {
                 var toCache = obj;
 
+#if CPP
                 if (toCache is Il2CppSystem.Object ilObject)
                 {
                     toCache = ilObject.TryCast<GameObject>() ?? ilObject.TryCast<Transform>()?.gameObject ?? ilObject;
                 }
+#else
+                if (toCache is GameObject || toCache is Transform)
+                {
+                    toCache = toCache as GameObject ?? (toCache as Transform).gameObject;
+                }
+#endif
 
                 var cache = CacheObjectBase.GetCacheObject(toCache);
                 m_searchResults.Add(cache);
@@ -83,7 +89,7 @@ namespace Explorer
             try
             {
                 // helpers
-                GUILayout.BeginHorizontal(GUI.skin.box, null);
+                GUILayout.BeginHorizontal(GUIContent.none, GUI.skin.box, null);
                 GUILayout.Label("<b><color=orange>Helpers</color></b>", new GUILayoutOption[] { GUILayout.Width(70) });
                 if (GUILayout.Button("Find Static Instances", new GUILayoutOption[] { GUILayout.Width(180) }))
                 {
@@ -96,15 +102,15 @@ namespace Explorer
                 SearchBox();
 
                 // results
-                GUILayout.BeginVertical(GUI.skin.box, null);
+                GUILayout.BeginVertical(GUIContent.none, GUI.skin.box, null);
 
                 GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-                GUILayout.Label("<b><color=orange>Results </color></b>" + " (" + m_searchResults.Count + ")", null);
+                GUILayout.Label("<b><color=orange>Results </color></b>" + " (" + m_searchResults.Count + ")", new GUILayoutOption[0]);
                 GUI.skin.label.alignment = TextAnchor.UpperLeft;
 
                 int count = m_searchResults.Count;
 
-                GUILayout.BeginHorizontal(null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 
                 Pages.DrawLimitInputArea();
 
@@ -145,7 +151,7 @@ namespace Explorer
                 }
                 else
                 {
-                    GUILayout.Label("<color=red><i>No results found!</i></color>", null);
+                    GUILayout.Label("<color=red><i>No results found!</i></color>", new GUILayoutOption[0]);
                 }
 
                 GUIUnstrip.EndScrollView();
@@ -159,21 +165,21 @@ namespace Explorer
 
         private void SearchBox()
         {
-            GUILayout.BeginVertical(GUI.skin.box, null);
+            GUILayout.BeginVertical(GUIContent.none, GUI.skin.box, null);
 
             // ----- GameObject Search -----
             GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-            GUILayout.Label("<b><color=orange>Search</color></b>", null);
+            GUILayout.Label("<b><color=orange>Search</color></b>", new GUILayoutOption[0]);
             GUI.skin.label.alignment = TextAnchor.UpperLeft;
 
-            GUILayout.BeginHorizontal(null);
+            GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 
             GUILayout.Label("Name Contains:", new GUILayoutOption[] { GUILayout.Width(100) });
             m_searchInput = GUILayout.TextField(m_searchInput, new GUILayoutOption[] { GUILayout.Width(200) });
 
             GUILayout.EndHorizontal();
 
-            GUILayout.BeginHorizontal(null);
+            GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 
             GUILayout.Label("Class Filter:", new GUILayoutOption[] { GUILayout.Width(100) });
             ClassFilterToggle(TypeFilter.Object, "Object");
@@ -183,7 +189,7 @@ namespace Explorer
             GUILayout.EndHorizontal();
             if (TypeMode == TypeFilter.Custom)
             {
-                GUILayout.BeginHorizontal(null);
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUI.skin.label.alignment = TextAnchor.MiddleRight;
                 GUILayout.Label("Custom Class:", new GUILayoutOption[] {  GUILayout.Width(250) });
                 GUI.skin.label.alignment = TextAnchor.UpperLeft;
@@ -191,7 +197,7 @@ namespace Explorer
                 GUILayout.EndHorizontal();
             }
 
-            GUILayout.BeginHorizontal(null);
+            GUILayout.BeginHorizontal(new GUILayoutOption[0]);
             GUILayout.Label("Scene Filter:", new GUILayoutOption[] {  GUILayout.Width(100) });
             SceneFilterToggle(SceneFilter.Any, "Any", 60);
             SceneFilterToggle(SceneFilter.This, "This Scene", 100);
@@ -199,7 +205,7 @@ namespace Explorer
             SceneFilterToggle(SceneFilter.None, "No Scene", 80);
             GUILayout.EndHorizontal();
 
-            if (GUILayout.Button("<b><color=cyan>Search</color></b>", null))
+            if (GUILayout.Button("<b><color=cyan>Search</color></b>", new GUILayoutOption[0]))
             {
                 Search();
             }
@@ -254,15 +260,23 @@ namespace Explorer
 
         private List<object> FindAllObjectsOfType(string searchQuery, string typeName)
         {
+#if CPP
             Il2CppSystem.Type searchType = null;
 
+#else
+            Type searchType = null;
+#endif
             if (TypeMode == TypeFilter.Custom)
             {
                 try
                 {
                     if (ReflectionHelpers.GetTypeByName(typeName) is Type t)
                     {
+#if CPP
                         searchType = Il2CppSystem.Type.GetType(t.AssemblyQualifiedName);
+#else
+                        searchType = t;
+#endif
                     }
                     else
                     {
@@ -271,7 +285,7 @@ namespace Explorer
                 }
                 catch (Exception e)
                 {
-                    MelonLogger.Log("Exception getting Search Type: " + e.GetType() + ", " + e.Message);
+                    ExplorerCore.Log("Exception getting Search Type: " + e.GetType() + ", " + e.Message);
                 }
             }
             else if (TypeMode == TypeFilter.Object)
@@ -291,7 +305,7 @@ namespace Explorer
             {
                 if (searchType != null)
                 {
-                    MelonLogger.LogWarning("Your Custom Class Type must inherit from UnityEngine.Object!");
+                    ExplorerCore.LogWarning("Your Custom Class Type must inherit from UnityEngine.Object!");
                 }
                 return new List<object>();
             }
@@ -300,7 +314,7 @@ namespace Explorer
 
             var allObjectsOfType = Resources.FindObjectsOfTypeAll(searchType);
 
-            //MelonLogger.Log("Found count: " + allObjectsOfType.Length);
+            //ExplorerCore.Log("Found count: " + allObjectsOfType.Length);
 
             int i = 0;
             foreach (var obj in allObjectsOfType)
@@ -313,7 +327,11 @@ namespace Explorer
                 }
 
                 if (searchType.FullName == ReflectionHelpers.ComponentType.FullName
+#if CPP
                     && ReflectionHelpers.TransformType.IsAssignableFrom(obj.GetIl2CppType()))
+#else
+                    && ReflectionHelpers.TransformType.IsAssignableFrom(obj.GetType()))
+#endif
                 {
                     // Transforms shouldn't really be counted as Components, skip them.
                     // They're more akin to GameObjects.
@@ -338,15 +356,18 @@ namespace Explorer
 
         public static bool FilterScene(object obj, SceneFilter filter)
         {
-            GameObject go;
+            GameObject go = null;
+#if CPP
             if (obj is Il2CppSystem.Object ilObject)
             {
                 go = ilObject.TryCast<GameObject>() ?? ilObject.TryCast<Component>().gameObject;                
             }
-            else
+#else
+            if (obj is GameObject || obj is Component)
             {
                 go = (obj as GameObject) ?? (obj as Component).gameObject;                
             }
+#endif
 
             if (!go)
             {
@@ -404,7 +425,7 @@ namespace Explorer
 
                     if (pi != null)
                     {
-                        obj = pi.GetValue(null);
+                        obj = pi.GetValue(null, null);
                     }
                     else
                     {

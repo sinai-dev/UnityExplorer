@@ -8,7 +8,7 @@ namespace Explorer
     {
         [XmlIgnore] public static readonly XmlSerializer Serializer = new XmlSerializer(typeof(ModConfig));
 
-        [XmlIgnore] private const string EXPLORER_FOLDER = @"Mods\CppExplorer";
+        [XmlIgnore] private const string EXPLORER_FOLDER = @"Mods\Explorer";
         [XmlIgnore] private const string SETTINGS_PATH = EXPLORER_FOLDER + @"\config.xml";
 
         [XmlIgnore] public static ModConfig Instance;

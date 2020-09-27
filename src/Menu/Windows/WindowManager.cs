@@ -85,12 +85,16 @@ namespace Explorer
             {
                 forceReflection = true;
             }
-            
+
+#if CPP
             Il2CppSystem.Object iObj = null;
             if (obj is Il2CppSystem.Object isObj)
             {
                 iObj = isObj;
             }
+#else
+            var iObj = obj;
+#endif
 
             if (!forceReflection)
             {
@@ -98,6 +102,7 @@ namespace Explorer
                 {
                     bool equals = ReferenceEquals(obj, window.Target);
 
+#if CPP
                     if (!equals && iObj is Il2CppSystem.Object iCurrent && window.Target is Il2CppSystem.Object iTarget)
                     {
                         if (iCurrent.GetIl2CppType().FullName != iTarget.GetIl2CppType().FullName)
@@ -110,6 +115,7 @@ namespace Explorer
 
                         equals = iCurrent.Pointer == iTarget.Pointer;
                     }
+#endif
 
                     if (equals)
                     {
@@ -134,7 +140,7 @@ namespace Explorer
         {
             if (!TabView)
             {
-                GUI.BringWindowToFront(window.windowID);
+                GUIUnstrip.BringWindowToFront(window.windowID);
                 GUI.FocusWindow(window.windowID);
             }
             else
@@ -165,7 +171,7 @@ namespace Explorer
         {
             get
             {
-                if (!CppExplorer.ShowMenu)
+                if (!ExplorerCore.ShowMenu)
                 {
                     return false;
                 }

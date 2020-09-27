@@ -4,7 +4,6 @@ using System;
 using UnityEngine;
 using System.Reflection;
 using System.Collections.Specialized;
-using MelonLoader;
 
 // used to test multiple generic constraints
 public class TestGeneric : IComparable<string>
@@ -44,12 +43,18 @@ namespace Explorer.Tests
         public static TestClass Instance => m_instance ?? (m_instance = new TestClass());
         private static TestClass m_instance;
 
+#if CPP
+        public static Il2CppSystem.Collections.Generic.HashSet<string> ILHashSetTest;
+#endif
+
         public TestClass()
         {
+#if CPP
             ILHashSetTest = new Il2CppSystem.Collections.Generic.HashSet<string>();
             ILHashSetTest.Add("1");
             ILHashSetTest.Add("2");
             ILHashSetTest.Add("3");
+#endif
 
             testBitmask = 1 | 2;
         }
@@ -109,7 +114,6 @@ namespace Explorer.Tests
             "Three"
         };
 
-        public static Il2CppSystem.Collections.Generic.HashSet<string> ILHashSetTest;
 
         // Test indexed parameter
 
