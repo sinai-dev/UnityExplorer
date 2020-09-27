@@ -49,7 +49,7 @@ Requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be ins
 Requires [BepInEx](https://github.com/BepInEx/BepInEx) to be installed for your game.
 
 1. Download the relevant <b>Explorer_BepInEx_.zip</b> from [Releases](https://github.com/sinai-dev/Explorer/releases).
-2. Unzip the file into the `BepInEx\plugins\` folder in your game's installation directory, created by MelonLoader.
+2. Unzip the file into the `BepInEx\plugins\` folder in your game's installation directory, created by BepInEx.
 3. Make sure it's not in a sub-folder, `Explorer.dll` and `mcs.dll` should be directly in the `plugins\` folder.
 
 ## How to use
