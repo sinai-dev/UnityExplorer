@@ -1,7 +1,5 @@
 # Explorer 
 
-[![Version](https://img.shields.io/badge/MelonLoader-0.2.7.1-green.svg)](https://github.com/HerpDerpinstine/MelonLoader) [![Version](https://img.shields.io/badge/BepInEx-5.3.0-green.svg)](https://github.com/BepInEx/BepInEx)
-
 <p align="center">
   <img align="center" src="icon.png">
 </p>
@@ -27,10 +25,10 @@
 
 ## Current status
 
-| Mod Loader  | Il2Cpp | Mono |
-| ----------- | ------ | ---- |
-| MelonLoader | ✔ | ✔ |
-| BepInEx     | <b>?</b> (WIP) | ✔ |
+| Mod Loader  | Il2Cpp | Mono | Mono (.NET 3.5) |
+| ----------- | ------ | ---- | ---- |
+| [![Version](https://img.shields.io/badge/MelonLoader-0.2.7.1-green.svg)](https://github.com/HerpDerpinstine/MelonLoader) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.MelonLoader.Il2Cpp.zip) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.MelonLoader.Mono.zip) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.MelonLoader.Mono.NET35.zip) |
+|  [![Version](https://img.shields.io/badge/BepInEx-5.3.0-green.svg)](https://github.com/BepInEx/BepInEx) | ❔ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.BepInEx.Il2Cpp.zip) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.BepInEx.Mono.zip) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.BepInEx.Mono.NET35.zip) |
 
 <b>IL2CPP Issues:</b>
 * .NET 3.5 is not currently supported (Unity 5.6.1 and older), this might change in the future.
@@ -43,14 +41,14 @@
 ### MelonLoader
 Requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be installed for your game.
 
-1. Download the relevant <b>Explorer_MelonLoader_.zip</b> from [Releases](https://github.com/sinai-dev/Explorer/releases).
+1. Download the relevant <b>Explorer_MelonLoader_.zip</b> from above.
 2. Unzip the file into the `Mods` folder in your game's installation directory, created by MelonLoader.
 3. Make sure it's not in a sub-folder, `Explorer.dll` and `mcs.dll` should be directly in the `Mods\` folder.
 
 ### BepInEx
 Requires [BepInEx](https://github.com/BepInEx/BepInEx) to be installed for your game.
 
-1. Download the relevant <b>Explorer_BepInEx_.zip</b> from [Releases](https://github.com/sinai-dev/Explorer/releases).
+1. Download the relevant <b>Explorer_BepInEx_.zip</b> from above.
 2. Unzip the file into the `BepInEx\plugins\` folder in your game's installation directory, created by BepInEx.
 3. Make sure it's not in a sub-folder, `Explorer.dll` and `mcs.dll` should be directly in the `plugins\` folder.
 
@@ -132,7 +130,7 @@ Explorer can force the mouse to be visible and unlocked when the menu is open, i
 For example:
 ```csharp
 using Explorer;
-using Harmony;
+using Harmony; // or 'using HarmonyLib;' for BepInEx
 // ...
 [HarmonyPatch(typeof(MyGame.MenuClass), nameof(MyGame.MenuClass.CursorUpdate)]
 public class MenuClass_CursorUpdate 
