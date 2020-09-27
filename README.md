@@ -1,4 +1,4 @@
-# Explorer [![Version](https://img.shields.io/badge/MelonLoader-0.2.7.1-green.svg)](https://github.com/HerpDerpinstine/MelonLoader) [![Version](https://img.shields.io/badge/BepInEx-5.3.0.svg)](https://github.com/BepInEx/BepInEx)
+# Explorer [![Version](https://img.shields.io/badge/MelonLoader-0.2.7.1-green.svg)](https://github.com/HerpDerpinstine/MelonLoader) [![Version](https://img.shields.io/badge/BepInEx-5.3.0-green.svg)](https://github.com/BepInEx/BepInEx)
 
 <p align="center">
   <img align="center" src="icon.png">
@@ -30,7 +30,7 @@
 | MelonLoader | ✔ | ✔ |
 | BepInEx     | <b>?</b> (WIP) | ✔ |
 
-<B>IL2CPP Issues:</b>
+<b>IL2CPP Issues:</b>
 * .NET 3.5 is not currently supported (Unity 5.6.1 and older), this might change in the future.
 * Some methods may still fail with a `MissingMethodException`, please let me know if you experience this (with full MelonLoader log please).
 * Reflection may fail with certain types, see [here](https://github.com/knah/Il2CppAssemblyUnhollower#known-issues) for more details.
