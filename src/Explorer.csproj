@@ -34,7 +34,7 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\Release\ML_Cpp\</OutputPath>
+    <OutputPath>..\Release\Explorer.MelonLoader.Il2Cpp\</OutputPath>
     <DefineConstants>CPP,ML</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -49,7 +49,7 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\Release\ML_Mono\</OutputPath>
+    <OutputPath>..\Release\Explorer.MelonLoader.Mono\</OutputPath>
     <DefineConstants>MONO,ML</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -64,7 +64,7 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\Release\ML_Mono_NET35\</OutputPath>
+    <OutputPath>..\Release\Explorer.MelonLoader.Mono.NET35\</OutputPath>
     <DefineConstants>MONO,ML,NET35</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -79,7 +79,7 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\Release\BIE_Cpp\</OutputPath>
+    <OutputPath>..\Release\Explorer.BepInEx.Il2Cpp\</OutputPath>
     <DefineConstants>CPP,BIE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -94,7 +94,7 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\Release\BIE_Mono\</OutputPath>
+    <OutputPath>..\Release\Explorer.BepInEx.Mono\</OutputPath>
     <DefineConstants>MONO,BIE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -109,7 +109,7 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\Release\BIE_Mono_NET35\</OutputPath>
+    <OutputPath>..\Release\Explorer.BepInEx.Mono.NET35\</OutputPath>
     <DefineConstants>MONO,BIE,NET35</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>

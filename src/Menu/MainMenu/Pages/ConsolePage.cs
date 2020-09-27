@@ -30,7 +30,9 @@ namespace Explorer
             "System.Collections",
             "System.Collections.Generic",
             "System.Reflection",
+#if ML
             "MelonLoader"
+#endif
         };
 
         public override void Init()
@@ -42,9 +44,14 @@ namespace Explorer
             {
                 MethodInput = @"// This is a basic C# console. 
 // Some common using directives are added by default, you can add more below.
-// If you want to return some output, Debug.Log() it.
-
-Debug.Log(""hello world"");";
+// If you want to return some output, Debug.Log() or MelonLogger.Log() it.
+"
+#if ML
++ @"MelonLogger.Log(""hello world"");";
+#else
++ @"Debug.Log(""hello world"");";
+#endif
+                ;
 
                 ResetConsole();
 

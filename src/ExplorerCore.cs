@@ -4,23 +4,23 @@ namespace Explorer
 {
     public class ExplorerCore
     {
-        public const string NAME =
-#if ML
-#if CPP
-                                    "Explorer (Il2Cpp, MelonLoader)";
-#else
-                                    "Explorer (Mono, MelonLoader)";
-#endif
-#else
-#if CPP
-                                    "Explorer (Il2Cpp, BepInEx)";
-#else
-                                    "Explorer (Mono, BepInEx)";
-#endif
-#endif
+        public const string NAME = "Explorer (" + PLATFORM + ", " + MODLOADER + ")";
         public const string VERSION = "1.8.0";
         public const string AUTHOR  = "Sinai";
         public const string GUID    = "com.sinai.explorer";
+
+        public const string MODLOADER =
+#if ML
+            "MelonLoader";
+#else
+            "BepInEx";
+#endif
+        public const string PLATFORM =
+#if CPP
+            "Il2Cpp";
+#else
+            "Mono";
+#endif
 
         public static ExplorerCore Instance { get; private set; }
 
