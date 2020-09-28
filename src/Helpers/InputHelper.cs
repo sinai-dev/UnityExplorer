@@ -82,7 +82,7 @@ namespace Explorer
         {
             ExplorerCore.Log("UnityEngine.Input is null, trying to load manually....");
 
-            if ((ReflectionHelpers.LoadModule("UnityEngine.InputLegacyModule.dll") || ReflectionHelpers.LoadModule("UnityEngine.CoreModule.dll")) 
+            if ((ReflectionHelpers.LoadModule("UnityEngine.InputLegacyModule") || ReflectionHelpers.LoadModule("UnityEngine.CoreModule")) 
                 && Input != null)
             {
                 ExplorerCore.Log("Ok!");

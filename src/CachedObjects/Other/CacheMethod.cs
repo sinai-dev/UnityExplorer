@@ -64,7 +64,7 @@ namespace Explorer
 
             if (ret != null)
             {
-                m_cachedReturnValue = GetCacheObject(ret);
+                m_cachedReturnValue = CacheFactory.GetTypeAndCacheObject(ret);
                 m_cachedReturnValue.UpdateValue();
             }
             else

@@ -131,7 +131,7 @@ namespace Explorer
             foreach (var key in IDict.Keys)
             {
                 Type t = ReflectionHelpers.GetActualType(key) ?? TypeOfKeys;
-                var cache = GetCacheObject(key, t);
+                var cache = CacheFactory.GetCacheObject(key, t);
                 keys.Add(cache);
             }
 
@@ -139,7 +139,7 @@ namespace Explorer
             foreach (var val in IDict.Values)
             {
                 Type t = ReflectionHelpers.GetActualType(val) ?? TypeOfValues;
-                var cache = GetCacheObject(val, t);
+                var cache = CacheFactory.GetCacheObject(val, t);
                 values.Add(cache);
             }
 

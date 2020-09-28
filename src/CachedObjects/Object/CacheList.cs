@@ -246,7 +246,7 @@ namespace Explorer
                     }
 #endif
 
-                    if (GetCacheObject(obj, t) is CacheObjectBase cached)
+                    if (CacheFactory.GetCacheObject(obj, t) is CacheObjectBase cached)
                     {
                         list.Add(cached);
                     }
@@ -354,6 +354,7 @@ namespace Explorer
                         GUI.skin.label.alignment = TextAnchor.MiddleCenter;
                         GUILayout.Label($"[{i}]", new GUILayoutOption[] { GUILayout.Width(30) });
 
+                        GUI.skin.label.alignment = TextAnchor.MiddleLeft;
                         entry.DrawValue(window, window.width - (whitespace + 85));                        
                     }
                     

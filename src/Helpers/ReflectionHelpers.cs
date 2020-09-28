@@ -20,10 +20,10 @@ namespace Explorer
 
 #if CPP
         public static ILType GameObjectType =>  Il2CppType.Of<GameObject>();
-        public static ILType TransformType =>   Il2CppType.Of<Transform>();
-        public static ILType ObjectType =>      Il2CppType.Of<UnityEngine.Object>();
-        public static ILType ComponentType =>   Il2CppType.Of<Component>();
-        public static ILType BehaviourType =>   Il2CppType.Of<Behaviour>();
+        public static ILType TransformType  =>  Il2CppType.Of<Transform>();
+        public static ILType ObjectType     =>  Il2CppType.Of<UnityEngine.Object>();
+        public static ILType ComponentType  =>  Il2CppType.Of<Component>();
+        public static ILType BehaviourType  =>  Il2CppType.Of<Behaviour>();
 
         private static readonly MethodInfo tryCastMethodInfo = typeof(Il2CppObjectBase).GetMethod("TryCast");
         private static readonly Dictionary<Type, MethodInfo> cachedTryCastMethods = new Dictionary<Type, MethodInfo>();
@@ -41,10 +41,10 @@ namespace Explorer
         }
 #else
         public static Type GameObjectType =>    typeof(GameObject);
-        public static Type TransformType =>     typeof(Transform);
-        public static Type ObjectType =>        typeof(UnityEngine.Object);
-        public static Type ComponentType =>     typeof(Component);
-        public static Type BehaviourType =>     typeof(Behaviour);
+        public static Type TransformType  =>    typeof(Transform);
+        public static Type ObjectType     =>    typeof(UnityEngine.Object);
+        public static Type ComponentType  =>    typeof(Component);
+        public static Type BehaviourType  =>    typeof(Behaviour);
 #endif
 
         public static bool IsEnumerable(Type t)
@@ -148,7 +148,12 @@ namespace Explorer
 
         public static bool LoadModule(string module)
         {
-            var path = $@"MelonLoader\Managed\{module}";
+#if CPP
+#if ML
+            var path = $@"MelonLoader\Managed\{module}.dll";
+#else
+            var path = $@"BepInEx\unhollowed\{module}.dll";
+#endif
             if (!File.Exists(path)) return false;
 
             try
@@ -159,8 +164,9 @@ namespace Explorer
             catch (Exception e)
             {
                 ExplorerCore.Log(e.GetType() + ", " + e.Message);
-                return false;
             }
+#endif
+            return false;
         }
 
         public static string ExceptionToString(Exception e)
@@ -175,7 +181,6 @@ namespace Explorer
                 return "Garbage collected in Il2Cpp.";
             }
 #endif
-
             return e.GetType() + ", " + e.Message;
         }
 

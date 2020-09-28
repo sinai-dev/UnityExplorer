@@ -7,9 +7,9 @@ using MelonLoader;
 
 namespace Explorer
 {
-    public class Explorer_MelonMod : MelonMod
+    public class ExplorerMelonMod : MelonMod
     {
-        public static Explorer_MelonMod Instance;
+        public static ExplorerMelonMod Instance;
 
         public override void OnApplicationStart()
         {

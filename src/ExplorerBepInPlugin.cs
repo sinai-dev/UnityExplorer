@@ -1,17 +1,12 @@
 ﻿#if BIE
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection;
 using System.IO;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-using Mono.CSharp;
-using UnityEngine.SceneManagement;
-using UnityEngine.Events;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 #if CPP
 using UnhollowerRuntimeLib;
 using BepInEx.IL2CPP;
@@ -21,15 +16,16 @@ namespace Explorer
 {
     [BepInPlugin(ExplorerCore.GUID, ExplorerCore.NAME, ExplorerCore.VERSION)]
 #if CPP
-    public class Explorer_BepInPlugin : BasePlugin
+    public class ExplorerBepInPlugin : BasePlugin
 #else
-    public class Explorer_BepInPlugin : BaseUnityPlugin
+    public class ExplorerBepInPlugin : BaseUnityPlugin
 #endif
     {
-        public static Explorer_BepInPlugin Instance;
+        public static ExplorerBepInPlugin Instance;
+
         public static ManualLogSource Logging =>
 #if CPP
-                                        Instance.Log;
+                                        Instance?.Log;
 #else
                                         Instance?.Logger;
 #endif
@@ -37,8 +33,7 @@ namespace Explorer
         public static readonly Harmony HarmonyInstance = new Harmony(ExplorerCore.GUID);
 
 #if CPP
-        // temporary for BIE Il2Cpp
-        private static bool tempSceneChangeCheck;
+        // temporary for Il2Cpp until scene change delegate works
         private static string lastSceneName;
 #endif
 
@@ -53,17 +48,16 @@ namespace Explorer
             Instance = this;
 
 #if CPP
-            tempSceneChangeCheck = true;
-            ClassInjector.RegisterTypeInIl2Cpp<DummyMB>();
+            ClassInjector.RegisterTypeInIl2Cpp<ExplorerBehaviour>();
 
-            GameObject.DontDestroyOnLoad(
-                new GameObject(
-                    "Explorer_Dummy", 
-                    new Il2CppSystem.Type[]
-                    {
-                        Il2CppType.Of<DummyMB>()
-                    })
+            var obj = new GameObject(
+                "ExplorerBehaviour",
+                new Il2CppSystem.Type[]
+                {
+                    Il2CppType.Of<ExplorerBehaviour>()
+                }
             );
+            GameObject.DontDestroyOnLoad(obj);
 #else
             SceneManager.activeSceneChanged += DoSceneChange;
 #endif
@@ -91,47 +85,34 @@ namespace Explorer
             ExplorerCore.OnSceneChange();
         }
 
-        internal static void DoUpdate()
+#if CPP // BepInEx Il2Cpp mod class doesn't have monobehaviour methods yet, so wrap them in a dummy.
+        public class ExplorerBehaviour : MonoBehaviour
         {
-            ExplorerCore.Update();
+            public ExplorerBehaviour(IntPtr ptr) : base(ptr) { }
+
+            internal void Awake()
+            {
+                Logging.LogMessage("ExplorerBehaviour.Awake");
+            }
+
+#endif
+            internal void Update()
+            {
+                ExplorerCore.Update();
 
 #if CPP
-            if (tempSceneChangeCheck)
-            {
                 var scene = SceneManager.GetActiveScene();
                 if (scene.name != lastSceneName)
                 {
                     lastSceneName = scene.name;
                     DoSceneChange(scene, scene);
                 }
-            }
 #endif
-        }
-
-        internal static void DoOnGUI()
-        {
-            ExplorerCore.OnGUI();
-        }
-
-#if CPP
-        public class DummyMB : MonoBehaviour
-        {
-            public DummyMB(IntPtr ptr) : base(ptr) { }
-
-            internal void Awake()
-            {
-                Logging.LogMessage("DummyMB Awake");
-            }
-
-#endif
-            internal void Update()
-            {
-                DoUpdate();
             }
 
             internal void OnGUI()
             {
-                DoOnGUI();
+                ExplorerCore.OnGUI();
             }
 #if CPP
         }

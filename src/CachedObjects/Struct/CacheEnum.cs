@@ -56,7 +56,7 @@ namespace Explorer
                 }
             }
 
-            GUILayout.Label(Value.ToString() + "<color=#2df7b2><i> (" + ValueType + ")</i></color>", new GUILayoutOption[0]);
+            GUILayout.Label(Value.ToString() + $"<color={UIStyles.Syntax.StructGreen}><i> ({ValueType})</i></color>", new GUILayoutOption[0]);
         }
 
         public void SetEnum(int change)

@@ -2,19 +2,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using UnityEngine;
 #if CPP
 using UnhollowerRuntimeLib;
 #endif
-using UnityEngine;
 
 namespace Explorer
 {
     public class CachePrimitive : CacheObjectBase
     {
+        private string m_valueToString;
         private bool m_isBool;
         private bool m_isString;
-
-        private string m_valueToString;
 
         public MethodInfo ParseMethod => m_parseMethod ?? (m_parseMethod = Value.GetType().GetMethod("Parse", new Type[] { typeof(string) }));
         private MethodInfo m_parseMethod;
@@ -22,8 +21,7 @@ namespace Explorer
         private bool m_canBitwiseOperate;
         private bool m_inBitwiseMode;
         private string m_bitwiseOperatorInput = "0";
-        private string m_bitwiseToString;
-        //private BitArray m_bitMask; // not needed I think
+        private string m_binaryInput;
 
         public override void Init()
         {
@@ -48,6 +46,8 @@ namespace Explorer
             }
 
             m_canBitwiseOperate = typeof(int).IsAssignableFrom(ValueType);
+
+            UpdateValue();
         }
 
         public override void UpdateValue()
@@ -57,20 +57,19 @@ namespace Explorer
             RefreshToString();
         }
 
-        public void RefreshToString()
+        private void RefreshToString()
         {
             m_valueToString = Value?.ToString();
 
-            if (m_inBitwiseMode)
+            if (m_canBitwiseOperate)
             {
                 var _int = (int)Value;
-                m_bitwiseToString = Convert.ToString(_int, toBase: 2);
+                m_binaryInput = Convert.ToString(_int, toBase: 2);
             }
         }
 
         public override void DrawValue(Rect window, float width)
         {
-            // bool uses Toggle
             if (m_isBool)
             {
                 var b = (bool)Value;
@@ -81,7 +80,8 @@ namespace Explorer
                     b = GUILayout.Toggle(b, label, new GUILayoutOption[0]);
                     if (b != (bool)Value)
                     {
-                        SetValueFromInput(b.ToString());
+                        Value = b;
+                        SetValue();
                     }
                 }
                 else
@@ -98,39 +98,20 @@ namespace Explorer
 
             GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 
-            // using ValueType.Name instead of ValueTypeName, because we only want the short name.
             GUILayout.Label("<color=#2df7b2><i>" + ValueType.Name + "</i></color>", new GUILayoutOption[] { GUILayout.Width(50) });
 
-            int dynSize = 25 + (m_valueToString.Length * 15);
-            var maxwidth = window.width - 310f;
-            if (CanWrite) maxwidth -= 60;
-
-            if (dynSize > maxwidth)
-            {
-                m_valueToString = GUIUnstrip.TextArea(m_valueToString, new GUILayoutOption[] { GUILayout.Width(maxwidth) });
-            }
-            else
-            {
-                m_valueToString = GUILayout.TextField(m_valueToString, new GUILayoutOption[] { GUILayout.Width(dynSize) });
-            }
-
+            m_valueToString = GUIUnstrip.TextArea(m_valueToString, new GUILayoutOption[] { GUILayout.ExpandWidth(true) });
             if (CanWrite)
             {
                 if (GUILayout.Button("<color=#00FF00>Apply</color>", new GUILayoutOption[] { GUILayout.Width(60) }))
                 {
-                    SetValueFromInput(m_valueToString);
-                    RefreshToString();
+                    SetValueFromInput();
                 }
             }
 
             if (m_canBitwiseOperate)
             {
-                bool orig = m_inBitwiseMode;
                 m_inBitwiseMode = GUILayout.Toggle(m_inBitwiseMode, "Bitwise?", new GUILayoutOption[0]);
-                if (orig != m_inBitwiseMode)
-                {
-                    RefreshToString();
-                }
             }
 
             GUIUnstrip.Space(10);
@@ -139,79 +120,91 @@ namespace Explorer
 
             if (m_inBitwiseMode)
             {
-                if (CanWrite)
-                {
-                    GUILayout.BeginHorizontal(new GUILayoutOption[0]);
-
-                    GUI.skin.label.alignment = TextAnchor.MiddleRight;
-                    GUILayout.Label("RHS:", new GUILayoutOption[] { GUILayout.Width(35) });
-                    GUI.skin.label.alignment = TextAnchor.UpperLeft;
-
-                    if (GUILayout.Button("~", new GUILayoutOption[] { GUILayout.Width(25) }))
-                    {
-                        if (int.TryParse(m_bitwiseOperatorInput, out int bit))
-                        {
-                            Value = ~bit;
-                            RefreshToString();
-                        }
-                    }
-
-                    if (GUILayout.Button("<<", new GUILayoutOption[] { GUILayout.Width(25) }))
-                    {
-                        if (int.TryParse(m_bitwiseOperatorInput, out int bit))
-                        {
-                            Value = (int)Value << bit;
-                            RefreshToString();
-                        }
-                    }
-                    if (GUILayout.Button(">>", new GUILayoutOption[] { GUILayout.Width(25) }))
-                    {
-                        if (int.TryParse(m_bitwiseOperatorInput, out int bit))
-                        {
-                            Value = (int)Value >> bit;
-                            RefreshToString();
-                        }
-                    }
-                    if (GUILayout.Button("|", new GUILayoutOption[] { GUILayout.Width(25) }))
-                    {
-                        if (int.TryParse(m_bitwiseOperatorInput, out int bit))
-                        {
-                            Value = (int)Value | bit;
-                            RefreshToString();
-                        }
-                    }
-                    if (GUILayout.Button("&", new GUILayoutOption[] { GUILayout.Width(25) }))
-                    {
-                        if (int.TryParse(m_bitwiseOperatorInput, out int bit))
-                        {
-                            Value = (int)Value & bit;
-                            RefreshToString();
-                        }
-                    }
-                    if (GUILayout.Button("^", new GUILayoutOption[] { GUILayout.Width(25) }))
-                    {
-                        if (int.TryParse(m_bitwiseOperatorInput, out int bit))
-                        {
-                            Value = (int)Value ^ bit;
-                            RefreshToString();
-                        }
-                    }
-
-                    m_bitwiseOperatorInput = GUILayout.TextField(m_bitwiseOperatorInput, new GUILayoutOption[] { GUILayout.Width(55) });
-
-                    GUILayout.EndHorizontal();
-                }
-
-                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
-                GUILayout.Label($"<color=cyan>Binary:</color>", new GUILayoutOption[] { GUILayout.Width(60) });
-                GUILayout.TextField(m_bitwiseToString, new GUILayoutOption[0]);
-                GUILayout.EndHorizontal();
+                DrawBitwise();
             }
 
             GUILayout.EndVertical();
         }
 
-        public void SetValueFromInput(string valueString)
+        private void DrawBitwise()
+        {
+            if (CanWrite)
+            {
+                GUILayout.BeginHorizontal(new GUILayoutOption[0]);
+
+                GUI.skin.label.alignment = TextAnchor.MiddleRight;
+                GUILayout.Label("RHS:", new GUILayoutOption[] { GUILayout.Width(35) });
+                GUI.skin.label.alignment = TextAnchor.UpperLeft;
+
+                if (GUILayout.Button("~", new GUILayoutOption[] { GUILayout.Width(25) }))
+                {
+                    if (int.TryParse(m_bitwiseOperatorInput, out int bit))
+                    {
+                        Value = ~bit;
+                        RefreshToString();
+                    }
+                }
+
+                if (GUILayout.Button("<<", new GUILayoutOption[] { GUILayout.Width(25) }))
+                {
+                    if (int.TryParse(m_bitwiseOperatorInput, out int bit))
+                    {
+                        Value = (int)Value << bit;
+                        RefreshToString();
+                    }
+                }
+                if (GUILayout.Button(">>", new GUILayoutOption[] { GUILayout.Width(25) }))
+                {
+                    if (int.TryParse(m_bitwiseOperatorInput, out int bit))
+                    {
+                        Value = (int)Value >> bit;
+                        RefreshToString();
+                    }
+                }
+                if (GUILayout.Button("|", new GUILayoutOption[] { GUILayout.Width(25) }))
+                {
+                    if (int.TryParse(m_bitwiseOperatorInput, out int bit))
+                    {
+                        Value = (int)Value | bit;
+                        RefreshToString();
+                    }
+                }
+                if (GUILayout.Button("&", new GUILayoutOption[] { GUILayout.Width(25) }))
+                {
+                    if (int.TryParse(m_bitwiseOperatorInput, out int bit))
+                    {
+                        Value = (int)Value & bit;
+                        RefreshToString();
+                    }
+                }
+                if (GUILayout.Button("^", new GUILayoutOption[] { GUILayout.Width(25) }))
+                {
+                    if (int.TryParse(m_bitwiseOperatorInput, out int bit))
+                    {
+                        Value = (int)Value ^ bit;
+                        RefreshToString();
+                    }
+                }
+
+                m_bitwiseOperatorInput = GUILayout.TextField(m_bitwiseOperatorInput, new GUILayoutOption[] { GUILayout.Width(55) });
+
+                GUILayout.EndHorizontal();
+            }
+
+            GUILayout.BeginHorizontal(new GUILayoutOption[0]);
+            GUILayout.Label($"<color=cyan>Binary:</color>", new GUILayoutOption[] { GUILayout.Width(60) });
+            m_binaryInput = GUILayout.TextField(m_binaryInput, new GUILayoutOption[0]);
+            if (CanWrite)
+            {
+                if (GUILayout.Button("Apply", new GUILayoutOption[0]))
+                {
+                    SetValueFromBinaryInput();
+                }
+            }
+            GUILayout.EndHorizontal();
+        }
+
+        public void SetValueFromInput()
         {
             if (MemInfo == null)
             {
@@ -221,23 +214,13 @@ namespace Explorer
 
             if (m_isString)
             {
-                Value = valueString;
+                Value = m_valueToString;
             }
             else
             {
                 try
                 {
-                    Value = ParseMethod.Invoke(null, new object[] { valueString });
-
-                    //if (m_inBitwiseMode)
-                    //{
-                    //    var method = typeof(Convert).GetMethod($"To{ValueType.Name}", new Type[] { typeof(string), typeof(int) });
-                    //    Value = method.Invoke(null, new object[] { valueString, 2 });
-                    //}
-                    //else
-                    //{
-                    //    Value = ParseMethod.Invoke(null, new object[] { valueString });
-                    //}
+                    Value = ParseMethod.Invoke(null, new object[] { m_valueToString });
                 }
                 catch (Exception e)
                 {
@@ -246,6 +229,23 @@ namespace Explorer
             }
 
             SetValue();
+            RefreshToString();
+        }
+
+        private void SetValueFromBinaryInput()
+        {
+            try
+            {
+                var method = typeof(Convert).GetMethod($"To{ValueType.Name}", new Type[] { typeof(string), typeof(int) });
+                Value = method.Invoke(null, new object[] { m_binaryInput, 2 });
+
+                SetValue();
+                RefreshToString();
+            }
+            catch (Exception e)
+            {
+                ExplorerCore.Log("Exception setting value: " + e.GetType() + ", " + e.Message);
+            }
         }
     }
 }

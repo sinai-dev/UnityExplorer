@@ -76,7 +76,7 @@ namespace Explorer
                 }
 #endif
 
-                var cache = CacheObjectBase.GetCacheObject(toCache);
+                var cache = CacheFactory.GetTypeAndCacheObject(toCache);
                 m_searchResults.Add(cache);
             }
 

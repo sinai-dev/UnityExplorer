@@ -204,7 +204,7 @@ namespace Explorer
 
                     try
                     {
-                        var cached = CacheObjectBase.GetCacheObject(member, target);
+                        var cached = CacheFactory.GetTypeAndCacheObject(member, target);
                         if (cached != null)
                         {
                             cachedSigs.Add(sig);

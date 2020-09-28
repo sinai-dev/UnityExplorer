@@ -369,7 +369,7 @@ namespace Explorer
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal(new GUILayoutOption[0]);
-            var width = m_rect.width / 2 - 115f;
+            var width = m_rect.width / 2 - 135f;
             m_addComponentInput = GUILayout.TextField(m_addComponentInput, new GUILayoutOption[] { GUILayout.Width(width) });
             if (GUILayout.Button("Add Comp", new GUILayoutOption[0]))
             {

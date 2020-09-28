@@ -6,9 +6,8 @@ using UnityEngine;
 
 namespace Explorer
 {
-    public class CacheEnumFlags : CacheObjectBase, IExpandHeight
+    public class CacheEnumFlags : CacheEnum, IExpandHeight
     {
-        public string[] EnumNames = new string[0];
         public bool[] m_enabledFlags = new bool[0];
 
         public bool IsExpanded { get; set; }
@@ -18,38 +17,12 @@ namespace Explorer
         {
             base.Init();
 
-            if (ValueType == null && Value != null)
-            {
-                ValueType = Value.GetType();
-            }
-
             if (ValueType != null)
             {
-                EnumNames = Enum.GetNames(ValueType);
-
                 m_enabledFlags = new bool[EnumNames.Length];
 
                 UpdateValue();
             }
-            else
-            {
-                ReflectionException = "Unknown, could not get Enum names.";
-            }
-        }
-
-        public void SetFlagsFromInput()
-        {
-            string val = "";
-            for (int i = 0; i < EnumNames.Length; i++)
-            {
-                if (m_enabledFlags[i])
-                {
-                    if (val != "") val += ", ";
-                    val += EnumNames[i];
-                }
-            }
-            Value = Enum.Parse(ValueType, val);
-            SetValue();
         }
 
         public override void UpdateValue()
@@ -70,7 +43,6 @@ namespace Explorer
                 ExplorerCore.Log(e.ToString());
             }
         }
-
 
         public override void DrawValue(Rect window, float width)
         {
@@ -120,6 +92,21 @@ namespace Explorer
 
                 GUILayout.BeginHorizontal(new GUILayoutOption[0]);
             }
+        }
+
+        public void SetFlagsFromInput()
+        {
+            string val = "";
+            for (int i = 0; i < EnumNames.Length; i++)
+            {
+                if (m_enabledFlags[i])
+                {
+                    if (val != "") val += ", ";
+                    val += EnumNames[i];
+                }
+            }
+            Value = Enum.Parse(ValueType, val);
+            SetValue();
         }
     }
 }

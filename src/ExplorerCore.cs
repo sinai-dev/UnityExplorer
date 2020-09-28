@@ -95,7 +95,7 @@ namespace Explorer
 #if ML
             MelonLoader.MelonLogger.Log(message);
 #else
-            Explorer_BepInPlugin.Logging?.LogMessage(message);
+            ExplorerBepInPlugin.Logging?.LogMessage(message);
 #endif
         }
 
@@ -104,7 +104,7 @@ namespace Explorer
 #if ML
             MelonLoader.MelonLogger.LogWarning(message);
 #else
-            Explorer_BepInPlugin.Logging?.LogWarning(message);
+            ExplorerBepInPlugin.Logging?.LogWarning(message);
 #endif
         }
 
@@ -113,7 +113,7 @@ namespace Explorer
 #if ML
             MelonLoader.MelonLogger.LogError(message);
 #else
-            Explorer_BepInPlugin.Logging?.LogError(message);
+            ExplorerBepInPlugin.Logging?.LogError(message);
 #endif
         }
     }

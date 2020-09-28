@@ -74,9 +74,9 @@ namespace Explorer
 
                 var harmony =
 #if ML
-                    Explorer_MelonMod.Instance.harmonyInstance;
+                    ExplorerMelonMod.Instance.harmonyInstance;
 #else
-                    Explorer_BepInPlugin.HarmonyInstance;
+                    ExplorerBepInPlugin.HarmonyInstance;
 #endif
                 ;
 

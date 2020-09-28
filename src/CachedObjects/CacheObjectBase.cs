@@ -27,278 +27,12 @@ namespace Explorer
         public string RichTextName => m_richTextName ?? GetRichTextName();
         private string m_richTextName;
 
-        public bool CanWrite
-        {
-            get
-            {
-                if (MemInfo is FieldInfo fi)
-                    return !(fi.IsLiteral && !fi.IsInitOnly);
-                else if (MemInfo is PropertyInfo pi)
-                    return pi.CanWrite;
-                else
-                    return false;
-            }
-        }
+        public bool CanWrite => m_canWrite ?? (bool)(m_canWrite = GetCanWrite());
+        private bool? m_canWrite;
 
         public virtual void Init() { }
 
-        public abstract void DrawValue(Rect window, float width);
-
-        /// <summary>
-        /// Get CacheObject from only an object instance
-        /// Calls GetCacheObject(obj, memberInfo, declaringInstance) with (obj, null, null)</summary>
-        public static CacheObjectBase GetCacheObject(object obj)
-        {
-            return GetCacheObject(obj, null, null);
-        }
-
-        /// <summary>
-        /// Get CacheObject from an object instance and provide the value type
-        /// Calls GetCacheObjectImpl directly</summary>
-        public static CacheObjectBase GetCacheObject(object obj, Type valueType)
-        {
-            return GetCacheObjectImpl(obj, null, null, valueType);
-        }
-
-        /// <summary>
-        /// Get CacheObject from only a MemberInfo and declaring instance
-        /// Calls GetCacheObject(obj, memberInfo, declaringInstance) with (null, memberInfo, declaringInstance)</summary>
-        public static CacheObjectBase GetCacheObject(MemberInfo memberInfo, object declaringInstance)
-        {
-            return GetCacheObject(null, memberInfo, declaringInstance);
-        }
-
-        /// <summary>
-        /// Get CacheObject from either an object or MemberInfo, and don't provide the type.
-        /// This gets the type and then calls GetCacheObjectImpl</summary>
-        public static CacheObjectBase GetCacheObject(object obj, MemberInfo memberInfo, object declaringInstance)
-        {
-            Type type = null;
-
-            if (memberInfo != null)
-            {
-                if (memberInfo is FieldInfo fi)
-                {
-                    type = fi.FieldType;
-                }
-                else if (memberInfo is PropertyInfo pi)
-                {
-                    type = pi.PropertyType;
-                }
-                else if (memberInfo is MethodInfo mi)
-                {
-                    type = mi.ReturnType;
-                }
-            }
-            else if (obj != null)
-            {
-                type = ReflectionHelpers.GetActualType(obj);
-            }
-
-            if (type == null)
-            {
-                return null;
-            }
-
-            return GetCacheObjectImpl(obj, memberInfo, declaringInstance, type);
-        }
-
-        /// <summary>
-        /// Actual GetCacheObject implementation (private)
-        /// </summary>
-        private static CacheObjectBase GetCacheObjectImpl(object obj, MemberInfo memberInfo, object declaringInstance, Type valueType)
-        {
-            CacheObjectBase holder;
-
-            var pi = memberInfo as PropertyInfo;
-            var mi = memberInfo as MethodInfo;
-
-            // Check if can process args
-            if ((pi != null && !CanProcessArgs(pi.GetIndexParameters())) 
-                || (mi != null && !CanProcessArgs(mi.GetParameters())))
-            {
-                return null;
-            }
-
-            if (mi != null)
-            {
-                holder = new CacheMethod();
-            }
-            else if (valueType == typeof(GameObject) || valueType == typeof(Transform))
-            {
-                holder = new CacheGameObject();
-            }
-            else if (valueType.IsPrimitive || valueType == typeof(string))
-            {
-                holder = new CachePrimitive();
-            }
-            else if (valueType.IsEnum)
-            {
-                if (valueType.GetCustomAttributes(typeof(FlagsAttribute), true) is object[] attributes && attributes.Length > 0)
-                {
-                    holder = new CacheEnumFlags();
-                }
-                else
-                {
-                    holder = new CacheEnum();
-                }
-            }
-            else if (valueType == typeof(Vector2) || valueType == typeof(Vector3) || valueType == typeof(Vector4))
-            {
-                holder = new CacheVector();
-            }
-            else if (valueType == typeof(Quaternion))
-            {
-                holder = new CacheQuaternion();
-            }
-            else if (valueType == typeof(Color))
-            {
-                holder = new CacheColor();
-            }
-            else if (valueType == typeof(Rect))
-            {
-                holder = new CacheRect();
-            }
-            // must check this before IsEnumerable
-            else if (ReflectionHelpers.IsDictionary(valueType))
-            {
-                holder = new CacheDictionary();
-            }
-            else if (ReflectionHelpers.IsEnumerable(valueType))
-            {
-                holder = new CacheList();
-            }
-            else
-            {
-                holder = new CacheOther();
-            }
-
-            holder.Value = obj;
-            holder.ValueType = valueType;
-
-            if (memberInfo != null)
-            {
-                holder.MemInfo = memberInfo;
-                holder.DeclaringType = memberInfo.DeclaringType;
-                holder.DeclaringInstance = declaringInstance;
-            }
-
-            if (pi != null)
-            {
-                holder.m_arguments = pi.GetIndexParameters();
-            }
-            else if (mi != null)
-            {
-                holder.m_arguments = mi.GetParameters();
-            }
-
-            holder.m_argumentInput = new string[holder.m_arguments.Length];
-            
-            holder.UpdateValue();
-
-            holder.Init();
-
-            return holder;
-        }
-
-        public static bool CanProcessArgs(ParameterInfo[] parameters)
-        {
-            foreach (var param in parameters)
-            {
-                var pType = param.ParameterType;
-
-                if (pType.IsByRef && pType.HasElementType)
-                {
-                    pType = pType.GetElementType();
-                }
-                
-                if (pType.IsPrimitive || pType == typeof(string))
-                {
-                    continue;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public float CalcWhitespace(Rect window)
-        {
-            if (!(this is IExpandHeight)) return 0f;
-
-            float whitespace = (this as IExpandHeight).WhiteSpace;
-            if (whitespace > 0)
-            {
-                ClampLabelWidth(window, ref whitespace);
-            }
-
-            return whitespace;
-        }
-
-        public object[] ParseArguments()
-        {
-            var parsedArgs = new List<object>();
-            for (int i = 0; i < m_arguments.Length; i++)
-            {
-                var input = m_argumentInput[i];
-                var type = m_arguments[i].ParameterType;
-
-                if (type.IsByRef)
-                {
-                    type = type.GetElementType();
-                }
-
-                if (!string.IsNullOrEmpty(input))
-                {
-                    // strings can obviously just be used directly
-                    if (type == typeof(string))
-                    {
-                        parsedArgs.Add(input);
-                        continue;
-                    }
-                    else
-                    {
-                        // try to invoke the parse method and use that.
-                        try
-                        {
-                            parsedArgs.Add(type.GetMethod("Parse", new Type[] { typeof(string) })
-                                               .Invoke(null, new object[] { input }));
-
-                            continue;
-                        }
-                        catch
-                        {
-                            ExplorerCore.Log($"Argument #{i} '{m_arguments[i].Name}' ({type.Name}), could not parse input '{input}'.");
-                        }
-                    }
-                }
-
-                // Didn't use input, see if there is a default value.
-                if (HasDefaultValue(m_arguments[i]))
-                {
-                    parsedArgs.Add(m_arguments[i].DefaultValue);
-                    continue;
-                }
-
-                // Try add a null arg I guess
-                parsedArgs.Add(null);
-            }
-
-            return parsedArgs.ToArray();
-        }
-
-        public static bool HasDefaultValue(ParameterInfo arg)
-        {
-            return
-#if NET35
-                arg.DefaultValue != null; // rip null default args in NET35
-#else
-                arg.HasDefaultValue;
-#endif
-        }
+        public abstract void DrawValue(Rect window, float width); 
 
         public virtual void UpdateValue()
         {
@@ -367,10 +101,82 @@ namespace Explorer
             }
         }
 
+        public object[] ParseArguments()
+        {
+            var parsedArgs = new List<object>();
+            for (int i = 0; i < m_arguments.Length; i++)
+            {
+                var input = m_argumentInput[i];
+                var type = m_arguments[i].ParameterType;
+
+                if (type.IsByRef)
+                {
+                    type = type.GetElementType();
+                }
+
+                if (string.IsNullOrEmpty(input))
+                {
+                    // No input, see if there is a default value.
+                    if (HasDefaultValue(m_arguments[i]))
+                    {
+                        parsedArgs.Add(m_arguments[i].DefaultValue);
+                        continue;
+                    }
+
+                    // Try add a null arg I guess
+                    parsedArgs.Add(null);
+                    continue;
+                }
+
+                // strings can obviously just be used directly
+                if (type == typeof(string))
+                {
+                    parsedArgs.Add(input);
+                    continue;
+                }
+                else
+                {
+                    try
+                    {
+                        var arg = type.GetMethod("Parse", new Type[] { typeof(string) })
+                                      .Invoke(null, new object[] { input });
+                        parsedArgs.Add(arg);
+                        continue;
+                    }
+                    catch
+                    {
+                        ExplorerCore.Log($"Argument #{i} '{m_arguments[i].Name}' ({type.Name}), could not parse input '{input}'.");
+                    }
+                }
+            }
+
+            return parsedArgs.ToArray();
+        }
+
+        public static bool HasDefaultValue(ParameterInfo arg) =>
+#if NET35
+                arg.DefaultValue != null;
+#else
+                arg.HasDefaultValue;
+#endif
+
         // ========= Gui Draw ==========
 
         public const float MAX_LABEL_WIDTH = 400f;
         public const string EVALUATE_LABEL = "<color=lime>Evaluate</color>";
+
+        public float CalcWhitespace(Rect window)
+        {
+            if (!(this is IExpandHeight)) return 0f;
+
+            float whitespace = (this as IExpandHeight).WhiteSpace;
+            if (whitespace > 0)
+            {
+                ClampLabelWidth(window, ref whitespace);
+            }
+
+            return whitespace;
+        }
 
         public static void ClampLabelWidth(Rect window, ref float labelWidth)
         {
@@ -436,7 +242,10 @@ namespace Explorer
                             GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 
                             GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-                            GUILayout.Label($"<color={UIStyles.Syntax.StructGreen}>{cm.GenericArgs[i].Name}</color>", new GUILayoutOption[] { GUILayout.Width(15) });
+                            GUILayout.Label(
+                                $"<color={UIStyles.Syntax.StructGreen}>{cm.GenericArgs[i].Name}</color>", 
+                                new GUILayoutOption[] { GUILayout.Width(15) }
+                            );
                             cm.GenericArgInput[i] = GUILayout.TextField(input, new GUILayoutOption[] { GUILayout.Width(150) });
                             GUI.skin.label.alignment = TextAnchor.MiddleLeft;
                             GUILayout.Label(types, new GUILayoutOption[0]);
@@ -477,13 +286,9 @@ namespace Explorer
                     if (GUILayout.Button(EVALUATE_LABEL, new GUILayoutOption[] { GUILayout.Width(70) }))
                     {
                         if (cm != null)
-                        {
                             cm.Evaluate();
-                        }
                         else
-                        {
                             UpdateValue();
-                        }
                     }
                     if (GUILayout.Button("Cancel", new GUILayoutOption[] { GUILayout.Width(70) }))
                     {
@@ -506,21 +311,17 @@ namespace Explorer
 
                 GUILayout.EndVertical();
 
-                // new line and space
                 GUILayout.EndHorizontal();
                 GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUIUnstrip.Space(labelWidth);
             }
             else if (cm != null)
             {
-                //GUILayout.BeginHorizontal(null);
-
                 if (GUILayout.Button(EVALUATE_LABEL, new GUILayoutOption[] { GUILayout.Width(70) }))
                 {
                     cm.Evaluate();
                 }
 
-                // new line and space
                 GUILayout.EndHorizontal();
                 GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUIUnstrip.Space(labelWidth);
@@ -544,6 +345,16 @@ namespace Explorer
             {
                 DrawValue(window, window.width - labelWidth - 90);
             }
+        }
+
+        private bool GetCanWrite()
+        {
+            if (MemInfo is FieldInfo fi)
+                return !(fi.IsLiteral && !fi.IsInitOnly);
+            else if (MemInfo is PropertyInfo pi)
+                return pi.CanWrite;
+            else
+                return false;
         }
 
         private string GetRichTextName()
@@ -582,9 +393,19 @@ namespace Explorer
                     memberColor = UIStyles.Syntax.Prop_Instance;
             }
 
-            string classColor = MemInfo.DeclaringType.IsAbstract && MemInfo.DeclaringType.IsSealed 
-                ? UIStyles.Syntax.Class_Static
-                : UIStyles.Syntax.Class_Instance;
+            string classColor;
+            if (MemInfo.DeclaringType.IsValueType)
+            {
+                classColor = UIStyles.Syntax.StructGreen;
+            }
+            else if (MemInfo.DeclaringType.IsAbstract && MemInfo.DeclaringType.IsSealed)
+            {
+                classColor = UIStyles.Syntax.Class_Static;
+            }
+            else
+            {
+                classColor = UIStyles.Syntax.Class_Instance;
+            }
 
             m_richTextName = $"<color={classColor}>{MemInfo.DeclaringType.Name}</color>.";
             if (isStatic) m_richTextName += "<i>";
@@ -606,23 +427,6 @@ namespace Explorer
 
                 m_richTextName += ">";
             }
-
-            // Method / Property arguments
-
-            //if (m_arguments.Length > 0 || this is CacheMethod)
-            //{
-            //    m_richTextName += "(";
-            //    var args = "";
-            //    foreach (var param in m_arguments)
-            //    {
-            //        if (args != "") args += ", ";
-
-            //        args += $"<color={classColor}>{param.ParameterType.Name}</color> ";
-            //        args += $"<color={UIStyles.Syntax.Local}>{param.Name}</color>";
-            //    }
-            //    m_richTextName += args;
-            //    m_richTextName += ")";
-            //}
 
             return m_richTextName;
         }
