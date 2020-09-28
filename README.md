@@ -24,9 +24,9 @@
 ## Current status
 
 | Mod Loader  | Il2Cpp | Mono | Mono (.NET 3.5) |
-| ----------- | ------ | ---- | ---- |
-| [![Version](https://img.shields.io/badge/MelonLoader-0.2.7.1-green.svg?style=flat-square)](https://github.com/HerpDerpinstine/MelonLoader) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.MelonLoader.Il2Cpp.zip) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.MelonLoader.Mono.zip) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.MelonLoader.Mono.NET35.zip) |
-|  [![Version](https://img.shields.io/badge/BepInEx-5.3.0-green.svg?style=flat-square)](https://github.com/BepInEx/BepInEx) | ❔ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.BepInEx.Il2Cpp.zip) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.BepInEx.Mono.zip) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.BepInEx.Mono.NET35.zip) |
+| ----------- | ------ | ---- | ----|
+| [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.MelonLoader.Il2Cpp.zip) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.MelonLoader.Mono.zip) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.MelonLoader.Mono.NET35.zip) |
+| [BepInEx](https://github.com/BepInEx/BepInEx) | ❔ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.BepInEx.Il2Cpp.zip) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.BepInEx.Mono.zip) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.BepInEx.Mono.NET35.zip) |
 
 <b>IL2CPP Issues:</b>
 * .NET 3.5 is not currently supported (Unity 5.6.1 and older), this might change in the future.
