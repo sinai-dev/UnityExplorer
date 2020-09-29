@@ -17,7 +17,7 @@ namespace Explorer
 #if CPP
             return Internal.TextField(text, options);
 #else
-            return GUIUnstrip.TextField(text, options);
+            return GUILayout.TextField(text, options);
 #endif
         }        
 
