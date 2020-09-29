@@ -10,7 +10,7 @@ namespace Explorer
     public class CacheEnum : CacheObjectBase
     {
         // public Type EnumType;
-        public string[] EnumNames;
+        public string[] EnumNames = new string[0];
 
         public override void Init()
         {

@@ -175,7 +175,7 @@ namespace Explorer
             GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 
             GUILayout.Label("Name Contains:", new GUILayoutOption[] { GUILayout.Width(100) });
-            m_searchInput = GUILayout.TextField(m_searchInput, new GUILayoutOption[] { GUILayout.Width(200) });
+            m_searchInput = GUIUnstrip.TextField(m_searchInput, new GUILayoutOption[] { GUILayout.Width(200) });
 
             GUILayout.EndHorizontal();
 
@@ -193,7 +193,7 @@ namespace Explorer
                 GUI.skin.label.alignment = TextAnchor.MiddleRight;
                 GUILayout.Label("Custom Class:", new GUILayoutOption[] {  GUILayout.Width(250) });
                 GUI.skin.label.alignment = TextAnchor.UpperLeft;
-                m_typeInput = GUILayout.TextField(m_typeInput, new GUILayoutOption[] {  GUILayout.Width(250) });
+                m_typeInput = GUIUnstrip.TextField(m_typeInput, new GUILayoutOption[] {  GUILayout.Width(250) });
                 GUILayout.EndHorizontal();
             }
 

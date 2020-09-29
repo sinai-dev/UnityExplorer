@@ -186,14 +186,14 @@ namespace Explorer
                     }
                 }
 
-                m_bitwiseOperatorInput = GUILayout.TextField(m_bitwiseOperatorInput, new GUILayoutOption[] { GUILayout.Width(55) });
+                m_bitwiseOperatorInput = GUIUnstrip.TextField(m_bitwiseOperatorInput, new GUILayoutOption[] { GUILayout.Width(55) });
 
                 GUILayout.EndHorizontal();
             }
 
             GUILayout.BeginHorizontal(new GUILayoutOption[0]);
             GUILayout.Label($"<color=cyan>Binary:</color>", new GUILayoutOption[] { GUILayout.Width(60) });
-            m_binaryInput = GUILayout.TextField(m_binaryInput, new GUILayoutOption[0]);
+            m_binaryInput = GUIUnstrip.TextField(m_binaryInput, new GUILayoutOption[0]);
             if (CanWrite)
             {
                 if (GUILayout.Button("Apply", new GUILayoutOption[0]))

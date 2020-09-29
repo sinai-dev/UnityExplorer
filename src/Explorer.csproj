@@ -11,6 +11,8 @@
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
+    <OutputPath>..\Release\Explorer.MelonLoader.Il2Cpp\</OutputPath>
+    <DefineConstants>CPP,ML</DefineConstants>
     <IsCpp>true</IsCpp>
     <IsMelonLoader>true</IsMelonLoader>
     <IsNet35>false</IsNet35>
@@ -25,6 +27,7 @@
     <AssemblyName>Explorer</AssemblyName>
     <!-- Set this to the MelonLoader Il2Cpp Game folder, without the ending '\' character. -->
     <MLCppGameFolder>D:\Steam\steamapps\common\Hellpoint</MLCppGameFolder>
+    <!--<MLCppGameFolder>D:\source\Unity Projects\Test\_BUILD</MLCppGameFolder>-->
     <!-- Set this to the MelonLoader Mono Game folder, without the ending '\' character. -->
     <MLMonoGameFolder>D:\Steam\steamapps\common\Outward</MLMonoGameFolder>
     <!-- Set this to the BepInEx Il2Cpp Game folder, without the ending '\' character. -->
@@ -241,8 +244,7 @@
     <Compile Include="Menu\CursorControl.cs" />
     <Compile Include="Tests\TestClass.cs" />
     <Compile Include="UnstripFixes\GUIUnstrip.cs" />
-    <Compile Include="UnstripFixes\LayoutUtilityUnstrip.cs" />
-    <Compile Include="UnstripFixes\ScrollViewStateUnstrip.cs" />
+    <Compile Include="UnstripFixes\Internal_LayoutUtility.cs" />
     <Compile Include="Extensions\UnityExtensions.cs" />
     <Compile Include="Helpers\PageHelper.cs" />
     <Compile Include="Helpers\ReflectionHelpers.cs" />
@@ -250,8 +252,8 @@
     <Compile Include="Helpers\UnityHelpers.cs" />
     <Compile Include="Menu\InspectUnderMouse.cs" />
     <Compile Include="CachedObjects\CacheObjectBase.cs" />
-    <Compile Include="UnstripFixes\SliderHandlerUnstrip.cs" />
-    <Compile Include="UnstripFixes\UnstripExtensions.cs" />
+    <Compile Include="UnstripFixes\Internal_ScrollViewState.cs" />
+    <Compile Include="UnstripFixes\Internal_SliderHandler.cs" />
     <Compile Include="Menu\ResizeDrag.cs" />
     <Compile Include="Menu\Windows\TabViewWindow.cs" />
     <Compile Include="Menu\Windows\UIWindow.cs" />
@@ -267,6 +269,8 @@
     <Compile Include="Menu\MainMenu\Pages\SearchPage.cs" />
     <Compile Include="Menu\UIStyles.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UnstripFixes\Internal.cs" />
+    <Compile Include="UnstripFixes\Internal_SliderState.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

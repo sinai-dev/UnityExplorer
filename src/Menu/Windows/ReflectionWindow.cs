@@ -272,7 +272,7 @@ namespace Explorer
 
                 GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUILayout.Label("<b>Search:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
-                m_search = GUILayout.TextField(m_search, new GUILayoutOption[0]);                
+                m_search = GUIUnstrip.TextField(m_search, new GUILayoutOption[0]);                
                 GUILayout.EndHorizontal();
 
                 GUILayout.BeginHorizontal(new GUILayoutOption[0]);

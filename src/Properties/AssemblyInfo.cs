@@ -6,7 +6,7 @@ using Explorer;
 #if ML
 using MelonLoader;
 
-[assembly: MelonInfo(typeof(ExplorerMelonMod), ExplorerCore.NAME, ExplorerCore.VERSION, ExplorerCore.AUTHOR)]
+[assembly: MelonInfo(typeof(ExplorerMelonMod), "Explorer", ExplorerCore.VERSION, ExplorerCore.AUTHOR)]
 [assembly: MelonGame(null, null)]
 #endif
 

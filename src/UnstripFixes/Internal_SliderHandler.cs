@@ -2,11 +2,53 @@
 using System;
 using UnhollowerRuntimeLib;
 using UnityEngine;
+using Explorer.UnstripInternals;
+using Il2CppSystem.Reflection;
 
 namespace Explorer
 {
-    public struct SliderHandlerUnstrip
+    public struct Internal_SliderHandler
 	{
+		public static int ScrollTroughSide
+        {
+			get
+            {
+				if (!m_getScrollTroughSideFailed)
+                {
+					try
+                    {
+						return GUI.scrollTroughSide;
+                    }
+					catch
+                    {
+						m_getScrollTroughSideFailed = true;
+                    }
+				}
+
+				return m_manualScrollTrough;
+            }
+			set
+            {
+				if (!m_setScrollTroughSideFailed)
+                {
+					try
+                    {
+						GUI.scrollTroughSide = value;
+						return;
+                    }
+					catch
+                    {
+						m_setScrollTroughSideFailed = true;
+                    }
+                }
+				m_manualScrollTrough = value;
+            }
+        }
+		private static bool m_getScrollTroughSideFailed;
+		private static bool m_setScrollTroughSideFailed;
+		private static int m_manualScrollTrough;
+
+
 		private readonly Rect position;
 		private readonly float currentValue;
 		private readonly float size;
@@ -17,7 +59,8 @@ namespace Explorer
 		private readonly bool horiz;
 		private readonly int id;
 
-		public SliderHandlerUnstrip(Rect position, float currentValue, float size, float start, float end, GUIStyle slider, GUIStyle thumb, bool horiz, int id)
+		public Internal_SliderHandler(Rect position, float currentValue, float size, float start, 
+			float end, GUIStyle slider, GUIStyle thumb, bool horiz, int id)
 		{
 			this.position = position;
 			this.currentValue = currentValue;
@@ -64,7 +107,7 @@ namespace Explorer
 			}
 			else
 			{
-				GUI.scrollTroughSide = 0;
+				ScrollTroughSide = 0;
 				GUIUtility.hotControl = this.id;
 				this.CurrentEvent().Use();
 				if (this.ThumbSelectionRect().Contains(this.CurrentEvent().mousePosition))
@@ -77,9 +120,10 @@ namespace Explorer
 					GUI.changed = true;
 					if (this.SupportsPageMovements())
 					{
-						this.SliderState().isDragging = false;
-						GUIUnstrip.nextScrollStepTime = DateTime.Now.AddMilliseconds(250.0);
-						GUI.scrollTroughSide = this.CurrentScrollTroughSide();
+						var ext = Internal_SliderState.FromPointer(GetSliderState().Pointer);
+						ext.isDragging = false;
+						Internal.nextScrollStepTime = DateTime.Now.AddMilliseconds(250.0);
+						ScrollTroughSide = this.CurrentScrollTroughSide();
 						result = this.PageMovementValue();
 					}
 					else
@@ -102,8 +146,8 @@ namespace Explorer
 			}
 			else
 			{
-				SliderState sliderState = this.SliderState();
-				if (!sliderState.isDragging)
+				var ext = Internal_SliderState.FromPointer(GetSliderState().Pointer);
+				if (!ext.isDragging)
 				{
 					result = this.currentValue;
 				}
@@ -111,8 +155,8 @@ namespace Explorer
 				{
 					GUI.changed = true;
 					this.CurrentEvent().Use();
-					float num = this.MousePosition() - sliderState.dragStartPos;
-					float value = sliderState.dragStartValue + num / this.ValuesPerPixel();
+					float num = this.MousePosition() - ext.dragStartPos;
+					float value = ext.dragStartValue + num / this.ValuesPerPixel();
 					result = this.Clamp(value);
 				}
 			}
@@ -143,7 +187,7 @@ namespace Explorer
 			}
 			else if (this.ThumbRect().Contains(this.CurrentEvent().mousePosition))
 			{
-				if (GUI.scrollTroughSide != 0)
+				if (ScrollTroughSide != 0)
 				{
 					GUIUtility.hotControl = 0;
 				}
@@ -152,20 +196,20 @@ namespace Explorer
 			else
 			{
 				GUI.InternalRepaintEditorWindow();
-				if (DateTime.Now < GUIUnstrip.nextScrollStepTime)
+				if (DateTime.Now < Internal.nextScrollStepTime)
 				{
 					result = this.currentValue;
 				}
-				else if (this.CurrentScrollTroughSide() != GUI.scrollTroughSide)
+				else if (this.CurrentScrollTroughSide() != ScrollTroughSide)
 				{
 					result = this.currentValue;
 				}
 				else
 				{
-					GUIUnstrip.nextScrollStepTime = DateTime.Now.AddMilliseconds(30.0);
+					Internal.nextScrollStepTime = DateTime.Now.AddMilliseconds(30.0);
 					if (this.SupportsPageMovements())
 					{
-						this.SliderState().isDragging = false;
+						Internal_SliderState.FromPointer(GetSliderState().Pointer).isDragging = false;
 						GUI.changed = true;
 						result = this.PageMovementValue();
 					}
@@ -261,15 +305,15 @@ namespace Explorer
 
 		private void StartDraggingWithValue(float dragStartValue)
 		{
-			SliderState sliderState = this.SliderState();
-			sliderState.dragStartPos = this.MousePosition();
-			sliderState.dragStartValue = dragStartValue;
-			sliderState.isDragging = true;
+			var ext = Internal_SliderState.FromPointer(GetSliderState().Pointer);
+			ext.dragStartPos = this.MousePosition();
+			ext.dragStartValue = dragStartValue;
+			ext.isDragging = true;
 		}
 
-		private SliderState SliderState()
+		private SliderState GetSliderState()
 		{
-			return (SliderState)GUIUtility.GetStateObject(Il2CppType.Of<SliderState>(), this.id).TryCast<SliderState>();
+			return GUIUtility.GetStateObject(Il2CppType.Of<SliderState>(), this.id).TryCast<SliderState>();
 		}
 
 		private Rect ThumbRect()

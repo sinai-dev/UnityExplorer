@@ -370,7 +370,7 @@ namespace Explorer
 
             GUILayout.BeginHorizontal(new GUILayoutOption[0]);
             var width = m_rect.width / 2 - 135f;
-            m_addComponentInput = GUILayout.TextField(m_addComponentInput, new GUILayoutOption[] { GUILayout.Width(width) });
+            m_addComponentInput = GUIUnstrip.TextField(m_addComponentInput, new GUILayoutOption[] { GUILayout.Width(width) });
             if (GUILayout.Button("Add Comp", new GUILayoutOption[0]))
             {
                 if (ReflectionHelpers.GetTypeByName(m_addComponentInput) is Type compType)
@@ -532,7 +532,7 @@ namespace Explorer
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 
-            m_setParentInput = GUILayout.TextField(m_setParentInput, new GUILayoutOption[0]);
+            m_setParentInput = GUIUnstrip.TextField(m_setParentInput, new GUILayoutOption[0]);
             if (GUILayout.Button("Set Parent", new GUILayoutOption[] { GUILayout.Width(80) }))
             {
                 if (GameObject.Find(m_setParentInput) is GameObject newparent)
@@ -682,7 +682,7 @@ namespace Explorer
 
             GUILayout.Label("+/-:", new GUILayoutOption[] { GUILayout.Width(30) });
             var amountInput = amount.ToString("F3");
-            amountInput = GUILayout.TextField(amountInput, new GUILayoutOption[] { GUILayout.Width(60) });
+            amountInput = GUIUnstrip.TextField(amountInput, new GUILayoutOption[] { GUILayout.Width(60) });
             if (float.TryParse(amountInput, out float f))
             {
                 amount = f;
@@ -697,7 +697,7 @@ namespace Explorer
         private void PlusMinusFloat(ref float f, float amount, bool multByTime)
         {
             string s = f.ToString("F3");
-            s = GUILayout.TextField(s, new GUILayoutOption[] { GUILayout.Width(60) });
+            s = GUIUnstrip.TextField(s, new GUILayoutOption[] { GUILayout.Width(60) });
             if (float.TryParse(s, out float f2))
             {
                 f = f2;

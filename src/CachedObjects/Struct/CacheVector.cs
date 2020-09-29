@@ -101,13 +101,13 @@ namespace Explorer
                 GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUIUnstrip.Space(whitespace);
                 GUILayout.Label("X:", new GUILayoutOption[] { GUILayout.Width(30) });
-                x = GUILayout.TextField(x, new GUILayoutOption[] { GUILayout.Width(120) });
+                x = GUIUnstrip.TextField(x, new GUILayoutOption[] { GUILayout.Width(120) });
                 GUILayout.EndHorizontal();
 
                 GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUIUnstrip.Space(whitespace);
                 GUILayout.Label("Y:", new GUILayoutOption[] { GUILayout.Width(30) });
-                y = GUILayout.TextField(y, new GUILayoutOption[] { GUILayout.Width(120) });
+                y = GUIUnstrip.TextField(y, new GUILayoutOption[] { GUILayout.Width(120) });
                 GUILayout.EndHorizontal();
 
                 if (VectorSize > 2)
@@ -116,7 +116,7 @@ namespace Explorer
                     GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                     GUIUnstrip.Space(whitespace);
                     GUILayout.Label("Z:", new GUILayoutOption[] { GUILayout.Width(30) });
-                    z = GUILayout.TextField(z, new GUILayoutOption[] { GUILayout.Width(120) });
+                    z = GUIUnstrip.TextField(z, new GUILayoutOption[] { GUILayout.Width(120) });
                     GUILayout.EndHorizontal();
                 }
                 if (VectorSize > 3)
@@ -125,7 +125,7 @@ namespace Explorer
                     GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                     GUIUnstrip.Space(whitespace);
                     GUILayout.Label("W:", new GUILayoutOption[] { GUILayout.Width(30) });
-                    w = GUILayout.TextField(w, new GUILayoutOption[] { GUILayout.Width(120) });
+                    w = GUIUnstrip.TextField(w, new GUILayoutOption[] { GUILayout.Width(120) });
                     GUILayout.EndHorizontal();
                 }
 

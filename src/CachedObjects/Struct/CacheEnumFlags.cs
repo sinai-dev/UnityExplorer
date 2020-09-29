@@ -17,21 +17,20 @@ namespace Explorer
         {
             base.Init();
 
-            if (ValueType != null)
-            {
-                m_enabledFlags = new bool[EnumNames.Length];
-
-                UpdateValue();
-            }
+            UpdateValue();
         }
 
         public override void UpdateValue()
         {
             base.UpdateValue();
 
+            if (Value == null) return;
+
             try
             {
                 var enabledNames = Value.ToString().Split(',').Select(it => it.Trim());
+
+                m_enabledFlags = new bool[EnumNames.Length];
 
                 for (int i = 0; i < EnumNames.Length; i++)
                 {

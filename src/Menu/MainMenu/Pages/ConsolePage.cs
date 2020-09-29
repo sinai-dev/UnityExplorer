@@ -165,7 +165,7 @@ namespace Explorer
 
             GUILayout.BeginHorizontal(new GUILayoutOption[0]);
             GUILayout.Label("Add namespace:", new GUILayoutOption[] { GUILayout.Width(105) });
-            UsingInput = GUILayout.TextField(UsingInput, new GUILayoutOption[] { GUILayout.Width(150) });
+            UsingInput = GUIUnstrip.TextField(UsingInput, new GUILayoutOption[] { GUILayout.Width(150) });
             if (GUILayout.Button("<b><color=lime>Add</color></b>", new GUILayoutOption[] { GUILayout.Width(120) }))
             {
                 AddUsing(UsingInput);

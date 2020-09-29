@@ -229,9 +229,12 @@ namespace Explorer
 
                 GUILayout.EndVertical();
             }
-            catch
+            catch (Exception e)
             {
-                // supress
+                if (!e.Message.Contains("in a group with only"))
+                {
+                    ExplorerCore.Log(e.ToString());
+                }
             }
         }
 
@@ -250,7 +253,7 @@ namespace Explorer
             GUILayout.BeginHorizontal(GUIContent.none, GUI.skin.box, null);
             GUILayout.Label("<b>Search Scene:</b>", new GUILayoutOption[] { GUILayout.Width(100) });
 
-            m_searchInput = GUILayout.TextField(m_searchInput, new GUILayoutOption[0]);
+            m_searchInput = GUIUnstrip.TextField(m_searchInput, new GUILayoutOption[0]);
 
             if (GUILayout.Button("Search", new GUILayoutOption[] { GUILayout.Width(80) }))
             {

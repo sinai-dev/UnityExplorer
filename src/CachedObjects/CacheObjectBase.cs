@@ -27,7 +27,7 @@ namespace Explorer
         public string RichTextName => m_richTextName ?? GetRichTextName();
         private string m_richTextName;
 
-        public bool CanWrite => m_canWrite ?? (bool)(m_canWrite = GetCanWrite());
+        public bool CanWrite => m_canWrite ?? GetCanWrite();
         private bool? m_canWrite;
 
         public virtual void Init() { }
@@ -114,51 +114,45 @@ namespace Explorer
                     type = type.GetElementType();
                 }
 
-                if (string.IsNullOrEmpty(input))
+                if (!string.IsNullOrEmpty(input))
                 {
-                    // No input, see if there is a default value.
-                    if (HasDefaultValue(m_arguments[i]))
+                    if (type == typeof(string))
                     {
-                        parsedArgs.Add(m_arguments[i].DefaultValue);
+                        parsedArgs.Add(input);
                         continue;
                     }
+                    else
+                    {
+                        try
+                        {
+                            var arg = type.GetMethod("Parse", new Type[] { typeof(string) })
+                                          .Invoke(null, new object[] { input });
 
-                    // Try add a null arg I guess
-                    parsedArgs.Add(null);
+                            parsedArgs.Add(arg);
+                            continue;
+                        }
+                        catch
+                        {
+                            ExplorerCore.Log($"Argument #{i} '{m_arguments[i].Name}' ({type.Name}), could not parse input '{input}'.");
+                        }
+                    }
+                }
+
+                // No input, see if there is a default value.
+                if (HasDefaultValue(m_arguments[i]))
+                {
+                    parsedArgs.Add(m_arguments[i].DefaultValue);
                     continue;
                 }
 
-                // strings can obviously just be used directly
-                if (type == typeof(string))
-                {
-                    parsedArgs.Add(input);
-                    continue;
-                }
-                else
-                {
-                    try
-                    {
-                        var arg = type.GetMethod("Parse", new Type[] { typeof(string) })
-                                      .Invoke(null, new object[] { input });
-                        parsedArgs.Add(arg);
-                        continue;
-                    }
-                    catch
-                    {
-                        ExplorerCore.Log($"Argument #{i} '{m_arguments[i].Name}' ({type.Name}), could not parse input '{input}'.");
-                    }
-                }
+                // Try add a null arg I guess
+                parsedArgs.Add(null);
             }
 
             return parsedArgs.ToArray();
         }
 
-        public static bool HasDefaultValue(ParameterInfo arg) =>
-#if NET35
-                arg.DefaultValue != null;
-#else
-                arg.HasDefaultValue;
-#endif
+        public static bool HasDefaultValue(ParameterInfo arg) => arg.DefaultValue != DBNull.Value;
 
         // ========= Gui Draw ==========
 
@@ -246,7 +240,7 @@ namespace Explorer
                                 $"<color={UIStyles.Syntax.StructGreen}>{cm.GenericArgs[i].Name}</color>", 
                                 new GUILayoutOption[] { GUILayout.Width(15) }
                             );
-                            cm.GenericArgInput[i] = GUILayout.TextField(input, new GUILayoutOption[] { GUILayout.Width(150) });
+                            cm.GenericArgInput[i] = GUIUnstrip.TextField(input, new GUILayoutOption[] { GUILayout.Width(150) });
                             GUI.skin.label.alignment = TextAnchor.MiddleLeft;
                             GUILayout.Label(types, new GUILayoutOption[0]);
 
@@ -274,7 +268,7 @@ namespace Explorer
 
                             GUI.skin.label.alignment = TextAnchor.MiddleCenter;
                             GUILayout.Label(i.ToString(), new GUILayoutOption[] { GUILayout.Width(15) });
-                            m_argumentInput[i] = GUILayout.TextField(input, new GUILayoutOption[] { GUILayout.Width(150) });
+                            m_argumentInput[i] = GUIUnstrip.TextField(input, new GUILayoutOption[] { GUILayout.Width(150) });
                             GUI.skin.label.alignment = TextAnchor.MiddleLeft;
                             GUILayout.Label(label, new GUILayoutOption[0]);
 
@@ -350,11 +344,13 @@ namespace Explorer
         private bool GetCanWrite()
         {
             if (MemInfo is FieldInfo fi)
-                return !(fi.IsLiteral && !fi.IsInitOnly);
+                m_canWrite = !(fi.IsLiteral && !fi.IsInitOnly);
             else if (MemInfo is PropertyInfo pi)
-                return pi.CanWrite;
+                m_canWrite = pi.CanWrite;
             else
-                return false;
+                m_canWrite = false;
+
+            return (bool)m_canWrite;
         }
 
         private string GetRichTextName()

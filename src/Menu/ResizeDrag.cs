@@ -8,7 +8,9 @@ namespace Explorer
 {
     public class ResizeDrag
     {
+#if CPP
         private static bool RESIZE_FAILED = false;
+#endif
 
         private static readonly GUIContent gcDrag = new GUIContent("<-- Drag to resize -->");
         private static bool isResizing = false;
@@ -17,6 +19,7 @@ namespace Explorer
 
         public static Rect ResizeWindow(Rect _rect, int ID)
         {
+#if CPP
             if (!RESIZE_FAILED)
             {
                 var origRect = _rect;
@@ -26,18 +29,14 @@ namespace Explorer
                     GUILayout.BeginHorizontal(GUIContent.none, GUI.skin.box, null);
 
                     GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-#if CPP
 #if ML
                     GUILayout.Button(gcDrag, GUI.skin.label, new GUILayoutOption[] { GUILayout.Height(15) });
 #else
                     GUILayout.Button(gcDrag.ToString(), new GUILayoutOption[] { GUILayout.Height(15) });
 #endif
-#else
-                    GUILayout.Button(gcDrag, GUI.skin.label, new GUILayoutOption[] { GUILayout.Height(15) });
-#endif
 
                     //var r = GUILayoutUtility.GetLastRect();
-                    var r = LayoutUtilityUnstrip.GetLastRect();
+                    var r = Internal_LayoutUtility.GetLastRect();
 
                     var mousePos = InputHelper.mousePosition;
 
@@ -115,6 +114,42 @@ namespace Explorer
                 GUILayout.EndHorizontal();
                 GUI.skin.label.alignment = TextAnchor.UpperLeft;
             }
+
+#else      // mono
+
+            GUILayout.BeginHorizontal(GUIContent.none, GUI.skin.box, null);
+
+            GUI.skin.label.alignment = TextAnchor.MiddleCenter;
+            GUILayout.Button(gcDrag, GUI.skin.label, new GUILayoutOption[] { GUILayout.Height(15) });
+
+            //var r = GUILayoutUtility.GetLastRect();
+            var r = GUILayoutUtility.GetLastRect();
+
+            var mousePos = InputHelper.mousePosition;
+
+            var mouse = GUIUnstrip.ScreenToGUIPoint(new Vector2(mousePos.x, Screen.height - mousePos.y));
+            if (r.Contains(mouse) && InputHelper.GetMouseButtonDown(0))
+            {
+                isResizing = true;
+                m_currentWindow = ID;
+                m_currentResize = new Rect(mouse.x, mouse.y, _rect.width, _rect.height);
+            }
+            else if (!InputHelper.GetMouseButton(0))
+            {
+                isResizing = false;
+            }
+
+            if (isResizing && ID == m_currentWindow)
+            {
+                _rect.width = Mathf.Max(100, m_currentResize.width + (mouse.x - m_currentResize.x));
+                _rect.height = Mathf.Max(100, m_currentResize.height + (mouse.y - m_currentResize.y));
+                _rect.xMax = Mathf.Min(Screen.width, _rect.xMax);  // modifying xMax affects width, not x
+                _rect.yMax = Mathf.Min(Screen.height, _rect.yMax);  // modifying yMax affects height, not y
+            }
+
+            GUILayout.EndHorizontal();
+
+#endif
 
             return _rect;
         }

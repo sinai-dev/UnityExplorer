@@ -64,25 +64,25 @@ namespace Explorer
                 GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUIUnstrip.Space(whitespace);
                 GUILayout.Label("R:", new GUILayoutOption[] { GUILayout.Width(30) });
-                r = GUILayout.TextField(r, new GUILayoutOption[] { GUILayout.Width(120) });
+                r = GUIUnstrip.TextField(r, new GUILayoutOption[] { GUILayout.Width(120) });
                 GUILayout.EndHorizontal();
 
                 GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUIUnstrip.Space(whitespace);
                 GUILayout.Label("G:", new GUILayoutOption[] { GUILayout.Width(30) });
-                g = GUILayout.TextField(g, new GUILayoutOption[] { GUILayout.Width(120) });
+                g = GUIUnstrip.TextField(g, new GUILayoutOption[] { GUILayout.Width(120) });
                 GUILayout.EndHorizontal();
 
                 GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUIUnstrip.Space(whitespace);
                 GUILayout.Label("B:", new GUILayoutOption[] { GUILayout.Width(30) });
-                b = GUILayout.TextField(b, new GUILayoutOption[] { GUILayout.Width(120) });
+                b = GUIUnstrip.TextField(b, new GUILayoutOption[] { GUILayout.Width(120) });
                 GUILayout.EndHorizontal();
 
                 GUILayout.BeginHorizontal(new GUILayoutOption[0]);
                 GUIUnstrip.Space(whitespace);
                 GUILayout.Label("A:", new GUILayoutOption[] { GUILayout.Width(30) });
-                a = GUILayout.TextField(a, new GUILayoutOption[] { GUILayout.Width(120) });
+                a = GUIUnstrip.TextField(a, new GUILayoutOption[] { GUILayout.Width(120) });
                 GUILayout.EndHorizontal();
 
                 // draw set value button
