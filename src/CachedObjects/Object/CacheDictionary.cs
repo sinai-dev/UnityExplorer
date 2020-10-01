@@ -269,6 +269,7 @@ namespace Explorer
                         GUI.skin.label.alignment = TextAnchor.MiddleCenter;
                         GUILayout.Label($"[{i}]", new GUILayoutOption[] { GUILayout.Width(30) });
 
+                        GUI.skin.label.alignment = TextAnchor.MiddleLeft;
                         GUILayout.Label("Key:", new GUILayoutOption[] { GUILayout.Width(40) });
                         key.DrawValue(window, (window.width / 2) - 80f);
 

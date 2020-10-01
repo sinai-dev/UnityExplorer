@@ -10,7 +10,7 @@ namespace Explorer
     {
         public static ScenePage Instance;
 
-        public override string Name { get => "Scene Explorer"; }
+        public override string Name { get => "Scenes"; }
 
         public PageHelper Pages = new PageHelper();
 

@@ -109,6 +109,8 @@ namespace Explorer.UnstripInternals
 
         public static string TextField(string text, GUILayoutOption[] options)
         {
+            text = text ?? "";
+
             int controlID = GUIUtility.GetControlID(FocusType.Keyboard);
             GUIContent guicontent = GUIContent.Temp(text);
             bool flag = GUIUtility.keyboardControl != controlID;

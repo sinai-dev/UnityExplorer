@@ -17,16 +17,20 @@ namespace Explorer
             Pages.Add(new ScenePage());
             Pages.Add(new SearchPage());
             Pages.Add(new ConsolePage());
+            Pages.Add(new OptionsPage());
 
             for (int i = 0; i < Pages.Count; i++)
             {
                 var page = Pages[i];
                 page.Init();
+
+                // If page failed to init, it will remove itself from the list. Lower the iterate counter.
+                if (!Pages.Contains(page)) i--;
             }
         }
 
         public const int MainWindowID = 5000;
-        public static Rect MainRect = new Rect(5,5, ModConfig.Instance.Default_Window_Size.x,ModConfig.Instance.Default_Window_Size.y);
+        public static Rect MainRect = new Rect(5, 5, ModConfig.Instance.Default_Window_Size.x, ModConfig.Instance.Default_Window_Size.y);
 
         public static readonly List<WindowPage> Pages = new List<WindowPage>();
         private static int m_currentPage = 0;

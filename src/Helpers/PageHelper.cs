@@ -21,7 +21,7 @@ namespace Explorer
                 CalculateMaxOffset();
             }
         }
-        private int m_itemsPerPage = 20;
+        private int m_itemsPerPage = ModConfig.Instance.Default_Page_Limit;
 
         public int ItemCount 
         {

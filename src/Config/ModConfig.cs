@@ -15,6 +15,7 @@ namespace Explorer
 
         public KeyCode Main_Menu_Toggle = KeyCode.F7;
         public Vector2 Default_Window_Size = new Vector2(550, 700);
+        public int Default_Page_Limit = 20;
 
         public static void OnLoad()
         {

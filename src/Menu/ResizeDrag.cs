@@ -150,6 +150,7 @@ namespace Explorer
             GUILayout.EndHorizontal();
 
 #endif
+            GUI.skin.label.alignment = TextAnchor.MiddleLeft;
 
             return _rect;
         }
