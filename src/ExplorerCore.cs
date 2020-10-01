@@ -4,22 +4,22 @@ namespace Explorer
 {
     public class ExplorerCore
     {
-        public const string NAME = "Explorer (" + PLATFORM + ", " + MODLOADER + ")";
-        public const string VERSION = "1.8.1";
+        public const string NAME    = "Explorer (" + PLATFORM + ", " + MODLOADER + ")";
+        public const string VERSION = "1.8.2";
         public const string AUTHOR  = "Sinai";
         public const string GUID    = "com.sinai.explorer";
 
-        public const string MODLOADER =
-#if ML
-            "MelonLoader";
-#else
-            "BepInEx";
-#endif
         public const string PLATFORM =
 #if CPP
             "Il2Cpp";
 #else
             "Mono";
+#endif
+        public const string MODLOADER =
+#if ML
+            "MelonLoader";
+#else
+            "BepInEx";
 #endif
 
         public static ExplorerCore Instance { get; private set; }
@@ -30,11 +30,10 @@ namespace Explorer
 
             ModConfig.OnLoad();
 
-            InputHelper.Init();
-
             new MainMenu();
             new WindowManager();
 
+            InputHelper.Init();
             CursorControl.Init();
 
             Log($"{NAME} {VERSION} initialized.");

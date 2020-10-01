@@ -33,7 +33,7 @@ namespace Explorer
             if (!UnityHelpers.MainCamera)
                 return;
 
-            var ray = UnityHelpers.MainCamera.ScreenPointToRay(InputHelper.mousePosition);
+            var ray = UnityHelpers.MainCamera.ScreenPointToRay(InputHelper.MousePosition);
 
             if (Physics.Raycast(ray, out RaycastHit hit, 1000f))
             {
@@ -61,7 +61,7 @@ namespace Explorer
             {
                 if (m_objUnderMouseName != "")
                 {
-                    var pos = InputHelper.mousePosition;
+                    var pos = InputHelper.MousePosition;
                     var rect = new Rect(
                         pos.x - (Screen.width / 2), // x
                         Screen.height - pos.y - 50, // y

@@ -66,7 +66,7 @@ namespace Explorer
 
             new ExplorerCore();
 
-            HarmonyInstance.PatchAll();
+            //HarmonyInstance.PatchAll();
         }
 
         void LoadMCS()

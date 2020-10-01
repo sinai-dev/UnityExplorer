@@ -267,7 +267,7 @@ namespace Explorer.UnstripInternals
 
 #endregion
 
-#region Scrolling
+        #region Scrolling
 
         private static Il2CppSystem.Object GetStateObject(Il2CppSystem.Type type, int controlID)
         {
@@ -653,7 +653,9 @@ namespace Explorer.UnstripInternals
 #endregion
     }
 
-    public static class UnstripExtensions
+    #region Extensions
+
+    public static class Extensions
     {
         public static Rect Unstripped_GetLast(this GUILayoutGroup group)
         {
@@ -670,5 +672,7 @@ namespace Explorer.UnstripInternals
             return result;
         }
     }
+
+    #endregion
 }
 #endif

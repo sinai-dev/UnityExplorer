@@ -34,6 +34,7 @@
     <BIECppGameFolder>D:\Steam\steamapps\common\Outward - Il2Cpp</BIECppGameFolder>
     <!-- Set this to the BepInEx Mono Game folder, without the ending '\' character. -->
     <BIEMonoGameFolder>D:\Steam\steamapps\common\Outward</BIEMonoGameFolder>
+    <!-- <BIEMonoGameFolder>D:\source\Unity Projects\! My Unity Games\NewInputSystemTest\_BUILD</BIEMonoGameFolder> -->
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_ML_Cpp|AnyCPU' ">
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>

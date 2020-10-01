@@ -189,7 +189,7 @@ namespace Explorer
 
         private static bool RectContainsMouse(Rect rect)
         {
-            var mousePos = InputHelper.mousePosition;
+            var mousePos = InputHelper.MousePosition;
             return rect.Contains(new Vector2(mousePos.x, Screen.height - mousePos.y));
         }
 

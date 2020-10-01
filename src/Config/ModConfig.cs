@@ -30,9 +30,9 @@ namespace Explorer
         }
 
         // returns true if settings successfully loaded
-        public static bool LoadSettings(bool checkExist = true)
+        public static bool LoadSettings()
         {
-            if (checkExist && !File.Exists(SETTINGS_PATH))
+            if (!File.Exists(SETTINGS_PATH))
                 return false;
 
             try
@@ -50,9 +50,9 @@ namespace Explorer
             return Instance != null;
         }
 
-        public static void SaveSettings(bool checkExist = true)
+        public static void SaveSettings()
         {
-            if (checkExist && File.Exists(SETTINGS_PATH))
+            if (File.Exists(SETTINGS_PATH))
                 File.Delete(SETTINGS_PATH);
 
             using (var file = File.Create(SETTINGS_PATH))

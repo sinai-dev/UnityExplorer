@@ -19,7 +19,7 @@ namespace Explorer
 #else
             return GUILayout.TextField(text, options);
 #endif
-        }        
+        }
 
         public static Rect Window(int id, Rect rect, GUI.WindowFunction windowFunc, string title)
         {
@@ -75,63 +75,50 @@ namespace Explorer
 #endif
         }
 
+        public static bool RepeatButton(string text, params GUILayoutOption[] options)
+        {
 #if CPP
-        public static bool RepeatButton(string text, params GUILayoutOption[] options) 
-        { 
-            return Internal.DoRepeatButton(GUIContent.Temp(text), GUI.skin.button, options); 
-        }
+            return Internal.DoRepeatButton(GUIContent.Temp(text), GUI.skin.button, options);
 #else
-        public static bool RepeatButton(string text, params GUILayoutOption[] args)
-        {
-            return GUILayout.RepeatButton(text, args);
-        }
+            return GUILayout.RepeatButton(text, options);
 #endif
-
-#if CPP
-        public static void BeginArea(Rect screenRect, GUIStyle style) 
-        {
-            Internal.BeginArea(screenRect, GUIContent.none, style);            
         }
+
+        public static void BeginArea(Rect screenRect, GUIStyle style)
+        {
+#if CPP
+            Internal.BeginArea(screenRect, GUIContent.none, style);
 #else
-        public static void BeginArea(Rect rect, GUIStyle skin)
-        {
-            GUILayout.BeginArea(rect, skin);
-        }
+            GUILayout.BeginArea(screenRect, style);
 #endif
+        }
 
-#if CPP
         static public void EndArea()
         {
-            Internal.EndArea();
-        }
-#else
-        public static void EndArea()
-        {
-            GUILayout.EndArea();
-        }
-#endif
-
-
 #if CPP
+            Internal.EndArea();
+#else
+            GUILayout.EndArea();
+#endif
+        }
+
+
         public static Vector2 BeginScrollView(Vector2 scroll, params GUILayoutOption[] options)
         {
+#if CPP
             return Internal.BeginScrollView(scroll, options);
+#else
+            return GUILayout.BeginScrollView(scroll, options);
+#endif
         }
 
         public static void EndScrollView(bool handleScrollWheel = true)
         {
+#if CPP
             Internal.EndScrollView(handleScrollWheel);
-        }
 #else
-        public static Vector2 BeginScrollView(Vector2 scroll, params GUILayoutOption[] options)
-        {
-            return GUILayout.BeginScrollView(scroll, options);
-        }
-
-        public static void EndScrollView()
-        {
             GUILayout.EndScrollView();
-        }
 #endif
+        }
     }
 }

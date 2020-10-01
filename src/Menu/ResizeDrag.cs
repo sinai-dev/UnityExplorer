@@ -38,7 +38,7 @@ namespace Explorer
                     //var r = GUILayoutUtility.GetLastRect();
                     var r = Internal_LayoutUtility.GetLastRect();
 
-                    var mousePos = InputHelper.mousePosition;
+                    var mousePos = InputHelper.MousePosition;
 
                     try
                     {
@@ -125,7 +125,7 @@ namespace Explorer
             //var r = GUILayoutUtility.GetLastRect();
             var r = GUILayoutUtility.GetLastRect();
 
-            var mousePos = InputHelper.mousePosition;
+            var mousePos = InputHelper.MousePosition;
 
             var mouse = GUIUnstrip.ScreenToGUIPoint(new Vector2(mousePos.x, Screen.height - mousePos.y));
             if (r.Contains(mouse) && InputHelper.GetMouseButtonDown(0))
