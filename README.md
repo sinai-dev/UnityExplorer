@@ -12,6 +12,10 @@
   <img src="https://img.shields.io/github/downloads/sinai-dev/Explorer/total.svg" />
 </p>
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/sinai-dev/Explorer/master/overview.png">  
+</p>
+
 - [Current status](#current-status)
 - [How to install](#how-to-install)
 - [How to use](#how-to-use)
@@ -73,9 +77,6 @@ This config is generated to `[Game_Directory]\Mods\Explorer\config.xml`. Edit th
 * Default: `<x>550</x> <y>700</y>`
 
 ## Features
-[![](overview.png)](https://raw.githubusercontent.com/sinai-dev/Explorer/master/overview.png)
-
-<i>An overview of the different Explorer menus.</i>
 
 ### Scene Explorer
 
