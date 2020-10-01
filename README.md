@@ -62,19 +62,21 @@ Requires [BepInEx](https://github.com/BepInEx/BepInEx) to be installed for your 
 
 ### Mod Config
 
-There is a simple Mod Config for the Explorer, which is generated the first time you run it.
+There is a simple Mod Config for the Explorer. You can access the settings via the "Options" page of the main menu.
 
-This config is generated to `[Game_Directory]\Mods\Explorer\config.xml`. Edit the config while the game is closed if you wish to change it.
-
-`Main_Menu_Toggle` (KeyCode)
+`Main Menu Toggle` (KeyCode)
 * Sets the keybinding for the Main Menu toggle (show/hide all Explorer windows)
 * See [this article](https://docs.unity3d.com/ScriptReference/KeyCode.html) for a full list of all accepted KeyCodes.
 * Default: `F7`
 
-`Default_Window_Size` (Vector2)
+`Default Window Size` (Vector2)
 * Sets the default width and height for all Explorer windows when created.
 * `x` is width, `y` is height.
 * Default: `<x>550</x> <y>700</y>`
+
+`Default Items per Page` (Int)
+* Sets the default items per page when viewing lists or search results.
+* Default: `20`
 
 ## Features
 
