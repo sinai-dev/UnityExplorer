@@ -147,13 +147,13 @@ public class MenuClass_CursorUpdate
 
 ## Building
 
-If you'd like to build this yourself, everything you need (other than MelonLoader) is included with this repository, there is no need for recursive cloning etc.
+If you'd like to build this yourself, everything you need (other than MelonLoader and/or BepInEx) is included with this repository.
 
-1. Install MelonLoader for your game.
+1. Install MelonLoader or BepInEx for your game.
 2. Open the `src\Explorer.csproj` file in a text editor.
-3. Set the relevant `GameFolder` value(s) for the version(s) you want to build, eg. set `MLCppGameFolder` if you want to build for a MelonLoader Il2Cpp game.
+3. Set the relevant `GameFolder` values for the versions you want to build, eg. set `MLCppGameFolder` if you want to build for a MelonLoader Il2Cpp game.
 4. Open the `src\Explorer.sln` project.
-5. Select `Solution 'Explorer' (1 of 1 project)` in the Solution Explorer panel, and set the <b>Active config</b> to the version you want to build, then build it.
+5. Select `Solution 'Explorer' (1 of 1 project)` in the Solution Explorer panel, and set the <b>Active config</b> property to the version you want to build, then build it.
 5. The DLLs are built to the `Release\` folder in the root of the repository.
 
 ## Credits
