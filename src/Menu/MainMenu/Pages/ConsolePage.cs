@@ -45,6 +45,7 @@ namespace Explorer
                 MethodInput = @"// This is a basic C# console. 
 // Some common using directives are added by default, you can add more below.
 // If you want to return some output, Debug.Log() or MelonLogger.Log() it.
+
 "
 #if ML
 + @"MelonLogger.Log(""hello world"");";
