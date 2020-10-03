@@ -109,7 +109,7 @@ namespace Explorer
                     DestroyWindow();
                     return;
                 }
-                else if (Target is UnityEngine.Object uObj)
+                if (Target is UnityEngine.Object uObj)
                 {
                     if (!uObj)
                     {

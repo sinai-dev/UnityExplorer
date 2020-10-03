@@ -241,7 +241,10 @@
     <Compile Include="ExplorerBepInPlugin.cs" />
     <Compile Include="ExplorerMelonMod.cs" />
     <Compile Include="Extensions\ReflectionExtensions.cs" />
-    <Compile Include="Helpers\InputHelper.cs" />
+    <Compile Include="Input\AbstractInput.cs" />
+    <Compile Include="Input\InputManager.cs" />
+    <Compile Include="Input\InputSystem.cs" />
+    <Compile Include="Input\LegacyInput.cs" />
     <Compile Include="Menu\CursorControl.cs" />
     <Compile Include="Menu\MainMenu\Pages\OptionsPage.cs" />
     <Compile Include="Tests\TestClass.cs" />

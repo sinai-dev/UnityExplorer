@@ -5,7 +5,7 @@ namespace Explorer
     public class ExplorerCore
     {
         public const string NAME    = "Explorer (" + PLATFORM + ", " + MODLOADER + ")";
-        public const string VERSION = "1.8.22";
+        public const string VERSION = "1.8.23";
         public const string AUTHOR  = "Sinai";
         public const string GUID    = "com.sinai.explorer";
 
@@ -33,7 +33,7 @@ namespace Explorer
             new MainMenu();
             new WindowManager();
 
-            InputHelper.Init();
+            InputManager.Init();
             CursorControl.Init();
 
             Log($"{NAME} {VERSION} initialized.");
@@ -54,7 +54,7 @@ namespace Explorer
 
         public static void Update()
         {
-            if (InputHelper.GetKeyDown(ModConfig.Instance.Main_Menu_Toggle))
+            if (InputManager.GetKeyDown(ModConfig.Instance.Main_Menu_Toggle))
             {
                 ShowMenu = !ShowMenu;
             }

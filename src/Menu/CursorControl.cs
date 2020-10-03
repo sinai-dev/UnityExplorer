@@ -108,7 +108,7 @@ namespace Explorer
         public static void Update()
         {
             // Check Force-Unlock input
-            if (InputHelper.GetKeyDown(KeyCode.LeftAlt))
+            if (InputManager.GetKeyDown(KeyCode.LeftAlt))
             {
                 ForceUnlockMouse = !ForceUnlockMouse;
             }

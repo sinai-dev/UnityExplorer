@@ -81,7 +81,7 @@ namespace Explorer
         {
             createdNew = false;
 
-            if (InputHelper.GetKey(KeyCode.LeftShift))
+            if (InputManager.GetKey(KeyCode.LeftShift))
             {
                 forceReflection = true;
             }
@@ -189,7 +189,7 @@ namespace Explorer
 
         private static bool RectContainsMouse(Rect rect)
         {
-            var mousePos = InputHelper.MousePosition;
+            var mousePos = InputManager.MousePosition;
             return rect.Contains(new Vector2(mousePos.x, Screen.height - mousePos.y));
         }
 

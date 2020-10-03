@@ -38,18 +38,18 @@ namespace Explorer
                     //var r = GUILayoutUtility.GetLastRect();
                     var r = Internal_LayoutUtility.GetLastRect();
 
-                    var mousePos = InputHelper.MousePosition;
+                    var mousePos = InputManager.MousePosition;
 
                     try
                     {
                         var mouse = GUIUnstrip.ScreenToGUIPoint(new Vector2(mousePos.x, Screen.height - mousePos.y));
-                        if (r.Contains(mouse) && InputHelper.GetMouseButtonDown(0))
+                        if (r.Contains(mouse) && InputManager.GetMouseButtonDown(0))
                         {
                             isResizing = true;
                             m_currentWindow = ID;
                             m_currentResize = new Rect(mouse.x, mouse.y, _rect.width, _rect.height);
                         }
-                        else if (!InputHelper.GetMouseButton(0))
+                        else if (!InputManager.GetMouseButton(0))
                         {
                             isResizing = false;
                         }
@@ -125,16 +125,16 @@ namespace Explorer
             //var r = GUILayoutUtility.GetLastRect();
             var r = GUILayoutUtility.GetLastRect();
 
-            var mousePos = InputHelper.MousePosition;
+            var mousePos = InputManager.MousePosition;
 
             var mouse = GUIUnstrip.ScreenToGUIPoint(new Vector2(mousePos.x, Screen.height - mousePos.y));
-            if (r.Contains(mouse) && InputHelper.GetMouseButtonDown(0))
+            if (r.Contains(mouse) && InputManager.GetMouseButtonDown(0))
             {
                 isResizing = true;
                 m_currentWindow = ID;
                 m_currentResize = new Rect(mouse.x, mouse.y, _rect.width, _rect.height);
             }
-            else if (!InputHelper.GetMouseButton(0))
+            else if (!InputManager.GetMouseButton(0))
             {
                 isResizing = false;
             }

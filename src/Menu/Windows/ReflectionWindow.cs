@@ -78,13 +78,15 @@ namespace Explorer
         {
             if (Target == null)
             {
+                ExplorerCore.Log("Target is null!");
                 DestroyWindow();
                 return;
             }
-            else if (Target is UnityEngine.Object uObj)
+            if (Target is UnityEngine.Object uObj)
             {
                 if (!uObj)
                 {
+                    ExplorerCore.Log("Target was destroyed!");
                     DestroyWindow();
                     return;
                 }
