@@ -62,22 +62,9 @@ namespace Explorer
             SceneManager.activeSceneChanged += DoSceneChange;
 #endif
 
-            LoadMCS();
-
             new ExplorerCore();
 
             //HarmonyInstance.PatchAll();
-        }
-
-        void LoadMCS()
-        {
-#if NET35
-            var path = @"BepInEx\plugins\mcs.NET35.dll";
-#else
-            var path = @"BepInEx\plugins\mcs.dll";
-#endif
-            Assembly.Load(File.ReadAllBytes(path));
-            ExplorerCore.Log("Loaded mcs!");
         }
 
         internal static void DoSceneChange(Scene arg0, Scene arg1)

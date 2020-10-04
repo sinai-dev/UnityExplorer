@@ -5,7 +5,7 @@ namespace Explorer
     public class ExplorerCore
     {
         public const string NAME    = "Explorer (" + PLATFORM + ", " + MODLOADER + ")";
-        public const string VERSION = "1.8.23";
+        public const string VERSION = "1.8.3";
         public const string AUTHOR  = "Sinai";
         public const string GUID    = "com.sinai.explorer";
 

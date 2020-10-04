@@ -27,14 +27,12 @@
     <AssemblyName>Explorer</AssemblyName>
     <!-- Set this to the MelonLoader Il2Cpp Game folder, without the ending '\' character. -->
     <MLCppGameFolder>D:\Steam\steamapps\common\Hellpoint</MLCppGameFolder>
-    <!--<MLCppGameFolder>D:\source\Unity Projects\Test\_BUILD</MLCppGameFolder>-->
     <!-- Set this to the MelonLoader Mono Game folder, without the ending '\' character. -->
     <MLMonoGameFolder>D:\Steam\steamapps\common\Outward</MLMonoGameFolder>
     <!-- Set this to the BepInEx Il2Cpp Game folder, without the ending '\' character. -->
     <BIECppGameFolder>D:\Steam\steamapps\common\Outward - Il2Cpp</BIECppGameFolder>
     <!-- Set this to the BepInEx Mono Game folder, without the ending '\' character. -->
     <BIEMonoGameFolder>D:\Steam\steamapps\common\Outward</BIEMonoGameFolder>
-    <!-- <BIEMonoGameFolder>D:\source\Unity Projects\! My Unity Games\NewInputSystemTest\_BUILD</BIEMonoGameFolder> -->
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_ML_Cpp|AnyCPU' ">
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -95,11 +93,11 @@
     <!-- MCS ref -->
     <Reference Include="mcs" Condition="'$(IsNet35)'=='false'">
       <HintPath>..\lib\mcs.dll</HintPath>
-      <Private>True</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="mcs" Condition="'$(IsNet35)'=='true'">
       <HintPath>..\lib\mcs.NET35.dll</HintPath>
-      <Private>True</Private>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <!-- Universal Mono UnityEngine.dll ref (v5.3) -->
