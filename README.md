@@ -155,7 +155,7 @@ If you'd like to build this yourself, everything you need (other than MelonLoade
 4. Open the `src\Explorer.sln` project.
 5. Select `Solution 'Explorer' (1 of 1 project)` in the Solution Explorer panel, and set the <b>Active config</b> property to the version you want to build, then build it.
 5. The DLLs are built to the `Release\` folder in the root of the repository.
-6. [IlRepack](https://github.com/gluck/il-repack) is used to merge `lib\mcs.dll` and the release dll, this step is optional. If you don't merge them, you will need to put `mcs.dll` in the folder with the mod when you install it.
+6. [ILRepack](https://github.com/gluck/il-repack) is used to merge `lib\mcs.dll` and the release dll, this step is optional. If you don't merge them, you will need to put `mcs.dll` in the folder with the mod when you install it.
 
 ## Credits
 
