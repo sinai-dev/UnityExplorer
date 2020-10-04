@@ -45,14 +45,14 @@ Requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be ins
 
 1. Download the relevant <b>Explorer_MelonLoader_.zip</b> from above.
 2. Unzip the file into the `Mods` folder in your game's installation directory, created by MelonLoader.
-3. Make sure it's not in a sub-folder, `Explorer.dll` and `mcs.dll` should be directly in the `Mods\` folder.
+3. Make sure it's not in a sub-folder, `Explorer.dll` should be directly in the `Mods\` folder.
 
 ### BepInEx
 Requires [BepInEx](https://github.com/BepInEx/BepInEx) to be installed for your game.
 
 1. Download the relevant <b>Explorer_BepInEx_.zip</b> from above.
 2. Unzip the file into the `BepInEx\plugins\` folder in your game's installation directory, created by BepInEx.
-3. Make sure it's not in a sub-folder, `Explorer.dll` and `mcs.dll` should be directly in the `plugins\` folder.
+3. Make sure it's not in a sub-folder, `Explorer.dll` should be directly in the `plugins\` folder.
 
 ## How to use
 
@@ -155,6 +155,7 @@ If you'd like to build this yourself, everything you need (other than MelonLoade
 4. Open the `src\Explorer.sln` project.
 5. Select `Solution 'Explorer' (1 of 1 project)` in the Solution Explorer panel, and set the <b>Active config</b> property to the version you want to build, then build it.
 5. The DLLs are built to the `Release\` folder in the root of the repository.
+6. [IlRepack](https://github.com/gluck/il-repack) is used to merge `lib\mcs.dll` and the release dll, this step is optional. If you don't merge them, you will need to put `mcs.dll` in the folder with the mod when you install it.
 
 ## Credits
 
