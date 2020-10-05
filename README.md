@@ -16,7 +16,7 @@
   <img src="https://raw.githubusercontent.com/sinai-dev/Explorer/master/overview.png">  
 </p>
 
-- [Current status](#current-status)
+- [Releases](#releases)
 - [How to install](#how-to-install)
 - [How to use](#how-to-use)
   - [Mod Config](#mod-config)
@@ -25,7 +25,7 @@
 - [Building](#building)
 - [Credits](#credits)
 
-## Current status
+## Releases
 
 | Mod Loader  | Il2Cpp | Mono |
 | ----------- | ------ | ---- |
@@ -42,14 +42,14 @@
 ### MelonLoader
 Requires [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) to be installed for your game.
 
-1. Download the relevant <b>Explorer_MelonLoader_.zip</b> from above.
+1. Download the relevant release from above.
 2. Unzip the file into the `Mods` folder in your game's installation directory, created by MelonLoader.
 3. Make sure it's not in a sub-folder, `Explorer.dll` should be directly in the `Mods\` folder.
 
 ### BepInEx
 Requires [BepInEx](https://github.com/BepInEx/BepInEx) to be installed for your game.
 
-1. Download the relevant <b>Explorer_BepInEx_.zip</b> from above.
+1. Download the relevant release from above.
 2. Unzip the file into the `BepInEx\plugins\` folder in your game's installation directory, created by BepInEx.
 3. Make sure it's not in a sub-folder, `Explorer.dll` should be directly in the `plugins\` folder.
 
