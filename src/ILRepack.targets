@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="ILRepacker" AfterTargets="Build">
+
+    <!-- Merging DLLs -->
+    <ItemGroup>
+      <InputAssemblies Include="$(OutputPath)$(AssemblyName).dll" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(IsNet35)'=='false'">
+      <InputAssemblies Include="..\lib\mcs.dll" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(IsNet35)'=='true'">
+      <InputAssemblies Include="..\lib\mcs.NET35.dll" />
+    </ItemGroup> 
+
+    <ILRepack
+      Parallel="true"
+      Internalize="true"
+      DebugInfo="false"
+      LibraryPath="..\lib\"
+      InputAssemblies="@(InputAssemblies)"      
+      TargetKind="Dll"
+      OutputFile="$(OutputPath)$(AssemblyName).dll"
+    />
+
+  </Target>
+</Project>

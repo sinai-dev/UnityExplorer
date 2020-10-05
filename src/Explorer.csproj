@@ -28,11 +28,13 @@
     <!-- Set this to the MelonLoader Il2Cpp Game folder, without the ending '\' character. -->
     <MLCppGameFolder>D:\Steam\steamapps\common\Hellpoint</MLCppGameFolder>
     <!-- Set this to the MelonLoader Mono Game folder, without the ending '\' character. -->
-    <MLMonoGameFolder>D:\Steam\steamapps\common\Outward</MLMonoGameFolder>
+    <MLMonoGameFolder>D:\Steam\steamapps\common\Outward_Mono</MLMonoGameFolder>
     <!-- Set this to the BepInEx Il2Cpp Game folder, without the ending '\' character. -->
-    <BIECppGameFolder>D:\Steam\steamapps\common\Outward - Il2Cpp</BIECppGameFolder>
+    <BIECppGameFolder>D:\Steam\steamapps\common\Outward</BIECppGameFolder>
     <!-- Set this to the BepInEx Mono Game folder, without the ending '\' character. -->
-    <BIEMonoGameFolder>D:\Steam\steamapps\common\Outward</BIEMonoGameFolder>
+    <BIEMonoGameFolder>D:\Steam\steamapps\common\Outward_Mono</BIEMonoGameFolder>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_ML_Cpp|AnyCPU' ">
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -275,5 +277,16 @@
     <Compile Include="UnstripFixes\Internal.cs" />
     <Compile Include="UnstripFixes\Internal_SliderState.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="ILRepack.targets" />
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="packages\ILRepack.Lib.MSBuild.Task.2.0.18.1\build\ILRepack.Lib.MSBuild.Task.targets" Condition="Exists('packages\ILRepack.Lib.MSBuild.Task.2.0.18.1\build\ILRepack.Lib.MSBuild.Task.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\ILRepack.Lib.MSBuild.Task.2.0.18.1\build\ILRepack.Lib.MSBuild.Task.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\ILRepack.Lib.MSBuild.Task.2.0.18.1\build\ILRepack.Lib.MSBuild.Task.targets'))" />
+  </Target>
 </Project>

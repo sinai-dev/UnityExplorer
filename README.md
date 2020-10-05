@@ -155,35 +155,7 @@ If you'd like to build this yourself, you will need to have installed BepInEx an
 4. Open the `src\Explorer.sln` project.
 5. Select `Solution 'Explorer' (1 of 1 project)` in the Solution Explorer panel, and set the <b>Active config</b> property to the version you want to build, then build it.
 5. The DLLs are built to the `Release\` folder in the root of the repository.
-
-[ILRepack](https://github.com/gluck/il-repack) is used to merge `lib\mcs.dll` and the release dll. Download the ILRepack nuget package and take the `ILRepack.exe` file from it.
-
-Put `ILRepack.exe` in the `Release\` folder, then create a `merge.bat` file like so:
-
-```batch
-:: Set GameFolder to the full path of the game you have installed MelonLoader and/or BepInEx for.
-SET GameFolder="..."
-
-:: Only include the lines for the version(s) you are building.
-
-:: MelonLoader Il2CPP:
-ILRepack.exe /lib:"%GameFolder%\MelonLoader" /lib:"%GameFolder%\MelonLoader\Managed" /out:"Explorer.MelonLoader.Il2Cpp\Explorer.dll" "Explorer.MelonLoader.Il2Cpp\Explorer.dll" "..\lib\mcs.dll"
-
-:: MelonLoader Mono
-ILRepack.exe /lib:"..\lib" /lib:"%GameFolder%\MelonLoader" /out:"Explorer.MelonLoader.Mono\Explorer.dll" "Explorer.MelonLoader.Mono\Explorer.dll" "..\lib\mcs.dll"
-
-:: MelonLoader Mono .NET35	
-ILRepack.exe /lib:"..\lib" /lib:"%GameFolder%\MelonLoader" /out:"Explorer.MelonLoader.Mono.NET35\Explorer.dll" "Explorer.MelonLoader.Mono.NET35\Explorer.dll" "..\lib\mcs.NET35.dll"
-	
-:: BepInEx Il2Cpp
-ILRepack.exe /lib:"%GameFolder%\BepInEx\core" /lib:"%GameFolder%\BepInEx\unhollowed" /out:"Explorer.BepInEx.Il2Cpp\Explorer.dll" "Explorer.BepInEx.Il2Cpp\Explorer.dll" "..\lib\mcs.dll"
-	
-:: BepInEx Mono
-ILRepack.exe /lib:"..\lib" /lib:"%GameFolder%\BepInEx\core" /out:"Explorer.BepInEx.Mono\Explorer.dll" "Explorer.BepInEx.Mono\Explorer.dll" "..\lib\mcs.dll"
-	
-:: BepInEx Mono .NET35	
-ILRepack.exe /lib:"..\lib" /lib:"%GameFolder%\BepInEx\core" /out:"Explorer.BepInEx.Mono.NET35\Explorer.dll" "Explorer.BepInEx.Mono.NET35\Explorer.dll" "..\lib\mcs.NET35.dll"
-```
+6. If ILRepack fails or is missing, use the NuGet package manager to re-install `ILRepack.Lib.MSBuild.Task`, then re-build.
 
 ## Credits
 
