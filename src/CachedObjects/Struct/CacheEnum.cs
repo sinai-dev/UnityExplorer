@@ -9,6 +9,8 @@ namespace Explorer
 {
     public class CacheEnum : CacheObjectBase
     {
+        internal static Dictionary<Type, string[]> EnumNamesInternalCache = new Dictionary<Type, string[]>();
+
         // public Type EnumType;
         public string[] EnumNames = new string[0];
 
@@ -21,23 +23,33 @@ namespace Explorer
 
             if (ValueType != null)
             {
-                // using GetValues not GetNames, to catch instances of weird enums (eg CameraClearFlags)
-                var values = Enum.GetValues(ValueType);
-
-                var list = new List<string>();
-                foreach (var value in values)
-                {
-                    var v = value.ToString();
-                    if (list.Contains(v)) continue;
-                    list.Add(v);
-                }
-
-                EnumNames = list.ToArray();
+                GetNames();
             }
             else
             {
                 ReflectionException = "Unknown, could not get Enum names.";
             }
+        }
+
+        internal void GetNames()
+        {
+            if (!EnumNamesInternalCache.ContainsKey(ValueType))
+            {
+                // using GetValues not GetNames, to catch instances of weird enums (eg CameraClearFlags)
+                var values = Enum.GetValues(ValueType);
+
+                var set = new HashSet<string>();
+                foreach (var value in values)
+                {
+                    var v = value.ToString();
+                    if (set.Contains(v)) continue;
+                    set.Add(v);
+                }
+
+                EnumNamesInternalCache.Add(ValueType, set.ToArray());
+            }
+
+            EnumNames = EnumNamesInternalCache[ValueType];
         }
 
         public override void DrawValue(Rect window, float width)

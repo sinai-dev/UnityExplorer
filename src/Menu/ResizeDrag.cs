@@ -32,7 +32,7 @@ namespace Explorer
 #if ML
                     GUILayout.Button(gcDrag, GUI.skin.label, new GUILayoutOption[] { GUILayout.Height(15) });
 #else
-                    GUILayout.Button(gcDrag.ToString(), new GUILayoutOption[] { GUILayout.Height(15) });
+                    GUILayout.Button("<-- Drag to resize -->", new GUILayoutOption[] { GUILayout.Height(15) });
 #endif
 
                     //var r = GUILayoutUtility.GetLastRect();

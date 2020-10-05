@@ -202,7 +202,7 @@ namespace Explorer
                         continue;
                     }
 
-                    // ExplorerCore.Log($"Trying to cache member {signature}...");
+                    //ExplorerCore.Log($"Trying to cache member {sig}...");
 
                     try
                     {

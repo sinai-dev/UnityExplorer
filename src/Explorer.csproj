@@ -28,11 +28,11 @@
     <!-- Set this to the MelonLoader Il2Cpp Game folder, without the ending '\' character. -->
     <MLCppGameFolder>D:\Steam\steamapps\common\Hellpoint</MLCppGameFolder>
     <!-- Set this to the MelonLoader Mono Game folder, without the ending '\' character. -->
-    <MLMonoGameFolder>D:\Steam\steamapps\common\Outward_Mono</MLMonoGameFolder>
+    <MLMonoGameFolder>D:\Steam\steamapps\common\Outward</MLMonoGameFolder>
     <!-- Set this to the BepInEx Il2Cpp Game folder, without the ending '\' character. -->
-    <BIECppGameFolder>D:\Steam\steamapps\common\Outward</BIECppGameFolder>
+    <BIECppGameFolder>D:\Steam\steamapps\common\Outward_Il2Cpp</BIECppGameFolder>
     <!-- Set this to the BepInEx Mono Game folder, without the ending '\' character. -->
-    <BIEMonoGameFolder>D:\Steam\steamapps\common\Outward_Mono</BIEMonoGameFolder>
+    <BIEMonoGameFolder>D:\Steam\steamapps\common\Outward</BIEMonoGameFolder>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>

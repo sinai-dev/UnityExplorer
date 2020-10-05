@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using System.Reflection;
 using UnityEngine;
 
@@ -13,7 +14,7 @@ namespace Explorer
 
         public PageHelper Pages = new PageHelper();
 
-        private CacheObjectBase[] m_cachedEntries;
+        private CacheObjectBase[] m_cachedEntries = new CacheObjectBase[0];
 
         // Type of Entries in the Array
         public Type EntryType 
@@ -218,6 +219,11 @@ namespace Explorer
                 return;
             }
 
+            CacheEntries();
+        }
+
+        public void CacheEntries()
+        {
             var enumerator = Enumerable.GetEnumerator();
             if (enumerator == null)
             {
@@ -276,8 +282,6 @@ namespace Explorer
 
             var whitespace = CalcWhitespace(window);
 
-            int count = m_cachedEntries.Length;
-
             if (!IsExpanded)
             {
                 if (GUILayout.Button("v", new GUILayoutOption[] { GUILayout.Width(25) }))
@@ -294,6 +298,8 @@ namespace Explorer
             }
 
             var negativeWhitespace = window.width - (whitespace + 100f);
+
+            int count = m_cachedEntries.Length;
 
             GUI.skin.button.alignment = TextAnchor.MiddleLeft;
             string btnLabel = $"[{count}] <color=#2df7b2>{EntryType.FullName}</color>";

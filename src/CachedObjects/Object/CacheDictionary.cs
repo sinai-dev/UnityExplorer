@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 #if CPP
 using UnhollowerBaseLib;
@@ -15,8 +16,8 @@ namespace Explorer
 
         public PageHelper Pages = new PageHelper();
 
-        private CacheObjectBase[] m_cachedKeys;
-        private CacheObjectBase[] m_cachedValues;
+        private CacheObjectBase[] m_cachedKeys = new CacheObjectBase[0];
+        private CacheObjectBase[] m_cachedValues = new CacheObjectBase[0];
 
         public Type TypeOfKeys
         {
@@ -119,6 +120,11 @@ namespace Explorer
 
             base.UpdateValue();
 
+            CacheEntries();
+        }
+
+        public void CacheEntries()
+        {
             // reset
             IDict = null;
 
@@ -190,8 +196,6 @@ namespace Explorer
 
             var whitespace = CalcWhitespace(window);
 
-            int count = m_cachedKeys.Length;
-
             if (!IsExpanded)
             {
                 if (GUILayout.Button("v", new GUILayoutOption[] { GUILayout.Width(25) }))
@@ -208,6 +212,8 @@ namespace Explorer
             }
 
             var negativeWhitespace = window.width - (whitespace + 100f);
+
+            int count = m_cachedKeys.Length;
 
             GUI.skin.button.alignment = TextAnchor.MiddleLeft;
             string btnLabel = $"[{count}] <color=#2df7b2>Dictionary<{TypeOfKeys.FullName}, {TypeOfValues.FullName}></color>";
@@ -260,21 +266,27 @@ namespace Explorer
 
                     //GUIUnstrip.Space(whitespace);
 
-                    if (key == null || val == null)
+                    if (key == null && val == null)
                     {
                         GUILayout.Label($"[{i}] <i><color=grey>(null)</color></i>", new GUILayoutOption[0]);
                     }
                     else
                     {
                         GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-                        GUILayout.Label($"[{i}]", new GUILayoutOption[] { GUILayout.Width(30) });
+                        GUILayout.Label($"[{i}]", new GUILayoutOption[] { GUILayout.Width(40) });
 
                         GUI.skin.label.alignment = TextAnchor.MiddleLeft;
                         GUILayout.Label("Key:", new GUILayoutOption[] { GUILayout.Width(40) });
-                        key.DrawValue(window, (window.width / 2) - 80f);
+                        if (key != null)
+                            key.DrawValue(window, (window.width / 2) - 80f);
+                        else
+                            GUILayout.Label("<i>null</i>", new GUILayoutOption[0]);
 
                         GUILayout.Label("Value:", new GUILayoutOption[] { GUILayout.Width(40) });
-                        val.DrawValue(window, (window.width / 2) - 80f);
+                        if (Value != null)
+                            val.DrawValue(window, (window.width / 2) - 80f);
+                        else
+                            GUILayout.Label("<i>null</i>", new GUILayoutOption[0]);
                     }
 
                 }
