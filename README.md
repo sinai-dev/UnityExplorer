@@ -27,13 +27,12 @@
 
 ## Current status
 
-| Mod Loader  | Il2Cpp | Mono | Mono (.NET 3.5) |
-| ----------- | ------ | ---- | ----|
-| [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.MelonLoader.Il2Cpp.zip) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.MelonLoader.Mono.zip) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.MelonLoader.Mono.NET35.zip) |
-| [BepInEx](https://github.com/BepInEx/BepInEx) | ❔ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.BepInEx.Il2Cpp.zip) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.BepInEx.Mono.zip) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.BepInEx.Mono.NET35.zip) |
+| Mod Loader  | Il2Cpp | Mono |
+| ----------- | ------ | ---- |
+| [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.MelonLoader.Il2Cpp.zip) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.MelonLoader.Mono.zip) | 
+| [BepInEx](https://github.com/BepInEx/BepInEx) | ❔ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.BepInEx.Il2Cpp.zip) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.BepInEx.Mono.zip) |
 
-<b>IL2CPP Issues:</b>
-* .NET 3.5 is not currently supported (Unity 5.6.1 and older), this might change in the future.
+<b>Il2Cpp Issues:</b>
 * Some methods may still fail with a `MissingMethodException`, please let me know if you experience this (with full MelonLoader log please).
 * Reflection may fail with certain types, see [here](https://github.com/knah/Il2CppAssemblyUnhollower#known-issues) for more details.
 * Scrolling with mouse wheel in the Explorer menu may not work on all games at the moment.
@@ -147,7 +146,7 @@ public class MenuClass_CursorUpdate
 
 ## Building
 
-If you'd like to build this yourself, you will need to have installed BepInEx and/or MelonLoader for at least one Unity game. If you want to build all 6 versions, you will need at least one Il2Cpp and one Mono game, with BepInEx and MelonLoader installed for both.
+If you'd like to build this yourself, you will need to have installed BepInEx and/or MelonLoader for at least one Unity game. If you want to build all 4 versions, you will need at least one Il2Cpp and one Mono game, with BepInEx and MelonLoader installed for both.
 
 1. Install MelonLoader or BepInEx for your game.
 2. Open the `src\Explorer.csproj` file in a text editor.

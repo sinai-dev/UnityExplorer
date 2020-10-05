@@ -5,13 +5,8 @@
     <!-- Merging DLLs -->
     <ItemGroup>
       <InputAssemblies Include="$(OutputPath)$(AssemblyName).dll" />
-    </ItemGroup>
-    <ItemGroup Condition="'$(IsNet35)'=='false'">
       <InputAssemblies Include="..\lib\mcs.dll" />
     </ItemGroup>
-    <ItemGroup Condition="'$(IsNet35)'=='true'">
-      <InputAssemblies Include="..\lib\mcs.NET35.dll" />
-    </ItemGroup> 
 
     <ILRepack
       Parallel="true"

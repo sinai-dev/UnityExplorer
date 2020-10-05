@@ -15,7 +15,6 @@
     <DefineConstants>CPP,ML</DefineConstants>
     <IsCpp>true</IsCpp>
     <IsMelonLoader>true</IsMelonLoader>
-    <IsNet35>false</IsNet35>
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
@@ -42,24 +41,14 @@
     <DefineConstants>CPP,ML</DefineConstants>
     <IsCpp>true</IsCpp>
     <IsMelonLoader>true</IsMelonLoader>
-    <IsNet35>false</IsNet35>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_ML_Mono|AnyCPU' ">
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <OutputPath>..\Release\Explorer.MelonLoader.Mono\</OutputPath>
     <DefineConstants>MONO,ML</DefineConstants>
     <Prefer32Bit>false</Prefer32Bit>
     <IsCpp>false</IsCpp>
     <IsMelonLoader>true</IsMelonLoader>
-    <IsNet35>false</IsNet35>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_ML_Mono_NET35|AnyCPU' ">
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <OutputPath>..\Release\Explorer.MelonLoader.Mono.NET35\</OutputPath>
-    <DefineConstants>MONO,ML,NET35</DefineConstants>
-    <IsCpp>false</IsCpp>
-    <IsMelonLoader>true</IsMelonLoader>
-    <IsNet35>true</IsNet35>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_BIE_Cpp|AnyCPU' ">
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -67,23 +56,13 @@
     <DefineConstants>CPP,BIE</DefineConstants>
     <IsCpp>true</IsCpp>
     <IsMelonLoader>false</IsMelonLoader>
-    <IsNet35>false</IsNet35>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_BIE_Mono|AnyCPU' ">
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <OutputPath>..\Release\Explorer.BepInEx.Mono\</OutputPath>
     <DefineConstants>MONO,BIE</DefineConstants>
     <IsCpp>false</IsCpp>
     <IsMelonLoader>false</IsMelonLoader>
-    <IsNet35>false</IsNet35>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_BIE_Mono_NET35|AnyCPU' ">
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <OutputPath>..\Release\Explorer.BepInEx.Mono.NET35\</OutputPath>
-    <DefineConstants>MONO,BIE,NET35</DefineConstants>
-    <IsCpp>false</IsCpp>
-    <IsMelonLoader>false</IsMelonLoader>
-    <IsNet35>true</IsNet35>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -93,12 +72,8 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <!-- MCS ref -->
-    <Reference Include="mcs" Condition="'$(IsNet35)'=='false'">
+    <Reference Include="mcs">
       <HintPath>..\lib\mcs.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="mcs" Condition="'$(IsNet35)'=='true'">
-      <HintPath>..\lib\mcs.NET35.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
