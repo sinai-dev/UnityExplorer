@@ -1,11 +1,16 @@
-﻿using UnityEngine;
+﻿using Explorer.Config;
+using Explorer.UI;
+using Explorer.UI.Inspectors;
+using Explorer.UI.Main;
+using Explorer.UI.Shared;
+using UnityEngine;
 
 namespace Explorer
 {
     public class ExplorerCore
     {
-        public const string NAME    = "Explorer (" + PLATFORM + ", " + MODLOADER + ")";
-        public const string VERSION = "1.8.3.1";
+        public const string NAME    = "Explorer " + VERSION + " (" + PLATFORM + ", " + MODLOADER + ")";
+        public const string VERSION = "2.0.0";
         public const string AUTHOR  = "Sinai";
         public const string GUID    = "com.sinai.explorer";
 
@@ -34,9 +39,11 @@ namespace Explorer
             new WindowManager();
 
             InputManager.Init();
-            CursorControl.Init();
+            ForceUnlockCursor.Init();
 
-            Log($"{NAME} {VERSION} initialized.");
+            ShowMenu = true;
+
+            Log($"{NAME} initialized.");
         }
 
         public static bool ShowMenu
@@ -49,7 +56,7 @@ namespace Explorer
         private static void SetShowMenu(bool show)
         {
             m_showMenu = show;
-            CursorControl.UpdateCursorControl();
+            ForceUnlockCursor.UpdateCursorControl();
         }
 
         public static void Update()
@@ -61,7 +68,7 @@ namespace Explorer
 
             if (ShowMenu)
             {
-                CursorControl.Update();
+                //CursorControl.Update();
                 InspectUnderMouse.Update();
 
                 MainMenu.Instance.Update();
@@ -89,30 +96,30 @@ namespace Explorer
             SearchPage.Instance?.OnSceneChange();
         }
 
-        public static void Log(string message)
+        public static void Log(object message)
         {
 #if ML
-            MelonLoader.MelonLogger.Log(message);
+            MelonLoader.MelonLogger.Log(message.ToString());
 #else
-            ExplorerBepInPlugin.Logging?.LogMessage(message);
+            ExplorerBepInPlugin.Logging?.LogMessage(message.ToString());
 #endif
         }
 
-        public static void LogWarning(string message)
+        public static void LogWarning(object message)
         {
 #if ML
-            MelonLoader.MelonLogger.LogWarning(message);
+            MelonLoader.MelonLogger.LogWarning(message.ToString());
 #else
-            ExplorerBepInPlugin.Logging?.LogWarning(message);
+            ExplorerBepInPlugin.Logging?.LogWarning(message.ToString());
 #endif
         }
 
-        public static void LogError(string message)
+        public static void LogError(object message)
         {
 #if ML
-            MelonLoader.MelonLogger.LogError(message);
+            MelonLoader.MelonLogger.LogError(message.ToString());
 #else
-            ExplorerBepInPlugin.Logging?.LogError(message);
+            ExplorerBepInPlugin.Logging?.LogError(message.ToString());
 #endif
         }
     }

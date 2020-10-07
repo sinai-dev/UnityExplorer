@@ -19,11 +19,11 @@ namespace Explorer
         public static BF CommonFlags = BF.Public | BF.Instance | BF.NonPublic | BF.Static;
 
 #if CPP
-        public static ILType GameObjectType =>  Il2CppType.Of<GameObject>();
-        public static ILType TransformType  =>  Il2CppType.Of<Transform>();
-        public static ILType ObjectType     =>  Il2CppType.Of<UnityEngine.Object>();
-        public static ILType ComponentType  =>  Il2CppType.Of<Component>();
-        public static ILType BehaviourType  =>  Il2CppType.Of<Behaviour>();
+        public static ILType GameObjectType => Il2CppType.Of<GameObject>();
+        public static ILType TransformType => Il2CppType.Of<Transform>();
+        public static ILType ObjectType => Il2CppType.Of<UnityEngine.Object>();
+        public static ILType ComponentType => Il2CppType.Of<Component>();
+        public static ILType BehaviourType => Il2CppType.Of<Behaviour>();
 
         private static readonly MethodInfo tryCastMethodInfo = typeof(Il2CppObjectBase).GetMethod("TryCast");
         private static readonly Dictionary<Type, MethodInfo> cachedTryCastMethods = new Dictionary<Type, MethodInfo>();
@@ -131,11 +131,11 @@ namespace Explorer
             return obj.GetType();
         }
 
-        public static Type[] GetAllBaseTypes(object obj)
+        public static Type[] GetAllBaseTypes(object obj) => GetAllBaseTypes(GetActualType(obj));
+
+        public static Type[] GetAllBaseTypes(Type type)
         {
             var list = new List<Type>();
-
-            var type = GetActualType(obj);
 
             while (type != null)
             {

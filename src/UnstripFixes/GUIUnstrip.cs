@@ -4,14 +4,52 @@ using System.Reflection;
 using UnityEngine;
 #if CPP
 using Explorer.UnstripInternals;
-using UnityEngineInternal;
-using UnhollowerRuntimeLib;
 #endif
 
 namespace Explorer
 {
     public class GUIUnstrip
     {
+        public static void BeginHorizontal(params GUILayoutOption[] options) 
+            => BeginHorizontal(GUIContent.none, GUIStyle.none, options);
+
+        public static void BeginHorizontal(GUIStyle style, params GUILayoutOption[] options) 
+            => BeginHorizontal(GUIContent.none, style, options);
+
+        public static void BeginHorizontal(GUIContent content, GUIStyle style, params GUILayoutOption[] options)
+        {
+#if CPP
+            Internal.BeginLayoutDirection(false, content, style, options);
+#else
+            GUILayout.BeginHorizontal(content, style, options);
+#endif
+        }
+
+        public static void BeginVertical(params GUILayoutOption[] options) 
+            => BeginVertical(GUIContent.none, GUIStyle.none, options);
+
+        public static void BeginVertical(GUIStyle style, params GUILayoutOption[] options)
+            => BeginVertical(GUIContent.none, style, options);        
+
+        public static void BeginVertical(GUIContent content, GUIStyle style, params GUILayoutOption[] options)
+        {
+#if CPP
+            Internal.BeginLayoutDirection(true, content, style, options);
+#else
+            GUILayout.BeginVertical(content, style, options);
+#endif
+        }
+
+
+        public static Rect GetLastRect()
+        {
+#if CPP
+            return Internal_LayoutUtility.GetLastRect();
+#else
+            return GUILayoutUtility.GetLastRect(); 
+#endif
+        }
+
         public static string TextField(string text, GUILayoutOption[] options)
         {
 #if CPP

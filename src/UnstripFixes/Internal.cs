@@ -107,6 +107,14 @@ namespace Explorer.UnstripInternals
 
         #region GUILayout Methods
 
+        public static void BeginLayoutDirection(bool vertical, GUIContent content, GUIStyle style, GUILayoutOption[] options)
+        {
+            var g = GUILayoutUtility.BeginLayoutGroup(style, options, Il2CppType.Of<GUILayoutGroup>());
+            g.isVertical = vertical;
+            if (style != GUIStyle.none || content != GUIContent.none)
+                GUI.Box(g.rect, content, style);
+        }
+
         public static string TextField(string text, GUILayoutOption[] options)
         {
             text = text ?? "";

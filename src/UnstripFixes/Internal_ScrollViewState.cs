@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Explorer
+namespace Explorer.UnstripInternals
 {
     public class Internal_ScrollViewState
     {

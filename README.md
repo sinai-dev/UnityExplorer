@@ -12,16 +12,11 @@
   <img src="https://img.shields.io/github/downloads/sinai-dev/Explorer/total.svg" />
 </p>
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/sinai-dev/Explorer/master/overview.png">  
-</p>
-
 - [Releases](#releases)
-- [How to install](#how-to-install)
-- [How to use](#how-to-use)
-  - [Mod Config](#mod-config)
 - [Features](#features)
-  - [Mouse Control](#mouse-control)
+- [How to install](#how-to-install)
+- [Mod Config](#mod-config)
+- [Mouse Control](#mouse-control)
 - [Building](#building)
 - [Credits](#credits)
 
@@ -33,9 +28,22 @@
 | [BepInEx](https://github.com/BepInEx/BepInEx) | ❔ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.BepInEx.Il2Cpp.zip) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.BepInEx.Mono.zip) |
 
 <b>Il2Cpp Issues:</b>
-* Some methods may still fail with a `MissingMethodException`, please let me know if you experience this (with full MelonLoader log please).
+* Some methods may still fail with a `MissingMethodException`, please let me know if you experience this (with full debug log please).
 * Reflection may fail with certain types, see [here](https://github.com/knah/Il2CppAssemblyUnhollower#known-issues) for more details.
 * Scrolling with mouse wheel in the Explorer menu may not work on all games at the moment.
+
+## Features
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/sinai-dev/Explorer/master/overview.png">  
+</p>
+
+* <b>Scene Explorer</b>: Simple menu to traverse the Transform heirarchy of the scene. 
+* <b>GameObject Inspector</b>: Various helpful tools to see and manipulate the GameObject, similar to what you can do in the Editor.
+* <b>Reflection Inspector</b>: Inspect Properties and Fields. Can also set primitive values and evaluate primitive methods.
+* <b>Search</b>: Search for UnityEngine.Objects with various filters, or use the helpers for static Instances and Classes.
+* <b>C# Console</b>: Interactive console for evaluating C# methods on the fly, with some basic helpers.
+* <b>Inspect-under-mouse</b>: Hover over an object with a collider and inspect it by clicking on it.
 
 ## How to install
 
@@ -53,73 +61,26 @@ Requires [BepInEx](https://github.com/BepInEx/BepInEx) to be installed for your 
 2. Unzip the file into the `BepInEx\plugins\` folder in your game's installation directory, created by BepInEx.
 3. Make sure it's not in a sub-folder, `Explorer.dll` should be directly in the `plugins\` folder.
 
-## How to use
-
-* Press F7 to show or hide the menu.
-* Use the Scene Explorer or the Object Search to start Exploring, or the C# Console to test some code.
-* See below for more specific details.
-
-### Mod Config
+## Mod Config
 
 There is a simple Mod Config for the Explorer. You can access the settings via the "Options" page of the main menu.
 
-`Main Menu Toggle` (KeyCode)
-* Sets the keybinding for the Main Menu toggle (show/hide all Explorer windows)
+`Main Menu Toggle` (KeyCode) | Default: `F7`
 * See [this article](https://docs.unity3d.com/ScriptReference/KeyCode.html) for a full list of all accepted KeyCodes.
-* Default: `F7`
 
-`Default Window Size` (Vector2)
+`Default Window Size` (Vector2) | Default: `x: 550, y: 700`
 * Sets the default width and height for all Explorer windows when created.
-* `x` is width, `y` is height.
-* Default: `<x>550</x> <y>700</y>`
 
-`Default Items per Page` (Int)
+`Default Items per Page` (int) | Default: `20`
 * Sets the default items per page when viewing lists or search results.
-* Default: `20`
 
-## Features
+`Enable Bitwise Editing` (bool) | Default: `false`
+* Whether or not to show the Bitwise Editing helper when inspecting integers
 
-### Scene Explorer
+`Enable Tab View` (bool) | Default: `true`
+* Whether or not all inspector windows a grouped into a single window with tabs. 
 
-* A simple menu which allows you to traverse the Transform heirarchy of the scene.
-* Click on a GameObject to set it as the current path, or <b>Inspect</b> it to send it to an Inspector Window.
-
-### Inspectors
-
-Explorer has two main inspector modes: <b>GameObject Inspector</b>, and <b>Reflection Inspector</b>.
-
-<b>Tips:</b> 
-* When in Tab View, GameObjects are denoted by a [G] prefix, and Reflection objects are denoted by a [R] prefix.
-* Hold <b>Left Shift</b> when you click the Inspect button to force Reflection mode for GameObjects and Transforms.
-
-### GameObject Inspector
-
-* Allows you to see the children and components on a GameObject.
-* Can use some basic GameObject Controls such as translating and rotating the object, destroy it, clone it, etc.
-
-### Reflection Inspector
-
-* The Reflection Inspector is used for all other supported objects.
-* Allows you to inspect Properties, Fields and basic Methods, as well as set primitive values and evaluate primitive methods.
-* Can search and filter members for the ones you are interested in.
-
-### Object Search
-
-* You can search for an `UnityEngine.Object` with the Object Search feature.
-* Filter by name, type, etc.
-* For GameObjects and Transforms you can filter which scene they are found in too.
-
-### C# console
-
-* A simple C# console, allows you to execute a method body on the fly.
-
-### Inspect-under-mouse
-
-* Press Shift+RMB (Right Mouse Button) while the Explorer menu is open to begin Inspect-Under-Mouse.
-* Hover over your desired object, if you see the name appear then you can click on it to inspect it.
-* Only objects with Colliders are supported.
-
-### Mouse Control
+## Mouse Control
 
 Explorer can force the mouse to be visible and unlocked when the menu is open, if you have enabled "Force Unlock Mouse" (Left-Alt toggle). However, you may also want to prevent the mouse clicking-through onto the game behind Explorer, this is possible but it requires specific patches for that game.
 

@@ -5,7 +5,7 @@ using UnityEngine;
 using Explorer.UnstripInternals;
 using Il2CppSystem.Reflection;
 
-namespace Explorer
+namespace Explorer.UnstripInternals
 {
     public struct Internal_SliderHandler
 	{

@@ -1,8 +1,7 @@
 ﻿#if CPP
 using UnityEngine;
-using Explorer.UnstripInternals;
 
-namespace Explorer
+namespace Explorer.UnstripInternals
 {
     public class Internal_LayoutUtility
     {

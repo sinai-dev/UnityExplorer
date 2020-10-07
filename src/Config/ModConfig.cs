@@ -2,7 +2,7 @@
 using System.Xml.Serialization;
 using UnityEngine;
 
-namespace Explorer
+namespace Explorer.Config
 {
     public class ModConfig
     {
@@ -13,9 +13,13 @@ namespace Explorer
 
         [XmlIgnore] public static ModConfig Instance;
 
-        public KeyCode Main_Menu_Toggle = KeyCode.F7;
+        // Actual configs
+        public KeyCode Main_Menu_Toggle    = KeyCode.F7;
         public Vector2 Default_Window_Size = new Vector2(550, 700);
-        public int Default_Page_Limit = 20;
+        public int     Default_Page_Limit  = 20;
+        public bool    Bitwise_Support     = false;
+        public bool    Tab_View            = true;
+        //public bool    Main_Toggle_Global  = true;
 
         public static void OnLoad()
         {
@@ -43,7 +47,7 @@ namespace Explorer
                     Instance = (ModConfig)Serializer.Deserialize(file);
                 }
             }
-            catch 
+            catch
             {
                 return false;
             }

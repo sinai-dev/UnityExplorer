@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Explorer
+namespace Explorer.UnstripInternals
 {
     public class Internal_SliderState
     {

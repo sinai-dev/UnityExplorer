@@ -19,7 +19,7 @@ namespace Explorer
             {
                 inputModule = new LegacyInput();
             }
-            
+
             if (inputModule == null)
             {
                 ExplorerCore.LogWarning("Could not find any Input module!");
