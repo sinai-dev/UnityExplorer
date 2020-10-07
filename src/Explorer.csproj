@@ -220,6 +220,7 @@
     <Compile Include="Input\InputManager.cs" />
     <Compile Include="Input\InputSystem.cs" />
     <Compile Include="Input\LegacyInput.cs" />
+    <Compile Include="Input\NoInput.cs" />
     <Compile Include="Menu\CursorControl.cs" />
     <Compile Include="Menu\MainMenu\Pages\OptionsPage.cs" />
     <Compile Include="Tests\TestClass.cs" />

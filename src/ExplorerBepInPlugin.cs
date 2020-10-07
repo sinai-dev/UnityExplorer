@@ -14,7 +14,7 @@ using BepInEx.IL2CPP;
 
 namespace Explorer
 {
-    [BepInPlugin(ExplorerCore.GUID, ExplorerCore.NAME, ExplorerCore.VERSION)]
+    [BepInPlugin(ExplorerCore.GUID, "Explorer", ExplorerCore.VERSION)]
 #if CPP
     public class ExplorerBepInPlugin : BasePlugin
 #else
