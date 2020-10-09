@@ -126,10 +126,12 @@ namespace Explorer.CacheObject
                 GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
 
                 GUI.skin.label.alignment = TextAnchor.MiddleCenter;
+
                 GUILayout.Label(i.ToString(), new GUILayoutOption[] { GUILayout.Width(15) });
-                this.m_argumentInput[i] = GUIUnstrip.TextField(input, new GUILayoutOption[] { GUILayout.Width(150) });
+                GUILayout.Label(label, new GUILayoutOption[] { GUILayout.ExpandWidth(false) });
+                this.m_argumentInput[i] = GUILayout.TextField(input, new GUILayoutOption[] { GUILayout.ExpandWidth(true) });
+
                 GUI.skin.label.alignment = TextAnchor.MiddleLeft;
-                GUILayout.Label(label, new GUILayoutOption[0]);
 
                 GUILayout.EndHorizontal();
             }

@@ -41,6 +41,7 @@
     <DefineConstants>CPP,ML</DefineConstants>
     <IsCpp>true</IsCpp>
     <IsMelonLoader>true</IsMelonLoader>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_ML_Mono|AnyCPU' ">
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
@@ -49,6 +50,7 @@
     <Prefer32Bit>false</Prefer32Bit>
     <IsCpp>false</IsCpp>
     <IsMelonLoader>true</IsMelonLoader>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_BIE_Cpp|AnyCPU' ">
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -56,6 +58,7 @@
     <DefineConstants>CPP,BIE</DefineConstants>
     <IsCpp>true</IsCpp>
     <IsMelonLoader>false</IsMelonLoader>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_BIE_Mono|AnyCPU' ">
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
@@ -63,6 +66,7 @@
     <DefineConstants>MONO,BIE</DefineConstants>
     <IsCpp>false</IsCpp>
     <IsMelonLoader>false</IsMelonLoader>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -230,7 +234,6 @@
     <Compile Include="Input\InputSystem.cs" />
     <Compile Include="Input\LegacyInput.cs" />
     <Compile Include="Input\NoInput.cs" />
-    <Compile Include="Tests\TestClass.cs" />
     <Compile Include="UI\Inspectors\InspectUnderMouse.cs" />
     <Compile Include="UI\Inspectors\Reflection\InstanceInspector.cs" />
     <Compile Include="UI\Inspectors\ReflectionInspector.cs" />
@@ -254,13 +257,14 @@
     <Compile Include="UI\TabViewWindow.cs" />
     <Compile Include="UI\WindowBase.cs" />
     <Compile Include="UI\WindowManager.cs" />
-    <Compile Include="UnstripFixes\GUIUnstrip.cs" />
-    <Compile Include="UnstripFixes\Internal_LayoutUtility.cs" />
-    <Compile Include="UnstripFixes\Internal_ScrollViewState.cs" />
-    <Compile Include="UnstripFixes\Internal_SliderHandler.cs" />
+    <Compile Include="Unstrip\Scene\SceneUnstrip.cs" />
+    <Compile Include="Unstrip\IMGUI\GUIUnstrip.cs" />
+    <Compile Include="Unstrip\IMGUI\Internal_LayoutUtility.cs" />
+    <Compile Include="Unstrip\IMGUI\Internal_ScrollViewState.cs" />
+    <Compile Include="Unstrip\IMGUI\Internal_SliderHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UnstripFixes\Internal.cs" />
-    <Compile Include="UnstripFixes\Internal_SliderState.cs" />
+    <Compile Include="Unstrip\IMGUI\Internal.cs" />
+    <Compile Include="Unstrip\IMGUI\Internal_SliderState.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ILRepack.targets" />

@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngineInternal;
 using UnhollowerRuntimeLib;
 
-namespace Explorer.UnstripInternals
+namespace Explorer.Unstrip.IMGUI
 {
     public class Internal
     {
@@ -14,7 +14,7 @@ namespace Explorer.UnstripInternals
         public static int s_ScrollControlId;
 
         public static bool ScrollFailed = false;
-        public static bool ManualUnstripFailed = false;        
+        public static bool ManualUnstripFailed = false;
 
         public static GenericStack ScrollStack => m_scrollStack ?? GetScrollStack();
         public static PropertyInfo m_scrollViewStatesInfo;
@@ -73,7 +73,7 @@ namespace Explorer.UnstripInternals
 
                     if (m_stateCacheDict == null) throw new Exception();
                 }
-                catch 
+                catch
                 {
                     m_stateCacheDict = new Dictionary<int, Il2CppSystem.Object>();
                 }
@@ -117,7 +117,7 @@ namespace Explorer.UnstripInternals
 
         public static string TextField(string text, GUILayoutOption[] options)
         {
-            text = text ?? "";
+            text = text ?? string.Empty;
 
             int controlID = GUIUtility.GetControlID(FocusType.Keyboard);
             GUIContent guicontent = GUIContent.Temp(text);
@@ -275,7 +275,7 @@ namespace Explorer.UnstripInternals
             GUI.EndGroup();
         }
 
-#endregion
+        #endregion
 
         #region Scrolling
 
@@ -422,7 +422,7 @@ namespace Explorer.UnstripInternals
             var scrollViewState = GetStateObject(Il2CppType.Of<ScrollViewState>(), controlID)
                                     .TryCast<ScrollViewState>();
 
-            if (scrollViewState == null) 
+            if (scrollViewState == null)
                 return scrollPosition;
 
             var scrollExt = Internal_ScrollViewState.FromPointer(scrollViewState.Pointer);
@@ -660,7 +660,7 @@ namespace Explorer.UnstripInternals
             return result;
         }
 
-#endregion
+        #endregion
     }
 
     #region Extensions

@@ -38,8 +38,6 @@ namespace Explorer.CacheObject
         {
             var fi = MemInfo as FieldInfo;
             fi.SetValue(fi.IsStatic ? null : DeclaringInstance, IValue.Value);
-
-            base.SetValue();
         }
     }
 }

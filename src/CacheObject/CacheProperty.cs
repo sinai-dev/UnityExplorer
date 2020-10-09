@@ -53,8 +53,6 @@ namespace Explorer.CacheObject
             var target = pi.GetAccessors()[0].IsStatic ? null : DeclaringInstance;
 
             pi.SetValue(target, IValue.Value, ParseArguments());
-
-            base.SetValue();
         }
     }
 }

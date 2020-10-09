@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 using System.Reflection;
+using System.Runtime.InteropServices;
+#if CPP
+using UnhollowerBaseLib;
+using UnityEngine.SceneManagement;
+#endif
 
 namespace Explorer.Tests
 {
@@ -31,6 +36,14 @@ namespace Explorer.Tests
         public static int StaticProperty => 5;
         public static int StaticField = 5;
         public int NonStaticField;
+
+#if CPP
+        public static IntPtr FindICall(string name) => il2cpp_resolve_icall(name);
+
+        [DllImport("GameAssembly", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        private static extern IntPtr il2cpp_resolve_icall([MarshalAs(UnmanagedType.LPStr)] string name);
+
+#endif
 
 #if CPP
         public static Il2CppSystem.Collections.Generic.HashSet<string> ILHashSetTest;

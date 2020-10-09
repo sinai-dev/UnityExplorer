@@ -1,7 +1,7 @@
 ﻿#if CPP
 using UnityEngine;
 
-namespace Explorer.UnstripInternals
+namespace Explorer.Unstrip.IMGUI
 {
     public class Internal_LayoutUtility
     {
@@ -85,7 +85,7 @@ namespace Explorer.UnstripInternals
                 last = GUILayoutUtility.kDummyRect;
             }
             return last;
-        }    
+        }
     }
 }
 #endif
