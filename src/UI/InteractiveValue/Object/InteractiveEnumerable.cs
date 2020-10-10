@@ -173,38 +173,20 @@ namespace Explorer.UI
 
         private Type GetEntryType()
         {
-            if (m_entryType == null)
+            if (ValueType.IsGenericType)
             {
-                if (OwnerCacheObject is CacheMember cacheMember && cacheMember.MemInfo != null)
-                {
-                    Type memberType = null;
-                    switch (cacheMember.MemInfo.MemberType)
-                    {
-                        case MemberTypes.Field:
-                            memberType = (cacheMember.MemInfo as FieldInfo).FieldType;
-                            break;
-                        case MemberTypes.Property:
-                            memberType = (cacheMember.MemInfo as PropertyInfo).PropertyType;
-                            break;
-                    }
+                var gArgs = ValueType.GetGenericArguments();
 
-                    if (memberType != null && memberType.IsGenericType)
-                    {
-                        m_entryType = memberType.GetGenericArguments()[0];
-                    }
-                }
-                else if (Value != null)
+                if (ValueType.FullName.Contains("ValueCollection"))
                 {
-                    var type = Value.GetType();
-                    if (type.IsGenericType)
-                    {
-                        m_entryType = type.GetGenericArguments()[0];
-                    }
+                    m_entryType = gArgs[gArgs.Length - 1];
+                }
+                else
+                {
+                    m_entryType = gArgs[0];
                 }
             }
-
-            // use System.Object for non-generic.
-            if (m_entryType == null)
+            else
             {
                 m_entryType = typeof(object);
             }
@@ -255,18 +237,11 @@ namespace Explorer.UI
                     }
 #endif
 
+                    //ExplorerCore.Log("Caching enumeration entry " + obj.ToString() + " as " + EntryType.FullName);
+
                     var cached = new CacheEnumerated() { Index = index, RefIList = Value as IList, ParentEnumeration = this };
                     cached.Init(obj, EntryType);
                     list.Add(cached);
-
-                    //if (CacheFactory.GetCacheObject(obj, t) is CacheObjectBase cached)
-                    //{
-                    //    list.Add(cached);
-                    //}
-                    //else
-                    //{
-                    //    list.Add(null);
-                    //}
                 }
                 else
                 {

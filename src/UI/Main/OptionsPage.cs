@@ -18,12 +18,14 @@ namespace Explorer.UI.Main
         public int defaultPageLimit;
         public bool bitwiseSupport;
         public bool tabView;
+        public string defaultOutputPath;
 
         private CacheObjectBase toggleKeyInput;
         private CacheObjectBase defaultSizeInput;
         private CacheObjectBase defaultPageLimitInput;
         private CacheObjectBase bitwiseSupportInput;
         private CacheObjectBase tabViewInput;
+        private CacheObjectBase defaultOutputPathInput;
 
         public override void Init()
         {
@@ -41,6 +43,9 @@ namespace Explorer.UI.Main
 
             tabView = ModConfig.Instance.Tab_View;
             tabViewInput = CacheFactory.GetCacheObject(typeof(OptionsPage).GetField("tabView"), this);
+
+            defaultOutputPath = ModConfig.Instance.Default_Output_Path;
+            defaultOutputPathInput = CacheFactory.GetCacheObject(typeof(OptionsPage).GetField("defaultOutputPath"), this);
         }
 
         public override void Update() { }
@@ -76,6 +81,11 @@ namespace Explorer.UI.Main
             GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
             GUILayout.Label($"Enable Tab View:", new GUILayoutOption[] { GUILayout.Width(215f) });
             tabViewInput.IValue.DrawValue(MainMenu.MainRect, MainMenu.MainRect.width - 215f);
+            GUILayout.EndHorizontal();
+
+            GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+            GUILayout.Label($"Default Output Path:", new GUILayoutOption[] { GUILayout.Width(215f) });
+            defaultOutputPathInput.IValue.DrawValue(MainMenu.MainRect, MainMenu.MainRect.width - 215f);
             GUILayout.EndHorizontal();
 
             if (GUILayout.Button("<color=lime><b>Apply and Save</b></color>", new GUILayoutOption[0]))

@@ -5,37 +5,35 @@ using System.Linq;
 using System.Text;
 using UnhollowerBaseLib;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-namespace Explorer.Unstrip.Scene
+namespace Explorer.Unstrip.Scenes
 {
     public class SceneUnstrip
     {
-        internal delegate void getRootSceneObjects(int handle, IntPtr list);
-        internal static getRootSceneObjects getRootSceneObjects_iCall =
-            IL2CPP.ResolveICall<getRootSceneObjects>("UnityEngine.SceneManagement.Scene::GetRootGameObjectsInternal");
-
-        public static void GetRootGameObjects_Internal(UnityEngine.SceneManagement.Scene scene, IntPtr list)
-        {
-            getRootSceneObjects_iCall(scene.handle, list);
-        }
-
-        public static GameObject[] GetRootSceneObjects(UnityEngine.SceneManagement.Scene scene)
+        //Scene.GetRootGameObjects();
+        public static GameObject[] GetRootGameObjects(Scene scene)
         {
             var list = new Il2CppSystem.Collections.Generic.List<GameObject>(GetRootCount_Internal(scene));
 
-            GetRootGameObjects_Internal(scene, list.Pointer);
+            GetRootGameObjectsInternal_iCall(scene.handle, list.Pointer);
 
             return list.ToArray();
         }
 
-        internal delegate int getRootCount(int handle);
-        internal static getRootCount getRootCount_iCall =
-            IL2CPP.ResolveICall<getRootCount>("UnityEngine.SceneManagement.Scene::GetRootCountInternal");
+        internal delegate void GetRootGameObjectsInternal_delegate(int handle, IntPtr list);
+        internal static GetRootGameObjectsInternal_delegate GetRootGameObjectsInternal_iCall =
+            IL2CPP.ResolveICall<GetRootGameObjectsInternal_delegate>("UnityEngine.SceneManagement.Scene::GetRootGameObjectsInternal");
 
+        //Scene.rootCount;
         public static int GetRootCount_Internal(UnityEngine.SceneManagement.Scene scene)
         {
-            return getRootCount_iCall(scene.handle);
+            return GetRootCountInternal_iCall(scene.handle);
         }
+
+        internal delegate int GetRootCountInternal_delegate(int handle);
+        internal static GetRootCountInternal_delegate GetRootCountInternal_iCall =
+            IL2CPP.ResolveICall<GetRootCountInternal_delegate>("UnityEngine.SceneManagement.Scene::GetRootCountInternal");
     }
 }
 #endif

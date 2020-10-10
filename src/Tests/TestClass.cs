@@ -4,6 +4,7 @@ using System;
 using UnityEngine;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Explorer.UI.Shared;
 #if CPP
 using UnhollowerBaseLib;
 using UnityEngine.SceneManagement;
@@ -33,6 +34,9 @@ namespace Explorer.Tests
         public static TestClass Instance => m_instance ?? (m_instance = new TestClass());
         private static TestClass m_instance;
 
+        public Texture2D TestTexture = UIStyles.MakeTex(200, 200, Color.white);
+        public static Sprite TestSprite;
+
         public static int StaticProperty => 5;
         public static int StaticField = 5;
         public int NonStaticField;
@@ -52,6 +56,16 @@ namespace Explorer.Tests
         public TestClass()
         {
 #if CPP
+            TestTexture.name = "TestTexture";
+
+            var r = new Rect(0, 0, TestTexture.width, TestTexture.height);
+            var v2 = Vector2.zero;
+            var v4 = Vector4.zero;
+            TestSprite = Sprite.CreateSprite_Injected(TestTexture, ref r, ref v2, 100f, 0u, SpriteMeshType.Tight, ref v4, false);
+
+            GameObject.DontDestroyOnLoad(TestTexture);
+            GameObject.DontDestroyOnLoad(TestSprite);
+
             ILHashSetTest = new Il2CppSystem.Collections.Generic.HashSet<string>();
             ILHashSetTest.Add("1");
             ILHashSetTest.Add("2");

@@ -212,6 +212,8 @@
     <Compile Include="UI\InteractiveValue\Object\InteractiveDictionary.cs" />
     <Compile Include="UI\InteractiveValue\Object\InteractiveEnumerable.cs" />
     <Compile Include="UI\InteractiveValue\Object\InteractiveGameObject.cs" />
+    <Compile Include="UI\InteractiveValue\Object\InteractiveSprite.cs" />
+    <Compile Include="UI\InteractiveValue\Object\InteractiveTexture2D.cs" />
     <Compile Include="UI\InteractiveValue\Struct\InteractiveQuaternion.cs" />
     <Compile Include="UI\InteractiveValue\Struct\InteractiveRect.cs" />
     <Compile Include="UI\InteractiveValue\Struct\InteractiveVector.cs" />
@@ -257,6 +259,7 @@
     <Compile Include="UI\TabViewWindow.cs" />
     <Compile Include="UI\WindowBase.cs" />
     <Compile Include="UI\WindowManager.cs" />
+    <Compile Include="Unstrip\ImageConversion\ImageConversionUnstrip.cs" />
     <Compile Include="Unstrip\Scene\SceneUnstrip.cs" />
     <Compile Include="Unstrip\IMGUI\GUIUnstrip.cs" />
     <Compile Include="Unstrip\IMGUI\Internal_LayoutUtility.cs" />

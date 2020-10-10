@@ -160,7 +160,7 @@ namespace Explorer.UI.Inspectors
                 {
                     try
                     {
-                        // make sure member type is Field, Method of Property (4 / 8 / 16)
+                        // make sure member type is Field, Method or Property (4 / 8 / 16)
                         int m = (int)member.MemberType;
                         if (m < 4 || m > 16)
                             continue;

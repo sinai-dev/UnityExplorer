@@ -146,7 +146,7 @@ namespace Explorer.UI
             {
                 GUILayout.Label($"<color=grey><i>Not yet evaluated</i></color> ({typeName})", new GUILayoutOption[0]);
             }
-            else if (Value == null && !(cacheMember is CacheMethod))
+            else if ((Value == null || Value is UnityEngine.Object uObj && !uObj) && !(cacheMember is CacheMethod))
             {
                 GUILayout.Label($"<i>null ({typeName})</i>", new GUILayoutOption[0]);
             }

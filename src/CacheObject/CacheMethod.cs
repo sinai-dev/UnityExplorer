@@ -73,7 +73,7 @@ namespace Explorer.CacheObject
             if (ret != null)
             {
                 //m_cachedReturnValue = CacheFactory.GetTypeAndCacheObject(ret);
-                m_cachedReturnValue = CacheFactory.GetCacheObject(ret, IValue.ValueType);
+                m_cachedReturnValue = CacheFactory.GetCacheObject(ret);
                 m_cachedReturnValue.UpdateValue();
             }
             else

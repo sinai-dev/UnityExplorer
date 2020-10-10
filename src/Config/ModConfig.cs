@@ -19,7 +19,7 @@ namespace Explorer.Config
         public int     Default_Page_Limit  = 20;
         public bool    Bitwise_Support     = false;
         public bool    Tab_View            = true;
-        //public bool    Main_Toggle_Global  = true;
+        public string  Default_Output_Path = @"Mods\Explorer";
 
         public static void OnLoad()
         {

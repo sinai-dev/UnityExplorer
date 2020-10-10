@@ -129,7 +129,7 @@ namespace Explorer.CacheObject
 
                 GUILayout.Label(i.ToString(), new GUILayoutOption[] { GUILayout.Width(15) });
                 GUILayout.Label(label, new GUILayoutOption[] { GUILayout.ExpandWidth(false) });
-                this.m_argumentInput[i] = GUILayout.TextField(input, new GUILayoutOption[] { GUILayout.ExpandWidth(true) });
+                this.m_argumentInput[i] = GUIUnstrip.TextField(input, new GUILayoutOption[] { GUILayout.ExpandWidth(true) });
 
                 GUI.skin.label.alignment = TextAnchor.MiddleLeft;
 

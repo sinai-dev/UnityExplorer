@@ -25,11 +25,21 @@ namespace Explorer.CacheObject
                 return;
             }
 
+            //ExplorerCore.Log("Initializing InteractiveValue of type " + valueType.FullName);
+
             InteractiveValue interactive;
 
             if (valueType == typeof(GameObject) || valueType == typeof(Transform))
             {
                 interactive = new InteractiveGameObject();
+            }
+            else if (valueType == typeof(Texture2D))
+            {
+                interactive = new InteractiveTexture2D();
+            }
+            else if (valueType == typeof(Sprite))
+            {
+                interactive = new InteractiveSprite();
             }
             else if (valueType.IsPrimitive || valueType == typeof(string))
             {
