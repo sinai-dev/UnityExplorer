@@ -82,7 +82,9 @@ There is a simple Mod Config for the Explorer. You can access the settings via t
 
 ## Mouse Control
 
-Explorer can force the mouse to be visible and unlocked when the menu is open, if you have enabled "Force Unlock Mouse" (Left-Alt toggle). However, you may also want to prevent the mouse clicking-through onto the game behind Explorer, this is possible but it requires specific patches for that game.
+Explorer can force the mouse to be visible and unlocked when the menu is open, if you have enabled "Force Unlock Mouse" (Left-Alt toggle). Explorer also attempts to prevent clicking-through onto the game behind the Explorer menu.
+
+If you need more mouse control:
 
 * For VRChat, use [VRCExplorerMouseControl](https://github.com/sinai-dev/VRCExplorerMouseControl)
 * For Hellpoint, use [HPExplorerMouseControl](https://github.com/sinai-dev/Hellpoint-Mods/tree/master/HPExplorerMouseControl/HPExplorerMouseControl)
@@ -93,8 +95,9 @@ For example:
 using Explorer;
 using Harmony; // or 'using HarmonyLib;' for BepInEx
 // ...
-[HarmonyPatch(typeof(MyGame.MenuClass), nameof(MyGame.MenuClass.CursorUpdate)]
-public class MenuClass_CursorUpdate 
+// You will need to figure out the relevant Class and Method for your game using dnSpy.
+[HarmonyPatch(typeof(MyGame.InputManager), nameof(MyGame.InputManager.Update)]
+public class InputManager_Update
 {
     [HarmonyPrefix]
     public static bool Prefix()
