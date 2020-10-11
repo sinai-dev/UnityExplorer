@@ -208,11 +208,13 @@
     <Compile Include="CacheObject\CacheMethod.cs" />
     <Compile Include="CacheObject\CacheProperty.cs" />
     <Compile Include="CacheObject\CacheObjectBase.cs" />
+    <Compile Include="Helpers\Texture2DHelpers.cs" />
     <Compile Include="UI\InteractiveValue\InteractiveValue.cs" />
     <Compile Include="UI\InteractiveValue\Object\InteractiveDictionary.cs" />
     <Compile Include="UI\InteractiveValue\Object\InteractiveEnumerable.cs" />
     <Compile Include="UI\InteractiveValue\Object\InteractiveGameObject.cs" />
     <Compile Include="UI\InteractiveValue\Object\InteractiveSprite.cs" />
+    <Compile Include="UI\InteractiveValue\Object\InteractiveTexture.cs" />
     <Compile Include="UI\InteractiveValue\Object\InteractiveTexture2D.cs" />
     <Compile Include="UI\InteractiveValue\Struct\InteractiveQuaternion.cs" />
     <Compile Include="UI\InteractiveValue\Struct\InteractiveRect.cs" />

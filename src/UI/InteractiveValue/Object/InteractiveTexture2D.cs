@@ -6,6 +6,7 @@ using Explorer.CacheObject;
 using Explorer.Config;
 using UnityEngine;
 using System.IO;
+using Explorer.Helpers;
 #if CPP
 using Explorer.Unstrip.ImageConversion;
 #endif
@@ -42,12 +43,16 @@ namespace Explorer.UI
             if (Value is Texture2D tex)
 #endif
             {
-                currentTex = tex;
-                texContent = new GUIContent
-                {
-                    image = currentTex
-                };
+                currentTex = tex;                
             }
+        }
+
+        public virtual void GetGUIContent()
+        {
+            texContent = new GUIContent
+            {
+                image = currentTex
+            };
         }
 
         public override void DrawValue(Rect window, float width)
@@ -56,21 +61,19 @@ namespace Explorer.UI
 
             GUIUnstrip.BeginHorizontal();
 
-            if (currentTex)
+            if (currentTex && !IsExpanded)
             {
-                if (!IsExpanded)
+                if (GUILayout.Button("v", new GUILayoutOption[] { GUILayout.Width(25) }))
                 {
-                    if (GUILayout.Button("v", new GUILayoutOption[] { GUILayout.Width(25) }))
-                    {
-                        IsExpanded = true;
-                    }
+                    IsExpanded = true;
+                    GetGUIContent();
                 }
-                else
+            }
+            else if (currentTex)
+            {
+                if (GUILayout.Button("^", new GUILayoutOption[] { GUILayout.Width(25) }))
                 {
-                    if (GUILayout.Button("^", new GUILayoutOption[] { GUILayout.Width(25) }))
-                    {
-                        IsExpanded = false;
-                    }
+                    IsExpanded = false;
                 }
             }
 
@@ -112,29 +115,22 @@ namespace Explorer.UI
 
             if (GUILayout.Button("Save to PNG", new GUILayoutOption[] { GUILayout.Width(100f) }))
             {
-                if (currentTex)
+                var name = RemoveInvalidFilenameChars(currentTex.name ?? "");
+                if (string.IsNullOrEmpty(name))
                 {
-                    var name = RemoveInvalidFilenameChars(currentTex.name ?? "");
-                    if (string.IsNullOrEmpty(name))
+                    if (OwnerCacheObject is CacheMember cacheMember)
                     {
-                        if (OwnerCacheObject is CacheMember cacheMember)
-                        {
-                            name = cacheMember.MemInfo.Name;
-                        }
-                        else
-                        {
-                            name = "UNTITLED";
-                        }
+                        name = cacheMember.MemInfo.Name;
                     }
-
-                    SaveTextureAsPNG(currentTex, saveFolder, name, false);
-
-                    ExplorerCore.Log($@"Saved to {saveFolder}\{name}.png!");
+                    else
+                    {
+                        name = "UNTITLED";
+                    }
                 }
-                else
-                {
-                    ExplorerCore.Log("Cannot save a null texture!");
-                }
+
+                Texture2DHelpers.SaveTextureAsPNG(currentTex, saveFolder, name, false);
+
+                ExplorerCore.Log($@"Saved to {saveFolder}\{name}.png!");
             }
         }
 
@@ -148,107 +144,6 @@ namespace Explorer.UI
             return s;
         }
 
-        public static void SaveTextureAsPNG(Texture2D tex, string dir, string name, bool isDTXnmNormal = false)
-        {
-            if (!Directory.Exists(dir))
-            {
-                Directory.CreateDirectory(dir);
-            }
-
-            byte[] data;
-            var savepath = dir + @"\" + name + ".png";
-
-            try
-            {
-                if (isDTXnmNormal)
-                {
-                    tex = DTXnmToRGBA(tex);
-                    tex.Apply(false, false);
-                }
-
-                data = tex.EncodeToPNG();
-
-                if (data == null)
-                {
-                    ExplorerCore.Log("Couldn't get data with EncodeToPNG (probably ReadOnly?), trying manually...");
-                    throw new Exception();
-                }
-            }
-            catch
-            {
-                var origFilter = tex.filterMode;
-                tex.filterMode = FilterMode.Point;
-
-                RenderTexture rt = RenderTexture.GetTemporary(tex.width, tex.height);
-                rt.filterMode = FilterMode.Point;
-                RenderTexture.active = rt;
-                Graphics.Blit(tex, rt);
-
-                Texture2D _newTex = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32, false);
-                _newTex.ReadPixels(new Rect(0, 0, tex.width, tex.height), 0, 0);
-
-                if (isDTXnmNormal)
-                {
-                    _newTex = DTXnmToRGBA(_newTex);
-                }
-
-                _newTex.Apply(false, false);
-
-                RenderTexture.active = null;
-                tex.filterMode = origFilter;
-
-                data = _newTex.EncodeToPNG();
-                //data = _newTex.GetRawTextureData();
-            }
-
-            if (data == null || data.Length < 1)
-            {
-                ExplorerCore.LogWarning("Couldn't get any data for the texture!");
-            }
-            else
-            {
-#if CPP
-                // The IL2CPP method will return invalid byte data.
-                // However, we can just iterate into safe C# byte[] array.
-                byte[] safeData = new byte[data.Length];
-                for (int i = 0; i < data.Length; i++)
-                {
-                    safeData[i] = (byte)data[i]; // not sure if cast is needed
-                }
-
-                File.WriteAllBytes(savepath, safeData);
-#else
-                File.WriteAllBytes(savepath, data);
-#endif
-            }
-        }
-
-        // Converts DTXnm-format Normal Map to RGBA-format Normal Map.
-        public static Texture2D DTXnmToRGBA(Texture2D tex)
-        {
-            Color[] colors = tex.GetPixels();
-
-            for (int i = 0; i < colors.Length; i++)
-            {
-                Color c = colors[i];
-
-                c.r = c.a * 2 - 1;  // red <- alpha
-                c.g = c.g * 2 - 1;  // green is always the same
-
-                Vector2 rg = new Vector2(c.r, c.g); //this is the red-green vector
-                c.b = Mathf.Sqrt(1 - Mathf.Clamp01(Vector2.Dot(rg, rg))); //recalculate the blue channel
-
-                colors[i] = new Color(
-                    (c.r * 0.5f) + 0.5f,
-                    (c.g * 0.5f) + 0.25f,
-                    (c.b * 0.5f) + 0.5f
-                );
-            }
-
-            var newtex = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32, false);
-            newtex.SetPixels(colors);
-
-            return newtex;
-        }
+        
     }
 }

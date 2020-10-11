@@ -10,7 +10,7 @@ namespace Explorer
     public class ExplorerCore
     {
         public const string NAME    = "Explorer " + VERSION + " (" + PLATFORM + ", " + MODLOADER + ")";
-        public const string VERSION = "2.0.2";
+        public const string VERSION = "2.0.3";
         public const string AUTHOR  = "Sinai";
         public const string GUID    = "com.sinai.explorer";
 

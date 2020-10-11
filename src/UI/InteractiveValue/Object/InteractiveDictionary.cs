@@ -10,6 +10,9 @@ using Explorer.CacheObject;
 
 namespace Explorer.UI
 {
+    // TODO: Re-work class using InteractiveEnumerable or maybe InteractiveCollection for the Keys/Value lists.
+    // Make the keys and values editable.
+
     public class InteractiveDictionary : InteractiveValue, IExpandHeight
     {
         public bool IsExpanded { get; set; }

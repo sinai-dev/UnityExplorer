@@ -161,8 +161,15 @@ namespace Explorer.UI.Main
                 GUIUnstrip.EndScrollView();
                 GUILayout.EndVertical();
             }
-            catch
+            catch (Exception e)
             {
+                ExplorerCore.Log("Exception drawing search results!");
+                while (e != null)
+                {
+                    ExplorerCore.Log(e);
+                    e = e.InnerException;
+                }
+
                 m_searchResults.Clear();
             }
         }

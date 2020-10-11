@@ -198,31 +198,33 @@ namespace Explorer.UI
             return m_toStringMethod;
         }
 
-        private string GetButtonLabel()
+        public string GetButtonLabel()
         {
             if (Value == null) return null;
 
+            var valueType = ReflectionHelpers.GetActualType(Value);
+
             string label = (string)ToStringMethod?.Invoke(Value, null) ?? Value.ToString();
 
-            var classColor = ValueType.IsAbstract && ValueType.IsSealed
+            var classColor = valueType.IsAbstract && valueType.IsSealed
                 ? Syntax.Class_Static
                 : Syntax.Class_Instance;
 
-            string typeLabel = $"<color={classColor}>{ValueType.FullName}</color>";
+            string typeLabel = $"<color={classColor}>{valueType.FullName}</color>";
 
             if (Value is UnityEngine.Object)
             {
-                label = label.Replace($"({ValueType.FullName})", $"({typeLabel})");
+                label = label.Replace($"({valueType.FullName})", $"({typeLabel})");
             }
             else
             {
-                if (!label.Contains(ValueType.FullName))
+                if (!label.Contains(valueType.FullName))
                 {
                     label += $" ({typeLabel})";
                 }
                 else
                 {
-                    label = label.Replace(ValueType.FullName, typeLabel);
+                    label = label.Replace(valueType.FullName, typeLabel);
                 }
             }
 

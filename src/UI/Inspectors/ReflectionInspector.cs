@@ -213,6 +213,7 @@ namespace Explorer.UI.Inspectors
                         try
                         {
                             var cached = CacheFactory.GetCacheObject(member, target);
+
                             if (cached != null)
                             {
                                 cachedSigs.Add(sig);

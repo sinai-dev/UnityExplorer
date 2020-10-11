@@ -37,6 +37,10 @@ namespace Explorer.CacheObject
             {
                 interactive = new InteractiveTexture2D();
             }
+            else if (valueType == typeof(Texture))
+            {
+                interactive = new InteractiveTexture();
+            }
             else if (valueType == typeof(Sprite))
             {
                 interactive = new InteractiveSprite();
