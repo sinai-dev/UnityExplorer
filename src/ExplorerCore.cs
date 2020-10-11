@@ -87,6 +87,11 @@ namespace Explorer
             WindowManager.Instance.OnGUI();
             InspectUnderMouse.OnGUI();
 
+            if (WindowManager.IsMouseInWindow)
+            {
+                InputManager.ResetInputAxes();
+            }
+
             GUI.skin = origSkin;
         }
 

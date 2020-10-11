@@ -42,6 +42,16 @@ namespace Explorer
         public static bool GetMouseButtonDown(int btn) => inputModule.GetMouseButtonDown(btn);
         public static bool GetMouseButton(int btn) => inputModule.GetMouseButton(btn);
 
+#if CPP
+        internal delegate void d_ResetInputAxes();
+        internal static d_ResetInputAxes ResetInputAxes_iCall =>
+            IL2CPP.ResolveICall<d_ResetInputAxes>("UnityEngine.Input::ResetInputAxes");
+
+        public static void ResetInputAxes() => ResetInputAxes_iCall();
+#else
+        public static void ResetInputAxes() => UnityEngine.Input.ResetInputAxes();
+#endif
+
         //#if CPP
         //#pragma warning disable IDE1006 
         //        // public extern static string compositionString { get; }
