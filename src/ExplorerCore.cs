@@ -10,7 +10,7 @@ namespace Explorer
     public class ExplorerCore
     {
         public const string NAME    = "Explorer " + VERSION + " (" + PLATFORM + ", " + MODLOADER + ")";
-        public const string VERSION = "2.0.3";
+        public const string VERSION = "2.0.4";
         public const string AUTHOR  = "Sinai";
         public const string GUID    = "com.sinai.explorer";
 
@@ -31,6 +31,12 @@ namespace Explorer
 
         public ExplorerCore()
         {
+            if (Instance != null)
+            {
+                Log("An instance of Explorer is already active!");
+                return;
+            }
+
             Instance = this;
 
             ModConfig.OnLoad();
@@ -87,7 +93,7 @@ namespace Explorer
             WindowManager.Instance.OnGUI();
             InspectUnderMouse.OnGUI();
 
-            if (WindowManager.IsMouseInWindow)
+            if (!ResizeDrag.IsMouseInResizeArea && WindowManager.IsMouseInWindow)
             {
                 InputManager.ResetInputAxes();
             }

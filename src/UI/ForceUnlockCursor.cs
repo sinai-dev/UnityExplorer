@@ -17,32 +17,25 @@ namespace Explorer.UI
         }
         private static bool m_forceUnlock;
 
-        private static CursorLockMode m_lastLockMode;
-        private static bool m_lastVisibleState;
-        private static bool m_currentlySettingCursor = false;
-
         public static bool ShouldForceMouse => ExplorerCore.ShowMenu && Unlock;
 
-        private static Type CursorType => m_cursorType ?? (m_cursorType = ReflectionHelpers.GetTypeByName("UnityEngine.Cursor"));
+        private static CursorLockMode m_lastLockMode;
+        private static bool m_lastVisibleState;
+
+        private static bool m_currentlySettingCursor = false;
+
+        private static Type CursorType 
+            => m_cursorType 
+            ?? (m_cursorType = ReflectionHelpers.GetTypeByName("UnityEngine.Cursor"));
         private static Type m_cursorType;
 
         public static void Init()
         {
             try
             {
-                // Check if Cursor class is loaded
                 if (CursorType == null)
                 {
-                    ExplorerCore.Log("Trying to manually load Cursor module...");
-
-                    if (ReflectionHelpers.LoadModule("UnityEngine.CoreModule") && CursorType != null)
-                    {
-                        ExplorerCore.Log("Ok!");
-                    }
-                    else
-                    {
-                        throw new Exception("Could not load UnityEngine.Cursor module!");
-                    }
+                    throw new Exception("Could not find Type 'UnityEngine.Cursor'!");
                 }
 
                 // Get current cursor state and enable cursor
@@ -91,7 +84,8 @@ namespace Explorer.UI
             }
             catch (Exception e)
             {
-                ExplorerCore.Log($"[NON-FATAL] Couldn't patch a method: {e.Message}");
+                string s = setter ? "set_" : "get_" ;
+                ExplorerCore.Log($"Unable to patch Cursor.{s}{property}: {e.Message}");
             }
         }
 

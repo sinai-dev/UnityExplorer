@@ -78,7 +78,10 @@ There is a simple Mod Config for the Explorer. You can access the settings via t
 * Whether or not to show the Bitwise Editing helper when inspecting integers
 
 `Enable Tab View` (bool) | Default: `true`
-* Whether or not all inspector windows a grouped into a single window with tabs. 
+* Whether or not all inspector windows a grouped into a single window with tabs.
+
+`Default Output Path` (string) | Default: `Mods\Explorer`
+* Where output is generated to, by default (for Texture PNG saving, etc).
 
 ## Mouse Control
 

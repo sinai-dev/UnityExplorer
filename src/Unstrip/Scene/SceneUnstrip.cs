@@ -26,7 +26,7 @@ namespace Explorer.Unstrip.Scenes
             IL2CPP.ResolveICall<GetRootGameObjectsInternal_delegate>("UnityEngine.SceneManagement.Scene::GetRootGameObjectsInternal");
 
         //Scene.rootCount;
-        public static int GetRootCount_Internal(UnityEngine.SceneManagement.Scene scene)
+        public static int GetRootCount_Internal(Scene scene)
         {
             return GetRootCountInternal_iCall(scene.handle);
         }

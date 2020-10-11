@@ -44,7 +44,7 @@ namespace Explorer
 
 #if CPP
         internal delegate void d_ResetInputAxes();
-        internal static d_ResetInputAxes ResetInputAxes_iCall =>
+        internal static d_ResetInputAxes ResetInputAxes_iCall =
             IL2CPP.ResolveICall<d_ResetInputAxes>("UnityEngine.Input::ResetInputAxes");
 
         public static void ResetInputAxes() => ResetInputAxes_iCall();

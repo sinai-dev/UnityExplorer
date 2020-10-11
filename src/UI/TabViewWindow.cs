@@ -70,6 +70,15 @@ namespace Explorer.UI
                 int rowCount = 0;
                 for (int i = 0; i < WindowManager.Windows.Count; i++)
                 {
+                    var window = WindowManager.Windows[i];
+
+                    // Prevent trying to draw destroyed UnityEngine.Objects
+                    // before the WindowManager removes them.
+                    if (window.Target is UnityEngine.Object uObj && !uObj)
+                    {
+                        continue;
+                    }
+
                     if (rowCount >= tabPerRow)
                     {
                         rowCount = 0;
@@ -82,7 +91,6 @@ namespace Explorer.UI
                     string color = focused ? "<color=lime>" : "<color=orange>";
                     GUI.color = focused ? Color.green : Color.white;
 
-                    var window = WindowManager.Windows[i];
                     if (GUILayout.Button(color + window.Title + "</color>", new GUILayoutOption[] { GUILayout.Width(200) }))
                     {
                         TargetTabID = i;

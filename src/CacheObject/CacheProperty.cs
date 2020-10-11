@@ -35,11 +35,26 @@ namespace Explorer.CacheObject
             try
             {
                 var pi = MemInfo as PropertyInfo;
-                var target = pi.GetAccessors()[0].IsStatic ? null : DeclaringInstance;
 
-                IValue.Value = pi.GetValue(target, ParseArguments());
+                if (pi.CanRead)
+                {
+                    var target = pi.GetAccessors()[0].IsStatic ? null : DeclaringInstance;
 
-                base.UpdateValue();
+                    IValue.Value = pi.GetValue(target, ParseArguments());
+
+                    base.UpdateValue();
+                }
+                else // create a dummy value for Write-Only properties.
+                {
+                    if (IValue.ValueType == typeof(string))
+                    {
+                        IValue.Value = "";
+                    }
+                    else
+                    {
+                        IValue.Value = Activator.CreateInstance(IValue.ValueType);
+                    }
+                }
             }
             catch (Exception e)
             {

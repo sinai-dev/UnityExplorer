@@ -63,25 +63,35 @@ namespace Explorer.UI.Main
             toggleKeyInput.IValue.DrawValue(MainMenu.MainRect, MainMenu.MainRect.width - 215f);
             GUILayout.EndHorizontal();
 
+            UIStyles.HorizontalLine(Color.black, true);
+
             GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
             GUILayout.Label($"Default Window Size:", new GUILayoutOption[] { GUILayout.Width(215f) });
             defaultSizeInput.IValue.DrawValue(MainMenu.MainRect, MainMenu.MainRect.width - 215f);
             GUILayout.EndHorizontal();
+
+            UIStyles.HorizontalLine(Color.black, true);
 
             GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
             GUILayout.Label($"Default Items per Page:", new GUILayoutOption[] { GUILayout.Width(215f) });
             defaultPageLimitInput.IValue.DrawValue(MainMenu.MainRect, MainMenu.MainRect.width - 215f);
             GUILayout.EndHorizontal();
 
+            UIStyles.HorizontalLine(Color.black, true);
+
             GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
             GUILayout.Label($"Enable Bitwise Editing:", new GUILayoutOption[] { GUILayout.Width(215f) });
             bitwiseSupportInput.IValue.DrawValue(MainMenu.MainRect, MainMenu.MainRect.width - 215f);
             GUILayout.EndHorizontal();
 
+            UIStyles.HorizontalLine(Color.black, true);
+
             GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
             GUILayout.Label($"Enable Tab View:", new GUILayoutOption[] { GUILayout.Width(215f) });
             tabViewInput.IValue.DrawValue(MainMenu.MainRect, MainMenu.MainRect.width - 215f);
             GUILayout.EndHorizontal();
+
+            UIStyles.HorizontalLine(Color.black, true);
 
             GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
             GUILayout.Label($"Default Output Path:", new GUILayoutOption[] { GUILayout.Width(215f) });

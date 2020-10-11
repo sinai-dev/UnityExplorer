@@ -11,6 +11,26 @@ namespace Explorer.UI
 
         public static bool TabView = Config.ModConfig.Instance.Tab_View;
 
+        public static bool IsMouseInWindow
+        {
+            get
+            {
+                if (!ExplorerCore.ShowMenu)
+                {
+                    return false;
+                }
+
+                foreach (var window in Windows)
+                {
+                    if (RectContainsMouse(window.m_rect))
+                    {
+                        return true;
+                    }
+                }
+                return RectContainsMouse(MainMenu.MainRect);
+            }
+        }
+
         public static List<WindowBase> Windows = new List<WindowBase>();
         public static int CurrentWindowID { get; set; } = 500000;
         private static Rect m_lastWindowRect;
@@ -121,26 +141,6 @@ namespace Explorer.UI
             FocusWindow(new_window);
 
             return new_window;
-        }
-
-        public static bool IsMouseInWindow
-        {
-            get
-            {
-                if (!ExplorerCore.ShowMenu)
-                {
-                    return false;
-                }
-
-                foreach (var window in Windows)
-                {
-                    if (RectContainsMouse(window.m_rect))
-                    {
-                        return true;
-                    }
-                }
-                return RectContainsMouse(MainMenu.MainRect);
-            }
         }
 
         private static bool RectContainsMouse(Rect rect)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Explorer.UI.Shared;
 using Explorer.UI.Main;
+using Explorer.Unstrip.LayerMasks;
 #if CPP
 using UnhollowerRuntimeLib;
 #endif
@@ -16,6 +17,8 @@ namespace Explorer.UI.Inspectors
            : $"GameObject Inspector ({TargetGO.name})";
 
         public GameObject TargetGO;
+
+        public bool pendingDestroy;
 
         private static bool m_hideControls;
 
@@ -42,6 +45,8 @@ namespace Explorer.UI.Inspectors
         private bool m_autoApplyTransform;
         private bool m_autoUpdateTransform;
         private bool m_localContext;
+
+        private int m_layer;
 
         private readonly List<Component> m_cachedDestroyList = new List<Component>();
         private string m_addComponentInput = "";
@@ -104,16 +109,16 @@ namespace Explorer.UI.Inspectors
         {
             try
             {
+                if (pendingDestroy) return;
+
                 if (Target == null)
                 {
-                    ExplorerCore.Log("Target is null!");
-                    DestroyWindow();
+                    DestroyOnException(new Exception("Target was destroyed."));
                     return;
                 }
                 if (!TargetGO && !GetObjectAsGameObject())
                 {
-                    ExplorerCore.Log("Target was destroyed!");
-                    DestroyWindow();
+                    DestroyOnException(new Exception("Target was destroyed."));
                     return;
                 }
 
@@ -131,6 +136,8 @@ namespace Explorer.UI.Inspectors
                     }
                     TargetGO.transform.localScale = m_frozenScale;
                 }
+
+                m_layer = TargetGO.layer;
 
                 // update child objects
                 var childList = new List<Transform>();
@@ -163,6 +170,7 @@ namespace Explorer.UI.Inspectors
         private void DestroyOnException(Exception e)
         {
             ExplorerCore.Log($"Exception drawing GameObject Window: {e.GetType()}, {e.Message}");
+            pendingDestroy = true;
             DestroyWindow();
         }
 
@@ -204,6 +212,8 @@ namespace Explorer.UI.Inspectors
 
         public override void WindowFunction(int windowID)
         {
+            if (pendingDestroy) return;
+
             try
             {
                 var rect = WindowManager.TabView ? TabViewWindow.Instance.m_rect : this.m_rect;
@@ -250,6 +260,8 @@ namespace Explorer.UI.Inspectors
                 GUIUnstrip.TextArea(m_name, new GUILayoutOption[0]);
                 GUILayout.EndHorizontal();
 
+                LayerControls();
+
                 // --- Horizontal Columns section ---
                 GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
 
@@ -278,6 +290,34 @@ namespace Explorer.UI.Inspectors
             {
                 DestroyOnException(e);
             }
+        }
+
+        private void LayerControls()
+        {
+            GUIUnstrip.BeginHorizontal();
+            GUILayout.Label("Layer:", new GUILayoutOption[] { GUILayout.Width(50) });
+
+            if (GUILayout.Button("<", new GUILayoutOption[] { GUILayout.Width(30) }))
+            {
+                if (m_layer > 0)
+                {
+                    m_layer--;
+                    if (TargetGO) TargetGO.layer = m_layer;
+                }
+            }
+            if (GUILayout.Button(">", new GUILayoutOption[] { GUILayout.Width(30) }))
+            {
+                if (m_layer < 32)
+                {
+                    m_layer++;
+                    if (TargetGO) TargetGO.layer = m_layer;
+                }
+            }
+
+            GUILayout.Label($"{m_layer} (<color=cyan>{LayerMaskUnstrip.LayerToName(m_layer)}</color>)", 
+                new GUILayoutOption[] { GUILayout.Width(200) });
+
+            GUILayout.EndHorizontal();
         }
 
         private void TransformList(Rect m_rect)

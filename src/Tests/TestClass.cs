@@ -15,16 +15,13 @@ namespace Explorer.Tests
     public static class StaticTestClass
     {
         public static int StaticProperty => 5;
-
         public static int StaticField = 69;
-
         public static List<string> StaticList = new List<string>
         {
             "one",
             "two",
             "three",
         };
-
         public static void StaticMethod() { }
 
     }
@@ -33,6 +30,14 @@ namespace Explorer.Tests
     {
         public static TestClass Instance => m_instance ?? (m_instance = new TestClass());
         private static TestClass m_instance;
+
+        public static bool ReadSetOnlyProperty => m_setOnlyProperty;
+
+        public static bool SetOnlyProperty
+        {
+            set => m_setOnlyProperty = value;
+        }
+        private static bool m_setOnlyProperty;
 
         public Texture2D TestTexture = UIStyles.MakeTex(200, 200, Color.white);
         public static Sprite TestSprite;

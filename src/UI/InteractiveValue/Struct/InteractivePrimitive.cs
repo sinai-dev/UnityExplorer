@@ -80,12 +80,13 @@ namespace Explorer.UI
 
                 if (OwnerCacheObject.CanWrite)
                 {
-                    b = GUILayout.Toggle(b, label, new GUILayoutOption[0]);
-                    if (b != (bool)Value)
-                    {
-                        Value = b;
-                        OwnerCacheObject.SetValue();
-                    }
+                    Value = GUILayout.Toggle(b, label, new GUILayoutOption[] { GUILayout.Width(60) });
+                    DrawApplyButton();
+                    //if (b != (bool)Value)
+                    //{
+                    //    Value = b;
+                    //    OwnerCacheObject.SetValue();
+                    //}
                 }
                 else
                 {
@@ -104,13 +105,8 @@ namespace Explorer.UI
             GUILayout.Label("<color=#2df7b2><i>" + ValueType.Name + "</i></color>", new GUILayoutOption[] { GUILayout.Width(50) });
 
             m_valueToString = GUIUnstrip.TextArea(m_valueToString, new GUILayoutOption[] { GUILayout.ExpandWidth(true) });
-            if (OwnerCacheObject.CanWrite)
-            {
-                if (GUILayout.Button("<color=#00FF00>Apply</color>", new GUILayoutOption[] { GUILayout.Width(60) }))
-                {
-                    SetValueFromInput();
-                }
-            }
+
+            DrawApplyButton();
 
             if (ModConfig.Instance.Bitwise_Support && m_canBitwiseOperate)
             {
@@ -127,6 +123,24 @@ namespace Explorer.UI
             }
 
             GUILayout.EndVertical();
+        }
+
+        private void DrawApplyButton()
+        {
+            if (OwnerCacheObject.CanWrite)
+            {
+                if (GUILayout.Button("<color=#00FF00>Apply</color>", new GUILayoutOption[] { GUILayout.Width(60) }))
+                {
+                    if (m_isBool)
+                    {
+                        OwnerCacheObject.SetValue();
+                    }
+                    else
+                    {
+                        SetValueFromInput();
+                    }
+                }
+            }
         }
 
         private void DrawBitwise()
