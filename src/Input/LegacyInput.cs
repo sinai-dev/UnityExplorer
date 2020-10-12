@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Explorer.Input
 {
-    public class LegacyInput : AbstractInput
+    public class LegacyInput : IAbstractInput
     {
         public static Type TInput => _input ?? (_input = ReflectionHelpers.GetTypeByName("UnityEngine.Input"));
         private static Type _input;
@@ -18,17 +18,17 @@ namespace Explorer.Input
         private static MethodInfo _getMouseButtonMethod;
         private static MethodInfo _getMouseButtonDownMethod;
 
-        public override Vector2 MousePosition => (Vector3)_mousePositionProp.GetValue(null, null);
+        public Vector2 MousePosition => (Vector3)_mousePositionProp.GetValue(null, null);
 
-        public override bool GetKey(KeyCode key) => (bool)_getKeyMethod.Invoke(null, new object[] { key });
+        public bool GetKey(KeyCode key) => (bool)_getKeyMethod.Invoke(null, new object[] { key });
 
-        public override bool GetKeyDown(KeyCode key) => (bool)_getKeyDownMethod.Invoke(null, new object[] { key });
+        public bool GetKeyDown(KeyCode key) => (bool)_getKeyDownMethod.Invoke(null, new object[] { key });
 
-        public override bool GetMouseButton(int btn) => (bool)_getMouseButtonMethod.Invoke(null, new object[] { btn });
+        public bool GetMouseButton(int btn) => (bool)_getMouseButtonMethod.Invoke(null, new object[] { btn });
 
-        public override bool GetMouseButtonDown(int btn) => (bool)_getMouseButtonDownMethod.Invoke(null, new object[] { btn });
+        public bool GetMouseButtonDown(int btn) => (bool)_getMouseButtonDownMethod.Invoke(null, new object[] { btn });
 
-        public override void Init()
+        public void Init()
         {
             ExplorerCore.Log("Initializing Legacy Input support...");
 

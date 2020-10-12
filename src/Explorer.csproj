@@ -231,7 +231,7 @@
     <Compile Include="Extensions\UnityExtensions.cs" />
     <Compile Include="Helpers\ReflectionHelpers.cs" />
     <Compile Include="Helpers\UnityHelpers.cs" />
-    <Compile Include="Input\AbstractInput.cs" />
+    <Compile Include="Input\IAbstractInput.cs" />
     <Compile Include="Tests\TestClass.cs" />
     <Compile Include="UI\ForceUnlockCursor.cs" />
     <Compile Include="Input\InputManager.cs" />

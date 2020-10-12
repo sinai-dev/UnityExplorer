@@ -169,6 +169,8 @@ namespace Explorer.UI.Inspectors
 
         private void DestroyOnException(Exception e)
         {
+            if (pendingDestroy) return;
+
             ExplorerCore.Log($"Exception drawing GameObject Window: {e.GetType()}, {e.Message}");
             pendingDestroy = true;
             DestroyWindow();

@@ -6,6 +6,7 @@ using System.Reflection;
 using UnityEngine;
 using Explorer.UI.Shared;
 using Explorer.CacheObject;
+using System.Threading;
 
 namespace Explorer.UI.Main
 {
@@ -15,8 +16,12 @@ namespace Explorer.UI.Main
 
         public override string Name { get => "Search"; }
 
+        private int MaxSearchResults = 5000;
+
         private string m_searchInput = "";
         private string m_typeInput = "";
+
+        //private bool m_cachingResults;
 
         private Vector2 resultsScroll = Vector2.zero;
 
@@ -58,6 +63,8 @@ namespace Explorer.UI.Main
 
         private void CacheResults(IEnumerable results, bool isStaticClasses = false)
         {
+            //m_cachingResults = true;
+
             m_searchResults = new List<CacheObjectBase>();
 
             foreach (var obj in results)
@@ -67,6 +74,9 @@ namespace Explorer.UI.Main
 #if CPP
                 if (toCache is Il2CppSystem.Object ilObject)
                 {
+                    var type = ReflectionHelpers.GetActualType(ilObject);
+                    ilObject = (Il2CppSystem.Object)ilObject.Il2CppCast(type);
+
                     toCache = ilObject.TryCast<GameObject>() ?? ilObject.TryCast<Transform>()?.gameObject ?? ilObject;
                 }
 #else
@@ -76,6 +86,14 @@ namespace Explorer.UI.Main
                 }
 #endif
 
+                if (toCache is TextAsset textAsset)
+                {
+                    if (string.IsNullOrEmpty(textAsset.text))
+                    {
+                        continue;
+                    }
+                }
+
                 var cache = CacheFactory.GetCacheObject(toCache);
                 cache.IsStaticClassSearchResult = isStaticClasses;
                 m_searchResults.Add(cache);
@@ -83,190 +101,25 @@ namespace Explorer.UI.Main
 
             Pages.ItemCount = m_searchResults.Count;
             Pages.PageOffset = 0;
+
+            results = null;
+
+            //m_cachingResults = false;
         }
-
-        public override void DrawWindow()
-        {
-            try
-            {
-                // helpers
-                GUIUnstrip.BeginHorizontal(GUIContent.none, GUI.skin.box, null);
-                GUILayout.Label("<b><color=orange>Helpers</color></b>", new GUILayoutOption[] { GUILayout.Width(70) });
-                if (GUILayout.Button("Find Static Instances", new GUILayoutOption[] { GUILayout.Width(180) }))
-                {
-                    CacheResults(GetStaticInstances());
-                }
-                if (GUILayout.Button("Find Static Classes", new GUILayoutOption[] { GUILayout.Width(180) }))
-                {
-                    CacheResults(GetStaticClasses(), true);
-                }
-                GUILayout.EndHorizontal();
-
-                // search box
-                SearchBox();
-
-                // results
-                GUIUnstrip.BeginVertical(GUIContent.none, GUI.skin.box, null);
-
-                GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-                GUILayout.Label("<b><color=orange>Results </color></b>" + " (" + m_searchResults.Count + ")", new GUILayoutOption[0]);
-                GUI.skin.label.alignment = TextAnchor.UpperLeft;
-
-                int count = m_searchResults.Count;
-
-                GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
-
-                Pages.DrawLimitInputArea();
-
-                if (count > Pages.ItemsPerPage)
-                {
-                    // prev/next page buttons
-
-                    if (Pages.ItemCount > Pages.ItemsPerPage)
-                    {
-                        if (GUILayout.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(80) }))
-                        {
-                            Pages.TurnPage(Turn.Left, ref this.resultsScroll);
-                        }
-
-                        Pages.CurrentPageLabel();
-
-                        if (GUILayout.Button("Next >", new GUILayoutOption[] { GUILayout.Width(80) }))
-                        {
-                            Pages.TurnPage(Turn.Right, ref this.resultsScroll);
-                        }
-                    }
-                }
-
-                GUILayout.EndHorizontal();
-
-                resultsScroll = GUIUnstrip.BeginScrollView(resultsScroll);
-
-                var _temprect = new Rect(MainMenu.MainRect.x, MainMenu.MainRect.y, MainMenu.MainRect.width + 160, MainMenu.MainRect.height);
-
-                if (m_searchResults.Count > 0)
-                {
-                    int offset = Pages.CalculateOffsetIndex();
-
-                    for (int i = offset; i < offset + Pages.ItemsPerPage && i < count; i++)
-                    {
-                        m_searchResults[i].Draw(MainMenu.MainRect, 0f);
-                    }
-                }
-                else
-                {
-                    GUILayout.Label("<color=red><i>No results found!</i></color>", new GUILayoutOption[0]);
-                }
-
-                GUIUnstrip.EndScrollView();
-                GUILayout.EndVertical();
-            }
-            catch (Exception e)
-            {
-                ExplorerCore.Log("Exception drawing search results!");
-                while (e != null)
-                {
-                    ExplorerCore.Log(e);
-                    e = e.InnerException;
-                }
-
-                m_searchResults.Clear();
-            }
-        }
-
-        private void SearchBox()
-        {
-            GUIUnstrip.BeginVertical(GUIContent.none, GUI.skin.box, null);
-
-            // ----- GameObject Search -----
-            GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-            GUILayout.Label("<b><color=orange>Search</color></b>", new GUILayoutOption[0]);
-            GUI.skin.label.alignment = TextAnchor.UpperLeft;
-
-            GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
-
-            GUILayout.Label("Name Contains:", new GUILayoutOption[] { GUILayout.Width(100) });
-            m_searchInput = GUIUnstrip.TextField(m_searchInput, new GUILayoutOption[] { GUILayout.Width(200) });
-
-            GUILayout.EndHorizontal();
-
-            GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
-
-            GUILayout.Label("Class Filter:", new GUILayoutOption[] { GUILayout.Width(100) });
-            ClassFilterToggle(TypeFilter.Object, "Object");
-            ClassFilterToggle(TypeFilter.GameObject, "GameObject");
-            ClassFilterToggle(TypeFilter.Component, "Component");
-            ClassFilterToggle(TypeFilter.Custom, "Custom");
-            GUILayout.EndHorizontal();
-            if (TypeMode == TypeFilter.Custom)
-            {
-                GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
-                GUI.skin.label.alignment = TextAnchor.MiddleRight;
-                GUILayout.Label("Custom Class:", new GUILayoutOption[] { GUILayout.Width(250) });
-                GUI.skin.label.alignment = TextAnchor.UpperLeft;
-                m_typeInput = GUIUnstrip.TextField(m_typeInput, new GUILayoutOption[] { GUILayout.Width(250) });
-                GUILayout.EndHorizontal();
-            }
-
-            GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
-            GUILayout.Label("Scene Filter:", new GUILayoutOption[] { GUILayout.Width(100) });
-            SceneFilterToggle(SceneFilter.Any, "Any", 60);
-            SceneFilterToggle(SceneFilter.This, "This Scene", 100);
-            SceneFilterToggle(SceneFilter.DontDestroy, "DontDestroyOnLoad", 140);
-            SceneFilterToggle(SceneFilter.None, "No Scene", 80);
-            GUILayout.EndHorizontal();
-
-            if (GUILayout.Button("<b><color=cyan>Search</color></b>", new GUILayoutOption[0]))
-            {
-                Search();
-            }
-
-            GUILayout.EndVertical();
-        }
-
-        private void ClassFilterToggle(TypeFilter mode, string label)
-        {
-            if (TypeMode == mode)
-            {
-                GUI.color = Color.green;
-            }
-            else
-            {
-                GUI.color = Color.white;
-            }
-            if (GUILayout.Button(label, new GUILayoutOption[] { GUILayout.Width(100) }))
-            {
-                TypeMode = mode;
-            }
-            GUI.color = Color.white;
-        }
-
-        private void SceneFilterToggle(SceneFilter mode, string label, float width)
-        {
-            if (SceneMode == mode)
-            {
-                GUI.color = Color.green;
-            }
-            else
-            {
-                GUI.color = Color.white;
-            }
-            if (GUILayout.Button(label, new GUILayoutOption[] { GUILayout.Width(width) }))
-            {
-                SceneMode = mode;
-            }
-            GUI.color = Color.white;
-        }
-
-
-        // -------------- ACTUAL METHODS (not Gui draw) ----------------- //        
-
-        // ======= search functions =======
 
         private void Search()
         {
+            //if (m_cachingResults)
+            //{
+            //    ExplorerCore.Log("Cannot search now, we are already caching results...");
+            //    return;
+            //}
+
             Pages.PageOffset = 0;
-            CacheResults(FindAllObjectsOfType(m_searchInput, m_typeInput));
+
+            // Would use Task, but Explorer is .NET 3.5-compatible.
+            var objectsOfType = FindAllObjectsOfType(m_searchInput, m_typeInput);
+            CacheResults(objectsOfType);
         }
 
         private List<object> FindAllObjectsOfType(string searchQuery, string typeName)
@@ -330,7 +183,7 @@ namespace Explorer.UI.Main
             int i = 0;
             foreach (var obj in allObjectsOfType)
             {
-                if (i >= 2000) break;
+                if (i >= MaxSearchResults) break;
 
                 if (searchQuery != "" && !obj.name.ToLower().Contains(searchQuery.ToLower()))
                 {
@@ -361,6 +214,10 @@ namespace Explorer.UI.Main
 
                 i++;
             }
+
+            allObjectsOfType = null;
+            searchType = null;
+            searchQuery = null;
 
             return matches;
         }
@@ -400,8 +257,6 @@ namespace Explorer.UI.Main
             }
             return false;
         }
-
-        // ====== other ========
 
         private static bool FilterName(string name)
         {
@@ -503,6 +358,203 @@ namespace Explorer.UI.Main
             }
 
             return list;
+        }
+
+        // =========== GUI DRAW ============= //
+
+        public override void DrawWindow()
+        {
+            try
+            {
+                // helpers
+                GUIUnstrip.BeginHorizontal(GUIContent.none, GUI.skin.box, null);
+                GUILayout.Label("<b><color=orange>Helpers</color></b>", new GUILayoutOption[] { GUILayout.Width(70) });
+                if (GUILayout.Button("Find Static Instances", new GUILayoutOption[] { GUILayout.Width(180) }))
+                {
+                    CacheResults(GetStaticInstances());
+                }
+                if (GUILayout.Button("Find Static Classes", new GUILayoutOption[] { GUILayout.Width(180) }))
+                {
+                    CacheResults(GetStaticClasses(), true);
+                }
+                GUILayout.EndHorizontal();
+
+                // search box
+                SearchBox();
+
+                // results
+                GUIUnstrip.BeginVertical(GUIContent.none, GUI.skin.box, null);
+
+                GUI.skin.label.alignment = TextAnchor.MiddleCenter;
+                GUILayout.Label("<b><color=orange>Results </color></b>" + " (" + m_searchResults.Count + ")", new GUILayoutOption[0]);
+                GUI.skin.label.alignment = TextAnchor.UpperLeft;
+
+                int count = m_searchResults.Count;
+
+                GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+
+                Pages.DrawLimitInputArea();
+
+                if (count > Pages.ItemsPerPage)
+                {
+                    // prev/next page buttons
+
+                    if (Pages.ItemCount > Pages.ItemsPerPage)
+                    {
+                        if (GUILayout.Button("< Prev", new GUILayoutOption[] { GUILayout.Width(80) }))
+                        {
+                            Pages.TurnPage(Turn.Left, ref this.resultsScroll);
+                        }
+
+                        Pages.CurrentPageLabel();
+
+                        if (GUILayout.Button("Next >", new GUILayoutOption[] { GUILayout.Width(80) }))
+                        {
+                            Pages.TurnPage(Turn.Right, ref this.resultsScroll);
+                        }
+                    }
+                }
+
+                GUILayout.EndHorizontal();
+
+                resultsScroll = GUIUnstrip.BeginScrollView(resultsScroll);
+
+                var _temprect = new Rect(MainMenu.MainRect.x, MainMenu.MainRect.y, MainMenu.MainRect.width + 160, MainMenu.MainRect.height);
+
+                if (m_searchResults.Count > 0)
+                {
+                    int offset = Pages.CalculateOffsetIndex();
+
+                    for (int i = offset; i < offset + Pages.ItemsPerPage && i < count; i++)
+                    {
+                        if (i >= m_searchResults.Count) break;
+
+                        m_searchResults[i].Draw(MainMenu.MainRect, 0f);
+                    }
+                }
+                else
+                {
+                    GUILayout.Label("<color=red><i>No results found!</i></color>", new GUILayoutOption[0]);
+                }
+
+                GUIUnstrip.EndScrollView();
+                GUILayout.EndVertical();
+            }
+            catch (Exception e)
+            {
+                if (!e.Message.Contains("in a group with only"))
+                {
+                    ExplorerCore.Log("Exception drawing search results!");
+                    while (e != null)
+                    {
+                        ExplorerCore.Log(e);
+                        e = e.InnerException;
+                    }
+                    m_searchResults.Clear();
+                }
+            }
+        }
+
+        private void SearchBox()
+        {
+            GUIUnstrip.BeginVertical(GUIContent.none, GUI.skin.box, null);
+
+            // ----- GameObject Search -----
+            GUI.skin.label.alignment = TextAnchor.MiddleCenter;
+            GUILayout.Label("<b><color=orange>Search</color></b>", new GUILayoutOption[0]);
+            GUI.skin.label.alignment = TextAnchor.UpperLeft;
+
+            GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+
+            GUILayout.Label("Name Contains:", new GUILayoutOption[] { GUILayout.Width(100) });
+            m_searchInput = GUIUnstrip.TextField(m_searchInput, new GUILayoutOption[] { GUILayout.Width(200) });
+
+            GUILayout.Label("Max Results:", new GUILayoutOption[] { GUILayout.Width(100) });
+            var s = MaxSearchResults.ToString();
+            s = GUIUnstrip.TextField(s, new GUILayoutOption[] { GUILayout.Width(80) });
+            if (int.TryParse(s, out int i))
+            {
+                MaxSearchResults = i;
+            }
+            GUILayout.EndHorizontal();
+
+            GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+
+            GUILayout.Label("Class Filter:", new GUILayoutOption[] { GUILayout.Width(100) });
+            ClassFilterToggle(TypeFilter.Object, "Object");
+            ClassFilterToggle(TypeFilter.GameObject, "GameObject");
+            ClassFilterToggle(TypeFilter.Component, "Component");
+            ClassFilterToggle(TypeFilter.Custom, "Custom");
+            GUILayout.EndHorizontal();
+            if (TypeMode == TypeFilter.Custom)
+            {
+                GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+                GUI.skin.label.alignment = TextAnchor.MiddleRight;
+                GUILayout.Label("Custom Class:", new GUILayoutOption[] { GUILayout.Width(250) });
+                GUI.skin.label.alignment = TextAnchor.UpperLeft;
+                m_typeInput = GUIUnstrip.TextField(m_typeInput, new GUILayoutOption[] { GUILayout.Width(250) });
+                GUILayout.EndHorizontal();
+            }
+
+            GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+            GUILayout.Label("Scene Filter:", new GUILayoutOption[] { GUILayout.Width(100) });
+            SceneFilterToggle(SceneFilter.Any, "Any", 60);
+            SceneFilterToggle(SceneFilter.This, "This Scene", 100);
+            SceneFilterToggle(SceneFilter.DontDestroy, "DontDestroyOnLoad", 140);
+            SceneFilterToggle(SceneFilter.None, "No Scene", 80);
+            GUILayout.EndHorizontal();
+
+            if (GUILayout.Button("<b><color=cyan>Search</color></b>", new GUILayoutOption[0]))
+            {
+                Search();
+            }
+            //if (m_cachingResults)
+            //{
+            //    GUILayout.Label("Searching...", new GUILayoutOption[0]);
+            //}
+            //else
+            //{
+            //    if (GUILayout.Button("<b><color=cyan>Search</color></b>", new GUILayoutOption[0]))
+            //    {
+            //        Search();
+            //    }
+            //}
+
+            GUILayout.EndVertical();
+        }
+
+        private void ClassFilterToggle(TypeFilter mode, string label)
+        {
+            if (TypeMode == mode)
+            {
+                GUI.color = Color.green;
+            }
+            else
+            {
+                GUI.color = Color.white;
+            }
+            if (GUILayout.Button(label, new GUILayoutOption[] { GUILayout.Width(100) }))
+            {
+                TypeMode = mode;
+            }
+            GUI.color = Color.white;
+        }
+
+        private void SceneFilterToggle(SceneFilter mode, string label, float width)
+        {
+            if (SceneMode == mode)
+            {
+                GUI.color = Color.green;
+            }
+            else
+            {
+                GUI.color = Color.white;
+            }
+            if (GUILayout.Button(label, new GUILayoutOption[] { GUILayout.Width(width) }))
+            {
+                SceneMode = mode;
+            }
+            GUI.color = Color.white;
         }
     }
 }

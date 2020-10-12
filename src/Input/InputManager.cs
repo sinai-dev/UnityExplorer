@@ -10,37 +10,35 @@ namespace Explorer
 {
     public static class InputManager
     {
-        private static AbstractInput inputModule;
+        private static IAbstractInput m_inputModule;
 
         public static void Init()
         {
-            if (InputSystem.TKeyboard != null || TryLoadModule("Unity.InputSystem", InputSystem.TKeyboard))
+            if (InputSystem.TKeyboard != null || (ReflectionHelpers.LoadModule("Unity.InputSystem") && InputSystem.TKeyboard != null))
             {
-                inputModule = new InputSystem();
+                m_inputModule = new InputSystem();
             }
-            else if (LegacyInput.TInput != null || TryLoadModule("UnityEngine.InputLegacyModule", LegacyInput.TInput))
+            else if (LegacyInput.TInput != null || (ReflectionHelpers.LoadModule("UnityEngine.InputLegacyModule") && LegacyInput.TInput != null))
             {
-                inputModule = new LegacyInput();
+                m_inputModule = new LegacyInput();
             }
 
-            if (inputModule == null)
+            if (m_inputModule == null)
             {
                 ExplorerCore.LogWarning("Could not find any Input module!");
-                inputModule = new NoInput();
+                m_inputModule = new NoInput();
             }
 
-            inputModule.Init();
-
-            bool TryLoadModule(string dll, Type check) => ReflectionHelpers.LoadModule(dll) && check != null;
+            m_inputModule.Init();
         }
 
-        public static Vector3 MousePosition => inputModule.MousePosition;
+        public static Vector3 MousePosition => m_inputModule.MousePosition;
 
-        public static bool GetKeyDown(KeyCode key) => inputModule.GetKeyDown(key);
-        public static bool GetKey(KeyCode key) => inputModule.GetKey(key);
+        public static bool GetKeyDown(KeyCode key) => m_inputModule.GetKeyDown(key);
+        public static bool GetKey(KeyCode key) => m_inputModule.GetKey(key);
 
-        public static bool GetMouseButtonDown(int btn) => inputModule.GetMouseButtonDown(btn);
-        public static bool GetMouseButton(int btn) => inputModule.GetMouseButton(btn);
+        public static bool GetMouseButtonDown(int btn) => m_inputModule.GetMouseButtonDown(btn);
+        public static bool GetMouseButton(int btn) => m_inputModule.GetMouseButton(btn);
 
 #if CPP
         internal delegate void d_ResetInputAxes();

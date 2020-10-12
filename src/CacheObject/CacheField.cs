@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
+using Explorer.UI;
 
 namespace Explorer.CacheObject
 {
@@ -21,6 +22,15 @@ namespace Explorer.CacheObject
 
         public override void UpdateValue()
         {
+            if (IValue is InteractiveDictionary iDict)
+            {
+                if (!iDict.EnsureDictionaryIsSupported())
+                {
+                    ReflectionException = "Not supported due to TypeInitializationException";
+                    return;
+                }
+            }
+
             try
             {
                 var fi = MemInfo as FieldInfo;

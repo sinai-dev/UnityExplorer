@@ -161,7 +161,7 @@ namespace Explorer.UI
             m_cachedValues = values.ToArray();
         }
 
-        private bool EnsureDictionaryIsSupported()
+        public bool EnsureDictionaryIsSupported()
         {
             if (typeof(IDictionary).IsAssignableFrom(ValueType))
             {
@@ -179,6 +179,11 @@ namespace Explorer.UI
                         .MakeGenericType(type)
                         .GetField("NativeClassPtr")
                         .GetValue(null);
+
+                    if (ptr == IntPtr.Zero)
+                    {
+                        return false;
+                    }
 
                     return Il2CppSystem.Type.internal_from_handle(IL2CPP.il2cpp_class_get_type(ptr)) is Il2CppSystem.Type;
                 }

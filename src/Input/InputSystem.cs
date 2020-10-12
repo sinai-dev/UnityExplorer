@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Explorer.Input
 {
-    public class InputSystem : AbstractInput
+    public class InputSystem : IAbstractInput
     {
         public static Type TKeyboard => _keyboard ?? (_keyboard = ReflectionHelpers.GetTypeByName("UnityEngine.InputSystem.Keyboard"));
         private static Type _keyboard;
@@ -43,9 +43,9 @@ namespace Explorer.Input
         private static PropertyInfo _positionProp;
         private static MethodInfo _readVector2InputMethod;
 
-        public override Vector2 MousePosition => (Vector2)_readVector2InputMethod.Invoke(MousePositionInfo, new object[0]);
+        public Vector2 MousePosition => (Vector2)_readVector2InputMethod.Invoke(MousePositionInfo, new object[0]);
 
-        public override bool GetKeyDown(KeyCode key)
+        public bool GetKeyDown(KeyCode key)
         {
             var parsedKey = Enum.Parse(TKey, key.ToString());
             var actualKey = _kbIndexer.GetValue(CurrentKeyboard, new object[] { parsedKey });
@@ -53,7 +53,7 @@ namespace Explorer.Input
             return (bool)_btnWasPressedProp.GetValue(actualKey, null);
         }
 
-        public override bool GetKey(KeyCode key)
+        public bool GetKey(KeyCode key)
         {
             var parsed = Enum.Parse(TKey, key.ToString());
             var actualKey = _kbIndexer.GetValue(CurrentKeyboard, new object[] { parsed });
@@ -61,7 +61,7 @@ namespace Explorer.Input
             return (bool)_btnIsPressedProp.GetValue(actualKey, null);
         }
 
-        public override bool GetMouseButtonDown(int btn)
+        public bool GetMouseButtonDown(int btn)
         {
             switch (btn)
             {
@@ -72,7 +72,7 @@ namespace Explorer.Input
             }
         }
 
-        public override bool GetMouseButton(int btn)
+        public bool GetMouseButton(int btn)
         {
             switch (btn)
             {
@@ -83,7 +83,7 @@ namespace Explorer.Input
             }
         }
 
-        public override void Init()
+        public void Init()
         {
             ExplorerCore.Log("Initializing new InputSystem support...");
 

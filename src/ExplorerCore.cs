@@ -10,7 +10,7 @@ namespace Explorer
     public class ExplorerCore
     {
         public const string NAME    = "Explorer " + VERSION + " (" + PLATFORM + ", " + MODLOADER + ")";
-        public const string VERSION = "2.0.4";
+        public const string VERSION = "2.0.5";
         public const string AUTHOR  = "Sinai";
         public const string GUID    = "com.sinai.explorer";
 
@@ -110,27 +110,27 @@ namespace Explorer
         public static void Log(object message)
         {
 #if ML
-            MelonLoader.MelonLogger.Log(message.ToString());
+            MelonLoader.MelonLogger.Log(message?.ToString());
 #else
-            ExplorerBepInPlugin.Logging?.LogMessage(message.ToString());
+            ExplorerBepInPlugin.Logging?.LogMessage(message?.ToString());
 #endif
         }
 
         public static void LogWarning(object message)
         {
 #if ML
-            MelonLoader.MelonLogger.LogWarning(message.ToString());
+            MelonLoader.MelonLogger.LogWarning(message?.ToString());
 #else
-            ExplorerBepInPlugin.Logging?.LogWarning(message.ToString());
+            ExplorerBepInPlugin.Logging?.LogWarning(message?.ToString());
 #endif
         }
 
         public static void LogError(object message)
         {
 #if ML
-            MelonLoader.MelonLogger.LogError(message.ToString());
+            MelonLoader.MelonLogger.LogError(message?.ToString());
 #else
-            ExplorerBepInPlugin.Logging?.LogError(message.ToString());
+            ExplorerBepInPlugin.Logging?.LogError(message?.ToString());
 #endif
         }
     }

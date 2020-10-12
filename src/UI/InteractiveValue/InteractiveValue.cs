@@ -204,27 +204,45 @@ namespace Explorer.UI
 
             var valueType = ReflectionHelpers.GetActualType(Value);
 
-            string label = (string)ToStringMethod?.Invoke(Value, null) ?? Value.ToString();
+            string label;
 
-            var classColor = valueType.IsAbstract && valueType.IsSealed
-                ? Syntax.Class_Static
-                : Syntax.Class_Instance;
-
-            string typeLabel = $"<color={classColor}>{valueType.FullName}</color>";
-
-            if (Value is UnityEngine.Object)
+            if (valueType == typeof(TextAsset))
             {
-                label = label.Replace($"({valueType.FullName})", $"({typeLabel})");
+                var textAsset = Value as TextAsset;
+
+                label = textAsset.text;
+
+                if (label.Length > 10)
+                {
+                    label = $"{label.Substring(0, 10)}...";
+                }
+
+                label = $"\"{label}\" {textAsset.name} (<color={Syntax.Class_Instance}>UnityEngine.TextAsset</color>)";
             }
             else
             {
-                if (!label.Contains(valueType.FullName))
+                label = (string)ToStringMethod?.Invoke(Value, null) ?? Value.ToString();
+
+                var classColor = valueType.IsAbstract && valueType.IsSealed
+                    ? Syntax.Class_Static
+                    : Syntax.Class_Instance;
+
+                string typeLabel = $"<color={classColor}>{valueType.FullName}</color>";
+
+                if (Value is UnityEngine.Object)
                 {
-                    label += $" ({typeLabel})";
+                    label = label.Replace($"({valueType.FullName})", $"({typeLabel})");
                 }
                 else
                 {
-                    label = label.Replace(valueType.FullName, typeLabel);
+                    if (!label.Contains(valueType.FullName))
+                    {
+                        label += $" ({typeLabel})";
+                    }
+                    else
+                    {
+                        label = label.Replace(valueType.FullName, typeLabel);
+                    }
                 }
             }
 

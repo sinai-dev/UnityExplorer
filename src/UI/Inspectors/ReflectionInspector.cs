@@ -208,8 +208,6 @@ namespace Explorer.UI.Inspectors
                             continue;
                         }
 
-                        //ExplorerCore.Log($"Trying to cache member {sig}...");
-
                         try
                         {
                             var cached = CacheFactory.GetCacheObject(member, target);
@@ -218,7 +216,11 @@ namespace Explorer.UI.Inspectors
                             {
                                 cachedSigs.Add(sig);
                                 list.Add(cached);
-                                cached.ReflectionException = exception;
+
+                                if (string.IsNullOrEmpty(cached.ReflectionException))
+                                {
+                                    cached.ReflectionException = exception;
+                                }
                             }
                         }
                         catch (Exception e)
