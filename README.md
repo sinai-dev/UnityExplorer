@@ -99,7 +99,7 @@ using Explorer;
 using Harmony; // or 'using HarmonyLib;' for BepInEx
 // ...
 // You will need to figure out the relevant Class and Method for your game using dnSpy.
-[HarmonyPatch(typeof(MyGame.InputManager), nameof(MyGame.InputManager.Update)]
+[HarmonyPatch(typeof(MyGame.InputManager), nameof(MyGame.InputManager.Update))]
 public class InputManager_Update
 {
     [HarmonyPrefix]
