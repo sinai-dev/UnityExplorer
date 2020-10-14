@@ -66,7 +66,7 @@ namespace Explorer.UI
                 GUIUnstrip.BeginVertical(GUIContent.none, GUI.skin.box, null);
                 GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
                 GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-                int tabPerRow = (int)Math.Floor((float)((decimal)m_rect.width / 238));
+                int tabPerRow = (int)Math.Floor(m_rect.width / 238);
                 int rowCount = 0;
                 for (int i = 0; i < WindowManager.Windows.Count; i++)
                 {

@@ -48,7 +48,7 @@ namespace Explorer.UI.Shared
                         {
                             IsMouseInResizeArea = true;
 
-                            if (InputManager.GetMouseButton(0))
+                            if (InputManager.GetMouseButtonDown(0))
                             {
                                 IsResizing = true;
                                 m_currentWindow = ID;

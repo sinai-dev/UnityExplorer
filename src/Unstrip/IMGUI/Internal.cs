@@ -76,6 +76,8 @@ namespace Explorer.Unstrip.IMGUI
         {
             text = text ?? string.Empty;
 
+            var skin = multiLine ? GUI.skin.textArea : GUI.skin.textField;
+
             int controlID = GUIUtility.GetControlID(FocusType.Keyboard);
             GUIContent guicontent = GUIContent.Temp(text);
             bool flag = GUIUtility.keyboardControl != controlID;
@@ -88,13 +90,13 @@ namespace Explorer.Unstrip.IMGUI
                 guicontent = GUIContent.Temp(text);
                 // guicontent = GUIContent.Temp(text + GUIUtility.compositionString);
             }
-            Rect rect = Internal_LayoutUtility.GetRect(guicontent, GUI.skin.textField, options);
+            Rect rect = Internal_LayoutUtility.GetRect(guicontent, skin, options);
             bool flag2 = GUIUtility.keyboardControl == controlID;
             if (flag2)
             {
                 guicontent = GUIContent.Temp(text);
             }
-            DoTextField(rect, controlID, guicontent, multiLine, -1, GUI.skin.textField);
+            DoTextField(rect, controlID, guicontent, multiLine, -1, skin);
             return guicontent.text;
         }
 
