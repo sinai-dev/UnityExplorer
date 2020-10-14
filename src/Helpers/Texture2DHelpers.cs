@@ -13,7 +13,7 @@ namespace Explorer.Helpers
 {
     public static class Texture2DHelpers
     {
-#if CPP
+#if CPP // If Mono
 #else
         private static bool isNewEncodeMethod = false;
         private static MethodInfo EncodeToPNGMethod => m_encodeToPNGMethod ?? GetEncodeToPNGMethod();
@@ -56,16 +56,16 @@ namespace Explorer.Helpers
             }
         }
 
-        public static Texture2D Copy(Texture2D other, Rect rect, bool isDTXnmNormal = false)
+        public static Texture2D Copy(Texture2D orig, Rect rect, bool isDTXnmNormal = false)
         {
             Color[] pixels;
 
-            if (!other.IsReadable())
+            if (!orig.IsReadable())
             {
-                other = ForceReadTexture(other, isDTXnmNormal);
+                orig = ForceReadTexture(orig);
             }
 
-            pixels = other.GetPixels((int)rect.x, (int)rect.y, (int)rect.width, (int)rect.height);
+            pixels = orig.GetPixels((int)rect.x, (int)rect.y, (int)rect.width, (int)rect.height);
 
             var _newTex = new Texture2D((int)rect.width, (int)rect.height);
             _newTex.SetPixels(pixels);
@@ -73,26 +73,21 @@ namespace Explorer.Helpers
             return _newTex;
         }
 
-        public static Texture2D ForceReadTexture(Texture2D tex, bool isDTXnmNormal = false)
+        public static Texture2D ForceReadTexture(Texture2D tex)
         {
             try
             {
                 var origFilter = tex.filterMode;
                 tex.filterMode = FilterMode.Point;
 
-                RenderTexture rt = RenderTexture.GetTemporary(tex.width, tex.height, 0, RenderTextureFormat.ARGB32);
+                var rt = RenderTexture.GetTemporary(tex.width, tex.height, 0, RenderTextureFormat.ARGB32);
                 rt.filterMode = FilterMode.Point;
                 RenderTexture.active = rt;
                 Graphics.Blit(tex, rt);
 
-                Texture2D _newTex = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32, false);
+                var _newTex = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
+
                 _newTex.ReadPixels(new Rect(0, 0, tex.width, tex.height), 0, 0);
-
-                if (isDTXnmNormal)
-                {
-                    _newTex = DTXnmToRGBA(_newTex);
-                }
-
                 _newTex.Apply(false, false);
 
                 RenderTexture.active = null;
@@ -117,8 +112,11 @@ namespace Explorer.Helpers
             byte[] data;
             var savepath = dir + @"\" + name + ".png";
 
-            // Fix for non-Readable or Compressed textures.
-            tex = ForceReadTexture(tex, isDTXnmNormal);
+            // Make sure we can EncodeToPNG it.
+            if (tex.format != TextureFormat.ARGB32 || !tex.IsReadable())
+            {
+                tex = ForceReadTexture(tex);
+            }
 
             if (isDTXnmNormal)
             {
@@ -129,15 +127,13 @@ namespace Explorer.Helpers
 #if CPP
             data = tex.EncodeToPNG();
 #else
-            var method = EncodeToPNGMethod;
-
             if (isNewEncodeMethod)
             {
-                data = (byte[])method.Invoke(null, new object[] { tex });
+                data = (byte[])EncodeToPNGMethod.Invoke(null, new object[] { tex });
             }
             else
             {
-                data = (byte[])method.Invoke(tex, new object[0]);
+                data = (byte[])EncodeToPNGMethod.Invoke(tex, new object[0]);
             }
 #endif
 
@@ -148,8 +144,10 @@ namespace Explorer.Helpers
             else
             {
 #if CPP
-                // The IL2CPP method will return invalid byte data.
-                // However, we can just iterate into safe C# byte[] array.
+                // The Il2Cpp EncodeToPNG() method does return System.Byte[],
+                // but for some reason it is not recognized or valid.
+                // Simple fix is iterating into a new array manually.
+
                 byte[] safeData = new byte[data.Length];
                 for (int i = 0; i < data.Length; i++)
                 {
@@ -185,7 +183,7 @@ namespace Explorer.Helpers
                 );
             }
 
-            var newtex = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32, false);
+            var newtex = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
             newtex.SetPixels(colors);
 
             return newtex;

@@ -6,6 +6,10 @@ using System.Reflection;
 using UnityEngine;
 using Explorer.UI.Shared;
 using Explorer.CacheObject;
+using System.Linq;
+#if CPP
+using UnhollowerBaseLib;
+#endif
 
 namespace Explorer.UI
 {

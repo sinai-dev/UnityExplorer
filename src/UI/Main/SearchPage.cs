@@ -117,13 +117,6 @@ namespace Explorer.UI.Main
 
             Pages.PageOffset = 0;
 
-            // Would use Task, but Explorer is .NET 3.5-compatible.
-            var objectsOfType = FindAllObjectsOfType(m_searchInput, m_typeInput);
-            CacheResults(objectsOfType);
-        }
-
-        private List<object> FindAllObjectsOfType(string searchQuery, string typeName)
-        {
 #if CPP
             Il2CppSystem.Type searchType = null;
 
@@ -132,24 +125,18 @@ namespace Explorer.UI.Main
 #endif
             if (TypeMode == TypeFilter.Custom)
             {
-                try
+                if (ReflectionHelpers.GetTypeByName(m_typeInput) is Type t)
                 {
-                    if (ReflectionHelpers.GetTypeByName(typeName) is Type t)
-                    {
 #if CPP
-                        searchType = Il2CppSystem.Type.GetType(t.AssemblyQualifiedName);
+                    searchType = Il2CppSystem.Type.GetType(t.AssemblyQualifiedName);
 #else
-                        searchType = t;
+                    searchType = t;
 #endif
-                    }
-                    else
-                    {
-                        throw new Exception($"Could not find a Type by the name of '{typeName}'!");
-                    }
                 }
-                catch (Exception e)
+                else
                 {
-                    ExplorerCore.Log("Exception getting Search Type: " + e.GetType() + ", " + e.Message);
+                    ExplorerCore.Log($"Could not find a Type by the name of '{m_typeInput}'!");
+                    return;
                 }
             }
             else if (TypeMode == TypeFilter.Object)
@@ -171,7 +158,7 @@ namespace Explorer.UI.Main
                 {
                     ExplorerCore.LogWarning("Your Custom Class Type must inherit from UnityEngine.Object!");
                 }
-                return new List<object>();
+                return;
             }
 
             var matches = new List<object>();
@@ -185,7 +172,7 @@ namespace Explorer.UI.Main
             {
                 if (i >= MaxSearchResults) break;
 
-                if (searchQuery != "" && !obj.name.ToLower().Contains(searchQuery.ToLower()))
+                if (m_searchInput != "" && !obj.name.ToLower().Contains(m_searchInput.ToLower()))
                 {
                     continue;
                 }
@@ -215,11 +202,7 @@ namespace Explorer.UI.Main
                 i++;
             }
 
-            allObjectsOfType = null;
-            searchType = null;
-            searchQuery = null;
-
-            return matches;
+            CacheResults(matches);
         }
 
         public static bool FilterScene(object obj, SceneFilter filter)

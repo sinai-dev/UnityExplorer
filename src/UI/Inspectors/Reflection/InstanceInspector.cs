@@ -72,11 +72,11 @@ namespace Explorer.UI.Inspectors
         
         public void DrawInstanceControls(Rect rect)
         {
-            if (m_uObj)
-            {
-                GUILayout.Label("Name: " + m_uObj.name, new GUILayoutOption[0]);
-            }
-            GUILayout.EndHorizontal();
+            //if (m_uObj)
+            //{
+            //    GUILayout.Label("Name: " + m_uObj.name, new GUILayoutOption[0]);
+            //}
+            //GUILayout.EndHorizontal();
 
             if (m_uObj)
             {
@@ -89,12 +89,16 @@ namespace Explorer.UI.Inspectors
                     GUILayout.Label("GameObject:", new GUILayoutOption[] { GUILayout.Width(135) });
                     var charWidth = obj.name.Length * 15;
                     var maxWidth = rect.width - 350;
-                    var labelWidth = charWidth < maxWidth ? charWidth : maxWidth;
-                    if (GUILayout.Button("<color=#00FF00>" + obj.name + "</color>", new GUILayoutOption[] { GUILayout.Width(labelWidth) }))
+                    var btnWidth = charWidth < maxWidth ? charWidth : maxWidth;
+                    if (GUILayout.Button("<color=#00FF00>" + obj.name + "</color>", new GUILayoutOption[] { GUILayout.Width(btnWidth) }))
                     {
                         WindowManager.InspectObject(obj, out bool _);
                     }
                     GUI.skin.label.alignment = TextAnchor.UpperLeft;
+                }
+                else
+                {
+                    GUILayout.Label("Name: " + m_uObj.name, new GUILayoutOption[0]);
                 }
                 GUILayout.EndHorizontal();
             }

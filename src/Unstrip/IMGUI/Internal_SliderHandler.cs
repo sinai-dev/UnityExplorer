@@ -118,8 +118,8 @@ namespace Explorer.Unstrip.IMGUI
                     GUI.changed = true;
                     if (this.SupportsPageMovements())
                     {
-                        var ext = Internal_SliderState.FromPointer(GetSliderState().Pointer);
-                        ext.isDragging = false;
+                        var state = GetSliderState();
+                        state.isDragging = false;
                         Internal.nextScrollStepTime = DateTime.Now.AddMilliseconds(250.0);
                         ScrollTroughSide = this.CurrentScrollTroughSide();
                         result = this.PageMovementValue();
@@ -144,8 +144,8 @@ namespace Explorer.Unstrip.IMGUI
             }
             else
             {
-                var ext = Internal_SliderState.FromPointer(GetSliderState().Pointer);
-                if (!ext.isDragging)
+                var state = GetSliderState();
+                if (!state.isDragging)
                 {
                     result = this.currentValue;
                 }
@@ -153,8 +153,8 @@ namespace Explorer.Unstrip.IMGUI
                 {
                     GUI.changed = true;
                     this.CurrentEvent().Use();
-                    float num = this.MousePosition() - ext.dragStartPos;
-                    float value = ext.dragStartValue + num / this.ValuesPerPixel();
+                    float num = this.MousePosition() - state.dragStartPos;
+                    float value = state.dragStartValue + num / this.ValuesPerPixel();
                     result = this.Clamp(value);
                 }
             }
@@ -207,7 +207,7 @@ namespace Explorer.Unstrip.IMGUI
                     Internal.nextScrollStepTime = DateTime.Now.AddMilliseconds(30.0);
                     if (this.SupportsPageMovements())
                     {
-                        Internal_SliderState.FromPointer(GetSliderState().Pointer).isDragging = false;
+                        GetSliderState().isDragging = false;
                         GUI.changed = true;
                         result = this.PageMovementValue();
                     }
@@ -303,15 +303,15 @@ namespace Explorer.Unstrip.IMGUI
 
         private void StartDraggingWithValue(float dragStartValue)
         {
-            var ext = Internal_SliderState.FromPointer(GetSliderState().Pointer);
-            ext.dragStartPos = this.MousePosition();
-            ext.dragStartValue = dragStartValue;
-            ext.isDragging = true;
+            var state = GetSliderState();
+            state.dragStartPos = this.MousePosition();
+            state.dragStartValue = dragStartValue;
+            state.isDragging = true;
         }
 
-        private SliderState GetSliderState()
+        private Internal_SliderState GetSliderState()
         {
-            return GUIUtility.GetStateObject(Il2CppType.Of<SliderState>(), this.id).TryCast<SliderState>();
+            return (Internal_SliderState)Internal_GUIUtility.GetMonoStateObject(typeof(Internal_SliderState), this.id);
         }
 
         private Rect ThumbRect()

@@ -53,9 +53,18 @@ namespace Explorer
         public static string TextField(string text, GUILayoutOption[] options)
         {
 #if CPP
-            return Internal.TextField(text, options);
+            return Internal.TextField(text, options, false);
 #else
             return GUILayout.TextField(text, options);
+#endif
+        }
+
+        public static string TextArea(string text, params GUILayoutOption[] options)
+        {
+#if CPP
+            return Internal.TextField(text, options, true);
+#else
+            return GUILayout.TextArea(text, options);
 #endif
         }
 
@@ -74,15 +83,6 @@ namespace Explorer
             return GUI.Button(rect, GUIContent.Temp(title), GUI.skin.button);
 #else
             return GUI.Button(rect, title);
-#endif
-        }
-
-        public static string TextArea(string text, params GUILayoutOption[] options)
-        {
-#if CPP
-            return GUILayout.DoTextField(text, -1, true, GUI.skin.textArea, options);
-#else
-            return GUILayout.TextArea(text, options);
 #endif
         }
 

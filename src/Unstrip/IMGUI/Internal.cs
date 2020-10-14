@@ -16,12 +16,9 @@ namespace Explorer.Unstrip.IMGUI
         public static bool ScrollFailed = false;
         public static bool ManualUnstripFailed = false;
 
-        public static GenericStack ScrollStack => m_scrollStack ?? GetScrollStack();
-        public static PropertyInfo m_scrollViewStatesInfo;
-        public static GenericStack m_scrollStack;
-
-        public static Dictionary<int, Il2CppSystem.Object> StateCache => m_stateCacheDict ?? GetStateCacheDict();
-        public static Dictionary<int, Il2CppSystem.Object> m_stateCacheDict;
+        public static Stack<object> ScrollStack => m_scrollStack ?? GetScrollStack();
+        public static Stack<object> m_scrollStack;
+        //public static PropertyInfo m_scrollViewStatesInfo;
 
         public static GUIStyle SpaceStyle => m_spaceStyle ?? GetSpaceStyle();
         public static GUIStyle m_spaceStyle;
@@ -34,51 +31,11 @@ namespace Explorer.Unstrip.IMGUI
         public static MethodInfo m_bringWindowToFrontMethod;
         public static bool m_bringWindowFrontAttempted;
 
-        private static GenericStack GetScrollStack()
+        private static Stack<object> GetScrollStack()
         {
-            if (m_scrollViewStatesInfo == null)
-            {
-                if (typeof(GUI).GetProperty("scrollViewStates", ReflectionHelpers.CommonFlags) is PropertyInfo scrollStatesInfo)
-                {
-                    m_scrollViewStatesInfo = scrollStatesInfo;
-                }
-                else if (typeof(GUI).GetProperty("s_ScrollViewStates", ReflectionHelpers.CommonFlags) is PropertyInfo s_scrollStatesInfo)
-                {
-                    m_scrollViewStatesInfo = s_scrollStatesInfo;
-                }
-            }
-
-            if (m_scrollViewStatesInfo?.GetValue(null, null) is GenericStack stack)
-            {
-                m_scrollStack = stack;
-            }
-            else
-            {
-                m_scrollStack = new GenericStack();
-            }
+            m_scrollStack = new Stack<object>();
 
             return m_scrollStack;
-        }
-
-        private static Dictionary<int, Il2CppSystem.Object> GetStateCacheDict()
-        {
-            if (m_stateCacheDict == null)
-            {
-                try
-                {
-                    var type = ReflectionHelpers.GetTypeByName("UnityEngine.GUIStateObjects");
-                    m_stateCacheDict = type.GetProperty("s_StateCache")
-                                            .GetValue(null, null)
-                                            as Dictionary<int, Il2CppSystem.Object>;
-
-                    if (m_stateCacheDict == null) throw new Exception();
-                }
-                catch
-                {
-                    m_stateCacheDict = new Dictionary<int, Il2CppSystem.Object>();
-                }
-            }
-            return m_stateCacheDict;
         }
 
         private static GUIStyle GetSpaceStyle()
@@ -115,7 +72,7 @@ namespace Explorer.Unstrip.IMGUI
                 GUI.Box(g.rect, content, style);
         }
 
-        public static string TextField(string text, GUILayoutOption[] options)
+        public static string TextField(string text, GUILayoutOption[] options, bool multiLine)
         {
             text = text ?? string.Empty;
 
@@ -137,13 +94,13 @@ namespace Explorer.Unstrip.IMGUI
             {
                 guicontent = GUIContent.Temp(text);
             }
-            DoTextField(rect, controlID, guicontent, false, -1, GUI.skin.textField);
+            DoTextField(rect, controlID, guicontent, multiLine, -1, GUI.skin.textField);
             return guicontent.text;
         }
 
         internal static void DoTextField(Rect position, int id, GUIContent content, bool multiline, int maxLength, GUIStyle style)
         {
-            if (GetStateObject(Il2CppType.Of<TextEditor>(), id).TryCast<TextEditor>() is TextEditor textEditor)
+            if (Internal_GUIUtility.GetMonoStateObject(typeof(Internal_TextEditor), id) is Internal_TextEditor textEditor)
             {
                 if (maxLength >= 0 && content.text.Length > maxLength)
                 {
@@ -156,8 +113,135 @@ namespace Explorer.Unstrip.IMGUI
                 textEditor.multiline = multiline;
                 textEditor.controlID = id;
                 textEditor.DetectFocusChange();
-                GUI.HandleTextFieldEventForDesktop(position, id, content, multiline, maxLength, style, textEditor);
+                HandleTextFieldEventForDesktop(position, id, content, multiline, maxLength, style, textEditor);
                 textEditor.UpdateScrollOffsetIfNeeded(Event.current);
+            }
+        }
+
+        private static void HandleTextFieldEventForDesktop(Rect position, int id, GUIContent content, bool multiline, int maxLength,
+            GUIStyle style, Internal_TextEditor editor)
+        {
+            var evt = Event.current;
+
+            bool change = false;
+            switch (evt.type)
+            {
+                case EventType.MouseDown:
+                    if (position.Contains(evt.mousePosition))
+                    {
+                        GUIUtility.hotControl = id;
+                        GUIUtility.keyboardControl = id;
+                        editor.m_HasFocus = true;
+                        editor.MoveCursorToPosition(Event.current.mousePosition);
+                        if (Event.current.clickCount == 2 && GUI.skin.settings.doubleClickSelectsWord)
+                        {
+                            editor.SelectCurrentWord();
+                            editor.DblClickSnap(Internal_TextEditor.DblClickSnapping.WORDS);
+                            editor.MouseDragSelectsWholeWords(true);
+                        }
+                        if (Event.current.clickCount == 3 && GUI.skin.settings.tripleClickSelectsLine)
+                        {
+                            editor.SelectCurrentParagraph();
+                            editor.MouseDragSelectsWholeWords(true);
+                            editor.DblClickSnap(Internal_TextEditor.DblClickSnapping.PARAGRAPHS);
+                        }
+                        evt.Use();
+                    }
+                    break;
+                case EventType.MouseDrag:
+                    if (GUIUtility.hotControl == id)
+                    {
+                        if (evt.shift)
+                            editor.MoveCursorToPosition(Event.current.mousePosition);
+                        else
+                            editor.SelectToPosition(Event.current.mousePosition);
+                        evt.Use();
+                    }
+                    break;
+                case EventType.MouseUp:
+                    if (GUIUtility.hotControl == id)
+                    {
+                        editor.MouseDragSelectsWholeWords(false);
+                        GUIUtility.hotControl = 0;
+                        evt.Use();
+                    }
+                    break;
+                case EventType.KeyDown:
+                    if (GUIUtility.keyboardControl != id)
+                        return;
+
+                    if (editor.HandleKeyEvent(evt))
+                    {
+                        evt.Use();
+                        change = true;
+                        content.text = editor.text;
+                        break;
+                    }
+
+                    // Ignore tab & shift-tab in textfields
+                    if (evt.keyCode == KeyCode.Tab || evt.character == '\t')
+                        return;
+
+                    char c = evt.character;
+
+                    if (c == '\n' && !multiline && !evt.alt)
+                        return;
+
+
+                    // Simplest test: only allow the character if the display font supports it.
+                    Font font = style.font;
+                    if (!font)
+                        font = GUI.skin.font;
+
+                    if (font.HasCharacter(c) || c == '\n')
+                    {
+                        editor.Insert(c);
+                        change = true;
+                        break;
+                    }
+
+                    // On windows, keypresses also send events with keycode but no character. Eat them up here.
+                    if (c == 0)
+                    {
+                        // if we have a composition string, make sure we clear the previous selection.
+                        if (InputManager.compositionString.Length > 0)
+                        {
+                            editor.ReplaceSelection("");
+                            change = true;
+                        }
+
+                        evt.Use();
+                    }
+                    //              else {
+                    // REALLY USEFUL:
+                    //              Debug.Log ("unhandled " +evt);
+                    //              evt.Use ();
+                    //          }
+                    break;
+                case EventType.Repaint:
+                    // If we have keyboard focus, draw the cursor
+                    // TODO:    check if this OpenGL view has keyboard focus
+                    if (GUIUtility.keyboardControl != id)
+                    {
+                        style.Draw(position, content, id, false);
+                    }
+                    else
+                    {
+                        editor.DrawCursor(content.text);
+                    }
+                    break;
+            }
+
+            if (GUIUtility.keyboardControl == id)
+                GUIUtility.textFieldInput = true;
+
+            if (change)
+            {
+                GUI.changed = true;
+                content.text = editor.text;
+                if (maxLength >= 0 && content.text.Length > maxLength)
+                    content.text = content.text.Substring(0, maxLength);
+                evt.Use();
             }
         }
 
@@ -279,22 +363,6 @@ namespace Explorer.Unstrip.IMGUI
 
         #region Scrolling
 
-        private static Il2CppSystem.Object GetStateObject(Il2CppSystem.Type type, int controlID)
-        {
-            Il2CppSystem.Object obj;
-            if (StateCache.ContainsKey(controlID))
-            {
-                obj = StateCache[controlID];
-            }
-            else
-            {
-                obj = Il2CppSystem.Activator.CreateInstance(type);
-                StateCache.Add(controlID, obj);
-            }
-
-            return obj;
-        }
-
         public static Vector2 BeginScrollView(Vector2 scroll, params GUILayoutOption[] options)
         {
             // First, just try normal way, may not have been stripped or was unstripped successfully.
@@ -348,10 +416,12 @@ namespace Explorer.Unstrip.IMGUI
 
                 if (ScrollStack.Count <= 0) return;
 
-                var state = ScrollStack.Peek().TryCast<ScrollViewState>();
-                var scrollExt = Internal_ScrollViewState.FromPointer(state.Pointer);
+                var scrollExt = ScrollStack.Peek() as Internal_ScrollViewState;
 
-                if (scrollExt == null) throw new Exception("Could not get scrollExt!");
+                //var state = ScrollStack.Peek().TryCast<ScrollViewState>();
+                //var scrollExt = Internal_ScrollViewState.FromPointer(state.Pointer);
+
+                //if (scrollExt == null) throw new Exception("Could not get scrollExt!");
 
                 GUIClip.Pop();
 
@@ -419,16 +489,18 @@ namespace Explorer.Unstrip.IMGUI
 
             int controlID = GUIUtility.GetControlID(GUI.s_ScrollviewHash, FocusType.Passive);
 
-            var scrollViewState = GetStateObject(Il2CppType.Of<ScrollViewState>(), controlID)
-                                    .TryCast<ScrollViewState>();
+            var scrollExt = (Internal_ScrollViewState)Internal_GUIUtility.GetMonoStateObject(typeof(Internal_ScrollViewState), controlID);
 
-            if (scrollViewState == null)
-                return scrollPosition;
+            //var scrollViewState = Internal_GUIUtility.GetStateObject(Il2CppType.Of<ScrollViewState>(), controlID)
+            //                        .TryCast<ScrollViewState>();
 
-            var scrollExt = Internal_ScrollViewState.FromPointer(scrollViewState.Pointer);
+            //if (scrollViewState == null)
+            //    return scrollPosition;
 
-            if (scrollExt == null)
-                return scrollPosition;
+            //var scrollExt = Internal_ScrollViewState.FromPointer(scrollViewState.Pointer);
+
+            //if (scrollExt == null)
+            //    return scrollPosition;
 
             bool apply = scrollExt.apply;
             if (apply)
@@ -446,7 +518,7 @@ namespace Explorer.Unstrip.IMGUI
             rect.width = position.width;
             rect.height = position.height;
 
-            ScrollStack.Push(scrollViewState);
+            ScrollStack.Push(scrollExt);
 
             Rect screenRect = new Rect(position.x, position.y, position.width, position.height);
             EventType type = Event.current.type;

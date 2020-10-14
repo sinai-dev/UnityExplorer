@@ -1,4 +1,6 @@
-﻿using Explorer.Config;
+﻿using System.Collections;
+using System.Linq;
+using Explorer.Config;
 using Explorer.UI;
 using Explorer.UI.Inspectors;
 using Explorer.UI.Main;
@@ -10,7 +12,7 @@ namespace Explorer
     public class ExplorerCore
     {
         public const string NAME    = "Explorer " + VERSION + " (" + PLATFORM + ", " + MODLOADER + ")";
-        public const string VERSION = "2.0.5";
+        public const string VERSION = "2.0.6";
         public const string AUTHOR  = "Sinai";
         public const string GUID    = "com.sinai.explorer";
 

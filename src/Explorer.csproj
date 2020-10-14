@@ -262,6 +262,8 @@
     <Compile Include="UI\WindowBase.cs" />
     <Compile Include="UI\WindowManager.cs" />
     <Compile Include="Unstrip\ImageConversion\ImageConversionUnstrip.cs" />
+    <Compile Include="Unstrip\IMGUI\Internal_GUIUtility.cs" />
+    <Compile Include="Unstrip\IMGUI\Internal_TextEditor.cs" />
     <Compile Include="Unstrip\LayerMask\LayerMaskUnstrip.cs" />
     <Compile Include="Unstrip\Scene\SceneUnstrip.cs" />
     <Compile Include="Unstrip\IMGUI\GUIUnstrip.cs" />

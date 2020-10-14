@@ -33,7 +33,7 @@ namespace Explorer.UI.Main
         public static TextEditor textEditor;
         private bool shouldRefocus;
 
-        public static GUIStyle AutocompleteStyle => autocompleteStyle ?? GetCompletionStyle();
+        public static GUIStyle AutocompleteStyle => autocompleteStyle ?? GetAutocompleteStyle();
         private static GUIStyle autocompleteStyle;
 
         public static readonly string[] DefaultUsing = new string[]
@@ -342,9 +342,9 @@ Help();";
         }
 
         // Credit ManlyMarco
-        private static GUIStyle GetCompletionStyle()
+        private static GUIStyle GetAutocompleteStyle()
         {
-            return autocompleteStyle = new GUIStyle(GUI.skin.button)
+            var style = new GUIStyle
             {
                 border = new RectOffset(0, 0, 0, 0),
                 margin = new RectOffset(0, 0, 0, 0),
@@ -353,8 +353,10 @@ Help();";
                 normal = { background = null },
                 focused = { background = Texture2D.whiteTexture, textColor = Color.black },
                 active = { background = Texture2D.whiteTexture, textColor = Color.black },
-                alignment = TextAnchor.MiddleLeft,
+                alignment = TextAnchor.MiddleLeft
             };
+
+            return autocompleteStyle = style;
         }
 
         private class VoidType

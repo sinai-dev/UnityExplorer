@@ -263,14 +263,11 @@ namespace Explorer.UI.Inspectors
                     ? new GUILayoutOption[] { GUILayout.Width(245f) }
                     : new GUILayoutOption[0];
                 GUILayout.Label("<b>Type:</b> <color=cyan>" + TargetType.FullName + "</color>", labelWidth);
+                GUILayout.EndHorizontal();
 
                 if (asInstance != null)
                 {
                     asInstance.DrawInstanceControls(rect);
-                }
-                else
-                {
-                    GUILayout.EndHorizontal();
                 }
 
                 UIStyles.HorizontalLine(Color.grey);

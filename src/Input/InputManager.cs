@@ -50,33 +50,37 @@ namespace Explorer
         public static void ResetInputAxes() => UnityEngine.Input.ResetInputAxes();
 #endif
 
-        //#if CPP
-        //#pragma warning disable IDE1006 
-        //        // public extern static string compositionString { get; }
+#if CPP
+#pragma warning disable IDE1006
+        // public extern static string compositionString { get; }
 
-        //        internal delegate string get_compositionString_delegate();
-        //        internal static get_compositionString_delegate get_compositionString_iCall =
-        //            IL2CPP.ResolveICall<get_compositionString_delegate>("UnityEngine.Input::get_compositionString");
+        internal delegate IntPtr d_get_compositionString();
+        internal static d_get_compositionString get_compositionString_iCall =
+            IL2CPP.ResolveICall<d_get_compositionString>("UnityEngine.Input::get_compositionString");
 
-        //        public static string compositionString => get_compositionString_iCall();
+        public static string compositionString => IL2CPP.Il2CppStringToManaged(get_compositionString_iCall());
 
-        //        // public extern static Vector2 compositionCursorPos { get; set; }
+        // public extern static Vector2 compositionCursorPos { get; set; }
 
-        //        internal delegate Vector2 get_compositionCursorPos_delegate();
-        //        internal static get_compositionCursorPos_delegate get_compositionCursorPos_iCall =
-        //            IL2CPP.ResolveICall<get_compositionCursorPos_delegate>("UnityEngine.Input::get_compositionCursorPos");
+        internal delegate void d_get_compositionCursorPos(out Vector2 ret);
+        internal static d_get_compositionCursorPos get_compositionCursorPos_iCall =
+            IL2CPP.ResolveICall<d_get_compositionCursorPos>("UnityEngine.Input::get_compositionCursorPos_Injected");
 
-        //        internal delegate void set_compositionCursorPos_delegate(Vector2 value);
-        //        internal static set_compositionCursorPos_delegate set_compositionCursorPos_iCall =
-        //            IL2CPP.ResolveICall<set_compositionCursorPos_delegate>("UnityEngine.Input::set_compositionCursorPos");
+        internal delegate void set_compositionCursorPos_delegate(ref Vector2 value);
+        internal static set_compositionCursorPos_delegate set_compositionCursorPos_iCall =
+            IL2CPP.ResolveICall<set_compositionCursorPos_delegate>("UnityEngine.Input::set_compositionCursorPos_Injected");
 
-        //        public static Vector2 compositionCursorPos
-        //        {
-        //            get => get_compositionCursorPos_iCall();
-        //            set => set_compositionCursorPos_iCall(value);
-        //        }
+        public static Vector2 compositionCursorPos
+        {
+            get
+            {
+                get_compositionCursorPos_iCall(out Vector2 ret);
+                return ret;
+            }
+            set => set_compositionCursorPos_iCall(ref value);
+        }
 
-        //#pragma warning restore IDE1006
-        //#endif
+#pragma warning restore IDE1006
+#endif
     }
 }

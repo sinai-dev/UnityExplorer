@@ -19,8 +19,6 @@ namespace Explorer.UI.Main
         private float m_timeOfLastUpdate = -1f;
         private const int PASSIVE_UPDATE_INTERVAL = 1;
 
-        private static bool m_getRootObjectsFailed;
-
         private static string m_currentScene = "";
 
         // gameobject list
@@ -50,7 +48,7 @@ namespace Explorer.UI.Main
             if (m_searching)
                 CancelSearch();
 
-            Update_Impl(true);
+            Update_Impl();
         }
 
         public void TraverseUp()
@@ -75,11 +73,6 @@ namespace Explorer.UI.Main
         public void CancelSearch()
         {
             m_searching = false;
-
-            if (m_getRootObjectsFailed && !m_currentTransform)
-            {
-                GetRootObjectsManual_Impl();
-            }
         }
 
         public List<CacheObjectBase> SearchSceneObjects(string _search)
@@ -112,7 +105,7 @@ namespace Explorer.UI.Main
             Update_Impl();
         }
 
-        private void Update_Impl(bool manual = false)
+        private void Update_Impl()
         {
             List<Transform> allTransforms = new List<Transform>();
 
@@ -126,39 +119,23 @@ namespace Explorer.UI.Main
             }
             else
             {
-                if (!m_getRootObjectsFailed)
+                for (int i = 0; i < SceneManager.sceneCount; i++)
                 {
-                    try
+                    var scene = SceneManager.GetSceneAt(i);
+
+                    if (scene.name == m_currentScene)
                     {
-                        for (int i = 0; i < SceneManager.sceneCount; i++)
-                        {
-                            var scene = SceneManager.GetSceneAt(i);
+                        var rootObjects =
+#if CPP
+                            Unstrip.Scenes.SceneUnstrip.GetRootGameObjects(scene)
+                                                  .Select(it => it.transform);
+#else
+                            scene.GetRootGameObjects().Select(it => it.transform);
+#endif
+                        allTransforms.AddRange(rootObjects);
 
-                            if (scene.name == m_currentScene)
-                            {
-                                allTransforms.AddRange(scene.GetRootGameObjects()
-                                                .Select(it => it.transform));
-
-                                break;
-                            }
-                        }
+                        break;
                     }
-                    catch
-                    {
-                        ExplorerCore.Log("Exception getting root scene objects, falling back to backup method...");
-
-                        m_getRootObjectsFailed = true;
-                        allTransforms.AddRange(GetRootObjectsManual_Impl());
-                    }
-                }
-                else
-                {
-                    if (!manual)
-                    {
-                        return;
-                    }
-
-                    allTransforms.AddRange(GetRootObjectsManual_Impl());
                 }
             }
 
@@ -175,36 +152,6 @@ namespace Explorer.UI.Main
             {
                 var child = allTransforms[i];
                 m_objectList.Add(CacheFactory.GetCacheObject(child));
-            }
-        }
-
-        private IEnumerable<Transform> GetRootObjectsManual_Impl()
-        {
-            try
-            {
-                var array = Resources.FindObjectsOfTypeAll(ReflectionHelpers.TransformType);
-
-                var list = new List<Transform>();
-                foreach (var obj in array)
-                {
-#if CPP
-                    var transform = obj.TryCast<Transform>();
-#else
-                    var transform = obj as Transform;
-#endif
-                    if (transform.parent == null && transform.gameObject.scene.name == m_currentScene)
-                    {
-                        list.Add(transform);
-                    }
-                }
-                return list;
-            }
-            catch (Exception e)
-            {
-                ExplorerCore.Log("Exception getting root scene objects (manual): "
-                    + e.GetType() + ", " + e.Message + "\r\n"
-                    + e.StackTrace);
-                return new Transform[0];
             }
         }
 
@@ -292,15 +239,12 @@ namespace Explorer.UI.Main
                 {
                     int index = names.IndexOf(m_currentScene);
                     index += changeWanted;
-                    if (index > scenes.Count - 1)
+                    
+                    if (index >= 0 && index < SceneManager.sceneCount)
                     {
-                        index = 0;
+                        m_currentScene = scenes[index].name;
+                        Update_Impl();
                     }
-                    else if (index < 0)
-                    {
-                        index = scenes.Count - 1;
-                    }
-                    m_currentScene = scenes[index].name;
                 }
             }
         }
@@ -317,7 +261,7 @@ namespace Explorer.UI.Main
                 {
                     Pages.TurnPage(Turn.Left, ref this.scroll);
 
-                    Update_Impl(true);
+                    Update_Impl();
                 }
 
                 Pages.CurrentPageLabel();
@@ -326,7 +270,7 @@ namespace Explorer.UI.Main
                 {
                     Pages.TurnPage(Turn.Right, ref this.scroll);
 
-                    Update_Impl(true);
+                    Update_Impl();
                 }
             }
 
@@ -356,14 +300,6 @@ namespace Explorer.UI.Main
             else
             {
                 GUILayout.Label("Scene Root GameObjects:", new GUILayoutOption[0]);
-
-                if (m_getRootObjectsFailed)
-                {
-                    if (GUILayout.Button("Update Root Object List (auto-update failed!)", new GUILayoutOption[0]))
-                    {
-                        Update_Impl(true);
-                    }
-                }
             }
 
             if (m_objectList.Count > 0)
