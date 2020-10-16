@@ -12,7 +12,7 @@ using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
 #endif
 
-namespace Explorer
+namespace Explorer.Helpers
 {
     public class ReflectionHelpers
     {

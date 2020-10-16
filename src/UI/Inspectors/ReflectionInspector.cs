@@ -7,6 +7,7 @@ using Explorer.UI;
 using Explorer.UI.Shared;
 using Explorer.CacheObject;
 using Explorer.UI.Inspectors;
+using Explorer.Helpers;
 #if CPP
 using UnhollowerBaseLib;
 #endif

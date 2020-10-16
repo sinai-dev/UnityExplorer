@@ -4,6 +4,7 @@ using UnityEngine;
 using Explorer.UI.Shared;
 using Explorer.UI.Main;
 using Explorer.Unstrip.LayerMasks;
+using Explorer.Helpers;
 #if CPP
 using UnhollowerRuntimeLib;
 #endif

@@ -7,6 +7,7 @@ using UnityEngine;
 using Explorer.UI.Shared;
 using Explorer.CacheObject;
 using System.Linq;
+using Explorer.Helpers;
 #if CPP
 using UnhollowerBaseLib;
 #endif

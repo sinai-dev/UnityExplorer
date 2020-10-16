@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using Explorer.Helpers;
 #if CPP
 using UnhollowerBaseLib;
 #endif
@@ -13,20 +14,14 @@ namespace Explorer.Unstrip.LayerMasks
     {
 #if CPP
         internal delegate IntPtr d_LayerToName(int layer);
-        internal static d_LayerToName LayerToName_iCall =
-            IL2CPP.ResolveICall<d_LayerToName>("UnityEngine.LayerMask::LayerToName");
 
         public static string LayerToName(int layer)
         {
-            var ptr = LayerToName_iCall(layer);
-
-            return IL2CPP.Il2CppStringToManaged(ptr);
+            var iCall = ICallHelper.GetICall<d_LayerToName>("UnityEngine.LayerMask::LayerToName");
+            return IL2CPP.Il2CppStringToManaged(iCall.Invoke(layer));
         }
 #else
-        public static string LayerToName(int layer)
-        {
-            return LayerMask.LayerToName(layer);
-        }
+        public static string LayerToName(int layer) => LayerMask.LayerToName(layer);
 #endif
     }
 }

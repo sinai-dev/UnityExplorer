@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Reflection;
 using Explorer.UI;
+using Explorer.Helpers;
 
 namespace Explorer.CacheObject
 {

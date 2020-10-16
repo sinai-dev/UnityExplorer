@@ -47,14 +47,6 @@ namespace Explorer.Tests
         public int NonStaticField;
 
 #if CPP
-        public static IntPtr FindICall(string name) => il2cpp_resolve_icall(name);
-
-        [DllImport("GameAssembly", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        private static extern IntPtr il2cpp_resolve_icall([MarshalAs(UnmanagedType.LPStr)] string name);
-
-#endif
-
-#if CPP
         public static Il2CppSystem.Collections.Generic.HashSet<string> ILHashSetTest;
 #endif
 
