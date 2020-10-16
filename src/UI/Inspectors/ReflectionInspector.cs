@@ -126,7 +126,7 @@ namespace Explorer.UI.Inspectors
         private void CacheMembers(Type[] types)
         {
             var list = new List<CacheMember>();
-            var cachedSigs = new List<string>();
+            var cachedSigs = new HashSet<string>();
 
             foreach (var declaringType in types)
             {
