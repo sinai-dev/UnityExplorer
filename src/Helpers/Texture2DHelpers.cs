@@ -143,21 +143,7 @@ namespace Explorer.Helpers
             }
             else
             {
-#if CPP
-                // The Il2Cpp EncodeToPNG() method does return System.Byte[],
-                // but for some reason it is not recognized or valid.
-                // Simple fix is iterating into a new array manually.
-
-                byte[] safeData = new byte[data.Length];
-                for (int i = 0; i < data.Length; i++)
-                {
-                    safeData[i] = (byte)data[i]; // not sure if cast is needed
-                }
-
-                File.WriteAllBytes(savepath, safeData);
-#else
                 File.WriteAllBytes(savepath, data);
-#endif
             }
         }
 

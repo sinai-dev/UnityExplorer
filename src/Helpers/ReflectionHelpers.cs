@@ -5,11 +5,11 @@ using System.IO;
 using System.Reflection;
 using UnityEngine;
 using BF = System.Reflection.BindingFlags;
-
 #if CPP
 using ILType = Il2CppSystem.Type;
 using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
+using System.Runtime.InteropServices;
 #endif
 
 namespace Explorer.Helpers
@@ -20,78 +20,68 @@ namespace Explorer.Helpers
 
 #if CPP
         public static ILType GameObjectType => Il2CppType.Of<GameObject>();
-        public static ILType TransformType => Il2CppType.Of<Transform>();
-        public static ILType ObjectType => Il2CppType.Of<UnityEngine.Object>();
-        public static ILType ComponentType => Il2CppType.Of<Component>();
-        public static ILType BehaviourType => Il2CppType.Of<Behaviour>();
+        public static ILType TransformType  => Il2CppType.Of<Transform>();
+        public static ILType ObjectType     => Il2CppType.Of<UnityEngine.Object>();
+        public static ILType ComponentType  => Il2CppType.Of<Component>();
+        public static ILType BehaviourType  => Il2CppType.Of<Behaviour>();
+#else
+        public static Type GameObjectType   => typeof(GameObject);
+        public static Type TransformType    => typeof(Transform);
+        public static Type ObjectType       => typeof(UnityEngine.Object);
+        public static Type ComponentType    => typeof(Component);
+        public static Type BehaviourType    => typeof(Behaviour);
+#endif
 
-        private static readonly MethodInfo tryCastMethodInfo = typeof(Il2CppObjectBase).GetMethod("TryCast");
-        private static readonly Dictionary<Type, MethodInfo> cachedTryCastMethods = new Dictionary<Type, MethodInfo>();
+#if CPP
+        private static readonly Dictionary<Type, IntPtr> ClassPointers = new Dictionary<Type, IntPtr>();
 
         public static object Il2CppCast(object obj, Type castTo)
         {
-            if (!typeof(Il2CppSystem.Object).IsAssignableFrom(castTo)) return obj;
+            if (!(obj is Il2CppSystem.Object ilObj))
+                return obj;
 
-            if (!cachedTryCastMethods.ContainsKey(castTo))
+            if (!typeof(Il2CppSystem.Object).IsAssignableFrom(castTo))
+                return obj;
+
+            IntPtr castToPtr;
+            if (!ClassPointers.ContainsKey(castTo))
             {
-                cachedTryCastMethods.Add(castTo, tryCastMethodInfo.MakeGenericMethod(castTo));
-            }
+                castToPtr = (IntPtr)typeof(Il2CppClassPointerStore<>)
+                    .MakeGenericType(new Type[] { castTo })
+                    .GetField("NativeClassPtr", BF.Public | BF.Static)
+                    .GetValue(null);
 
-            return cachedTryCastMethods[castTo].Invoke(obj, null);
-        }
-#else
-        public static Type GameObjectType =>    typeof(GameObject);
-        public static Type TransformType  =>    typeof(Transform);
-        public static Type ObjectType     =>    typeof(UnityEngine.Object);
-        public static Type ComponentType  =>    typeof(Component);
-        public static Type BehaviourType  =>    typeof(Behaviour);
-#endif
+                if (castToPtr == IntPtr.Zero)
+                {
+                    ExplorerCore.LogWarning($"[Il2CppCast] Could not get an IntPtr for castTo '{castTo.FullName}'!");
+                    return obj;
+                }
 
-        public static bool IsEnumerable(Type t)
-        {
-            if (typeof(IEnumerable).IsAssignableFrom(t))
-            {
-                return true;
-            }
-
-#if CPP
-            if (t.IsGenericType && t.GetGenericTypeDefinition() is Type g)
-            {
-                return typeof(Il2CppSystem.Collections.Generic.List<>).IsAssignableFrom(g)
-                    || typeof(Il2CppSystem.Collections.Generic.IList<>).IsAssignableFrom(g)
-                    || typeof(Il2CppSystem.Collections.Generic.HashSet<>).IsAssignableFrom(g);
+                ClassPointers.Add(castTo, castToPtr);
             }
             else
             {
-                return typeof(Il2CppSystem.Collections.IList).IsAssignableFrom(t);
-            }
-#else
-            return false;
-#endif
-        }
-
-        public static bool IsDictionary(Type t)
-        {
-            if (typeof(IDictionary).IsAssignableFrom(t))
-            {
-                return true;
+                castToPtr = ClassPointers[castTo];
             }
 
-#if CPP
-            if (t.IsGenericType && t.GetGenericTypeDefinition() is Type g)
-            {
-                return typeof(Il2CppSystem.Collections.Generic.Dictionary<,>).IsAssignableFrom(g)
-                    || typeof(Il2CppSystem.Collections.Generic.IDictionary<,>).IsAssignableFrom(g);
-            }
-            else
-            {
-                return typeof(Il2CppSystem.Collections.IDictionary).IsAssignableFrom(t)
-                    || typeof(Il2CppSystem.Collections.Hashtable).IsAssignableFrom(t);
-            }
-#else
-            return false;
-#endif
+            IntPtr objPtr = ilObj.Pointer;
+            var classPtr = il2cpp_object_get_class(objPtr);
+
+            //if (RuntimeSpecificsStore.IsInjected(classPtr))
+            //    return obj;
+
+            if (!il2cpp_class_is_assignable_from(castToPtr, classPtr))
+                return obj;
+
+            return Activator.CreateInstance(castTo, objPtr);
         }
+
+        [DllImport("GameAssembly", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        public static extern bool il2cpp_class_is_assignable_from(IntPtr klass, IntPtr oklass);
+
+        [DllImport("GameAssembly", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        public static extern IntPtr il2cpp_object_get_class(IntPtr obj);
+#endif
 
         public static Type GetTypeByName(string fullName)
         {
@@ -169,48 +159,55 @@ namespace Explorer.Helpers
             return false;
         }
 
+        public static bool IsEnumerable(Type t)
+        {
+            if (typeof(IEnumerable).IsAssignableFrom(t))
+            {
+                return true;
+            }
+
+#if CPP
+            if (t.IsGenericType && t.GetGenericTypeDefinition() is Type g)
+            {
+                return typeof(Il2CppSystem.Collections.Generic.List<>).IsAssignableFrom(g)
+                    || typeof(Il2CppSystem.Collections.Generic.IList<>).IsAssignableFrom(g)
+                    || typeof(Il2CppSystem.Collections.Generic.HashSet<>).IsAssignableFrom(g);
+            }
+            else
+            {
+                return typeof(Il2CppSystem.Collections.IList).IsAssignableFrom(t);
+            }
+#else
+            return false;
+#endif
+        }
+
+        public static bool IsDictionary(Type t)
+        {
+            if (typeof(IDictionary).IsAssignableFrom(t))
+            {
+                return true;
+            }
+
+#if CPP
+            if (t.IsGenericType && t.GetGenericTypeDefinition() is Type g)
+            {
+                return typeof(Il2CppSystem.Collections.Generic.Dictionary<,>).IsAssignableFrom(g)
+                    || typeof(Il2CppSystem.Collections.Generic.IDictionary<,>).IsAssignableFrom(g);
+            }
+            else
+            {
+                return typeof(Il2CppSystem.Collections.IDictionary).IsAssignableFrom(t)
+                    || typeof(Il2CppSystem.Collections.Hashtable).IsAssignableFrom(t);
+            }
+#else
+            return false;
+#endif
+        }
+
         public static string ExceptionToString(Exception e)
         {
-#if CPP
-            if (IsFailedGeneric(e))
-            {
-                return "Unable to initialize this type.";
-            }
-            else if (IsObjectCollected(e))
-            {
-                return "Garbage collected in Il2Cpp.";
-            }
-#endif
             return e.GetType() + ", " + e.Message;
         }
-
-#if CPP
-        public static bool IsFailedGeneric(Exception e)
-        {
-            return IsExceptionOfType(e, typeof(TargetInvocationException)) && IsExceptionOfType(e, typeof(TypeLoadException));
-        }
-
-        public static bool IsObjectCollected(Exception e)
-        {
-            return IsExceptionOfType(e, typeof(ObjectCollectedException));
-        }
-
-        public static bool IsExceptionOfType(Exception e, Type t, bool strict = true, bool checkInner = true)
-        {
-            bool isType;
-
-            if (strict)
-                isType = e.GetType() == t;
-            else
-                isType = t.IsAssignableFrom(e.GetType());
-
-            if (isType) return true;
-
-            if (e.InnerException != null && checkInner)
-                return IsExceptionOfType(e.InnerException, t, strict);
-            else
-                return false;
-        }
-#endif
     }
 }
