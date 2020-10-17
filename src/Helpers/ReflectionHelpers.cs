@@ -54,7 +54,7 @@ namespace Explorer.Helpers
                 if (castToPtr == IntPtr.Zero)
                 {
                     ExplorerCore.LogWarning($"[Il2CppCast] Could not get an IntPtr for castTo '{castTo.FullName}'!");
-                    return obj;
+                    //return obj;
                 }
 
                 ClassPointers.Add(castTo, castToPtr);
@@ -67,11 +67,11 @@ namespace Explorer.Helpers
             IntPtr objPtr = ilObj.Pointer;
             var classPtr = il2cpp_object_get_class(objPtr);
 
-            //if (RuntimeSpecificsStore.IsInjected(classPtr))
-            //    return obj;
-
             if (!il2cpp_class_is_assignable_from(castToPtr, classPtr))
                 return obj;
+
+            if (RuntimeSpecificsStore.IsInjected(classPtr))
+                return UnhollowerBaseLib.Runtime.ClassInjectorBase.GetMonoObjectFromIl2CppPointer(objPtr);
 
             return Activator.CreateInstance(castTo, objPtr);
         }
