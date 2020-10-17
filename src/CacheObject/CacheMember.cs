@@ -53,7 +53,7 @@ namespace Explorer.CacheObject
         {
             if (m_arguments.Length < 1)
             {
-                return null;
+                return new object[0];
             }
 
             var parsedArgs = new List<object>();
