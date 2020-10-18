@@ -5,9 +5,11 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Explorer.Helpers
 {
+    [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "External methods")]
     public static class ICallHelper
     {
         private static readonly Dictionary<string, Delegate> iCallCache = new Dictionary<string, Delegate>();
@@ -32,14 +34,8 @@ namespace Explorer.Helpers
             return (T)iCall;
         }
 
-        #region External
-        #pragma warning disable IDE1006 // Naming Styles
-
         [DllImport("GameAssembly", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern IntPtr il2cpp_resolve_icall([MarshalAs(UnmanagedType.LPStr)] string name);
-
-        #pragma warning restore IDE1006
-        #endregion
     }
 }
 #endif

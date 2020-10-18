@@ -3,12 +3,14 @@ using System.Reflection;
 using UnityEngine;
 using Explorer.Input;
 using Explorer.Helpers;
+using System.Diagnostics.CodeAnalysis;
 #if CPP
 using UnhollowerBaseLib;
 #endif
 
 namespace Explorer
 {
+    [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Unity style")]
     public static class InputManager
     {
         private static IAbstractInput m_inputModule;
@@ -49,7 +51,6 @@ namespace Explorer
 #endif
 
 #if CPP
-#pragma warning disable IDE1006
         // public extern static string compositionString { get; }
 
         internal delegate IntPtr d_get_compositionString();
@@ -82,8 +83,6 @@ namespace Explorer
                 iCall.Invoke(ref value);
             }
         }
-
-#pragma warning restore IDE1006
 #endif
     }
 }

@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 using Explorer.UI.Shared;
 using Explorer.CacheObject;
 using Explorer.Helpers;
+using Explorer.Unstrip.Resources;
 
 namespace Explorer.UI.Main
 {
@@ -80,7 +81,7 @@ namespace Explorer.UI.Main
         {
             var matches = new List<CacheObjectBase>();
 
-            foreach (var obj in Resources.FindObjectsOfTypeAll(ReflectionHelpers.GameObjectType))
+            foreach (var obj in ResourcesUnstrip.FindObjectsOfTypeAll(ReflectionHelpers.GameObjectType))
             {
 #if CPP
                 var go = obj.TryCast<GameObject>();
@@ -164,7 +165,7 @@ namespace Explorer.UI.Main
             {
                 DrawHeaderArea();
 
-                GUIUnstrip.BeginVertical(GUIContent.none, GUI.skin.box, null);
+                GUIHelper.BeginVertical(GUIContent.none, GUI.skin.box, null);
 
                 DrawPageButtons();
 
@@ -190,7 +191,7 @@ namespace Explorer.UI.Main
 
         private void DrawHeaderArea()
         {
-            GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+            GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
 
             // Current Scene label
             GUILayout.Label("Current Scene:", new GUILayoutOption[] { GUILayout.Width(120) });
@@ -200,10 +201,10 @@ namespace Explorer.UI.Main
             GUILayout.EndHorizontal();
 
             // ----- GameObject Search -----
-            GUIUnstrip.BeginHorizontal(GUIContent.none, GUI.skin.box, null);
+            GUIHelper.BeginHorizontal(GUIContent.none, GUI.skin.box, null);
             GUILayout.Label("<b>Search Scene:</b>", new GUILayoutOption[] { GUILayout.Width(100) });
 
-            m_searchInput = GUIUnstrip.TextField(m_searchInput, new GUILayoutOption[0]);
+            m_searchInput = GUIHelper.TextField(m_searchInput, new GUILayoutOption[0]);
 
             if (GUILayout.Button("Search", new GUILayoutOption[] { GUILayout.Width(80) }))
             {
@@ -211,7 +212,7 @@ namespace Explorer.UI.Main
             }
             GUILayout.EndHorizontal();
 
-            GUIUnstrip.Space(5);
+            GUIHelper.Space(5);
         }
 
         private void SceneChangeButtons()
@@ -252,7 +253,7 @@ namespace Explorer.UI.Main
 
         private void DrawPageButtons()
         {
-            GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+            GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
 
             Pages.DrawLimitInputArea();
 
@@ -283,7 +284,7 @@ namespace Explorer.UI.Main
         {
             if (m_currentTransform != null)
             {
-                GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+                GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
                 if (GUILayout.Button("<-", new GUILayoutOption[] { GUILayout.Width(35) }))
                 {
                     TraverseUp();

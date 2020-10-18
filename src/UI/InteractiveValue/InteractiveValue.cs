@@ -71,14 +71,14 @@ namespace Explorer.UI
             }
             else
             {
-                GUIUnstrip.Space(labelWidth);
+                GUIHelper.Space(labelWidth);
             }
 
             var cacheMethod = OwnerCacheObject as CacheMethod;
 
             if (cacheMember != null && cacheMember.HasParameters)
             {
-                GUIUnstrip.BeginVertical(new GUILayoutOption[] { GUILayout.ExpandHeight(true) } );
+                GUIHelper.BeginVertical(new GUILayoutOption[] { GUILayout.ExpandHeight(true) } );
 
                 if (cacheMember.m_isEvaluating)
                 {
@@ -92,7 +92,7 @@ namespace Explorer.UI
                         cacheMember.DrawArgsInput();
                     }
 
-                    GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+                    GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
                     if (GUILayout.Button(EVALUATE_LABEL, new GUILayoutOption[] { GUILayout.Width(70) }))
                     {
                         if (cacheMethod != null)
@@ -122,8 +122,8 @@ namespace Explorer.UI
                 GUILayout.EndVertical();
 
                 GUILayout.EndHorizontal();
-                GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
-                GUIUnstrip.Space(labelWidth);
+                GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
+                GUIHelper.Space(labelWidth);
             }
             else if (cacheMethod != null)
             {
@@ -133,8 +133,8 @@ namespace Explorer.UI
                 }
 
                 GUILayout.EndHorizontal();
-                GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
-                GUIUnstrip.Space(labelWidth);
+                GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
+                GUIHelper.Space(labelWidth);
             }
 
             string typeName = $"<color={Syntax.Class_Instance}>{ValueType.FullName}</color>";

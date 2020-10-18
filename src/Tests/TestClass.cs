@@ -8,6 +8,7 @@ using Explorer.UI.Shared;
 #if CPP
 using UnhollowerBaseLib;
 using UnityEngine.SceneManagement;
+using Explorer.Unstrip.ImageConversion;
 #endif
 
 namespace Explorer.Tests
@@ -62,6 +63,10 @@ namespace Explorer.Tests
 
             GameObject.DontDestroyOnLoad(TestTexture);
             GameObject.DontDestroyOnLoad(TestSprite);
+
+            //// test loading a tex from file
+            //var dataToLoad = System.IO.File.ReadAllBytes(@"Mods\Explorer\Tex_Nemundis_Nebula.png");
+            //ExplorerCore.Log($"Tex load success: {TestTexture.LoadImage(dataToLoad, false)}");
 
             ILHashSetTest = new Il2CppSystem.Collections.Generic.HashSet<string>();
             ILHashSetTest.Add("1");

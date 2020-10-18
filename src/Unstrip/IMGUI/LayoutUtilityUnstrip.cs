@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Explorer.Unstrip.IMGUI
 {
-    public class Internal_LayoutUtility
+    public class LayoutUtilityUnstrip
     {
         public static Rect GetRect(float width, float height, GUIStyle style, params GUILayoutOption[] options)
         {

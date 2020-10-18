@@ -182,14 +182,14 @@ namespace Explorer.CacheObject
                 }
                 var input = this.GenericArgInput[i];
 
-                GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+                GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
 
                 GUI.skin.label.alignment = TextAnchor.MiddleCenter;
                 GUILayout.Label(
                     $"<color={Syntax.StructGreen}>{this.GenericArgs[i].Name}</color>",
                     new GUILayoutOption[] { GUILayout.Width(15) }
                 );
-                this.GenericArgInput[i] = GUIUnstrip.TextField(input, new GUILayoutOption[] { GUILayout.Width(150) });
+                this.GenericArgInput[i] = GUIHelper.TextField(input, new GUILayoutOption[] { GUILayout.Width(150) });
                 GUI.skin.label.alignment = TextAnchor.MiddleLeft;
                 GUILayout.Label(types, new GUILayoutOption[0]);
 

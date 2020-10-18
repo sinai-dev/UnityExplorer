@@ -31,13 +31,11 @@ namespace Explorer.Unstrip.ImageConversion
             byte[] safeData = new byte[data.Length];
             for (int i = 0; i < data.Length; i++)
             {
-                safeData[i] = (byte)data[i]; // not sure if cast is needed
+                safeData[i] = (byte)data[i]; 
             }
 
             return safeData;
         }
-
-        // ******** LoadImage not yet working. ********
 
         // bool ImageConversion.LoadImage(this Texture2D tex, byte[] data, bool markNonReadable);
 
@@ -45,15 +43,14 @@ namespace Explorer.Unstrip.ImageConversion
 
         public static bool LoadImage(this Texture2D tex, byte[] data, bool markNonReadable)
         {
-            IntPtr unmanagedArray = Marshal.AllocHGlobal(data.Length);
-            Marshal.Copy(data, 0, unmanagedArray, data.Length);
+            var il2cppArray = new Il2CppStructArray<byte>(data.Length);
+            for (int i = 0; i < data.Length; i++)
+            {
+                il2cppArray[i] = data[i];
+            }
 
             var ret = ICallHelper.GetICall<d_LoadImage>("UnityEngine.ImageConversion::LoadImage")
-                .Invoke(tex.Pointer, unmanagedArray, markNonReadable);
-
-            // var ret = tex.LoadRawTextureDataImpl(unmanagedArray, data.Length);            
-
-            Marshal.FreeHGlobal(unmanagedArray);
+                .Invoke(tex.Pointer, il2cppArray.Pointer, markNonReadable);
 
             return ret;
         }

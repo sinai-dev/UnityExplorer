@@ -8,6 +8,8 @@ using System.Reflection;
 using System.IO;
 #if CPP
 using UnhollowerRuntimeLib;
+using TextEditor = Explorer.Unstrip.IMGUI.TextEditorUnstrip;
+using Explorer.Unstrip.IMGUI;
 #endif 
 
 namespace Explorer.UI.Main
@@ -140,15 +142,15 @@ Help();";
 
             GUILayout.Label("Enter code here as though it is a method body:", new GUILayoutOption[0]);
 
-            inputAreaScroll = GUIUnstrip.BeginScrollView(
+            inputAreaScroll = GUIHelper.BeginScrollView(
                 inputAreaScroll, 
-                new GUILayoutOption[] { GUILayout.Height(250), GUILayout.ExpandHeight(true) }
+                new GUILayoutOption[] { GUILayout.Height(250), GUIHelper.ExpandHeight(true) }
             );
 
             GUI.SetNextControlName(INPUT_CONTROL_NAME);
-            m_input = GUIUnstrip.TextArea(m_input, new GUILayoutOption[] { GUILayout.ExpandHeight(true) });
+            m_input = GUIHelper.TextArea(m_input, new GUILayoutOption[] { GUIHelper.ExpandHeight(true) });
 
-            GUIUnstrip.EndScrollView();
+            GUIHelper.EndScrollView();
 
             // EXECUTE BUTTON
 
@@ -179,7 +181,7 @@ Help();";
             // SUGGESTIONS
             if (AutoCompletes.Count > 0)
             {
-                autocompleteScroll = GUIUnstrip.BeginScrollView(autocompleteScroll, new GUILayoutOption[] { GUILayout.Height(150) });
+                autocompleteScroll = GUIHelper.BeginScrollView(autocompleteScroll, new GUILayoutOption[] { GUILayout.Height(150) });
 
                 var origSkin = GUI.skin.button;
                 GUI.skin.button = AutocompleteStyle;
@@ -196,7 +198,7 @@ Help();";
 
                 GUI.skin.button = origSkin;
 
-                GUIUnstrip.EndScrollView();
+                GUIHelper.EndScrollView();
             }
 
             if (shouldRefocus)
@@ -209,9 +211,9 @@ Help();";
 
             GUILayout.Label("<b>Using directives:</b>", new GUILayoutOption[0]);
 
-            GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+            GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
             GUILayout.Label("Add namespace:", new GUILayoutOption[] { GUILayout.Width(105) });
-            m_usingInput = GUIUnstrip.TextField(m_usingInput, new GUILayoutOption[] { GUILayout.Width(150) });
+            m_usingInput = GUIHelper.TextField(m_usingInput, new GUILayoutOption[] { GUILayout.Width(150) });
             if (GUILayout.Button("<b><color=lime>Add</color></b>", new GUILayoutOption[] { GUILayout.Width(120) }))
             {
                 AddUsing(m_usingInput);
@@ -245,7 +247,8 @@ Help();";
 #endif
 
 #if CPP
-            textEditor = GUIUtility.GetStateObject(Il2CppType.Of<TextEditor>(), GUIUtility.keyboardControl).TryCast<TextEditor>();
+            //textEditor = GUIUtility.GetStateObject(Il2CppType.Of<TextEditor>(), GUIUtility.keyboardControl).TryCast<TextEditor>();
+            textEditor = (TextEditor)GUIUtilityUnstrip.GetMonoStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
 #else
             textEditor = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
 #endif
@@ -346,9 +349,9 @@ Help();";
         {
             var style = new GUIStyle
             {
-                border = new RectOffset(0, 0, 0, 0),
-                margin = new RectOffset(0, 0, 0, 0),
-                padding = new RectOffset(0, 0, 0, 0),
+                border = new RectOffset(),
+                margin = new RectOffset(),
+                padding = new RectOffset(),
                 hover = { background = Texture2D.whiteTexture, textColor = Color.black },
                 normal = { background = null },
                 focused = { background = Texture2D.whiteTexture, textColor = Color.black },

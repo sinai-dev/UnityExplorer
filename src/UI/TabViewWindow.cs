@@ -52,7 +52,7 @@ namespace Explorer.UI
             try
             {
                 GUI.DragWindow(new Rect(0, 0, m_rect.width - 90, 20));
-                if (GUIUnstrip.Button(new Rect(m_rect.width - 90, 2, 80, 20), "<color=red>Close All</color>"))
+                if (GUIHelper.Button(new Rect(m_rect.width - 90, 2, 80, 20), "<color=red>Close All</color>"))
                 {
                     foreach (var window in WindowManager.Windows)
                     {
@@ -61,10 +61,10 @@ namespace Explorer.UI
                     return;
                 }
 
-                GUIUnstrip.BeginArea(new Rect(5, 25, m_rect.width - 10, m_rect.height - 35), GUI.skin.box);
+                GUIHelper.BeginArea(new Rect(5, 25, m_rect.width - 10, m_rect.height - 35), GUI.skin.box);
 
-                GUIUnstrip.BeginVertical(GUIContent.none, GUI.skin.box, null);
-                GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+                GUIHelper.BeginVertical(GUIContent.none, GUI.skin.box, null);
+                GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
                 GUI.skin.button.alignment = TextAnchor.MiddleLeft;
                 int tabPerRow = (int)Math.Floor(m_rect.width / 238);
                 int rowCount = 0;
@@ -83,7 +83,7 @@ namespace Explorer.UI
                     {
                         rowCount = 0;
                         GUILayout.EndHorizontal();
-                        GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+                        GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
                     }
                     rowCount++;
 
@@ -109,7 +109,7 @@ namespace Explorer.UI
 
                 m_rect = ResizeDrag.ResizeWindow(m_rect, windowID);
 
-                GUIUnstrip.EndArea();
+                GUIHelper.EndArea();
             }
             catch (Exception e)
             {

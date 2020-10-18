@@ -75,23 +75,23 @@ namespace Explorer.UI
 
                 for (int i = 0; i < EnumNames.Length; i++)
                 {
-                    GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
-                    GUIUnstrip.Space(whitespace);
+                    GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
+                    GUIHelper.Space(whitespace);
 
                     m_enabledFlags[i] = GUILayout.Toggle(m_enabledFlags[i], EnumNames[i], new GUILayoutOption[0]);
 
                     GUILayout.EndHorizontal();
                 }
 
-                GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
-                GUIUnstrip.Space(whitespace);
+                GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
+                GUIHelper.Space(whitespace);
                 if (GUILayout.Button("<color=lime>Apply</color>", new GUILayoutOption[] { GUILayout.Width(155) }))
                 {
                     SetFlagsFromInput();
                 }
                 GUILayout.EndHorizontal();
 
-                GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+                GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
             }
         }
 

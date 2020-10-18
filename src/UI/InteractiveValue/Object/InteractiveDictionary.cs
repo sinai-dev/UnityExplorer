@@ -237,7 +237,7 @@ namespace Explorer.UI
             }
             GUI.skin.button.alignment = TextAnchor.MiddleCenter;
 
-            GUIUnstrip.Space(5);
+            GUIHelper.Space(5);
 
             if (IsExpanded)
             {
@@ -246,9 +246,9 @@ namespace Explorer.UI
                 if (count > Pages.ItemsPerPage)
                 {
                     GUILayout.EndHorizontal();
-                    GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+                    GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
 
-                    GUIUnstrip.Space(whitespace);
+                    GUIHelper.Space(whitespace);
 
                     Pages.CurrentPageLabel();
 
@@ -264,7 +264,7 @@ namespace Explorer.UI
 
                     Pages.DrawLimitInputArea();
 
-                    GUIUnstrip.Space(5);
+                    GUIHelper.Space(5);
                 }
 
                 int offset = Pages.CalculateOffsetIndex();
@@ -276,7 +276,7 @@ namespace Explorer.UI
 
                     //collapsing the BeginHorizontal called from ReflectionWindow.WindowFunction or previous array entry
                     GUILayout.EndHorizontal();
-                    GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+                    GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
 
                     //GUIUnstrip.Space(whitespace);
 

@@ -47,7 +47,7 @@ namespace Explorer.UI
                 return;
             }
             m_currentPage = index;
-            GUIUnstrip.BringWindowToFront(MainWindowID);
+            GUIHelper.BringWindowToFront(MainWindowID);
             GUI.FocusWindow(MainWindowID);
         }
 
@@ -58,39 +58,39 @@ namespace Explorer.UI
 
         public void OnGUI()
         {
-            MainRect = GUIUnstrip.Window(MainWindowID, MainRect, (GUI.WindowFunction)MainWindow, ExplorerCore.NAME);
+            MainRect = GUIHelper.Window(MainWindowID, MainRect, (GUI.WindowFunction)MainWindow, ExplorerCore.NAME);
         }
 
         private void MainWindow(int id)
         {
             GUI.DragWindow(new Rect(0, 0, MainRect.width - 90, 20));
 
-            if (GUIUnstrip.Button(new Rect(MainRect.width - 90, 2, 80, 20), $"Hide ({ModConfig.Instance.Main_Menu_Toggle})"))
+            if (GUIHelper.Button(new Rect(MainRect.width - 90, 2, 80, 20), $"Hide ({ModConfig.Instance.Main_Menu_Toggle})"))
             {
                 ExplorerCore.ShowMenu = false;
                 return;
             }
 
-            GUIUnstrip.BeginArea(new Rect(5, 25, MainRect.width - 10, MainRect.height - 35), GUI.skin.box);
+            GUIHelper.BeginArea(new Rect(5, 25, MainRect.width - 10, MainRect.height - 35), GUI.skin.box);
 
             MainHeader();
 
             var page = Pages[m_currentPage];
 
-            page.scroll = GUIUnstrip.BeginScrollView(page.scroll);
+            page.scroll = GUIHelper.BeginScrollView(page.scroll);
 
             page.DrawWindow();
 
-            GUIUnstrip.EndScrollView();
+            GUIHelper.EndScrollView();
 
             MainRect = ResizeDrag.ResizeWindow(MainRect, MainWindowID);
 
-            GUIUnstrip.EndArea();
+            GUIHelper.EndArea();
         }
 
         private void MainHeader()
         {
-            GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+            GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
             for (int i = 0; i < Pages.Count; i++)
             {
                 if (m_currentPage == i)
@@ -105,7 +105,7 @@ namespace Explorer.UI
             }
             GUILayout.EndHorizontal();
 
-            GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+            GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
             GUI.color = Color.white;
             InspectUnderMouse.EnableInspect = GUILayout.Toggle(InspectUnderMouse.EnableInspect, "Inspect Under Mouse (Shift + RMB)", new GUILayoutOption[0]);
 
@@ -117,7 +117,7 @@ namespace Explorer.UI
             GUILayout.EndHorizontal();
 
             //GUIUnstrip.Space(10);
-            GUIUnstrip.Space(10);
+            GUIHelper.Space(10);
 
             GUI.color = Color.white;
         }

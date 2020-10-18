@@ -80,7 +80,7 @@ namespace Explorer.UI.Inspectors
 
             if (m_uObj)
             {
-                GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+                GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
                 GUILayout.Label("<b>Tools:</b>", new GUILayoutOption[] { GUILayout.Width(80) });
                 Buttons.InstantiateButton(m_uObj);
                 if (m_component && m_component.gameObject is GameObject obj)

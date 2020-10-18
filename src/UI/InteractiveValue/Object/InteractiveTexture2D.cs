@@ -57,9 +57,9 @@ namespace Explorer.UI
 
         public override void DrawValue(Rect window, float width)
         {
-            GUIUnstrip.BeginVertical();
+            GUIHelper.BeginVertical();
 
-            GUIUnstrip.BeginHorizontal();
+            GUIHelper.BeginHorizontal();
 
             if (currentTex && !IsExpanded)
             {
@@ -105,11 +105,11 @@ namespace Explorer.UI
 
         private void DrawTextureControls()
         {
-            GUIUnstrip.BeginHorizontal();
+            GUIHelper.BeginHorizontal();
 
             GUILayout.Label("Save folder:", new GUILayoutOption[] { GUILayout.Width(80f) });
-            saveFolder = GUIUnstrip.TextField(saveFolder, new GUILayoutOption[0]);
-            GUIUnstrip.Space(10f);
+            saveFolder = GUIHelper.TextField(saveFolder, new GUILayoutOption[0]);
+            GUIHelper.Space(10f);
 
             GUILayout.EndHorizontal();
 

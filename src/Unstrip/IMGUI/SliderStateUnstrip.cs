@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Explorer.Unstrip.IMGUI
 {
-    public class Internal_SliderState
+    public class SliderStateUnstrip
     {
         public float dragStartPos;
         public float dragStartValue;

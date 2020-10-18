@@ -94,7 +94,7 @@ namespace Explorer.UI.Shared
         {
             GUILayout.Label("Limit: ", new GUILayoutOption[] { GUILayout.Width(50) });
             var limit = this.ItemsPerPage.ToString();
-            limit = GUIUnstrip.TextField(limit, new GUILayoutOption[] { GUILayout.Width(50) });
+            limit = GUIHelper.TextField(limit, new GUILayoutOption[] { GUILayout.Width(50) });
             if (limit != ItemsPerPage.ToString() && int.TryParse(limit, out int i))
             {
                 ItemsPerPage = i;

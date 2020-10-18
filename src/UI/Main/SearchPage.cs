@@ -7,6 +7,7 @@ using UnityEngine;
 using Explorer.UI.Shared;
 using Explorer.CacheObject;
 using Explorer.Helpers;
+using Explorer.Unstrip.Resources;
 
 namespace Explorer.UI.Main
 {
@@ -163,7 +164,7 @@ namespace Explorer.UI.Main
 
             var matches = new List<object>();
 
-            var allObjectsOfType = Resources.FindObjectsOfTypeAll(searchType);
+            var allObjectsOfType = ResourcesUnstrip.FindObjectsOfTypeAll(searchType);
 
             //ExplorerCore.Log("Found count: " + allObjectsOfType.Length);
 
@@ -350,7 +351,7 @@ namespace Explorer.UI.Main
             try
             {
                 // helpers
-                GUIUnstrip.BeginHorizontal(GUIContent.none, GUI.skin.box, null);
+                GUIHelper.BeginHorizontal(GUIContent.none, GUI.skin.box, null);
                 GUILayout.Label("<b><color=orange>Helpers</color></b>", new GUILayoutOption[] { GUILayout.Width(70) });
                 if (GUILayout.Button("Find Static Instances", new GUILayoutOption[] { GUILayout.Width(180) }))
                 {
@@ -366,7 +367,7 @@ namespace Explorer.UI.Main
                 SearchBox();
 
                 // results
-                GUIUnstrip.BeginVertical(GUIContent.none, GUI.skin.box, null);
+                GUIHelper.BeginVertical(GUIContent.none, GUI.skin.box, null);
 
                 GUI.skin.label.alignment = TextAnchor.MiddleCenter;
                 GUILayout.Label("<b><color=orange>Results </color></b>" + " (" + m_searchResults.Count + ")", new GUILayoutOption[0]);
@@ -374,7 +375,7 @@ namespace Explorer.UI.Main
 
                 int count = m_searchResults.Count;
 
-                GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+                GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
 
                 Pages.DrawLimitInputArea();
 
@@ -400,7 +401,7 @@ namespace Explorer.UI.Main
 
                 GUILayout.EndHorizontal();
 
-                resultsScroll = GUIUnstrip.BeginScrollView(resultsScroll);
+                resultsScroll = GUIHelper.BeginScrollView(resultsScroll);
 
                 var _temprect = new Rect(MainMenu.MainRect.x, MainMenu.MainRect.y, MainMenu.MainRect.width + 160, MainMenu.MainRect.height);
 
@@ -420,7 +421,7 @@ namespace Explorer.UI.Main
                     GUILayout.Label("<color=red><i>No results found!</i></color>", new GUILayoutOption[0]);
                 }
 
-                GUIUnstrip.EndScrollView();
+                GUIHelper.EndScrollView();
                 GUILayout.EndVertical();
             }
             catch (Exception e)
@@ -440,28 +441,28 @@ namespace Explorer.UI.Main
 
         private void SearchBox()
         {
-            GUIUnstrip.BeginVertical(GUIContent.none, GUI.skin.box, null);
+            GUIHelper.BeginVertical(GUIContent.none, GUI.skin.box, null);
 
             // ----- GameObject Search -----
             GUI.skin.label.alignment = TextAnchor.MiddleCenter;
             GUILayout.Label("<b><color=orange>Search</color></b>", new GUILayoutOption[0]);
             GUI.skin.label.alignment = TextAnchor.UpperLeft;
 
-            GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+            GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
 
             GUILayout.Label("Name Contains:", new GUILayoutOption[] { GUILayout.Width(100) });
-            m_searchInput = GUIUnstrip.TextField(m_searchInput, new GUILayoutOption[] { GUILayout.Width(200) });
+            m_searchInput = GUIHelper.TextField(m_searchInput, new GUILayoutOption[] { GUILayout.Width(200) });
 
             GUILayout.Label("Max Results:", new GUILayoutOption[] { GUILayout.Width(100) });
             var s = MaxSearchResults.ToString();
-            s = GUIUnstrip.TextField(s, new GUILayoutOption[] { GUILayout.Width(80) });
+            s = GUIHelper.TextField(s, new GUILayoutOption[] { GUILayout.Width(80) });
             if (int.TryParse(s, out int i))
             {
                 MaxSearchResults = i;
             }
             GUILayout.EndHorizontal();
 
-            GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+            GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
 
             GUILayout.Label("Class Filter:", new GUILayoutOption[] { GUILayout.Width(100) });
             ClassFilterToggle(TypeFilter.Object, "Object");
@@ -471,15 +472,15 @@ namespace Explorer.UI.Main
             GUILayout.EndHorizontal();
             if (TypeMode == TypeFilter.Custom)
             {
-                GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+                GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
                 GUI.skin.label.alignment = TextAnchor.MiddleRight;
                 GUILayout.Label("Custom Class:", new GUILayoutOption[] { GUILayout.Width(250) });
                 GUI.skin.label.alignment = TextAnchor.UpperLeft;
-                m_typeInput = GUIUnstrip.TextField(m_typeInput, new GUILayoutOption[] { GUILayout.Width(250) });
+                m_typeInput = GUIHelper.TextField(m_typeInput, new GUILayoutOption[] { GUILayout.Width(250) });
                 GUILayout.EndHorizontal();
             }
 
-            GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+            GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
             GUILayout.Label("Scene Filter:", new GUILayoutOption[] { GUILayout.Width(100) });
             SceneFilterToggle(SceneFilter.Any, "Any", 60);
             SceneFilterToggle(SceneFilter.This, "This Scene", 100);

@@ -5,6 +5,7 @@ using System.IO;
 using System.Reflection;
 using UnityEngine;
 using BF = System.Reflection.BindingFlags;
+using System.Diagnostics.CodeAnalysis;
 #if CPP
 using ILType = Il2CppSystem.Type;
 using UnhollowerBaseLib;
@@ -14,6 +15,7 @@ using System.Runtime.InteropServices;
 
 namespace Explorer.Helpers
 {
+    [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "External methods")]
     public class ReflectionHelpers
     {
         public static BF CommonFlags = BF.Public | BF.Instance | BF.NonPublic | BF.Static;
@@ -51,12 +53,6 @@ namespace Explorer.Helpers
                     .GetField("NativeClassPtr", BF.Public | BF.Static)
                     .GetValue(null);
 
-                if (castToPtr == IntPtr.Zero)
-                {
-                    ExplorerCore.LogWarning($"[Il2CppCast] Could not get an IntPtr for castTo '{castTo.FullName}'!");
-                    //return obj;
-                }
-
                 ClassPointers.Add(castTo, castToPtr);
             }
             else
@@ -64,16 +60,18 @@ namespace Explorer.Helpers
                 castToPtr = ClassPointers[castTo];
             }
 
-            IntPtr objPtr = ilObj.Pointer;
-            var classPtr = il2cpp_object_get_class(objPtr);
+            if (castToPtr == IntPtr.Zero)
+                return obj;
+
+            var classPtr = il2cpp_object_get_class(ilObj.Pointer);
 
             if (!il2cpp_class_is_assignable_from(castToPtr, classPtr))
                 return obj;
 
-            if (RuntimeSpecificsStore.IsInjected(classPtr))
-                return UnhollowerBaseLib.Runtime.ClassInjectorBase.GetMonoObjectFromIl2CppPointer(objPtr);
+            if (RuntimeSpecificsStore.IsInjected(castToPtr))
+                return UnhollowerBaseLib.Runtime.ClassInjectorBase.GetMonoObjectFromIl2CppPointer(ilObj.Pointer);
 
-            return Activator.CreateInstance(castTo, objPtr);
+            return Activator.CreateInstance(castTo, ilObj.Pointer);
         }
 
         [DllImport("GameAssembly", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
@@ -81,6 +79,7 @@ namespace Explorer.Helpers
 
         [DllImport("GameAssembly", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern IntPtr il2cpp_object_get_class(IntPtr obj);
+
 #endif
 
         public static Type GetTypeByName(string fullName)

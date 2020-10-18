@@ -9,9 +9,9 @@ using UnityEngine;
 
 namespace Explorer.Unstrip.IMGUI
 {
-    public class Internal_TextEditor
+    public class TextEditorUnstrip
     {
-        public Internal_TextEditor() { }
+        public TextEditorUnstrip() { }
         // public Internal_TextEditor(IntPtr ptr) : base(ptr) { }
 
         public TouchScreenKeyboard keyboardOnScreen = null;

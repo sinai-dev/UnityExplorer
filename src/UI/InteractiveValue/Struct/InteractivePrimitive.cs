@@ -98,13 +98,13 @@ namespace Explorer.UI
 
             // all other non-bool values use TextField
 
-            GUIUnstrip.BeginVertical(new GUILayoutOption[0]);
+            GUIHelper.BeginVertical(new GUILayoutOption[0]);
 
-            GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+            GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
 
             GUILayout.Label("<color=#2df7b2><i>" + ValueType.Name + "</i></color>", new GUILayoutOption[] { GUILayout.Width(50) });
 
-            m_valueToString = GUIUnstrip.TextArea(m_valueToString, new GUILayoutOption[] { GUILayout.ExpandWidth(true) });
+            m_valueToString = GUIHelper.TextArea(m_valueToString, new GUILayoutOption[] { GUILayout.ExpandWidth(true) });
 
             DrawApplyButton();
 
@@ -113,7 +113,7 @@ namespace Explorer.UI
                 m_inBitwiseMode = GUILayout.Toggle(m_inBitwiseMode, "Bitwise?", new GUILayoutOption[0]);
             }
 
-            GUIUnstrip.Space(10);
+            GUIHelper.Space(10);
 
             GUILayout.EndHorizontal();
 
@@ -147,7 +147,7 @@ namespace Explorer.UI
         {
             if (OwnerCacheObject.CanWrite)
             {
-                GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+                GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
 
                 GUI.skin.label.alignment = TextAnchor.MiddleRight;
                 GUILayout.Label("RHS:", new GUILayoutOption[] { GUILayout.Width(35) });
@@ -203,14 +203,14 @@ namespace Explorer.UI
                     }
                 }
 
-                m_bitwiseOperatorInput = GUIUnstrip.TextField(m_bitwiseOperatorInput, new GUILayoutOption[] { GUILayout.Width(55) });
+                m_bitwiseOperatorInput = GUIHelper.TextField(m_bitwiseOperatorInput, new GUILayoutOption[] { GUILayout.Width(55) });
 
                 GUILayout.EndHorizontal();
             }
 
-            GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+            GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
             GUILayout.Label($"<color=cyan>Binary:</color>", new GUILayoutOption[] { GUILayout.Width(60) });
-            m_binaryInput = GUIUnstrip.TextField(m_binaryInput, new GUILayoutOption[0]);
+            m_binaryInput = GUIHelper.TextField(m_binaryInput, new GUILayoutOption[0]);
             if (OwnerCacheObject.CanWrite)
             {
                 if (GUILayout.Button("Apply", new GUILayoutOption[0]))

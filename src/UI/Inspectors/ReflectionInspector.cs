@@ -254,12 +254,12 @@ namespace Explorer.UI.Inspectors
                 if (!WindowManager.TabView)
                 {
                     Header();
-                    GUIUnstrip.BeginArea(new Rect(5, 25, rect.width - 10, rect.height - 35), GUI.skin.box);
+                    GUIHelper.BeginArea(new Rect(5, 25, rect.width - 10, rect.height - 35), GUI.skin.box);
                 }
 
                 var asInstance = this as InstanceInspector;
 
-                GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+                GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
                 var labelWidth = (asInstance != null && asInstance.m_uObj)
                     ? new GUILayoutOption[] { GUILayout.Width(245f) }
                     : new GUILayoutOption[0];
@@ -273,12 +273,12 @@ namespace Explorer.UI.Inspectors
 
                 UIStyles.HorizontalLine(Color.grey);
 
-                GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+                GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
                 GUILayout.Label("<b>Search:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
-                m_search = GUIUnstrip.TextField(m_search, new GUILayoutOption[0]);
+                m_search = GUIHelper.TextField(m_search, new GUILayoutOption[0]);
                 GUILayout.EndHorizontal();
 
-                GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+                GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
                 GUILayout.Label("<b>Filter:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
                 FilterTypeToggle(MemberTypes.All, "All");
                 FilterTypeToggle(MemberTypes.Property, "Properties");
@@ -288,7 +288,7 @@ namespace Explorer.UI.Inspectors
 
                 if (this is InstanceInspector)
                 {
-                    GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+                    GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
                     GUILayout.Label("<b>Scope:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
                     FilterScopeToggle(MemberScopes.Both, "Both");
                     FilterScopeToggle(MemberScopes.Instance, "Instance");
@@ -296,7 +296,7 @@ namespace Explorer.UI.Inspectors
                     GUILayout.EndHorizontal();
                 }
 
-                GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+                GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
                 GUILayout.Label("<b>Values:</b>", new GUILayoutOption[] { GUILayout.Width(75) });
                 if (GUILayout.Button("Update", new GUILayoutOption[] { GUILayout.Width(100) }))
                 {
@@ -309,12 +309,12 @@ namespace Explorer.UI.Inspectors
                 GUI.color = Color.white;
                 GUILayout.EndHorizontal();
 
-                GUIUnstrip.Space(10);
+                GUIHelper.Space(10);
 
                 Pages.ItemCount = m_cachedMembersFiltered.Length;
 
                 // prev/next page buttons
-                GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+                GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
 
                 Pages.DrawLimitInputArea();
 
@@ -336,13 +336,13 @@ namespace Explorer.UI.Inspectors
 
                 // ====== BODY ======
 
-                scroll = GUIUnstrip.BeginScrollView(scroll);
+                scroll = GUIHelper.BeginScrollView(scroll);
 
-                GUIUnstrip.Space(10);
+                GUIHelper.Space(10);
 
                 UIStyles.HorizontalLine(Color.grey);
 
-                GUIUnstrip.BeginVertical(GUIContent.none, GUI.skin.box, null);
+                GUIHelper.BeginVertical(GUIContent.none, GUI.skin.box, null);
 
                 var members = this.m_cachedMembersFiltered;
                 int start = Pages.CalculateOffsetIndex();
@@ -351,7 +351,7 @@ namespace Explorer.UI.Inspectors
                 {
                     var holder = members[j];
 
-                    GUIUnstrip.BeginHorizontal(new GUILayoutOption[] { GUILayout.Height(25) });
+                    GUIHelper.BeginHorizontal(new GUILayoutOption[] { GUILayout.Height(25) });
                     try
                     {
                         holder.Draw(rect, 180f);
@@ -369,13 +369,13 @@ namespace Explorer.UI.Inspectors
                 }
 
                 GUILayout.EndVertical();
-                GUIUnstrip.EndScrollView();
+                GUIHelper.EndScrollView();
 
                 if (!WindowManager.TabView)
                 {
                     m_rect = ResizeDrag.ResizeWindow(rect, windowID);
 
-                    GUIUnstrip.EndArea();
+                    GUIHelper.EndArea();
                 }
             }
             catch (Exception e) when (e.Message.Contains("in a group with only"))

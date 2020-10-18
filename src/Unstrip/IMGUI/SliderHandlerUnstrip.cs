@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Explorer.Unstrip.IMGUI
 {
-    public struct Internal_SliderHandler
+    public struct SliderHandlerUnstrip
     {
         public static int ScrollTroughSide
         {
@@ -57,7 +57,7 @@ namespace Explorer.Unstrip.IMGUI
         private readonly bool horiz;
         private readonly int id;
 
-        public Internal_SliderHandler(Rect position, float currentValue, float size, float start,
+        public SliderHandlerUnstrip(Rect position, float currentValue, float size, float start,
             float end, GUIStyle slider, GUIStyle thumb, bool horiz, int id)
         {
             this.position = position;
@@ -120,7 +120,7 @@ namespace Explorer.Unstrip.IMGUI
                     {
                         var state = GetSliderState();
                         state.isDragging = false;
-                        Internal.nextScrollStepTime = DateTime.Now.AddMilliseconds(250.0);
+                        GUIUnstrip.nextScrollStepTime = DateTime.Now.AddMilliseconds(250.0);
                         ScrollTroughSide = this.CurrentScrollTroughSide();
                         result = this.PageMovementValue();
                     }
@@ -194,7 +194,7 @@ namespace Explorer.Unstrip.IMGUI
             else
             {
                 GUI.InternalRepaintEditorWindow();
-                if (DateTime.Now < Internal.nextScrollStepTime)
+                if (DateTime.Now < GUIUnstrip.nextScrollStepTime)
                 {
                     result = this.currentValue;
                 }
@@ -204,7 +204,7 @@ namespace Explorer.Unstrip.IMGUI
                 }
                 else
                 {
-                    Internal.nextScrollStepTime = DateTime.Now.AddMilliseconds(30.0);
+                    GUIUnstrip.nextScrollStepTime = DateTime.Now.AddMilliseconds(30.0);
                     if (this.SupportsPageMovements())
                     {
                         GetSliderState().isDragging = false;
@@ -309,9 +309,9 @@ namespace Explorer.Unstrip.IMGUI
             state.isDragging = true;
         }
 
-        private Internal_SliderState GetSliderState()
+        private SliderStateUnstrip GetSliderState()
         {
-            return (Internal_SliderState)Internal_GUIUtility.GetMonoStateObject(typeof(Internal_SliderState), this.id);
+            return (SliderStateUnstrip)GUIUtilityUnstrip.GetMonoStateObject(typeof(SliderStateUnstrip), this.id);
         }
 
         private Rect ThumbRect()

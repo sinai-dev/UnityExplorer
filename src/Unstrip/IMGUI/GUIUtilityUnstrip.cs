@@ -8,7 +8,7 @@ using Explorer.Helpers;
 
 namespace Explorer.Unstrip.IMGUI
 {
-    public class Internal_GUIUtility
+    public class GUIUtilityUnstrip
     {
         public static Dictionary<int, object> MonoStateCache = new Dictionary<int, object>();
 

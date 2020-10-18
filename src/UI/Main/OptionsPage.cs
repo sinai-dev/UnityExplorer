@@ -56,44 +56,44 @@ namespace Explorer.UI.Main
             GUILayout.Label("<color=orange><size=16><b>Options</b></size></color>", new GUILayoutOption[0]);
             GUI.skin.label.alignment = TextAnchor.MiddleLeft;
 
-            GUIUnstrip.BeginVertical(GUIContent.none, GUI.skin.box, new GUILayoutOption[0]);
+            GUIHelper.BeginVertical(GUIContent.none, GUI.skin.box, new GUILayoutOption[0]);
 
-            GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+            GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
             GUILayout.Label($"Menu Toggle Key:", new GUILayoutOption[] { GUILayout.Width(215f) });
             toggleKeyInput.IValue.DrawValue(MainMenu.MainRect, MainMenu.MainRect.width - 215f);
             GUILayout.EndHorizontal();
 
             UIStyles.HorizontalLine(Color.black, true);
 
-            GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+            GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
             GUILayout.Label($"Default Window Size:", new GUILayoutOption[] { GUILayout.Width(215f) });
             defaultSizeInput.IValue.DrawValue(MainMenu.MainRect, MainMenu.MainRect.width - 215f);
             GUILayout.EndHorizontal();
 
             UIStyles.HorizontalLine(Color.black, true);
 
-            GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+            GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
             GUILayout.Label($"Default Items per Page:", new GUILayoutOption[] { GUILayout.Width(215f) });
             defaultPageLimitInput.IValue.DrawValue(MainMenu.MainRect, MainMenu.MainRect.width - 215f);
             GUILayout.EndHorizontal();
 
             UIStyles.HorizontalLine(Color.black, true);
 
-            GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+            GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
             GUILayout.Label($"Enable Bitwise Editing:", new GUILayoutOption[] { GUILayout.Width(215f) });
             bitwiseSupportInput.IValue.DrawValue(MainMenu.MainRect, MainMenu.MainRect.width - 215f);
             GUILayout.EndHorizontal();
 
             UIStyles.HorizontalLine(Color.black, true);
 
-            GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+            GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
             GUILayout.Label($"Enable Tab View:", new GUILayoutOption[] { GUILayout.Width(215f) });
             tabViewInput.IValue.DrawValue(MainMenu.MainRect, MainMenu.MainRect.width - 215f);
             GUILayout.EndHorizontal();
 
             UIStyles.HorizontalLine(Color.black, true);
 
-            GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+            GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
             GUILayout.Label($"Default Output Path:", new GUILayoutOption[] { GUILayout.Width(215f) });
             defaultOutputPathInput.IValue.DrawValue(MainMenu.MainRect, MainMenu.MainRect.width - 215f);
             GUILayout.EndHorizontal();
@@ -105,13 +105,13 @@ namespace Explorer.UI.Main
 
             GUILayout.EndVertical();
 
-            GUIUnstrip.Space(10f);
+            GUIHelper.Space(10f);
 
             GUI.skin.label.alignment = TextAnchor.MiddleCenter;
             GUILayout.Label("<color=orange><size=16><b>Other</b></size></color>", new GUILayoutOption[0]);
             GUI.skin.label.alignment = TextAnchor.MiddleLeft;
 
-            GUIUnstrip.BeginVertical(GUIContent.none, GUI.skin.box, new GUILayoutOption[0]);
+            GUIHelper.BeginVertical(GUIContent.none, GUI.skin.box, new GUILayoutOption[0]);
 
             if (GUILayout.Button("Inspect Test Class", new GUILayoutOption[0]))
             {

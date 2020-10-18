@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Explorer.Unstrip.IMGUI
 {
-    public class Internal_ScrollViewState
+    public class ScrollViewStateUnstrip
     {
         public Rect position;
         public Rect visibleRect;

@@ -123,13 +123,13 @@ namespace Explorer.CacheObject
                     label = $"<i>[{label} = {this.m_arguments[i].DefaultValue ?? "null"}]</i>";
                 }
 
-                GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+                GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
 
                 GUI.skin.label.alignment = TextAnchor.MiddleCenter;
 
                 GUILayout.Label(i.ToString(), new GUILayoutOption[] { GUILayout.Width(15) });
                 GUILayout.Label(label, new GUILayoutOption[] { GUILayout.ExpandWidth(false) });
-                this.m_argumentInput[i] = GUIUnstrip.TextField(input, new GUILayoutOption[] { GUILayout.ExpandWidth(true) });
+                this.m_argumentInput[i] = GUIHelper.TextField(input, new GUILayoutOption[] { GUILayout.ExpandWidth(true) });
 
                 GUI.skin.label.alignment = TextAnchor.MiddleLeft;
 

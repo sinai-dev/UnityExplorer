@@ -262,18 +262,19 @@
     <Compile Include="UI\WindowBase.cs" />
     <Compile Include="UI\WindowManager.cs" />
     <Compile Include="Unstrip\ImageConversion\ImageConversionUnstrip.cs" />
-    <Compile Include="Unstrip\IMGUI\Internal_GUIUtility.cs" />
-    <Compile Include="Unstrip\IMGUI\Internal_TextEditor.cs" />
+    <Compile Include="Unstrip\IMGUI\GUIUtilityUnstrip.cs" />
+    <Compile Include="Unstrip\IMGUI\TextEditorUnstrip.cs" />
     <Compile Include="Helpers\ICallHelper.cs" />
     <Compile Include="Unstrip\LayerMask\LayerMaskUnstrip.cs" />
+    <Compile Include="Unstrip\Resources\ResourcesUnstrip.cs" />
     <Compile Include="Unstrip\Scene\SceneUnstrip.cs" />
-    <Compile Include="Unstrip\IMGUI\GUIUnstrip.cs" />
-    <Compile Include="Unstrip\IMGUI\Internal_LayoutUtility.cs" />
-    <Compile Include="Unstrip\IMGUI\Internal_ScrollViewState.cs" />
-    <Compile Include="Unstrip\IMGUI\Internal_SliderHandler.cs" />
+    <Compile Include="Unstrip\IMGUI\GUIHelper.cs" />
+    <Compile Include="Unstrip\IMGUI\LayoutUtilityUnstrip.cs" />
+    <Compile Include="Unstrip\IMGUI\ScrollViewStateUnstrip.cs" />
+    <Compile Include="Unstrip\IMGUI\SliderHandlerUnstrip.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Unstrip\IMGUI\Internal.cs" />
-    <Compile Include="Unstrip\IMGUI\Internal_SliderState.cs" />
+    <Compile Include="Unstrip\IMGUI\GUIUnstrip.cs" />
+    <Compile Include="Unstrip\IMGUI\SliderStateUnstrip.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ILRepack.targets" />

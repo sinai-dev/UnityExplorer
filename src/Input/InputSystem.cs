@@ -10,64 +10,64 @@ namespace Explorer.Input
 {
     public class InputSystem : IAbstractInput
     {
-        public static Type TKeyboard => _keyboard ?? (_keyboard = ReflectionHelpers.GetTypeByName("UnityEngine.InputSystem.Keyboard"));
-        private static Type _keyboard;
+        public static Type TKeyboard => m_tKeyboard ?? (m_tKeyboard = ReflectionHelpers.GetTypeByName("UnityEngine.InputSystem.Keyboard"));
+        private static Type m_tKeyboard;
 
-        public static Type TMouse => _mouse ?? (_mouse = ReflectionHelpers.GetTypeByName("UnityEngine.InputSystem.Mouse"));
-        private static Type _mouse;
+        public static Type TMouse => m_tMouse ?? (m_tMouse = ReflectionHelpers.GetTypeByName("UnityEngine.InputSystem.Mouse"));
+        private static Type m_tMouse;
 
-        public static Type TKey => _key ?? (_key = ReflectionHelpers.GetTypeByName("UnityEngine.InputSystem.Key"));
-        private static Type _key;
+        public static Type TKey => m_tKey ?? (m_tKey = ReflectionHelpers.GetTypeByName("UnityEngine.InputSystem.Key"));
+        private static Type m_tKey;
 
-        private static PropertyInfo _btnIsPressedProp;
-        private static PropertyInfo _btnWasPressedProp;
+        private static PropertyInfo m_btnIsPressedProp;
+        private static PropertyInfo m_btnWasPressedProp;
 
-        private static object CurrentKeyboard => _currentKeyboard ?? (_currentKeyboard = _kbCurrentProp.GetValue(null, null));
-        private static object _currentKeyboard;
-        private static PropertyInfo _kbCurrentProp;
-        private static PropertyInfo _kbIndexer;
+        private static object CurrentKeyboard => m_currentKeyboard ?? (m_currentKeyboard = m_kbCurrentProp.GetValue(null, null));
+        private static object m_currentKeyboard;
+        private static PropertyInfo m_kbCurrentProp;
+        private static PropertyInfo m_kbIndexer;
 
-        private static object CurrentMouse => _currentMouse ?? (_currentMouse = _mouseCurrentProp.GetValue(null, null));
-        private static object _currentMouse;
-        private static PropertyInfo _mouseCurrentProp;
+        private static object CurrentMouse => m_currentMouse ?? (m_currentMouse = m_mouseCurrentProp.GetValue(null, null));
+        private static object m_currentMouse;
+        private static PropertyInfo m_mouseCurrentProp;
 
-        private static object LeftMouseButton => _lmb ?? (_lmb = _leftButtonProp.GetValue(CurrentMouse, null));
-        private static object _lmb;
-        private static PropertyInfo _leftButtonProp;
+        private static object LeftMouseButton => m_lmb ?? (m_lmb = m_leftButtonProp.GetValue(CurrentMouse, null));
+        private static object m_lmb;
+        private static PropertyInfo m_leftButtonProp;
 
-        private static object RightMouseButton => _rmb ?? (_rmb = _rightButtonProp.GetValue(CurrentMouse, null));
-        private static object _rmb;
-        private static PropertyInfo _rightButtonProp;
+        private static object RightMouseButton => m_rmb ?? (m_rmb = m_rightButtonProp.GetValue(CurrentMouse, null));
+        private static object m_rmb;
+        private static PropertyInfo m_rightButtonProp;
 
-        private static object MousePositionInfo => _pos ?? (_pos = _positionProp.GetValue(CurrentMouse, null));
-        private static object _pos;
-        private static PropertyInfo _positionProp;
-        private static MethodInfo _readVector2InputMethod;
+        private static object MousePositionInfo => m_pos ?? (m_pos = m_positionProp.GetValue(CurrentMouse, null));
+        private static object m_pos;
+        private static PropertyInfo m_positionProp;
+        private static MethodInfo m_readVector2InputMethod;
 
-        public Vector2 MousePosition => (Vector2)_readVector2InputMethod.Invoke(MousePositionInfo, new object[0]);
+        public Vector2 MousePosition => (Vector2)m_readVector2InputMethod.Invoke(MousePositionInfo, new object[0]);
 
         public bool GetKeyDown(KeyCode key)
         {
             var parsedKey = Enum.Parse(TKey, key.ToString());
-            var actualKey = _kbIndexer.GetValue(CurrentKeyboard, new object[] { parsedKey });
+            var actualKey = m_kbIndexer.GetValue(CurrentKeyboard, new object[] { parsedKey });
 
-            return (bool)_btnWasPressedProp.GetValue(actualKey, null);
+            return (bool)m_btnWasPressedProp.GetValue(actualKey, null);
         }
 
         public bool GetKey(KeyCode key)
         {
             var parsed = Enum.Parse(TKey, key.ToString());
-            var actualKey = _kbIndexer.GetValue(CurrentKeyboard, new object[] { parsed });
+            var actualKey = m_kbIndexer.GetValue(CurrentKeyboard, new object[] { parsed });
 
-            return (bool)_btnIsPressedProp.GetValue(actualKey, null);
+            return (bool)m_btnIsPressedProp.GetValue(actualKey, null);
         }
 
         public bool GetMouseButtonDown(int btn)
         {
             switch (btn)
             {
-                case 0: return (bool)_btnWasPressedProp.GetValue(LeftMouseButton, null);
-                case 1: return (bool)_btnWasPressedProp.GetValue(RightMouseButton, null);
+                case 0: return (bool)m_btnWasPressedProp.GetValue(LeftMouseButton, null);
+                case 1: return (bool)m_btnWasPressedProp.GetValue(RightMouseButton, null);
                 // case 2: return (bool)_btnWasPressedProp.GetValue(MiddleMouseButton, null);
                 default: throw new NotImplementedException();
             }
@@ -77,8 +77,8 @@ namespace Explorer.Input
         {
             switch (btn)
             {
-                case 0: return (bool)_btnIsPressedProp.GetValue(LeftMouseButton, null);
-                case 1: return (bool)_btnIsPressedProp.GetValue(RightMouseButton, null);
+                case 0: return (bool)m_btnIsPressedProp.GetValue(LeftMouseButton, null);
+                case 1: return (bool)m_btnIsPressedProp.GetValue(RightMouseButton, null);
                 // case 2: return (bool)_btnIsPressedProp.GetValue(MiddleMouseButton, null);
                 default: throw new NotImplementedException();
             }
@@ -88,21 +88,21 @@ namespace Explorer.Input
         {
             ExplorerCore.Log("Initializing new InputSystem support...");
 
-            _kbCurrentProp = TKeyboard.GetProperty("current");
-            _kbIndexer = TKeyboard.GetProperty("Item", new Type[] { TKey });
+            m_kbCurrentProp = TKeyboard.GetProperty("current");
+            m_kbIndexer = TKeyboard.GetProperty("Item", new Type[] { TKey });
 
             var btnControl = ReflectionHelpers.GetTypeByName("UnityEngine.InputSystem.Controls.ButtonControl");
-            _btnIsPressedProp = btnControl.GetProperty("isPressed");
-            _btnWasPressedProp = btnControl.GetProperty("wasPressedThisFrame");
+            m_btnIsPressedProp = btnControl.GetProperty("isPressed");
+            m_btnWasPressedProp = btnControl.GetProperty("wasPressedThisFrame");
 
-            _mouseCurrentProp = TMouse.GetProperty("current");
-            _leftButtonProp = TMouse.GetProperty("leftButton");
-            _rightButtonProp = TMouse.GetProperty("rightButton");
+            m_mouseCurrentProp = TMouse.GetProperty("current");
+            m_leftButtonProp = TMouse.GetProperty("leftButton");
+            m_rightButtonProp = TMouse.GetProperty("rightButton");
 
-            _positionProp = ReflectionHelpers.GetTypeByName("UnityEngine.InputSystem.Pointer")
+            m_positionProp = ReflectionHelpers.GetTypeByName("UnityEngine.InputSystem.Pointer")
                             .GetProperty("position");
 
-            _readVector2InputMethod = ReflectionHelpers.GetTypeByName("UnityEngine.InputSystem.InputControl`1")
+            m_readVector2InputMethod = ReflectionHelpers.GetTypeByName("UnityEngine.InputSystem.InputControl`1")
                                       .MakeGenericType(typeof(Vector2))
                                       .GetMethod("ReadValue");
         }

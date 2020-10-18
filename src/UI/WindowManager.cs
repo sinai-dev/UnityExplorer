@@ -110,7 +110,7 @@ namespace Explorer.UI
         {
             if (!TabView)
             {
-                GUIUnstrip.BringWindowToFront(window.windowID);
+                GUIHelper.BringWindowToFront(window.windowID);
                 GUI.FocusWindow(window.windowID);
             }
             else

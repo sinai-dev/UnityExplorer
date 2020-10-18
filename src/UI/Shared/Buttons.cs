@@ -59,7 +59,7 @@ namespace Explorer.UI.Shared
 
             // ------ toggle active button ------
 
-            GUIUnstrip.BeginHorizontal(new GUILayoutOption[0]);
+            GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
             GUI.skin.button.alignment = TextAnchor.UpperLeft;
 
             GUI.color = color;
