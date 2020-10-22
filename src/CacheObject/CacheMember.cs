@@ -128,8 +128,8 @@ namespace Explorer.CacheObject
                 GUI.skin.label.alignment = TextAnchor.MiddleCenter;
 
                 GUILayout.Label(i.ToString(), new GUILayoutOption[] { GUILayout.Width(15) });
-                GUILayout.Label(label, new GUILayoutOption[] { GUILayout.ExpandWidth(false) });
-                this.m_argumentInput[i] = GUIHelper.TextField(input, new GUILayoutOption[] { GUILayout.ExpandWidth(true) });
+                GUILayout.Label(label, new GUILayoutOption[] { GUIHelper.ExpandWidth(false) });
+                this.m_argumentInput[i] = GUIHelper.TextField(input, new GUILayoutOption[] { GUIHelper.ExpandWidth(true) });
 
                 GUI.skin.label.alignment = TextAnchor.MiddleLeft;
 

@@ -104,7 +104,7 @@ namespace Explorer.UI
 
             GUILayout.Label("<color=#2df7b2><i>" + ValueType.Name + "</i></color>", new GUILayoutOption[] { GUILayout.Width(50) });
 
-            m_valueToString = GUIHelper.TextArea(m_valueToString, new GUILayoutOption[] { GUILayout.ExpandWidth(true) });
+            m_valueToString = GUIHelper.TextArea(m_valueToString, new GUILayoutOption[] { GUIHelper.ExpandWidth(true) });
 
             DrawApplyButton();
 

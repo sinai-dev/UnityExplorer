@@ -224,6 +224,11 @@ namespace Explorer.UI
             {
                 label = (string)ToStringMethod?.Invoke(Value, null) ?? Value.ToString();
 
+                if (label.Length > 100)
+                {
+                    label = label.Substring(0, 99);
+                }
+
                 var classColor = valueType.IsAbstract && valueType.IsSealed
                     ? Syntax.Class_Static
                     : Syntax.Class_Instance;

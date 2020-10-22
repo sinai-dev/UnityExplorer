@@ -8,9 +8,6 @@ using UnhollowerRuntimeLib;
 
 namespace Explorer.Unstrip.IMGUI
 {
-     // Also contains some stuff from GUI.
-     // This class was meant to be temporary but who knows.
-
     public class GUIUnstrip
     {
         #region Properties
@@ -93,10 +90,39 @@ namespace Explorer.Unstrip.IMGUI
 
         public static void BeginLayoutDirection(bool vertical, GUIContent content, GUIStyle style, GUILayoutOption[] options)
         {
-            var g = GUILayoutUtility.BeginLayoutGroup(style, options, Il2CppType.Of<GUILayoutGroup>());
+            var g = BeginLayoutGroup(style, options, Il2CppType.Of<GUILayoutGroup>());
             g.isVertical = vertical;
             if (style != GUIStyle.none || content != GUIContent.none)
                 GUI.Box(g.rect, content, style);
+        }
+
+        public static GUILayoutGroup BeginLayoutGroup(GUIStyle style, GUILayoutOption[] options, Il2CppSystem.Type layoutType)
+        {
+            EventType type = Event.current.type;
+            GUILayoutGroup guilayoutGroup;
+            if (type != EventType.Used && type != EventType.Layout)
+            {
+                guilayoutGroup = GUILayoutUtility.current.topLevel.GetNext().TryCast<GUILayoutGroup>();
+
+                if (guilayoutGroup == null)
+                {
+                    throw new ArgumentException("GUILayout: Mismatched LayoutGroup." + Event.current.type);
+                }
+                guilayoutGroup.ResetCursor();
+            }
+            else
+            {
+                guilayoutGroup = GUILayoutUtility.CreateGUILayoutGroupInstanceOfType(layoutType);
+                guilayoutGroup.style = style;
+                if (options != null)
+                {
+                    guilayoutGroup.ApplyOptions(options);
+                }
+                GUILayoutUtility.current.topLevel.entries.Add(guilayoutGroup);
+            }
+            GUILayoutUtility.current.layoutGroups.Push(guilayoutGroup);
+            GUILayoutUtility.current.topLevel = guilayoutGroup;
+            return guilayoutGroup;
         }
 
         public static string TextField(string text, GUILayoutOption[] options, bool multiLine)
@@ -347,7 +373,7 @@ namespace Explorer.Unstrip.IMGUI
             {
                 guilayoutGroup = (GUILayoutGroup)Activator.CreateInstance(layoutType);
                 guilayoutGroup.style = style;
-                GUILayoutUtility.current.windows.Add(guilayoutGroup);
+                GUILayoutUtility.current.windows.entries.Add(guilayoutGroup);
             }
             GUILayoutUtility.current.layoutGroups.Push(guilayoutGroup);
             GUILayoutUtility.current.topLevel = guilayoutGroup;

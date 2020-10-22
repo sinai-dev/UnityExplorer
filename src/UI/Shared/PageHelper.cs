@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Explorer.UI.Shared
 {
@@ -38,7 +39,7 @@ namespace Explorer.UI.Shared
 
         private int CalculateMaxOffset()
         {
-            return MaxPageOffset = (int)Mathf.Ceil((float)(ItemCount / (decimal)ItemsPerPage)) - 1;
+            return MaxPageOffset = (int)Math.Ceiling((float)(ItemCount / (decimal)ItemsPerPage)) - 1;
         }
 
         public void CurrentPageLabel()

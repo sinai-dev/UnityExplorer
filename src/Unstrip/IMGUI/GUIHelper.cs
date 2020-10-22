@@ -13,6 +13,14 @@ namespace Explorer
 
     public class GUIHelper
     {
+        internal static GUILayoutOption ExpandWidth(bool expand)
+        {
+#if CPP
+            return GUIUnstrip.ExpandWidth(expand);
+#else
+            return GUIHelper.ExpandWidth(expand);
+#endif
+        }
 
         internal static GUILayoutOption ExpandHeight(bool expand)
         {
