@@ -9,10 +9,6 @@ namespace ExplorerBeta.UI
 {
     public static class UIFactory
 	{
-		//private const float kWidth = 160f;
-		//private const float kThickHeight = 30f;
-		//private const float kThinHeight = 20f;
-
 		private static Vector2 s_ThickElementSize = new Vector2(160f, 30f);
 		private static Vector2 s_ThinElementSize = new Vector2(160f, 20f);
 		//private static Vector2 s_ImageElementSize = new Vector2(100f, 100f);
@@ -80,7 +76,7 @@ namespace ExplorerBeta.UI
 			Transform transform = go.transform;
 			for (int i = 0; i < transform.childCount; i++)
 			{
-				DefaultControls.SetLayerRecursively(transform.GetChild(i).gameObject, 5);
+				SetLayerRecursively(transform.GetChild(i).gameObject, 5);
 			}
 		}
 
