@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Explorer
+namespace ExplorerBeta
 {
     public static class UnityExtensions
     {

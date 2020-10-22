@@ -1,12 +1,12 @@
 ﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Explorer;
+using ExplorerBeta;
 
 #if ML
 using MelonLoader;
 
-[assembly: MelonInfo(typeof(ExplorerMelonMod), "Explorer", ExplorerCore.VERSION, ExplorerCore.AUTHOR)]
+[assembly: MelonInfo(typeof(ExplorerMelonMod), "ExplorerBeta", ExplorerCore.VERSION, ExplorerCore.AUTHOR)]
 [assembly: MelonGame(null, null)]
 #endif
 

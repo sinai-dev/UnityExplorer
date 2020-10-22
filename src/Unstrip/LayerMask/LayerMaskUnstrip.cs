@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using Explorer.Helpers;
+using ExplorerBeta.Helpers;
 #if CPP
 using UnhollowerBaseLib;
 #endif
 
-namespace Explorer.Unstrip.LayerMasks
+namespace ExplorerBeta.Unstrip.LayerMasks
 {
     public static class LayerMaskUnstrip
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Explorer.Input
+namespace ExplorerBeta.Input
 {
     // Just a stub for games where no Input module was able to load at all.
 
