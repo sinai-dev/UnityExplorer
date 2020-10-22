@@ -76,7 +76,7 @@ namespace ExplorerBeta.UI
 			Transform transform = go.transform;
 			for (int i = 0; i < transform.childCount; i++)
 			{
-				SetLayerRecursively(transform.GetChild(i).gameObject, 5);
+				SetLayerRecursively(transform.GetChild(i).gameObject);
 			}
 		}
 

@@ -30,29 +30,7 @@ namespace ExplorerBeta.UI
 
             try
             {
-                var path = @"Mods\Explorer\cursor.png";
-                var data = File.ReadAllBytes(path);
-
-                var tex = new Texture2D(32, 32);
-                tex.LoadImage(data, false);
-                UnityEngine.Object.DontDestroyOnLoad(tex);
-
-                var size = new Rect();
-                size.width = 32;
-                size.height = 32;
-                var sprite = UIManager.CreateSprite(tex, size);
-                UnityEngine.Object.DontDestroyOnLoad(sprite);
-
-                m_resizeCursorImage = new GameObject("ResizeCursorImage");
-                m_resizeCursorImage.transform.SetParent(UIManager.CanvasRoot.transform);
-
-                var image = m_resizeCursorImage.AddComponent<Image>();
-                image.sprite = sprite;
-                var rect = image.transform.TryCast<RectTransform>();
-                rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 32);
-                rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 32);
-
-                m_resizeCursorImage.SetActive(false);
+                LoadCursorImage();
             }
             catch (Exception e)
             {
@@ -67,7 +45,7 @@ namespace ExplorerBeta.UI
             var resizePos = Panel.InverseTransformPoint(rawMousePos);
             var dragPos = DragableArea.InverseTransformPoint(rawMousePos);
 
-            if (m_wasHoveringResize)
+            if (WasHoveringResize)
             {
                 UpdateHoverImagePos();
             }
@@ -114,7 +92,7 @@ namespace ExplorerBeta.UI
                     var type = GetResizeType(resizePos);
                     OnHoverResize(type);
                 }
-                else if (m_wasHoveringResize)
+                else if (WasHoveringResize)
                 {
                     OnHoverResizeEnd();
                 }
@@ -158,26 +136,23 @@ namespace ExplorerBeta.UI
         #region RESIZE
 
         private const int RESIZE_THICKNESS = 10;
+
         private bool WasResizing { get; set; }
         private ResizeTypes m_currentResizeType = ResizeTypes.NONE;
-        private Vector2 m_lastMousePos;
+        private Vector2 m_lastResizePos;
 
-        private bool m_wasHoveringResize;
+        private bool WasHoveringResize { get; set; }
         private ResizeTypes m_lastResizeHoverType;
         private GameObject m_resizeCursorImage;
 
-        private Rect m_outerResize;
-        private Rect m_innerResize;
-        private readonly Dictionary<ResizeTypes, Rect> m_cachedResizeAreas = new Dictionary<ResizeTypes, Rect>
+        private Rect m_cachedOuterResize;
+
+        private readonly Dictionary<ResizeTypes, Rect> m_resizeMask = new Dictionary<ResizeTypes, Rect>
         {
-            { ResizeTypes.Top,          Rect.zero },
-            { ResizeTypes.Left,         Rect.zero },
-            { ResizeTypes.Right,        Rect.zero },
-            { ResizeTypes.Bottom,       Rect.zero },
-            { ResizeTypes.TopLeft,      Rect.zero },
-            { ResizeTypes.TopRight,     Rect.zero },
-            { ResizeTypes.BottomLeft,   Rect.zero },
-            { ResizeTypes.BottomRight,  Rect.zero },
+            { ResizeTypes.Top,      Rect.zero },
+            { ResizeTypes.Left,     Rect.zero },
+            { ResizeTypes.Right,    Rect.zero },
+            { ResizeTypes.Bottom,   Rect.zero },
         };
 
         [Flags]
@@ -194,160 +169,148 @@ namespace ExplorerBeta.UI
             BottomRight = Bottom | Right,
         }
 
-        private void UpdateHoverImagePos()
-        {
-            if (!m_resizeCursorImage)
-                return;
-
-            m_resizeCursorImage.transform.localPosition = UIManager.CanvasRoot.transform.TryCast<RectTransform>()
-                                                            .InverseTransformPoint(InputManager.MousePosition);
-        }
-
         private void UpdateResizeCache()
         {
             int halfThick = RESIZE_THICKNESS / 2;
+            int dblThick = RESIZE_THICKNESS * 2;
 
-            // calculate main two rects
+            // calculate main outer rect
+            // the resize area is both outside and inside the panel,
+            // to give a bit of buffer and make it easier to use.
 
-            this.m_outerResize = new Rect();
-            m_outerResize.x = Panel.rect.x - halfThick;
-            m_outerResize.y = Panel.rect.y - halfThick;
-            m_outerResize.width = Panel.rect.width + (RESIZE_THICKNESS * 2);
-            m_outerResize.height = Panel.rect.height + (RESIZE_THICKNESS * 2);
+            // outer rect is the outer-most bounds of our resize area
+            var outer = new Rect();
+            outer.x = Panel.rect.x - halfThick;
+            outer.y = Panel.rect.y - halfThick;
+            outer.width = Panel.rect.width + dblThick;
+            outer.height = Panel.rect.height + dblThick;
+            m_cachedOuterResize = outer;
 
-            this.m_innerResize = new Rect();
-            m_innerResize.x = m_outerResize.x + RESIZE_THICKNESS;
-            m_innerResize.y = m_outerResize.y + RESIZE_THICKNESS;
-            m_innerResize.width = Panel.rect.width - RESIZE_THICKNESS;
-            m_innerResize.height = Panel.rect.height - RESIZE_THICKNESS;
+            // calculate the four cross sections to use as flags
 
-            // calculate resize areas
-
-            var left = m_cachedResizeAreas[ResizeTypes.Left];
-            left.x = m_outerResize.x;
-            left.y = m_outerResize.y + RESIZE_THICKNESS;
-            left.width = RESIZE_THICKNESS;
-            left.height = m_innerResize.height - RESIZE_THICKNESS;
-            m_cachedResizeAreas[ResizeTypes.Left] = left;
-
-            var topLeft = m_cachedResizeAreas[ResizeTypes.TopLeft];
-            topLeft.x = m_outerResize.x;
-            topLeft.y = m_innerResize.y + m_innerResize.height;
-            topLeft.width = RESIZE_THICKNESS;
-            topLeft.height = RESIZE_THICKNESS;
-            m_cachedResizeAreas[ResizeTypes.TopLeft] = topLeft;
-
-            var top = m_cachedResizeAreas[ResizeTypes.Top];
-            top.x = m_innerResize.x;
-            top.y = m_innerResize.y + m_innerResize.height;
-            top.width = m_innerResize.width;
-            top.height = RESIZE_THICKNESS;
-            m_cachedResizeAreas[ResizeTypes.Top] = top;
-
-            var topRight = m_cachedResizeAreas[ResizeTypes.TopRight];
-            topRight.x = m_innerResize.x + m_innerResize.width;
-            topRight.y = m_innerResize.y + m_innerResize.height;
-            topRight.width = RESIZE_THICKNESS;
-            topRight.height = RESIZE_THICKNESS;
-            m_cachedResizeAreas[ResizeTypes.TopRight] = topRight;
-
-            var right = m_cachedResizeAreas[ResizeTypes.Right];
-            right.x = m_innerResize.x + m_innerResize.width;
-            right.y = m_innerResize.y + halfThick;
-            right.width = RESIZE_THICKNESS;
-            right.height = m_innerResize.height - RESIZE_THICKNESS;
-            m_cachedResizeAreas[ResizeTypes.Right] = right;
-
-            var bottomRight = m_cachedResizeAreas[ResizeTypes.BottomRight];
-            bottomRight.x = m_innerResize.x + m_innerResize.width;
-            bottomRight.y = m_outerResize.y;
-            bottomRight.width = RESIZE_THICKNESS;
-            bottomRight.height = RESIZE_THICKNESS;
-            m_cachedResizeAreas[ResizeTypes.BottomRight] = bottomRight;
-
-            var bottom = m_cachedResizeAreas[ResizeTypes.Bottom];
-            bottom.x = m_innerResize.x;
-            bottom.y = m_outerResize.y;
-            bottom.width = m_innerResize.width;
+            var bottom = new Rect();
+            bottom.x = outer.x;
+            bottom.y = outer.y;
+            bottom.width = outer.width;
             bottom.height = RESIZE_THICKNESS;
-            m_cachedResizeAreas[ResizeTypes.Bottom] = bottom;
+            m_resizeMask[ResizeTypes.Bottom] = bottom;
 
-            var bottomLeft = m_cachedResizeAreas[ResizeTypes.BottomLeft];
-            bottomLeft.x = m_outerResize.x;
-            bottomLeft.y = m_outerResize.y;
-            bottomLeft.width = RESIZE_THICKNESS;
-            bottomLeft.height = RESIZE_THICKNESS;
-            m_cachedResizeAreas[ResizeTypes.BottomLeft] = bottomLeft;
+            var left = new Rect();
+            left.x = outer.x;
+            left.y = outer.y;
+            left.width = RESIZE_THICKNESS;
+            left.height = outer.height;
+            m_resizeMask[ResizeTypes.Left] = left;
+
+            var top = new Rect();
+            top.x = outer.x;
+            top.y = outer.y + Panel.rect.height;
+            top.width = outer.width;
+            top.height = RESIZE_THICKNESS;
+            m_resizeMask[ResizeTypes.Top] = top;
+
+            var right = new Rect();
+            right.x = outer.x + Panel.rect.width;
+            right.y = outer.y;
+            right.width = RESIZE_THICKNESS;
+            right.height = outer.height;
+            m_resizeMask[ResizeTypes.Right] = right;
         }
 
         private bool MouseInResizeArea(Vector2 mousePos)
-        {           
-            return m_outerResize.Contains(mousePos) && !m_innerResize.Contains(mousePos);
+        {
+            return m_cachedOuterResize.Contains(mousePos) && GetResizeType(mousePos) != ResizeTypes.NONE;
         }
 
         private ResizeTypes GetResizeType(Vector2 mousePos)
         {
-            foreach (var entry in m_cachedResizeAreas)
-            {
-                if (entry.Value.Contains(mousePos))
-                {
-                    return entry.Key;
-                }
-            }
-            return ResizeTypes.NONE;
+            // Calculate which part of the resize area we're in, if any.
+            // We do this via a bitmask with the ResizeTypes enum.
+            // We can return Top/Right/Bottom/Left, or a corner like TopLeft.
+
+            int mask = 0;
+
+            if (m_resizeMask[ResizeTypes.Top].Contains(mousePos))
+                mask |= (int)ResizeTypes.Top;
+            else if (m_resizeMask[ResizeTypes.Bottom].Contains(mousePos))
+                mask |= (int)ResizeTypes.Bottom;
+
+            if (m_resizeMask[ResizeTypes.Left].Contains(mousePos))
+                mask |= (int)ResizeTypes.Left;
+            else if (m_resizeMask[ResizeTypes.Right].Contains(mousePos))
+                mask |= (int)ResizeTypes.Right;
+
+            return (ResizeTypes)mask;
         }
 
         public void OnHoverResize(ResizeTypes resizeType)
         {
-            if (m_wasHoveringResize && m_lastResizeHoverType == resizeType)
+            if (WasHoveringResize && m_lastResizeHoverType == resizeType)
                 return;
 
             // we are entering resize, or the resize type has changed.
 
-            m_wasHoveringResize = true;
+            WasHoveringResize = true;
             m_lastResizeHoverType = resizeType;
 
             m_resizeCursorImage.SetActive(true);
 
-            float rotation = 0;
+            // set the rotation for the resize icon
+            float iconRotation = 0f;
             switch (resizeType)
             {
                 case ResizeTypes.TopRight:
                 case ResizeTypes.BottomLeft:
-                    rotation = 45f; break;
+                    iconRotation = 45f; break;
                 case ResizeTypes.Top:
                 case ResizeTypes.Bottom:
-                    rotation = 90f; break;
+                    iconRotation = 90f; break;
                 case ResizeTypes.TopLeft:
                 case ResizeTypes.BottomRight:
-                    rotation = 135f; break;
+                    iconRotation = 135f; break;
             }
 
             var rot = m_resizeCursorImage.transform.rotation;
-            rot.eulerAngles = new Vector3(0, 0, rotation);
+            rot.eulerAngles = new Vector3(0, 0, iconRotation);
             m_resizeCursorImage.transform.rotation = rot;
 
             UpdateHoverImagePos();
         }
 
+        // update the resize icon position to be above the mouse
+        private void UpdateHoverImagePos()
+        {
+            if (!m_resizeCursorImage)
+                return;
+
+            var t =
+#if CPP
+                UIManager.CanvasRoot.transform.TryCast<RectTransform>();
+#else
+                UIManager.CanvasRoot.transform as RectTransform;
+#endif
+
+            m_resizeCursorImage.transform.localPosition = t.InverseTransformPoint(InputManager.MousePosition);
+        }
+
         public void OnHoverResizeEnd()
         {
-            m_wasHoveringResize = false;
+            WasHoveringResize = false;
             m_resizeCursorImage.SetActive(false);
         }
 
         public void OnBeginResize(ResizeTypes resizeType)
         {
             m_currentResizeType = resizeType;
-            m_lastMousePos = InputManager.MousePosition;
+            m_lastResizePos = InputManager.MousePosition;
             WasResizing = true;
         }
 
         public void OnResize()
         {
             var mousePos = InputManager.MousePosition;
-            var diff = m_lastMousePos - (Vector2)mousePos;
-            m_lastMousePos = mousePos;
+            var diff = m_lastResizePos - (Vector2)mousePos;
+            m_lastResizePos = mousePos;
 
             var diffX = (float)((decimal)diff.x / Screen.width);
             var diffY = (float)((decimal)diff.y / Screen.height);
@@ -383,6 +346,33 @@ namespace ExplorerBeta.UI
         {
             WasResizing = false;
             UpdateResizeCache();
+        }
+
+        private void LoadCursorImage()
+        {
+            var path = @"Mods\Explorer\cursor.png";
+            var data = File.ReadAllBytes(path);
+
+            var tex = new Texture2D(32, 32);
+            tex.LoadImage(data, false);
+            UnityEngine.Object.DontDestroyOnLoad(tex);
+
+            var size = new Rect();
+            size.width = 32;
+            size.height = 32;
+            var sprite = UIManager.CreateSprite(tex, size);
+            UnityEngine.Object.DontDestroyOnLoad(sprite);
+
+            m_resizeCursorImage = new GameObject("ResizeCursorImage");
+            m_resizeCursorImage.transform.SetParent(UIManager.CanvasRoot.transform);
+
+            var image = m_resizeCursorImage.AddComponent<Image>();
+            image.sprite = sprite;
+            var rect = image.transform.TryCast<RectTransform>();
+            rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 32);
+            rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 32);
+
+            m_resizeCursorImage.SetActive(false);
         }
 
         #endregion
