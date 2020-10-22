@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using ExplorerBeta.Helpers;
+using Explorer.Helpers;
 
-namespace ExplorerBeta
+namespace Explorer
 {
     public static class ReflectionExtensions
     {

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace ExplorerBeta.Helpers
+namespace Explorer.Helpers
 {
     public class UnityHelpers
     {

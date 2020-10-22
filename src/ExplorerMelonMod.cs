@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using MelonLoader;
 
-namespace ExplorerBeta
+namespace Explorer
 {
     public class ExplorerMelonMod : MelonMod
     {
@@ -28,10 +28,10 @@ namespace ExplorerBeta
             ExplorerCore.Update();
         }
 
-        //public override void OnGUI()
-        //{
-        //    ExplorerCore.OnGUI();
-        //}
+        public override void OnGUI()
+        {
+            ExplorerCore.OnGUI();
+        }
     }
 }
 #endif

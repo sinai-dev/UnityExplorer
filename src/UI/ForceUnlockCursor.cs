@@ -1,16 +1,13 @@
 ﻿using System;
 using UnityEngine;
-using ExplorerBeta.Helpers;
-using UnityEngine.EventSystems;
-using ExplorerBeta.UI;
-using ExplorerBeta.Input;
+using Explorer.Helpers;
 #if ML
 using Harmony;
 #else
 using HarmonyLib;
 #endif
 
-namespace ExplorerBeta.UI
+namespace Explorer.UI
 {
     public class ForceUnlockCursor
     {
@@ -21,12 +18,6 @@ namespace ExplorerBeta.UI
         }
         private static bool m_forceUnlock;
 
-        private static void SetForceUnlock(bool unlock)
-        {
-            m_forceUnlock = unlock;
-            UpdateCursorControl();
-        }
-
         public static bool ShouldForceMouse => ExplorerCore.ShowMenu && Unlock;
 
         private static CursorLockMode m_lastLockMode;
@@ -34,8 +25,8 @@ namespace ExplorerBeta.UI
 
         private static bool m_currentlySettingCursor = false;
 
-        private static Type CursorType
-            => m_cursorType
+        private static Type CursorType 
+            => m_cursorType 
             ?? (m_cursorType = ReflectionHelpers.GetTypeByName("UnityEngine.Cursor"));
         private static Type m_cursorType;
 
@@ -53,13 +44,11 @@ namespace ExplorerBeta.UI
                 m_lastVisibleState = Cursor.visible;
 
                 // Setup Harmony Patches
-                TryPatch(typeof(EventSystem), "current", new HarmonyMethod(typeof(ForceUnlockCursor).GetMethod(nameof(Prefix_EventSystem_set_current))), true);
+                TryPatch("lockState", new HarmonyMethod(typeof(ForceUnlockCursor).GetMethod(nameof(Prefix_set_lockState))), true);
+                TryPatch("lockState", new HarmonyMethod(typeof(ForceUnlockCursor).GetMethod(nameof(Postfix_get_lockState))), false);
 
-                TryPatch(typeof(Cursor), "lockState", new HarmonyMethod(typeof(ForceUnlockCursor).GetMethod(nameof(Prefix_set_lockState))), true);
-                //TryPatch(typeof(Cursor), "lockState", new HarmonyMethod(typeof(ForceUnlockCursor).GetMethod(nameof(Postfix_get_lockState))), false);
-
-                TryPatch(typeof(Cursor), "visible", new HarmonyMethod(typeof(ForceUnlockCursor).GetMethod(nameof(Prefix_set_visible))), true);
-                //TryPatch(typeof(Cursor), "visible", new HarmonyMethod(typeof(ForceUnlockCursor).GetMethod(nameof(Postfix_get_visible))), false);
+                TryPatch("visible", new HarmonyMethod(typeof(ForceUnlockCursor).GetMethod(nameof(Prefix_set_visible))), true);
+                TryPatch("visible", new HarmonyMethod(typeof(ForceUnlockCursor).GetMethod(nameof(Postfix_get_visible))), false);
             }
             catch (Exception e)
             {
@@ -69,7 +58,7 @@ namespace ExplorerBeta.UI
             Unlock = true;
         }
 
-        private static void TryPatch(Type type, string property, HarmonyMethod patch, bool setter)
+        private static void TryPatch(string property, HarmonyMethod patch, bool setter)
         {
             try
             {
@@ -81,7 +70,7 @@ namespace ExplorerBeta.UI
 #endif
                 ;
 
-                var prop = type.GetProperty(property);
+                var prop = typeof(Cursor).GetProperty(property);
 
                 if (setter)
                 {
@@ -96,9 +85,15 @@ namespace ExplorerBeta.UI
             }
             catch (Exception e)
             {
-                string suf = setter ? "set_" : "get_";
-                ExplorerCore.Log($"Unable to patch {type.Name}.{suf}{property}: {e.Message}");
+                string s = setter ? "set_" : "get_" ;
+                ExplorerCore.Log($"Unable to patch Cursor.{s}{property}: {e.Message}");
             }
+        }
+
+        private static void SetForceUnlock(bool unlock)
+        {
+            m_forceUnlock = unlock;
+            UpdateCursorControl();
         }
 
         public static void Update()
@@ -130,45 +125,6 @@ namespace ExplorerBeta.UI
             catch (Exception e)
             {
                 ExplorerCore.Log($"Exception setting Cursor state: {e.GetType()}, {e.Message}");
-            }
-        }
-
-        // Event system
-
-        private static bool m_settingEventSystem;
-        private static EventSystem m_lastEventSystem;
-        private static BaseInputModule m_lastInputModule;
-
-        public static void SetEventSystem()
-        {
-            m_settingEventSystem = true;
-            UIManager.SetEventSystem();
-            m_settingEventSystem = false;
-        }
-
-        public static void ReleaseEventSystem()
-        {
-            if (m_lastEventSystem)
-            {
-                m_settingEventSystem = true;
-                EventSystem.current = m_lastEventSystem;
-                m_lastInputModule?.ActivateModule();
-                m_settingEventSystem = false;
-            }
-        }
-
-        [HarmonyPrefix]
-        public static void Prefix_EventSystem_set_current(ref EventSystem value)
-        {
-            if (!m_settingEventSystem)
-            {
-                m_lastEventSystem = value;
-                m_lastInputModule = value?.currentInputModule;
-
-                if (ExplorerCore.ShowMenu)
-                {
-                    value = UIManager.EventSys;
-                }
             }
         }
 
@@ -204,22 +160,22 @@ namespace ExplorerBeta.UI
             }
         }
 
-        //[HarmonyPrefix]
-        //public static void Postfix_get_lockState(ref CursorLockMode __result)
-        //{
-        //    if (ShouldForceMouse)
-        //    {
-        //        __result = m_lastLockMode;
-        //    }
-        //}
+        [HarmonyPrefix]
+        public static void Postfix_get_lockState(ref CursorLockMode __result)
+        {
+            if (ShouldForceMouse)
+            {
+                __result = m_lastLockMode;
+            }
+        }
 
-        //[HarmonyPrefix]
-        //public static void Postfix_get_visible(ref bool __result)
-        //{
-        //    if (ShouldForceMouse)
-        //    {
-        //        __result = m_lastVisibleState;
-        //    }
-        //}
+        [HarmonyPrefix]
+        public static void Postfix_get_visible(ref bool __result)
+        {
+            if (ShouldForceMouse)
+            {
+                __result = m_lastVisibleState;
+            }
+        }
     }
 }

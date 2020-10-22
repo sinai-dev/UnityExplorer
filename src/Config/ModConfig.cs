@@ -2,7 +2,7 @@
 using System.Xml.Serialization;
 using UnityEngine;
 
-namespace ExplorerBeta.Config
+namespace Explorer.Config
 {
     public class ModConfig
     {

@@ -1,84 +1,84 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Reflection;
-//using Explorer.UI;
-//using Explorer.Helpers;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Reflection;
+using Explorer.UI;
+using Explorer.Helpers;
 
-//namespace Explorer.CacheObject
-//{
-//    public class CacheProperty : CacheMember
-//    {
-//        public override bool IsStatic => (MemInfo as PropertyInfo).GetAccessors()[0].IsStatic;
+namespace Explorer.CacheObject
+{
+    public class CacheProperty : CacheMember
+    {
+        public override bool IsStatic => (MemInfo as PropertyInfo).GetAccessors()[0].IsStatic;
 
-//        public override void InitMember(MemberInfo member, object declaringInstance)
-//        {
-//            base.InitMember(member, declaringInstance);
+        public override void InitMember(MemberInfo member, object declaringInstance)
+        {
+            base.InitMember(member, declaringInstance);
 
-//            var pi = member as PropertyInfo;
+            var pi = member as PropertyInfo;
 
-//            this.m_arguments = pi.GetIndexParameters();
-//            this.m_argumentInput = new string[m_arguments.Length];
+            this.m_arguments = pi.GetIndexParameters();
+            this.m_argumentInput = new string[m_arguments.Length];
 
-//            base.Init(null, pi.PropertyType);
+            base.Init(null, pi.PropertyType);
 
-//            UpdateValue();
-//        }
+            UpdateValue();
+        }
 
-//        public override void UpdateValue()
-//        {
-//            if (HasParameters && !m_isEvaluating)
-//            {
-//                // Need to enter parameters first.
-//                return;
-//            }
+        public override void UpdateValue()
+        {
+            if (HasParameters && !m_isEvaluating)
+            {
+                // Need to enter parameters first.
+                return;
+            }
 
-//            if (IValue is InteractiveDictionary iDict)
-//            {
-//                if (!iDict.EnsureDictionaryIsSupported())
-//                {
-//                    ReflectionException = "Not supported due to TypeInitializationException";
-//                    return;
-//                }
-//            }
+            if (IValue is InteractiveDictionary iDict)
+            {
+                if (!iDict.EnsureDictionaryIsSupported())
+                {
+                    ReflectionException = "Not supported due to TypeInitializationException";
+                    return;
+                }
+            }
 
-//            try
-//            {
-//                var pi = MemInfo as PropertyInfo;
+            try
+            {
+                var pi = MemInfo as PropertyInfo;
 
-//                if (pi.CanRead)
-//                {
-//                    var target = pi.GetAccessors()[0].IsStatic ? null : DeclaringInstance;
+                if (pi.CanRead)
+                {
+                    var target = pi.GetAccessors()[0].IsStatic ? null : DeclaringInstance;
 
-//                    IValue.Value = pi.GetValue(target, ParseArguments());
+                    IValue.Value = pi.GetValue(target, ParseArguments());
 
-//                    base.UpdateValue();
-//                }
-//                else // create a dummy value for Write-Only properties.
-//                {
-//                    if (IValue.ValueType == typeof(string))
-//                    {
-//                        IValue.Value = "";
-//                    }
-//                    else
-//                    {
-//                        IValue.Value = Activator.CreateInstance(IValue.ValueType);
-//                    }
-//                }
-//            }
-//            catch (Exception e)
-//            {
-//                ReflectionException = ReflectionHelpers.ExceptionToString(e);
-//            }
-//        }
+                    base.UpdateValue();
+                }
+                else // create a dummy value for Write-Only properties.
+                {
+                    if (IValue.ValueType == typeof(string))
+                    {
+                        IValue.Value = "";
+                    }
+                    else
+                    {
+                        IValue.Value = Activator.CreateInstance(IValue.ValueType);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                ReflectionException = ReflectionHelpers.ExceptionToString(e);
+            }
+        }
 
-//        public override void SetValue()
-//        {
-//            var pi = MemInfo as PropertyInfo;
-//            var target = pi.GetAccessors()[0].IsStatic ? null : DeclaringInstance;
+        public override void SetValue()
+        {
+            var pi = MemInfo as PropertyInfo;
+            var target = pi.GetAccessors()[0].IsStatic ? null : DeclaringInstance;
 
-//            pi.SetValue(target, IValue.Value, ParseArguments());
-//        }
-//    }
-//}
+            pi.SetValue(target, IValue.Value, ParseArguments());
+        }
+    }
+}

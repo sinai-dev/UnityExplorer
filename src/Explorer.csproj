@@ -23,7 +23,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <Prefer32Bit>false</Prefer32Bit>
     <RootNamespace>Explorer</RootNamespace>
-    <AssemblyName>ExplorerBeta</AssemblyName>
+    <AssemblyName>Explorer</AssemblyName>
     <!-- Set this to the MelonLoader Il2Cpp Game folder, without the ending '\' character. -->
     <MLCppGameFolder>D:\Steam\steamapps\common\Hellpoint</MLCppGameFolder>
     <!-- Set this to the MelonLoader Mono Game folder, without the ending '\' character. -->
@@ -132,6 +132,10 @@
       <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
       <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.PhysicsModule.dll</HintPath>
       <Private>False</Private>
@@ -142,14 +146,6 @@
     </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.UI.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.UIModule">
-      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.UIModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -187,6 +183,10 @@
       <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
       <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.PhysicsModule.dll</HintPath>
       <Private>False</Private>
@@ -199,14 +199,6 @@
       <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.UIModule">
-      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.UIModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.IMGUIModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CacheObject\CacheEnumerated.cs" />
@@ -217,6 +209,20 @@
     <Compile Include="CacheObject\CacheProperty.cs" />
     <Compile Include="CacheObject\CacheObjectBase.cs" />
     <Compile Include="Helpers\Texture2DHelpers.cs" />
+    <Compile Include="UI\InteractiveValue\InteractiveValue.cs" />
+    <Compile Include="UI\InteractiveValue\Object\InteractiveDictionary.cs" />
+    <Compile Include="UI\InteractiveValue\Object\InteractiveEnumerable.cs" />
+    <Compile Include="UI\InteractiveValue\Object\InteractiveGameObject.cs" />
+    <Compile Include="UI\InteractiveValue\Object\InteractiveSprite.cs" />
+    <Compile Include="UI\InteractiveValue\Object\InteractiveTexture.cs" />
+    <Compile Include="UI\InteractiveValue\Object\InteractiveTexture2D.cs" />
+    <Compile Include="UI\InteractiveValue\Struct\InteractiveQuaternion.cs" />
+    <Compile Include="UI\InteractiveValue\Struct\InteractiveRect.cs" />
+    <Compile Include="UI\InteractiveValue\Struct\InteractiveVector.cs" />
+    <Compile Include="UI\InteractiveValue\Struct\InteractiveColor.cs" />
+    <Compile Include="UI\InteractiveValue\Struct\InteractiveEnum.cs" />
+    <Compile Include="UI\InteractiveValue\Struct\InteractiveFlags.cs" />
+    <Compile Include="UI\InteractiveValue\Struct\InteractivePrimitive.cs" />
     <Compile Include="Config\ModConfig.cs" />
     <Compile Include="ExplorerCore.cs" />
     <Compile Include="ExplorerBepInPlugin.cs" />
@@ -225,25 +231,50 @@
     <Compile Include="Extensions\UnityExtensions.cs" />
     <Compile Include="Helpers\ReflectionHelpers.cs" />
     <Compile Include="Helpers\UnityHelpers.cs" />
-    <Compile Include="UI\ForceUnlockCursor.cs" />
     <Compile Include="Input\IAbstractInput.cs" />
     <Compile Include="Tests\TestClass.cs" />
+    <Compile Include="UI\ForceUnlockCursor.cs" />
     <Compile Include="Input\InputManager.cs" />
     <Compile Include="Input\InputSystem.cs" />
     <Compile Include="Input\LegacyInput.cs" />
     <Compile Include="Input\NoInput.cs" />
-    <Compile Include="UI\Main\MainMenu.cs" />
-    <Compile Include="UI\Main\PanelDragger.cs" />
-    <Compile Include="UI\InteractiveValue\InteractiveValue.cs" />
+    <Compile Include="UI\Inspectors\InspectUnderMouse.cs" />
+    <Compile Include="UI\Inspectors\Reflection\InstanceInspector.cs" />
+    <Compile Include="UI\Inspectors\ReflectionInspector.cs" />
+    <Compile Include="UI\Inspectors\Reflection\StaticInspector.cs" />
+    <Compile Include="UI\MainMenu.cs" />
+    <Compile Include="UI\Main\ConsolePage.cs" />
+    <Compile Include="UI\Main\Console\AutoComplete.cs" />
+    <Compile Include="UI\Main\Console\ScriptInteraction.cs" />
+    <Compile Include="UI\Main\Console\ScriptEvaluator.cs" />
+    <Compile Include="UI\Main\OptionsPage.cs" />
+    <Compile Include="UI\Main\ScenePage.cs" />
+    <Compile Include="UI\Main\SearchPage.cs" />
+    <Compile Include="UI\Main\BaseMainMenuPage.cs" />
+    <Compile Include="UI\Shared\Buttons.cs" />
+    <Compile Include="UI\Shared\IExpandHeight.cs" />
+    <Compile Include="UI\Shared\PageHelper.cs" />
+    <Compile Include="UI\Shared\ResizeDrag.cs" />
     <Compile Include="UI\Shared\Syntax.cs" />
-    <Compile Include="UI\UIManager.cs" />
+    <Compile Include="UI\Shared\UIStyles.cs" />
+    <Compile Include="UI\Inspectors\GameObjectInspector.cs" />
+    <Compile Include="UI\TabViewWindow.cs" />
+    <Compile Include="UI\WindowBase.cs" />
+    <Compile Include="UI\WindowManager.cs" />
     <Compile Include="Unstrip\ImageConversion\ImageConversionUnstrip.cs" />
+    <Compile Include="Unstrip\IMGUI\GUIUtilityUnstrip.cs" />
+    <Compile Include="Unstrip\IMGUI\TextEditorUnstrip.cs" />
     <Compile Include="Helpers\ICallHelper.cs" />
     <Compile Include="Unstrip\LayerMask\LayerMaskUnstrip.cs" />
     <Compile Include="Unstrip\Resources\ResourcesUnstrip.cs" />
     <Compile Include="Unstrip\Scene\SceneUnstrip.cs" />
+    <Compile Include="Unstrip\IMGUI\GUIHelper.cs" />
+    <Compile Include="Unstrip\IMGUI\LayoutUtilityUnstrip.cs" />
+    <Compile Include="Unstrip\IMGUI\ScrollViewStateUnstrip.cs" />
+    <Compile Include="Unstrip\IMGUI\SliderHandlerUnstrip.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\UIFactory.cs" />
+    <Compile Include="Unstrip\IMGUI\GUIUnstrip.cs" />
+    <Compile Include="Unstrip\IMGUI\SliderStateUnstrip.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ILRepack.targets" />

@@ -4,15 +4,14 @@ using System;
 using UnityEngine;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using ExplorerBeta.UI.Shared;
-using ExplorerBeta.UI;
+using Explorer.UI.Shared;
 #if CPP
 using UnhollowerBaseLib;
 using UnityEngine.SceneManagement;
-using ExplorerBeta.Unstrip.ImageConversion;
+using Explorer.Unstrip.ImageConversion;
 #endif
 
-namespace ExplorerBeta.Tests
+namespace Explorer.Tests
 {
     public static class StaticTestClass
     {
@@ -41,7 +40,7 @@ namespace ExplorerBeta.Tests
         }
         private static bool m_setOnlyProperty;
 
-        public Texture2D TestTexture = UIManager.MakeSolidTexture(Color.white, 200, 200);
+        public Texture2D TestTexture = UIStyles.MakeTex(200, 200, Color.white);
         public static Sprite TestSprite;
 
         public static int StaticProperty => 5;

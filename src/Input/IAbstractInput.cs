@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace ExplorerBeta.Input
+namespace Explorer.Input
 {
     public interface IAbstractInput
     {

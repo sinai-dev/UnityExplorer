@@ -6,12 +6,12 @@ using System.Text;
 using UnhollowerBaseLib;
 using UnityEngine;
 using System.IO;
-using ExplorerBeta.Helpers;
+using Explorer.Helpers;
 using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace ExplorerBeta.Unstrip.ImageConversion
+namespace Explorer.Unstrip.ImageConversion
 {
     public static class ImageConversionUnstrip
     {

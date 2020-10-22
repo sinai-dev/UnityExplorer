@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using ExplorerBeta.Helpers;
+using Explorer.Helpers;
 using UnityEngine;
 #if CPP
 using UnhollowerBaseLib;
 #endif
 
-namespace ExplorerBeta.Unstrip.Resources
+namespace Explorer.Unstrip.Resources
 {
     public class ResourcesUnstrip
     {
