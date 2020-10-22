@@ -7,7 +7,7 @@ using System.Text;
 using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Explorer.Helpers
+namespace ExplorerBeta.Helpers
 {
     [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "External methods")]
     public static class ICallHelper

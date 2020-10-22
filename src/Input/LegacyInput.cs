@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using Explorer.Helpers;
+using ExplorerBeta.Helpers;
 
-namespace Explorer.Input
+namespace ExplorerBeta.Input
 {
     public class LegacyInput : IAbstractInput
     {

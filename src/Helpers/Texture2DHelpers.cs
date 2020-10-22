@@ -6,10 +6,10 @@ using UnityEngine;
 using System.IO;
 using System.Reflection;
 #if CPP
-using Explorer.Unstrip.ImageConversion;
+using ExplorerBeta.Unstrip.ImageConversion;
 #endif
 
-namespace Explorer.Helpers
+namespace ExplorerBeta.Helpers
 {
     public static class Texture2DHelpers
     {

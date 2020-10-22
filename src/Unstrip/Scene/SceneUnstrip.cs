@@ -3,12 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Explorer.Helpers;
+using ExplorerBeta.Helpers;
 using UnhollowerBaseLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Explorer.Unstrip.Scenes
+namespace ExplorerBeta.Unstrip.Scenes
 {
     public class SceneUnstrip
     {

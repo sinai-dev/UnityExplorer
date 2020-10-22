@@ -1,18 +1,17 @@
 ﻿using System.Collections;
 using System.Linq;
-using Explorer.Config;
-using Explorer.UI;
-using Explorer.UI.Inspectors;
-using Explorer.UI.Main;
-using Explorer.UI.Shared;
+using ExplorerBeta.Config;
+using ExplorerBeta.Input;
+using ExplorerBeta.UI;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-namespace Explorer
+namespace ExplorerBeta
 {
     public class ExplorerCore
     {
         public const string NAME    = "Explorer " + VERSION + " (" + PLATFORM + ", " + MODLOADER + ")";
-        public const string VERSION = "2.0.7";
+        public const string VERSION = "3.0.0b";
         public const string AUTHOR  = "Sinai";
         public const string GUID    = "com.sinai.explorer";
 
@@ -31,6 +30,16 @@ namespace Explorer
 
         public static ExplorerCore Instance { get; private set; }
 
+        public static bool ShowMenu
+        {
+            get => m_showMenu;
+            set => SetShowMenu(value);
+        }
+        public static bool m_showMenu;
+
+        private static bool m_doneUIInit;
+        private static float m_startupTime;
+
         public ExplorerCore()
         {
             if (Instance != null)
@@ -43,8 +52,9 @@ namespace Explorer
 
             ModConfig.OnLoad();
 
-            new MainMenu();
-            new WindowManager();
+            // Temporary? Need a small delay after OnApplicationStart before we can safely make our GameObject.
+            // Can't use Threads (crash), can't use Coroutine (no BepInEx support yet).
+            m_startupTime = Time.realtimeSinceStartup;
 
             InputManager.Init();
             ForceUnlockCursor.Init();
@@ -52,23 +62,40 @@ namespace Explorer
             ShowMenu = true;
 
             Log($"{NAME} initialized.");
-        }
-
-        public static bool ShowMenu
-        {
-            get => m_showMenu;
-            set => SetShowMenu(value);
-        }
-        public static bool m_showMenu;        
+        }      
 
         private static void SetShowMenu(bool show)
         {
             m_showMenu = show;
+           
+            if (UIManager.CanvasRoot)
+            {
+                UIManager.CanvasRoot.SetActive(show);
+
+                if (show)
+                {
+                    ForceUnlockCursor.SetEventSystem();
+                }
+                else
+                {
+                    ForceUnlockCursor.ReleaseEventSystem();
+                }
+            }
+
             ForceUnlockCursor.UpdateCursorControl();
         }
 
         public static void Update()
         {
+            // Temporary delay before UIManager.Init
+            if (!m_doneUIInit && Time.realtimeSinceStartup - m_startupTime > 1f)
+            {
+                UIManager.Init();
+
+                Log("Initialized Explorer UI.");
+                m_doneUIInit = true;
+            }
+
             if (InputManager.GetKeyDown(ModConfig.Instance.Main_Menu_Toggle))
             {
                 ShowMenu = !ShowMenu;
@@ -77,36 +104,17 @@ namespace Explorer
             if (ShowMenu)
             {
                 ForceUnlockCursor.Update();
-                InspectUnderMouse.Update();
 
-                MainMenu.Instance.Update();
-                WindowManager.Instance.Update();
+                UIManager.Update();
+
+                //// TODO:
+                //InspectUnderMouse.Update();
             }
-        }
-
-        public static void OnGUI()
-        {
-            if (!ShowMenu) return;
-
-            var origSkin = GUI.skin;
-            GUI.skin = UIStyles.WindowSkin;
-
-            MainMenu.Instance.OnGUI();
-            WindowManager.Instance.OnGUI();
-            InspectUnderMouse.OnGUI();
-
-            if (!ResizeDrag.IsMouseInResizeArea && WindowManager.IsMouseInWindow)
-            {
-                InputManager.ResetInputAxes();
-            }
-
-            GUI.skin = origSkin;
         }
 
         public static void OnSceneChange()
         {
-            ScenePage.Instance?.OnSceneChange();
-            SearchPage.Instance?.OnSceneChange();
+            UIManager.OnSceneChange();
         }
 
         public static void Log(object message)
