@@ -11,8 +11,6 @@ using UnityEngine.UI;
  
 namespace ExplorerBeta.UI
 {
-    // This class itself is fine.
-
     public static class UIManager
     {
         public static GameObject CanvasRoot { get; private set; }
