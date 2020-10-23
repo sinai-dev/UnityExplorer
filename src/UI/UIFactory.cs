@@ -55,9 +55,11 @@ namespace ExplorerBeta.UI
 		private static void SetDefaultColorTransitionValues(Selectable slider)
 		{
 			ColorBlock colors = slider.colors;
-			colors.highlightedColor = new Color(0.4f, 0.4f, 0.4f);
-			colors.pressedColor = new Color(0.05f, 0.05f, 0.05f);
+			colors.normalColor = new Color(0.3f, 0.3f, 0.3f);
+			colors.highlightedColor = new Color(0.45f, 0.45f, 0.45f);
+			colors.pressedColor = new Color(0.1f, 0.1f, 0.1f);
 			colors.disabledColor = new Color(0.7f, 0.7f, 0.7f);
+			slider.colors = colors;
 		}
 
 		private static void SetParentAndAlign(GameObject child, GameObject parent)
@@ -529,6 +531,12 @@ namespace ExplorerBeta.UI
 		public static GameObject CreateScrollView(GameObject parent, out GameObject content)
 		{
 			GameObject scrollObj = CreateUIObject("Scroll View", parent);
+
+			var mainLayout = scrollObj.AddComponent<LayoutElement>();
+			mainLayout.flexibleWidth = 999;
+			mainLayout.flexibleHeight = 999;
+			mainLayout.preferredHeight = 200;
+			mainLayout.preferredWidth = 200;
 
 			GameObject viewportObj = CreateUIObject("Viewport", scrollObj);
 

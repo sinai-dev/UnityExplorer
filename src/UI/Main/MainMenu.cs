@@ -65,7 +65,11 @@ namespace ExplorerBeta.UI.Main
             if (m_activePage == page || page == null)
                 return;
 
+            m_activePage?.Content?.SetActive(false);
+
             m_activePage = page;
+
+            m_activePage.Content?.SetActive(true);
 
             var button = page.RefNavbarButton;
 
@@ -87,16 +91,7 @@ namespace ExplorerBeta.UI.Main
 
         #region UI Interaction Callbacks
 
-        private void OnPressHide()
-        {
-            ExplorerCore.ShowMenu = false;
-        }
-
-        private void OnNavButtonPressed(BaseMenuPage page)
-        {
-            ExplorerCore.Log($"Pressed '{page.Name}'");
-            SetPage(page);
-        }
+        // ... none needed yet
 
         #endregion
 
@@ -159,7 +154,7 @@ namespace ExplorerBeta.UI.Main
             var hideBtnObj = UIFactory.CreateButton(titleBar);
 
             var hideBtn = hideBtnObj.GetComponent<Button>();
-            hideBtn.onClick.AddListener(new Action(OnPressHide));
+            hideBtn.onClick.AddListener(new Action(() => { ExplorerCore.ShowMenu = false; }));
             var colorBlock = hideBtn.colors;
             colorBlock.normalColor = new Color(65f/255f, 23f/255f, 23f/255f);
             colorBlock.pressedColor = new Color(35f/255f, 10f/255f, 10f/255f);
@@ -207,7 +202,7 @@ namespace ExplorerBeta.UI.Main
 
                 page.RefNavbarButton = btn;
 
-                btn.onClick.AddListener(new Action(() => { OnNavButtonPressed(page); }));
+                btn.onClick.AddListener(new Action(() => { SetPage(page); }));
 
                 var text = btnObj.GetComponentInChildren<Text>();
                 text.text = page.Name;

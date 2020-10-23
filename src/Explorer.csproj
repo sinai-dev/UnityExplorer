@@ -240,6 +240,7 @@
     <Compile Include="UI\Main\Pages\SearchPage.cs" />
     <Compile Include="UI\Main\PanelDragger.cs" />
     <Compile Include="UI\InteractiveValue\InteractiveValue.cs" />
+    <Compile Include="UI\Shared\PageHandler.cs" />
     <Compile Include="UI\Shared\Syntax.cs" />
     <Compile Include="UI\UIManager.cs" />
     <Compile Include="Unstrip\ImageConversion\ImageConversionUnstrip.cs" />
