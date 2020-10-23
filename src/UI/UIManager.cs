@@ -20,7 +20,7 @@ namespace ExplorerBeta.UI
         public static void Init()
         {
             var res = UIFactory.UIResources = new UIFactory.Resources();
-            var bg = CreateSprite(MakeSolidTexture(new Color(0.1f, 0.1f, 0.1f), 1, 1), new Rect(0, 0, 1, 1));
+            var bg = CreateSprite(MakeSolidTexture(new Color(0.16f, 0.16f, 0.16f), 1, 1));
             res.background = bg;
 
             // Create core UI Canvas and Event System handler
@@ -95,11 +95,15 @@ namespace ExplorerBeta.UI
             // todo
         }
 
-        public static Sprite CreateSprite(Texture2D tex, Rect size)
+        public static Sprite CreateSprite(Texture2D tex, Rect size = default)
         {
 #if CPP
             var pivot = Vector2.zero;
             var border = Vector4.zero;
+
+            if (size == default)
+                size = new Rect(0, 0, tex.width, tex.height);
+
             return Sprite.CreateSprite_Injected(tex, ref size, ref pivot, 100f, 0u, SpriteMeshType.Tight, ref border, false);
 #else
             return Sprite.Create(tex, size, Vector2.zero);

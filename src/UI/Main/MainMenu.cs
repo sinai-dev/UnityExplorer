@@ -10,14 +10,20 @@ using ExplorerBeta.UI.Shared;
 
 namespace ExplorerBeta.UI.Main
 {
-    // TODO REMAKE THIS
-
     public class MainMenu
     {
         public static MainMenu Instance { get; set; }
 
         public PanelDragger Dragger { get; private set; }
+
         public GameObject MainPanel { get; private set; }
+        public GameObject PageViewport { get; private set; }
+
+        // Navbar buttons
+        private Button m_lastNavButtonPressed;
+        private readonly Color m_navButtonNormal = new Color(65f/255f, 66f/255f, 66f/255f);
+        private readonly Color m_navButtonHighlight = new Color(50f/255f, 195f/255f, 50f/255f);
+        private readonly Color m_navButtonSelected = new Color(60f/255f, 120f/255f, 60f/255f);
 
         public MainMenu()
         {
@@ -29,150 +35,186 @@ namespace ExplorerBeta.UI.Main
 
             Instance = this;
 
-            MainPanel = CreateBasePanel("MainMenu");
-            CreateTitleBar();
-            CreateNavbar();
-            CreateViewArea();
+            ConstructMenu();
         }
 
         public void Update()
         {
-
+            // todo
         }
 
-        private void TestButtonCallback()
+        #region UI Interaction Callbacks
+
+        private void OnPressHide()
         {
-            //if (EventSystem.current != EventSys)
-            //    return;
+            ExplorerCore.ShowMenu = false;
+        }
 
-            var go = EventSystem.current.currentSelectedGameObject;
-            if (!go)
-                return;
+        private void OnNavButtonPressed(string pageName, Button button)
+        {
+            ExplorerCore.Log($"Pressed '{pageName}'");
 
-            var name = go.name;
-            if (go.GetComponentInChildren<Text>() is Text text)
+            var colors = button.colors;
+            colors.normalColor = m_navButtonSelected;
+            colors.selectedColor = m_navButtonSelected;
+            button.colors = colors;
+
+            if (m_lastNavButtonPressed && m_lastNavButtonPressed != button)
             {
-                name = text.text;
+                var oldColors = m_lastNavButtonPressed.colors;
+                oldColors.normalColor = m_navButtonNormal;
+                oldColors.selectedColor = m_navButtonNormal;
+                m_lastNavButtonPressed.colors = oldColors;
             }
-            ExplorerCore.Log($"{Time.time} | Pressed {name ?? "null"}");
 
-            if (name == "X")
+            m_lastNavButtonPressed = button;            
+        }
+
+        #endregion
+
+        #region UI Construction
+
+        private void ConstructMenu()
+        {
+            MainPanel = UIFactory.CreatePanel(UIManager.CanvasRoot, "MainMenu", out GameObject content);
+
+            var panelRect = MainPanel.GetComponent<RectTransform>();
+            panelRect.anchorMin = new Vector2(0.25f, 0.1f);
+            panelRect.anchorMax = new Vector2(0.75f, 0.95f);
+
+            ConstructTitleBar(content);
+
+            ConstructNavbar(content);
+
+            ConstructMainViewport(content);
+        }
+
+        private void ConstructTitleBar(GameObject content)
+        {
+            // Core title bar holder
+
+            var titleBar = UIFactory.CreateHorizontalGroup(content);
+
+            var titleGroup = titleBar.GetComponent<HorizontalLayoutGroup>();
+            titleGroup.childControlHeight = true;
+            titleGroup.childControlWidth = true;
+            titleGroup.childForceExpandHeight = true;
+            titleGroup.childForceExpandWidth = true;
+            titleGroup.padding.left = 15;
+            titleGroup.padding.right = 3;
+            titleGroup.padding.top = 3;
+            titleGroup.padding.bottom = 3;
+
+            var titleLayout = titleBar.AddComponent<LayoutElement>();
+            titleLayout.minHeight = 35;
+            titleLayout.flexibleHeight = 0;
+
+            // Explorer label
+
+            var textObj = UIFactory.CreateLabel(titleBar, TextAnchor.MiddleLeft);
+
+            var text = textObj.GetComponent<Text>();
+            text.text = $"<b>Explorer</b> <i>v{ExplorerCore.VERSION}</i>";
+            text.resizeTextForBestFit = true;
+            text.resizeTextMinSize = 12;
+            text.resizeTextMaxSize = 20;
+
+            var textLayout = textObj.AddComponent<LayoutElement>();
+            textLayout.flexibleWidth = 50;
+
+            // Add PanelDragger using the label object
+
+            Dragger = new PanelDragger(titleBar.GetComponent<RectTransform>(), MainPanel.GetComponent<RectTransform>());
+
+            // Hide button
+
+            var hideBtnObj = UIFactory.CreateButton(titleBar);
+
+            var hideBtn = hideBtnObj.GetComponent<Button>();
+            hideBtn.onClick = new Button.ButtonClickedEvent();
+            hideBtn.onClick.AddListener(new Action(OnPressHide));
+            var colorBlock = hideBtn.colors;
+            colorBlock.normalColor = new Color(65f/255f, 23f/255f, 23f/255f);
+            colorBlock.pressedColor = new Color(35f/255f, 10f/255f, 10f/255f);
+            colorBlock.highlightedColor = new Color(156f/255f, 0f, 0f);
+            hideBtn.colors = colorBlock;
+
+            var btnLayout = hideBtnObj.AddComponent<LayoutElement>();
+            btnLayout.minWidth = 90;
+            btnLayout.flexibleWidth = 2;
+
+            var hideText = hideBtnObj.GetComponentInChildren<Text>();
+            // Todo use actual keycode from mod config, update on OnSettingsChanged or whatever
+            hideText.text = "Hide (F7)";
+            hideText.color = Color.white;
+            hideText.resizeTextForBestFit = true;
+            hideText.resizeTextMinSize = 8;
+            hideText.resizeTextMaxSize = 16;
+        }
+
+        private void ConstructNavbar(GameObject content)
+        {
+            // Todo add pages programatically
+
+            var navbarObj = UIFactory.CreateHorizontalGroup(content);
+
+            var navGroup = navbarObj.GetComponent<HorizontalLayoutGroup>();
+            navGroup.padding.left = 3;
+            navGroup.padding.right = 3;
+            navGroup.padding.top = 3;
+            navGroup.padding.bottom = 3;
+            navGroup.spacing = 5;
+            navGroup.childControlHeight = true;
+            navGroup.childControlWidth = true;
+            navGroup.childForceExpandHeight = true;
+            navGroup.childForceExpandWidth = true;
+
+            var navLayout = navbarObj.AddComponent<LayoutElement>();
+            navLayout.minHeight = 35;
+            navLayout.flexibleHeight = 0;
+
+            // todo use page enum instead
+            var names = new string[] { "Home", "Search", "C# Console", "Options/Misc" };
+            for (int i = 0; i < 4; i++)
             {
-                ExplorerCore.ShowMenu = false;
-            }
-        }
+                var btnObj = UIFactory.CreateButton(navbarObj);
+                var btn = btnObj.GetComponent<Button>();
 
-        #region UI Generator
+                var name = names[i];
 
-        public virtual GameObject CreateBasePanel(string name)
-        {
-            var basePanel = UIFactory.CreatePanel(UIManager.CanvasRoot.gameObject, name);
-            var panelRect = basePanel.GetComponent<RectTransform>();
-            panelRect.anchorMin = new Vector2(0.327f, 0.0967f);
-            panelRect.anchorMax = new Vector2(0.672f, 0.904f);
-            panelRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 620f);
-            panelRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 800f);
+                btn.onClick.AddListener(new Action(() => { OnNavButtonPressed(name, btn); }));
 
-            return basePanel;
-        }
+                var text = btnObj.GetComponentInChildren<Text>();
+                text.text = name;
 
-        private void CreateTitleBar()
-        {
-            // Make the horizontal group for window title area
-            var titleGroup = UIFactory.CreateHorizontalGroup(MainPanel);
-            var titleRect = titleGroup.GetComponent<RectTransform>();
-            titleRect.anchorMin = new Vector2(0.005f, 0.96f);
-            titleRect.anchorMax = new Vector2(0.995f, 0.994f);
-            titleRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 613);
-            titleRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 30);
-
-            var group = titleGroup.GetComponent<HorizontalLayoutGroup>();
-            group.childControlWidth = true;
-            //group.childScaleWidth = true;
-            group.childForceExpandHeight = true;
-            group.childForceExpandWidth = true;
-
-            // Create window title
-            var titleLabel = UIFactory.CreateLabel(titleGroup, TextAnchor.MiddleCenter);
-            var labelText = titleLabel.GetComponent<Text>();
-            labelText.text = ExplorerCore.NAME;
-            labelText.fontSize = 15;
-            var labelRect = labelText.GetComponent<RectTransform>();
-            labelRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 575);
-            labelRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 25);
-
-            // Add drag handler (on Title label)
-            Dragger = new PanelDragger(titleLabel.transform.TryCast<RectTransform>(),
-                                        MainPanel.GetComponent<RectTransform>());
-
-            // Create X Button
-            var exitBtnObj = UIFactory.CreateButton(titleGroup);
-            var exitBtn = exitBtnObj.GetComponentInChildren<Button>();
-            exitBtn.onClick.AddListener(new Action(TestButtonCallback));
-            var exitBtnText = exitBtnObj.GetComponentInChildren<Text>();
-            exitBtnText.text = "X";
-            exitBtnText.fontSize = 14;
-            var exitBtnRect = exitBtnObj.GetComponent<RectTransform>();
-            exitBtnRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 40f);
-            exitBtnRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 25f);
-        }
-
-        private void CreateNavbar()
-        {
-            // Make the horizontal group for the nav bar
-            var navArea = UIFactory.CreateHorizontalGroup(MainPanel);
-            var group = navArea.GetComponent<HorizontalLayoutGroup>();
-            group.childAlignment = TextAnchor.MiddleLeft;
-            group.spacing = 5;
-            group.childForceExpandWidth = true;
-            group.childForceExpandHeight = true;
-            group.childControlWidth = true;
-            group.spacing = 5;
-
-            var padding = new RectOffset();
-            padding.left = 5;
-            padding.right = 5;
-            padding.top = 3;
-            padding.bottom = 3;
-            group.padding = padding;
-
-            var navRect = navArea.GetComponent<RectTransform>();
-            navRect.anchorMin = new Vector2(0.005f, 0.93f);
-            navRect.anchorMax = new Vector2(0.995f, 0.97f);
-            var pos = navRect.localPosition;
-            pos.y = 348;
-            navRect.localPosition = pos;
-            navRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 613);
-            navRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 30);
-
-            // Add the buttons for pages (this should be done programmatically)
-            var names = new string[] { "Scenes", "Search", "C# Console", "Options" };
-            for (int i = 0; i < names.Length; i++)
-            {
-                var btn = UIFactory.CreateButton(navArea);
-                var text = btn.GetComponentInChildren<Text>();
-                text.text = names[i];
-
-                btn.GetComponent<Button>().onClick.AddListener(new Action(TestButtonCallback));
-
+                // Set button colors
+                var colorBlock = btn.colors;
                 if (i == 0)
                 {
-                    var image = btn.GetComponentInChildren<Image>();
-                    image.color = new Color(0.1f, 0.35f, 0.1f);
+                    colorBlock.normalColor = m_navButtonSelected;
+                    m_lastNavButtonPressed = btn;
                 }
+                else
+                {
+                    colorBlock.normalColor = m_navButtonNormal;
+                }
+                colorBlock.selectedColor = colorBlock.normalColor;
+                colorBlock.highlightedColor = m_navButtonHighlight;
+                colorBlock.pressedColor = m_navButtonSelected;
+                btn.colors = colorBlock;
             }
         }
 
-        private void CreateViewArea()
+        private void ConstructMainViewport(GameObject content)
         {
-            // Make the vertical group for the viewport
-            var viewGroup = UIFactory.CreateVerticalGroup(MainPanel);
-            var viewRect = viewGroup.GetComponent<RectTransform>();
-            viewRect.anchorMin = new Vector2(0.005f, -0.038f);
-            viewRect.anchorMax = new Vector2(0.995f, 0.954f);
-            viewRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 613);
-            viewRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 720f);
-            viewRect.localPosition = new Vector3(0, -35f, 0);
+            var mainObj = UIFactory.CreateHorizontalGroup(content);
+            var mainGroup = mainObj.GetComponent<HorizontalLayoutGroup>();
+            mainGroup.childControlHeight = true;
+            mainGroup.childControlWidth = true;
+            mainGroup.childForceExpandHeight = true;
+            mainGroup.childForceExpandWidth = true;
+
+            PageViewport = mainObj;
         }
 
         #endregion

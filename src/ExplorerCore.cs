@@ -1,10 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Linq;
 using ExplorerBeta.Config;
 using ExplorerBeta.Input;
 using ExplorerBeta.UI;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace ExplorerBeta
 {

@@ -12,7 +12,7 @@ namespace ExplorerBeta.UI
 		private static Vector2 s_ThickElementSize = new Vector2(160f, 30f);
 		private static Vector2 s_ThinElementSize = new Vector2(160f, 20f);
 		//private static Vector2 s_ImageElementSize = new Vector2(100f, 100f);
-		private static Color s_DefaultSelectableColor = new Color(0.3f, 0.3f, 0.3f, 1f);
+		private static Color s_DefaultSelectableColor = new Color(1f, 1f, 1f, 1f);
 		private static Color s_PanelColor = new Color(0.1f, 0.1f, 0.1f, 1.0f);
 		private static Color s_TextColor = new Color(0.95f, 0.95f, 0.95f, 1f);
 
@@ -80,7 +80,7 @@ namespace ExplorerBeta.UI
 			}
 		}
 
-		public static GameObject CreatePanel(GameObject parent, string name)
+		public static GameObject CreatePanel(GameObject parent, string name, out GameObject content)
 		{
 			GameObject panelObj = CreateUIObject($"Panel_{name}", parent, s_ThickElementSize);
 
@@ -91,16 +91,43 @@ namespace ExplorerBeta.UI
 			rect.sizeDelta = Vector2.zero;
 
 			Image image = panelObj.AddComponent<Image>();
-			image.sprite = UIResources.background;
-			image.type = Image.Type.Sliced;
-			image.color = s_PanelColor;
+			image.type = Image.Type.Filled;
+			image.color = new Color(0.05f, 0.05f, 0.05f);
+
+			var group = panelObj.AddComponent<VerticalLayoutGroup>();
+			group.padding.left = 3;
+			group.padding.right = 3;
+			group.padding.bottom = 3;
+			group.padding.top = 3;
+			group.childControlHeight = true;
+			group.childControlWidth = true;
+			group.childForceExpandHeight = true;
+			group.childForceExpandWidth = true;
+
+			content = new GameObject("Content");
+			content.transform.parent = panelObj.transform;
+
+			Image image2 = content.AddComponent<Image>();
+			image2.type = Image.Type.Filled;
+			image2.color = new Color(0.1f, 0.1f, 0.1f);
+
+			var group2 = content.AddComponent<VerticalLayoutGroup>();
+			group2.padding.left = 5;
+			group2.padding.right = 5;
+			group2.padding.bottom = 5;
+			group2.padding.top = 5;
+			group2.spacing = 5;
+			group2.childControlHeight = true;
+			group2.childControlWidth = true;
+			group2.childForceExpandHeight = false;
+			group2.childForceExpandWidth = true;
 
 			return panelObj;
 		}
 
 		public static GameObject CreateVerticalGroup(GameObject parent, Color color = default)
 		{
-			var groupObj = CreateUIObject("HorizontalLayout", parent);
+			var groupObj = CreateUIObject("VerticalLayout", parent);
 
 			var horiGroup = groupObj.AddComponent<VerticalLayoutGroup>();
 			horiGroup.childAlignment = TextAnchor.UpperLeft;
@@ -233,14 +260,13 @@ namespace ExplorerBeta.UI
 			GameObject handleObj = CreateUIObject("Handle", slideAreaObj);
 
 			Image scrollImage = scrollObj.AddComponent<Image>();
-			scrollImage.sprite = UIResources.background;
 			scrollImage.type = Image.Type.Sliced;
-			scrollImage.color = s_DefaultSelectableColor;
+			scrollImage.color = new Color(0.1f, 0.1f, 0.1f);
 
 			Image handleImage = handleObj.AddComponent<Image>();
 			handleImage.sprite = UIResources.standard;
 			handleImage.type = Image.Type.Sliced;
-			handleImage.color = s_DefaultSelectableColor;
+			handleImage.color = new Color(0.4f, 0.4f, 0.4f);
 
 			RectTransform slideAreaRect = slideAreaObj.GetComponent<RectTransform>();
 			slideAreaRect.sizeDelta = new Vector2(-20f, -20f);
@@ -396,8 +422,8 @@ namespace ExplorerBeta.UI
 			templateImage.type = Image.Type.Sliced;
 
 			ScrollRect scrollRect = templateObj.AddComponent<ScrollRect>();
-            scrollRect.content = (RectTransform)contentObj.transform;
-			scrollRect.viewport = (RectTransform)viewportObj.transform;
+            scrollRect.content = contentObj.GetComponent<RectTransform>();
+			scrollRect.viewport = viewportObj.GetComponent<RectTransform>();
 			scrollRect.horizontal = false;
 			scrollRect.movementType = ScrollRect.MovementType.Clamped;
 			scrollRect.verticalScrollbar = scrollbar;
@@ -431,16 +457,16 @@ namespace ExplorerBeta.UI
 			{
 				text = "Option A"
 			});
-			//dropdown.options.Add(new Dropdown.OptionData
-			//{
-			//	text = "Option B"
-			//});
-			//dropdown.options.Add(new Dropdown.OptionData
-			//{
-			//	text = "Option C"
-			//});
+            dropdown.options.Add(new Dropdown.OptionData
+            {
+                text = "Option B"
+            });
+            dropdown.options.Add(new Dropdown.OptionData
+            {
+                text = "Option C"
+            });
 
-			dropdown.RefreshShownValue();
+            dropdown.RefreshShownValue();
 
 			RectTransform labelRect = labelObj.GetComponent<RectTransform>();
 			labelRect.anchorMin = Vector2.zero;
@@ -500,33 +526,50 @@ namespace ExplorerBeta.UI
 			return dropdownObj;
 		}
 
-		public static GameObject CreateScrollView(GameObject parent)
+		public static GameObject CreateScrollView(GameObject parent, out GameObject content)
 		{
-			GameObject scrollObj = CreateUIObject("Scroll View", parent, new Vector2(200f, 200f));
+			GameObject scrollObj = CreateUIObject("Scroll View", parent);
 
 			GameObject viewportObj = CreateUIObject("Viewport", scrollObj);
-			GameObject contentObj = CreateUIObject("Content", viewportObj);
+
+			var viewportGroup = viewportObj.AddComponent<VerticalLayoutGroup>();
+			viewportGroup.childControlHeight = true;
+			viewportGroup.childControlWidth = true;
+			viewportGroup.childForceExpandHeight = true;
+			viewportGroup.childForceExpandWidth = true;
+
+			content = CreateUIObject("Content", viewportObj);
+
+			var contentGroup = content.AddComponent<VerticalLayoutGroup>();
+			contentGroup.padding.left = 5;
+			contentGroup.padding.right = 5;
+			contentGroup.padding.top = 5;
+			contentGroup.padding.bottom = 5;
+			contentGroup.childControlHeight = false;
+			contentGroup.childControlWidth = true;
+			contentGroup.childForceExpandHeight = false;
+			contentGroup.childForceExpandWidth = true;
 
 			GameObject horiScroll = CreateScrollbar(scrollObj);
 			horiScroll.name = "Scrollbar Horizontal";
-			//SetParentAndAlign(scrollbarObj, scrollObj);
+			SetParentAndAlign(horiScroll, scrollObj);
 
-			RectTransform horiRect = horiScroll.GetComponent<RectTransform>();
-			horiRect.anchorMin = Vector2.zero;
-			horiRect.anchorMax = Vector2.right;
-			horiRect.pivot = Vector2.zero;
-			horiRect.sizeDelta = new Vector2(0f, horiRect.sizeDelta.y);
+            RectTransform horiRect = horiScroll.GetComponent<RectTransform>();
+            horiRect.anchorMin = Vector2.zero;
+            horiRect.anchorMax = Vector2.right;
+            horiRect.pivot = Vector2.zero;
+            horiRect.sizeDelta = new Vector2(0f, horiRect.sizeDelta.y);
 
-			GameObject vertScroll = CreateScrollbar(scrollObj);
+            GameObject vertScroll = CreateScrollbar(scrollObj);
 			vertScroll.name = "Scrollbar Vertical";
-			//SetParentAndAlign(vertScroll, scrollObj);
+			SetParentAndAlign(vertScroll, scrollObj);
 			vertScroll.GetComponent<Scrollbar>().SetDirection(Scrollbar.Direction.BottomToTop, true);
 
-			RectTransform vertRect = vertScroll.GetComponent<RectTransform>();
-			vertRect.anchorMin = Vector2.right;
-			vertRect.anchorMax = Vector2.one;
-			vertRect.pivot = Vector2.one;
-			vertRect.sizeDelta = new Vector2(vertRect.sizeDelta.x, 0f);
+            RectTransform vertRect = vertScroll.GetComponent<RectTransform>();
+            vertRect.anchorMin = Vector2.right;
+            vertRect.anchorMax = Vector2.one;
+            vertRect.pivot = Vector2.one;
+            vertRect.sizeDelta = new Vector2(vertRect.sizeDelta.x, 0f);
 
 			RectTransform viewportRect = viewportObj.GetComponent<RectTransform>();
 			viewportRect.anchorMin = Vector2.zero;
@@ -534,21 +577,21 @@ namespace ExplorerBeta.UI
 			viewportRect.sizeDelta = Vector2.zero;
 			viewportRect.pivot = Vector2.up;
 
-			RectTransform contentRect = contentObj.GetComponent<RectTransform>();
+			RectTransform contentRect = content.GetComponent<RectTransform>();
 			contentRect.anchorMin = Vector2.up;
 			contentRect.anchorMax = Vector2.one;
-			contentRect.sizeDelta = new Vector2(0f, 300f);
 			contentRect.pivot = Vector2.up;
 
 			ScrollRect scrollRect = scrollObj.AddComponent<ScrollRect>();
 			scrollRect.content = contentRect;
 			scrollRect.viewport = viewportRect;
 			scrollRect.horizontalScrollbar = horiScroll.GetComponent<Scrollbar>();
-			scrollRect.verticalScrollbar = vertScroll.GetComponent<Scrollbar>();
-			scrollRect.horizontalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
-			scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
-			scrollRect.horizontalScrollbarSpacing = -3f;
+            scrollRect.verticalScrollbar = vertScroll.GetComponent<Scrollbar>();
+            scrollRect.horizontalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
+            scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
+            scrollRect.horizontalScrollbarSpacing = -3f;
 			scrollRect.verticalScrollbarSpacing = -3f;
+			scrollRect.scrollSensitivity = 25;
 
 			Image scrollImage = scrollObj.AddComponent<Image>();
 			scrollImage.sprite = UIResources.background;

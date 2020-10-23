@@ -42,6 +42,7 @@ namespace ExplorerBeta.UI
         {
             var rawMousePos = InputManager.MousePosition;
 
+            ResizeTypes type;
             var resizePos = Panel.InverseTransformPoint(rawMousePos);
             var dragPos = DragableArea.InverseTransformPoint(rawMousePos);
 
@@ -60,8 +61,9 @@ namespace ExplorerBeta.UI
                 }
                 else if (MouseInResizeArea(resizePos))
                 {
-                    var type = GetResizeType(resizePos);
-                    OnBeginResize(type);
+                    type = GetResizeType(resizePos);
+                    if (type != ResizeTypes.NONE)
+                        OnBeginResize(type);
                 }
             }
             // If mouse still pressed from last frame
@@ -87,9 +89,8 @@ namespace ExplorerBeta.UI
                 {
                     OnEndResize();
                 }
-                else if (MouseInResizeArea(resizePos))
+                else if (MouseInResizeArea(resizePos) && (type = GetResizeType(resizePos)) != ResizeTypes.NONE)
                 {
-                    var type = GetResizeType(resizePos);
                     OnHoverResize(type);
                 }
                 else if (WasHoveringResize)
@@ -145,7 +146,7 @@ namespace ExplorerBeta.UI
         private ResizeTypes m_lastResizeHoverType;
         private GameObject m_resizeCursorImage;
 
-        private Rect m_cachedOuterResize;
+        private Rect m_resizeRect;
 
         private readonly Dictionary<ResizeTypes, Rect> m_resizeMask = new Dictionary<ResizeTypes, Rect>
         {
@@ -179,47 +180,26 @@ namespace ExplorerBeta.UI
             // to give a bit of buffer and make it easier to use.
 
             // outer rect is the outer-most bounds of our resize area
-            var outer = new Rect();
-            outer.x = Panel.rect.x - halfThick;
-            outer.y = Panel.rect.y - halfThick;
-            outer.width = Panel.rect.width + dblThick;
-            outer.height = Panel.rect.height + dblThick;
-            m_cachedOuterResize = outer;
+            var outer = new Rect(Panel.rect.x - halfThick, 
+                Panel.rect.y - halfThick, 
+                Panel.rect.width + dblThick, 
+                Panel.rect.height + dblThick);
+            m_resizeRect = outer;
 
             // calculate the four cross sections to use as flags
 
-            var bottom = new Rect();
-            bottom.x = outer.x;
-            bottom.y = outer.y;
-            bottom.width = outer.width;
-            bottom.height = RESIZE_THICKNESS;
-            m_resizeMask[ResizeTypes.Bottom] = bottom;
+            m_resizeMask[ResizeTypes.Bottom] = new Rect(outer.x, outer.y, outer.width, RESIZE_THICKNESS);
 
-            var left = new Rect();
-            left.x = outer.x;
-            left.y = outer.y;
-            left.width = RESIZE_THICKNESS;
-            left.height = outer.height;
-            m_resizeMask[ResizeTypes.Left] = left;
+            m_resizeMask[ResizeTypes.Left] = new Rect(outer.x, outer.y, RESIZE_THICKNESS, outer.height);
 
-            var top = new Rect();
-            top.x = outer.x;
-            top.y = outer.y + Panel.rect.height;
-            top.width = outer.width;
-            top.height = RESIZE_THICKNESS;
-            m_resizeMask[ResizeTypes.Top] = top;
+            m_resizeMask[ResizeTypes.Top] = new Rect(outer.x, outer.y + Panel.rect.height, outer.width, RESIZE_THICKNESS);
 
-            var right = new Rect();
-            right.x = outer.x + Panel.rect.width;
-            right.y = outer.y;
-            right.width = RESIZE_THICKNESS;
-            right.height = outer.height;
-            m_resizeMask[ResizeTypes.Right] = right;
+            m_resizeMask[ResizeTypes.Right] = new Rect(outer.x + Panel.rect.width, outer.y, RESIZE_THICKNESS, outer.height);
         }
 
         private bool MouseInResizeArea(Vector2 mousePos)
         {
-            return m_cachedOuterResize.Contains(mousePos) && GetResizeType(mousePos) != ResizeTypes.NONE;
+            return m_resizeRect.Contains(mousePos);
         }
 
         private ResizeTypes GetResizeType(Vector2 mousePos)
@@ -283,13 +263,7 @@ namespace ExplorerBeta.UI
             if (!m_resizeCursorImage)
                 return;
 
-            var t =
-#if CPP
-                UIManager.CanvasRoot.transform.TryCast<RectTransform>();
-#else
-                UIManager.CanvasRoot.transform as RectTransform;
-#endif
-
+            var t = UIManager.CanvasRoot.GetComponent<RectTransform>();
             m_resizeCursorImage.transform.localPosition = t.InverseTransformPoint(InputManager.MousePosition);
         }
 
@@ -357,10 +331,7 @@ namespace ExplorerBeta.UI
             tex.LoadImage(data, false);
             UnityEngine.Object.DontDestroyOnLoad(tex);
 
-            var size = new Rect();
-            size.width = 32;
-            size.height = 32;
-            var sprite = UIManager.CreateSprite(tex, size);
+            var sprite = UIManager.CreateSprite(tex);
             UnityEngine.Object.DontDestroyOnLoad(sprite);
 
             m_resizeCursorImage = new GameObject("ResizeCursorImage");
