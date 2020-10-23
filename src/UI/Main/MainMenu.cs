@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using ExplorerBeta.UI.Shared;
+using Explorer.UI.Main.Pages;
 
 namespace ExplorerBeta.UI.Main
 {
@@ -18,6 +19,9 @@ namespace ExplorerBeta.UI.Main
 
         public GameObject MainPanel { get; private set; }
         public GameObject PageViewport { get; private set; }
+
+        public readonly List<BaseMenuPage> Pages = new List<BaseMenuPage>();
+        private BaseMenuPage m_activePage;
 
         // Navbar buttons
         private Button m_lastNavButtonPressed;
@@ -35,7 +39,19 @@ namespace ExplorerBeta.UI.Main
 
             Instance = this;
 
+            Pages.Add(new HomePage());
+            Pages.Add(new SearchPage());
+            Pages.Add(new ConsolePage());
+            Pages.Add(new OptionsPage());
+
             ConstructMenu();
+
+            foreach (var page in Pages)
+            {
+                page.Init();
+            }
+
+            SetPage(Pages[0]);
         }
 
         public void Update()
@@ -43,16 +59,15 @@ namespace ExplorerBeta.UI.Main
             // todo
         }
 
-        #region UI Interaction Callbacks
-
-        private void OnPressHide()
+        // todo
+        private void SetPage(BaseMenuPage page)
         {
-            ExplorerCore.ShowMenu = false;
-        }
+            if (m_activePage == page || page == null)
+                return;
 
-        private void OnNavButtonPressed(string pageName, Button button)
-        {
-            ExplorerCore.Log($"Pressed '{pageName}'");
+            m_activePage = page;
+
+            var button = page.RefNavbarButton;
 
             var colors = button.colors;
             colors.normalColor = m_navButtonSelected;
@@ -67,7 +82,20 @@ namespace ExplorerBeta.UI.Main
                 m_lastNavButtonPressed.colors = oldColors;
             }
 
-            m_lastNavButtonPressed = button;            
+            m_lastNavButtonPressed = button;
+        }
+
+        #region UI Interaction Callbacks
+
+        private void OnPressHide()
+        {
+            ExplorerCore.ShowMenu = false;
+        }
+
+        private void OnNavButtonPressed(BaseMenuPage page)
+        {
+            ExplorerCore.Log($"Pressed '{page.Name}'");
+            SetPage(page);
         }
 
         #endregion
@@ -131,7 +159,6 @@ namespace ExplorerBeta.UI.Main
             var hideBtnObj = UIFactory.CreateButton(titleBar);
 
             var hideBtn = hideBtnObj.GetComponent<Button>();
-            hideBtn.onClick = new Button.ButtonClickedEvent();
             hideBtn.onClick.AddListener(new Action(OnPressHide));
             var colorBlock = hideBtn.colors;
             colorBlock.normalColor = new Color(65f/255f, 23f/255f, 23f/255f);
@@ -173,31 +200,21 @@ namespace ExplorerBeta.UI.Main
             navLayout.minHeight = 35;
             navLayout.flexibleHeight = 0;
 
-            // todo use page enum instead
-            var names = new string[] { "Home", "Search", "C# Console", "Options/Misc" };
-            for (int i = 0; i < 4; i++)
+            foreach (var page in Pages)
             {
                 var btnObj = UIFactory.CreateButton(navbarObj);
                 var btn = btnObj.GetComponent<Button>();
 
-                var name = names[i];
+                page.RefNavbarButton = btn;
 
-                btn.onClick.AddListener(new Action(() => { OnNavButtonPressed(name, btn); }));
+                btn.onClick.AddListener(new Action(() => { OnNavButtonPressed(page); }));
 
                 var text = btnObj.GetComponentInChildren<Text>();
-                text.text = name;
+                text.text = page.Name;
 
                 // Set button colors
                 var colorBlock = btn.colors;
-                if (i == 0)
-                {
-                    colorBlock.normalColor = m_navButtonSelected;
-                    m_lastNavButtonPressed = btn;
-                }
-                else
-                {
-                    colorBlock.normalColor = m_navButtonNormal;
-                }
+                colorBlock.normalColor = m_navButtonNormal;
                 colorBlock.selectedColor = colorBlock.normalColor;
                 colorBlock.highlightedColor = m_navButtonHighlight;
                 colorBlock.pressedColor = m_navButtonSelected;

@@ -233,6 +233,11 @@
     <Compile Include="Input\LegacyInput.cs" />
     <Compile Include="Input\NoInput.cs" />
     <Compile Include="UI\Main\MainMenu.cs" />
+    <Compile Include="UI\Main\Pages\BaseMenuPage.cs" />
+    <Compile Include="UI\Main\Pages\ConsolePage.cs" />
+    <Compile Include="UI\Main\Pages\HomePage.cs" />
+    <Compile Include="UI\Main\Pages\OptionsPage.cs" />
+    <Compile Include="UI\Main\Pages\SearchPage.cs" />
     <Compile Include="UI\Main\PanelDragger.cs" />
     <Compile Include="UI\InteractiveValue\InteractiveValue.cs" />
     <Compile Include="UI\Shared\Syntax.cs" />

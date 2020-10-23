@@ -38,7 +38,7 @@ namespace ExplorerBeta
         public static bool m_showMenu;
 
         private static bool m_doneUIInit;
-        private static float m_startupTime;
+        private static float m_timeSinceStartup;
 
         public ExplorerCore()
         {
@@ -51,10 +51,6 @@ namespace ExplorerBeta
             Instance = this;
 
             ModConfig.OnLoad();
-
-            // Temporary? Need a small delay after OnApplicationStart before we can safely make our GameObject.
-            // Can't use Threads (crash), can't use Coroutine (no BepInEx support yet).
-            m_startupTime = Time.realtimeSinceStartup;
 
             InputManager.Init();
             ForceUnlockCursor.Init();
@@ -88,12 +84,17 @@ namespace ExplorerBeta
         public static void Update()
         {
             // Temporary delay before UIManager.Init
-            if (!m_doneUIInit && Time.realtimeSinceStartup - m_startupTime > 1f)
+            if (!m_doneUIInit)
             {
-                UIManager.Init();
+                m_timeSinceStartup += Time.deltaTime;
 
-                Log("Initialized Explorer UI.");
-                m_doneUIInit = true;
+                if (m_timeSinceStartup > 1f)
+                {
+                    UIManager.Init();
+
+                    Log("Initialized Explorer UI.");
+                    m_doneUIInit = true;
+                }
             }
 
             if (InputManager.GetKeyDown(ModConfig.Instance.Main_Menu_Toggle))
