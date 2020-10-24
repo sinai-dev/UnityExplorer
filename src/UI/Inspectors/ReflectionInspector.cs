@@ -99,19 +99,19 @@ namespace Explorer.UI.Inspectors
             if (m_typeFilter != MemberTypes.All && m_typeFilter != holder.MemInfo?.MemberType)
                 return false;
 
-            // check scope filter
-            if (m_scopeFilter == MemberScopes.Instance)
-            {
-                return !holder.IsStatic;
-            }
-            else if (m_scopeFilter == MemberScopes.Static)
-            {
-                return holder.IsStatic;
-            }
-
             // hide failed reflection
             if (!string.IsNullOrEmpty(holder.ReflectionException) && m_hideFailedReflection)
                 return false;
+
+            // check scope filter
+            if (m_scopeFilter == MemberScopes.Instance && holder.IsStatic)
+            {
+                return false;
+            }
+            else if (m_scopeFilter == MemberScopes.Static && !holder.IsStatic)
+            {
+                return false;
+            }
 
             // see if we should do name search
             if (m_search == "" || holder.MemInfo == null)
@@ -141,22 +141,6 @@ namespace Explorer.UI.Inspectors
                     continue;
                 }
 
-                object target = Target;
-                string exception = null;
-
-#if CPP
-                if (!IsStaticInspector && target is Il2CppSystem.Object ilObject)
-                {
-                    try
-                    {
-                        target = ilObject.Il2CppCast(declaringType);
-                    }
-                    catch (Exception e)
-                    {
-                        exception = ReflectionHelpers.ExceptionToString(e);
-                    }
-                }
-#endif
                 foreach (var member in infos)
                 {
                     try
@@ -211,17 +195,12 @@ namespace Explorer.UI.Inspectors
 
                         try
                         {
-                            var cached = CacheFactory.GetCacheObject(member, target);
+                            var cached = CacheFactory.GetCacheObject(member, Target);
 
                             if (cached != null)
                             {
                                 cachedSigs.Add(sig);
                                 list.Add(cached);
-
-                                if (string.IsNullOrEmpty(cached.ReflectionException))
-                                {
-                                    cached.ReflectionException = exception;
-                                }
                             }
                         }
                         catch (Exception e)

@@ -2,6 +2,7 @@
 using UnityEngine;
 using Explorer.Config;
 using Explorer.UI.Inspectors;
+using Explorer.Helpers;
 
 namespace Explorer.UI
 {
@@ -26,7 +27,15 @@ namespace Explorer.UI
         {
             var window = Activator.CreateInstance<T>();
 
+#if CPP
+            if (target is Il2CppSystem.Object ilObject)
+            {
+                target = ilObject.Il2CppCast(ReflectionHelpers.GetActualType(ilObject));
+            }
+#endif
+
             window.Target = target;
+
             window.windowID = WindowManager.NextWindowID();
             window.m_rect = WindowManager.GetNewWindowRect();
 

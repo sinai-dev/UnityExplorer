@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using Explorer.Helpers;
+using BF = System.Reflection.BindingFlags;
 #if ML
 using Harmony;
 #else
@@ -40,8 +41,17 @@ namespace Explorer.UI
                 }
 
                 // Get current cursor state and enable cursor
-                m_lastLockMode = Cursor.lockState;
-                m_lastVisibleState = Cursor.visible;
+                try
+                {
+                    //m_lastLockMode = Cursor.lockState;
+                    m_lastLockMode = (CursorLockMode?)typeof(Cursor).GetProperty("lockState", BF.Public | BF.Static)?.GetValue(null, null)
+                                     ?? CursorLockMode.None;
+
+                    //m_lastVisibleState = Cursor.visible;
+                    m_lastVisibleState = (bool?)typeof(Cursor).GetProperty("visible", BF.Public | BF.Static)?.GetValue(null, null) 
+                                         ?? false;
+                }
+                catch { }
 
                 // Setup Harmony Patches
                 TryPatch("lockState", new HarmonyMethod(typeof(ForceUnlockCursor).GetMethod(nameof(Prefix_set_lockState))), true);
