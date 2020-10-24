@@ -4,6 +4,7 @@ using System.Linq;
 using ExplorerBeta.Config;
 using ExplorerBeta.Input;
 using ExplorerBeta.UI;
+using ExplorerBeta.UI.Main;
 using UnityEngine;
 
 namespace ExplorerBeta
@@ -58,7 +59,7 @@ namespace ExplorerBeta
             ShowMenu = true;
 
             Log($"{NAME} initialized.");
-        }      
+        }
 
         private static void SetShowMenu(bool show)
         {
@@ -96,6 +97,10 @@ namespace ExplorerBeta
                     m_doneUIInit = true;
                 }
             }
+            else
+            {
+                UIManager.Update();
+            }
 
             if (InputManager.GetKeyDown(ModConfig.Instance.Main_Menu_Toggle))
             {
@@ -105,11 +110,7 @@ namespace ExplorerBeta
             if (ShowMenu)
             {
                 ForceUnlockCursor.Update();
-
                 UIManager.Update();
-
-                //// TODO:
-                //InspectUnderMouse.Update();
             }
         }
 
@@ -120,6 +121,7 @@ namespace ExplorerBeta
 
         public static void Log(object message)
         {
+            DebugConsole.Log(message?.ToString());
 #if ML
             MelonLoader.MelonLogger.Log(message?.ToString());
 #else
@@ -129,6 +131,7 @@ namespace ExplorerBeta
 
         public static void LogWarning(object message)
         {
+            DebugConsole.Log(message?.ToString(), "FFFF00");
 #if ML
             MelonLoader.MelonLogger.LogWarning(message?.ToString());
 #else
@@ -138,6 +141,7 @@ namespace ExplorerBeta
 
         public static void LogError(object message)
         {
+            DebugConsole.Log(message?.ToString(), "FF0000");
 #if ML
             MelonLoader.MelonLogger.LogError(message?.ToString());
 #else

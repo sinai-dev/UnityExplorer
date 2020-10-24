@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace ExplorerBeta.UI
 {
-    public static class UIFactory
+	public static class UIFactory
 	{
 		private static Vector2 s_ThickElementSize = new Vector2(160f, 30f);
 		private static Vector2 s_ThinElementSize = new Vector2(160f, 20f);
@@ -35,7 +36,7 @@ namespace ExplorerBeta.UI
 
 			var rect = obj.AddComponent<RectTransform>();
 			if (size != default)
-            {
+			{
 				rect.sizeDelta = size;
 			}
 
@@ -72,7 +73,7 @@ namespace ExplorerBeta.UI
 			SetLayerRecursively(child);
 		}
 
-		private static void SetLayerRecursively(GameObject go)
+		public static void SetLayerRecursively(GameObject go)
 		{
 			go.layer = 5;
 			Transform transform = go.transform;
@@ -145,7 +146,7 @@ namespace ExplorerBeta.UI
 		}
 
 		public static GameObject CreateHorizontalGroup(GameObject parent, Color color = default)
-        {
+		{
 			var groupObj = CreateUIObject("HorizontalLayout", parent);
 
 			var horiGroup = groupObj.AddComponent<HorizontalLayoutGroup>();
@@ -162,15 +163,16 @@ namespace ExplorerBeta.UI
 		}
 
 		public static GameObject CreateLabel(GameObject parent, TextAnchor alignment)
-        {
+		{
 			GameObject labelObj = CreateUIObject("Label", parent, s_ThinElementSize);
 
 			var text = labelObj.AddComponent<Text>();
 			SetDefaultTextValues(text);
 			text.alignment = alignment;
+			text.supportRichText = true;
 
 			return labelObj;
-        }
+		}
 
 		public static GameObject CreateButton(GameObject parent)
 		{
@@ -331,6 +333,86 @@ namespace ExplorerBeta.UI
 			labelRect.offsetMin = new Vector2(23f, 1f);
 			labelRect.offsetMax = new Vector2(-5f, -2f);
 			return toggleObj;
+		}
+
+		public static GameObject CreateTMPInput(GameObject parent)
+        {
+			GameObject mainObj = CreateUIObject("InputField (TMP)", parent);
+
+			Image mainImage = mainObj.AddComponent<Image>();
+			mainImage.type = Image.Type.Sliced;
+			mainImage.color = new Color(38f / 255f, 38f / 255f, 38f / 255f, 1.0f);
+
+			var mainInput = mainObj.AddComponent<TMP_InputField>();
+			mainInput.navigation.mode = Navigation.Mode.None;
+			mainInput.richText = true;
+			mainInput.isRichTextEditingAllowed = true;
+			mainInput.lineType = TMP_InputField.LineType.MultiLineNewline;
+			mainInput.interactable = true;
+			mainInput.transition = Selectable.Transition.ColorTint;
+			mainInput.onFocusSelectAll = false;
+
+			var mainColors = mainInput.colors;
+			mainColors.normalColor = new Color(1, 1, 1, 1);
+			mainColors.highlightedColor = new Color(245f / 255f, 245f / 255f, 245f / 255f, 1.0f);
+			mainColors.pressedColor = new Color(200f / 255f, 200f / 255f, 200f / 255f, 1.0f);
+			mainColors.highlightedColor = new Color(245f / 255f, 245f / 255f, 245f / 255f, 1.0f);
+			mainInput.colors = mainColors;
+
+            var mainGroup = mainObj.AddComponent<VerticalLayoutGroup>();
+            mainGroup.childControlHeight = true;
+            mainGroup.childControlWidth = true;
+            mainGroup.childForceExpandWidth = true;
+            mainGroup.childForceExpandHeight = true;
+
+            var textArea = CreateUIObject("Text Area", mainObj);
+            textArea.AddComponent<RectMask2D>();
+
+            var textAreaRect = textArea.GetComponent<RectTransform>();
+            textAreaRect.anchorMin = new Vector2(0, 0);
+            textAreaRect.anchorMax = new Vector2(1, 1);
+			textAreaRect.offsetMin = new Vector2(10, 7);
+			textAreaRect.offsetMax = new Vector2(10, 6);
+
+            mainInput.textViewport = textArea.GetComponent<RectTransform>();
+
+			var placeHolderObj = CreateUIObject("Placeholder", textArea);
+			var placeholderText = placeHolderObj.AddComponent<TextMeshProUGUI>();
+			placeholderText.fontSize = 16;
+			placeholderText.text = "Nothing logged yet...";
+			placeholderText.color = new Color(0.5f, 0.5f, 0.5f, 1.0f);
+
+            var placeHolderRect = placeHolderObj.GetComponent<RectTransform>();
+            placeHolderRect.anchorMin = Vector2.zero;
+			placeHolderRect.anchorMax = Vector2.one;
+			placeHolderRect.offsetMin = Vector2.zero;
+            placeHolderRect.offsetMax = Vector2.zero;
+
+			var placeholderLayout = placeHolderObj.AddComponent<LayoutElement>();
+			placeholderLayout.preferredWidth = 990;
+			placeholderLayout.flexibleWidth = 500;
+
+			mainInput.placeholder = placeholderText;
+
+			var inputTextObj = CreateUIObject("Text", textArea);
+			var inputText = inputTextObj.AddComponent<TextMeshProUGUI>();
+			inputText.fontSize = 16;
+			inputText.text = "";
+			inputText.color = new Color(1f, 1f, 1f, 1f);
+
+            var inputTextRect = inputTextObj.GetComponent<RectTransform>();
+			inputTextRect.anchorMin = Vector2.zero;
+			inputTextRect.anchorMax = Vector2.one;
+			inputTextRect.offsetMin = Vector2.zero;
+			inputTextRect.offsetMax = Vector2.zero;
+
+			var test = inputTextObj.AddComponent<LayoutElement>();
+			test.preferredWidth = 990;
+			test.flexibleWidth = 500;
+
+			mainInput.textComponent = inputText;
+
+			return mainObj;
 		}
 
 		public static GameObject CreateInputField(GameObject parent)
@@ -528,7 +610,7 @@ namespace ExplorerBeta.UI
 			return dropdownObj;
 		}
 
-		public static GameObject CreateScrollView(GameObject parent, out GameObject content)
+		public static GameObject CreateScrollView(GameObject parent, out GameObject content, Color color = default)
 		{
 			GameObject scrollObj = CreateUIObject("Scroll View", parent);
 
@@ -602,14 +684,17 @@ namespace ExplorerBeta.UI
 			scrollRect.scrollSensitivity = 25;
 
 			Image scrollImage = scrollObj.AddComponent<Image>();
-			scrollImage.sprite = UIResources.background;
-			scrollImage.type = Image.Type.Sliced;
-			scrollImage.color = s_PanelColor;
-			viewportObj.AddComponent<Mask>().showMaskGraphic = false;
+			scrollImage.type = Image.Type.Filled;
+
+			scrollImage.color = (color == default) ? new Color(0.3f, 0.3f, 0.3f, 1f) : color;
 
 			Image viewportImage = viewportObj.AddComponent<Image>();
 			viewportImage.sprite = UIResources.mask;
 			viewportImage.type = Image.Type.Sliced;
+			viewportImage.color = new Color(1, 1, 1, 1);
+
+			var mask = viewportObj.AddComponent<Mask>();
+			mask.showMaskGraphic = false;
 
 			return scrollObj;
 		}

@@ -4,6 +4,7 @@ using ExplorerBeta.Helpers;
 using UnityEngine.EventSystems;
 using ExplorerBeta.UI;
 using ExplorerBeta.Input;
+using BF = System.Reflection.BindingFlags;
 #if ML
 using Harmony;
 #else
@@ -49,8 +50,17 @@ namespace ExplorerBeta.UI
                 }
 
                 // Get current cursor state and enable cursor
-                m_lastLockMode = Cursor.lockState;
-                m_lastVisibleState = Cursor.visible;
+                try
+                {
+                    //m_lastLockMode = Cursor.lockState;
+                    m_lastLockMode = (CursorLockMode?)typeof(Cursor).GetProperty("lockState", BF.Public | BF.Static)?.GetValue(null, null)
+                                     ?? CursorLockMode.None;
+
+                    //m_lastVisibleState = Cursor.visible;
+                    m_lastVisibleState = (bool?)typeof(Cursor).GetProperty("visible", BF.Public | BF.Static)?.GetValue(null, null)
+                                         ?? false;
+                }
+                catch { }
 
                 // Setup Harmony Patches
                 TryPatch(typeof(EventSystem), "current", new HarmonyMethod(typeof(ForceUnlockCursor).GetMethod(nameof(Prefix_EventSystem_set_current))), true);

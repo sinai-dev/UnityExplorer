@@ -28,6 +28,12 @@ namespace ExplorerBeta.UI
 
             // Create submodules
             new MainMenu();
+
+            // Force refresh of anchors (?)
+            Canvas.ForceUpdateCanvases();
+
+            CanvasRoot.SetActive(false);
+            CanvasRoot.SetActive(true);
         }
 
         public static void SetEventSystem()

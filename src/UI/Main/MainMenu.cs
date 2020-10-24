@@ -75,14 +75,14 @@ namespace ExplorerBeta.UI.Main
 
             var colors = button.colors;
             colors.normalColor = m_navButtonSelected;
-            colors.selectedColor = m_navButtonSelected;
+            //try { colors.selectedColor = m_navButtonSelected; } catch { }
             button.colors = colors;
 
             if (m_lastNavButtonPressed && m_lastNavButtonPressed != button)
             {
                 var oldColors = m_lastNavButtonPressed.colors;
                 oldColors.normalColor = m_navButtonNormal;
-                oldColors.selectedColor = m_navButtonNormal;
+                //try { oldColors.selectedColor = m_navButtonNormal; } catch { }
                 m_lastNavButtonPressed.colors = oldColors;
             }
 
@@ -110,6 +110,13 @@ namespace ExplorerBeta.UI.Main
             ConstructNavbar(content);
 
             ConstructMainViewport(content);
+
+            ConstructDebugConsole(content);
+        }
+
+        private void ConstructDebugConsole(GameObject content)
+        {
+            new DebugConsole(content);
         }
 
         private void ConstructTitleBar(GameObject content)
@@ -176,8 +183,6 @@ namespace ExplorerBeta.UI.Main
 
         private void ConstructNavbar(GameObject content)
         {
-            // Todo add pages programatically
-
             var navbarObj = UIFactory.CreateHorizontalGroup(content);
 
             var navGroup = navbarObj.GetComponent<HorizontalLayoutGroup>();
@@ -210,7 +215,7 @@ namespace ExplorerBeta.UI.Main
                 // Set button colors
                 var colorBlock = btn.colors;
                 colorBlock.normalColor = m_navButtonNormal;
-                colorBlock.selectedColor = colorBlock.normalColor;
+                //try { colorBlock.selectedColor = colorBlock.normalColor; } catch { }
                 colorBlock.highlightedColor = m_navButtonHighlight;
                 colorBlock.pressedColor = m_navButtonSelected;
                 btn.colors = colorBlock;

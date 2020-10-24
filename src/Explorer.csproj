@@ -87,6 +87,10 @@
       <HintPath>..\lib\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>..\lib\Unity.TextMeshPro.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <!-- MelonLoader Mono ref -->
   <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)'=='true|false'">
@@ -124,6 +128,10 @@
       <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\Il2CppSystem.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\Unity.TextMeshPro.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
@@ -134,6 +142,10 @@
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
       <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextCoreModule">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.TextCoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
@@ -179,6 +191,10 @@
       <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\Il2CppSystem.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\Unity.TextMeshPro.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.dll</HintPath>
       <Private>False</Private>
@@ -189,6 +205,10 @@
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
       <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextCoreModule">
+      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.TextCoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
@@ -232,6 +252,7 @@
     <Compile Include="Input\InputSystem.cs" />
     <Compile Include="Input\LegacyInput.cs" />
     <Compile Include="Input\NoInput.cs" />
+    <Compile Include="UI\Main\DebugConsole.cs" />
     <Compile Include="UI\Main\MainMenu.cs" />
     <Compile Include="UI\Main\Pages\BaseMenuPage.cs" />
     <Compile Include="UI\Main\Pages\ConsolePage.cs" />
@@ -243,6 +264,7 @@
     <Compile Include="UI\Shared\PageHandler.cs" />
     <Compile Include="UI\Shared\Syntax.cs" />
     <Compile Include="UI\UIManager.cs" />
+    <Compile Include="Unstrip\ColorUtility\ColorUtilityUnstrip.cs" />
     <Compile Include="Unstrip\ImageConversion\ImageConversionUnstrip.cs" />
     <Compile Include="Helpers\ICallHelper.cs" />
     <Compile Include="Unstrip\LayerMask\LayerMaskUnstrip.cs" />
