@@ -6,17 +6,15 @@ using UnityEngine;
 
 namespace Explorer.UI.Main.Pages.Console.Lexer
 {
-    internal struct InputStringMatchInfo
+    internal struct LexerMatchInfo
     {
-        // Public
         public int startIndex;
         public int endIndex;
         public string htmlColor;
     }
 
-    internal class InputStringLexer : ILexer
+    internal class InputLexer : ILexer
     {
-        // Private
         private string inputString = null;
         private MatchLexer[] matchers = null;
         private readonly HashSet<char> specialStartSymbols = new HashSet<char>();
@@ -26,7 +24,6 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
         private int currentIndex = 0;
         private int currentLookaheadIndex = 0;
 
-        // Properties
         public bool EndOfStream
         {
             get { return currentLookaheadIndex >= inputString.Length; }
@@ -37,102 +34,82 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
             get { return previous; }
         }
 
-        // Methods
         public void UseMatchers(char[] delimiters, MatchLexer[] matchers)
         {
-            // Store matchers
             this.matchers = matchers;
 
-            // Clear old symbols
             specialStartSymbols.Clear();
             specialEndSymbols.Clear();
 
-            // Check for any delimiter characters
             if (delimiters != null)
             {
-                // Add delimiters
                 foreach (char character in delimiters)
                 {
-                    // Add to start
                     if (specialStartSymbols.Contains(character) == false)
                         specialStartSymbols.Add(character);
 
-                    // Add to end
                     if (specialEndSymbols.Contains(character) == false)
                         specialEndSymbols.Add(character);
                 }
             }
 
-            // Check for any matchers
             if (matchers != null)
             {
-                // Add all special symbols which can act as a delimiter
                 foreach (MatchLexer lexer in matchers)
                 {
-                    foreach (char special in lexer.SpecialStartCharacters)
+                    foreach (char special in lexer.StartChars)
                         if (specialStartSymbols.Contains(special) == false)
                             specialStartSymbols.Add(special);
 
-                    foreach (char special in lexer.SpecialEndCharacters)
+                    foreach (char special in lexer.EndChars)
                         if (specialEndSymbols.Contains(special) == false)
                             specialEndSymbols.Add(special);
                 }
             }
         }
 
-        public IEnumerable<InputStringMatchInfo> LexInputString(string input)
+        public IEnumerable<LexerMatchInfo> LexInputString(string input)
         {
             if (input == null || matchers == null || matchers.Length == 0)
                 yield break;
 
-            // Store the input string
             this.inputString = input;
             this.current = ' ';
             this.previous = ' ';
             this.currentIndex = 0;
             this.currentLookaheadIndex = 0;
 
-            // Process the input string
             while (EndOfStream == false)
             {
                 bool didMatchLexer = false;
 
-                // Read any white spaces
                 ReadWhiteSpace();
 
-                // Process each matcher
                 foreach (MatchLexer matcher in matchers)
                 {
-                    // Get the current index
                     int startIndex = currentIndex;
 
-                    // Try to match
                     bool isMatched = matcher.IsMatch(this);
 
                     if (isMatched == true)
                     {
-                        // Get the end index of the match
                         int endIndex = currentIndex;
 
-                        // Set matched flag
                         didMatchLexer = true;
 
-                        // Register the match
-                        yield return new InputStringMatchInfo
+                        yield return new LexerMatchInfo
                         {
                             startIndex = startIndex,
                             endIndex = endIndex,
-                            htmlColor = matcher.HTMLColor,
+                            htmlColor = matcher.HexColor,
                         };
 
-                        // Move to next character
                         break;
                     }
                 }
 
                 if (didMatchLexer == false)
                 {
-                    // Move to next
                     ReadNext();
                     Commit();
                 }
@@ -141,14 +118,11 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
 
         public char ReadNext()
         {
-            // Check for end of stream
             if (EndOfStream == true)
                 return '\0';
 
-            // Update previous character
             previous = current;
 
-            // Get the character
             current = inputString[currentLookaheadIndex];
             currentLookaheadIndex++;
 
@@ -159,7 +133,6 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
         {
             if (amount == -1)
             {
-                // Revert to index
                 currentLookaheadIndex = currentIndex;
             }
             else
@@ -193,14 +166,11 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
 
         private void ReadWhiteSpace()
         {
-            // Read until white space
             while (char.IsWhiteSpace(ReadNext()) == true)
             {
-                // Consume the char
                 Commit();
             }
 
-            // Return lexer state
             Rollback();
         }
     }

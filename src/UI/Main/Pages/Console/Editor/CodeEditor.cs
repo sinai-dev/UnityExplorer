@@ -7,60 +7,16 @@ using System.Reflection;
 using ExplorerBeta.Input;
 using Explorer.UI.Main.Pages.Console.Lexer;
 using ExplorerBeta;
+using System.Linq;
 
 namespace Explorer.UI.Main.Pages.Console
 {
     public class CodeEditor
-    {
-        public CodeEditor(TMP_InputField inputField, TextMeshProUGUI inputText, TextMeshProUGUI inputHighlightText, TextMeshProUGUI lineText, 
-            Image background, Image lineHighlight, Image lineNumberBackground, Image scrollbar)
-        {
-            this.InputField = inputField;
-            this.inputText = inputText;
-            this.inputHighlightText = inputHighlightText;
-            this.lineText = lineText;
-            this.background = background;
-            this.lineHighlight = lineHighlight;
-            this.lineNumberBackground = lineNumberBackground;
-            this.scrollbar = scrollbar;
+    {        
+        private readonly InputLexer inputLexer = new InputLexer();
 
-            var highlightTextRect = inputHighlightText.GetComponent<RectTransform>();
-            highlightTextRect.anchorMin = Vector2.zero;
-            highlightTextRect.anchorMax = Vector2.one;
-            highlightTextRect.offsetMin = Vector2.zero;
-            highlightTextRect.offsetMax = Vector2.zero;
+        public TMP_InputField InputField { get; }
 
-            if (!AllReferencesAssigned())
-            {
-                throw new Exception("CodeEditor: Components are missing!");
-            }
-
-            this.inputTextTransform = inputText.GetComponent<RectTransform>();
-            this.lineHighlightTransform = lineHighlight.GetComponent<RectTransform>();
-
-            ApplyTheme();
-            ApplyLanguage();
-
-            // subscribe to text input changing
-            InputField.onValueChanged.AddListener(new Action<string>((string s) => { Refresh(); }));
-        }
-
-        private static readonly KeyCode[] lineChangeKeys =
-        { 
-            KeyCode.Return, KeyCode.Backspace, KeyCode.UpArrow, 
-            KeyCode.DownArrow, KeyCode.LeftArrow, KeyCode.RightArrow 
-        };
-        
-        private static readonly StringBuilder highlightedBuilder = new StringBuilder(4096);
-        private static readonly StringBuilder lineBuilder = new StringBuilder();
-
-        private readonly InputStringLexer lexer = new InputStringLexer();
-        private readonly RectTransform inputTextTransform;
-        private readonly RectTransform lineHighlightTransform;
-        private string lastText;
-        private bool lineHighlightLocked;
-
-        public readonly TMP_InputField InputField;
         private readonly TextMeshProUGUI inputText;
         private readonly TextMeshProUGUI inputHighlightText;
         private readonly TextMeshProUGUI lineText;
@@ -69,13 +25,26 @@ namespace Explorer.UI.Main.Pages.Console
         private readonly Image lineNumberBackground;
         private readonly Image scrollbar;
 
-        private bool lineNumbers = true;
-        private int lineNumbersSize = 20;
+        private string lastText;
+        private bool lineHighlightLocked;
+        private readonly RectTransform inputTextTransform;
+        private readonly RectTransform lineHighlightTransform;
 
-        public int LineCount { get; private set; } = 0;
-        public int CurrentLine { get; private set; } = 0;
-        public int CurrentColumn { get; private set; } = 0;
-        public int CurrentIndent { get; private set; } = 0;
+        public int LineCount { get; private set; }
+        public int CurrentLine { get; private set; }
+        public int CurrentColumn { get; private set; }
+        public int CurrentIndent { get; private set; }
+
+        private static readonly StringBuilder highlightedBuilder = new StringBuilder(4096);
+        private static readonly StringBuilder lineBuilder = new StringBuilder();
+
+        private static readonly KeyCode[] lineChangeKeys =
+        {
+            KeyCode.Return, KeyCode.Backspace, KeyCode.UpArrow,
+            KeyCode.DownArrow, KeyCode.LeftArrow, KeyCode.RightArrow
+        };
+
+        public string HighlightedText => inputHighlightText.text;
 
         public string Text
         {
@@ -97,64 +66,39 @@ namespace Explorer.UI.Main.Pages.Console
             }
         }
 
-        public string HighlightedText => inputHighlightText.text;
-
-        public bool LineNumbers
+        public CodeEditor(TMP_InputField inputField, TextMeshProUGUI inputText, TextMeshProUGUI inputHighlightText, TextMeshProUGUI lineText,
+            Image background, Image lineHighlight, Image lineNumberBackground, Image scrollbar)
         {
-            get { return lineNumbers; }
-            set
+            this.InputField = inputField;
+            this.inputText = inputText;
+            this.inputHighlightText = inputHighlightText;
+            this.lineText = lineText;
+            this.background = background;
+            this.lineHighlight = lineHighlight;
+            this.lineNumberBackground = lineNumberBackground;
+            this.scrollbar = scrollbar;
+
+            if (!AllReferencesAssigned())
             {
-                lineNumbers = value;
-
-                //RectTransform inputFieldTransform = InputField.transform as RectTransform;
-                //RectTransform lineNumberBackgroudTransform = lineNumberBackground.transform as RectTransform;
-
-                //// Check for line numbers
-                //if (lineNumbers == true)
-                //{
-                //    // Enable line numbers
-                //    lineNumberBackground.gameObject.SetActive(true);
-                //    lineText.gameObject.SetActive(true);
-
-                //    // Set left value
-                //    inputFieldTransform.offsetMin = new Vector2(lineNumbersSize, inputFieldTransform.offsetMin.y);
-                //    lineNumberBackgroudTransform.sizeDelta = new Vector2(lineNumbersSize + 15, lineNumberBackgroudTransform.sizeDelta.y);
-                //}
-                //else
-                //{
-                //    // Disable line numbers
-                //    lineNumberBackground.gameObject.SetActive(false);
-                //    lineText.gameObject.SetActive(false);
-
-                //    // Set left value
-                //    inputFieldTransform.offsetMin = new Vector2(0, inputFieldTransform.offsetMin.y);
-                //}
+                throw new Exception("References are missing!");
             }
-        }
 
-        // todo maybe not needed
-        public int LineNumbersSize
-        {
-            get { return lineNumbersSize; }
-            set
-            {
-                lineNumbersSize = value;
+            this.inputTextTransform = inputText.GetComponent<RectTransform>();
+            this.lineHighlightTransform = lineHighlight.GetComponent<RectTransform>();
 
-                // Update the line numbers
-                LineNumbers = lineNumbers;
-            }
+            ApplyTheme();
+            inputLexer.UseMatchers(CSharpLexer.DelimiterSymbols, CSharpLexer.Matchers);
+
+            // subscribe to text input changing
+            this.InputField.onValueChanged.AddListener(new Action<string>((string s) => { OnInputChanged(); }));
         }
 
         public void Update()
         {
-            // Auto indent
-            if (AutoIndent.autoIndentMode != AutoIndent.IndentMode.None)
+            // Check for new line
+            if (InputManager.GetKeyDown(KeyCode.Return))
             {
-                // Check for new line
-                if (InputManager.GetKeyDown(KeyCode.Return))
-                {
-                    AutoIndentCaret();
-                }
+                AutoIndentCaret();
             }
 
             bool focusKeyPressed = false;
@@ -172,54 +116,16 @@ namespace Explorer.UI.Main.Pages.Console
             // Update line highlight
             if (focusKeyPressed || InputManager.GetMouseButton(0))
             {
-                UpdateCurrentLineHighlight();
+                UpdateHighlight();
             }
         }
 
-        public void Refresh(bool forceUpdate = false)
+        public void OnInputChanged(bool forceUpdate = false)
         {
-            // Trigger a content change event
-            DisplayedContentChanged(InputField.text, forceUpdate);
-        }
+            var newText = InputField.text;
 
-        public void SetLineHighlight(int lineNumber, bool lockLineHighlight)
-        {
-            // Check if code editor is not active
-            if (lineNumber < 1 || lineNumber > LineCount)
-                return;
+            UpdateIndent();
 
-            //int lineOffset = 0;
-            //int lineIndex = lineNumber - 1;
-
-            // Highlight the current line
-            lineHighlightTransform.anchoredPosition = new Vector2(5,
-                (inputText.textInfo.lineInfo[inputText.textInfo.characterInfo[0].lineNumber].lineHeight *
-                -(lineNumber - 1))  - 4f +
-                inputTextTransform.anchoredPosition.y);
-
-            // Lock the line highlight so it cannot be moved
-            if (lockLineHighlight == true)
-                LockLineHighlight();
-            else
-                UnlockLineHighlight();
-        }
-
-        public void LockLineHighlight()
-        {
-            lineHighlightLocked = true;
-        }
-
-        public void UnlockLineHighlight()
-        {
-            lineHighlightLocked = false;
-        }
-
-        private void DisplayedContentChanged(string newText, bool forceUpdate)
-        {
-            // Update caret position
-            UpdateCurrentLineColumnIndent();
-
-            // Check for change
             if ((!forceUpdate && lastText == newText) || string.IsNullOrEmpty(newText))
             {
                 if (string.IsNullOrEmpty(newText))
@@ -227,37 +133,45 @@ namespace Explorer.UI.Main.Pages.Console
                     inputHighlightText.text = string.Empty;
                 }
 
-                // Its possible the text was cleared so we need to sync numbers and highlighter
-                UpdateCurrentLineNumbers();
-                UpdateCurrentLineHighlight();
+                UpdateLineNumbers();
+                UpdateHighlight();
                 return;
             }
 
             inputHighlightText.text = SyntaxHighlightContent(newText);
 
             // Sync line numbers and update the line highlight
-            UpdateCurrentLineNumbers();
-            UpdateCurrentLineHighlight();
+            UpdateLineNumbers();
+            UpdateHighlight();
 
             this.lastText = newText;
         }
 
-        private void UpdateCurrentLineNumbers()
+        public void SetLineHighlight(int lineNumber, bool lockLineHighlight)
         {
-            // Get the line count
+            if (lineNumber < 1 || lineNumber > LineCount)
+                return;
+
+            lineHighlightTransform.anchoredPosition = new Vector2(5,
+                (inputText.textInfo.lineInfo[inputText.textInfo.characterInfo[0].lineNumber].lineHeight *
+                -(lineNumber - 1))  - 4f +
+                inputTextTransform.anchoredPosition.y);
+
+            lineHighlightLocked = lockLineHighlight;
+        }
+
+        private void UpdateLineNumbers()
+        {
             int currentLineCount = inputText.textInfo.lineCount;
 
             int currentLineNumber = 1;
 
-            // Check for a change in line
             if (currentLineCount != LineCount)
             {
                 try
                 {
-                    // Update line numbers
                     lineBuilder.Length = 0;
 
-                    // Build line numbers string
                     for (int i = 1; i < currentLineCount + 2; i++)
                     {
                         if (i - 1 > 0 && i - 1 < currentLineCount - 1)
@@ -292,7 +206,6 @@ namespace Explorer.UI.Main.Pages.Console
                         }
                     }
 
-                    // Update displayed line numbers
                     lineText.text = lineBuilder.ToString();
                     LineCount = currentLineCount;
                 }
@@ -300,9 +213,8 @@ namespace Explorer.UI.Main.Pages.Console
             }
         }
 
-        private void UpdateCurrentLineColumnIndent()
+        private void UpdateIndent()
         {
-            // Get the current line number
             int caret = InputField.caretPosition;
             
             if (caret < 0 || caret >= inputText.textInfo.characterInfo.Count)
@@ -318,48 +230,35 @@ namespace Explorer.UI.Main.Pages.Console
 
             CurrentLine = inputText.textInfo.characterInfo[caret].lineNumber;
 
-            // Get the total character count
             int charCount = 0;
             for (int i = 0; i < CurrentLine; i++)
                 charCount += inputText.textInfo.lineInfo[i].characterCount;
 
-            // Get the column position
             CurrentColumn = caret - charCount;
-
             CurrentIndent = 0;
 
-            // Check for auto indent allowed
-            if (AutoIndent.allowAutoIndent)
+            for (int i = 0; i < caret && i < InputField.text.Length; i++)
             {
-                for (int i = 0; i < caret && i < InputField.text.Length; i++)
-                {
-                    char character = InputField.text[i];
+                char character = InputField.text[i];
 
-                    // Check for opening indents
-                    if (character == AutoIndent.indentIncreaseCharacter)
-                        CurrentIndent++;
+                if (character == CSharpLexer.indentIncreaseCharacter)
+                    CurrentIndent++;
 
-                    // Check for closing indents
-                    if (character == AutoIndent.indentDecreaseCharacter)
-                        CurrentIndent--;
-                }
-
-                // Dont allow negative indents
-                if (CurrentIndent < 0)
-                    CurrentIndent = 0;
+                if (character == CSharpLexer.indentDecreaseCharacter)
+                    CurrentIndent--;
             }
+
+            if (CurrentIndent < 0)
+                CurrentIndent = 0;
         }
 
-        private void UpdateCurrentLineHighlight()
+        private void UpdateHighlight()
         {
             if (lineHighlightLocked)
                 return;
 
             try
             {
-                // unity 2018.2 and older may need lineOffset as 0? not sure
-                //int lineOffset = 1;
-
                 int caret = InputField.caretPosition - 1;
 
                 var lineHeight = inputText.textInfo.lineInfo[inputText.textInfo.characterInfo[0].lineNumber].lineHeight;
@@ -378,44 +277,33 @@ namespace Explorer.UI.Main.Pages.Console
 
         private string SyntaxHighlightContent(string inputText)
         {
-            if (!InputTheme.allowSyntaxHighlighting)
-                return inputText;
-
             int offset = 0;
 
             highlightedBuilder.Length = 0;
 
-            foreach (var match in lexer.LexInputString(inputText))
+            foreach (var match in inputLexer.LexInputString(inputText))
             {
-                // Copy text before the match
                 for (int i = offset; i < match.startIndex; i++)
                     highlightedBuilder.Append(inputText[i]);
 
-                // Add the opening color tag
                 highlightedBuilder.Append(match.htmlColor);
 
-                // Copy text inbetween the match boundaries
                 for (int i = match.startIndex; i < match.endIndex; i++)
                     highlightedBuilder.Append(inputText[i]);
 
-                // Add the closing color tag
                 highlightedBuilder.Append(CLOSE_COLOR_TAG);
 
-                // Update offset
                 offset = match.endIndex;
             }
 
-            // Copy remaining text
             for (int i = offset; i < inputText.Length; i++)
                 highlightedBuilder.Append(inputText[i]);
 
-            // Convert to string
             inputText = highlightedBuilder.ToString();
 
             return inputText;
         }
 
-        // todo param is probably pointless
         private void AutoIndentCaret()
         {
             if (CurrentIndent > 0)
@@ -429,7 +317,7 @@ namespace Explorer.UI.Main.Pages.Console
                     var indentMinusOne = indent.Substring(0, indent.Length - 1);
 
                     // get last index of {
-                    // check it on the next line if its not already
+                    // chuck it on the next line if its not already
                     var text = InputField.text;
                     var sub = InputField.text.Substring(0, InputField.caretPosition);
                     var lastIndex = sub.LastIndexOf("{");
@@ -444,37 +332,9 @@ namespace Explorer.UI.Main.Pages.Console
                     }
 
                     // check if should add auto-close }
-                    int numOpen = 0;
-                    int numClose = 0;
-                    char prevChar = default;
-                    foreach (var _char in InputField.text)
-                    {
-                        if (_char == '{')
-                        {
-                            if (prevChar != default && (prevChar == '\\' || prevChar == '{'))
-                            {
-                                if (prevChar == '{')
-                                    numOpen--;
-                            }
-                            else
-                            {
-                                numOpen++;
-                            }
-                        }
-                        else if (_char == '}')
-                        {
-                            if (prevChar != default && (prevChar == '\\' || prevChar == '}'))
-                            {
-                                if (prevChar == '}')
-                                    numClose--;
-                            }
-                            else
-                            {
-                                numClose++;
-                            }
-                        }
-                        prevChar = _char;
-                    }
+                    int numOpen = InputField.text.Where(x => x == CSharpLexer.indentIncreaseCharacter).Count();
+                    int numClose = InputField.text.Where(x => x == CSharpLexer.indentDecreaseCharacter).Count();
+
                     if (numOpen > numClose)
                     {
                         // add auto-indent closing
@@ -490,14 +350,14 @@ namespace Explorer.UI.Main.Pages.Console
             }
 
             // Update line column and indent positions
-            UpdateCurrentLineColumnIndent();
+            UpdateIndent();
 
             inputText.text = InputField.text;
             inputText.SetText(InputField.text, true);
             inputText.Rebuild(CanvasUpdate.Prelayout);
             InputField.ForceLabelUpdate();
             InputField.Rebuild(CanvasUpdate.Prelayout);
-            Refresh(true);
+            OnInputChanged(true);
         }
 
         private string GetAutoIndentTab(int amount)
@@ -510,26 +370,34 @@ namespace Explorer.UI.Main.Pages.Console
             return tab;
         }
 
+        private static Color caretColor = new Color32(255, 255, 255, 255);
+        private static Color textColor = new Color32(255, 255, 255, 255);
+        private static Color backgroundColor = new Color32(37, 37, 37, 255);
+        private static Color lineHighlightColor = new Color32(50, 50, 50, 255);
+        private static Color lineNumberBackgroundColor = new Color32(25, 25, 25, 255);
+        private static Color lineNumberTextColor = new Color32(180, 180, 180, 255);
+        private static Color scrollbarColor = new Color32(45, 50, 50, 255);
+
         private void ApplyTheme()
         {
-            // Check for missing references
-            if (!AllReferencesAssigned())
-                throw new Exception("Cannot apply theme because one or more required component references are missing. ");
+            var highlightTextRect = inputHighlightText.GetComponent<RectTransform>();
+            highlightTextRect.anchorMin = Vector2.zero;
+            highlightTextRect.anchorMax = Vector2.one;
+            highlightTextRect.offsetMin = Vector2.zero;
+            highlightTextRect.offsetMax = Vector2.zero;
 
-            // Apply theme colors
-            InputField.caretColor = InputTheme.caretColor;
-            inputText.color = InputTheme.textColor;
-            inputHighlightText.color = InputTheme.textColor;
-            background.color = InputTheme.backgroundColor;
-            lineHighlight.color = InputTheme.lineHighlightColor;
-            lineNumberBackground.color = InputTheme.lineNumberBackgroundColor;
-            lineText.color = InputTheme.lineNumberTextColor;
-            scrollbar.color = InputTheme.scrollbarColor;
+            InputField.caretColor = caretColor;
+            inputText.color = textColor;
+            inputHighlightText.color = textColor;
+            background.color = backgroundColor;
+            lineHighlight.color = lineHighlightColor;
+            lineNumberBackground.color = lineNumberBackgroundColor;
+            lineText.color = lineNumberTextColor;
+            scrollbar.color = scrollbarColor;
         }
 
         private void ApplyLanguage()
         {
-            lexer.UseMatchers(CodeTheme.DelimiterSymbols, CodeTheme.Matchers);
         }
 
         private bool AllReferencesAssigned()

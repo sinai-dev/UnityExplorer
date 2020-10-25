@@ -21,7 +21,7 @@ namespace Explorer.UI.Main.Pages
 
         public static ConsolePage Instance { get; private set; }
 
-        private CodeEditor codeEditor;
+        private CodeEditor m_codeEditor;
 
         private ScriptEvaluator m_evaluator;
 
@@ -62,7 +62,7 @@ namespace Explorer.UI.Main.Pages
 
         public override void Update()
         {
-            codeEditor?.Update();
+            m_codeEditor?.Update();
         }
 
         internal string AsmToUsing(string asm, bool richText = false)
@@ -121,6 +121,110 @@ namespace Explorer.UI.Main.Pages
             UsingDirectives = new List<string>();
         }
 
+        private static string m_prevInput = "NULL";
+
+        // TODO call from OnInputChanged
+
+        private void CheckAutocomplete()
+        {
+            var input = m_codeEditor.InputField.text;
+            var caretIndex = m_codeEditor.InputField.caretPosition;
+
+            if (!string.IsNullOrEmpty(input))
+            {
+                try
+                {
+                    var splitChars = new[] { ',', ';', '<', '>', '(', ')', '[', ']', '=', '|', '&' };
+
+                    // Credit ManlyMarco
+                    // Separate input into parts, grab only the part with cursor in it
+                    var start = caretIndex <= 0 ? 0 : input.LastIndexOfAny(splitChars, (int)(caretIndex - 1)) + 1;
+                    var end = caretIndex <= 0 ? input.Length : input.IndexOfAny(splitChars, (int)(caretIndex - 1));
+                    if (end < 0 || end < start) end = input.Length;
+                    input = input.Substring(start, end - start);
+                }
+                catch (ArgumentException) { }
+
+                if (!string.IsNullOrEmpty(input) && input != m_prevInput)
+                {
+                    GetAutocompletes(input);
+                }
+            }
+            else
+            {
+                ClearAutocompletes();
+            }
+
+            m_prevInput = input;
+        }
+
+        private void ClearAutocompletes()
+        {
+            if (AutoCompletes.Any())
+            {
+                AutoCompletes.Clear();
+            }
+        }
+
+        private void UseAutocomplete(string suggestion)
+        {
+            int cursorIndex = m_codeEditor.InputField.caretPosition;
+            var input = m_codeEditor.InputField.text;
+            input = input.Insert(cursorIndex, suggestion);
+            m_codeEditor.InputField.text = input;
+
+            ClearAutocompletes();
+        }
+
+        private void GetAutocompletes(string input)
+        {
+            try
+            {
+                //ExplorerCore.Log("Fetching suggestions for input " + input);
+
+                // Credit ManylMarco
+                AutoCompletes.Clear();
+                var completions = m_evaluator.GetCompletions(input, out string prefix);
+                if (completions != null)
+                {
+                    if (prefix == null)
+                        prefix = input;
+
+                    AutoCompletes.AddRange(completions
+                        .Where(x => !string.IsNullOrEmpty(x))
+                        .Select(x => new AutoComplete(x, prefix, AutoComplete.Contexts.Other))
+                        );
+                }
+
+                var trimmed = input.Trim();
+                if (trimmed.StartsWith("using"))
+                    trimmed = trimmed.Remove(0, 5).Trim();
+
+                var namespaces = AutoCompleteHelpers.Namespaces
+                    .Where(x => x.StartsWith(trimmed) && x.Length > trimmed.Length)
+                    .Select(x => new AutoComplete(
+                        x.Substring(trimmed.Length),
+                        x.Substring(0, trimmed.Length),
+                        AutoComplete.Contexts.Namespace));
+
+                AutoCompletes.AddRange(namespaces);
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.Log("C# Console error:\r\n" + ex);
+                ClearAutocompletes();
+            }
+        }
+
+        // Call on OnInputChanged, or maybe limit frequency if its too laggy
+
+        // update autocomplete buttons 
+
+        private void RefreshAutocompleteButtons()
+        {
+            throw new NotImplementedException("TODO");
+        }
+
         #region UI Construction
 
         public void ConstructUI()
@@ -139,7 +243,7 @@ namespace Explorer.UI.Main.Pages
 
             var topBarObj = UIFactory.CreateHorizontalGroup(Content);
             var topBarLayout = topBarObj.AddComponent<LayoutElement>();
-            topBarLayout.preferredHeight = 50;
+            topBarLayout.minHeight = 50;
             topBarLayout.flexibleHeight = 0;
 
             var topBarGroup = topBarObj.GetComponent<HorizontalLayoutGroup>();
@@ -348,7 +452,7 @@ namespace Explorer.UI.Main.Pages
 
             try
             {
-                codeEditor = new CodeEditor(inputField, mainTextInput, highlightTextInput, linesTextInput,
+                m_codeEditor = new CodeEditor(inputField, mainTextInput, highlightTextInput, linesTextInput,
                     mainBgImage, lineHighlightImage, linesBgImage, scrollImage);
             }
             catch (Exception e)
