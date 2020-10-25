@@ -71,6 +71,8 @@ namespace ExplorerBeta.UI
 
         public static void Update()
         {
+            MainMenu.Instance?.Update();
+
             if (EventSys && InputModule)
             {
                 if (EventSystem.current != EventSys)

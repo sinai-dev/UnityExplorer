@@ -97,10 +97,6 @@ namespace ExplorerBeta
                     m_doneUIInit = true;
                 }
             }
-            else
-            {
-                UIManager.Update();
-            }
 
             if (InputManager.GetKeyDown(ModConfig.Instance.Main_Menu_Toggle))
             {

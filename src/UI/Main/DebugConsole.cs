@@ -94,14 +94,6 @@ namespace ExplorerBeta.UI.Main
             tmpInput.verticalScrollbar = scroller;
 
             m_textInput = input.GetComponent<TMP_InputField>();
-
-            for (int i = 0; i < 100; i++)
-            {
-                Log("hello " + i);
-            }
-
-            Log("hello", Color.red);
-            Log("hello", Color.yellow);
         }
 
         public static void Log(string message)

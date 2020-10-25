@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace ExplorerBeta.UI
@@ -12,10 +13,10 @@ namespace ExplorerBeta.UI
 	{
 		private static Vector2 s_ThickElementSize = new Vector2(160f, 30f);
 		private static Vector2 s_ThinElementSize = new Vector2(160f, 20f);
-		//private static Vector2 s_ImageElementSize = new Vector2(100f, 100f);
 		private static Color s_DefaultSelectableColor = new Color(1f, 1f, 1f, 1f);
-		private static Color s_PanelColor = new Color(0.1f, 0.1f, 0.1f, 1.0f);
 		private static Color s_TextColor = new Color(0.95f, 0.95f, 0.95f, 1f);
+		//private static Color s_PanelColor = new Color(0.1f, 0.1f, 0.1f, 1.0f);
+		//private static Vector2 s_ImageElementSize = new Vector2(100f, 100f);
 
 		public static Resources UIResources { get; set; }
 
@@ -30,7 +31,7 @@ namespace ExplorerBeta.UI
 			public Sprite mask;
 		}
 
-		private static GameObject CreateUIObject(string name, GameObject parent, Vector2 size = default)
+		public static GameObject CreateUIObject(string name, GameObject parent, Vector2 size = default)
 		{
 			GameObject obj = new GameObject(name);
 
@@ -53,14 +54,22 @@ namespace ExplorerBeta.UI
 			//lbl.resizeTextForBestFit = true;
 		}
 
-		private static void SetDefaultColorTransitionValues(Selectable slider)
+		private static void SetDefaultColorTransitionValues(Selectable selectable)
 		{
-			ColorBlock colors = slider.colors;
-			colors.normalColor = new Color(0.3f, 0.3f, 0.3f);
+			ColorBlock colors = selectable.colors;
+			colors.normalColor = new Color(0.4f, 0.4f, 0.4f);
 			colors.highlightedColor = new Color(0.45f, 0.45f, 0.45f);
 			colors.pressedColor = new Color(0.1f, 0.1f, 0.1f);
 			colors.disabledColor = new Color(0.7f, 0.7f, 0.7f);
-			slider.colors = colors;
+
+			// fix to make all buttons become de-selected after being clicked.
+			// this is because i'm not setting any ColorBlock.selectedColor, because it is commonly stripped.
+			if (selectable is Button button)
+            {
+				button.onClick.AddListener(new Action(() => { button.OnDeselect(EventSystem.current?.baseEventDataCache); }));
+            }
+
+			selectable.colors = colors;
 		}
 
 		private static void SetParentAndAlign(GameObject child, GameObject parent)
@@ -365,7 +374,7 @@ namespace ExplorerBeta.UI
             mainGroup.childForceExpandWidth = true;
             mainGroup.childForceExpandHeight = true;
 
-            var textArea = CreateUIObject("Text Area", mainObj);
+            var textArea = CreateUIObject("TextArea", mainObj);
             textArea.AddComponent<RectMask2D>();
 
             var textAreaRect = textArea.GetComponent<RectTransform>();
@@ -379,7 +388,7 @@ namespace ExplorerBeta.UI
 			var placeHolderObj = CreateUIObject("Placeholder", textArea);
 			var placeholderText = placeHolderObj.AddComponent<TextMeshProUGUI>();
 			placeholderText.fontSize = 16;
-			placeholderText.text = "Nothing logged yet...";
+			placeholderText.text = "...";
 			placeholderText.color = new Color(0.5f, 0.5f, 0.5f, 1.0f);
 
             var placeHolderRect = placeHolderObj.GetComponent<RectTransform>();

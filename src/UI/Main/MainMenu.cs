@@ -49,6 +49,7 @@ namespace ExplorerBeta.UI.Main
             foreach (var page in Pages)
             {
                 page.Init();
+                page.Content?.SetActive(false);
             }
 
             SetPage(Pages[0]);
@@ -56,7 +57,7 @@ namespace ExplorerBeta.UI.Main
 
         public void Update()
         {
-            // todo
+            m_activePage?.Update();
         }
 
         // todo
