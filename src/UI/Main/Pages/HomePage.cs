@@ -6,6 +6,7 @@ using ExplorerBeta;
 using ExplorerBeta.UI;
 using ExplorerBeta.UI.Main;
 using ExplorerBeta.UI.Shared;
+using ExplorerBeta.Unstrip.Resources;
 using ExplorerBeta.Unstrip.Scenes;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -17,43 +18,65 @@ namespace Explorer.UI.Main.Pages
     {
         public override string Name => "Home";
 
-        // private PageHandler m_sceneListPages;
+        private const float UPDATE_INTERVAL = 1f;
+        private float m_timeOfLastUpdate;
+
+        // ~~ Scene pane ~~
+
         private Dropdown m_sceneDropdown;
 
-        private Dictionary<string, int> m_sceneHandles = new Dictionary<string, int>();
-
-        // is tihs needed?
         private int m_currentSceneHandle;
+        private readonly Dictionary<string, int> m_sceneHandles = new Dictionary<string, int>();
 
         private List<GameObject> m_currentObjectList = new List<GameObject>();
+        private int m_lastMaxIndex;
+        // todo
+        private GameObject m_selectedSceneObject;
+
         private GameObject m_sceneListContent;
         private readonly List<Text> m_sceneListTexts = new List<Text>();
-        // todo
-        private GameObject m_currentSceneObject;
 
-        private int m_lastMaxIndex;
+        // ~~ Inspector pane ~~ TODO
 
         public override void Init()
         {
             ConstructMenu();
 
-            // get DontDestroyScene handle
+            // Get DontDestroyOnLoad scene handle. I think it's always -12, but best to be safe.
             var test = new GameObject();
             GameObject.DontDestroyOnLoad(test);
-            GetSceneHandle(test.scene);
+            StoreScenehandle(test.scene);
             GameObject.Destroy(test);
 
             RefreshActiveScenes();
         }
 
+
         public override void Update()
         {
-            // refresh active scenes? maybe on a timer to limit frequency
+            // TODO update inspector tabs
 
-            // refresh scene objects on limited frequency
+
+            // update scene pane
+
+            if (Time.realtimeSinceStartup - m_timeOfLastUpdate < UPDATE_INTERVAL)
+                return;
+
+            m_timeOfLastUpdate = Time.realtimeSinceStartup;
+
+            RefreshActiveScenes();
+
+            if (!m_selectedSceneObject)
+            {
+                SetSceneObjectList(SceneUnstrip.GetRootGameObjects(m_currentSceneHandle));
+            }
+            else
+            {
+                // TODO refresh objects from inspected transform
+            }
         }
 
-        private int GetSceneHandle(Scene scene)
+        private int StoreScenehandle(Scene scene)
         {
             if (!m_sceneHandles.ContainsKey(scene.name))
             {
@@ -87,7 +110,9 @@ namespace Explorer.UI.Main.Pages
             SetSceneObjectList(rootObjs);
         }
 
-        private void RefreshActiveScenes(bool firstTime = false)
+        private bool m_doneFirstSceneRefresh;
+
+        private void RefreshActiveScenes()
         {
             var activeScene = SceneManager.GetActiveScene().name;
             var otherScenes = new List<string>();
@@ -95,16 +120,16 @@ namespace Explorer.UI.Main.Pages
             for (int i = 0; i < SceneManager.sceneCount; i++)
             {
                 var scene = SceneManager.GetSceneAt(i);
-                GetSceneHandle(scene);
+                StoreScenehandle(scene);
 
-                if (!firstTime || scene.name != activeScene)
+                if (m_doneFirstSceneRefresh || scene.name != activeScene)
                     otherScenes.Add(scene.name);
             }
             otherScenes.Add("DontDestroyOnLoad");
 
             m_sceneDropdown.options.Clear();
 
-            if (firstTime)
+            if (!m_doneFirstSceneRefresh)
             {
                 m_sceneDropdown.options.Add(new Dropdown.OptionData
                 {
@@ -120,7 +145,10 @@ namespace Explorer.UI.Main.Pages
                 });
             }
 
-            SetScene(activeScene);
+            if (!m_doneFirstSceneRefresh)
+                SetScene(activeScene);
+
+            m_doneFirstSceneRefresh = true;
         }
 
         private void SceneButtonClicked(int index)
@@ -128,6 +156,9 @@ namespace Explorer.UI.Main.Pages
             var obj = m_currentObjectList[index];
 
             ExplorerCore.Log("Clicked " + obj.name);
+            m_selectedSceneObject = obj;
+
+            // TODO ?
         }
 
         private void SetSceneObjectList(IEnumerable<GameObject> objects)
@@ -241,18 +272,12 @@ namespace Explorer.UI.Main.Pages
                 SetScene(scene);
             }
 
-            // Scene list(TODO)
-
-            //m_sceneListPages = new PageHandler(100);
-            //m_sceneListPages.ConstructUI(leftPane);
-            //m_sceneListPages.OnPageChanged += RefreshSceneObjectList;
-
             var scrollTest = UIFactory.CreateScrollView(leftPane, out m_sceneListContent, new Color(0.15f, 0.15f, 0.15f, 1));
             for (int i = 0; i < 50; i++)
             {
                 AddSceneButton();
             }
-            m_lastMaxIndex = 51;
+            m_lastMaxIndex = 50;
         }
 
         private void AddSceneButton()
@@ -278,6 +303,8 @@ namespace Explorer.UI.Main.Pages
 
             m_sceneListTexts.Add(text);
         }
+
+        // todo construct inspector pane
 
 #endregion
     }

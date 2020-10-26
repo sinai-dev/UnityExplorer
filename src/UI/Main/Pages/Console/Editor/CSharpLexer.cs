@@ -24,21 +24,21 @@ namespace Explorer.UI.Main.Pages.Console
         public static KeywordMatch validKeywordMatcher = new KeywordMatch
         {
             highlightColor = new Color(0.33f, 0.61f, 0.83f, 1.0f),
-            keywords = @"add as ascending await base bool break by byte 
+            keywords = @"add as ascending await bool break by byte 
  case catch char checked const continue decimal default descending do dynamic 
- else enum equals false finally fixed float for foreach from global goto group 
- if in int into is join let lock long new null object on orderby out params 
+ else equals false finally float for foreach from global goto group 
+ if in int into is join let lock long new null object on orderby out 
  ref remove return sbyte select short sizeof stackalloc string 
- struct switch this throw true try typeof uint ulong unchecked unsafe ushort 
+ struct switch throw true try typeof uint ulong ushort 
  value var where while yield"
         };
 
         public static KeywordMatch invalidKeywordMatcher = new KeywordMatch()
         {
             highlightColor = new Color(0.95f, 0.10f, 0.10f, 1.0f),
-            keywords = @"abstract async class delegate explicit extern get 
- implicit interface internal namespace operator override private protected public 
- using partial readonly sealed set static virtual volatile void"
+            keywords = @"abstract async base class delegate enum explicit extern fixed get 
+ implicit interface internal namespace operator override params private protected public 
+ using partial readonly sealed set static this unchecked unsafe virtual volatile void"
         };
 
         private static char[] delimiterSymbolCache = null;

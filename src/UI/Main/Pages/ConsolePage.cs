@@ -94,20 +94,20 @@ namespace Explorer.UI.Main.Pages
 
             m_evaluator.Compile(str, out var compiled);
 
-            try
-            {
-                if (compiled == null)
-                {
-                    throw new Exception("Mono.Csharp Service was unable to compile the code provided.");
-                }
-
-                compiled.Invoke(ref ret);
-            }
-            catch (Exception e)
+            if (compiled == null)
             {
                 if (!suppressWarning)
+                    ExplorerCore.LogWarning("Unable to compile the code!"); 
+            }
+            else
+            {
+                try
                 {
-                    ExplorerCore.LogWarning(e.GetType() + ", " + e.Message);
+                    compiled.Invoke(ref ret);
+                }
+                catch (Exception e)
+                {
+                    ExplorerCore.LogWarning($"Exception executing code: {e.GetType()}, {e.Message}\r\n{e.StackTrace}");
                 }
             }
 
