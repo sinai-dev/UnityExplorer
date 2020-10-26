@@ -19,19 +19,15 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
         private MatchLexer[] matchers = null;
         private readonly HashSet<char> specialStartSymbols = new HashSet<char>();
         private readonly HashSet<char> specialEndSymbols = new HashSet<char>();
-        private char current = ' ';
-        private char previous = ' ';
         private int currentIndex = 0;
         private int currentLookaheadIndex = 0;
+
+        private char current = ' ';
+        public char Previous { get; private set; } = ' ';
 
         public bool EndOfStream
         {
             get { return currentLookaheadIndex >= inputString.Length; }
-        }
-
-        public char Previous
-        {
-            get { return previous; }
         }
 
         public void UseMatchers(char[] delimiters, MatchLexer[] matchers)
@@ -45,10 +41,10 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
             {
                 foreach (char character in delimiters)
                 {
-                    if (specialStartSymbols.Contains(character) == false)
+                    if (!specialStartSymbols.Contains(character))
                         specialStartSymbols.Add(character);
 
-                    if (specialEndSymbols.Contains(character) == false)
+                    if (!specialEndSymbols.Contains(character))
                         specialEndSymbols.Add(character);
                 }
             }
@@ -58,11 +54,11 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
                 foreach (MatchLexer lexer in matchers)
                 {
                     foreach (char special in lexer.StartChars)
-                        if (specialStartSymbols.Contains(special) == false)
+                        if (!specialStartSymbols.Contains(special))
                             specialStartSymbols.Add(special);
 
                     foreach (char special in lexer.EndChars)
-                        if (specialEndSymbols.Contains(special) == false)
+                        if (!specialEndSymbols.Contains(special))
                             specialEndSymbols.Add(special);
                 }
             }
@@ -75,11 +71,11 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
 
             this.inputString = input;
             this.current = ' ';
-            this.previous = ' ';
+            this.Previous = ' ';
             this.currentIndex = 0;
             this.currentLookaheadIndex = 0;
 
-            while (EndOfStream == false)
+            while (!EndOfStream)
             {
                 bool didMatchLexer = false;
 
@@ -91,7 +87,7 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
 
                     bool isMatched = matcher.IsMatch(this);
 
-                    if (isMatched == true)
+                    if (isMatched)
                     {
                         int endIndex = currentIndex;
 
@@ -108,7 +104,7 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
                     }
                 }
 
-                if (didMatchLexer == false)
+                if (!didMatchLexer)
                 {
                     ReadNext();
                     Commit();
@@ -118,10 +114,10 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
 
         public char ReadNext()
         {
-            if (EndOfStream == true)
+            if (EndOfStream)
                 return '\0';
 
-            previous = current;
+            Previous = current;
 
             current = inputString[currentLookaheadIndex];
             currentLookaheadIndex++;
@@ -144,11 +140,11 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
             int previousIndex = currentLookaheadIndex - 1;
 
             if (previousIndex >= inputString.Length)
-                previous = inputString[inputString.Length - 1];
+                Previous = inputString[inputString.Length - 1];
             else if (previousIndex >= 0)
-                previous = inputString[previousIndex];
+                Previous = inputString[previousIndex];
             else
-                previous = ' ';
+                Previous = ' ';
         }
 
         public void Commit()

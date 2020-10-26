@@ -5,6 +5,7 @@ using ExplorerBeta.Config;
 using ExplorerBeta.Input;
 using ExplorerBeta.UI;
 using ExplorerBeta.UI.Main;
+using System.Reflection;
 using UnityEngine;
 
 namespace ExplorerBeta
@@ -56,6 +57,12 @@ namespace ExplorerBeta
             InputManager.Init();
             ForceUnlockCursor.Init();
 
+#if CPP
+            Application.add_logMessageReceived(new Action<string, string, LogType>(LogCallback));
+#else
+            Application.logMessageReceived += LogCallback;
+#endif
+
             ShowMenu = true;
 
             Log($"{NAME} initialized.");
@@ -89,7 +96,7 @@ namespace ExplorerBeta
             {
                 m_timeSinceStartup += Time.deltaTime;
 
-                if (m_timeSinceStartup > 1f)
+                if (m_timeSinceStartup > 0.1f)
                 {
                     UIManager.Init();
 
@@ -115,9 +122,36 @@ namespace ExplorerBeta
             UIManager.OnSceneChange();
         }
 
-        public static void Log(object message)
+        private void LogCallback(string message, string stackTrace, LogType type)
+        {
+            if (!DebugConsole.LogUnity)
+                return;
+
+            message = $"[UNITY] {message}";
+
+            switch (type)
+            {
+                case LogType.Assert:
+                case LogType.Log:
+                    Log(message);
+                    break;
+                case LogType.Warning:
+                    LogWarning(message);
+                    break;
+                case LogType.Exception:
+                case LogType.Error:
+                    LogError(message);
+                    break;
+            }
+        }
+
+        public static void Log(object message, bool unity = false)
         {
             DebugConsole.Log(message?.ToString());
+
+            if (unity)
+                return;
+
 #if ML
             MelonLoader.MelonLogger.Log(message?.ToString());
 #else
@@ -125,23 +159,31 @@ namespace ExplorerBeta
 #endif
         }
 
-        public static void LogWarning(object message)
+        public static void LogWarning(object message, bool unity = false)
         {
             DebugConsole.Log(message?.ToString(), "FFFF00");
+
+            if (unity)
+                return;
+
 #if ML
             MelonLoader.MelonLogger.LogWarning(message?.ToString());
 #else
-            ExplorerBepInPlugin.Logging?.LogWarning(message?.ToString());
+                        ExplorerBepInPlugin.Logging?.LogWarning(message?.ToString());
 #endif
         }
 
-        public static void LogError(object message)
+        public static void LogError(object message, bool unity = false)
         {
             DebugConsole.Log(message?.ToString(), "FF0000");
+
+            if (unity)
+                return;
+
 #if ML
             MelonLoader.MelonLogger.LogError(message?.ToString());
 #else
-            ExplorerBepInPlugin.Logging?.LogError(message?.ToString());
+                        ExplorerBepInPlugin.Logging?.LogError(message?.ToString());
 #endif
         }
     }

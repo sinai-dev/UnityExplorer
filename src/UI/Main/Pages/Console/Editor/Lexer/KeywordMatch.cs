@@ -18,7 +18,7 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
 
         private readonly HashSet<string> shortlist = new HashSet<string>();
         private readonly Stack<string> removeList = new Stack<string>();
-        private string[] keywordCache = null;
+        public string[] keywordCache = null;
 
         public override bool IsImplicitMatch(ILexer lexer)
         {
@@ -34,7 +34,7 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
             char currentChar = lexer.ReadNext();
 
             for (int i = 0; i < keywordCache.Length; i++)
-                if (CompareChar(keywordCache[i][0], currentChar))
+                if (keywordCache[i][0] == currentChar)
                     shortlist.Add(keywordCache[i]);
 
             if (shortlist.Count == 0)
@@ -61,8 +61,7 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
 
                 foreach (string keyword in shortlist)
                 {
-                    if (currentIndex >= keyword.Length ||
-                        !CompareChar(keyword[currentIndex], currentChar))
+                    if (currentIndex >= keyword.Length || keyword[currentIndex] != currentChar)
                     {
                         removeList.Push(keyword);
                     }
@@ -103,8 +102,5 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
                 keywordCache = list.ToArray();
             }
         }
-
-        private bool CompareChar(char a, char b) => 
-            (a == b) || (char.ToUpper(a, CultureInfo.CurrentCulture) == char.ToUpper(b, CultureInfo.CurrentCulture));
     }
 }

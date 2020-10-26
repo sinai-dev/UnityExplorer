@@ -8,6 +8,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using ExplorerBeta.UI.Shared;
 using Explorer.UI.Main.Pages;
+using Explorer.UI.Main.Pages.Console;
 
 namespace ExplorerBeta.UI.Main
 {
@@ -41,6 +42,7 @@ namespace ExplorerBeta.UI.Main
 
             Pages.Add(new HomePage());
             Pages.Add(new SearchPage());
+            // TODO remove page on games where it failed to init?
             Pages.Add(new ConsolePage());
             Pages.Add(new OptionsPage());
 
@@ -60,13 +62,16 @@ namespace ExplorerBeta.UI.Main
             m_activePage?.Update();
         }
 
-        // todo
         private void SetPage(BaseMenuPage page)
         {
             if (m_activePage == page || page == null)
                 return;
 
             m_activePage?.Content?.SetActive(false);
+            if (m_activePage is ConsolePage)
+            {
+                AutoCompleter.m_mainObj.SetActive(false);
+            }
 
             m_activePage = page;
 
@@ -162,7 +167,11 @@ namespace ExplorerBeta.UI.Main
             var hideBtnObj = UIFactory.CreateButton(titleBar);
 
             var hideBtn = hideBtnObj.GetComponent<Button>();
+#if CPP
             hideBtn.onClick.AddListener(new Action(() => { ExplorerCore.ShowMenu = false; }));
+#else
+            hideBtn.onClick.AddListener(() => { ExplorerCore.ShowMenu = false; });
+#endif
             var colorBlock = hideBtn.colors;
             colorBlock.normalColor = new Color(65f/255f, 23f/255f, 23f/255f);
             colorBlock.pressedColor = new Color(35f/255f, 10f/255f, 10f/255f);
@@ -208,7 +217,11 @@ namespace ExplorerBeta.UI.Main
 
                 page.RefNavbarButton = btn;
 
+#if CPP
                 btn.onClick.AddListener(new Action(() => { SetPage(page); }));
+#else
+                btn.onClick.AddListener(() => { SetPage(page); });
+#endif
 
                 var text = btnObj.GetComponentInChildren<Text>();
                 text.text = page.Name;
@@ -235,6 +248,6 @@ namespace ExplorerBeta.UI.Main
             PageViewport = mainObj;
         }
 
-        #endregion
+#endregion
     }
 }

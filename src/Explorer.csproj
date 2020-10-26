@@ -12,7 +12,7 @@
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
     <OutputPath>..\Release\Explorer.MelonLoader.Il2Cpp\</OutputPath>
-    <DefineConstants>CPP,ML</DefineConstants>
+    <DefineConstants></DefineConstants>
     <IsCpp>true</IsCpp>
     <IsMelonLoader>true</IsMelonLoader>
     <DebugSymbols>false</DebugSymbols>
@@ -25,18 +25,22 @@
     <RootNamespace>Explorer</RootNamespace>
     <AssemblyName>ExplorerBeta</AssemblyName>
     <!-- Set this to the MelonLoader Il2Cpp Game folder, without the ending '\' character. -->
-    <MLCppGameFolder>D:\Steam\steamapps\common\Hellpoint</MLCppGameFolder>
+    <MLCppGameFolder>D:\Steam\steamapps\common\VRChat</MLCppGameFolder>
     <!-- Set this to the MelonLoader Mono Game folder, without the ending '\' character. -->
     <MLMonoGameFolder>D:\Steam\steamapps\common\Outward</MLMonoGameFolder>
+    <!-- Set this to the Mono Managed folder, without the ending '\' character. -->
+    <MLMonoManagedFolder>D:\Steam\steamapps\common\Outward\Outward_Data\Managed</MLMonoManagedFolder>
     <!-- Set this to the BepInEx Il2Cpp Game folder, without the ending '\' character. -->
     <BIECppGameFolder>D:\Steam\steamapps\common\Outward_Il2Cpp</BIECppGameFolder>
     <!-- Set this to the BepInEx Mono Game folder, without the ending '\' character. -->
     <BIEMonoGameFolder>D:\Steam\steamapps\common\Outward</BIEMonoGameFolder>
+    <!-- Set this to the BepInEx Managed folder, without the ending '\' character. -->
+    <BIEMonoManagedFolder>D:\Steam\steamapps\common\Outward\Outward_Data\Managed</BIEMonoManagedFolder>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_ML_Cpp|AnyCPU' ">
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <!-- <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion> -->
     <OutputPath>..\Release\Explorer.MelonLoader.Il2Cpp\</OutputPath>
     <DefineConstants>CPP,ML</DefineConstants>
     <IsCpp>true</IsCpp>
@@ -44,7 +48,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_ML_Mono|AnyCPU' ">
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <!-- <TargetFrameworkVersion>v3.5</TargetFrameworkVersion> -->
     <OutputPath>..\Release\Explorer.MelonLoader.Mono\</OutputPath>
     <DefineConstants>MONO,ML</DefineConstants>
     <Prefer32Bit>false</Prefer32Bit>
@@ -53,7 +57,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_BIE_Cpp|AnyCPU' ">
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <!-- <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion> -->
     <OutputPath>..\Release\Explorer.BepInEx.Il2Cpp\</OutputPath>
     <DefineConstants>CPP,BIE</DefineConstants>
     <IsCpp>true</IsCpp>
@@ -61,7 +65,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_BIE_Mono|AnyCPU' ">
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <!-- <TargetFrameworkVersion>v3.5</TargetFrameworkVersion> -->
     <OutputPath>..\Release\Explorer.BepInEx.Mono\</OutputPath>
     <DefineConstants>MONO,BIE</DefineConstants>
     <IsCpp>false</IsCpp>
@@ -81,24 +85,71 @@
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-  <!-- Universal Mono UnityEngine.dll ref (v5.3) -->
+  
+  <!-- Universal Mono UnityEngine.dll ref (v5.3) --><!--
   <ItemGroup Condition="'$(IsCpp)'=='false'">
     <Reference Include="UnityEngine">
       <HintPath>..\lib\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\lib\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
       <HintPath>..\lib\Unity.TextMeshPro.dll</HintPath>
       <Private>False</Private>
     </Reference>
-  </ItemGroup>
-  <!-- MelonLoader Mono ref -->
+  </ItemGroup>-->
+  
+  <!-- MelonLoader Mono refs -->
   <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)'=='true|false'">
     <Reference Include="MelonLoader.ModHandler">
       <HintPath>$(MLMonoGameFolder)\MelonLoader\MelonLoader.ModHandler.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>$(MLMonoManagedFolder)\Unity.TextMeshPro.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(MLMonoManagedFolder)\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(MLMonoManagedFolder)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>$(MLMonoManagedFolder)\UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextCoreModule">
+      <HintPath>$(MLMonoManagedFolder)\UnityEngine.TextCoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>$(MLMonoManagedFolder)\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(MLMonoManagedFolder)\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>$(MLMonoManagedFolder)\UnityEngine.UIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(MLMonoManagedFolder)\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>$(MLMonoManagedFolder)\UnityEngine.ImageConversionModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
+  
   <!-- BepInEx Mono refs -->
   <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)'=='false|false'">
     <Reference Include="BepInEx">
@@ -109,7 +160,48 @@
       <HintPath>$(BIEMonoGameFolder)\BepInEx\core\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>$(BIEMonoManagedFolder)\Unity.TextMeshPro.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(BIEMonoManagedFolder)\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(BIEMonoManagedFolder)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>$(BIEMonoManagedFolder)\UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextCoreModule">
+      <HintPath>$(BIEMonoManagedFolder)\UnityEngine.TextCoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>$(BIEMonoManagedFolder)\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(BIEMonoManagedFolder)\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>$(BIEMonoManagedFolder)\UnityEngine.UIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(BIEMonoManagedFolder)\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>$(BIEMonoManagedFolder)\UnityEngine.ImageConversionModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
+  
   <!-- MelonLoader Il2Cpp refs -->
   <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)'=='true|true'">
     <Reference Include="MelonLoader.ModHandler">
@@ -165,6 +257,7 @@
       <Private>False</Private>
     </Reference>
   </ItemGroup>
+  
   <!-- BepInEx Il2Cpp refs -->
   <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)'=='false|true'">
     <Reference Include="BepInEx">
@@ -247,7 +340,7 @@
     <Compile Include="Helpers\UnityHelpers.cs" />
     <Compile Include="UI\ForceUnlockCursor.cs" />
     <Compile Include="Input\IAbstractInput.cs" />
-    <Compile Include="Tests\TestClass.cs" />
+    <Compile Include="CacheObject\Tests\TestClass.cs" />
     <Compile Include="Input\InputManager.cs" />
     <Compile Include="Input\InputSystem.cs" />
     <Compile Include="Input\LegacyInput.cs" />
@@ -256,6 +349,7 @@
     <Compile Include="UI\Main\MainMenu.cs" />
     <Compile Include="UI\Main\Pages\BaseMenuPage.cs" />
     <Compile Include="UI\Main\Pages\ConsolePage.cs" />
+    <Compile Include="UI\Main\Pages\Console\AutoCompleter.cs" />
     <Compile Include="UI\Main\Pages\Console\Editor\CodeEditor.cs" />
     <Compile Include="UI\Main\Pages\Console\Editor\CSharpLexer.cs" />
     <Compile Include="UI\Main\Pages\Console\Editor\Lexer\CommentMatch.cs" />

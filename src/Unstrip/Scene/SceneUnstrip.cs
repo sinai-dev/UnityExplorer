@@ -16,13 +16,18 @@ namespace ExplorerBeta.Unstrip.Scenes
 
         internal delegate void d_GetRootGameObjects(int handle, IntPtr list);
 
-        public static GameObject[] GetRootGameObjects(Scene scene)
+        public static GameObject[] GetRootGameObjects(Scene scene) => GetRootGameObjects(scene.handle);
+
+        public static GameObject[] GetRootGameObjects(int handle)
         {
-            var list = new Il2CppSystem.Collections.Generic.List<GameObject>(GetRootCount(scene));
+            if (handle == -1)
+                return new GameObject[0];
+
+            var list = new Il2CppSystem.Collections.Generic.List<GameObject>(GetRootCount(handle));
 
             var iCall = ICallHelper.GetICall<d_GetRootGameObjects>("UnityEngine.SceneManagement.Scene::GetRootGameObjectsInternal");
 
-            iCall.Invoke(scene.handle, list.Pointer);
+            iCall.Invoke(handle, list.Pointer);
 
             return list.ToArray();
         }
@@ -31,10 +36,12 @@ namespace ExplorerBeta.Unstrip.Scenes
 
         internal delegate int GetRootCountInternal_delegate(int handle);
 
-        public static int GetRootCount(Scene scene)
+        public static int GetRootCount(Scene scene) => GetRootCount(scene.handle);
+
+        public static int GetRootCount(int handle)
         {
             var iCall = ICallHelper.GetICall<GetRootCountInternal_delegate>("UnityEngine.SceneManagement.Scene::GetRootCountInternal");
-            return iCall.Invoke(scene.handle);
+            return iCall.Invoke(handle);
         }
     }
 }

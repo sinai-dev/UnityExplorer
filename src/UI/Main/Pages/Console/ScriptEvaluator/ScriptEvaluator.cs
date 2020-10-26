@@ -8,7 +8,7 @@ using Mono.CSharp;
 
 namespace Explorer.UI.Main.Pages.Console
 {
-    internal class ScriptEvaluator : Evaluator, IDisposable
+    public class ScriptEvaluator : Evaluator, IDisposable
     {
         private static readonly HashSet<string> StdLib = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase)
         {

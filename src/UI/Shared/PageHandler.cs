@@ -79,8 +79,6 @@ namespace ExplorerBeta.UI.Shared
 
         #region UI
 
-        // TODO
-
         private GameObject m_pageUIHolder;
         private Text m_currentPageLabel;
 
@@ -111,7 +109,11 @@ namespace ExplorerBeta.UI.Shared
 
             var leftBtnObj = UIFactory.CreateButton(m_pageUIHolder);
             var leftBtn = leftBtnObj.GetComponent<Button>();
+#if CPP
             leftBtn.onClick.AddListener(new Action(() => { TurnPage(Turn.Left); }));
+#else
+            leftBtn.onClick.AddListener(() => { TurnPage(Turn.Left); });
+#endif
             var leftBtnText = leftBtnObj.GetComponentInChildren<Text>();
             leftBtnText.text = "<";
             var leftBtnLayout = leftBtnObj.AddComponent<LayoutElement>();
@@ -131,7 +133,11 @@ namespace ExplorerBeta.UI.Shared
 
             var rightBtnObj = UIFactory.CreateButton(m_pageUIHolder);
             var rightBtn = rightBtnObj.GetComponent<Button>();
+#if CPP
             rightBtn.onClick.AddListener(new Action(() => { TurnPage(Turn.Right); }));
+#else
+            rightBtn.onClick.AddListener(() => { TurnPage(Turn.Right); });
+#endif
             var rightBtnText = rightBtnObj.GetComponentInChildren<Text>();
             rightBtnText.text = ">";
             var rightBtnLayout = rightBtnObj.AddComponent<LayoutElement>();
@@ -150,6 +156,6 @@ namespace ExplorerBeta.UI.Shared
             m_currentPageLabel.text = $"Page {m_currentPage + 1} / {LastPage + 1}";
         }
 
-        #endregion
+#endregion
     }
 }

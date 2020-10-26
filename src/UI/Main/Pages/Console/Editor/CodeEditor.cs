@@ -8,6 +8,7 @@ using ExplorerBeta.Input;
 using Explorer.UI.Main.Pages.Console.Lexer;
 using ExplorerBeta;
 using System.Linq;
+using UnityEngine.EventSystems;
 
 namespace Explorer.UI.Main.Pages.Console
 {
@@ -17,7 +18,7 @@ namespace Explorer.UI.Main.Pages.Console
 
         public TMP_InputField InputField { get; }
 
-        private readonly TextMeshProUGUI inputText;
+        public readonly TextMeshProUGUI inputText;
         private readonly TextMeshProUGUI inputHighlightText;
         private readonly TextMeshProUGUI lineText;
         private readonly Image background;
@@ -25,7 +26,6 @@ namespace Explorer.UI.Main.Pages.Console
         private readonly Image lineNumberBackground;
         private readonly Image scrollbar;
 
-        private string lastText;
         private bool lineHighlightLocked;
         private readonly RectTransform inputTextTransform;
         private readonly RectTransform lineHighlightTransform;
@@ -90,33 +90,41 @@ namespace Explorer.UI.Main.Pages.Console
             inputLexer.UseMatchers(CSharpLexer.DelimiterSymbols, CSharpLexer.Matchers);
 
             // subscribe to text input changing
+#if CPP
             this.InputField.onValueChanged.AddListener(new Action<string>((string s) => { OnInputChanged(); }));
+#else
+            this.InputField.onValueChanged.AddListener((string s) => { OnInputChanged(); });
+#endif
         }
 
         public void Update()
         {
             // Check for new line
-            if (InputManager.GetKeyDown(KeyCode.Return))
+            if (ConsolePage.EnableAutoIndent && InputManager.GetKeyDown(KeyCode.Return))
             {
                 AutoIndentCaret();
             }
 
-            bool focusKeyPressed = false;
-
-            // Check for any focus key pressed
-            foreach (KeyCode key in lineChangeKeys)
+            if (EventSystem.current?.currentSelectedGameObject?.name == "InputField (TMP)")
             {
-                if (InputManager.GetKeyDown(key))
+                bool focusKeyPressed = false;
+
+                // Check for any focus key pressed
+                foreach (KeyCode key in lineChangeKeys)
                 {
-                    focusKeyPressed = true;
-                    break;
+                    if (InputManager.GetKeyDown(key))
+                    {
+                        focusKeyPressed = true;
+                        break;
+                    }
                 }
-            }
 
-            // Update line highlight
-            if (focusKeyPressed || InputManager.GetMouseButton(0))
-            {
-                UpdateHighlight();
+                // Update line highlight
+                if (focusKeyPressed || InputManager.GetMouseButton(0))
+                {
+                    UpdateHighlight();
+                    ConsolePage.Instance.OnInputChanged();
+                }
             }
         }
 
@@ -126,25 +134,19 @@ namespace Explorer.UI.Main.Pages.Console
 
             UpdateIndent();
 
-            if ((!forceUpdate && lastText == newText) || string.IsNullOrEmpty(newText))
+            if (!forceUpdate && string.IsNullOrEmpty(newText))
             {
-                if (string.IsNullOrEmpty(newText))
-                {
-                    inputHighlightText.text = string.Empty;
-                }
-
-                UpdateLineNumbers();
-                UpdateHighlight();
-                return;
+                inputHighlightText.text = string.Empty;
+            }
+            else
+            {
+                inputHighlightText.text = SyntaxHighlightContent(newText);
             }
 
-            inputHighlightText.text = SyntaxHighlightContent(newText);
-
-            // Sync line numbers and update the line highlight
             UpdateLineNumbers();
             UpdateHighlight();
 
-            this.lastText = newText;
+            ConsolePage.Instance.OnInputChanged();
         }
 
         public void SetLineHighlight(int lineNumber, bool lockLineHighlight)
@@ -217,12 +219,12 @@ namespace Explorer.UI.Main.Pages.Console
         {
             int caret = InputField.caretPosition;
             
-            if (caret < 0 || caret >= inputText.textInfo.characterInfo.Count)
+            if (caret < 0 || caret >= inputText.textInfo.characterInfo.Length)
             {
-                while (caret >= 0 && caret >= inputText.textInfo.characterInfo.Count)
+                while (caret >= 0 && caret >= inputText.textInfo.characterInfo.Length)
                     caret--;
 
-                if (caret < 0 || caret >= inputText.textInfo.characterInfo.Count)
+                if (caret < 0 || caret >= inputText.textInfo.characterInfo.Length)
                 {
                     return;
                 }
@@ -357,6 +359,7 @@ namespace Explorer.UI.Main.Pages.Console
             inputText.Rebuild(CanvasUpdate.Prelayout);
             InputField.ForceLabelUpdate();
             InputField.Rebuild(CanvasUpdate.Prelayout);
+
             OnInputChanged(true);
         }
 
@@ -394,10 +397,6 @@ namespace Explorer.UI.Main.Pages.Console
             lineNumberBackground.color = lineNumberBackgroundColor;
             lineText.color = lineNumberTextColor;
             scrollbar.color = scrollbarColor;
-        }
-
-        private void ApplyLanguage()
-        {
         }
 
         private bool AllReferencesAssigned()

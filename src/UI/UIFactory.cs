@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using TMPro;
 using UnityEngine;
@@ -11,25 +12,10 @@ namespace ExplorerBeta.UI
 {
 	public static class UIFactory
 	{
-		private static Vector2 s_ThickElementSize = new Vector2(160f, 30f);
-		private static Vector2 s_ThinElementSize = new Vector2(160f, 20f);
-		private static Color s_DefaultSelectableColor = new Color(1f, 1f, 1f, 1f);
-		private static Color s_TextColor = new Color(0.95f, 0.95f, 0.95f, 1f);
-		//private static Color s_PanelColor = new Color(0.1f, 0.1f, 0.1f, 1.0f);
-		//private static Vector2 s_ImageElementSize = new Vector2(100f, 100f);
-
-		public static Resources UIResources { get; set; }
-
-		public struct Resources
-		{
-			public Sprite standard;
-			public Sprite background;
-			public Sprite inputField;
-			public Sprite knob;
-			public Sprite checkmark;
-			public Sprite dropdown;
-			public Sprite mask;
-		}
+		private static Vector2 thickSize = new Vector2(160f, 30f);
+		private static Vector2 thinSize = new Vector2(160f, 20f);
+		private static Color defaultTextColor = new Color(0.95f, 0.95f, 0.95f, 1f);
+		private static Font m_defaultFont;
 
 		public static GameObject CreateUIObject(string name, GameObject parent, Vector2 size = default)
 		{
@@ -48,10 +34,14 @@ namespace ExplorerBeta.UI
 
 		private static void SetDefaultTextValues(Text lbl)
 		{
-			lbl.color = s_TextColor;
-			lbl.AssignDefaultFont();
-			//lbl.alignment = alignment;
-			//lbl.resizeTextForBestFit = true;
+			lbl.color = defaultTextColor;
+
+			if (!m_defaultFont)
+            {
+				m_defaultFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            }
+
+			lbl.font = m_defaultFont;
 		}
 
 		private static void SetDefaultColorTransitionValues(Selectable selectable)
@@ -65,9 +55,21 @@ namespace ExplorerBeta.UI
 			// fix to make all buttons become de-selected after being clicked.
 			// this is because i'm not setting any ColorBlock.selectedColor, because it is commonly stripped.
 			if (selectable is Button button)
-            {
-				button.onClick.AddListener(new Action(() => { button.OnDeselect(EventSystem.current?.baseEventDataCache); }));
-            }
+			{
+#if CPP
+				button.onClick.AddListener(new Action(() => 
+				{
+					button.OnDeselect(null); 
+				}));
+#else
+				button.onClick.AddListener(Deselect);
+
+                void Deselect()
+                {
+					button.OnDeselect(null);
+                }
+#endif
+			}
 
 			selectable.colors = colors;
 		}
@@ -94,7 +96,7 @@ namespace ExplorerBeta.UI
 
 		public static GameObject CreatePanel(GameObject parent, string name, out GameObject content)
 		{
-			GameObject panelObj = CreateUIObject($"Panel_{name}", parent, s_ThickElementSize);
+			GameObject panelObj = CreateUIObject($"Panel_{name}", parent, thickSize);
 
 			RectTransform rect = panelObj.GetComponent<RectTransform>();
 			rect.anchorMin = Vector2.zero;
@@ -173,7 +175,7 @@ namespace ExplorerBeta.UI
 
 		public static GameObject CreateLabel(GameObject parent, TextAnchor alignment)
 		{
-			GameObject labelObj = CreateUIObject("Label", parent, s_ThinElementSize);
+			GameObject labelObj = CreateUIObject("Label", parent, thinSize);
 
 			var text = labelObj.AddComponent<Text>();
 			SetDefaultTextValues(text);
@@ -185,16 +187,15 @@ namespace ExplorerBeta.UI
 
 		public static GameObject CreateButton(GameObject parent)
 		{
-			GameObject buttonObj = CreateUIObject("Button", parent, s_ThinElementSize);
+			GameObject buttonObj = CreateUIObject("Button", parent, thinSize);
 
 			GameObject textObj = new GameObject("Text");
 			textObj.AddComponent<RectTransform>();
 			SetParentAndAlign(textObj, buttonObj);
 
 			Image image = buttonObj.AddComponent<Image>();
-			image.sprite = UIResources.standard;
 			image.type = Image.Type.Sliced;
-			image.color = s_DefaultSelectableColor;
+			image.color = new Color(1, 1, 1, 1);
 
 			SetDefaultColorTransitionValues(buttonObj.AddComponent<Button>());
 
@@ -213,7 +214,7 @@ namespace ExplorerBeta.UI
 
 		public static GameObject CreateSlider(GameObject parent)
 		{
-			GameObject sliderObj = CreateUIObject("Slider", parent, s_ThinElementSize);
+			GameObject sliderObj = CreateUIObject("Slider", parent, thinSize);
 
 			GameObject bgObj = CreateUIObject("Background", sliderObj);
 			GameObject fillAreaObj = CreateUIObject("Fill Area", sliderObj);
@@ -222,9 +223,8 @@ namespace ExplorerBeta.UI
 			GameObject handleObj = CreateUIObject("Handle", handleSlideAreaObj);
 
 			Image bgImage = bgObj.AddComponent<Image>();
-			bgImage.sprite = UIResources.background;
 			bgImage.type = Image.Type.Sliced;
-			bgImage.color = s_DefaultSelectableColor;
+			bgImage.color = new Color(0.15f, 0.15f, 0.15f, 1.0f);
 
 			RectTransform bgRect = bgObj.GetComponent<RectTransform>();
 			bgRect.anchorMin = new Vector2(0f, 0.25f);
@@ -238,9 +238,8 @@ namespace ExplorerBeta.UI
 			fillAreaRect.sizeDelta = new Vector2(-20f, 0f);
 
 			Image fillImage = fillObj.AddComponent<Image>();
-			fillImage.sprite = UIResources.standard;
 			fillImage.type = Image.Type.Sliced;
-			fillImage.color = s_DefaultSelectableColor;
+			fillImage.color = new Color(0.3f, 0.3f, 0.3f, 1.0f);
 
 			fillObj.GetComponent<RectTransform>().sizeDelta = new Vector2(10f, 0f);
 
@@ -250,8 +249,7 @@ namespace ExplorerBeta.UI
 			handleSlideRect.anchorMax = new Vector2(1f, 1f);
 
 			Image handleImage = handleObj.AddComponent<Image>();
-			handleImage.sprite = UIResources.knob;
-			handleImage.color = s_DefaultSelectableColor;
+			handleImage.color = new Color(0.5f, 0.5f, 0.5f, 1.0f);
 
 			handleObj.GetComponent<RectTransform>().sizeDelta = new Vector2(20f, 0f);
 
@@ -267,7 +265,7 @@ namespace ExplorerBeta.UI
 
 		public static GameObject CreateScrollbar(GameObject parent)
 		{
-			GameObject scrollObj = CreateUIObject("Scrollbar", parent, s_ThinElementSize);
+			GameObject scrollObj = CreateUIObject("Scrollbar", parent, thinSize);
 
 			GameObject slideAreaObj = CreateUIObject("Sliding Area", scrollObj);
 			GameObject handleObj = CreateUIObject("Handle", slideAreaObj);
@@ -277,7 +275,6 @@ namespace ExplorerBeta.UI
 			scrollImage.color = new Color(0.1f, 0.1f, 0.1f);
 
 			Image handleImage = handleObj.AddComponent<Image>();
-			handleImage.sprite = UIResources.standard;
 			handleImage.type = Image.Type.Sliced;
 			handleImage.color = new Color(0.4f, 0.4f, 0.4f);
 
@@ -297,26 +294,39 @@ namespace ExplorerBeta.UI
 			return scrollObj;
 		}
 
-		public static GameObject CreateToggle(GameObject parent)
+		public static GameObject CreateToggle(GameObject parent, out Toggle toggle, out Text text)
 		{
-			GameObject toggleObj = CreateUIObject("Toggle", parent, s_ThinElementSize);
+			GameObject toggleObj = CreateUIObject("Toggle", parent, thinSize);
 
 			GameObject bgObj = CreateUIObject("Background", toggleObj);
 			GameObject checkObj = CreateUIObject("Checkmark", bgObj);
 			GameObject labelObj = CreateUIObject("Label", toggleObj);
 
-			Toggle toggle = toggleObj.AddComponent<Toggle>();
+			toggle = toggleObj.AddComponent<Toggle>();
 			toggle.isOn = true;
+			var toggleComp = toggle;
+#if CPP
+			toggle.onValueChanged.AddListener(new Action<bool>((bool val) => 
+			{
+				toggleComp.OnDeselect(null); 
+			}));
+#else
+			toggle.onValueChanged.AddListener(Deselect);
+
+			void Deselect(bool _)
+            {
+				toggleComp.OnDeselect(null);
+            }
+#endif
 
 			Image bgImage = bgObj.AddComponent<Image>();
-			bgImage.sprite = UIResources.standard;
 			bgImage.type = Image.Type.Sliced;
-			bgImage.color = s_DefaultSelectableColor;
+			bgImage.color = new Color(0.1f, 0.1f, 0.1f, 1.0f);
 
 			Image checkImage = checkObj.AddComponent<Image>();
-			checkImage.sprite = UIResources.checkmark;
+			checkImage.color = new Color(90f/255f, 115f/255f, 90f/255f, 1.0f);
 
-			Text text = labelObj.AddComponent<Text>();
+			text = labelObj.AddComponent<Text>();
 			text.text = "Toggle";
 			SetDefaultTextValues(text);
 
@@ -334,7 +344,7 @@ namespace ExplorerBeta.UI
 			checkRect.anchorMin = new Vector2(0.5f, 0.5f);
 			checkRect.anchorMax = new Vector2(0.5f, 0.5f);
 			checkRect.anchoredPosition = Vector2.zero;
-			checkRect.sizeDelta = new Vector2(20f, 20f);
+			checkRect.sizeDelta = new Vector2(14f, 14f);
 
 			RectTransform labelRect = labelObj.GetComponent<RectTransform>();
 			labelRect.anchorMin = new Vector2(0f, 0f);
@@ -353,7 +363,9 @@ namespace ExplorerBeta.UI
 			mainImage.color = new Color(38f / 255f, 38f / 255f, 38f / 255f, 1.0f);
 
 			var mainInput = mainObj.AddComponent<TMP_InputField>();
-			mainInput.navigation.mode = Navigation.Mode.None;
+			var nav = mainInput.navigation;
+			nav.mode = Navigation.Mode.None;
+			mainInput.navigation = nav;
 			mainInput.richText = true;
 			mainInput.isRichTextEditingAllowed = true;
 			mainInput.lineType = TMP_InputField.LineType.MultiLineNewline;
@@ -426,15 +438,14 @@ namespace ExplorerBeta.UI
 
 		public static GameObject CreateInputField(GameObject parent)
 		{
-			GameObject inputObj = CreateUIObject("InputField", parent, s_ThickElementSize);
+			GameObject inputObj = CreateUIObject("InputField", parent, thickSize);
 
 			GameObject placeholderObj = CreateUIObject("Placeholder", inputObj);
 			GameObject textObj = CreateUIObject("Text", inputObj);
 
 			Image inputImage = inputObj.AddComponent<Image>();
-			inputImage.sprite = UIResources.inputField;
 			inputImage.type = Image.Type.Sliced;
-			inputImage.color = s_DefaultSelectableColor;
+			inputImage.color = new Color(0.1f, 0.1f, 0.1f, 1.0f);
 
 			InputField inputField = inputObj.AddComponent<InputField>();
 			SetDefaultColorTransitionValues(inputField);
@@ -470,12 +481,11 @@ namespace ExplorerBeta.UI
 			return inputObj;
 		}
 
-		public static GameObject CreateDropdown(GameObject parent)
+		public static GameObject CreateDropdown(GameObject parent, out Dropdown dropdown)
 		{
-			GameObject dropdownObj = CreateUIObject("Dropdown", parent, s_ThickElementSize);
+			GameObject dropdownObj = CreateUIObject("Dropdown", parent, thickSize);
 
 			GameObject labelObj = CreateUIObject("Label", dropdownObj);
-			GameObject arrowObj = CreateUIObject("Arrow", dropdownObj);
 			GameObject templateObj = CreateUIObject("Template", dropdownObj);
 			GameObject viewportObj = CreateUIObject("Viewport", templateObj);
 			GameObject contentObj = CreateUIObject("Content", viewportObj);
@@ -500,19 +510,24 @@ namespace ExplorerBeta.UI
 			itemLabelText.alignment = TextAnchor.MiddleLeft;
 
 			Image itemBgImage = itemBgObj.AddComponent<Image>();
-			itemBgImage.color = new Color32(245, 245, 245, byte.MaxValue);
+			itemBgImage.color = new Color(0.5f, 0.5f, 0.5f, 1.0f);
 
-			Image itemCheckImage = itemCheckObj.AddComponent<Image>();
-			itemCheckImage.sprite = UIResources.checkmark;
+            Toggle itemToggle = itemObj.AddComponent<Toggle>();
+            itemToggle.targetGraphic = itemBgImage;
+            itemToggle.isOn = true;
+			var colors = itemToggle.colors;
+			colors.normalColor = new Color(0.15f, 0.15f, 0.15f, 1.0f);
+			colors.highlightedColor = new Color(0.25f, 0.25f, 0.25f, 1.0f);
+			itemToggle.colors = colors;
 
-			Toggle itemToggle = itemObj.AddComponent<Toggle>();
-			itemToggle.targetGraphic = itemBgImage;
-			itemToggle.graphic = itemCheckImage;
-			itemToggle.isOn = true;
-
+#if CPP
+			itemToggle.onValueChanged.AddListener(new Action<bool>((bool val) => { itemToggle.OnDeselect(null); }));
+#else
+			itemToggle.onValueChanged.AddListener((bool val) => { itemToggle.OnDeselect(null); });
+#endif
 			Image templateImage = templateObj.AddComponent<Image>();
-			templateImage.sprite = UIResources.standard;
 			templateImage.type = Image.Type.Sliced;
+			templateImage.color = new Color(0.15f, 0.15f, 0.15f, 1.0f);
 
 			ScrollRect scrollRect = templateObj.AddComponent<ScrollRect>();
             scrollRect.content = contentObj.GetComponent<RectTransform>();
@@ -526,37 +541,29 @@ namespace ExplorerBeta.UI
 			viewportObj.AddComponent<Mask>().showMaskGraphic = false;
 
 			Image viewportImage = viewportObj.AddComponent<Image>();
-			viewportImage.sprite = UIResources.mask;
 			viewportImage.type = Image.Type.Sliced;
 
 			Text labelText = labelObj.AddComponent<Text>();
 			SetDefaultTextValues(labelText);
 			labelText.alignment = TextAnchor.MiddleLeft;
 
-			arrowObj.AddComponent<Image>().sprite = UIResources.dropdown;
 			Image dropdownImage = dropdownObj.AddComponent<Image>();
-			dropdownImage.sprite = UIResources.standard;
-			dropdownImage.color = s_DefaultSelectableColor;
+			dropdownImage.color = new Color(0.2f, 0.2f, 0.2f, 1);
 			dropdownImage.type = Image.Type.Sliced;
 
-			Dropdown dropdown = dropdownObj.AddComponent<Dropdown>();
+			dropdown = dropdownObj.AddComponent<Dropdown>();
 			dropdown.targetGraphic = dropdownImage;
-			SetDefaultColorTransitionValues(dropdown);
 			dropdown.template = templateObj.GetComponent<RectTransform>();
 			dropdown.captionText = labelText;
 			dropdown.itemText = itemLabelText;
-			itemLabelText.text = "Option A";
+			itemLabelText.text = "1";
 			dropdown.options.Add(new Dropdown.OptionData
 			{
-				text = "Option A"
+				text = "2"
 			});
             dropdown.options.Add(new Dropdown.OptionData
             {
-                text = "Option B"
-            });
-            dropdown.options.Add(new Dropdown.OptionData
-            {
-                text = "Option C"
+                text = "3"
             });
 
             dropdown.RefreshShownValue();
@@ -566,12 +573,6 @@ namespace ExplorerBeta.UI
 			labelRect.anchorMax = Vector2.one;
 			labelRect.offsetMin = new Vector2(10f, 6f);
 			labelRect.offsetMax = new Vector2(-25f, -7f);
-
-			RectTransform arrowRect = arrowObj.GetComponent<RectTransform>();
-			arrowRect.anchorMin = new Vector2(1f, 0.5f);
-			arrowRect.anchorMax = new Vector2(1f, 0.5f);
-			arrowRect.sizeDelta = new Vector2(20f, 20f);
-			arrowRect.anchoredPosition = new Vector2(-15f, 0f);
 
 			RectTransform templateRect = templateObj.GetComponent<RectTransform>();
 			templateRect.anchorMin = new Vector2(0f, 0f);
@@ -602,12 +603,6 @@ namespace ExplorerBeta.UI
 			itemBgRect.anchorMin = Vector2.zero;
 			itemBgRect.anchorMax = Vector2.one;
 			itemBgRect.sizeDelta = Vector2.zero;
-
-			RectTransform itemCheckRect = itemCheckObj.GetComponent<RectTransform>();
-			itemCheckRect.anchorMin = new Vector2(0f, 0.5f);
-			itemCheckRect.anchorMax = new Vector2(0f, 0.5f);
-			itemCheckRect.sizeDelta = new Vector2(20f, 20f);
-			itemCheckRect.anchoredPosition = new Vector2(10f, 0f);
 
 			RectTransform itemLabelRect = itemLabelObj.GetComponent<RectTransform>();
 			itemLabelRect.anchorMin = Vector2.zero;
@@ -698,7 +693,7 @@ namespace ExplorerBeta.UI
 			scrollImage.color = (color == default) ? new Color(0.3f, 0.3f, 0.3f, 1f) : color;
 
 			Image viewportImage = viewportObj.AddComponent<Image>();
-			viewportImage.sprite = UIResources.mask;
+			//viewportImage.sprite = Theme.mask;
 			viewportImage.type = Image.Type.Sliced;
 			viewportImage.color = new Color(1, 1, 1, 1);
 

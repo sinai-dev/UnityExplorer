@@ -9,8 +9,6 @@ namespace Explorer.UI.Main.Pages.Console
 {
     public static class CSharpLexer
     {
-        // todo option to disable auto-indent
-        public static bool allowAutoIndent = true;
         public static char indentIncreaseCharacter = '{';
         public static char indentDecreaseCharacter = '}';
 

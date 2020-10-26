@@ -6,9 +6,11 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using ExplorerBeta.Input;
 using ExplorerBeta.Helpers;
-using ExplorerBeta.Unstrip.ImageConversion;
 using System.IO;
 using System.Linq;
+#if CPP
+using ExplorerBeta.Unstrip.ImageConversion;
+#endif
 
 namespace ExplorerBeta.UI
 {
@@ -102,7 +104,7 @@ namespace ExplorerBeta.UI
             return;
         }
 
-        #region DRAGGING
+#region DRAGGING
 
         public RectTransform DragableArea { get; set; }
         public bool WasDragging { get; set; }
@@ -132,9 +134,9 @@ namespace ExplorerBeta.UI
             UpdateResizeCache();
         }
 
-        #endregion
+#endregion
 
-        #region RESIZE
+#region RESIZE
 
         private const int RESIZE_THICKNESS = 10;
 
@@ -339,13 +341,13 @@ namespace ExplorerBeta.UI
 
             var image = m_resizeCursorImage.AddComponent<Image>();
             image.sprite = sprite;
-            var rect = image.transform.TryCast<RectTransform>();
+            var rect = image.transform.GetComponent<RectTransform>();
             rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 32);
             rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 32);
 
             m_resizeCursorImage.SetActive(false);
         }
 
-        #endregion
+#endregion
     }
 }

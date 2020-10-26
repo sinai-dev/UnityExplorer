@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Explorer.UI.Main.Pages.Console;
 using ExplorerBeta;
@@ -9,21 +10,28 @@ using ExplorerBeta.UI;
 using ExplorerBeta.UI.Main;
 using ExplorerBeta.Unstrip.Resources;
 using TMPro;
-using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.UI;
+#if CPP
+using UnhollowerRuntimeLib;
+#endif
 
 namespace Explorer.UI.Main.Pages
 {
+    // TODO: Maybe add interface for managing the Using directives of the console.
+    // Otherwise it's pretty much done.
+
     public class ConsolePage : BaseMenuPage
     {
         public override string Name => "C# Console";
 
         public static ConsolePage Instance { get; private set; }
 
-        private CodeEditor m_codeEditor;
+        public static bool EnableSuggestions { get; set; } = true;
+        public static bool EnableAutoIndent { get; set; } = true;
 
-        private ScriptEvaluator m_evaluator;
+        public CodeEditor m_codeEditor;
+        public ScriptEvaluator m_evaluator;
 
         public static List<AutoComplete> AutoCompletes = new List<AutoComplete>();
         public static List<string> UsingDirectives;
@@ -52,6 +60,8 @@ namespace Explorer.UI.Main.Pages
                 }
 
                 ConstructUI();
+
+                AutoCompleter.Init();
             }
             catch (Exception e)
             {
@@ -63,16 +73,11 @@ namespace Explorer.UI.Main.Pages
         public override void Update()
         {
             m_codeEditor?.Update();
+
+            AutoCompleter.Update();
         }
 
-        internal string AsmToUsing(string asm, bool richText = false)
-        {
-            if (richText)
-            {
-                return $"<color=#569cd6>using</color> {asm};";
-            }
-            return $"using {asm};";
-        }
+        internal string AsmToUsing(string asm) => $"using {asm};";
 
         public void AddUsing(string asm)
         {
@@ -121,111 +126,26 @@ namespace Explorer.UI.Main.Pages
             UsingDirectives = new List<string>();
         }
 
-        private static string m_prevInput = "NULL";
-
-        // TODO call from OnInputChanged
-
-        private void CheckAutocomplete()
+        internal void OnInputChanged()
         {
-            var input = m_codeEditor.InputField.text;
-            var caretIndex = m_codeEditor.InputField.caretPosition;
+            AutoCompleter.CheckAutocomplete();
 
-            if (!string.IsNullOrEmpty(input))
-            {
-                try
-                {
-                    var splitChars = new[] { ',', ';', '<', '>', '(', ')', '[', ']', '=', '|', '&' };
-
-                    // Credit ManlyMarco
-                    // Separate input into parts, grab only the part with cursor in it
-                    var start = caretIndex <= 0 ? 0 : input.LastIndexOfAny(splitChars, (int)(caretIndex - 1)) + 1;
-                    var end = caretIndex <= 0 ? input.Length : input.IndexOfAny(splitChars, (int)(caretIndex - 1));
-                    if (end < 0 || end < start) end = input.Length;
-                    input = input.Substring(start, end - start);
-                }
-                catch (ArgumentException) { }
-
-                if (!string.IsNullOrEmpty(input) && input != m_prevInput)
-                {
-                    GetAutocompletes(input);
-                }
-            }
-            else
-            {
-                ClearAutocompletes();
-            }
-
-            m_prevInput = input;
+            AutoCompleter.SetSuggestions(AutoCompletes.ToArray());
         }
 
-        private void ClearAutocompletes()
-        {
-            if (AutoCompletes.Any())
-            {
-                AutoCompletes.Clear();
-            }
-        }
 
-        private void UseAutocomplete(string suggestion)
+        public void UseAutocomplete(string suggestion)
         {
             int cursorIndex = m_codeEditor.InputField.caretPosition;
             var input = m_codeEditor.InputField.text;
             input = input.Insert(cursorIndex, suggestion);
             m_codeEditor.InputField.text = input;
+            m_codeEditor.InputField.caretPosition += suggestion.Length;
 
-            ClearAutocompletes();
+            AutoCompleter.ClearAutocompletes();
         }
 
-        private void GetAutocompletes(string input)
-        {
-            try
-            {
-                //ExplorerCore.Log("Fetching suggestions for input " + input);
-
-                // Credit ManylMarco
-                AutoCompletes.Clear();
-                var completions = m_evaluator.GetCompletions(input, out string prefix);
-                if (completions != null)
-                {
-                    if (prefix == null)
-                        prefix = input;
-
-                    AutoCompletes.AddRange(completions
-                        .Where(x => !string.IsNullOrEmpty(x))
-                        .Select(x => new AutoComplete(x, prefix, AutoComplete.Contexts.Other))
-                        );
-                }
-
-                var trimmed = input.Trim();
-                if (trimmed.StartsWith("using"))
-                    trimmed = trimmed.Remove(0, 5).Trim();
-
-                var namespaces = AutoCompleteHelpers.Namespaces
-                    .Where(x => x.StartsWith(trimmed) && x.Length > trimmed.Length)
-                    .Select(x => new AutoComplete(
-                        x.Substring(trimmed.Length),
-                        x.Substring(0, trimmed.Length),
-                        AutoComplete.Contexts.Namespace));
-
-                AutoCompletes.AddRange(namespaces);
-            }
-            catch (Exception ex)
-            {
-                ExplorerCore.Log("C# Console error:\r\n" + ex);
-                ClearAutocompletes();
-            }
-        }
-
-        // Call on OnInputChanged, or maybe limit frequency if its too laggy
-
-        // update autocomplete buttons 
-
-        private void RefreshAutocompleteButtons()
-        {
-            throw new NotImplementedException("TODO");
-        }
-
-        #region UI Construction
+#region UI Construction
 
         public void ConstructUI()
         {
@@ -240,6 +160,10 @@ namespace Explorer.UI.Main.Pages
             mainGroup.childControlWidth = true;
             mainGroup.childForceExpandHeight = true;
             mainGroup.childForceExpandWidth = true;
+
+#region TOP BAR 
+
+            // Main group object
 
             var topBarObj = UIFactory.CreateHorizontalGroup(Content);
             var topBarLayout = topBarObj.AddComponent<LayoutElement>();
@@ -256,6 +180,7 @@ namespace Explorer.UI.Main.Pages
             topBarGroup.childForceExpandWidth = true;
             topBarGroup.childControlWidth = true;
             topBarGroup.childControlHeight = true;
+            topBarGroup.childAlignment = TextAnchor.LowerCenter;
 
             var topBarLabel = UIFactory.CreateLabel(topBarObj, TextAnchor.MiddleLeft);
             var topBarLabelLayout = topBarLabel.AddComponent<LayoutElement>();
@@ -265,24 +190,72 @@ namespace Explorer.UI.Main.Pages
             topBarText.text = "C# Console";
             topBarText.fontSize = 20;
 
-            var compileBtnObj = UIFactory.CreateButton(topBarObj);
-            var compileBtnLayout = compileBtnObj.AddComponent<LayoutElement>();
-            compileBtnLayout.preferredWidth = 80;
-            compileBtnLayout.flexibleWidth = 0;
-            var compileButton = compileBtnObj.GetComponent<Button>();
-            var compileBtnColors = compileButton.colors;
-            compileBtnColors.normalColor = new Color(14f/255f, 106f/255f, 14f/255f);
-            compileButton.colors = compileBtnColors;
-            var btnText = compileBtnObj.GetComponentInChildren<Text>();
-            btnText.text = ">";
-            btnText.fontSize = 25;
-            btnText.color = Color.white;
+            // Enable Suggestions toggle
+
+            var suggestToggleObj = UIFactory.CreateToggle(topBarObj, out Toggle suggestToggle, out Text suggestToggleText);
+#if CPP
+            suggestToggle.onValueChanged.AddListener(new Action<bool>(SuggestToggleCallback));
+#else
+            suggestToggle.onValueChanged.AddListener(SuggestToggleCallback);
+#endif
+            void SuggestToggleCallback(bool val)
+            {
+                EnableSuggestions = val;
+                AutoCompleter.Update();
+            }
+
+            suggestToggleText.text = "Suggestions";
+            suggestToggleText.alignment = TextAnchor.UpperLeft;
+            var suggestTextPos = suggestToggleText.transform.localPosition;
+            suggestTextPos.y = -14;
+            suggestToggleText.transform.localPosition = suggestTextPos;
+
+            var suggestLayout = suggestToggleObj.AddComponent<LayoutElement>();
+            suggestLayout.minWidth = 120;
+            suggestLayout.flexibleWidth = 0;
+
+            var suggestRect = suggestToggleObj.transform.Find("Background");
+            var suggestPos = suggestRect.localPosition;
+            suggestPos.y = -14;
+            suggestRect.localPosition = suggestPos;
+
+            // Enable Auto-indent toggle
+
+            var autoIndentToggleObj = UIFactory.CreateToggle(topBarObj, out Toggle autoIndentToggle, out Text autoIndentToggleText);
+#if CPP
+            autoIndentToggle.onValueChanged.AddListener(new Action<bool>((bool val) => 
+            {
+                EnableAutoIndent = val;
+            }));
+#else
+            autoIndentToggle.onValueChanged.AddListener(OnIndentChanged);
+
+            void OnIndentChanged(bool val) => EnableAutoIndent = val;
+#endif
+            autoIndentToggleText.text = "Auto-indent";
+            autoIndentToggleText.alignment = TextAnchor.UpperLeft;
+            var autoIndentTextPos = autoIndentToggleText.transform.localPosition;
+            autoIndentTextPos.y = -14;
+            autoIndentToggleText.transform.localPosition = autoIndentTextPos;
+
+            var autoIndentLayout = autoIndentToggleObj.AddComponent<LayoutElement>();
+            autoIndentLayout.minWidth = 120;
+            autoIndentLayout.flexibleWidth = 0;
+
+            var autoIndentRect = autoIndentToggleObj.transform.Find("Background");
+            suggestPos = autoIndentRect.localPosition;
+            suggestPos.y = -14;
+            autoIndentRect.localPosition = suggestPos;
+
+#endregion
+
+#region CONSOLE INPUT
 
             var consoleBase = UIFactory.CreateUIObject("CodeEditor", Content);
 
             var consoleLayout = consoleBase.AddComponent<LayoutElement>();
             consoleLayout.preferredHeight = 500;
-            consoleLayout.flexibleHeight = 5;
+            consoleLayout.flexibleHeight = 50;
 
             consoleBase.AddComponent<RectMask2D>();
 
@@ -356,6 +329,11 @@ namespace Explorer.UI.Main.Pages
             var mainTextInput = mainTextObj.GetComponent<TextMeshProUGUI>();
             mainTextInput.fontSize = 18;
 
+            var placeHolderText = textAreaObj.transform.Find("Placeholder").GetComponent<TextMeshProUGUI>();
+            placeHolderText.text = @"Welcome to the Explorer C# Console!
+
+Use the <color=#c74e26>Help();</color> command for a list of available helper methods, or <color=#c74e26>Log(""[message]"");</color> to print something to console.";
+
             var linesTextObj = UIFactory.CreateUIObject("LinesText", mainTextObj.gameObject);
             var linesTextRect = linesTextObj.GetComponent<RectTransform>();
 
@@ -403,15 +381,49 @@ namespace Explorer.UI.Main.Pages
             tmpInput.GetComponentInChildren<RectMask2D>().enabled = false;
             inputObj.GetComponent<Image>().enabled = false;
 
-            // setup button callbacks
+#endregion
 
-            compileButton.onClick.AddListener(new Action(() => 
+#region COMPILE BUTTON
+
+            var compileBtnObj = UIFactory.CreateButton(Content);
+            var compileBtnLayout = compileBtnObj.AddComponent<LayoutElement>();
+            compileBtnLayout.preferredWidth = 80;
+            compileBtnLayout.flexibleWidth = 0;
+            compileBtnLayout.minHeight = 45;
+            compileBtnLayout.flexibleHeight = 0;
+            var compileButton = compileBtnObj.GetComponent<Button>();
+            var compileBtnColors = compileButton.colors;
+            compileBtnColors.normalColor = new Color(14f / 255f, 80f / 255f, 14f / 255f);
+            compileButton.colors = compileBtnColors;
+            var btnText = compileBtnObj.GetComponentInChildren<Text>();
+            btnText.text = "Run";
+            btnText.fontSize = 18;
+            btnText.color = Color.white;
+
+            // Set compile button callback now that we have the Input Field reference
+#if CPP
+            compileButton.onClick.AddListener(new Action(() =>
             {
                 if (!string.IsNullOrEmpty(tmpInput.text))
                 {
                     Evaluate(tmpInput.text.Trim());
                 }
             }));
+#else
+            compileButton.onClick.AddListener(CompileCallback);
+
+            void CompileCallback()
+            {
+                if (!string.IsNullOrEmpty(tmpInput.text))
+                {
+                    Evaluate(tmpInput.text.Trim());
+                }
+            }
+#endif
+
+            #endregion
+
+            #region FONT
 
             TMP_FontAsset fontToUse = null;
 #if CPP
@@ -439,16 +451,23 @@ namespace Explorer.UI.Main.Pages
 #endif
             if (fontToUse != null)
             {
-                fontToUse.faceInfo.tabWidth = 10;
-                fontToUse.tabSize = 10;
                 var faceInfo = fontToUse.faceInfo;
+                fontToUse.tabSize = 10;
                 faceInfo.tabWidth = 10;
+#if CPP
                 fontToUse.faceInfo = faceInfo;
+#else
+                typeof(TMP_FontAsset)
+                    .GetField("m_FaceInfo", BindingFlags.NonPublic | BindingFlags.Instance)
+                    .SetValue(fontToUse, faceInfo);
+#endif
 
                 tmpInput.fontAsset = fontToUse;
                 mainTextInput.font = fontToUse;
                 highlightTextInput.font = fontToUse;
             }
+
+#endregion
 
             try
             {

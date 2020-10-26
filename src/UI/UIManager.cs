@@ -19,10 +19,6 @@ namespace ExplorerBeta.UI
 
         public static void Init()
         {
-            var res = UIFactory.UIResources = new UIFactory.Resources();
-            var bg = CreateSprite(MakeSolidTexture(new Color(0.16f, 0.16f, 0.16f), 1, 1));
-            res.background = bg;
-
             // Create core UI Canvas and Event System handler
             CreateRootCanvas();
 
@@ -82,6 +78,7 @@ namespace ExplorerBeta.UI
                 }
 
                 // Fix for games which override the InputModule pointer events (eg, VRChat)
+#if CPP
                 if (InputModule.m_InputPointerEvent != null)
                 {
                     var evt = InputModule.m_InputPointerEvent;
@@ -90,6 +87,7 @@ namespace ExplorerBeta.UI
                         evt.eligibleForClick = true;
                     }
                 }
+#endif
             }
 
             if (PanelDragger.Instance != null)
