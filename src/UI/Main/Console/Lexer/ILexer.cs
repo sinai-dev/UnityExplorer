@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Explorer.UI.Main.Pages.Console.Lexer
+﻿namespace ExplorerBeta.UI.Main.Console.Lexer
 {
     public enum SpecialCharacterPosition
     {

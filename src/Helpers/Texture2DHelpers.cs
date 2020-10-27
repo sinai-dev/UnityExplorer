@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 using System.IO;
-using System.Reflection;
 #if CPP
 using ExplorerBeta.Unstrip.ImageConversion;
 #endif
@@ -61,9 +57,7 @@ namespace ExplorerBeta.Helpers
             Color[] pixels;
 
             if (!orig.IsReadable())
-            {
                 orig = ForceReadTexture(orig);
-            }
 
             pixels = orig.GetPixels((int)rect.x, (int)rect.y, (int)rect.width, (int)rect.height);
 
@@ -77,7 +71,7 @@ namespace ExplorerBeta.Helpers
         {
             try
             {
-                var origFilter = tex.filterMode;
+                FilterMode origFilter = tex.filterMode;
                 tex.filterMode = FilterMode.Point;
 
                 var rt = RenderTexture.GetTemporary(tex.width, tex.height, 0, RenderTextureFormat.ARGB32);
@@ -105,12 +99,10 @@ namespace ExplorerBeta.Helpers
         public static void SaveTextureAsPNG(Texture2D tex, string dir, string name, bool isDTXnmNormal = false)
         {
             if (!Directory.Exists(dir))
-            {
                 Directory.CreateDirectory(dir);
-            }
 
             byte[] data;
-            var savepath = dir + @"\" + name + ".png";
+            string savepath = dir + @"\" + name + ".png";
 
             // Make sure we can EncodeToPNG it.
             if (tex.format != TextureFormat.ARGB32 || !tex.IsReadable())
@@ -154,12 +146,12 @@ namespace ExplorerBeta.Helpers
 
             for (int i = 0; i < colors.Length; i++)
             {
-                Color c = colors[i];
+                var c = colors[i];
 
                 c.r = c.a * 2 - 1;  // red <- alpha
                 c.g = c.g * 2 - 1;  // green is always the same
 
-                Vector2 rg = new Vector2(c.r, c.g); //this is the red-green vector
+                var rg = new Vector2(c.r, c.g); //this is the red-green vector
                 c.b = Mathf.Sqrt(1 - Mathf.Clamp01(Vector2.Dot(rg, rg))); //recalculate the blue channel
 
                 colors[i] = new Color(

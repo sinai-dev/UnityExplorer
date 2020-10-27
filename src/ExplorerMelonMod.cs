@@ -1,8 +1,4 @@
 ﻿#if ML
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using MelonLoader;
 
 namespace ExplorerBeta

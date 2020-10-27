@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Text;
-using Explorer.UI.Main.Pages.Console;
-using ExplorerBeta;
-using ExplorerBeta.UI;
-using ExplorerBeta.UI.Main;
+using ExplorerBeta.UI.Main.Console;
 using ExplorerBeta.Unstrip.Resources;
 using TMPro;
 using UnityEngine;
@@ -16,12 +11,9 @@ using UnityEngine.UI;
 using UnhollowerRuntimeLib;
 #endif
 
-namespace Explorer.UI.Main.Pages
+namespace ExplorerBeta.UI.Main
 {
-    // TODO: Maybe add interface for managing the Using directives of the console.
-    // Otherwise it's pretty much done.
-
-    public class ConsolePage : BaseMenuPage
+    public class ConsolePage : MainMenu.Page
     {
         public override string Name => "C# Console";
 
@@ -33,7 +25,7 @@ namespace Explorer.UI.Main.Pages
         public CodeEditor m_codeEditor;
         public ScriptEvaluator m_evaluator;
 
-        public static List<AutoComplete> AutoCompletes = new List<AutoComplete>();
+        public static List<Suggestion> AutoCompletes = new List<Suggestion>();
         public static List<string> UsingDirectives;
 
         public static readonly string[] DefaultUsing = new string[]
@@ -54,7 +46,7 @@ namespace Explorer.UI.Main.Pages
             {
                 ResetConsole();
 
-                foreach (var use in DefaultUsing)
+                foreach (string use in DefaultUsing)
                 {
                     AddUsing(use);
                 }
@@ -66,7 +58,7 @@ namespace Explorer.UI.Main.Pages
             catch (Exception e)
             {
                 ExplorerCore.LogWarning($"Error setting up console!\r\nMessage: {e.Message}");
-                // TODO
+                // TODO remove page button from menu
             }
         }
 
@@ -77,32 +69,31 @@ namespace Explorer.UI.Main.Pages
             AutoCompleter.Update();
         }
 
-        internal string AsmToUsing(string asm) => $"using {asm};";
-
         public void AddUsing(string asm)
         {
             if (!UsingDirectives.Contains(asm))
             {
                 UsingDirectives.Add(asm);
-                Evaluate(AsmToUsing(asm), true);
+                Evaluate($"using {asm};", true);
             }
         }
 
-        public object Evaluate(string str, bool suppressWarning = false)
+        public void Evaluate(string str, bool suppressWarning = false)
         {
-            object ret = VoidType.Value;
-
-            m_evaluator.Compile(str, out var compiled);
+            m_evaluator.Compile(str, out Mono.CSharp.CompiledMethod compiled);
 
             if (compiled == null)
             {
                 if (!suppressWarning)
-                    ExplorerCore.LogWarning("Unable to compile the code!"); 
+                {
+                    ExplorerCore.LogWarning("Unable to compile the code!");
+                }
             }
             else
             {
                 try
                 {
+                    object ret = VoidType.Value;
                     compiled.Invoke(ref ret);
                 }
                 catch (Exception e)
@@ -110,8 +101,6 @@ namespace Explorer.UI.Main.Pages
                     ExplorerCore.LogWarning($"Exception executing code: {e.GetType()}, {e.Message}\r\n{e.StackTrace}");
                 }
             }
-
-            return ret;
         }
 
         public void ResetConsole()
@@ -133,11 +122,10 @@ namespace Explorer.UI.Main.Pages
             AutoCompleter.SetSuggestions(AutoCompletes.ToArray());
         }
 
-
         public void UseAutocomplete(string suggestion)
         {
             int cursorIndex = m_codeEditor.InputField.caretPosition;
-            var input = m_codeEditor.InputField.text;
+            string input = m_codeEditor.InputField.text;
             input = input.Insert(cursorIndex, suggestion);
             m_codeEditor.InputField.text = input;
             m_codeEditor.InputField.caretPosition += suggestion.Length;
@@ -145,15 +133,15 @@ namespace Explorer.UI.Main.Pages
             AutoCompleter.ClearAutocompletes();
         }
 
-#region UI Construction
+        #region UI Construction
 
         public void ConstructUI()
         {
             Content = UIFactory.CreateUIObject("C# Console", MainMenu.Instance.PageViewport);
 
             var mainLayout = Content.AddComponent<LayoutElement>();
-            mainLayout.preferredHeight = 300;
-            mainLayout.flexibleHeight = 4;
+            mainLayout.preferredHeight = 9900;
+            mainLayout.flexibleHeight = 9000;
 
             var mainGroup = Content.AddComponent<VerticalLayoutGroup>();
             mainGroup.childControlHeight = true;
@@ -161,12 +149,12 @@ namespace Explorer.UI.Main.Pages
             mainGroup.childForceExpandHeight = true;
             mainGroup.childForceExpandWidth = true;
 
-#region TOP BAR 
+            #region TOP BAR 
 
             // Main group object
 
             var topBarObj = UIFactory.CreateHorizontalGroup(Content);
-            var topBarLayout = topBarObj.AddComponent<LayoutElement>();
+            LayoutElement topBarLayout = topBarObj.AddComponent<LayoutElement>();
             topBarLayout.minHeight = 50;
             topBarLayout.flexibleHeight = 0;
 
@@ -223,7 +211,7 @@ namespace Explorer.UI.Main.Pages
 
             var autoIndentToggleObj = UIFactory.CreateToggle(topBarObj, out Toggle autoIndentToggle, out Text autoIndentToggleText);
 #if CPP
-            autoIndentToggle.onValueChanged.AddListener(new Action<bool>((bool val) => 
+            autoIndentToggle.onValueChanged.AddListener(new Action<bool>((bool val) =>
             {
                 EnableAutoIndent = val;
             }));
@@ -247,9 +235,9 @@ namespace Explorer.UI.Main.Pages
             suggestPos.y = -14;
             autoIndentRect.localPosition = suggestPos;
 
-#endregion
+            #endregion
 
-#region CONSOLE INPUT
+            #region CONSOLE INPUT
 
             var consoleBase = UIFactory.CreateUIObject("CodeEditor", Content);
 
@@ -287,7 +275,9 @@ namespace Explorer.UI.Main.Pages
 
             var lineHighlightImage = lineHighlight.GetComponent<Image>();
             if (!lineHighlightImage)
+            {
                 lineHighlightImage = lineHighlight.AddComponent<Image>();
+            }
 
             var linesBg = UIFactory.CreateUIObject("LinesBackground", consoleBase);
             var linesBgRect = linesBg.GetComponent<RectTransform>();
@@ -330,9 +320,21 @@ namespace Explorer.UI.Main.Pages
             mainTextInput.fontSize = 18;
 
             var placeHolderText = textAreaObj.transform.Find("Placeholder").GetComponent<TextMeshProUGUI>();
-            placeHolderText.text = @"Welcome to the Explorer C# Console!
+            placeHolderText.text = @"Welcome to the Explorer C# Console.
 
-Use the <color=#c74e26>Help();</color> command for a list of available helper methods, or <color=#c74e26>Log(""[message]"");</color> to print something to console.";
+The following helper methods are available:
+
+* <color=#c74e26>Log(""message"");</color> logs a message to the debug console
+* <color=#c74e26>AddUsing(""SomeNamespace"");</color> adds a using directive to the C# console
+* <color=#c74e26>GetUsing();</color> logs the current using directives to the debug console
+* <color=#c74e26>Reset();</color> resets all using directives and variables
+
+TODO:
+* <color=#c74e26>CurrentTarget();</color> returns the currently inspected target on the Home page
+* <color=#c74e26>AllTargets();</color> returns an object[] array containing all inspected instances
+* <color=#c74e26>Inspect(someObject)</color> to inspect an instance, eg. Inspect(Camera.main);
+* <color=#c74e26>Inspect(typeof(SomeClass))</color> to inspect a Class with static reflection
+";
 
             var linesTextObj = UIFactory.CreateUIObject("LinesText", mainTextObj.gameObject);
             var linesTextRect = linesTextObj.GetComponent<RectTransform>();
@@ -381,9 +383,9 @@ Use the <color=#c74e26>Help();</color> command for a list of available helper me
             tmpInput.GetComponentInChildren<RectMask2D>().enabled = false;
             inputObj.GetComponent<Image>().enabled = false;
 
-#endregion
+            #endregion
 
-#region COMPILE BUTTON
+            #region COMPILE BUTTON
 
             var compileBtnObj = UIFactory.CreateButton(Content);
             var compileBtnLayout = compileBtnObj.AddComponent<LayoutElement>();
@@ -427,10 +429,10 @@ Use the <color=#c74e26>Help();</color> command for a list of available helper me
 
             TMP_FontAsset fontToUse = null;
 #if CPP
-            var fonts = ResourcesUnstrip.FindObjectsOfTypeAll(Il2CppType.Of<TMP_FontAsset>());
-            foreach (var font in fonts)
+            UnityEngine.Object[] fonts = ResourcesUnstrip.FindObjectsOfTypeAll(Il2CppType.Of<TMP_FontAsset>());
+            foreach (UnityEngine.Object font in fonts)
             {
-                var fontCast = font.Il2CppCast(typeof(TMP_FontAsset)) as TMP_FontAsset;
+                TMP_FontAsset fontCast = font.Il2CppCast(typeof(TMP_FontAsset)) as TMP_FontAsset;
 
                 if (fontCast.name.Contains("LiberationSans"))
                 {
@@ -451,7 +453,7 @@ Use the <color=#c74e26>Help();</color> command for a list of available helper me
 #endif
             if (fontToUse != null)
             {
-                var faceInfo = fontToUse.faceInfo;
+                UnityEngine.TextCore.FaceInfo faceInfo = fontToUse.faceInfo;
                 fontToUse.tabSize = 10;
                 faceInfo.tabWidth = 10;
 #if CPP
@@ -467,7 +469,7 @@ Use the <color=#c74e26>Help();</color> command for a list of available helper me
                 highlightTextInput.font = fontToUse;
             }
 
-#endregion
+            #endregion
 
             try
             {
@@ -480,7 +482,7 @@ Use the <color=#c74e26>Help();</color> command for a list of available helper me
             }
         }
 
-#endregion
+        #endregion
 
         private class VoidType
         {

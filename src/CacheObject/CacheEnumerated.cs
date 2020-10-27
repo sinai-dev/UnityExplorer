@@ -3,9 +3,9 @@
 //using System.Collections.Generic;
 //using System.Linq;
 //using System.Text;
-//using Explorer.UI;
+//using ExplorerBeta.UI;
 
-//namespace Explorer.CacheObject
+//namespace ExplorerBeta.CacheObject
 //{
 //    public class CacheEnumerated : CacheObjectBase
 //    {

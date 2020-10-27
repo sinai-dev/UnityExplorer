@@ -14,21 +14,20 @@ namespace ExplorerBeta.Config
         [XmlIgnore] public static ModConfig Instance;
 
         // Actual configs
-        public KeyCode Main_Menu_Toggle    = KeyCode.F7;
+        public KeyCode Main_Menu_Toggle = KeyCode.F7;
         public Vector2 Default_Window_Size = new Vector2(550, 700);
-        public int     Default_Page_Limit  = 20;
-        public bool    Bitwise_Support     = false;
-        public bool    Tab_View            = true;
-        public string  Default_Output_Path = @"Mods\Explorer";
+        public int Default_Page_Limit = 20;
+        public bool Bitwise_Support = false;
+        public bool Tab_View = true;
+        public string Default_Output_Path = @"Mods\Explorer";
 
         public static void OnLoad()
         {
             if (!Directory.Exists(EXPLORER_FOLDER))
-            {
                 Directory.CreateDirectory(EXPLORER_FOLDER);
-            }
 
-            if (LoadSettings()) return;
+            if (LoadSettings())
+                return;
 
             Instance = new ModConfig();
             SaveSettings();
@@ -38,7 +37,9 @@ namespace ExplorerBeta.Config
         public static bool LoadSettings()
         {
             if (!File.Exists(SETTINGS_PATH))
+            {
                 return false;
+            }
 
             try
             {
@@ -58,7 +59,9 @@ namespace ExplorerBeta.Config
         public static void SaveSettings()
         {
             if (File.Exists(SETTINGS_PATH))
+            {
                 File.Delete(SETTINGS_PATH);
+            }
 
             using (var file = File.Create(SETTINGS_PATH))
             {

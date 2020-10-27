@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace ExplorerBeta.Input
 {
     // Just a stub for games where no Input module was able to load at all.
 
-    public class NoInput : IAbstractInput
+    public class NoInput : IHandleInput
     {
         public Vector2 MousePosition => Vector2.zero;
 

@@ -1,19 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ExplorerBeta.UI;
+using ExplorerBeta.UI.Main.Console;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
-using ExplorerBeta.UI.Shared;
-using Explorer.UI.Main.Pages;
-using Explorer.UI.Main.Pages.Console;
 
 namespace ExplorerBeta.UI.Main
 {
     public class MainMenu
     {
+        public abstract class Page
+        {
+            public abstract string Name { get; }
+
+            public GameObject Content;
+            public Button RefNavbarButton { get; set; }
+
+            public bool Enabled
+            {
+                get => Content?.activeSelf ?? false;
+                set => Content?.SetActive(true);
+            }
+
+
+            public abstract void Init();
+            public abstract void Update();
+        }
+
         public static MainMenu Instance { get; set; }
 
         public PanelDragger Dragger { get; private set; }
@@ -21,14 +33,14 @@ namespace ExplorerBeta.UI.Main
         public GameObject MainPanel { get; private set; }
         public GameObject PageViewport { get; private set; }
 
-        public readonly List<BaseMenuPage> Pages = new List<BaseMenuPage>();
-        private BaseMenuPage m_activePage;
+        public readonly List<Page> Pages = new List<Page>();
+        private Page m_activePage;
 
         // Navbar buttons
         private Button m_lastNavButtonPressed;
-        private readonly Color m_navButtonNormal = new Color(65f/255f, 66f/255f, 66f/255f);
-        private readonly Color m_navButtonHighlight = new Color(50f/255f, 195f/255f, 50f/255f);
-        private readonly Color m_navButtonSelected = new Color(60f/255f, 120f/255f, 60f/255f);
+        private readonly Color m_navButtonNormal = new Color(65f / 255f, 66f / 255f, 66f / 255f);
+        private readonly Color m_navButtonHighlight = new Color(50f / 255f, 195f / 255f, 50f / 255f);
+        private readonly Color m_navButtonSelected = new Color(60f / 255f, 120f / 255f, 60f / 255f);
 
         public MainMenu()
         {
@@ -48,7 +60,7 @@ namespace ExplorerBeta.UI.Main
 
             ConstructMenu();
 
-            foreach (var page in Pages)
+            foreach (Page page in Pages)
             {
                 page.Init();
                 page.Content?.SetActive(false);
@@ -62,10 +74,12 @@ namespace ExplorerBeta.UI.Main
             m_activePage?.Update();
         }
 
-        private void SetPage(BaseMenuPage page)
+        public void SetPage(Page page)
         {
             if (m_activePage == page || page == null)
+            {
                 return;
+            }
 
             m_activePage?.Content?.SetActive(false);
             if (m_activePage is ConsolePage)
@@ -77,16 +91,16 @@ namespace ExplorerBeta.UI.Main
 
             m_activePage.Content?.SetActive(true);
 
-            var button = page.RefNavbarButton;
+            Button button = page.RefNavbarButton;
 
-            var colors = button.colors;
+            ColorBlock colors = button.colors;
             colors.normalColor = m_navButtonSelected;
             //try { colors.selectedColor = m_navButtonSelected; } catch { }
             button.colors = colors;
 
             if (m_lastNavButtonPressed && m_lastNavButtonPressed != button)
             {
-                var oldColors = m_lastNavButtonPressed.colors;
+                ColorBlock oldColors = m_lastNavButtonPressed.colors;
                 oldColors.normalColor = m_navButtonNormal;
                 //try { oldColors.selectedColor = m_navButtonNormal; } catch { }
                 m_lastNavButtonPressed.colors = oldColors;
@@ -107,7 +121,7 @@ namespace ExplorerBeta.UI.Main
         {
             MainPanel = UIFactory.CreatePanel(UIManager.CanvasRoot, "MainMenu", out GameObject content);
 
-            var panelRect = MainPanel.GetComponent<RectTransform>();
+            RectTransform panelRect = MainPanel.GetComponent<RectTransform>();
             panelRect.anchorMin = new Vector2(0.25f, 0.1f);
             panelRect.anchorMax = new Vector2(0.75f, 0.95f);
 
@@ -129,9 +143,9 @@ namespace ExplorerBeta.UI.Main
         {
             // Core title bar holder
 
-            var titleBar = UIFactory.CreateHorizontalGroup(content);
+            GameObject titleBar = UIFactory.CreateHorizontalGroup(content);
 
-            var titleGroup = titleBar.GetComponent<HorizontalLayoutGroup>();
+            HorizontalLayoutGroup titleGroup = titleBar.GetComponent<HorizontalLayoutGroup>();
             titleGroup.childControlHeight = true;
             titleGroup.childControlWidth = true;
             titleGroup.childForceExpandHeight = true;
@@ -141,21 +155,21 @@ namespace ExplorerBeta.UI.Main
             titleGroup.padding.top = 3;
             titleGroup.padding.bottom = 3;
 
-            var titleLayout = titleBar.AddComponent<LayoutElement>();
+            LayoutElement titleLayout = titleBar.AddComponent<LayoutElement>();
             titleLayout.minHeight = 35;
             titleLayout.flexibleHeight = 0;
 
             // Explorer label
 
-            var textObj = UIFactory.CreateLabel(titleBar, TextAnchor.MiddleLeft);
+            GameObject textObj = UIFactory.CreateLabel(titleBar, TextAnchor.MiddleLeft);
 
-            var text = textObj.GetComponent<Text>();
+            Text text = textObj.GetComponent<Text>();
             text.text = $"<b>Explorer</b> <i>v{ExplorerCore.VERSION}</i>";
             text.resizeTextForBestFit = true;
             text.resizeTextMinSize = 12;
             text.resizeTextMaxSize = 20;
 
-            var textLayout = textObj.AddComponent<LayoutElement>();
+            LayoutElement textLayout = textObj.AddComponent<LayoutElement>();
             textLayout.flexibleWidth = 50;
 
             // Add PanelDragger using the label object
@@ -164,25 +178,25 @@ namespace ExplorerBeta.UI.Main
 
             // Hide button
 
-            var hideBtnObj = UIFactory.CreateButton(titleBar);
+            GameObject hideBtnObj = UIFactory.CreateButton(titleBar);
 
-            var hideBtn = hideBtnObj.GetComponent<Button>();
+            Button hideBtn = hideBtnObj.GetComponent<Button>();
 #if CPP
             hideBtn.onClick.AddListener(new Action(() => { ExplorerCore.ShowMenu = false; }));
 #else
             hideBtn.onClick.AddListener(() => { ExplorerCore.ShowMenu = false; });
 #endif
-            var colorBlock = hideBtn.colors;
-            colorBlock.normalColor = new Color(65f/255f, 23f/255f, 23f/255f);
-            colorBlock.pressedColor = new Color(35f/255f, 10f/255f, 10f/255f);
-            colorBlock.highlightedColor = new Color(156f/255f, 0f, 0f);
+            ColorBlock colorBlock = hideBtn.colors;
+            colorBlock.normalColor = new Color(65f / 255f, 23f / 255f, 23f / 255f);
+            colorBlock.pressedColor = new Color(35f / 255f, 10f / 255f, 10f / 255f);
+            colorBlock.highlightedColor = new Color(156f / 255f, 0f, 0f);
             hideBtn.colors = colorBlock;
 
-            var btnLayout = hideBtnObj.AddComponent<LayoutElement>();
+            LayoutElement btnLayout = hideBtnObj.AddComponent<LayoutElement>();
             btnLayout.minWidth = 90;
             btnLayout.flexibleWidth = 2;
 
-            var hideText = hideBtnObj.GetComponentInChildren<Text>();
+            Text hideText = hideBtnObj.GetComponentInChildren<Text>();
             // Todo use actual keycode from mod config, update on OnSettingsChanged or whatever
             hideText.text = "Hide (F7)";
             hideText.color = Color.white;
@@ -193,9 +207,9 @@ namespace ExplorerBeta.UI.Main
 
         private void ConstructNavbar(GameObject content)
         {
-            var navbarObj = UIFactory.CreateHorizontalGroup(content);
+            GameObject navbarObj = UIFactory.CreateHorizontalGroup(content);
 
-            var navGroup = navbarObj.GetComponent<HorizontalLayoutGroup>();
+            HorizontalLayoutGroup navGroup = navbarObj.GetComponent<HorizontalLayoutGroup>();
             navGroup.padding.left = 3;
             navGroup.padding.right = 3;
             navGroup.padding.top = 3;
@@ -206,14 +220,14 @@ namespace ExplorerBeta.UI.Main
             navGroup.childForceExpandHeight = true;
             navGroup.childForceExpandWidth = true;
 
-            var navLayout = navbarObj.AddComponent<LayoutElement>();
+            LayoutElement navLayout = navbarObj.AddComponent<LayoutElement>();
             navLayout.minHeight = 35;
             navLayout.flexibleHeight = 0;
 
-            foreach (var page in Pages)
+            foreach (Page page in Pages)
             {
-                var btnObj = UIFactory.CreateButton(navbarObj);
-                var btn = btnObj.GetComponent<Button>();
+                GameObject btnObj = UIFactory.CreateButton(navbarObj);
+                Button btn = btnObj.GetComponent<Button>();
 
                 page.RefNavbarButton = btn;
 
@@ -223,11 +237,11 @@ namespace ExplorerBeta.UI.Main
                 btn.onClick.AddListener(() => { SetPage(page); });
 #endif
 
-                var text = btnObj.GetComponentInChildren<Text>();
+                Text text = btnObj.GetComponentInChildren<Text>();
                 text.text = page.Name;
 
                 // Set button colors
-                var colorBlock = btn.colors;
+                ColorBlock colorBlock = btn.colors;
                 colorBlock.normalColor = m_navButtonNormal;
                 //try { colorBlock.selectedColor = colorBlock.normalColor; } catch { }
                 colorBlock.highlightedColor = m_navButtonHighlight;
@@ -238,8 +252,8 @@ namespace ExplorerBeta.UI.Main
 
         private void ConstructMainViewport(GameObject content)
         {
-            var mainObj = UIFactory.CreateHorizontalGroup(content);
-            var mainGroup = mainObj.GetComponent<HorizontalLayoutGroup>();
+            GameObject mainObj = UIFactory.CreateHorizontalGroup(content);
+            HorizontalLayoutGroup mainGroup = mainObj.GetComponent<HorizontalLayoutGroup>();
             mainGroup.childControlHeight = true;
             mainGroup.childControlWidth = true;
             mainGroup.childForceExpandHeight = true;
@@ -248,6 +262,6 @@ namespace ExplorerBeta.UI.Main
             PageViewport = mainObj;
         }
 
-#endregion
+        #endregion
     }
 }

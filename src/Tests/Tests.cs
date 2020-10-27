@@ -1,15 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System;
-using UnityEngine;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using ExplorerBeta.UI.Shared;
 using ExplorerBeta.UI;
+using UnityEngine;
 #if CPP
-using UnhollowerBaseLib;
-using UnityEngine.SceneManagement;
-using ExplorerBeta.Unstrip.ImageConversion;
 #endif
 
 namespace ExplorerBeta.Tests
@@ -57,10 +50,10 @@ namespace ExplorerBeta.Tests
 #if CPP
             TestTexture.name = "TestTexture";
 
-            var r = new Rect(0, 0, TestTexture.width, TestTexture.height);
-            var v2 = Vector2.zero;
-            var v4 = Vector4.zero;
-            TestSprite = Sprite.CreateSprite_Injected(TestTexture, ref r, ref v2, 100f, 0u, SpriteMeshType.Tight, ref v4, false);
+            //var r = new Rect(0, 0, TestTexture.width, TestTexture.height);
+            //var v2 = Vector2.zero;
+            //var v4 = Vector4.zero;
+            //TestSprite = Sprite.CreateSprite_Injected(TestTexture, ref r, ref v2, 100f, 0u, SpriteMeshType.Tight, ref v4, false);
 
             GameObject.DontDestroyOnLoad(TestTexture);
             GameObject.DontDestroyOnLoad(TestSprite);

@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Explorer.Unstrip.ColorUtility;
-using ExplorerBeta;
 using UnityEngine;
 
-namespace Explorer.UI.Main.Pages.Console.Lexer
+namespace ExplorerBeta.UI.Main.Console.Lexer
 {
     public sealed class SymbolMatch : MatchLexer
     {
@@ -25,7 +21,9 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
             {
                 BuildSymbolCache();
                 foreach (string symbol in symbolCache.Where(x => x.Length > 0))
+                {
                     yield return symbol[0];
+                }
             }
         }
 
@@ -35,14 +33,18 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
             {
                 BuildSymbolCache();
                 foreach (string symbol in symbolCache.Where(x => x.Length > 0))
+                {
                     yield return symbol[0];
+                }
             }
         }
 
         public override bool IsImplicitMatch(ILexer lexer)
         {
             if (lexer == null)
+            {
                 return false;
+            }
 
             BuildSymbolCache();
 
@@ -50,7 +52,9 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
                 !char.IsLetter(lexer.Previous) &&
                 !char.IsDigit(lexer.Previous) &&
                 !lexer.IsSpecialSymbol(lexer.Previous, SpecialCharacterPosition.End))
+            {
                 return false;
+            }
 
             shortlist.Clear();
 
@@ -60,11 +64,15 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
             for (int i = symbolCache.Length - 1; i >= 0; i--)
             {
                 if (symbolCache[i][0] == currentChar)
+                {
                     shortlist.Add(symbolCache[i]);
+                }
             }
 
             if (shortlist.Count == 0)
+            {
                 return false;
+            }
 
             do
             {
@@ -96,7 +104,9 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
                 }
 
                 while (removeList.Count > 0)
+                {
                     shortlist.Remove(removeList.Pop());
+                }
             }
             while (shortlist.Count > 0);
 
@@ -114,17 +124,21 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
             }
 
             while (removeList.Count > 0)
+            {
                 shortlist.Remove(removeList.Pop());
+            }
         }
 
         private void BuildSymbolCache()
         {
             if (symbolCache != null)
+            {
                 return;
+            }
 
-            var symSplit = Symbols.Split(' ');
-            var list = new List<string>();
-            foreach (var sym in symSplit)
+            string[] symSplit = Symbols.Split(' ');
+            List<string> list = new List<string>();
+            foreach (string sym in symSplit)
             {
                 if (!string.IsNullOrEmpty(sym) && sym.Length > 0)
                 {

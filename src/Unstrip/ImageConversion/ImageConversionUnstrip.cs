@@ -1,15 +1,9 @@
 ﻿#if CPP
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnhollowerBaseLib;
-using UnityEngine;
 using System.IO;
 using ExplorerBeta.Helpers;
-using System.Runtime.InteropServices;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
+using UnhollowerBaseLib;
+using UnityEngine;
 
 namespace ExplorerBeta.Unstrip.ImageConversion
 {
@@ -21,7 +15,7 @@ namespace ExplorerBeta.Unstrip.ImageConversion
 
         public static byte[] EncodeToPNG(this Texture2D tex)
         {
-            var data = ICallHelper.GetICall<d_EncodeToPNG>("UnityEngine.ImageConversion::EncodeToPNG")
+            byte[] data = ICallHelper.GetICall<d_EncodeToPNG>("UnityEngine.ImageConversion::EncodeToPNG")
                 .Invoke(tex.Pointer);
 
             // The Il2Cpp EncodeToPNG() method does return System.Byte[],
@@ -31,7 +25,7 @@ namespace ExplorerBeta.Unstrip.ImageConversion
             byte[] safeData = new byte[data.Length];
             for (int i = 0; i < data.Length; i++)
             {
-                safeData[i] = (byte)data[i]; 
+                safeData[i] = (byte)data[i];
             }
 
             return safeData;
@@ -43,13 +37,13 @@ namespace ExplorerBeta.Unstrip.ImageConversion
 
         public static bool LoadImage(this Texture2D tex, byte[] data, bool markNonReadable)
         {
-            var il2cppArray = new Il2CppStructArray<byte>(data.Length);
+            Il2CppStructArray<byte> il2cppArray = new Il2CppStructArray<byte>(data.Length);
             for (int i = 0; i < data.Length; i++)
             {
                 il2cppArray[i] = data[i];
             }
 
-            var ret = ICallHelper.GetICall<d_LoadImage>("UnityEngine.ImageConversion::LoadImage")
+            bool ret = ICallHelper.GetICall<d_LoadImage>("UnityEngine.ImageConversion::LoadImage")
                 .Invoke(tex.Pointer, il2cppArray.Pointer, markNonReadable);
 
             return ret;
@@ -64,7 +58,7 @@ namespace ExplorerBeta.Unstrip.ImageConversion
                 return false;
             }
 
-            var data = File.ReadAllBytes(filePath);
+            byte[] data = File.ReadAllBytes(filePath);
             return tex.LoadImage(data, markNonReadable);
         }
     }

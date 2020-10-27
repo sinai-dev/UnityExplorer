@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using System.Collections.Generic;
 
-namespace Explorer.UI.Main.Pages.Console.Lexer
+namespace ExplorerBeta.UI.Main.Console.Lexer
 {
     internal struct LexerMatchInfo
     {
@@ -42,10 +38,14 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
                 foreach (char character in delimiters)
                 {
                     if (!specialStartSymbols.Contains(character))
+                    {
                         specialStartSymbols.Add(character);
+                    }
 
                     if (!specialEndSymbols.Contains(character))
+                    {
                         specialEndSymbols.Add(character);
+                    }
                 }
             }
 
@@ -54,12 +54,20 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
                 foreach (MatchLexer lexer in matchers)
                 {
                     foreach (char special in lexer.StartChars)
+                    {
                         if (!specialStartSymbols.Contains(special))
+                        {
                             specialStartSymbols.Add(special);
+                        }
+                    }
 
                     foreach (char special in lexer.EndChars)
+                    {
                         if (!specialEndSymbols.Contains(special))
+                        {
                             specialEndSymbols.Add(special);
+                        }
+                    }
                 }
             }
         }
@@ -67,13 +75,15 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
         public IEnumerable<LexerMatchInfo> LexInputString(string input)
         {
             if (input == null || matchers == null || matchers.Length == 0)
+            {
                 yield break;
+            }
 
-            this.inputString = input;
-            this.current = ' ';
-            this.Previous = ' ';
-            this.currentIndex = 0;
-            this.currentLookaheadIndex = 0;
+            inputString = input;
+            current = ' ';
+            Previous = ' ';
+            currentIndex = 0;
+            currentLookaheadIndex = 0;
 
             while (!EndOfStream)
             {
@@ -115,7 +125,9 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
         public char ReadNext()
         {
             if (EndOfStream)
+            {
                 return '\0';
+            }
 
             Previous = current;
 
@@ -134,17 +146,25 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
             else
             {
                 if (currentLookaheadIndex > currentIndex)
+                {
                     currentLookaheadIndex -= amount;
+                }
             }
 
             int previousIndex = currentLookaheadIndex - 1;
 
             if (previousIndex >= inputString.Length)
+            {
                 Previous = inputString[inputString.Length - 1];
+            }
             else if (previousIndex >= 0)
+            {
                 Previous = inputString[previousIndex];
+            }
             else
+            {
                 Previous = ' ';
+            }
         }
 
         public void Commit()
@@ -155,7 +175,9 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
         public bool IsSpecialSymbol(char character, SpecialCharacterPosition position = SpecialCharacterPosition.Start)
         {
             if (position == SpecialCharacterPosition.Start)
+            {
                 return specialStartSymbols.Contains(character);
+            }
 
             return specialEndSymbols.Contains(character);
         }

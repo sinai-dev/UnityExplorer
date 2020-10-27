@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Reflection;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
 using ExplorerBeta.Helpers;
+using UnityEngine;
 
 namespace ExplorerBeta.Input
 {
-    public class LegacyInput : IAbstractInput
+    public class LegacyInput : IHandleInput
     {
         public static Type TInput => m_tInput ?? (m_tInput = ReflectionHelpers.GetTypeByName("UnityEngine.Input"));
         private static Type m_tInput;

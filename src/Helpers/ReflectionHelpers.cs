@@ -22,10 +22,10 @@ namespace ExplorerBeta.Helpers
 
 #if CPP
         public static ILType GameObjectType => Il2CppType.Of<GameObject>();
-        public static ILType TransformType  => Il2CppType.Of<Transform>();
-        public static ILType ObjectType     => Il2CppType.Of<UnityEngine.Object>();
-        public static ILType ComponentType  => Il2CppType.Of<Component>();
-        public static ILType BehaviourType  => Il2CppType.Of<Behaviour>();
+        public static ILType TransformType => Il2CppType.Of<Transform>();
+        public static ILType ObjectType => Il2CppType.Of<UnityEngine.Object>();
+        public static ILType ComponentType => Il2CppType.Of<Component>();
+        public static ILType BehaviourType => Il2CppType.Of<Behaviour>();
 #else
         public static Type GameObjectType   => typeof(GameObject);
         public static Type TransformType    => typeof(Transform);
@@ -40,10 +40,14 @@ namespace ExplorerBeta.Helpers
         public static object Il2CppCast(object obj, Type castTo)
         {
             if (!(obj is Il2CppSystem.Object ilObj))
+            {
                 return obj;
+            }
 
             if (!typeof(Il2CppSystem.Object).IsAssignableFrom(castTo))
+            {
                 return obj;
+            }
 
             IntPtr castToPtr;
             if (!ClassPointers.ContainsKey(castTo))
@@ -61,9 +65,11 @@ namespace ExplorerBeta.Helpers
             }
 
             if (castToPtr == IntPtr.Zero)
+            {
                 return obj;
+            }
 
-            var classPtr = il2cpp_object_get_class(ilObj.Pointer);
+            IntPtr classPtr = il2cpp_object_get_class(ilObj.Pointer);
 
             if (!il2cpp_class_is_assignable_from(castToPtr, classPtr))
                 return obj;
@@ -100,7 +106,8 @@ namespace ExplorerBeta.Helpers
 
         public static Type GetActualType(object obj)
         {
-            if (obj == null) return null;
+            if (obj == null)
+                return null;
 
 #if CPP
             // Need to use GetIl2CppType for Il2CppSystem Objects
@@ -124,7 +131,7 @@ namespace ExplorerBeta.Helpers
 
         public static Type[] GetAllBaseTypes(Type type)
         {
-            var list = new List<Type>();
+            List<Type> list = new List<Type>();
 
             while (type != null)
             {
@@ -139,11 +146,14 @@ namespace ExplorerBeta.Helpers
         {
 #if CPP
 #if ML
-            var path = $@"MelonLoader\Managed\{module}.dll";
+            string path = $@"MelonLoader\Managed\{module}.dll";
 #else
             var path = $@"BepInEx\unhollowed\{module}.dll";
 #endif
-            if (!File.Exists(path)) return false;
+            if (!File.Exists(path))
+            {
+                return false;
+            }
 
             try
             {

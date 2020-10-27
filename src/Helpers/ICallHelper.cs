@@ -1,11 +1,8 @@
 ﻿#if CPP
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 
 namespace ExplorerBeta.Helpers
 {
@@ -17,18 +14,16 @@ namespace ExplorerBeta.Helpers
         public static T GetICall<T>(string iCallName) where T : Delegate
         {
             if (iCallCache.ContainsKey(iCallName))
-            {
                 return (T)iCallCache[iCallName];
-            }
 
-            var ptr = il2cpp_resolve_icall(iCallName);
+            IntPtr ptr = il2cpp_resolve_icall(iCallName);
 
             if (ptr == IntPtr.Zero)
             {
                 throw new MissingMethodException($"Could not resolve internal call by name '{iCallName}'!");
             }
 
-            var iCall = Marshal.GetDelegateForFunctionPointer(ptr, typeof(T));
+            Delegate iCall = Marshal.GetDelegateForFunctionPointer(ptr, typeof(T));
             iCallCache.Add(iCallName, iCall);
 
             return (T)iCall;

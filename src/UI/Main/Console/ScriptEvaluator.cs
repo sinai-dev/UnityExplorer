@@ -6,7 +6,7 @@ using Mono.CSharp;
 
 // Thanks to ManlyMarco for this
 
-namespace Explorer.UI.Main.Pages.Console
+namespace ExplorerBeta.UI.Main.Console
 {
     public class ScriptEvaluator : Evaluator, IDisposable
     {
@@ -35,7 +35,10 @@ namespace Explorer.UI.Main.Pages.Console
         {
             string name = args.LoadedAssembly.GetName().Name;
             if (StdLib.Contains(name))
+            {
                 return;
+            }
+
             ReferenceAssembly(args.LoadedAssembly);
         }
 
@@ -58,11 +61,14 @@ namespace Explorer.UI.Main.Pages.Console
 
         private static void ImportAppdomainAssemblies(Action<Assembly> import)
         {
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 string name = assembly.GetName().Name;
                 if (StdLib.Contains(name))
+                {
                     continue;
+                }
+
                 import(assembly);
             }
         }

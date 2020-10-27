@@ -2,7 +2,6 @@
 using UnityEngine;
 using ExplorerBeta.Helpers;
 using UnityEngine.EventSystems;
-using ExplorerBeta.UI;
 using ExplorerBeta.Input;
 using BF = System.Reflection.BindingFlags;
 #if ML
@@ -83,7 +82,7 @@ namespace ExplorerBeta.UI
         {
             try
             {
-                var harmony =
+                HarmonyInstance harmony =
 #if ML
                     ExplorerMelonMod.Instance.harmonyInstance;
 #else
@@ -91,7 +90,7 @@ namespace ExplorerBeta.UI
 #endif
                 ;
 
-                var prop = type.GetProperty(property);
+                System.Reflection.PropertyInfo prop = type.GetProperty(property);
 
                 if (setter)
                 {

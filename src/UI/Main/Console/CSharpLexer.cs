@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
+using ExplorerBeta.UI.Main.Console.Lexer;
 using UnityEngine;
-using Explorer.UI.Main.Pages.Console.Lexer;
-using System.Runtime.InteropServices;
 
-namespace Explorer.UI.Main.Pages.Console
+namespace ExplorerBeta.UI.Main.Console
 {
     public static class CSharpLexer
     {
@@ -29,7 +27,7 @@ namespace Explorer.UI.Main.Pages.Console
  else equals false finally float for foreach from global goto group 
  if in int into is join let lock long new null object on orderby out 
  ref remove return sbyte select short sizeof stackalloc string 
- struct switch throw true try typeof uint ulong ushort 
+ switch throw true try typeof uint ulong ushort 
  value var where while yield"
         };
 
@@ -38,7 +36,7 @@ namespace Explorer.UI.Main.Pages.Console
             highlightColor = new Color(0.95f, 0.10f, 0.10f, 1.0f),
             keywords = @"abstract async base class delegate enum explicit extern fixed get 
  implicit interface internal namespace operator override params private protected public 
- using partial readonly sealed set static this unchecked unsafe virtual volatile void"
+ using partial readonly sealed set static struct this unchecked unsafe virtual volatile void"
         };
 
         private static char[] delimiterSymbolCache = null;
@@ -53,8 +51,12 @@ namespace Explorer.UI.Main.Pages.Console
                     int count = 0;
 
                     for (int i = 0; i < symbols.Length; i++)
+                    {
                         if (symbols[i].Length == 1)
+                        {
                             count++;
+                        }
+                    }
 
                     delimiterSymbolCache = new char[count];
 
@@ -113,7 +115,9 @@ namespace Explorer.UI.Main.Pages.Console
                 {
                     indentBuilder.Append('\n');
                     for (int j = 0; j < indent; j++)
+                    {
                         indentBuilder.Append("\t");
+                    }
                 }
                 else if (input[i] == '\t')
                 {
@@ -142,7 +146,9 @@ namespace Explorer.UI.Main.Pages.Console
             for (int i = formattedSection.Length - 1; i >= 0; i--)
             {
                 if (formattedSection[i] == '\n')
+                {
                     continue;
+                }
 
                 caretPosition = i;
                 break;
@@ -158,11 +164,15 @@ namespace Explorer.UI.Main.Pages.Console
             for (int i = startIndex; i < endIndex; i++)
             {
                 if (inputString[i] == '\t')
+                {
                     indent++;
+                }
 
                 // Check for end line or other characters
                 if (inputString[i] == '\n' || inputString[i] != ' ')
+                {
                     break;
+                }
             }
 
             return indent;

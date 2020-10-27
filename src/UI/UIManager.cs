@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ExplorerBeta.Input;
-using ExplorerBeta.UI.Main;
-using ExplorerBeta.UI.Shared;
+﻿using ExplorerBeta.UI.Main;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
- 
+
 namespace ExplorerBeta.UI
 {
     public static class UIManager
@@ -25,7 +19,7 @@ namespace ExplorerBeta.UI
             // Create submodules
             new MainMenu();
 
-            // Force refresh of anchors (?)
+            // Force refresh of anchors
             Canvas.ForceUpdateCanvases();
 
             CanvasRoot.SetActive(false);
@@ -40,7 +34,7 @@ namespace ExplorerBeta.UI
 
         private static GameObject CreateRootCanvas()
         {
-            var rootObj = new GameObject("ExplorerCanvas");
+            GameObject rootObj = new GameObject("ExplorerCanvas");
             UnityEngine.Object.DontDestroyOnLoad(rootObj);
             rootObj.layer = 5;
 
@@ -51,12 +45,13 @@ namespace ExplorerBeta.UI
             InputModule = rootObj.AddComponent<StandaloneInputModule>();
             InputModule.ActivateModule();
 
-            var canvas = rootObj.AddComponent<Canvas>();
+            Canvas canvas = rootObj.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceCamera;
             canvas.referencePixelsPerUnit = 100;
             canvas.sortingOrder = 999;
+            canvas.pixelPerfect = false;
 
-            var scaler = rootObj.AddComponent<CanvasScaler>();
+            CanvasScaler scaler = rootObj.AddComponent<CanvasScaler>();
             scaler.referenceResolution = new Vector2(1920, 1080);
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
 
@@ -81,7 +76,7 @@ namespace ExplorerBeta.UI
 #if CPP
                 if (InputModule.m_InputPointerEvent != null)
                 {
-                    var evt = InputModule.m_InputPointerEvent;
+                    PointerEventData evt = InputModule.m_InputPointerEvent;
                     if (!evt.eligibleForClick && evt.selectedObject)
                     {
                         evt.eligibleForClick = true;
@@ -99,16 +94,19 @@ namespace ExplorerBeta.UI
         public static void OnSceneChange()
         {
             // todo
+            SceneExplorer.Instance?.OnSceneChange();
         }
 
         public static Sprite CreateSprite(Texture2D tex, Rect size = default)
         {
 #if CPP
-            var pivot = Vector2.zero;
-            var border = Vector4.zero;
+            Vector2 pivot = Vector2.zero;
+            Vector4 border = Vector4.zero;
 
             if (size == default)
+            {
                 size = new Rect(0, 0, tex.width, tex.height);
+            }
 
             return Sprite.CreateSprite_Injected(tex, ref size, ref pivot, 100f, 0u, SpriteMeshType.Tight, ref border, false);
 #else
@@ -118,13 +116,13 @@ namespace ExplorerBeta.UI
 
         public static Texture2D MakeSolidTexture(Color color, int width, int height)
         {
-            var pixels = new Color[width * height];
+            Color[] pixels = new Color[width * height];
             for (int i = 0; i < pixels.Length; i++)
             {
                 pixels[i] = color;
             }
 
-            var tex = new Texture2D(width, height);
+            Texture2D tex = new Texture2D(width, height);
             tex.SetPixels(pixels);
             tex.Apply();
 

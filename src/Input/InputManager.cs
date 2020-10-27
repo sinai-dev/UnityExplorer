@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Reflection;
 using UnityEngine;
-using ExplorerBeta.Input;
 using ExplorerBeta.Helpers;
 using System.Diagnostics.CodeAnalysis;
 #if CPP
@@ -13,7 +11,7 @@ namespace ExplorerBeta.Input
     [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Unity style")]
     public static class InputManager
     {
-        private static IAbstractInput m_inputModule;
+        private static IHandleInput m_inputModule;
 
         public static void Init()
         {

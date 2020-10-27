@@ -1,21 +1,18 @@
 ﻿using System;
-using System.Collections;
-using System.Linq;
 using ExplorerBeta.Config;
 using ExplorerBeta.Input;
 using ExplorerBeta.UI;
 using ExplorerBeta.UI.Main;
-using System.Reflection;
 using UnityEngine;
 
 namespace ExplorerBeta
 {
     public class ExplorerCore
     {
-        public const string NAME    = "Explorer " + VERSION + " (" + PLATFORM + ", " + MODLOADER + ")";
+        public const string NAME = "Explorer " + VERSION + " (" + PLATFORM + ", " + MODLOADER + ")";
         public const string VERSION = "3.0.0b";
-        public const string AUTHOR  = "Sinai";
-        public const string GUID    = "com.sinai.explorer";
+        public const string AUTHOR = "Sinai";
+        public const string GUID = "com.sinai.explorer";
 
         public const string PLATFORM =
 #if CPP
@@ -71,19 +68,15 @@ namespace ExplorerBeta
         private static void SetShowMenu(bool show)
         {
             m_showMenu = show;
-           
+
             if (UIManager.CanvasRoot)
             {
                 UIManager.CanvasRoot.SetActive(show);
 
                 if (show)
-                {
                     ForceUnlockCursor.SetEventSystem();
-                }
                 else
-                {
                     ForceUnlockCursor.ReleaseEventSystem();
-                }
             }
 
             ForceUnlockCursor.UpdateCursorControl();
@@ -91,29 +84,35 @@ namespace ExplorerBeta
 
         public static void Update()
         {
-            // Temporary delay before UIManager.Init
             if (!m_doneUIInit)
-            {
-                m_timeSinceStartup += Time.deltaTime;
-
-                if (m_timeSinceStartup > 0.1f)
-                {
-                    UIManager.Init();
-
-                    Log("Initialized Explorer UI.");
-                    m_doneUIInit = true;
-                }
-            }
+                CheckUIInit();
 
             if (InputManager.GetKeyDown(ModConfig.Instance.Main_Menu_Toggle))
-            {
                 ShowMenu = !ShowMenu;
-            }
 
             if (ShowMenu)
             {
                 ForceUnlockCursor.Update();
                 UIManager.Update();
+            }
+        }
+
+        private static void CheckUIInit()
+        {
+            m_timeSinceStartup += Time.deltaTime;
+
+            if (m_timeSinceStartup > 0.1f)
+            {
+                m_doneUIInit = true;
+                try
+                {
+                    UIManager.Init();
+                    Log("Initialized Explorer UI.");
+                }
+                catch (Exception e)
+                {
+                    LogWarning($"Exception setting up UI: {e}");
+                }
             }
         }
 

@@ -1,18 +1,14 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
 using ExplorerBeta.Input;
-using ExplorerBeta.Helpers;
 using System.IO;
-using System.Linq;
 #if CPP
 using ExplorerBeta.Unstrip.ImageConversion;
 #endif
 
-namespace ExplorerBeta.UI
+namespace ExplorerBeta.UI.Main
 {
     // Handles dragging and resizing for the main explorer window.
 
@@ -42,11 +38,11 @@ namespace ExplorerBeta.UI
 
         public void Update()
         {
-            var rawMousePos = InputManager.MousePosition;
+            Vector3 rawMousePos = InputManager.MousePosition;
 
             ResizeTypes type;
-            var resizePos = Panel.InverseTransformPoint(rawMousePos);
-            var dragPos = DragableArea.InverseTransformPoint(rawMousePos);
+            Vector3 resizePos = Panel.InverseTransformPoint(rawMousePos);
+            Vector3 dragPos = DragableArea.InverseTransformPoint(rawMousePos);
 
             if (WasHoveringResize)
             {
@@ -65,7 +61,9 @@ namespace ExplorerBeta.UI
                 {
                     type = GetResizeType(resizePos);
                     if (type != ResizeTypes.NONE)
+                    {
                         OnBeginResize(type);
+                    }
                 }
             }
             // If mouse still pressed from last frame
@@ -104,7 +102,7 @@ namespace ExplorerBeta.UI
             return;
         }
 
-#region DRAGGING
+        #region DRAGGING
 
         public RectTransform DragableArea { get; set; }
         public bool WasDragging { get; set; }
@@ -118,11 +116,11 @@ namespace ExplorerBeta.UI
 
         public void OnDrag()
         {
-            var diff = InputManager.MousePosition - m_lastDragPosition;
+            Vector3 diff = InputManager.MousePosition - m_lastDragPosition;
             m_lastDragPosition = InputManager.MousePosition;
 
-            var pos = Panel.localPosition;
-            var z = pos.z;
+            Vector3 pos = Panel.localPosition;
+            float z = pos.z;
             pos += diff;
             pos.z = z;
             Panel.localPosition = pos;
@@ -134,9 +132,9 @@ namespace ExplorerBeta.UI
             UpdateResizeCache();
         }
 
-#endregion
+        #endregion
 
-#region RESIZE
+        #region RESIZE
 
         private const int RESIZE_THICKNESS = 10;
 
@@ -161,14 +159,14 @@ namespace ExplorerBeta.UI
         [Flags]
         public enum ResizeTypes
         {
-            NONE        = 0,
-            Top         = 1,
-            Left        = 2,
-            Right       = 4,
-            Bottom      = 8,
-            TopLeft     = Top | Left,
-            TopRight    = Top | Right,
-            BottomLeft  = Bottom | Left,
+            NONE = 0,
+            Top = 1,
+            Left = 2,
+            Right = 4,
+            Bottom = 8,
+            TopLeft = Top | Left,
+            TopRight = Top | Right,
+            BottomLeft = Bottom | Left,
             BottomRight = Bottom | Right,
         }
 
@@ -182,9 +180,9 @@ namespace ExplorerBeta.UI
             // to give a bit of buffer and make it easier to use.
 
             // outer rect is the outer-most bounds of our resize area
-            var outer = new Rect(Panel.rect.x - halfThick, 
-                Panel.rect.y - halfThick, 
-                Panel.rect.width + dblThick, 
+            Rect outer = new Rect(Panel.rect.x - halfThick,
+                Panel.rect.y - halfThick,
+                Panel.rect.width + dblThick,
                 Panel.rect.height + dblThick);
             m_resizeRect = outer;
 
@@ -213,14 +211,22 @@ namespace ExplorerBeta.UI
             int mask = 0;
 
             if (m_resizeMask[ResizeTypes.Top].Contains(mousePos))
+            {
                 mask |= (int)ResizeTypes.Top;
+            }
             else if (m_resizeMask[ResizeTypes.Bottom].Contains(mousePos))
+            {
                 mask |= (int)ResizeTypes.Bottom;
+            }
 
             if (m_resizeMask[ResizeTypes.Left].Contains(mousePos))
+            {
                 mask |= (int)ResizeTypes.Left;
+            }
             else if (m_resizeMask[ResizeTypes.Right].Contains(mousePos))
+            {
                 mask |= (int)ResizeTypes.Right;
+            }
 
             return (ResizeTypes)mask;
         }
@@ -228,7 +234,9 @@ namespace ExplorerBeta.UI
         public void OnHoverResize(ResizeTypes resizeType)
         {
             if (WasHoveringResize && m_lastResizeHoverType == resizeType)
+            {
                 return;
+            }
 
             // we are entering resize, or the resize type has changed.
 
@@ -252,7 +260,7 @@ namespace ExplorerBeta.UI
                     iconRotation = 135f; break;
             }
 
-            var rot = m_resizeCursorImage.transform.rotation;
+            Quaternion rot = m_resizeCursorImage.transform.rotation;
             rot.eulerAngles = new Vector3(0, 0, iconRotation);
             m_resizeCursorImage.transform.rotation = rot;
 
@@ -263,9 +271,11 @@ namespace ExplorerBeta.UI
         private void UpdateHoverImagePos()
         {
             if (!m_resizeCursorImage)
+            {
                 return;
+            }
 
-            var t = UIManager.CanvasRoot.GetComponent<RectTransform>();
+            RectTransform t = UIManager.CanvasRoot.GetComponent<RectTransform>();
             m_resizeCursorImage.transform.localPosition = t.InverseTransformPoint(InputManager.MousePosition);
         }
 
@@ -284,35 +294,35 @@ namespace ExplorerBeta.UI
 
         public void OnResize()
         {
-            var mousePos = InputManager.MousePosition;
-            var diff = m_lastResizePos - (Vector2)mousePos;
+            Vector3 mousePos = InputManager.MousePosition;
+            Vector2 diff = m_lastResizePos - (Vector2)mousePos;
             m_lastResizePos = mousePos;
 
-            var diffX = (float)((decimal)diff.x / Screen.width);
-            var diffY = (float)((decimal)diff.y / Screen.height);
+            float diffX = (float)((decimal)diff.x / Screen.width);
+            float diffY = (float)((decimal)diff.y / Screen.height);
 
             if (m_currentResizeType.HasFlag(ResizeTypes.Left))
             {
-                var anch = Panel.anchorMin;
+                Vector2 anch = Panel.anchorMin;
                 anch.x -= diffX;
                 Panel.anchorMin = anch;
             }
             else if (m_currentResizeType.HasFlag(ResizeTypes.Right))
             {
-                var anch = Panel.anchorMax;
+                Vector2 anch = Panel.anchorMax;
                 anch.x -= diffX;
                 Panel.anchorMax = anch;
             }
 
             if (m_currentResizeType.HasFlag(ResizeTypes.Top))
             {
-                var anch = Panel.anchorMax;
+                Vector2 anch = Panel.anchorMax;
                 anch.y -= diffY;
                 Panel.anchorMax = anch;
             }
             else if (m_currentResizeType.HasFlag(ResizeTypes.Bottom))
             {
-                var anch = Panel.anchorMin;
+                Vector2 anch = Panel.anchorMin;
                 anch.y -= diffY;
                 Panel.anchorMin = anch;
             }
@@ -326,28 +336,28 @@ namespace ExplorerBeta.UI
 
         private void LoadCursorImage()
         {
-            var path = @"Mods\Explorer\cursor.png";
-            var data = File.ReadAllBytes(path);
+            string path = @"Mods\Explorer\cursor.png";
+            byte[] data = File.ReadAllBytes(path);
 
-            var tex = new Texture2D(32, 32);
+            Texture2D tex = new Texture2D(32, 32);
             tex.LoadImage(data, false);
             UnityEngine.Object.DontDestroyOnLoad(tex);
 
-            var sprite = UIManager.CreateSprite(tex);
+            Sprite sprite = UIManager.CreateSprite(tex);
             UnityEngine.Object.DontDestroyOnLoad(sprite);
 
             m_resizeCursorImage = new GameObject("ResizeCursorImage");
             m_resizeCursorImage.transform.SetParent(UIManager.CanvasRoot.transform);
 
-            var image = m_resizeCursorImage.AddComponent<Image>();
+            Image image = m_resizeCursorImage.AddComponent<Image>();
             image.sprite = sprite;
-            var rect = image.transform.GetComponent<RectTransform>();
+            RectTransform rect = image.transform.GetComponent<RectTransform>();
             rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 32);
             rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 32);
 
             m_resizeCursorImage.SetActive(false);
         }
 
-#endregion
+        #endregion
     }
 }

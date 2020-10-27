@@ -1,16 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Explorer.Unstrip.ColorUtility;
-using ExplorerBeta.Input;
-using ExplorerBeta.Unstrip.Resources;
+using ExplorerBeta.Unstrip.ColorUtility;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 #if CPP
-using UnhollowerRuntimeLib;
 #endif
 
 namespace ExplorerBeta.UI.Main
@@ -20,8 +14,6 @@ namespace ExplorerBeta.UI.Main
         public static DebugConsole Instance { get; private set; }
 
         public static bool LogUnity { get; set; } = true;
-
-        public static GameObject CanvasRoot;
 
         public readonly List<string> AllMessages;
         public readonly List<Text> MessageHolders;
@@ -44,12 +36,42 @@ namespace ExplorerBeta.UI.Main
                 ExplorerCore.Log(e);
             }
         }
+        public static void Log(string message)
+        {
+            Log(message, null);
+        }
+
+        public static void Log(string message, Color color)
+        {
+            Log(message, color.ToHex());
+        }
+
+        public static void Log(string message, string hexColor)
+        {
+            if (Instance == null)
+            {
+                return;
+            }
+
+            Instance.AllMessages.Add(message);
+
+            if (Instance.m_textInput)
+            {
+                if (hexColor != null)
+                {
+                    message = $"<color=#{hexColor}>{message}</color>";
+                }
+
+                Instance.m_textInput.text = $"{message}\n{Instance.m_textInput.text}";
+            }
+        }
 
         // todo: get scrollbar working with inputfield somehow
 
         public void ConstructUI(GameObject parent)
         {
             var mainObj = UIFactory.CreateVerticalGroup(parent, new Color(0.1f, 0.1f, 0.1f, 1.0f));
+
             var mainGroup = mainObj.GetComponent<VerticalLayoutGroup>();
             mainGroup.childControlHeight = true;
             mainGroup.childControlWidth = true;
@@ -63,11 +85,10 @@ namespace ExplorerBeta.UI.Main
             mask.showMaskGraphic = true;
 
             var mainLayout = mainObj.AddComponent<LayoutElement>();
-            mainLayout.minHeight = 40;
-            mainLayout.preferredHeight = 230;
+            mainLayout.minHeight = 190;
             mainLayout.flexibleHeight = 0;
 
-#region LOG AREA
+            #region LOG AREA
             var logAreaObj = UIFactory.CreateHorizontalGroup(mainObj);
             var logAreaGroup = logAreaObj.GetComponent<HorizontalLayoutGroup>();
             logAreaGroup.childControlHeight = true;
@@ -76,8 +97,8 @@ namespace ExplorerBeta.UI.Main
             logAreaGroup.childForceExpandWidth = true;
 
             var logAreaLayout = logAreaObj.AddComponent<LayoutElement>();
-            logAreaLayout.preferredHeight = 300;
-            logAreaLayout.flexibleHeight = 50;
+            logAreaLayout.preferredHeight = 190;
+            logAreaLayout.flexibleHeight = 0;
 
             var inputObj = UIFactory.CreateTMPInput(logAreaObj);
 
@@ -114,12 +135,12 @@ namespace ExplorerBeta.UI.Main
 
             m_textInput = inputObj.GetComponent<TMP_InputField>();
 
-#endregion
+            #endregion
 
-#region BOTTOM BAR
+            #region BOTTOM BAR
 
             var bottomBarObj = UIFactory.CreateHorizontalGroup(mainObj);
-            var topBarLayout = bottomBarObj.AddComponent<LayoutElement>();
+            LayoutElement topBarLayout = bottomBarObj.AddComponent<LayoutElement>();
             topBarLayout.minHeight = 40;
             topBarLayout.flexibleHeight = 0;
 
@@ -165,13 +186,13 @@ namespace ExplorerBeta.UI.Main
                 {
                     logAreaObj.SetActive(false);
                     hideBtnText.text = "Show";
-                    mainLayout.preferredHeight = 40;
+                    mainLayout.minHeight = 40;
                 }
                 else
                 {
                     logAreaObj.SetActive(true);
                     hideBtnText.text = "Hide";
-                    mainLayout.preferredHeight = 230;
+                    mainLayout.minHeight = 190;
                 }
             }
 
@@ -214,16 +235,10 @@ namespace ExplorerBeta.UI.Main
 
             var unityToggleObj = UIFactory.CreateToggle(bottomBarObj, out Toggle unityToggle, out Text unityToggleText);
 #if CPP
-            unityToggle.onValueChanged.AddListener(new Action<bool>(ToggleCallback));
+            unityToggle.onValueChanged.AddListener(new Action<bool>((bool val) => { LogUnity = val; }));
 #else
-            unityToggle.onValueChanged.AddListener(ToggleCallback);
+            unityToggle.onValueChanged.AddListener((bool val) => { LogUnity = val; }));
 #endif
-
-            void ToggleCallback(bool val)
-            {
-                LogUnity = val;
-            }
-
             unityToggleText.text = "Print Unity Debug?";
             unityToggleText.alignment = TextAnchor.MiddleLeft;
 
@@ -236,33 +251,9 @@ namespace ExplorerBeta.UI.Main
             pos.y = -8;
             unityToggleRect.localPosition = pos;
 
-#endregion
+            #endregion
         }
 
-        public static void Log(string message)
-        {
-            Log(message, null);
-        }
-
-        public static void Log(string message, Color color)
-        {
-            Log(message, color.ToHex());
-        }
-
-        public static void Log(string message, string hexColor)
-        {
-            if (Instance == null)
-                return;
-
-            Instance.AllMessages.Add(message);
-
-            if (Instance.m_textInput)
-            {
-                if (hexColor != null)
-                    message = $"<color=#{hexColor}>{message}</color>";
-
-                Instance.m_textInput.text = $"{message}\n{Instance.m_textInput.text}";
-            }
-        }
+        
     }
 }

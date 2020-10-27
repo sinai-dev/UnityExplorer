@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Explorer.UI.Main.Pages
+﻿namespace ExplorerBeta.UI.Main
 {
-    public class OptionsPage : BaseMenuPage
+    public class OptionsPage : MainMenu.Page
     {
         public override string Name => "Options / Misc";
 

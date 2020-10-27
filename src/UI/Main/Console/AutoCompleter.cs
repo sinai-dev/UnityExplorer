@@ -1,20 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ExplorerBeta;
-using ExplorerBeta.Input;
-using ExplorerBeta.UI;
-using ExplorerBeta.UI.Main;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 #if CPP
-using UnhollowerRuntimeLib;
 #endif
 
-namespace Explorer.UI.Main.Pages.Console
+namespace ExplorerBeta.UI.Main.Console
 {
     public class AutoCompleter
     {
@@ -31,7 +24,7 @@ namespace Explorer.UI.Main.Pages.Console
         private static readonly List<Text> m_hiddenSuggestionTexts = new List<Text>();
 
         private static bool m_suggestionsDirty;
-        private static AutoComplete[] m_suggestions = new AutoComplete[0];
+        private static Suggestion[] m_suggestions = new Suggestion[0];
         private static int m_lastBatchIndex;
 
         private static string m_prevInput = "NULL";
@@ -47,12 +40,16 @@ namespace Explorer.UI.Main.Pages.Console
         public static void Update()
         {
             if (!m_mainObj)
+            {
                 return;
+            }
 
             if (!ConsolePage.EnableSuggestions)
             {
                 if (m_mainObj.activeSelf)
+                {
                     m_mainObj.SetActive(false);
+                }
 
                 return;
             }
@@ -62,7 +59,7 @@ namespace Explorer.UI.Main.Pages.Console
             UpdatePosition();
         }
 
-        public static void SetSuggestions(AutoComplete[] suggestions)
+        public static void SetSuggestions(Suggestion[] suggestions)
         {
             m_suggestions = suggestions;
 
@@ -73,12 +70,16 @@ namespace Explorer.UI.Main.Pages.Console
         private static void RefreshButtons()
         {
             if (!m_suggestionsDirty)
+            {
                 return;
+            }
 
             if (m_suggestions.Length < 1)
             {
                 if (m_mainObj.activeSelf)
+                {
                     m_mainObj?.SetActive(false);
+                }
                 return;
             }
 
@@ -99,12 +100,16 @@ namespace Explorer.UI.Main.Pages.Console
                 if (i >= m_suggestions.Length)
                 {
                     if (m_suggestionButtons[i].activeSelf)
+                    {
                         m_suggestionButtons[i].SetActive(false);
+                    }
                 }
                 else
                 {
                     if (!m_suggestionButtons[i].activeSelf)
+                    {
                         m_suggestionButtons[i].SetActive(true);
+                    }
 
                     var suggestion = m_suggestions[i];
                     var label = m_suggestionTexts[i];
@@ -113,14 +118,7 @@ namespace Explorer.UI.Main.Pages.Console
                     label.text = suggestion.Full;
                     hiddenLabel.text = suggestion.Addition;
 
-                    if (suggestion.Context == AutoComplete.Contexts.Namespace)
-                    {
-                        label.color = new Color(0.75f, 0.75f, 0.75f, 1.0f);
-                    }
-                    else
-                    {
-                        label.color = Color.white;
-                    }
+                    label.color = suggestion.TextColor;
                 }
 
                 m_lastBatchIndex = i;
@@ -134,14 +132,20 @@ namespace Explorer.UI.Main.Pages.Console
             var editor = ConsolePage.Instance.m_codeEditor;
 
             if (editor.InputField.text.Length < 1)
+            {
                 return;
+            }
 
-            var caretPos = editor.InputField.caretPosition;
+            int caretPos = editor.InputField.caretPosition;
             while (caretPos >= editor.inputText.textInfo.characterInfo.Length)
+            {
                 caretPos--;
+            }
 
             if (caretPos == m_lastCaretPos)
+            {
                 return;
+            }
 
             m_lastCaretPos = caretPos;
 
@@ -149,9 +153,9 @@ namespace Explorer.UI.Main.Pages.Console
             {
                 var pos = editor.inputText.textInfo.characterInfo[caretPos].bottomLeft;
 
-                pos = MainMenu.Instance.MainPanel.transform.TransformPoint(pos);
+                pos = editor.InputField.transform.TransformPoint(pos);
 
-                m_mainObj.transform.position = new Vector3(pos.x + m_thisRect.rect.width / 2, pos.y - 12, 0);
+                m_mainObj.transform.position = new Vector3(pos.x, pos.y - 3, 0);
             }
         }
 
@@ -160,14 +164,14 @@ namespace Explorer.UI.Main.Pages.Console
         public static void CheckAutocomplete()
         {
             var m_codeEditor = ConsolePage.Instance.m_codeEditor;
-            var input = m_codeEditor.InputField.text;
-            var caretIndex = m_codeEditor.InputField.caretPosition;
+            string input = m_codeEditor.InputField.text;
+            int caretIndex = m_codeEditor.InputField.caretPosition;
 
             if (!string.IsNullOrEmpty(input))
             {
                 try
                 {
-                    var start = caretIndex <= 0 ? 0 : input.LastIndexOfAny(splitChars, caretIndex - 1) + 1;
+                    int start = caretIndex <= 0 ? 0 : input.LastIndexOfAny(splitChars, caretIndex - 1) + 1;
                     input = input.Substring(start, caretIndex - start).Trim();
                 }
                 catch (ArgumentException) { }
@@ -199,39 +203,52 @@ namespace Explorer.UI.Main.Pages.Console
             {
                 // Credit ManylMarco
                 ConsolePage.AutoCompletes.Clear();
-                var completions = ConsolePage.Instance.m_evaluator.GetCompletions(input, out string prefix);
+                string[] completions = ConsolePage.Instance.m_evaluator.GetCompletions(input, out string prefix);
                 if (completions != null)
                 {
                     if (prefix == null)
+                    {
                         prefix = input;
+                    }
 
                     ConsolePage.AutoCompletes.AddRange(completions
                         .Where(x => !string.IsNullOrEmpty(x))
-                        .Select(x => new AutoComplete(x, prefix, AutoComplete.Contexts.Other))
+                        .Select(x => new Suggestion(x, prefix, Suggestion.Contexts.Other))
                         );
                 }
 
-                var trimmed = input.Trim();
+                string trimmed = input.Trim();
                 if (trimmed.StartsWith("using"))
+                {
                     trimmed = trimmed.Remove(0, 5).Trim();
+                }
 
-                var namespaces = AutoCompleteHelpers.Namespaces
+                IEnumerable<Suggestion> namespaces = Suggestion.Namespaces
                     .Where(x => x.StartsWith(trimmed) && x.Length > trimmed.Length)
-                    .Select(x => new AutoComplete(
+                    .Select(x => new Suggestion(
                         x.Substring(trimmed.Length),
                         x.Substring(0, trimmed.Length),
-                        AutoComplete.Contexts.Namespace));
+                        Suggestion.Contexts.Namespace));
 
                 ConsolePage.AutoCompletes.AddRange(namespaces);
+
+                IEnumerable<Suggestion> keywords = Suggestion.Keywords
+                    .Where(x => x.StartsWith(trimmed) && x.Length > trimmed.Length)
+                    .Select(x => new Suggestion(
+                        x.Substring(trimmed.Length),
+                        x.Substring(0, trimmed.Length),
+                        Suggestion.Contexts.Keyword));
+
+                ConsolePage.AutoCompletes.AddRange(keywords);
             }
             catch (Exception ex)
             {
-                ExplorerCore.Log("C# Console error:\r\n" + ex);
+                ExplorerCore.Log("Autocomplete error:\r\n" + ex.ToString());
                 ClearAutocompletes();
             }
         }
 
-#region UI Construction
+        #region UI Construction
 
         private static void ConstructUI()
         {
@@ -243,7 +260,7 @@ namespace Explorer.UI.Main.Pages.Console
 
             var mainRect = obj.GetComponent<RectTransform>();
             m_thisRect = mainRect;
-            mainRect.pivot = new Vector2(0.5f, 0.5f);
+            mainRect.pivot = new Vector2(0f, 1f);
             mainRect.anchorMin = new Vector2(0.45f, 0.45f);
             mainRect.anchorMax = new Vector2(0.65f, 0.6f);
             mainRect.offsetMin = Vector2.zero;
@@ -258,10 +275,10 @@ namespace Explorer.UI.Main.Pages.Console
             for (int i = 0; i < MAX_LABELS; i++)
             {
                 var buttonObj = UIFactory.CreateButton(content);
-                var btn = buttonObj.GetComponent<Button>();
-                var btnColors = btn.colors;
+                Button btn = buttonObj.GetComponent<Button>();
+                ColorBlock btnColors = btn.colors;
                 btnColors.normalColor = new Color(0f, 0f, 0f, 0f);
-                btnColors.highlightedColor = new Color(0.5f, 0.5f, 0.5f, 1.0f);
+                btnColors.highlightedColor = new Color(0.2f, 0.2f, 0.2f, 1.0f);
                 btn.colors = btnColors;
 
                 var nav = btn.navigation;
@@ -289,7 +306,7 @@ namespace Explorer.UI.Main.Pages.Console
                 void UseAutocompleteButton()
                 {
                     ConsolePage.Instance.UseAutocomplete(hiddenText.text);
-                    EventSystem.current.SetSelectedGameObject(ConsolePage.Instance.m_codeEditor.InputField.gameObject, 
+                    EventSystem.current.SetSelectedGameObject(ConsolePage.Instance.m_codeEditor.InputField.gameObject,
                         null);
                 }
 
@@ -298,6 +315,6 @@ namespace Explorer.UI.Main.Pages.Console
             }
         }
 
-#endregion
+        #endregion
     }
 }

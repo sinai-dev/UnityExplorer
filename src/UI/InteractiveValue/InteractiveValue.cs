@@ -3,11 +3,11 @@
 //using System.Linq;
 //using System.Reflection;
 //using UnityEngine;
-//using Explorer.CacheObject;
-//using Explorer.Helpers;
-//using Explorer.UI.Shared;
+//using ExplorerBeta.CacheObject;
+//using ExplorerBeta.Helpers;
+//using ExplorerBeta.UI.Shared;
 
-//namespace Explorer.UI
+//namespace ExplorerBeta.UI
 //{
 //    public class InteractiveValue
 //    {
@@ -35,7 +35,7 @@
 //            GetButtonLabel();
 //        }
 
-        
+
 
 //        private MethodInfo GetToStringMethod()
 //        {

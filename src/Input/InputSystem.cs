@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Reflection;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
 using ExplorerBeta.Helpers;
+using UnityEngine;
 
 namespace ExplorerBeta.Input
 {
-    public class InputSystem : IAbstractInput
+    public class InputSystem : IHandleInput
     {
         public static Type TKeyboard => m_tKeyboard ?? (m_tKeyboard = ReflectionHelpers.GetTypeByName("UnityEngine.InputSystem.Keyboard"));
         private static Type m_tKeyboard;

@@ -1,19 +1,17 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System;
-using System.Text;
-using System.Reflection;
-using ExplorerBeta.Input;
-using Explorer.UI.Main.Pages.Console.Lexer;
-using ExplorerBeta;
+﻿using System;
 using System.Linq;
+using System.Text;
+using ExplorerBeta.Input;
+using ExplorerBeta.UI.Main.Console.Lexer;
+using TMPro;
+using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
-namespace Explorer.UI.Main.Pages.Console
+namespace ExplorerBeta.UI.Main.Console
 {
     public class CodeEditor
-    {        
+    {
         private readonly InputLexer inputLexer = new InputLexer();
 
         public TMP_InputField InputField { get; }
@@ -69,7 +67,7 @@ namespace Explorer.UI.Main.Pages.Console
         public CodeEditor(TMP_InputField inputField, TextMeshProUGUI inputText, TextMeshProUGUI inputHighlightText, TextMeshProUGUI lineText,
             Image background, Image lineHighlight, Image lineNumberBackground, Image scrollbar)
         {
-            this.InputField = inputField;
+            InputField = inputField;
             this.inputText = inputText;
             this.inputHighlightText = inputHighlightText;
             this.lineText = lineText;
@@ -83,15 +81,15 @@ namespace Explorer.UI.Main.Pages.Console
                 throw new Exception("References are missing!");
             }
 
-            this.inputTextTransform = inputText.GetComponent<RectTransform>();
-            this.lineHighlightTransform = lineHighlight.GetComponent<RectTransform>();
+            inputTextTransform = inputText.GetComponent<RectTransform>();
+            lineHighlightTransform = lineHighlight.GetComponent<RectTransform>();
 
             ApplyTheme();
             inputLexer.UseMatchers(CSharpLexer.DelimiterSymbols, CSharpLexer.Matchers);
 
             // subscribe to text input changing
 #if CPP
-            this.InputField.onValueChanged.AddListener(new Action<string>((string s) => { OnInputChanged(); }));
+            InputField.onValueChanged.AddListener(new Action<string>((string s) => { OnInputChanged(); }));
 #else
             this.InputField.onValueChanged.AddListener((string s) => { OnInputChanged(); });
 #endif
@@ -130,7 +128,7 @@ namespace Explorer.UI.Main.Pages.Console
 
         public void OnInputChanged(bool forceUpdate = false)
         {
-            var newText = InputField.text;
+            string newText = InputField.text;
 
             UpdateIndent();
 
@@ -152,11 +150,13 @@ namespace Explorer.UI.Main.Pages.Console
         public void SetLineHighlight(int lineNumber, bool lockLineHighlight)
         {
             if (lineNumber < 1 || lineNumber > LineCount)
+            {
                 return;
+            }
 
             lineHighlightTransform.anchoredPosition = new Vector2(5,
                 (inputText.textInfo.lineInfo[inputText.textInfo.characterInfo[0].lineNumber].lineHeight *
-                -(lineNumber - 1))  - 4f +
+                -(lineNumber - 1)) - 4f +
                 inputTextTransform.anchoredPosition.y);
 
             lineHighlightLocked = lockLineHighlight;
@@ -218,11 +218,13 @@ namespace Explorer.UI.Main.Pages.Console
         private void UpdateIndent()
         {
             int caret = InputField.caretPosition;
-            
+
             if (caret < 0 || caret >= inputText.textInfo.characterInfo.Length)
             {
                 while (caret >= 0 && caret >= inputText.textInfo.characterInfo.Length)
+                {
                     caret--;
+                }
 
                 if (caret < 0 || caret >= inputText.textInfo.characterInfo.Length)
                 {
@@ -234,7 +236,9 @@ namespace Explorer.UI.Main.Pages.Console
 
             int charCount = 0;
             for (int i = 0; i < CurrentLine; i++)
+            {
                 charCount += inputText.textInfo.lineInfo[i].characterCount;
+            }
 
             CurrentColumn = caret - charCount;
             CurrentIndent = 0;
@@ -244,28 +248,36 @@ namespace Explorer.UI.Main.Pages.Console
                 char character = InputField.text[i];
 
                 if (character == CSharpLexer.indentIncreaseCharacter)
+                {
                     CurrentIndent++;
+                }
 
                 if (character == CSharpLexer.indentDecreaseCharacter)
+                {
                     CurrentIndent--;
+                }
             }
 
             if (CurrentIndent < 0)
+            {
                 CurrentIndent = 0;
+            }
         }
 
         private void UpdateHighlight()
         {
             if (lineHighlightLocked)
+            {
                 return;
+            }
 
             try
             {
                 int caret = InputField.caretPosition - 1;
 
-                var lineHeight = inputText.textInfo.lineInfo[inputText.textInfo.characterInfo[0].lineNumber].lineHeight;
-                var lineNumber = inputText.textInfo.characterInfo[caret].lineNumber;
-                var offset = lineNumber + inputTextTransform.anchoredPosition.y;
+                float lineHeight = inputText.textInfo.lineInfo[inputText.textInfo.characterInfo[0].lineNumber].lineHeight;
+                int lineNumber = inputText.textInfo.characterInfo[caret].lineNumber;
+                float offset = lineNumber + inputTextTransform.anchoredPosition.y;
 
                 lineHighlightTransform.anchoredPosition = new Vector2(5, -(offset * lineHeight));
             }
@@ -283,15 +295,19 @@ namespace Explorer.UI.Main.Pages.Console
 
             highlightedBuilder.Length = 0;
 
-            foreach (var match in inputLexer.LexInputString(inputText))
+            foreach (LexerMatchInfo match in inputLexer.LexInputString(inputText))
             {
                 for (int i = offset; i < match.startIndex; i++)
+                {
                     highlightedBuilder.Append(inputText[i]);
+                }
 
                 highlightedBuilder.Append(match.htmlColor);
 
                 for (int i = match.startIndex; i < match.endIndex; i++)
+                {
                     highlightedBuilder.Append(inputText[i]);
+                }
 
                 highlightedBuilder.Append(CLOSE_COLOR_TAG);
 
@@ -299,7 +315,9 @@ namespace Explorer.UI.Main.Pages.Console
             }
 
             for (int i = offset; i < inputText.Length; i++)
+            {
                 highlightedBuilder.Append(inputText[i]);
+            }
 
             inputText = highlightedBuilder.ToString();
 
@@ -310,23 +328,23 @@ namespace Explorer.UI.Main.Pages.Console
         {
             if (CurrentIndent > 0)
             {
-                var indent = GetAutoIndentTab(CurrentIndent);
+                string indent = GetAutoIndentTab(CurrentIndent);
 
                 if (indent.Length > 0)
                 {
-                    var caretPos = InputField.caretPosition;
+                    int caretPos = InputField.caretPosition;
 
-                    var indentMinusOne = indent.Substring(0, indent.Length - 1);
+                    string indentMinusOne = indent.Substring(0, indent.Length - 1);
 
                     // get last index of {
                     // chuck it on the next line if its not already
-                    var text = InputField.text;
-                    var sub = InputField.text.Substring(0, InputField.caretPosition);
-                    var lastIndex = sub.LastIndexOf("{");
-                    var offset = lastIndex - 1;
+                    string text = InputField.text;
+                    string sub = InputField.text.Substring(0, InputField.caretPosition);
+                    int lastIndex = sub.LastIndexOf("{");
+                    int offset = lastIndex - 1;
                     if (offset >= 0 && text[offset] != '\n' && text[offset] != '\t')
                     {
-                        var open = "\n" + indentMinusOne;
+                        string open = "\n" + indentMinusOne;
 
                         InputField.text = text.Insert(offset + 1, open);
 
@@ -368,7 +386,9 @@ namespace Explorer.UI.Main.Pages.Console
             string tab = string.Empty;
 
             for (int i = 0; i < amount; i++)
+            {
                 tab += "\t";
+            }
 
             return tab;
         }

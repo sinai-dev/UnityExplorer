@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
-using Explorer.Unstrip.ColorUtility;
+﻿using UnityEngine;
 
-namespace Explorer.UI.Main.Pages.Console.Lexer
+namespace ExplorerBeta.UI.Main.Console.Lexer
 {
     public sealed class NumberMatch : MatchLexer
     {

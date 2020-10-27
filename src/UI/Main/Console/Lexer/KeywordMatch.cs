@@ -1,19 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using Explorer.Unstrip.ColorUtility;
-using ExplorerBeta;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace Explorer.UI.Main.Pages.Console.Lexer
+namespace ExplorerBeta.UI.Main.Console.Lexer
 {
     public sealed class KeywordMatch : MatchLexer
     {
         public string keywords;
 
-        public override Color HighlightColor => this.highlightColor;
+        public override Color HighlightColor => highlightColor;
         public Color highlightColor;
 
         private readonly HashSet<string> shortlist = new HashSet<string>();
@@ -26,7 +20,9 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
 
             if (!char.IsWhiteSpace(lexer.Previous) &&
                 !lexer.IsSpecialSymbol(lexer.Previous, SpecialCharacterPosition.End))
+            {
                 return false;
+            }
 
             shortlist.Clear();
 
@@ -34,11 +30,17 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
             char currentChar = lexer.ReadNext();
 
             for (int i = 0; i < keywordCache.Length; i++)
+            {
                 if (keywordCache[i][0] == currentChar)
+                {
                     shortlist.Add(keywordCache[i]);
+                }
+            }
 
             if (shortlist.Count == 0)
+            {
                 return false;
+            }
 
             do
             {
@@ -68,7 +70,9 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
                 }
 
                 while (removeList.Count > 0)
+                {
                     shortlist.Remove(removeList.Pop());
+                }
             }
             while (shortlist.Count > 0);
 
@@ -78,21 +82,27 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
         private void RemoveLongStrings(int length)
         {
             foreach (string keyword in shortlist)
+            {
                 if (keyword.Length > length)
+                {
                     removeList.Push(keyword);
+                }
+            }
 
             while (removeList.Count > 0)
+            {
                 shortlist.Remove(removeList.Pop());
+            }
         }
 
         private void BuildKeywordCache()
         {
             if (keywordCache == null)
             {
-                var kwSplit = keywords.Split(' ');
+                string[] kwSplit = keywords.Split(' ');
 
-                var list = new List<string>();
-                foreach (var kw in kwSplit)
+                List<string> list = new List<string>();
+                foreach (string kw in kwSplit)
                 {
                     if (!string.IsNullOrEmpty(kw) && kw.Length > 0)
                     {

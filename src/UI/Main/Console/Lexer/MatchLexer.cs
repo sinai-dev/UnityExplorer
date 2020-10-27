@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using Explorer.Unstrip.ColorUtility;
-using ExplorerBeta;
+﻿using System.Collections.Generic;
+using ExplorerBeta.Unstrip.ColorUtility;
 using UnityEngine;
 
-namespace Explorer.UI.Main.Pages.Console.Lexer
+namespace ExplorerBeta.UI.Main.Console.Lexer
 {
     public abstract class MatchLexer
     {

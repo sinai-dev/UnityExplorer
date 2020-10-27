@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using Explorer.Unstrip.ColorUtility;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace Explorer.UI.Main.Pages.Console.Lexer
+namespace ExplorerBeta.UI.Main.Console.Lexer
 {
     public sealed class CommentMatch : MatchLexer
     {
@@ -35,7 +33,11 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
                 if (match)
                 {
                     // Read until end
-                    while (!IsEndLineOrEndFile(lexer, lexer.ReadNext())) ;
+                    while (!IsEndLineOrEndFile(lexer, lexer.ReadNext()))
+                    {
+                        ;
+                    }
+
                     return true;
                 }
             }

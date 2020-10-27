@@ -12,9 +12,10 @@
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
     <OutputPath>..\Release\Explorer.MelonLoader.Il2Cpp\</OutputPath>
-    <DefineConstants></DefineConstants>
-    <IsCpp>true</IsCpp>
-    <IsMelonLoader>true</IsMelonLoader>
+    <DefineConstants>
+    </DefineConstants>
+    <IsCpp>false</IsCpp>
+    <IsMelonLoader>false</IsMelonLoader>
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
@@ -22,7 +23,7 @@
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x64</PlatformTarget>
     <Prefer32Bit>false</Prefer32Bit>
-    <RootNamespace>Explorer</RootNamespace>
+    <RootNamespace>ExplorerBeta</RootNamespace>
     <AssemblyName>ExplorerBeta</AssemblyName>
     <!-- Set this to the MelonLoader Il2Cpp Game folder, without the ending '\' character. -->
     <MLCppGameFolder>D:\Steam\steamapps\common\VRChat</MLCppGameFolder>
@@ -85,8 +86,8 @@
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-  
-  <!-- Universal Mono UnityEngine.dll ref (v5.3) --><!--
+  <!-- Universal Mono UnityEngine.dll ref (v5.3) -->
+  <!--
   <ItemGroup Condition="'$(IsCpp)'=='false'">
     <Reference Include="UnityEngine">
       <HintPath>..\lib\UnityEngine.dll</HintPath>
@@ -101,7 +102,6 @@
       <Private>False</Private>
     </Reference>
   </ItemGroup>-->
-  
   <!-- MelonLoader Mono refs -->
   <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)'=='true|false'">
     <Reference Include="MelonLoader.ModHandler">
@@ -149,7 +149,6 @@
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-  
   <!-- BepInEx Mono refs -->
   <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)'=='false|false'">
     <Reference Include="BepInEx">
@@ -201,7 +200,6 @@
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-  
   <!-- MelonLoader Il2Cpp refs -->
   <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)'=='true|true'">
     <Reference Include="MelonLoader.ModHandler">
@@ -257,7 +255,6 @@
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-  
   <!-- BepInEx Il2Cpp refs -->
   <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)'=='false|true'">
     <Reference Include="BepInEx">
@@ -346,26 +343,31 @@
     <Compile Include="Input\LegacyInput.cs" />
     <Compile Include="Input\NoInput.cs" />
     <Compile Include="UI\Main\DebugConsole.cs" />
+    <Compile Include="UI\Main\InspectorManager.cs" />
     <Compile Include="UI\Main\MainMenu.cs" />
-    <Compile Include="UI\Main\Pages\BaseMenuPage.cs" />
-    <Compile Include="UI\Main\Pages\ConsolePage.cs" />
-    <Compile Include="UI\Main\Pages\Console\AutoCompleter.cs" />
-    <Compile Include="UI\Main\Pages\Console\Editor\CodeEditor.cs" />
-    <Compile Include="UI\Main\Pages\Console\Editor\CSharpLexer.cs" />
-    <Compile Include="UI\Main\Pages\Console\Editor\Lexer\CommentMatch.cs" />
-    <Compile Include="UI\Main\Pages\Console\Editor\Lexer\ILexer.cs" />
-    <Compile Include="UI\Main\Pages\Console\Editor\Lexer\InputLexer.cs" />
-    <Compile Include="UI\Main\Pages\Console\Editor\Lexer\KeywordMatch.cs" />
-    <Compile Include="UI\Main\Pages\Console\Editor\Lexer\StringMatch.cs" />
-    <Compile Include="UI\Main\Pages\Console\Editor\Lexer\MatchLexer.cs" />
-    <Compile Include="UI\Main\Pages\Console\Editor\Lexer\NumberMatch.cs" />
-    <Compile Include="UI\Main\Pages\Console\Editor\Lexer\SymbolMatch.cs" />
-    <Compile Include="UI\Main\Pages\Console\ScriptEvaluator\AutoComplete.cs" />
-    <Compile Include="UI\Main\Pages\Console\ScriptEvaluator\ScriptEvaluator.cs" />
-    <Compile Include="UI\Main\Pages\Console\ScriptEvaluator\ScriptInteraction.cs" />
-    <Compile Include="UI\Main\Pages\HomePage.cs" />
-    <Compile Include="UI\Main\Pages\OptionsPage.cs" />
-    <Compile Include="UI\Main\Pages\SearchPage.cs" />
+    <Compile Include="UI\Main\ConsolePage.cs" />
+    <Compile Include="UI\Main\Console\AutoCompleter.cs" />
+    <Compile Include="UI\Main\Console\CodeEditor.cs" />
+    <Compile Include="UI\Main\Console\CSharpLexer.cs" />
+    <Compile Include="UI\Main\Console\Lexer\CommentMatch.cs" />
+    <Compile Include="UI\Main\Console\Lexer\ILexer.cs" />
+    <Compile Include="UI\Main\Console\Lexer\InputLexer.cs" />
+    <Compile Include="UI\Main\Console\Lexer\KeywordMatch.cs" />
+    <Compile Include="UI\Main\Console\Lexer\StringMatch.cs" />
+    <Compile Include="UI\Main\Console\Lexer\MatchLexer.cs" />
+    <Compile Include="UI\Main\Console\Lexer\NumberMatch.cs" />
+    <Compile Include="UI\Main\Console\Lexer\SymbolMatch.cs" />
+    <Compile Include="UI\Main\Console\Suggestion.cs" />
+    <Compile Include="UI\Main\Console\ScriptEvaluator.cs" />
+    <Compile Include="UI\Main\Console\ScriptInteraction.cs" />
+    <Compile Include="UI\Main\HomePage.cs" />
+    <Compile Include="UI\Main\Inspectors\GameObjectInspector.cs" />
+    <Compile Include="UI\Main\Inspectors\InspectorBase.cs" />
+    <Compile Include="UI\Main\Inspectors\InstanceInspector.cs" />
+    <Compile Include="UI\Main\Inspectors\StaticInspector.cs" />
+    <Compile Include="UI\Main\OptionsPage.cs" />
+    <Compile Include="UI\Main\SceneExplorer.cs" />
+    <Compile Include="UI\Main\SearchPage.cs" />
     <Compile Include="UI\Main\PanelDragger.cs" />
     <Compile Include="UI\InteractiveValue\InteractiveValue.cs" />
     <Compile Include="UI\Shared\PageHandler.cs" />
@@ -384,7 +386,9 @@
     <None Include="ILRepack.targets" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="UI\MouseInspector\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\ILRepack.Lib.MSBuild.Task.2.0.18.1\build\ILRepack.Lib.MSBuild.Task.targets" Condition="Exists('packages\ILRepack.Lib.MSBuild.Task.2.0.18.1\build\ILRepack.Lib.MSBuild.Task.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

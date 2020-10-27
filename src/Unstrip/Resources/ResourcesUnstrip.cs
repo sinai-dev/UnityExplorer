@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using ExplorerBeta.Helpers;
-using UnityEngine;
 #if CPP
 using UnhollowerBaseLib;
 #endif
@@ -17,12 +13,12 @@ namespace ExplorerBeta.Unstrip.Resources
 
         public static UnityEngine.Object[] FindObjectsOfTypeAll(Il2CppSystem.Type type)
         {
-            var arrayPtr = ICallHelper.GetICall<d_FindObjectsOfTypeAll>("UnityEngine.Resources::FindObjectsOfTypeAll")
+            IntPtr arrayPtr = ICallHelper.GetICall<d_FindObjectsOfTypeAll>("UnityEngine.Resources::FindObjectsOfTypeAll")
                 .Invoke(type.Pointer);
 
-            var array = new Il2CppReferenceArray<UnityEngine.Object>(arrayPtr);
+            Il2CppReferenceArray<UnityEngine.Object> array = new Il2CppReferenceArray<UnityEngine.Object>(arrayPtr);
 
-            var ret = new UnityEngine.Object[array.Length];
+            UnityEngine.Object[] ret = new UnityEngine.Object[array.Length];
 
             for (int i = 0; i < array.Length; i++)
             {

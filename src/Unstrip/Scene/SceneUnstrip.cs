@@ -1,10 +1,6 @@
 ﻿#if CPP
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using ExplorerBeta.Helpers;
-using UnhollowerBaseLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -21,11 +17,13 @@ namespace ExplorerBeta.Unstrip.Scenes
         public static GameObject[] GetRootGameObjects(int handle)
         {
             if (handle == -1)
+            {
                 return new GameObject[0];
+            }
 
-            var list = new Il2CppSystem.Collections.Generic.List<GameObject>(GetRootCount(handle));
+            Il2CppSystem.Collections.Generic.List<GameObject> list = new Il2CppSystem.Collections.Generic.List<GameObject>(GetRootCount(handle));
 
-            var iCall = ICallHelper.GetICall<d_GetRootGameObjects>("UnityEngine.SceneManagement.Scene::GetRootGameObjectsInternal");
+            d_GetRootGameObjects iCall = ICallHelper.GetICall<d_GetRootGameObjects>("UnityEngine.SceneManagement.Scene::GetRootGameObjectsInternal");
 
             iCall.Invoke(handle, list.Pointer);
 
@@ -40,7 +38,7 @@ namespace ExplorerBeta.Unstrip.Scenes
 
         public static int GetRootCount(int handle)
         {
-            var iCall = ICallHelper.GetICall<GetRootCountInternal_delegate>("UnityEngine.SceneManagement.Scene::GetRootCountInternal");
+            GetRootCountInternal_delegate iCall = ICallHelper.GetICall<GetRootCountInternal_delegate>("UnityEngine.SceneManagement.Scene::GetRootCountInternal");
             return iCall.Invoke(handle);
         }
     }

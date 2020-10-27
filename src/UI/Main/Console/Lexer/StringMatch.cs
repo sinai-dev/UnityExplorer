@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Explorer.Unstrip.ColorUtility;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace Explorer.UI.Main.Pages.Console.Lexer
+namespace ExplorerBeta.UI.Main.Console.Lexer
 {
     public sealed class StringMatch : MatchLexer
     {
@@ -18,7 +14,11 @@ namespace Explorer.UI.Main.Pages.Console.Lexer
         {
             if (lexer.ReadNext() == '"')
             {
-                while (!IsClosingQuoteOrEndFile(lexer, lexer.ReadNext())) ;
+                while (!IsClosingQuoteOrEndFile(lexer, lexer.ReadNext()))
+                {
+                    ;
+                }
+
                 return true;
             }
             return false;
