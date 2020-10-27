@@ -28,7 +28,7 @@ namespace ExplorerBeta.UI.Main.Console
  if in int into is join let lock long new null object on orderby out 
  ref remove return sbyte select short sizeof stackalloc string 
  switch throw true try typeof uint ulong ushort 
- value var where while yield"
+ var where while yield"
         };
 
         public static KeywordMatch invalidKeywordMatcher = new KeywordMatch()
@@ -36,7 +36,7 @@ namespace ExplorerBeta.UI.Main.Console
             highlightColor = new Color(0.95f, 0.10f, 0.10f, 1.0f),
             keywords = @"abstract async base class delegate enum explicit extern fixed get 
  implicit interface internal namespace operator override params private protected public 
- using partial readonly sealed set static struct this unchecked unsafe virtual volatile void"
+ using partial readonly sealed set static struct this unchecked unsafe value virtual volatile void"
         };
 
         private static char[] delimiterSymbolCache = null;

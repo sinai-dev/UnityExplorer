@@ -2,9 +2,9 @@
 
 namespace ExplorerBeta.UI.Main.Inspectors
 {
-    public class StaticInspector : InspectorBase
+    public class StaticInspector : ReflectionInspector
     {
-        public override string TabLabel => " [S] TODO";
+        public override string TabLabel => $" [S] {base.TabLabel}";
 
         public StaticInspector(Type type) : base(type)
         {

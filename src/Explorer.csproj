@@ -336,14 +336,15 @@
     <Compile Include="Helpers\ReflectionHelpers.cs" />
     <Compile Include="Helpers\UnityHelpers.cs" />
     <Compile Include="UI\ForceUnlockCursor.cs" />
-    <Compile Include="Input\IAbstractInput.cs" />
-    <Compile Include="CacheObject\Tests\TestClass.cs" />
+    <Compile Include="Input\IHandleInput.cs" />
+    <Compile Include="Tests\Tests.cs" />
     <Compile Include="Input\InputManager.cs" />
     <Compile Include="Input\InputSystem.cs" />
     <Compile Include="Input\LegacyInput.cs" />
     <Compile Include="Input\NoInput.cs" />
     <Compile Include="UI\Main\DebugConsole.cs" />
     <Compile Include="UI\Main\InspectorManager.cs" />
+    <Compile Include="UI\Main\Inspectors\ReflectionInspector.cs" />
     <Compile Include="UI\Main\MainMenu.cs" />
     <Compile Include="UI\Main\ConsolePage.cs" />
     <Compile Include="UI\Main\Console\AutoCompleter.cs" />

@@ -13,7 +13,5 @@ namespace ExplorerBeta.Input
 
         public bool GetMouseButton(int btn) => false;
         public bool GetMouseButtonDown(int btn) => false;
-
-        public void Init() { }
     }
 }

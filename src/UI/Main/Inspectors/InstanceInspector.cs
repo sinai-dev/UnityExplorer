@@ -3,25 +3,13 @@ using ExplorerBeta.Helpers;
 
 namespace ExplorerBeta.UI.Main.Inspectors
 {
-    public class InstanceInspector : InspectorBase
+    public class InstanceInspector : ReflectionInspector
     {
         // todo
-        public override string TabLabel => $" [R] {m_targetTypeShortName}";
-        private readonly string m_targetTypeShortName;
+        public override string TabLabel => $" [R] {base.TabLabel}";
 
         public InstanceInspector(object target) : base(target)
         {
-            // todo
-
-            Type type = ReflectionHelpers.GetActualType(target);
-
-            if (type == null)
-            {
-                // TODO
-                return;
-            }
-
-            m_targetTypeShortName = type.Name;
 
         }
 

@@ -27,66 +27,28 @@ namespace ExplorerBeta.UI.Main.Console
 
         public static object CurrentTarget()
         {
-            throw new NotImplementedException("TODO");
+            return InspectorManager.Instance?.m_activeInspector?.Target;
         }
 
         public static object[] AllTargets()
         {
-            throw new NotImplementedException("TODO");
+            int count = InspectorManager.Instance?.m_currentInspectors.Count ?? 0;
+            object[] ret = new object[count];
+            for (int i = 0; i < count; i++)
+            {
+                ret[i] = InspectorManager.Instance?.m_currentInspectors[i].Target;
+            }
+            return ret;
         }
 
         public static void Inspect(object obj)
         {
-            throw new NotImplementedException("TODO");
+            InspectorManager.Instance.Inspect(obj);
         }
 
         public static void Inspect(Type type)
         {
-            throw new NotImplementedException("TODO");
+            InspectorManager.Instance.Inspect(type);
         }
-
-        //        public static void Help()
-        //        {
-        //            ExplorerCore.Log(@"
-        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        //              C# Console Help
-
-        //The following helper methods are available:
-
-        //void Log(object message)
-        //    prints a message to the console window and debug log
-        //    usage: Log(""hello world"");
-
-        //void AddUsing(string directive)
-        //    adds a using directive to the console.
-        //    usage: AddUsing(""UnityEngine.UI"");
-
-        //void GetUsing()
-        //    logs the current using directives to the debug console
-        //    usage: GetUsing();
-
-        //void Reset()
-        //    resets the C# console, clearing all variables and using directives.
-        //    usage: Reset();
-        //");
-
-        //TODO:
-
-        //ExplorerCore.Log("object CurrentTarget()");
-        //ExplorerCore.Log("    returns the target object of the current tab (in tab view mode only)");
-        //ExplorerCore.Log("    usage: var target = CurrentTarget();");
-        //ExplorerCore.Log("");
-        //ExplorerCore.Log("object[] AllTargets()");
-        //ExplorerCore.Log("    returns an object[] array containing all currently inspected objects");
-        //ExplorerCore.Log("    usage: var targets = AllTargets();");
-        //ExplorerCore.Log("");
-        //ExplorerCore.Log("void Inspect(object obj)");
-        //ExplorerCore.Log("    inspects the provided object in a new window.");
-        //ExplorerCore.Log("    usage: Inspect(Camera.main);");
-        //ExplorerCore.Log("");
-        //ExplorerCore.Log("void Inspect(Type type)");
-        //ExplorerCore.Log("    attempts to inspect the provided type with static-only reflection.");
-        //ExplorerCore.Log("    usage: Inspect(typeof(Camera));");
-        //}
     }
 }

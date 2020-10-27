@@ -19,8 +19,9 @@ namespace ExplorerBeta.UI.Main
 
         public InspectorBase m_activeInspector;
         public readonly List<InspectorBase> m_currentInspectors = new List<InspectorBase>();
+
         public GameObject m_tabBarContent;
-        public GameObject m_rightPaneContent;
+        public GameObject m_inspectorContent;
 
         public void Update()
         {
@@ -121,11 +122,11 @@ namespace ExplorerBeta.UI.Main
 
         public void ConstructInspectorPane()
         {
-            m_rightPaneContent = UIFactory.CreateVerticalGroup(HomePage.Instance.Content, new Color(72f / 255f, 72f / 255f, 72f / 255f));
-            LayoutElement rightLayout = m_rightPaneContent.AddComponent<LayoutElement>();
+            var mainObj = UIFactory.CreateVerticalGroup(HomePage.Instance.Content, new Color(72f / 255f, 72f / 255f, 72f / 255f));
+            LayoutElement rightLayout = mainObj.AddComponent<LayoutElement>();
             rightLayout.flexibleWidth = 999999;
 
-            VerticalLayoutGroup rightGroup = m_rightPaneContent.GetComponent<VerticalLayoutGroup>();
+            var rightGroup = mainObj.GetComponent<VerticalLayoutGroup>();
             rightGroup.childForceExpandHeight = true;
             rightGroup.childForceExpandWidth = true;
             rightGroup.childControlHeight = true;
@@ -136,40 +137,40 @@ namespace ExplorerBeta.UI.Main
             rightGroup.padding.top = 8;
             rightGroup.padding.bottom = 8;
 
-            GameObject inspectorTitle = UIFactory.CreateLabel(m_rightPaneContent, TextAnchor.UpperLeft);
+            var inspectorTitle = UIFactory.CreateLabel(mainObj, TextAnchor.UpperLeft);
             Text title = inspectorTitle.GetComponent<Text>();
             title.text = "Inspector";
             title.fontSize = 20;
-            LayoutElement titleLayout = inspectorTitle.AddComponent<LayoutElement>();
+            var titleLayout = inspectorTitle.AddComponent<LayoutElement>();
             titleLayout.minHeight = 30;
             titleLayout.flexibleHeight = 0;
 
-            m_tabBarContent = UIFactory.CreateGridGroup(m_rightPaneContent, new Vector2(185, 20), new Vector2(5, 2), new Color(0.1f, 0.1f, 0.1f, 1));
+            m_tabBarContent = UIFactory.CreateGridGroup(mainObj, new Vector2(185, 20), new Vector2(5, 2), new Color(0.1f, 0.1f, 0.1f, 1));
 
-            GridLayoutGroup gridGroup = m_tabBarContent.GetComponent<GridLayoutGroup>();
+            var gridGroup = m_tabBarContent.GetComponent<GridLayoutGroup>();
             gridGroup.padding.top = 4;
             gridGroup.padding.left = 4;
             gridGroup.padding.right = 4;
             gridGroup.padding.bottom = 4;
 
-            // TEMP DUMMY INSPECTOR
+            // inspector content area
 
-            GameObject dummyInspectorObj = UIFactory.CreateVerticalGroup(m_rightPaneContent, new Color(0.1f, 0.1f, 0.1f, 1.0f));
+            m_inspectorContent = UIFactory.CreateVerticalGroup(mainObj, new Color(0.1f, 0.1f, 0.1f, 1.0f));
 
-            VerticalLayoutGroup dummyGroup = dummyInspectorObj.GetComponent<VerticalLayoutGroup>();
-            dummyGroup.childForceExpandHeight = true;
-            dummyGroup.childForceExpandWidth = true;
-            dummyGroup.childControlHeight = true;
-            dummyGroup.childControlWidth = true;
-            dummyGroup.spacing = 5;
-            dummyGroup.padding.top = 5;
-            dummyGroup.padding.left = 5;
-            dummyGroup.padding.right = 5;
-            dummyGroup.padding.bottom = 5;
+            var contentGroup = m_inspectorContent.GetComponent<VerticalLayoutGroup>();
+            contentGroup.childForceExpandHeight = true;
+            contentGroup.childForceExpandWidth = true;
+            contentGroup.childControlHeight = true;
+            contentGroup.childControlWidth = true;
+            contentGroup.spacing = 5;
+            contentGroup.padding.top = 5;
+            contentGroup.padding.left = 5;
+            contentGroup.padding.right = 5;
+            contentGroup.padding.bottom = 5;
 
-            LayoutElement dummyLayout = dummyInspectorObj.AddComponent<LayoutElement>();
-            dummyLayout.preferredHeight = 900;
-            dummyLayout.flexibleHeight = 10000;
+            var contentLayout = m_inspectorContent.AddComponent<LayoutElement>();
+            contentLayout.preferredHeight = 900;
+            contentLayout.flexibleHeight = 10000;
         }
 
         #endregion

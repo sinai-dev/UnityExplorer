@@ -9,7 +9,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-
 namespace ExplorerBeta.UI.Main
 {
     public class SceneExplorer
@@ -404,7 +403,7 @@ namespace ExplorerBeta.UI.Main
             Button inspectButton = m_mainInspectBtn.GetComponent<Button>();
             inspectButton.onClick.AddListener(new Action(() => { InspectorManager.Instance.Inspect(m_selectedSceneObject); }));
 
-            GameObject scrollObj = UIFactory.CreateScrollView(leftPane, out m_sceneListCanvas, new Color(0.15f, 0.15f, 0.15f, 1));
+            GameObject scrollObj = UIFactory.CreateScrollView(leftPane, out m_sceneListCanvas, new Color(0.1f, 0.1f, 0.1f));
             Scrollbar scroll = scrollObj.transform.Find("Scrollbar Vertical").GetComponent<Scrollbar>();
             ColorBlock colors = scroll.colors;
             colors.normalColor = new Color(0.6f, 0.6f, 0.6f, 1.0f);
@@ -423,7 +422,7 @@ namespace ExplorerBeta.UI.Main
         {
             int thisIndex = m_sceneListTexts.Count();
 
-            GameObject btnGroupObj = UIFactory.CreateHorizontalGroup(m_sceneListCanvas, new Color(0.15f, 0.15f, 0.15f));
+            GameObject btnGroupObj = UIFactory.CreateHorizontalGroup(m_sceneListCanvas, new Color(0.1f, 0.1f, 0.1f));
             HorizontalLayoutGroup btnGroup = btnGroupObj.GetComponent<HorizontalLayoutGroup>();
             btnGroup.childForceExpandWidth = true;
             btnGroup.childControlWidth = true;
@@ -443,8 +442,8 @@ namespace ExplorerBeta.UI.Main
             mainBtnLayout.flexibleWidth = 0;
             Button mainBtn = mainButtonObj.GetComponent<Button>();
             ColorBlock mainColors = mainBtn.colors;
-            mainColors.normalColor = new Color(0, 0, 0, 0);
-            mainColors.highlightedColor = new Color(0.3f, 0.3f, 0.3f, 1);
+            mainColors.normalColor = new Color(0.1f, 0.1f, 0.1f);
+            mainColors.highlightedColor = new Color(0.2f, 0.2f, 0.2f, 1);
             mainBtn.colors = mainColors;
 #if CPP
             mainBtn.onClick.AddListener(new Action(() => { SceneListObjectClicked(thisIndex); }));
@@ -468,7 +467,8 @@ namespace ExplorerBeta.UI.Main
 
             Button inspectBtn = inspectBtnObj.GetComponent<Button>();
             ColorBlock inspectColors = inspectBtn.colors;
-            inspectColors.normalColor = new Color(1, 1, 1, 0.05f);
+            inspectColors.normalColor = new Color(0.15f, 0.15f, 0.15f);
+            mainColors.highlightedColor = new Color(0.2f, 0.2f, 0.2f, 0.5f);
             inspectBtn.colors = inspectColors;
             inspectBtn.onClick.AddListener(new Action(() => { InspectorManager.Instance.Inspect(m_sceneShortList[thisIndex]); }));
         }

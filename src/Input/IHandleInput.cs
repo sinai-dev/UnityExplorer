@@ -4,8 +4,6 @@ namespace ExplorerBeta.Input
 {
     public interface IHandleInput
     {
-        void Init();
-
         Vector2 MousePosition { get; }
 
         bool GetKeyDown(KeyCode key);

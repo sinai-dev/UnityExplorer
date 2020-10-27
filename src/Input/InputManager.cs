@@ -29,8 +29,6 @@ namespace ExplorerBeta.Input
                 ExplorerCore.LogWarning("Could not find any Input module!");
                 m_inputModule = new NoInput();
             }
-
-            m_inputModule.Init();
         }
 
         public static Vector3 MousePosition => m_inputModule.MousePosition;

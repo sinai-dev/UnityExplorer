@@ -159,7 +159,7 @@ namespace ExplorerBeta.UI.Main.Console
             }
         }
 
-        private static readonly char[] splitChars = new[] { '{', '}', ',', ';', '<', '>', '(', ')', '[', ']', '=', '|', '&' };
+        private static readonly char[] splitChars = new[] { '{', '}', ',', ';', '<', '>', '(', ')', '[', ']', '=', '|', '&', '?' };
 
         public static void CheckAutocomplete()
         {
