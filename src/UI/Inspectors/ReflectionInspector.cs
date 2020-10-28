@@ -150,13 +150,12 @@ namespace Explorer.UI.Inspectors
                         if (m < 4 || m > 16)
                             continue;
 
-                        var fi = member as FieldInfo;
                         var pi = member as PropertyInfo;
                         var mi = member as MethodInfo;
 
                         if (IsStaticInspector)
                         {
-                            if (fi != null && !fi.IsStatic) continue;
+                            if (member is FieldInfo fi && !fi.IsStatic) continue;
                             else if (pi != null && !pi.GetAccessors()[0].IsStatic) continue;
                             else if (mi != null && !mi.IsStatic) continue;
                         }
@@ -195,6 +194,8 @@ namespace Explorer.UI.Inspectors
 
                         try
                         {
+                            // ExplorerCore.Log($"Trying to cache member {sig}...");
+
                             var cached = CacheFactory.GetCacheObject(member, Target);
 
                             if (cached != null)

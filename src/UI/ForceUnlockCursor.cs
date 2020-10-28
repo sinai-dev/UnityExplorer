@@ -43,15 +43,14 @@ namespace Explorer.UI
                 // Get current cursor state and enable cursor
                 try
                 {
-                    //m_lastLockMode = Cursor.lockState;
-                    m_lastLockMode = (CursorLockMode?)typeof(Cursor).GetProperty("lockState", BF.Public | BF.Static)?.GetValue(null, null)
-                                     ?? CursorLockMode.None;
-
-                    //m_lastVisibleState = Cursor.visible;
-                    m_lastVisibleState = (bool?)typeof(Cursor).GetProperty("visible", BF.Public | BF.Static)?.GetValue(null, null) 
-                                         ?? false;
+                    m_lastLockMode = (CursorLockMode)typeof(Cursor).GetProperty("lockState", BF.Public | BF.Static).GetValue(null, null);
+                    m_lastVisibleState = (bool)typeof(Cursor).GetProperty("visible", BF.Public | BF.Static).GetValue(null, null);
                 }
-                catch { }
+                catch 
+                {
+                    m_lastLockMode = CursorLockMode.None;
+                    m_lastVisibleState = true;
+                }
 
                 // Setup Harmony Patches
                 TryPatch("lockState", new HarmonyMethod(typeof(ForceUnlockCursor).GetMethod(nameof(Prefix_set_lockState))), true);

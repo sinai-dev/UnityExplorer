@@ -18,7 +18,7 @@ namespace Explorer
 #if CPP
             return GUIUnstrip.ExpandWidth(expand);
 #else
-            return GUIHelper.ExpandWidth(expand);
+            return GUILayout.ExpandWidth(expand);
 #endif
         }
 

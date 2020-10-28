@@ -35,6 +35,7 @@ namespace Explorer.UI.Main
         public override void Init()
         {
             Instance = this;
+            m_currentScene = UnityHelpers.ActiveSceneName;
         }
 
         public void OnSceneChange()

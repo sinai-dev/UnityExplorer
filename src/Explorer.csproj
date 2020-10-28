@@ -25,7 +25,7 @@
     <RootNamespace>Explorer</RootNamespace>
     <AssemblyName>Explorer</AssemblyName>
     <!-- Set this to the MelonLoader Il2Cpp Game folder, without the ending '\' character. -->
-    <MLCppGameFolder>D:\Steam\steamapps\common\Hellpoint</MLCppGameFolder>
+    <MLCppGameFolder>D:\Steam\steamapps\common\VRChat</MLCppGameFolder>
     <!-- Set this to the MelonLoader Mono Game folder, without the ending '\' character. -->
     <MLMonoGameFolder>D:\Steam\steamapps\common\Outward</MLMonoGameFolder>
     <!-- Set this to the BepInEx Il2Cpp Game folder, without the ending '\' character. -->

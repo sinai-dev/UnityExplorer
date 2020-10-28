@@ -11,6 +11,11 @@ namespace Explorer.UI
     {
         private Sprite refSprite;
 
+        public override void Init()
+        {
+            base.Init();
+        }
+
         public override void UpdateValue()
         {
 #if CPP
@@ -30,7 +35,7 @@ namespace Explorer.UI
 
         public override void GetTexture2D()
         {
-            if (refSprite)
+            if (refSprite && refSprite.texture)
             {
                 currentTex = refSprite.texture;
             }
