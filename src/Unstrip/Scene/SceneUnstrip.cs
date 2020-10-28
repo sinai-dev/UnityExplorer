@@ -1,6 +1,6 @@
-﻿#if CPP
-using System;
+﻿using System;
 using ExplorerBeta.Helpers;
+using ExplorerBeta.UI.Main;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -8,8 +8,22 @@ namespace ExplorerBeta.Unstrip.Scenes
 {
     public class SceneUnstrip
     {
+        public static GameObject[] GetRootGameObjects(Scene scene) => scene.GetRootGameObjects();
+
+        public static GameObject[] GetRootGameObjects(int handle)
+        {
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+            {
+                var scene = SceneManager.GetSceneAt(i);
+                if (scene.handle == handle)
+                    return scene.GetRootGameObjects();
+            }
+            return new GameObject[0];
+        }
+
         //Scene.GetRootGameObjects();
 
+#if CPP
         internal delegate void d_GetRootGameObjects(int handle, IntPtr list);
 
         public static GameObject[] GetRootGameObjects(Scene scene) => GetRootGameObjects(scene.handle);
@@ -41,6 +55,6 @@ namespace ExplorerBeta.Unstrip.Scenes
             GetRootCountInternal_delegate iCall = ICallHelper.GetICall<GetRootCountInternal_delegate>("UnityEngine.SceneManagement.Scene::GetRootCountInternal");
             return iCall.Invoke(handle);
         }
+#endif
     }
 }
-#endif

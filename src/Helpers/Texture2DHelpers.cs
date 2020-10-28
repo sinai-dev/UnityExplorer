@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using System.IO;
+using System.Reflection;
 #if CPP
 using ExplorerBeta.Unstrip.ImageConversion;
 #endif

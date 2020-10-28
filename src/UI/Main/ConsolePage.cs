@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using ExplorerBeta.UI.Main.Console;
 using ExplorerBeta.Unstrip.Resources;

@@ -4,10 +4,10 @@ using System.Linq;
 using ExplorerBeta.Helpers;
 using ExplorerBeta.UI.Main.Inspectors;
 using ExplorerBeta.UI.Shared;
-using ExplorerBeta.Unstrip.Scenes;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using ExplorerBeta.Unstrip.Scenes;
 
 namespace ExplorerBeta.UI.Main
 {
@@ -15,14 +15,17 @@ namespace ExplorerBeta.UI.Main
     {
         public static SceneExplorer Instance;
 
-        public SceneExplorer() { Instance = this; }
+        public SceneExplorer()
+        { 
+            Instance = this; 
+            ConstructScenePane();
+        }
 
         private const float UPDATE_INTERVAL = 1f;
         private float m_timeOfLastSceneUpdate;
 
-        private bool m_doneFirstSceneRefresh;
         private GameObject m_selectedSceneObject;
-        private int m_currentSceneHandle;
+        private int m_currentSceneHandle = -1;
         private int m_lastCount;
 
         public PageHandler m_sceneListPageHandler;
@@ -30,22 +33,23 @@ namespace ExplorerBeta.UI.Main
         private GameObject[] m_allSceneListObjects = new GameObject[0];
         private readonly List<GameObject> m_sceneShortList = new List<GameObject>();
         private readonly List<Text> m_sceneListTexts = new List<Text>();
-        private readonly List<bool> m_sceneListActiveStates = new List<bool>();
 
+        public static int DontDestroyHandle;
+        
         private GameObject m_sceneListCanvas;
         private Dropdown m_sceneDropdown;
         private Text m_scenePathText;
         private GameObject m_mainInspectBtn;
         private GameObject m_backButtonObj;
 
-        private readonly Dictionary<string, int> m_sceneHandles = new Dictionary<string, int>();
+        //private readonly Dictionary<string, int> m_sceneHandles = new Dictionary<string, int>();
 
         public void Init()
         {
             // Get DontDestroyOnLoad scene handle. I think it's always -12, but best to be safe.
             GameObject test = new GameObject();
             GameObject.DontDestroyOnLoad(test);
-            StoreScenehandle(test.scene);
+            DontDestroyHandle = test.scene.handle;
             GameObject.Destroy(test);
 
             RefreshActiveScenes();
@@ -73,70 +77,62 @@ namespace ExplorerBeta.UI.Main
             }
         }
 
-        private int StoreScenehandle(Scene scene)
-        {
-            if (!m_sceneHandles.ContainsKey(scene.name))
-            {
-                m_sceneHandles.Add(scene.name, scene.handle);
-            }
-            return scene.handle;
-        }
+        //private int StoreScenehandle(Scene scene)
+        //{
+        //    if (scene == null || scene.handle == -1)
+        //        return -1;
 
-        private int GetSceneHandle(string sceneName)
+        //    if (!m_sceneHandles.ContainsKey(scene.name))
+        //    {
+        //        m_sceneHandles.Add(scene.name, scene.handle);
+        //    }
+        //    return scene.handle;
+        //}
+
+        public int GetSceneHandle(string sceneName)
         {
-            if (!m_sceneHandles.ContainsKey(sceneName))
+            if (sceneName == "DontDestroyOnLoad")
+                return DontDestroyHandle;
+
+            for (int i = 0; i < SceneManager.sceneCount; i++)
             {
-                return -1;
+                var scene = SceneManager.GetSceneAt(i);
+                if (scene.name == sceneName)
+                    return scene.handle;
             }
-            else
-            {
-                return m_sceneHandles[sceneName];
-            }
+            return -1;
         }
 
         internal void OnSceneChange()
         {
-            m_doneFirstSceneRefresh = false;
+            m_sceneDropdown.OnCancel(null);
             RefreshActiveScenes();
         }
 
         private void RefreshActiveScenes()
         {
-            string mainActiveScene = SceneManager.GetActiveScene().name;
-            List<string> otherScenes = new List<string>();
-            List<int> validHandles = new List<int>();
+            var names = new List<string>();
+            var handles = new List<int>();
 
             for (int i = 0; i < SceneManager.sceneCount; i++)
             {
                 Scene scene = SceneManager.GetSceneAt(i);
 
-                if (scene == null || string.IsNullOrEmpty(scene.name))
-                {
+                int handle = scene.handle;
+
+                if (scene == null || handle == -1 || string.IsNullOrEmpty(scene.name))
                     continue;
-                }
 
-                StoreScenehandle(scene);
-                validHandles.Add(scene.handle);
-
-                if (m_doneFirstSceneRefresh || scene.name != mainActiveScene)
-                {
-                    otherScenes.Add(scene.name);
-                }
+                handles.Add(handle);
+                names.Add(scene.name);
             }
-            otherScenes.Add("DontDestroyOnLoad");
-            validHandles.Add(GetSceneHandle("DontDestroyOnLoad"));
+
+            names.Add("DontDestroyOnLoad");
+            handles.Add(DontDestroyHandle);
 
             m_sceneDropdown.options.Clear();
 
-            if (!m_doneFirstSceneRefresh)
-            {
-                m_sceneDropdown.options.Add(new Dropdown.OptionData
-                {
-                    text = mainActiveScene
-                });
-            }
-
-            foreach (string scene in otherScenes)
+            foreach (string scene in names)
             {
                 m_sceneDropdown.options.Add(new Dropdown.OptionData
                 {
@@ -144,12 +140,12 @@ namespace ExplorerBeta.UI.Main
                 });
             }
 
-            if (!m_doneFirstSceneRefresh || !validHandles.Contains(m_currentSceneHandle))
+            if (!handles.Contains(m_currentSceneHandle))
             {
-                SetScene(mainActiveScene);
+                ExplorerCore.Log("Reverting to default scene");
+                m_sceneDropdown.transform.Find("Label").GetComponent<Text>().text = names[0];
+                SetScene(handles[0]);
             }
-
-            m_doneFirstSceneRefresh = true;
         }
 
         public void SetScene(string name) => SetScene(GetSceneHandle(name));
@@ -157,9 +153,7 @@ namespace ExplorerBeta.UI.Main
         public void SetScene(int handle)
         {
             if (handle == -1)
-            {
                 return;
-            }
 
             m_currentSceneHandle = handle;
 
@@ -235,24 +229,14 @@ namespace ExplorerBeta.UI.Main
             {
                 newCount++;
 
-                // still updating from gameobject list.
-                // check first if the reference has changed for this index.
-
                 if (i + startIndex >= objects.Length)
                 {
-                    // execeeded actual list, but not yet reached previous limit.
-                    // disable remaining buttons.
-
                     if (i > m_lastCount || i >= m_sceneListTexts.Count)
-                    {
                         break;
-                    }
 
-                    GameObject obj = m_sceneListTexts[i].transform.parent.parent.gameObject;
-                    if (obj.activeSelf)
-                    {
-                        obj.SetActive(false);
-                    }
+                    GameObject label = m_sceneListTexts[i].transform.parent.parent.gameObject;
+                    if (label.activeSelf)
+                        label.SetActive(false);
                 }
                 else
                 {
@@ -261,24 +245,27 @@ namespace ExplorerBeta.UI.Main
                     if (i >= m_sceneShortList.Count)
                     {
                         m_sceneShortList.Add(obj);
-                        if (i >= m_sceneListTexts.Count)
-                        {
-                            AddSceneButton();
-                            m_sceneListActiveStates.Add(obj.activeSelf);
-                        }
+                        AddSceneButton();
                     }
                     else
                     {
                         m_sceneShortList[i] = obj;
                     }
 
-                    m_sceneListTexts[i].text = obj.name;
-                    m_sceneListTexts[i].color = obj.activeSelf ? Color.green : Color.red;
+                    var text = m_sceneListTexts[i];
 
-                    GameObject parent = m_sceneListTexts[i].transform.parent.parent.gameObject;
-                    if (!parent.activeSelf)
+                    var name = obj.name;
+
+                    if (obj.transform.childCount > 0)
+                        name = $"<color=grey>[{obj.transform.childCount}]</color> {name}";
+
+                    text.text = name;
+                    text.color = obj.activeSelf ? Color.green : Color.red;
+
+                    var label = text.transform.parent.parent.gameObject;
+                    if (!label.activeSelf)
                     {
-                        parent.SetActive(true);
+                        label.SetActive(true);
                     }
                 }
             }
@@ -401,8 +388,12 @@ namespace ExplorerBeta.UI.Main
             inspectButtonLayout.minWidth = 65;
             inspectButtonLayout.flexibleWidth = 0;
             Button inspectButton = m_mainInspectBtn.GetComponent<Button>();
+#if CPP
             inspectButton.onClick.AddListener(new Action(() => { InspectorManager.Instance.Inspect(m_selectedSceneObject); }));
 
+#else
+            inspectButton.onClick.AddListener(() => { InspectorManager.Instance.Inspect(m_selectedSceneObject); });
+#endif
             GameObject scrollObj = UIFactory.CreateScrollView(leftPane, out m_sceneListCanvas, new Color(0.1f, 0.1f, 0.1f));
             Scrollbar scroll = scrollObj.transform.Find("Scrollbar Vertical").GetComponent<Scrollbar>();
             ColorBlock colors = scroll.colors;
@@ -448,7 +439,7 @@ namespace ExplorerBeta.UI.Main
 #if CPP
             mainBtn.onClick.AddListener(new Action(() => { SceneListObjectClicked(thisIndex); }));
 #else
-            btn.onClick.AddListener(() => { SceneButtonClicked(thisIndex); });
+            mainBtn.onClick.AddListener(() => { SceneListObjectClicked(thisIndex); });
 #endif
 
             Text mainText = mainButtonObj.GetComponentInChildren<Text>();
@@ -470,9 +461,13 @@ namespace ExplorerBeta.UI.Main
             inspectColors.normalColor = new Color(0.15f, 0.15f, 0.15f);
             mainColors.highlightedColor = new Color(0.2f, 0.2f, 0.2f, 0.5f);
             inspectBtn.colors = inspectColors;
+#if CPP
             inspectBtn.onClick.AddListener(new Action(() => { InspectorManager.Instance.Inspect(m_sceneShortList[thisIndex]); }));
+#else
+            inspectBtn.onClick.AddListener(() => { InspectorManager.Instance.Inspect(m_sceneShortList[thisIndex]); });
+#endif
         }
 
-        #endregion
+#endregion
     }
 }

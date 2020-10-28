@@ -237,7 +237,7 @@ namespace ExplorerBeta.UI.Main
 #if CPP
             unityToggle.onValueChanged.AddListener(new Action<bool>((bool val) => { LogUnity = val; }));
 #else
-            unityToggle.onValueChanged.AddListener((bool val) => { LogUnity = val; }));
+            unityToggle.onValueChanged.AddListener((bool val) => { LogUnity = val; });
 #endif
             unityToggleText.text = "Print Unity Debug?";
             unityToggleText.alignment = TextAnchor.MiddleLeft;

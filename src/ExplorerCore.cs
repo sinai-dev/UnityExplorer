@@ -10,9 +10,9 @@ namespace ExplorerBeta
     public class ExplorerCore
     {
         public const string NAME = "Explorer " + VERSION + " (" + PLATFORM + ", " + MODLOADER + ")";
-        public const string VERSION = "3.0.0b";
+        public const string VERSION = "3.0.0";
         public const string AUTHOR = "Sinai";
-        public const string GUID = "com.sinai.explorer";
+        public const string GUID = "com.sinai.explorerBETA";
 
         public const string PLATFORM =
 #if CPP

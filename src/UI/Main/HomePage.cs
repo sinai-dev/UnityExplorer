@@ -18,6 +18,10 @@ namespace ExplorerBeta.UI.Main
 
             ConstructMenu();
 
+            new SceneExplorer();
+
+            new InspectorManager();
+
             SceneExplorer.Instance.Init();
         }
 
@@ -42,12 +46,6 @@ namespace ExplorerBeta.UI.Main
             mainGroup.childForceExpandWidth = true;
             mainGroup.childControlHeight = true;
             mainGroup.childControlWidth = true;
-
-            new SceneExplorer();
-            SceneExplorer.Instance.ConstructScenePane();
-
-            new InspectorManager();
-            InspectorManager.Instance.ConstructInspectorPane();
         }
     }
 }

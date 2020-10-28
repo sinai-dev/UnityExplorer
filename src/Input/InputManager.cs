@@ -38,47 +38,5 @@ namespace ExplorerBeta.Input
 
         public static bool GetMouseButtonDown(int btn) => m_inputModule.GetMouseButtonDown(btn);
         public static bool GetMouseButton(int btn) => m_inputModule.GetMouseButton(btn);
-
-#if CPP
-        internal delegate void d_ResetInputAxes();
-        public static void ResetInputAxes() => ICallHelper.GetICall<d_ResetInputAxes>("UnityEngine.Input::ResetInputAxes").Invoke();
-#else
-        public static void ResetInputAxes() => UnityEngine.Input.ResetInputAxes();
-#endif
-
-#if CPP
-        // public extern static string compositionString { get; }
-
-        internal delegate IntPtr d_get_compositionString();
-
-        public static string compositionString
-        {
-            get
-            {
-                var iCall = ICallHelper.GetICall<d_get_compositionString>("UnityEngine.Input::get_compositionString");
-                return IL2CPP.Il2CppStringToManaged(iCall.Invoke());
-            }
-        }
-
-        // public extern static Vector2 compositionCursorPos { get; set; }
-
-        internal delegate void d_get_compositionCursorPos(out Vector2 ret);
-        internal delegate void d_set_compositionCursorPos(ref Vector2 value);
-
-        public static Vector2 compositionCursorPos
-        {
-            get
-            {
-                var iCall = ICallHelper.GetICall<d_get_compositionCursorPos>("UnityEngine.Input::get_compositionCursorPos_Injected");
-                iCall.Invoke(out Vector2 ret);
-                return ret;
-            }
-            set
-            {
-                var iCall = ICallHelper.GetICall<d_set_compositionCursorPos>("UnityEngine.Input::set_compositionCursorPos_Injected");
-                iCall.Invoke(ref value);
-            }
-        }
-#endif
     }
 }

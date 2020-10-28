@@ -18,6 +18,8 @@ namespace ExplorerBeta.UI.Main
 
         public RectTransform Panel { get; set; }
 
+        private static bool s_loadedCursorImage;
+
         public PanelDragger(RectTransform dragArea, RectTransform panelToDrag)
         {
             Instance = this;
@@ -25,15 +27,6 @@ namespace ExplorerBeta.UI.Main
             Panel = panelToDrag;
 
             UpdateResizeCache();
-
-            try
-            {
-                LoadCursorImage();
-            }
-            catch (Exception e)
-            {
-                ExplorerCore.Log("Exception loading resize cursor: " + e.ToString());
-            }
         }
 
         public void Update()
@@ -44,7 +37,7 @@ namespace ExplorerBeta.UI.Main
             Vector3 resizePos = Panel.InverseTransformPoint(rawMousePos);
             Vector3 dragPos = DragableArea.InverseTransformPoint(rawMousePos);
 
-            if (WasHoveringResize)
+            if (WasHoveringResize && m_resizeCursorImage)
             {
                 UpdateHoverImagePos();
             }
@@ -144,7 +137,7 @@ namespace ExplorerBeta.UI.Main
 
         private bool WasHoveringResize { get; set; }
         private ResizeTypes m_lastResizeHoverType;
-        private GameObject m_resizeCursorImage;
+        public GameObject m_resizeCursorImage;
 
         private Rect m_resizeRect;
 
@@ -238,12 +231,16 @@ namespace ExplorerBeta.UI.Main
                 return;
             }
 
+            if (!s_loadedCursorImage)
+                LoadCursorImage();
+
             // we are entering resize, or the resize type has changed.
 
             WasHoveringResize = true;
             m_lastResizeHoverType = resizeType;
 
             m_resizeCursorImage.SetActive(true);
+            ExplorerCore.Log("Set image active.");
 
             // set the rotation for the resize icon
             float iconRotation = 0f;
@@ -270,11 +267,6 @@ namespace ExplorerBeta.UI.Main
         // update the resize icon position to be above the mouse
         private void UpdateHoverImagePos()
         {
-            if (!m_resizeCursorImage)
-            {
-                return;
-            }
-
             RectTransform t = UIManager.CanvasRoot.GetComponent<RectTransform>();
             m_resizeCursorImage.transform.localPosition = t.InverseTransformPoint(InputManager.MousePosition);
         }
@@ -336,26 +328,35 @@ namespace ExplorerBeta.UI.Main
 
         private void LoadCursorImage()
         {
-            string path = @"Mods\Explorer\cursor.png";
-            byte[] data = File.ReadAllBytes(path);
+            try
+            {
+                string path = @"Mods\Explorer\cursor.png";
+                byte[] data = File.ReadAllBytes(path);
 
-            Texture2D tex = new Texture2D(32, 32);
-            tex.LoadImage(data, false);
-            UnityEngine.Object.DontDestroyOnLoad(tex);
+                Texture2D tex = new Texture2D(32, 32);
+                tex.LoadImage(data, false);
+                UnityEngine.Object.DontDestroyOnLoad(tex);
 
-            Sprite sprite = UIManager.CreateSprite(tex);
-            UnityEngine.Object.DontDestroyOnLoad(sprite);
+                Sprite sprite = UIManager.CreateSprite(tex, new Rect(0, 0, 32, 32));
+                UnityEngine.Object.DontDestroyOnLoad(sprite);
 
-            m_resizeCursorImage = new GameObject("ResizeCursorImage");
-            m_resizeCursorImage.transform.SetParent(UIManager.CanvasRoot.transform);
+                m_resizeCursorImage = new GameObject("ResizeCursorImage");
+                m_resizeCursorImage.transform.SetParent(UIManager.CanvasRoot.transform);
 
-            Image image = m_resizeCursorImage.AddComponent<Image>();
-            image.sprite = sprite;
-            RectTransform rect = image.transform.GetComponent<RectTransform>();
-            rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 32);
-            rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 32);
+                Image image = m_resizeCursorImage.AddComponent<Image>();
+                image.sprite = sprite;
+                RectTransform rect = image.transform.GetComponent<RectTransform>();
+                rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 32);
+                rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 32);
 
-            m_resizeCursorImage.SetActive(false);
+                //m_resizeCursorImage.SetActive(false);
+
+                s_loadedCursorImage = true;
+            }
+            catch (Exception e)
+            {
+                ExplorerCore.LogWarning("Exception loading cursor image!\r\n" + e.ToString());
+            }
         }
 
         #endregion

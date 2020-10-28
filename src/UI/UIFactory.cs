@@ -547,14 +547,14 @@ namespace ExplorerBeta.UI
             itemLabelText.alignment = TextAnchor.MiddleLeft;
 
             Image itemBgImage = itemBgObj.AddComponent<Image>();
-            itemBgImage.color = new Color(0.35f, 0.35f, 0.35f, 1.0f);
+            itemBgImage.color = new Color(0.25f, 0.45f, 0.25f, 1.0f);
 
             Toggle itemToggle = itemObj.AddComponent<Toggle>();
             itemToggle.targetGraphic = itemBgImage;
             itemToggle.isOn = true;
             ColorBlock colors = itemToggle.colors;
             colors.normalColor = new Color(0.35f, 0.35f, 0.35f, 1.0f);
-            colors.highlightedColor = new Color(0.35f, 0.65f, 0.35f, 1.0f);
+            colors.highlightedColor = new Color(0.25f, 0.45f, 0.25f, 1.0f);
             itemToggle.colors = colors;
 
 #if CPP
@@ -609,7 +609,7 @@ namespace ExplorerBeta.UI
             labelRect.anchorMin = Vector2.zero;
             labelRect.anchorMax = Vector2.one;
             labelRect.offsetMin = new Vector2(10f, 6f);
-            labelRect.offsetMax = new Vector2(-25f, -7f);
+            labelRect.offsetMax = new Vector2(-28f, -7f);
 
             RectTransform templateRect = templateObj.GetComponent<RectTransform>();
             templateRect.anchorMin = new Vector2(0f, 0f);
@@ -634,7 +634,7 @@ namespace ExplorerBeta.UI
             RectTransform itemRect = itemObj.GetComponent<RectTransform>();
             itemRect.anchorMin = new Vector2(0f, 0.5f);
             itemRect.anchorMax = new Vector2(1f, 0.5f);
-            itemRect.sizeDelta = new Vector2(0f, 20f);
+            itemRect.sizeDelta = new Vector2(0f, 25f);
 
             RectTransform itemBgRect = itemBgObj.GetComponent<RectTransform>();
             itemBgRect.anchorMin = Vector2.zero;

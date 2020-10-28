@@ -12,9 +12,9 @@ using UnhollowerRuntimeLib;
 using BepInEx.IL2CPP;
 #endif
 
-namespace Explorer
+namespace ExplorerBeta
 {
-    [BepInPlugin(ExplorerCore.GUID, "Explorer", ExplorerCore.VERSION)]
+    [BepInPlugin(ExplorerCore.GUID, "ExplorerBeta", ExplorerCore.VERSION)]
 #if CPP
     public class ExplorerBepInPlugin : BasePlugin
 #else
@@ -64,7 +64,7 @@ namespace Explorer
 
             new ExplorerCore();
 
-            //HarmonyInstance.PatchAll();
+            // HarmonyInstance.PatchAll();
         }
 
         internal static void DoSceneChange(Scene arg0, Scene arg1)
@@ -95,11 +95,6 @@ namespace Explorer
                     DoSceneChange(scene, scene);
                 }
 #endif
-            }
-
-            internal void OnGUI()
-            {
-                ExplorerCore.OnGUI();
             }
 #if CPP
         }

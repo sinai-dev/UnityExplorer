@@ -81,6 +81,8 @@ namespace ExplorerBeta.UI.Main.Console
                 throw new Exception("References are missing!");
             }
 
+            InputField.restoreOriginalTextOnEscape = false;
+
             inputTextTransform = inputText.GetComponent<RectTransform>();
             lineHighlightTransform = lineHighlight.GetComponent<RectTransform>();
 

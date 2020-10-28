@@ -82,7 +82,7 @@ namespace ExplorerBeta.UI
         {
             try
             {
-                HarmonyInstance harmony =
+                var harmony =
 #if ML
                     ExplorerMelonMod.Instance.harmonyInstance;
 #else
@@ -103,10 +103,10 @@ namespace ExplorerBeta.UI
                     harmony.Patch(prop.GetGetMethod(), postfix: patch);
                 }
             }
-            catch (Exception e)
+            catch // (Exception e)
             {
-                string suf = setter ? "set_" : "get_";
-                ExplorerCore.Log($"Unable to patch {type.Name}.{suf}{property}: {e.Message}");
+                //string suf = setter ? "set_" : "get_";
+                //ExplorerCore.Log($"Unable to patch {type.Name}.{suf}{property}: {e.Message}");
             }
         }
 

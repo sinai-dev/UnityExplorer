@@ -15,7 +15,11 @@ namespace ExplorerBeta.UI.Main
     {
         public static InspectorManager Instance { get; private set; }
 
-        public InspectorManager() { Instance = this; }
+        public InspectorManager() 
+        {
+            Instance = this; 
+            ConstructInspectorPane();
+        }
 
         public InspectorBase m_activeInspector;
         public readonly List<InspectorBase> m_currentInspectors = new List<InspectorBase>();
@@ -76,7 +80,7 @@ namespace ExplorerBeta.UI.Main
             }
 
             m_currentInspectors.Add(inspector);
-            inspector.inspectorContent?.SetActive(false);
+            inspector.Content?.SetActive(false);
 
             SetInspectorTab(inspector);
         }
@@ -92,7 +96,7 @@ namespace ExplorerBeta.UI.Main
 
             m_activeInspector = inspector;
 
-            m_activeInspector.inspectorContent?.SetActive(true);
+            m_activeInspector.Content?.SetActive(true);
 
             Color activeColor = new Color(0, 0.25f, 0, 1);
             ColorBlock colors = inspector.tabButton.colors;
@@ -108,7 +112,7 @@ namespace ExplorerBeta.UI.Main
                 return;
             }
 
-            m_activeInspector.inspectorContent?.SetActive(false);
+            m_activeInspector.Content?.SetActive(false);
 
             ColorBlock colors = m_activeInspector.tabButton.colors;
             colors.normalColor = new Color(0.2f, 0.2f, 0.2f, 1);

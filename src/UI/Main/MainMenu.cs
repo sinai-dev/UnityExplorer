@@ -38,9 +38,9 @@ namespace ExplorerBeta.UI.Main
 
         // Navbar buttons
         private Button m_lastNavButtonPressed;
-        private readonly Color m_navButtonNormal = new Color(65f / 255f, 66f / 255f, 66f / 255f);
-        private readonly Color m_navButtonHighlight = new Color(50f / 255f, 195f / 255f, 50f / 255f);
-        private readonly Color m_navButtonSelected = new Color(60f / 255f, 120f / 255f, 60f / 255f);
+        private readonly Color m_navButtonNormal = new Color(0.3f, 0.3f, 0.3f, 1);
+        private readonly Color m_navButtonHighlight = new Color(0.3f, 0.6f, 0.3f);
+        private readonly Color m_navButtonSelected = new Color(0.2f, 0.5f, 0.2f, 1); 
 
         public MainMenu()
         {
@@ -84,7 +84,7 @@ namespace ExplorerBeta.UI.Main
             m_activePage?.Content?.SetActive(false);
             if (m_activePage is ConsolePage)
             {
-                AutoCompleter.m_mainObj.SetActive(false);
+                AutoCompleter.m_mainObj?.SetActive(false);
             }
 
             m_activePage = page;
@@ -108,12 +108,6 @@ namespace ExplorerBeta.UI.Main
 
             m_lastNavButtonPressed = button;
         }
-
-        #region UI Interaction Callbacks
-
-        // ... none needed yet
-
-        #endregion
 
         #region UI Construction
 

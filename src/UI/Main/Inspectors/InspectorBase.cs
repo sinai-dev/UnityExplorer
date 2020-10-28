@@ -12,7 +12,7 @@ namespace ExplorerBeta.UI.Main.Inspectors
 
         public abstract string TabLabel { get; }
 
-        public GameObject inspectorContent;
+        public GameObject Content;
         public Button tabButton;
         public Text tabText;
 
@@ -54,9 +54,9 @@ namespace ExplorerBeta.UI.Main.Inspectors
                 GameObject.Destroy(tabGroup);
             }
 
-            if (inspectorContent)
+            if (Content)
             {
-                GameObject.Destroy(inspectorContent);
+                GameObject.Destroy(Content);
             }
 
             if (ReferenceEquals(InspectorManager.Instance.m_activeInspector, this))
@@ -121,8 +121,11 @@ namespace ExplorerBeta.UI.Main.Inspectors
             tabText.alignment = TextAnchor.MiddleLeft;
 
             tabButton = targetButtonObj.GetComponent<Button>();
+#if CPP
             tabButton.onClick.AddListener(new Action(() => { InspectorManager.Instance.SetInspectorTab(this); }));
-
+#else
+            tabButton.onClick.AddListener(() => { InspectorManager.Instance.SetInspectorTab(this); });
+#endif
             var closeBtnObj = UIFactory.CreateButton(tabGroupObj);
             var closeBtnLayout = closeBtnObj.AddComponent<LayoutElement>();
             closeBtnLayout.minWidth = 20;
@@ -132,12 +135,17 @@ namespace ExplorerBeta.UI.Main.Inspectors
             closeBtnText.color = new Color(1, 0, 0, 1);
 
             var closeBtn = closeBtnObj.GetComponent<Button>();
+#if CPP
             closeBtn.onClick.AddListener(new Action(() => { Destroy(); }));
+#else
+            closeBtn.onClick.AddListener(() => { Destroy(); });
+#endif
+
             var closeColors = closeBtn.colors;
             closeColors.normalColor = new Color(0.2f, 0.2f, 0.2f, 1);
             closeBtn.colors = closeColors;
         }
 
-        #endregion
+#endregion
     }
 }
