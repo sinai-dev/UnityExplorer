@@ -43,7 +43,7 @@ namespace Explorer.Helpers
                 return obj;
 
             if (!typeof(Il2CppSystem.Object).IsAssignableFrom(castTo))
-                return obj;
+                return obj as System.Object;
 
             IntPtr castToPtr;
             if (!ClassPointers.ContainsKey(castTo))

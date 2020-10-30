@@ -10,6 +10,7 @@ using Explorer.UI.Inspectors;
 using Explorer.Helpers;
 #if CPP
 using UnhollowerBaseLib;
+using UnhollowerRuntimeLib;
 #endif
 
 namespace Explorer.UI.Inspectors
@@ -141,6 +142,18 @@ namespace Explorer.UI.Inspectors
                     continue;
                 }
 
+                var target = Target;
+#if CPP
+                try
+                {
+                    target = target.Il2CppCast(declaringType);
+                }
+                catch //(Exception e)
+                {
+                    //ExplorerCore.LogWarning("Excepting casting " + target.GetType().FullName + " to " + declaringType.FullName);
+                }
+#endif
+
                 foreach (var member in infos)
                 {
                     try
@@ -156,7 +169,7 @@ namespace Explorer.UI.Inspectors
                         if (IsStaticInspector)
                         {
                             if (member is FieldInfo fi && !fi.IsStatic) continue;
-                            else if (pi != null && !pi.GetAccessors()[0].IsStatic) continue;
+                            else if (pi != null && !pi.GetAccessors(true)[0].IsStatic) continue;
                             else if (mi != null && !mi.IsStatic) continue;
                         }
 
@@ -196,7 +209,7 @@ namespace Explorer.UI.Inspectors
                         {
                             // ExplorerCore.Log($"Trying to cache member {sig}...");
 
-                            var cached = CacheFactory.GetCacheObject(member, Target);
+                            var cached = CacheFactory.GetCacheObject(member, target);
 
                             if (cached != null)
                             {

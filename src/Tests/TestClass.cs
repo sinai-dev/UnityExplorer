@@ -49,6 +49,7 @@ namespace Explorer.Tests
 
 #if CPP
         public static Il2CppSystem.Collections.Generic.HashSet<string> ILHashSetTest;
+        public static Il2CppReferenceArray<Il2CppSystem.Object> testRefArray;
 #endif
 
         public TestClass()
@@ -63,6 +64,12 @@ namespace Explorer.Tests
 
             GameObject.DontDestroyOnLoad(TestTexture);
             GameObject.DontDestroyOnLoad(TestSprite);
+
+            testRefArray = new Il2CppReferenceArray<Il2CppSystem.Object>(5);
+            for (int i = 0; i < 5; i++)
+            {
+                testRefArray[i] = "hi " + i;
+            }
 
             //// test loading a tex from file
             //var dataToLoad = System.IO.File.ReadAllBytes(@"Mods\Explorer\Tex_Nemundis_Nebula.png");
