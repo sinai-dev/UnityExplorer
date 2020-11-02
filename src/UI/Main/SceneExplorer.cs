@@ -142,15 +142,14 @@ namespace ExplorerBeta.UI.Main
 
             if (!handles.Contains(m_currentSceneHandle))
             {
-                ExplorerCore.Log("Reverting to default scene");
                 m_sceneDropdown.transform.Find("Label").GetComponent<Text>().text = names[0];
-                SetScene(handles[0]);
+                SetTargetScene(handles[0]);
             }
         }
 
-        public void SetScene(string name) => SetScene(GetSceneHandle(name));
+        public void SetTargetScene(string name) => SetTargetScene(GetSceneHandle(name));
 
-        public void SetScene(int handle)
+        public void SetTargetScene(int handle)
         {
             if (handle == -1)
                 return;
@@ -172,8 +171,11 @@ namespace ExplorerBeta.UI.Main
             //m_scenePathText.ForceMeshUpdate();
         }
 
-        public void SetSceneListObject(GameObject obj)
+        public void SetTargetObject(GameObject obj)
         {
+            if (!obj)
+                return;
+
             m_scenePathText.text = obj.name;
             //m_scenePathText.ForceMeshUpdate();
 
@@ -195,7 +197,7 @@ namespace ExplorerBeta.UI.Main
                 return;
             }
 
-            SetSceneListObject(m_sceneShortList[index]);
+            SetTargetObject(m_sceneShortList[index]);
         }
 
         private void OnSceneListPageTurn()
@@ -242,10 +244,13 @@ namespace ExplorerBeta.UI.Main
                 {
                     GameObject obj = objects[i + startIndex];
 
+                    if (!obj)
+                        continue;
+
                     if (i >= m_sceneShortList.Count)
                     {
                         m_sceneShortList.Add(obj);
-                        AddSceneButton();
+                        AddObjectListButton();
                     }
                     else
                     {
@@ -316,7 +321,7 @@ namespace ExplorerBeta.UI.Main
             void SetSceneFromDropdown(int val)
             {
                 string scene = m_sceneDropdown.options[val].text;
-                SetScene(scene);
+                SetTargetScene(scene);
             }
 
             GameObject scenePathGroupObj = UIFactory.CreateHorizontalGroup(leftPane, new Color(1, 1, 1, 0f));
@@ -346,14 +351,14 @@ namespace ExplorerBeta.UI.Main
 
             void SetSceneObjectParent()
             {
-                if (!m_selectedSceneObject || !m_selectedSceneObject.transform.parent)
+                if (!m_selectedSceneObject || !m_selectedSceneObject.transform.parent?.gameObject)
                 {
                     m_selectedSceneObject = null;
-                    SetScene(m_currentSceneHandle);
+                    SetTargetScene(m_currentSceneHandle);
                 }
                 else
                 {
-                    SetSceneListObject(m_selectedSceneObject.transform.parent.gameObject);
+                    SetTargetObject(m_selectedSceneObject.transform.parent.gameObject);
                 }
             }
 
@@ -400,7 +405,13 @@ namespace ExplorerBeta.UI.Main
             colors.normalColor = new Color(0.6f, 0.6f, 0.6f, 1.0f);
             scroll.colors = colors;
 
-            VerticalLayoutGroup sceneGroup = m_sceneListCanvas.GetComponent<VerticalLayoutGroup>();
+            var horiScroll = scrollObj.transform.Find("Scrollbar Horizontal");
+            horiScroll.gameObject.SetActive(false);
+
+            var scrollRect = scrollObj.GetComponentInChildren<ScrollRect>();
+            scrollRect.horizontalScrollbar = null;
+
+            var sceneGroup = m_sceneListCanvas.GetComponent<VerticalLayoutGroup>();
             sceneGroup.childControlHeight = true;
             sceneGroup.spacing = 2;
 
@@ -409,7 +420,7 @@ namespace ExplorerBeta.UI.Main
             m_sceneListPageHandler.OnPageChanged += OnSceneListPageTurn;
         }
 
-        private void AddSceneButton()
+        private void AddObjectListButton()
         {
             int thisIndex = m_sceneListTexts.Count();
 

@@ -59,14 +59,22 @@ namespace ExplorerBeta.UI.Main.Inspectors
                 GameObject.Destroy(Content);
             }
 
+            int thisIndex = -1;
+            if (InspectorManager.Instance.m_currentInspectors.Contains(this))
+            {
+                thisIndex = InspectorManager.Instance.m_currentInspectors.IndexOf(this);
+                InspectorManager.Instance.m_currentInspectors.Remove(this);
+            }
+
             if (ReferenceEquals(InspectorManager.Instance.m_activeInspector, this))
             {
                 InspectorManager.Instance.UnsetInspectorTab();
-            }
 
-            if (InspectorManager.Instance.m_currentInspectors.Contains(this))
-            {
-                InspectorManager.Instance.m_currentInspectors.Remove(this);
+                if (InspectorManager.Instance.m_currentInspectors.Count > 0)
+                {
+                    var prevTab = InspectorManager.Instance.m_currentInspectors[thisIndex > 0 ? thisIndex - 1 : 0];
+                    InspectorManager.Instance.SetInspectorTab(prevTab);
+                }
             }
         }
 

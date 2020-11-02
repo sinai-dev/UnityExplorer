@@ -240,7 +240,6 @@ namespace ExplorerBeta.UI.Main
             m_lastResizeHoverType = resizeType;
 
             m_resizeCursorImage.SetActive(true);
-            ExplorerCore.Log("Set image active.");
 
             // set the rotation for the resize icon
             float iconRotation = 0f;

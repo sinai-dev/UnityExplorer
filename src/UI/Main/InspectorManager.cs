@@ -29,9 +29,12 @@ namespace ExplorerBeta.UI.Main
 
         public void Update()
         {
-            foreach (InspectorBase tab in m_currentInspectors)
+            for (int i = 0; i < m_currentInspectors.Count; i++)
             {
-                tab.Update();
+                if (i >= m_currentInspectors.Count)
+                    break;
+
+                m_currentInspectors[i].Update();
             }
         }
 

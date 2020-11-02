@@ -8,6 +8,7 @@ namespace ExplorerBeta.Unstrip.Scenes
 {
     public class SceneUnstrip
     {
+#if MONO
         public static GameObject[] GetRootGameObjects(Scene scene) => scene.GetRootGameObjects();
 
         public static GameObject[] GetRootGameObjects(int handle)
@@ -22,6 +23,7 @@ namespace ExplorerBeta.Unstrip.Scenes
         }
 
         //Scene.GetRootGameObjects();
+#endif
 
 #if CPP
         internal delegate void d_GetRootGameObjects(int handle, IntPtr list);

@@ -391,7 +391,7 @@ namespace ExplorerBeta.UI
             return toggleObj;
         }
 
-        public static GameObject CreateTMPInput(GameObject parent)
+        public static GameObject CreateTMPInput(GameObject parent, int fontSize = 16, int overflowMode = 0, int alignment = 257)
         {
             GameObject mainObj = CreateUIObject("InputField (TMP)", parent);
 
@@ -436,9 +436,11 @@ namespace ExplorerBeta.UI
 
             GameObject placeHolderObj = CreateUIObject("Placeholder", textArea);
             TextMeshProUGUI placeholderText = placeHolderObj.AddComponent<TextMeshProUGUI>();
-            placeholderText.fontSize = 16;
+            placeholderText.fontSize = fontSize;
             placeholderText.text = "...";
             placeholderText.color = new Color(0.5f, 0.5f, 0.5f, 1.0f);
+            placeholderText.overflowMode = (TextOverflowModes)overflowMode;
+            placeholderText.alignment = (TextAlignmentOptions)alignment;
 
             RectTransform placeHolderRect = placeHolderObj.GetComponent<RectTransform>();
             placeHolderRect.anchorMin = Vector2.zero;
@@ -454,9 +456,11 @@ namespace ExplorerBeta.UI
 
             GameObject inputTextObj = CreateUIObject("Text", textArea);
             TextMeshProUGUI inputText = inputTextObj.AddComponent<TextMeshProUGUI>();
-            inputText.fontSize = 16;
+            inputText.fontSize = fontSize;
             inputText.text = "";
             inputText.color = new Color(1f, 1f, 1f, 1f);
+            inputText.overflowMode = (TextOverflowModes)overflowMode;
+            inputText.alignment = (TextAlignmentOptions)alignment;
 
             RectTransform inputTextRect = inputTextObj.GetComponent<RectTransform>();
             inputTextRect.anchorMin = Vector2.zero;
@@ -464,9 +468,9 @@ namespace ExplorerBeta.UI
             inputTextRect.offsetMin = Vector2.zero;
             inputTextRect.offsetMax = Vector2.zero;
 
-            LayoutElement test = inputTextObj.AddComponent<LayoutElement>();
-            test.preferredWidth = 990;
-            test.flexibleWidth = 500;
+            LayoutElement inputTextLayout = inputTextObj.AddComponent<LayoutElement>();
+            inputTextLayout.preferredWidth = 990;
+            inputTextLayout.flexibleWidth = 500;
 
             mainInput.textComponent = inputText;
 
@@ -523,6 +527,7 @@ namespace ExplorerBeta.UI
             GameObject dropdownObj = CreateUIObject("Dropdown", parent, thickSize);
 
             GameObject labelObj = CreateUIObject("Label", dropdownObj);
+            GameObject arrowObj = CreateUIObject("Arrow", dropdownObj);
             GameObject templateObj = CreateUIObject("Template", dropdownObj);
             GameObject viewportObj = CreateUIObject("Viewport", templateObj);
             GameObject contentObj = CreateUIObject("Content", viewportObj);
@@ -545,6 +550,15 @@ namespace ExplorerBeta.UI
             Text itemLabelText = itemLabelObj.AddComponent<Text>();
             SetDefaultTextValues(itemLabelText);
             itemLabelText.alignment = TextAnchor.MiddleLeft;
+
+            var arrowText = arrowObj.AddComponent<Text>();
+            SetDefaultTextValues(arrowText);
+            arrowText.text = "▼";
+            var arrowRect = arrowObj.GetComponent<RectTransform>();
+            arrowRect.anchorMin = new Vector2(1f, 0.5f);
+            arrowRect.anchorMax = new Vector2(1f, 0.5f);
+            arrowRect.sizeDelta = new Vector2(20f, 20f);
+            arrowRect.anchoredPosition = new Vector2(-15f, 0f);
 
             Image itemBgImage = itemBgObj.AddComponent<Image>();
             itemBgImage.color = new Color(0.25f, 0.45f, 0.25f, 1.0f);
