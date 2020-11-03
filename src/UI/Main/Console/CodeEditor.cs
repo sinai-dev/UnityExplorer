@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
-using ExplorerBeta.Input;
-using ExplorerBeta.UI.Main.Console.Lexer;
+using UnityExplorer.Input;
+using UnityExplorer.UI.Main.Console.Lexer;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace ExplorerBeta.UI.Main.Console
+namespace UnityExplorer.UI.Main.Console
 {
     public class CodeEditor
     {

@@ -1,10 +1,10 @@
 ﻿using System;
-using ExplorerBeta.Helpers;
-using ExplorerBeta.UI.Main;
+using UnityExplorer.Helpers;
+using UnityExplorer.UI.Main;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace ExplorerBeta.Unstrip.Scenes
+namespace UnityExplorer.Unstrip.Scenes
 {
     public class SceneUnstrip
     {
@@ -13,12 +13,22 @@ namespace ExplorerBeta.Unstrip.Scenes
 
         public static GameObject[] GetRootGameObjects(int handle)
         {
-            for (int i = 0; i < SceneManager.sceneCount; i++)
+            Scene scene = default;
+            if (handle == SceneExplorer.DontDestroyHandle)
+                scene = SceneExplorer.DontDestroyObject.scene;
+            else
             {
-                var scene = SceneManager.GetSceneAt(i);
-                if (scene.handle == handle)
-                    return scene.GetRootGameObjects();
+                for (int i = 0; i < SceneManager.sceneCount; i++)
+                {
+                    var iscene = SceneManager.GetSceneAt(i);
+                    if (iscene.handle == handle)
+                        scene = iscene;
+                }
             }
+
+            if (scene != default && scene.handle != -1)
+                return scene.GetRootGameObjects();
+
             return new GameObject[0];
         }
 

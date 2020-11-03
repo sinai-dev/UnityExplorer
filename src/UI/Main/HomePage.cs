@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace ExplorerBeta.UI.Main
+namespace UnityExplorer.UI.Main
 {
     public class HomePage : MainMenu.Page
     {

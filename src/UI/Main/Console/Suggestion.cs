@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
-namespace ExplorerBeta.UI.Main.Console
+namespace UnityExplorer.UI.Main.Console
 {
     public struct Suggestion
     {

@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using ExplorerBeta.Input;
+using UnityExplorer.Input;
 using System.IO;
 #if CPP
-using ExplorerBeta.Unstrip.ImageConversion;
+using UnityExplorer.Unstrip.ImageConversion;
 #endif
 
-namespace ExplorerBeta.UI.Main
+namespace UnityExplorer.UI.Main
 {
     // Handles dragging and resizing for the main explorer window.
 

@@ -1,12 +1,12 @@
 ﻿using System;
 using UnityEngine;
-using ExplorerBeta.Helpers;
+using UnityExplorer.Helpers;
 using System.Diagnostics.CodeAnalysis;
 #if CPP
 using UnhollowerBaseLib;
 #endif
 
-namespace ExplorerBeta.Input
+namespace UnityExplorer.Input
 {
     [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Unity style")]
     public static class InputManager

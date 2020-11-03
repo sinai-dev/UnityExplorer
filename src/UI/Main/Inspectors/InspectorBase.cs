@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace ExplorerBeta.UI.Main.Inspectors
+namespace UnityExplorer.UI.Main.Inspectors
 {
     public abstract class InspectorBase
     {
@@ -12,7 +12,7 @@ namespace ExplorerBeta.UI.Main.Inspectors
 
         public abstract string TabLabel { get; }
 
-        public GameObject Content;
+        public abstract GameObject Content { get; set; }
         public Button tabButton;
         public Text tabText;
 
@@ -54,10 +54,10 @@ namespace ExplorerBeta.UI.Main.Inspectors
                 GameObject.Destroy(tabGroup);
             }
 
-            if (Content)
-            {
-                GameObject.Destroy(Content);
-            }
+            //if (Content)
+            //{
+            //    GameObject.Destroy(Content);
+            //}
 
             int thisIndex = -1;
             if (InspectorManager.Instance.m_currentInspectors.Contains(this))

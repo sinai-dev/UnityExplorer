@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ExplorerBeta.Helpers;
-using ExplorerBeta.UI.Main.Inspectors;
-using ExplorerBeta.UI.Shared;
-using ExplorerBeta.Unstrip.Scenes;
+using UnityExplorer.Helpers;
+using UnityExplorer.UI.Main.Inspectors;
+using UnityExplorer.UI.Shared;
+using UnityExplorer.Unstrip.Scenes;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-namespace ExplorerBeta.UI.Main
+namespace UnityExplorer.UI.Main
 {
     public class InspectorManager
     {

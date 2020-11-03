@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ExplorerBeta.UI.Main.Inspectors
+namespace UnityExplorer.UI.Main.Inspectors
 {
     public class StaticInspector : ReflectionInspector
     {

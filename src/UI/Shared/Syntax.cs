@@ -1,4 +1,4 @@
-﻿namespace ExplorerBeta.UI.Shared
+﻿namespace UnityExplorer.UI.Shared
 {
     public class Syntax
     {

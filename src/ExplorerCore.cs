@@ -1,18 +1,18 @@
 ﻿using System;
-using ExplorerBeta.Config;
-using ExplorerBeta.Input;
-using ExplorerBeta.UI;
-using ExplorerBeta.UI.Main;
+using UnityExplorer.Config;
+using UnityExplorer.Input;
+using UnityExplorer.UI;
+using UnityExplorer.UI.Main;
 using UnityEngine;
 
-namespace ExplorerBeta
+namespace UnityExplorer
 {
     public class ExplorerCore
     {
-        public const string NAME = "Explorer " + VERSION + " (" + PLATFORM + ", " + MODLOADER + ")";
+        public const string NAME = "UnityExplorer " + VERSION + " (" + PLATFORM + ", " + MODLOADER + ")";
         public const string VERSION = "3.0.0";
         public const string AUTHOR = "Sinai";
-        public const string GUID = "com.sinai.explorerBETA";
+        public const string GUID = "com.sinai.unityexplorer";
 
         public const string PLATFORM =
 #if CPP
@@ -107,7 +107,7 @@ namespace ExplorerBeta
                 try
                 {
                     UIManager.Init();
-                    Log("Initialized Explorer UI.");
+                    Log("Initialized UnityExplorer UI.");
                 }
                 catch (Exception e)
                 {

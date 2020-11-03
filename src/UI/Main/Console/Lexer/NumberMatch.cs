@@ -1,12 +1,12 @@
 ﻿using UnityEngine;
 
-namespace ExplorerBeta.UI.Main.Console.Lexer
+namespace UnityExplorer.UI.Main.Console.Lexer
 {
-    public sealed class NumberMatch : MatchLexer
+    public sealed class NumberMatch : Matcher
     {
         public override Color HighlightColor => new Color(0.58f, 0.33f, 0.33f, 1.0f);
 
-        public override bool IsImplicitMatch(ILexer lexer)
+        public override bool IsImplicitMatch(InputLexer lexer)
         {
             if (!char.IsWhiteSpace(lexer.Previous) &&
                 !lexer.IsSpecialSymbol(lexer.Previous, SpecialCharacterPosition.End))

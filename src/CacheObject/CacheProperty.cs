@@ -3,10 +3,10 @@
 //using System.Linq;
 //using System.Text;
 //using System.Reflection;
-//using ExplorerBeta.UI;
-//using ExplorerBeta.Helpers;
+//using UnityExplorer.UI;
+//using UnityExplorer.Helpers;
 
-//namespace ExplorerBeta.CacheObject
+//namespace UnityExplorer.CacheObject
 //{
 //    public class CacheProperty : CacheMember
 //    {

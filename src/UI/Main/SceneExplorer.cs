@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ExplorerBeta.Helpers;
-using ExplorerBeta.UI.Main.Inspectors;
-using ExplorerBeta.UI.Shared;
+using UnityExplorer.Helpers;
+using UnityExplorer.UI.Main.Inspectors;
+using UnityExplorer.UI.Shared;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using ExplorerBeta.Unstrip.Scenes;
+using UnityExplorer.Unstrip.Scenes;
 
-namespace ExplorerBeta.UI.Main
+namespace UnityExplorer.UI.Main
 {
     public class SceneExplorer
     {
@@ -28,30 +28,36 @@ namespace ExplorerBeta.UI.Main
         private int m_currentSceneHandle = -1;
         private int m_lastCount;
 
-        public PageHandler m_sceneListPageHandler;
-
-        private GameObject[] m_allSceneListObjects = new GameObject[0];
-        private readonly List<GameObject> m_sceneShortList = new List<GameObject>();
-        private readonly List<Text> m_sceneListTexts = new List<Text>();
-
-        public static int DontDestroyHandle;
-        
-        private GameObject m_sceneListCanvas;
         private Dropdown m_sceneDropdown;
         private Text m_scenePathText;
         private GameObject m_mainInspectBtn;
         private GameObject m_backButtonObj;
 
-        //private readonly Dictionary<string, int> m_sceneHandles = new Dictionary<string, int>();
+        public PageHandler m_sceneListPageHandler;
+
+        private GameObject[] m_allSceneListObjects = new GameObject[0];
+        private readonly List<GameObject> m_sceneShortList = new List<GameObject>();
+        private GameObject m_sceneListContent;
+        private readonly List<Text> m_sceneListTexts = new List<Text>();
+
+        public static int DontDestroyHandle => DontDestroyObject.scene.handle;
+
+        internal static GameObject DontDestroyObject
+        {
+            get
+            {
+                if (!m_dontDestroyObject)
+                {
+                    m_dontDestroyObject = new GameObject("DontDestroyMe");
+                    GameObject.DontDestroyOnLoad(m_dontDestroyObject);
+                }
+                return m_dontDestroyObject;
+            }
+        }
+        internal static GameObject m_dontDestroyObject;
 
         public void Init()
         {
-            // Get DontDestroyOnLoad scene handle. I think it's always -12, but best to be safe.
-            GameObject test = new GameObject();
-            GameObject.DontDestroyOnLoad(test);
-            DontDestroyHandle = test.scene.handle;
-            GameObject.Destroy(test);
-
             RefreshActiveScenes();
         }
 
@@ -76,18 +82,6 @@ namespace ExplorerBeta.UI.Main
                 RefreshSelectedSceneObject();
             }
         }
-
-        //private int StoreScenehandle(Scene scene)
-        //{
-        //    if (scene == null || scene.handle == -1)
-        //        return -1;
-
-        //    if (!m_sceneHandles.ContainsKey(scene.name))
-        //    {
-        //        m_sceneHandles.Add(scene.name, scene.handle);
-        //    }
-        //    return scene.handle;
-        //}
 
         public int GetSceneHandle(string sceneName)
         {
@@ -190,21 +184,6 @@ namespace ExplorerBeta.UI.Main
             }
         }
 
-        private void SceneListObjectClicked(int index)
-        {
-            if (index >= m_sceneShortList.Count || !m_sceneShortList[index])
-            {
-                return;
-            }
-
-            SetTargetObject(m_sceneShortList[index]);
-        }
-
-        private void OnSceneListPageTurn()
-        {
-            SetSceneObjectList(m_allSceneListObjects);
-        }
-
         private void RefreshSelectedSceneObject()
         {
             GameObject[] list = new GameObject[m_selectedSceneObject.transform.childCount];
@@ -218,20 +197,44 @@ namespace ExplorerBeta.UI.Main
 
         private void SetSceneObjectList(GameObject[] objects)
         {
+            m_allSceneListObjects = objects;
+            RefreshSceneObjectList();
+        }
+
+        private void SceneListObjectClicked(int index)
+        {
+            if (index >= m_sceneShortList.Count || !m_sceneShortList[index])
+            {
+                return;
+            }
+
+            SetTargetObject(m_sceneShortList[index]);
+        }
+
+        private void OnSceneListPageTurn()
+        {
+            RefreshSceneObjectList();
+        }
+
+        private void RefreshSceneObjectList()
+        {
             m_timeOfLastSceneUpdate = Time.realtimeSinceStartup;
 
-            m_allSceneListObjects = objects;
+            var objects = m_allSceneListObjects;
             m_sceneListPageHandler.ListCount = objects.Length;
 
-            int startIndex = m_sceneListPageHandler.IndexOffset;
+            //int startIndex = m_sceneListPageHandler.StartIndex;
 
             int newCount = 0;
 
-            for (int i = 0; i < m_sceneListPageHandler.ItemsPerPage; i++)
+            foreach (var itemIndex in m_sceneListPageHandler)
             {
                 newCount++;
 
-                if (i + startIndex >= objects.Length)
+                // normalized index starting from 0
+                var i = itemIndex - m_sceneListPageHandler.StartIndex;
+
+                if (itemIndex >= objects.Length)
                 {
                     if (i > m_lastCount || i >= m_sceneListTexts.Count)
                         break;
@@ -242,7 +245,7 @@ namespace ExplorerBeta.UI.Main
                 }
                 else
                 {
-                    GameObject obj = objects[i + startIndex];
+                    GameObject obj = objects[itemIndex];
 
                     if (!obj)
                         continue;
@@ -278,7 +281,7 @@ namespace ExplorerBeta.UI.Main
             m_lastCount = newCount;
         }
 
-        #region SCENE PANE
+        #region UI CONSTRUCTION
 
         public void ConstructScenePane()
         {
@@ -399,7 +402,7 @@ namespace ExplorerBeta.UI.Main
 #else
             inspectButton.onClick.AddListener(() => { InspectorManager.Instance.Inspect(m_selectedSceneObject); });
 #endif
-            GameObject scrollObj = UIFactory.CreateScrollView(leftPane, out m_sceneListCanvas, new Color(0.1f, 0.1f, 0.1f));
+            GameObject scrollObj = UIFactory.CreateScrollView(leftPane, out m_sceneListContent, new Color(0.1f, 0.1f, 0.1f));
             Scrollbar scroll = scrollObj.transform.Find("Scrollbar Vertical").GetComponent<Scrollbar>();
             ColorBlock colors = scroll.colors;
             colors.normalColor = new Color(0.6f, 0.6f, 0.6f, 1.0f);
@@ -411,7 +414,7 @@ namespace ExplorerBeta.UI.Main
             var scrollRect = scrollObj.GetComponentInChildren<ScrollRect>();
             scrollRect.horizontalScrollbar = null;
 
-            var sceneGroup = m_sceneListCanvas.GetComponent<VerticalLayoutGroup>();
+            var sceneGroup = m_sceneListContent.GetComponent<VerticalLayoutGroup>();
             sceneGroup.childControlHeight = true;
             sceneGroup.spacing = 2;
 
@@ -424,7 +427,7 @@ namespace ExplorerBeta.UI.Main
         {
             int thisIndex = m_sceneListTexts.Count();
 
-            GameObject btnGroupObj = UIFactory.CreateHorizontalGroup(m_sceneListCanvas, new Color(0.1f, 0.1f, 0.1f));
+            GameObject btnGroupObj = UIFactory.CreateHorizontalGroup(m_sceneListContent, new Color(0.1f, 0.1f, 0.1f));
             HorizontalLayoutGroup btnGroup = btnGroupObj.GetComponent<HorizontalLayoutGroup>();
             btnGroup.childForceExpandWidth = true;
             btnGroup.childControlWidth = true;
@@ -455,6 +458,7 @@ namespace ExplorerBeta.UI.Main
 
             Text mainText = mainButtonObj.GetComponentInChildren<Text>();
             mainText.alignment = TextAnchor.MiddleLeft;
+            mainText.horizontalOverflow = HorizontalWrapMode.Overflow;
             m_sceneListTexts.Add(mainText);
 
             GameObject inspectBtnObj = UIFactory.CreateButton(btnGroupObj);

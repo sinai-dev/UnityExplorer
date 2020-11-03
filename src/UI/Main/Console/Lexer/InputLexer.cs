@@ -1,18 +1,24 @@
 ﻿using System.Collections.Generic;
 
-namespace ExplorerBeta.UI.Main.Console.Lexer
+namespace UnityExplorer.UI.Main.Console.Lexer
 {
-    internal struct LexerMatchInfo
+    public struct LexerMatchInfo
     {
         public int startIndex;
         public int endIndex;
         public string htmlColor;
     }
 
-    internal class InputLexer : ILexer
+    public enum SpecialCharacterPosition
+    {
+        Start,
+        End,
+    };
+
+    public class InputLexer
     {
         private string inputString = null;
-        private MatchLexer[] matchers = null;
+        private Matcher[] matchers = null;
         private readonly HashSet<char> specialStartSymbols = new HashSet<char>();
         private readonly HashSet<char> specialEndSymbols = new HashSet<char>();
         private int currentIndex = 0;
@@ -26,7 +32,7 @@ namespace ExplorerBeta.UI.Main.Console.Lexer
             get { return currentLookaheadIndex >= inputString.Length; }
         }
 
-        public void UseMatchers(char[] delimiters, MatchLexer[] matchers)
+        public void UseMatchers(char[] delimiters, Matcher[] matchers)
         {
             this.matchers = matchers;
 
@@ -51,7 +57,7 @@ namespace ExplorerBeta.UI.Main.Console.Lexer
 
             if (matchers != null)
             {
-                foreach (MatchLexer lexer in matchers)
+                foreach (Matcher lexer in matchers)
                 {
                     foreach (char special in lexer.StartChars)
                     {
@@ -91,7 +97,7 @@ namespace ExplorerBeta.UI.Main.Console.Lexer
 
                 ReadWhiteSpace();
 
-                foreach (MatchLexer matcher in matchers)
+                foreach (Matcher matcher in matchers)
                 {
                     int startIndex = currentIndex;
 

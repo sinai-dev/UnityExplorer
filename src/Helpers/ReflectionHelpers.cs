@@ -13,7 +13,7 @@ using UnhollowerRuntimeLib;
 using System.Runtime.InteropServices;
 #endif
 
-namespace ExplorerBeta.Helpers
+namespace UnityExplorer.Helpers
 {
     [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "External methods")]
     public class ReflectionHelpers

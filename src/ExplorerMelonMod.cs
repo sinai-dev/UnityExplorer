@@ -1,7 +1,7 @@
 ﻿#if ML
 using MelonLoader;
 
-namespace ExplorerBeta
+namespace UnityExplorer
 {
     public class ExplorerMelonMod : MelonMod
     {

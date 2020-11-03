@@ -2,9 +2,9 @@
 using System.Linq;
 using UnityEngine;
 
-namespace ExplorerBeta.UI.Main.Console.Lexer
+namespace UnityExplorer.UI.Main.Console.Lexer
 {
-    public sealed class SymbolMatch : MatchLexer
+    public sealed class SymbolMatch : Matcher
     {
         public override Color HighlightColor => new Color(0.58f, 0.47f, 0.37f, 1.0f);
 
@@ -39,7 +39,7 @@ namespace ExplorerBeta.UI.Main.Console.Lexer
             }
         }
 
-        public override bool IsImplicitMatch(ILexer lexer)
+        public override bool IsImplicitMatch(InputLexer lexer)
         {
             if (lexer == null)
             {

@@ -1,4 +1,4 @@
-﻿namespace ExplorerBeta.UI.Main
+﻿namespace UnityExplorer.UI.Main
 {
     public class OptionsPage : MainMenu.Page
     {

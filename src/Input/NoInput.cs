@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace ExplorerBeta.Input
+namespace UnityExplorer.Input
 {
     // Just a stub for games where no Input module was able to load at all.
 

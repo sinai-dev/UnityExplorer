@@ -1,11 +1,11 @@
 ﻿using System;
-using ExplorerBeta.Helpers;
+using UnityExplorer.Helpers;
 using UnityEngine;
 #if CPP
 using UnhollowerBaseLib;
 #endif
 
-namespace ExplorerBeta.Unstrip.LayerMasks
+namespace UnityExplorer.Unstrip.LayerMasks
 {
     public static class LayerMaskUnstrip
     {

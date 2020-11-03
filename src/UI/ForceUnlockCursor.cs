@@ -1,8 +1,8 @@
 ﻿using System;
 using UnityEngine;
-using ExplorerBeta.Helpers;
+using UnityExplorer.Helpers;
 using UnityEngine.EventSystems;
-using ExplorerBeta.Input;
+using UnityExplorer.Input;
 using BF = System.Reflection.BindingFlags;
 #if ML
 using Harmony;
@@ -10,7 +10,7 @@ using Harmony;
 using HarmonyLib;
 #endif
 
-namespace ExplorerBeta.UI
+namespace UnityExplorer.UI
 {
     public class ForceUnlockCursor
     {

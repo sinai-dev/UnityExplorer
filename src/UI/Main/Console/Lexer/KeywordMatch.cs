@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace ExplorerBeta.UI.Main.Console.Lexer
+namespace UnityExplorer.UI.Main.Console.Lexer
 {
-    public sealed class KeywordMatch : MatchLexer
+    public sealed class KeywordMatch : Matcher
     {
         public string keywords;
 
@@ -14,7 +14,7 @@ namespace ExplorerBeta.UI.Main.Console.Lexer
         private readonly Stack<string> removeList = new Stack<string>();
         public string[] keywordCache = null;
 
-        public override bool IsImplicitMatch(ILexer lexer)
+        public override bool IsImplicitMatch(InputLexer lexer)
         {
             BuildKeywordCache();
 

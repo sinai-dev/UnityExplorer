@@ -3,11 +3,11 @@
 //using System.Linq;
 //using System.Reflection;
 //using UnityEngine;
-//using ExplorerBeta.CacheObject;
-//using ExplorerBeta.Helpers;
-//using ExplorerBeta.UI.Shared;
+//using UnityExplorer.CacheObject;
+//using UnityExplorer.Helpers;
+//using UnityExplorer.UI.Shared;
 
-//namespace ExplorerBeta.UI
+//namespace UnityExplorer.UI
 //{
 //    public class InteractiveValue
 //    {

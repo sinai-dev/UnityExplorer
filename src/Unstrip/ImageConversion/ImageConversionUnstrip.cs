@@ -1,11 +1,11 @@
 ﻿#if CPP
 using System;
 using System.IO;
-using ExplorerBeta.Helpers;
+using UnityExplorer.Helpers;
 using UnhollowerBaseLib;
 using UnityEngine;
 
-namespace ExplorerBeta.Unstrip.ImageConversion
+namespace UnityExplorer.Unstrip.ImageConversion
 {
     public static class ImageConversionUnstrip
     {

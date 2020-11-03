@@ -1,7 +1,7 @@
 ﻿using System;
 using Mono.CSharp;
 
-namespace ExplorerBeta.UI.Main.Console
+namespace UnityExplorer.UI.Main.Console
 {
     public class ScriptInteraction : InteractiveBase
     {

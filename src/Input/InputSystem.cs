@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Reflection;
-using ExplorerBeta.Helpers;
+using UnityExplorer.Helpers;
 using UnityEngine;
 
-namespace ExplorerBeta.Input
+namespace UnityExplorer.Input
 {
     public class InputSystem : IHandleInput
     {

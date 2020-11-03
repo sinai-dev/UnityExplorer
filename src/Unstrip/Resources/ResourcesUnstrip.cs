@@ -1,10 +1,10 @@
 ﻿using System;
-using ExplorerBeta.Helpers;
+using UnityExplorer.Helpers;
 #if CPP
 using UnhollowerBaseLib;
 #endif
 
-namespace ExplorerBeta.Unstrip.Resources
+namespace UnityExplorer.Unstrip.Resources
 {
     public class ResourcesUnstrip
     {

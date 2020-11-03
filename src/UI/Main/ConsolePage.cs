@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using ExplorerBeta.UI.Main.Console;
-using ExplorerBeta.Unstrip.Resources;
+using UnityExplorer.UI.Main.Console;
+using UnityExplorer.Unstrip.Resources;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,7 +12,7 @@ using UnityEngine.UI;
 using UnhollowerRuntimeLib;
 #endif
 
-namespace ExplorerBeta.UI.Main
+namespace UnityExplorer.UI.Main
 {
     public class ConsolePage : MainMenu.Page
     {
@@ -321,17 +321,24 @@ namespace ExplorerBeta.UI.Main
             mainTextInput.fontSize = 18;
 
             var placeHolderText = textAreaObj.transform.Find("Placeholder").GetComponent<TextMeshProUGUI>();
-            placeHolderText.text = @"Welcome to the Explorer C# Console.
+            placeHolderText.text = @"Welcome to the UnityExplorer C# Console.
 
 The following helper methods are available:
 
 * <color=#add490>Log(""message"");</color> logs a message to the debug console
+
 * <color=#add490>CurrentTarget();</color> returns the currently inspected target on the Home page
+
 * <color=#add490>AllTargets();</color> returns an object[] array containing all inspected instances
+
 * <color=#add490>Inspect(someObject)</color> to inspect an instance, eg. Inspect(Camera.main);
+
 * <color=#add490>Inspect(typeof(SomeClass))</color> to inspect a Class with static reflection
+
 * <color=#add490>AddUsing(""SomeNamespace"");</color> adds a using directive to the C# console
+
 * <color=#add490>GetUsing();</color> logs the current using directives to the debug console
+
 * <color=#add490>Reset();</color> resets all using directives and variables
 ";
 

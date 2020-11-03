@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using ExplorerBeta.UI.Main.Console;
+using UnityExplorer.UI.Main.Console;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace ExplorerBeta.UI.Main
+namespace UnityExplorer.UI.Main
 {
     public class MainMenu
     {
@@ -117,7 +117,7 @@ namespace ExplorerBeta.UI.Main
 
             RectTransform panelRect = MainPanel.GetComponent<RectTransform>();
             panelRect.anchorMin = new Vector2(0.25f, 0.1f);
-            panelRect.anchorMax = new Vector2(0.75f, 0.95f);
+            panelRect.anchorMax = new Vector2(0.78f, 0.95f);
 
             ConstructTitleBar(content);
 
@@ -125,11 +125,6 @@ namespace ExplorerBeta.UI.Main
 
             ConstructMainViewport(content);
 
-            ConstructDebugConsole(content);
-        }
-
-        private void ConstructDebugConsole(GameObject content)
-        {
             new DebugConsole(content);
         }
 
@@ -158,7 +153,7 @@ namespace ExplorerBeta.UI.Main
             GameObject textObj = UIFactory.CreateLabel(titleBar, TextAnchor.MiddleLeft);
 
             Text text = textObj.GetComponent<Text>();
-            text.text = $"<b>Explorer</b> <i>v{ExplorerCore.VERSION}</i>";
+            text.text = $"<b>UnityExplorer</b> <i>v{ExplorerCore.VERSION}</i>";
             text.resizeTextForBestFit = true;
             text.resizeTextMinSize = 12;
             text.resizeTextMaxSize = 20;

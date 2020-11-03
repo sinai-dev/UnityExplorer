@@ -23,8 +23,8 @@
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x64</PlatformTarget>
     <Prefer32Bit>false</Prefer32Bit>
-    <RootNamespace>ExplorerBeta</RootNamespace>
-    <AssemblyName>ExplorerBeta</AssemblyName>
+    <RootNamespace>UnityExplorer</RootNamespace>
+    <AssemblyName>UnityExplorer</AssemblyName>
     <!-- Set this to the MelonLoader Il2Cpp Game folder, without the ending '\' character. -->
     <MLCppGameFolder>D:\Steam\steamapps\common\VRChat</MLCppGameFolder>
     <!-- Set this to the MelonLoader Mono Game folder, without the ending '\' character. -->
@@ -359,11 +359,10 @@
     <Compile Include="UI\Main\Console\CodeEditor.cs" />
     <Compile Include="UI\Main\Console\CSharpLexer.cs" />
     <Compile Include="UI\Main\Console\Lexer\CommentMatch.cs" />
-    <Compile Include="UI\Main\Console\Lexer\ILexer.cs" />
     <Compile Include="UI\Main\Console\Lexer\InputLexer.cs" />
     <Compile Include="UI\Main\Console\Lexer\KeywordMatch.cs" />
     <Compile Include="UI\Main\Console\Lexer\StringMatch.cs" />
-    <Compile Include="UI\Main\Console\Lexer\MatchLexer.cs" />
+    <Compile Include="UI\Main\Console\Lexer\Matcher.cs" />
     <Compile Include="UI\Main\Console\Lexer\NumberMatch.cs" />
     <Compile Include="UI\Main\Console\Lexer\SymbolMatch.cs" />
     <Compile Include="UI\Main\Console\Suggestion.cs" />

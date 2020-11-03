@@ -1,9 +1,9 @@
-﻿using ExplorerBeta.UI.Main;
+﻿using UnityExplorer.UI.Main;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace ExplorerBeta.UI
+namespace UnityExplorer.UI
 {
     public static class UIManager
     {

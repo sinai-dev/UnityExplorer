@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
-namespace ExplorerBeta.Helpers
+namespace UnityExplorer.Helpers
 {
     [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "External methods")]
     public static class ICallHelper

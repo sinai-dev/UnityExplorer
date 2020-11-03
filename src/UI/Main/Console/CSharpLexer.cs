@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Text;
-using ExplorerBeta.UI.Main.Console.Lexer;
+using UnityExplorer.UI.Main.Console.Lexer;
 using UnityEngine;
 
-namespace ExplorerBeta.UI.Main.Console
+namespace UnityExplorer.UI.Main.Console
 {
     public static class CSharpLexer
     {
@@ -73,14 +73,14 @@ namespace ExplorerBeta.UI.Main.Console
             }
         }
 
-        private static MatchLexer[] matchers = null;
-        internal static MatchLexer[] Matchers
+        private static Matcher[] matchers = null;
+        internal static Matcher[] Matchers
         {
             get
             {
                 if (matchers == null)
                 {
-                    List<MatchLexer> matcherList = new List<MatchLexer>
+                    List<Matcher> matcherList = new List<Matcher>
                     {
                         commentMatcher,
                         symbolMatcher,

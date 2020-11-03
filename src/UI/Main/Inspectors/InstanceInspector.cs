@@ -1,7 +1,7 @@
 ﻿using System;
-using ExplorerBeta.Helpers;
+using UnityExplorer.Helpers;
 
-namespace ExplorerBeta.UI.Main.Inspectors
+namespace UnityExplorer.UI.Main.Inspectors
 {
     public class InstanceInspector : ReflectionInspector
     {

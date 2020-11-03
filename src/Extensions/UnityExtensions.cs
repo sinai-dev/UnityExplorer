@@ -1,17 +1,17 @@
 ﻿using UnityEngine;
 
-namespace ExplorerBeta
+namespace UnityExplorer
 {
     public static class UnityExtensions
     {
-        public static string GetTransformPath(this Transform _transform)
+        public static string GetTransformPath(this Transform t, bool includeThisName = false)
         {
-            string path = _transform.name;
+            string path = includeThisName ? t.transform.name : "";
 
-            while (_transform.parent != null)
+            while (t.parent != null)
             {
-                _transform = _transform.parent;
-                path = _transform.name + "/" + path;
+                t = t.parent;
+                path = $"{t.name}/{path}";
             }
 
             return path;

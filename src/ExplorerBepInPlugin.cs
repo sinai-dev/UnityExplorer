@@ -12,9 +12,9 @@ using UnhollowerRuntimeLib;
 using BepInEx.IL2CPP;
 #endif
 
-namespace ExplorerBeta
+namespace UnityExplorer
 {
-    [BepInPlugin(ExplorerCore.GUID, "ExplorerBeta", ExplorerCore.VERSION)]
+    [BepInPlugin(ExplorerCore.GUID, "UnityExplorer", ExplorerCore.VERSION)]
 #if CPP
     public class ExplorerBepInPlugin : BasePlugin
 #else

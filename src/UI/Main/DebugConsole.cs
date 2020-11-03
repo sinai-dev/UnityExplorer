@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using ExplorerBeta.Unstrip.ColorUtility;
+using UnityExplorer.Unstrip.ColorUtility;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 #if CPP
 #endif
 
-namespace ExplorerBeta.UI.Main
+namespace UnityExplorer.UI.Main
 {
     public class DebugConsole
     {

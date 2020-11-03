@@ -7,7 +7,7 @@ using UnityEngine.UI;
 #if CPP
 #endif
 
-namespace ExplorerBeta.UI.Main.Console
+namespace UnityExplorer.UI.Main.Console
 {
     public class AutoCompleter
     {

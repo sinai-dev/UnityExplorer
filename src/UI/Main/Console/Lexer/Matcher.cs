@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using ExplorerBeta.Unstrip.ColorUtility;
+using UnityExplorer.Unstrip.ColorUtility;
 using UnityEngine;
 
-namespace ExplorerBeta.UI.Main.Console.Lexer
+namespace UnityExplorer.UI.Main.Console.Lexer
 {
-    public abstract class MatchLexer
+    public abstract class Matcher
     {
         public abstract Color HighlightColor { get; }
 
@@ -14,9 +14,9 @@ namespace ExplorerBeta.UI.Main.Console.Lexer
         public virtual IEnumerable<char> StartChars { get { yield break; } }
         public virtual IEnumerable<char> EndChars { get { yield break; } }
 
-        public abstract bool IsImplicitMatch(ILexer lexer);
+        public abstract bool IsImplicitMatch(InputLexer lexer);
 
-        public bool IsMatch(ILexer lexer)
+        public bool IsMatch(InputLexer lexer)
         {
             if (IsImplicitMatch(lexer))
             {

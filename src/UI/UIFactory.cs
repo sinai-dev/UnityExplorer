@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace ExplorerBeta.UI
+namespace UnityExplorer.UI
 {
     public static class UIFactory
     {
@@ -581,6 +581,7 @@ namespace ExplorerBeta.UI
             templateImage.color = new Color(0.15f, 0.15f, 0.15f, 1.0f);
 
             ScrollRect scrollRect = templateObj.AddComponent<ScrollRect>();
+            scrollRect.scrollSensitivity = 25;
             scrollRect.content = contentObj.GetComponent<RectTransform>();
             scrollRect.viewport = viewportObj.GetComponent<RectTransform>();
             scrollRect.horizontal = false;

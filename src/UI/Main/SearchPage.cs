@@ -1,4 +1,4 @@
-﻿namespace ExplorerBeta.UI.Main
+﻿namespace UnityExplorer.UI.Main
 {
     public class SearchPage : MainMenu.Page
     {

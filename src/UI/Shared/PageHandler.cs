@@ -1,9 +1,11 @@
 ﻿using System;
-using ExplorerBeta.Config;
+using System.Collections;
+using System.Collections.Generic;
+using UnityExplorer.Config;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace ExplorerBeta.UI.Shared
+namespace UnityExplorer.UI.Shared
 {
     public enum Turn
     {
@@ -11,22 +13,25 @@ namespace ExplorerBeta.UI.Shared
         Right
     }
 
-    public class PageHandler
+    public class PageHandler : IEnumerator
     {
         public PageHandler()
         {
-            m_itemsPerPage = ModConfig.Instance?.Default_Page_Limit ?? 20;
+            ItemsPerPage = ModConfig.Instance?.Default_Page_Limit ?? 20;
         }
-
-        public event Action OnPageChanged;
 
         // For now this is just set when the PageHandler is created, based on config.
         // At some point I might make it possible to change this after creation again.
-        public int ItemsPerPage => m_itemsPerPage;
-        private int m_itemsPerPage;
+        public int ItemsPerPage { get; }
+
+        // IEnumerator.Current
+        public object Current => m_currentIndex;
+        private int m_currentIndex = 0;
 
         private int m_currentPage;
+        public event Action OnPageChanged;
 
+        // ui
         private GameObject m_pageUIHolder;
         private Text m_currentPageLabel;
 
@@ -52,15 +57,14 @@ namespace ExplorerBeta.UI.Shared
             }
         }
 
-        // the last page index (not using "index" to avoid confusion with next property)
-        public int LastPage => (int)Math.Ceiling(ListCount / (decimal)m_itemsPerPage) - 1;
+        public int LastPage => (int)Math.Ceiling(ListCount / (decimal)ItemsPerPage) - 1;
 
         // The index of the first element of the current page
-        public int IndexOffset
+        public int StartIndex
         {
             get
             {
-                int offset = m_currentPage * m_itemsPerPage;
+                int offset = m_currentPage * ItemsPerPage;
 
                 if (offset >= ListCount)
                 {
@@ -69,6 +73,39 @@ namespace ExplorerBeta.UI.Shared
                 }
 
                 return offset;
+            }
+        }
+
+        public int EndIndex
+        {
+            get
+            {
+                int end = StartIndex + ItemsPerPage;
+                if (end >= ListCount)
+                    end = ListCount - 1;
+                return end;
+            }
+        }
+
+        // IEnumerator.MoveNext()
+        public bool MoveNext()
+        {
+            m_currentIndex++;
+            return m_currentIndex < StartIndex + ItemsPerPage;
+        }
+
+        // IEnumerator.Reset()
+        public void Reset()
+        {
+            m_currentIndex = StartIndex - 1;
+        }
+
+        public IEnumerator<int> GetEnumerator()
+        {
+            Reset();
+            while (MoveNext())
+            {
+                yield return m_currentIndex;
             }
         }
 
@@ -94,7 +131,7 @@ namespace ExplorerBeta.UI.Shared
             }
         }
 
-        #region UI
+        #region UI CONSTRUCTION
 
         public void Show() => m_pageUIHolder?.SetActive(true);
 
@@ -121,7 +158,7 @@ namespace ExplorerBeta.UI.Shared
             LayoutElement parentLayout = m_pageUIHolder.AddComponent<LayoutElement>();
             parentLayout.minHeight = 20;
             parentLayout.flexibleHeight = 0;
-            parentLayout.minWidth = 290;
+            parentLayout.minWidth = 200;
             parentLayout.flexibleWidth = 30;
 
             GameObject leftBtnObj = UIFactory.CreateButton(m_pageUIHolder);
@@ -136,7 +173,7 @@ namespace ExplorerBeta.UI.Shared
             LayoutElement leftBtnLayout = leftBtnObj.AddComponent<LayoutElement>();
             leftBtnLayout.flexibleHeight = 0;
             leftBtnLayout.flexibleWidth = 0;
-            leftBtnLayout.minWidth = 50;
+            leftBtnLayout.minWidth = 40;
             leftBtnLayout.minHeight = 20;
 
             GameObject labelObj = UIFactory.CreateLabel(m_pageUIHolder, TextAnchor.MiddleCenter);
@@ -144,7 +181,7 @@ namespace ExplorerBeta.UI.Shared
             m_currentPageLabel.text = "Page 1 / TODO";
             LayoutElement textLayout = labelObj.AddComponent<LayoutElement>();
             textLayout.flexibleWidth = 1.5f;
-            textLayout.preferredWidth = 200;
+            textLayout.preferredWidth = 120;
 
             GameObject rightBtnObj = UIFactory.CreateButton(m_pageUIHolder);
             Button rightBtn = rightBtnObj.GetComponent<Button>();
@@ -158,7 +195,7 @@ namespace ExplorerBeta.UI.Shared
             LayoutElement rightBtnLayout = rightBtnObj.AddComponent<LayoutElement>();
             rightBtnLayout.flexibleHeight = 0;
             rightBtnLayout.flexibleWidth = 0;
-            rightBtnLayout.minWidth = 50;
+            rightBtnLayout.minWidth = 40;
             rightBtnLayout.minHeight = 20;
 
             ListCount = 0;

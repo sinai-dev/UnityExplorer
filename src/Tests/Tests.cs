@@ -1,11 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using ExplorerBeta.UI;
+using UnityExplorer.UI;
 using UnityEngine;
 #if CPP
 #endif
 
-namespace ExplorerBeta.Tests
+namespace UnityExplorer.Tests
 {
     public static class StaticTestClass
     {

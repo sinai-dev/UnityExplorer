@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace ExplorerBeta.Input
+namespace UnityExplorer.Input
 {
     public interface IHandleInput
     {
