@@ -2,7 +2,7 @@
 using UnityExplorer.Config;
 using UnityExplorer.Input;
 using UnityExplorer.UI;
-using UnityExplorer.UI.Main;
+using UnityExplorer.UI.PageModel;
 using UnityEngine;
 
 namespace UnityExplorer

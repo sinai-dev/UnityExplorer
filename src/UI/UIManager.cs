@@ -1,7 +1,7 @@
-﻿using UnityExplorer.UI.Main;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityExplorer.Inspectors;
 
 namespace UnityExplorer.UI
 {

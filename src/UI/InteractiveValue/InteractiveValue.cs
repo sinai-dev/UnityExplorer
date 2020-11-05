@@ -7,7 +7,7 @@
 //using UnityExplorer.Helpers;
 //using UnityExplorer.UI.Shared;
 
-//namespace UnityExplorer.UI
+//namespace UnityExplorer.UI.InteractiveValue
 //{
 //    public class InteractiveValue
 //    {

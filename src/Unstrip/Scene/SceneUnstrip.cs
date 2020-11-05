@@ -1,8 +1,8 @@
 ﻿using System;
 using UnityExplorer.Helpers;
-using UnityExplorer.UI.Main;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityExplorer.Inspectors;
 
 namespace UnityExplorer.Unstrip.Scenes
 {

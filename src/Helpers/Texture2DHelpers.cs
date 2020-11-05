@@ -53,7 +53,7 @@ namespace UnityExplorer.Helpers
             }
         }
 
-        public static Texture2D Copy(Texture2D orig, Rect rect, bool isDTXnmNormal = false)
+        public static Texture2D Copy(Texture2D orig, Rect rect) //, bool isDTXnmNormal = false)
         {
             Color[] pixels;
 

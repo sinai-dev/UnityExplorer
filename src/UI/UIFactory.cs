@@ -437,6 +437,7 @@ namespace UnityExplorer.UI
             GameObject placeHolderObj = CreateUIObject("Placeholder", textArea);
             TextMeshProUGUI placeholderText = placeHolderObj.AddComponent<TextMeshProUGUI>();
             placeholderText.fontSize = fontSize;
+            placeholderText.fontSizeMax = fontSize;
             placeholderText.text = "...";
             placeholderText.color = new Color(0.5f, 0.5f, 0.5f, 1.0f);
             placeholderText.overflowMode = (TextOverflowModes)overflowMode;
@@ -457,6 +458,7 @@ namespace UnityExplorer.UI
             GameObject inputTextObj = CreateUIObject("Text", textArea);
             TextMeshProUGUI inputText = inputTextObj.AddComponent<TextMeshProUGUI>();
             inputText.fontSize = fontSize;
+            inputText.fontSizeMax = fontSize;
             inputText.text = "";
             inputText.color = new Color(1f, 1f, 1f, 1f);
             inputText.overflowMode = (TextOverflowModes)overflowMode;

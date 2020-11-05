@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using BF = System.Reflection.BindingFlags;
@@ -16,7 +17,7 @@ using System.Runtime.InteropServices;
 namespace UnityExplorer.Helpers
 {
     [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "External methods")]
-    public class ReflectionHelpers
+    public static class ReflectionHelpers
     {
         public static BF CommonFlags = BF.Public | BF.Instance | BF.NonPublic | BF.Static;
 
@@ -37,7 +38,13 @@ namespace UnityExplorer.Helpers
 #if CPP
         private static readonly Dictionary<Type, IntPtr> ClassPointers = new Dictionary<Type, IntPtr>();
 
-        public static object Il2CppCast(object obj, Type castTo)
+        [DllImport("GameAssembly", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        public static extern bool il2cpp_class_is_assignable_from(IntPtr klass, IntPtr oklass);
+
+        [DllImport("GameAssembly", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        public static extern IntPtr il2cpp_object_get_class(IntPtr obj);
+
+        public static object Il2CppCast(this object obj, Type castTo)
         {
             if (!(obj is Il2CppSystem.Object ilObj))
             {
@@ -79,14 +86,30 @@ namespace UnityExplorer.Helpers
 
             return Activator.CreateInstance(castTo, ilObj.Pointer);
         }
-
-        [DllImport("GameAssembly", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public static extern bool il2cpp_class_is_assignable_from(IntPtr klass, IntPtr oklass);
-
-        [DllImport("GameAssembly", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public static extern IntPtr il2cpp_object_get_class(IntPtr obj);
-
 #endif
+
+        public static IEnumerable<Type> TryGetTypes(this Assembly asm)
+        {
+            try
+            {
+                return asm.GetTypes();
+            }
+            catch (ReflectionTypeLoadException e)
+            {
+                try
+                {
+                    return asm.GetExportedTypes();
+                }
+                catch
+                {
+                    return e.Types.Where(t => t != null);
+                }
+            }
+            catch
+            {
+                return Enumerable.Empty<Type>();
+            }
+        }
 
         public static Type GetTypeByName(string fullName)
         {
