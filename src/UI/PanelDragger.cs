@@ -122,7 +122,7 @@ namespace UnityExplorer.UI
         public void OnEndDrag()
         {
             WasDragging = false;
-            UpdateResizeCache();
+            //UpdateResizeCache();
         }
 
         #endregion
@@ -130,6 +130,8 @@ namespace UnityExplorer.UI
         #region RESIZE
 
         private const int RESIZE_THICKNESS = 10;
+
+        private readonly Vector2 minResize = new Vector2(733, 542);
 
         private bool WasResizing { get; set; }
         private ResizeTypes m_currentResizeType = ResizeTypes.NONE;
@@ -287,35 +289,40 @@ namespace UnityExplorer.UI
         {
             Vector3 mousePos = InputManager.MousePosition;
             Vector2 diff = m_lastResizePos - (Vector2)mousePos;
+
+            if ((Vector2)mousePos == m_lastResizePos)
+                return;
+
             m_lastResizePos = mousePos;
 
             float diffX = (float)((decimal)diff.x / Screen.width);
             float diffY = (float)((decimal)diff.y / Screen.height);
 
+            Vector2 anchorMin = Panel.anchorMin;
+            Vector2 anchorMax = Panel.anchorMax;
+
             if (m_currentResizeType.HasFlag(ResizeTypes.Left))
-            {
-                Vector2 anch = Panel.anchorMin;
-                anch.x -= diffX;
-                Panel.anchorMin = anch;
-            }
+                anchorMin.x -= diffX;
             else if (m_currentResizeType.HasFlag(ResizeTypes.Right))
-            {
-                Vector2 anch = Panel.anchorMax;
-                anch.x -= diffX;
-                Panel.anchorMax = anch;
-            }
+                anchorMax.x -= diffX;
 
             if (m_currentResizeType.HasFlag(ResizeTypes.Top))
-            {
-                Vector2 anch = Panel.anchorMax;
-                anch.y -= diffY;
-                Panel.anchorMax = anch;
-            }
+                anchorMax.y -= diffY;
             else if (m_currentResizeType.HasFlag(ResizeTypes.Bottom))
+                anchorMin.y -= diffY;
+
+            var newWidth = (anchorMax.x - anchorMin.x) * Screen.width;
+            var newHeight = (anchorMax.y - anchorMin.y) * Screen.height;
+
+            if (newWidth >= minResize.x)
             {
-                Vector2 anch = Panel.anchorMin;
-                anch.y -= diffY;
-                Panel.anchorMin = anch;
+                Panel.anchorMin = new Vector2(anchorMin.x, Panel.anchorMin.y);
+                Panel.anchorMax = new Vector2(anchorMax.x, Panel.anchorMax.y);
+            }
+            if (newHeight >= minResize.y)
+            {
+                Panel.anchorMin = new Vector2(Panel.anchorMin.x, anchorMin.y);
+                Panel.anchorMax = new Vector2(Panel.anchorMax.x, anchorMax.y);
             }
         }
 

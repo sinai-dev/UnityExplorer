@@ -155,6 +155,19 @@ namespace UnityExplorer.Console
 
                 pos = editor.InputField.transform.TransformPoint(pos);
 
+                // fix position when scrolled down
+                var scrollSize = editor.InputField.verticalScrollbar.size;
+                var scrollValue = editor.InputField.verticalScrollbar.value;
+
+                scrollSize += (1 - scrollSize) * (1 - scrollValue);
+
+                if (!Mathf.Approximately(scrollSize, 1))
+                {
+                    var height = editor.InputField.textViewport.rect.height;
+
+                    pos.y += (1 / scrollSize * height) - height;
+                }
+
                 m_mainObj.transform.position = new Vector3(pos.x, pos.y - 3, 0);
             }
         }

@@ -21,6 +21,8 @@ namespace UnityExplorer.Inspectors
             ConstructScenePane();
         }
 
+        private static bool Hiding;
+
         private const float UPDATE_INTERVAL = 1f;
         private float m_timeOfLastSceneUpdate;
 
@@ -34,10 +36,9 @@ namespace UnityExplorer.Inspectors
         private GameObject m_backButtonObj;
 
         public PageHandler m_sceneListPageHandler;
-
+        private GameObject m_sceneListContent;
         private GameObject[] m_allSceneListObjects = new GameObject[0];
         private readonly List<GameObject> m_sceneShortList = new List<GameObject>();
-        private GameObject m_sceneListContent;
         private readonly List<Text> m_sceneListTexts = new List<Text>();
 
         public static int DontDestroyHandle => DontDestroyObject.scene.handle;
@@ -63,7 +64,7 @@ namespace UnityExplorer.Inspectors
 
         public void Update()
         {
-            if (Time.realtimeSinceStartup - m_timeOfLastSceneUpdate < UPDATE_INTERVAL)
+            if (Hiding || Time.realtimeSinceStartup - m_timeOfLastSceneUpdate < UPDATE_INTERVAL)
             {
                 return;
             }
@@ -341,11 +342,14 @@ namespace UnityExplorer.Inspectors
 
             m_backButtonObj = UIFactory.CreateButton(scenePathGroupObj);
             Text backButtonText = m_backButtonObj.GetComponentInChildren<Text>();
-            backButtonText.text = "<";
+            backButtonText.text = "◄";
             LayoutElement backButtonLayout = m_backButtonObj.AddComponent<LayoutElement>();
             backButtonLayout.minWidth = 40;
             backButtonLayout.flexibleWidth = 0;
             Button backButton = m_backButtonObj.GetComponent<Button>();
+            var colors = backButton.colors;
+            colors.normalColor = new Color(0.12f, 0.12f, 0.12f);
+            backButton.colors = colors;
 #if CPP
             backButton.onClick.AddListener(new Action(() => { SetSceneObjectParent(); }));
 #else
@@ -403,24 +407,58 @@ namespace UnityExplorer.Inspectors
             inspectButton.onClick.AddListener(() => { InspectorManager.Instance.Inspect(m_selectedSceneObject); });
 #endif
             GameObject scrollObj = UIFactory.CreateScrollView(leftPane, out m_sceneListContent, new Color(0.1f, 0.1f, 0.1f));
-            Scrollbar scroll = scrollObj.transform.Find("Scrollbar Vertical").GetComponent<Scrollbar>();
-            ColorBlock colors = scroll.colors;
-            colors.normalColor = new Color(0.6f, 0.6f, 0.6f, 1.0f);
-            scroll.colors = colors;
-
-            var horiScroll = scrollObj.transform.Find("Scrollbar Horizontal");
-            horiScroll.gameObject.SetActive(false);
-
-            var scrollRect = scrollObj.GetComponentInChildren<ScrollRect>();
-            scrollRect.horizontalScrollbar = null;
-
-            var sceneGroup = m_sceneListContent.GetComponent<VerticalLayoutGroup>();
-            sceneGroup.childControlHeight = true;
-            sceneGroup.spacing = 2;
 
             m_sceneListPageHandler = new PageHandler();
             m_sceneListPageHandler.ConstructUI(leftPane);
             m_sceneListPageHandler.OnPageChanged += OnSceneListPageTurn;
+
+            // hide button
+
+            var hideButtonObj = UIFactory.CreateButton(leftPane);
+            var hideBtn = hideButtonObj.GetComponent<Button>();
+
+            var hideColors = hideBtn.colors;
+            hideColors.normalColor = new Color(0.15f, 0.15f, 0.15f);
+            hideBtn.colors = hideColors;
+            var hideText = hideButtonObj.GetComponentInChildren<Text>();
+            hideText.text = "Hide Scene Explorer";
+            hideText.fontSize = 13;
+            var hideLayout = hideButtonObj.AddComponent<LayoutElement>();
+            hideLayout.minWidth = 20;
+            hideLayout.minHeight = 20;
+#if MONO
+            hideBtn.onClick.AddListener(OnHide);
+#else
+            hideBtn.onClick.AddListener(new Action(OnHide));
+#endif
+
+            void OnHide()
+            {
+                if (!Hiding)
+                {
+                    Hiding = true;
+
+                    hideText.text = "►";
+                    leftLayout.minWidth = 20;
+                    titleObj.SetActive(false);
+                    sceneDropdownObj.SetActive(false);
+                    scenePathGroupObj.SetActive(false);
+                    scrollObj.SetActive(false);
+                    m_sceneListPageHandler.Hide();
+                }
+                else
+                {
+                    Hiding = false;
+
+                    hideText.text = "Hide Scene Explorer";
+                    leftLayout.minWidth = 350;
+                    titleObj.SetActive(true);
+                    sceneDropdownObj.SetActive(true);
+                    scenePathGroupObj.SetActive(true);
+                    scrollObj.SetActive(true);
+                    Update();
+                }
+            }
         }
 
         private void AddObjectListButton()
@@ -443,7 +481,7 @@ namespace UnityExplorer.Inspectors
             LayoutElement mainBtnLayout = mainButtonObj.AddComponent<LayoutElement>();
             mainBtnLayout.minHeight = 25;
             mainBtnLayout.flexibleHeight = 0;
-            mainBtnLayout.minWidth = 240;
+            mainBtnLayout.minWidth = 230;
             mainBtnLayout.flexibleWidth = 0;
             Button mainBtn = mainButtonObj.GetComponent<Button>();
             ColorBlock mainColors = mainBtn.colors;

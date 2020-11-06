@@ -19,6 +19,8 @@ namespace UnityExplorer.UI
             // Create submodules
             new MainMenu();
 
+            MouseInspector.ConstructUI();
+
             // Force refresh of anchors
             Canvas.ForceUpdateCanvases();
 
@@ -88,6 +90,14 @@ namespace UnityExplorer.UI
             if (PanelDragger.Instance != null)
             {
                 PanelDragger.Instance.Update();
+            }
+
+            foreach (var slider in SliderScrollbar.Instances)
+            {
+                if (slider.m_slider.gameObject.activeInHierarchy)
+                {
+                    slider.Update();
+                }
             }
         }
 

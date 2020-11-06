@@ -4,6 +4,7 @@ using UnityExplorer.Input;
 using UnityExplorer.UI;
 using UnityExplorer.UI.PageModel;
 using UnityEngine;
+using UnityExplorer.Inspectors;
 
 namespace UnityExplorer
 {
@@ -87,13 +88,20 @@ namespace UnityExplorer
             if (!m_doneUIInit)
                 CheckUIInit();
 
-            if (InputManager.GetKeyDown(ModConfig.Instance.Main_Menu_Toggle))
-                ShowMenu = !ShowMenu;
-
-            if (ShowMenu)
+            if (MouseInspector.Enabled)
             {
-                ForceUnlockCursor.Update();
-                UIManager.Update();
+                MouseInspector.UpdateInspect();
+            }
+            else
+            {
+                if (InputManager.GetKeyDown(ModConfig.Instance.Main_Menu_Toggle))
+                    ShowMenu = !ShowMenu;
+
+                if (ShowMenu)
+                {
+                    ForceUnlockCursor.Update();
+                    UIManager.Update();
+                }
             }
         }
 

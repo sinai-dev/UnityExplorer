@@ -33,7 +33,7 @@ namespace UnityExplorer
 
             new ExplorerCore();
 
-            HarmonyInstance.PatchAll();
+            // HarmonyInstance.PatchAll();
         }
 
         internal static void DoSceneChange(Scene arg0, Scene arg1)

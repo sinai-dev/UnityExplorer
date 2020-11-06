@@ -149,17 +149,17 @@ namespace UnityExplorer.UI.Shared
             Image image = m_pageUIHolder.GetComponent<Image>();
             image.color = new Color(0f, 0f, 0f, 0f);
 
-            HorizontalLayoutGroup parentGroup = m_pageUIHolder.GetComponent<HorizontalLayoutGroup>();
-            parentGroup.childForceExpandHeight = true;
-            parentGroup.childForceExpandWidth = false;
-            parentGroup.childControlWidth = true;
-            parentGroup.childControlHeight = true;
+            HorizontalLayoutGroup mainGroup = m_pageUIHolder.GetComponent<HorizontalLayoutGroup>();
+            mainGroup.childForceExpandHeight = true;
+            mainGroup.childForceExpandWidth = false;
+            mainGroup.childControlWidth = true;
+            mainGroup.childControlHeight = true;
 
-            LayoutElement parentLayout = m_pageUIHolder.AddComponent<LayoutElement>();
-            parentLayout.minHeight = 20;
-            parentLayout.flexibleHeight = 0;
-            parentLayout.minWidth = 200;
-            parentLayout.flexibleWidth = 30;
+            LayoutElement mainLayout = m_pageUIHolder.AddComponent<LayoutElement>();
+            mainLayout.minHeight = 20;
+            mainLayout.flexibleHeight = 0;
+            mainLayout.minWidth = 100;
+            mainLayout.flexibleWidth = 30;
 
             GameObject leftBtnObj = UIFactory.CreateButton(m_pageUIHolder);
             Button leftBtn = leftBtnObj.GetComponent<Button>();
@@ -169,19 +169,19 @@ namespace UnityExplorer.UI.Shared
             leftBtn.onClick.AddListener(() => { TurnPage(Turn.Left); });
 #endif
             Text leftBtnText = leftBtnObj.GetComponentInChildren<Text>();
-            leftBtnText.text = "<";
+            leftBtnText.text = "◄";
             LayoutElement leftBtnLayout = leftBtnObj.AddComponent<LayoutElement>();
             leftBtnLayout.flexibleHeight = 0;
             leftBtnLayout.flexibleWidth = 0;
-            leftBtnLayout.minWidth = 40;
+            leftBtnLayout.minWidth = 30;
             leftBtnLayout.minHeight = 20;
 
             GameObject labelObj = UIFactory.CreateLabel(m_pageUIHolder, TextAnchor.MiddleCenter);
             m_currentPageLabel = labelObj.GetComponent<Text>();
             m_currentPageLabel.text = "Page 1 / TODO";
             LayoutElement textLayout = labelObj.AddComponent<LayoutElement>();
-            textLayout.flexibleWidth = 1.5f;
-            textLayout.preferredWidth = 120;
+            textLayout.minWidth = 60f;
+            textLayout.flexibleWidth = 5000f;
 
             GameObject rightBtnObj = UIFactory.CreateButton(m_pageUIHolder);
             Button rightBtn = rightBtnObj.GetComponent<Button>();
@@ -191,11 +191,11 @@ namespace UnityExplorer.UI.Shared
             rightBtn.onClick.AddListener(() => { TurnPage(Turn.Right); });
 #endif
             Text rightBtnText = rightBtnObj.GetComponentInChildren<Text>();
-            rightBtnText.text = ">";
+            rightBtnText.text = "►";
             LayoutElement rightBtnLayout = rightBtnObj.AddComponent<LayoutElement>();
             rightBtnLayout.flexibleHeight = 0;
             rightBtnLayout.flexibleWidth = 0;
-            rightBtnLayout.minWidth = 40;
+            rightBtnLayout.minWidth = 30;
             rightBtnLayout.minHeight = 20;
 
             ListCount = 0;
