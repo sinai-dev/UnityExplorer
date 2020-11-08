@@ -210,7 +210,7 @@ namespace UnityExplorer.Inspectors
         {
             var parent = InspectorManager.Instance.m_inspectorContent;
 
-            s_content = UIFactory.CreateScrollView(parent, out GameObject scrollContent, new Color(0.1f, 0.1f, 0.1f));
+            s_content = UIFactory.CreateScrollView(parent, out GameObject scrollContent, out _, new Color(0.1f, 0.1f, 0.1f));
 
             var scrollGroup = scrollContent.GetComponent<VerticalLayoutGroup>();
             scrollGroup.childForceExpandHeight = true;
@@ -388,8 +388,8 @@ namespace UnityExplorer.Inspectors
                 var layer = LayerMaskUnstrip.LayerToName(i);
                 m_layerDropdown.options.Add(new Dropdown.OptionData { text = $"{i}: {layer}" });
             }
-            var itemText = layerDropdownObj.transform.Find("Label").GetComponent<Text>();
-            itemText.resizeTextForBestFit = true;
+            //var itemText = layerDropdownObj.transform.Find("Label").GetComponent<Text>();
+            //itemText.resizeTextForBestFit = true;
             var layerDropdownLayout = layerDropdownObj.AddComponent<LayoutElement>();
             layerDropdownLayout.minWidth = 120;
             layerDropdownLayout.flexibleWidth = 2000;

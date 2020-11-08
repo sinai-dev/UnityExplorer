@@ -55,7 +55,7 @@ namespace UnityExplorer.Inspectors
 
                 var inversePos = UIManager.CanvasRoot.transform.InverseTransformPoint(mousePos);
 
-                s_mousePosLabel.text = $"Mouse Position: {((Vector2)InputManager.MousePosition).ToString()}";
+                s_mousePosLabel.text = $"<color=grey>Mouse Position:</color> {((Vector2)InputManager.MousePosition).ToString()}";
 
                 float yFix = mousePos.y < 120 ? 80 : -80;
 
@@ -75,7 +75,7 @@ namespace UnityExplorer.Inspectors
                 if (obj != s_lastHit)
                 {
                     s_lastHit = obj;
-                    s_objNameLabel.text = $"<b>Hit:</b> <color=cyan>{obj.name}</color>";
+                    s_objNameLabel.text = $"<b>Click to Inspect:</b> <color=cyan>{obj.name}</color>";
                     s_objPathLabel.text = $"Path: {obj.transform.GetTransformPath(true)}";
                 }
 
@@ -116,11 +116,11 @@ namespace UnityExplorer.Inspectors
 
             // Title text
 
-            var titleObj = UIFactory.CreateLabel(content, TextAnchor.MiddleLeft);
+            var titleObj = UIFactory.CreateLabel(content, TextAnchor.MiddleCenter);
             var titleText = titleObj.GetComponent<Text>();
             titleText.text = "<b>Mouse Inspector</b> (press <b>ESC</b> to cancel)";
 
-            var mousePosObj = UIFactory.CreateLabel(content, TextAnchor.MiddleLeft);
+            var mousePosObj = UIFactory.CreateLabel(content, TextAnchor.MiddleCenter);
             s_mousePosLabel = mousePosObj.GetComponent<Text>();
             s_mousePosLabel.text = "Mouse Position:";
 

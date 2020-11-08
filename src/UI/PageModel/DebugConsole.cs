@@ -4,6 +4,7 @@ using UnityExplorer.Unstrip.ColorUtility;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityExplorer.Config;
 
 namespace UnityExplorer.UI.PageModel
 {
@@ -11,10 +12,12 @@ namespace UnityExplorer.UI.PageModel
     {
         public static DebugConsole Instance { get; private set; }
 
-        public static bool LogUnity { get; set; } = true;
+        public static bool LogUnity { get; set; } = ModConfig.Instance.Log_Unity_Debug;
 
-        public readonly List<string> AllMessages;
-        public readonly List<Text> MessageHolders;
+        public static readonly List<string> AllMessages = new List<string>();
+        public static readonly List<Text> MessageHolders = new List<Text>();
+
+        internal static readonly List<string> s_preInitMessages = new List<string>();
 
         private TMP_InputField m_textInput;
 
@@ -22,18 +25,22 @@ namespace UnityExplorer.UI.PageModel
         {
             Instance = this;
 
-            AllMessages = new List<string>();
-            MessageHolders = new List<Text>();
+            //AllMessages = new List<string>();
+            //MessageHolders = new List<Text>();
 
-            try
+            ConstructUI(parent);
+
+            string preAppend = "";
+            for (int i = s_preInitMessages.Count - 1; i >= 0; i--)
             {
-                ConstructUI(parent);
+                var msg = s_preInitMessages[i];
+                if (preAppend != "")
+                    preAppend += "\r\n";
+                preAppend += msg;
             }
-            catch (Exception e)
-            {
-                ExplorerCore.Log(e);
-            }
+            m_textInput.text = preAppend;
         }
+
         public static void Log(string message)
         {
             Log(message, null);
@@ -46,25 +53,18 @@ namespace UnityExplorer.UI.PageModel
 
         public static void Log(string message, string hexColor)
         {
-            if (Instance == null)
-            {
-                return;
-            }
+            message = $"{AllMessages.Count}: {message}";
 
-            Instance.AllMessages.Add(message);
+            AllMessages.Add(message);
 
-            if (Instance.m_textInput)
-            {
-                if (hexColor != null)
-                {
-                    message = $"<color=#{hexColor}>{message}</color>";
-                }
-
+            if (hexColor != null)
+                message = $"<color=#{hexColor}>{message}</color>";
+            
+            if (Instance?.m_textInput)
                 Instance.m_textInput.text = $"{message}\n{Instance.m_textInput.text}";
-            }
+            else
+                s_preInitMessages.Add(message);
         }
-
-        // todo: get scrollbar working with inputfield somehow
 
         public void ConstructUI(GameObject parent)
         {
@@ -129,11 +129,21 @@ namespace UnityExplorer.UI.PageModel
             tmpInput.scrollSensitivity = 15;
             tmpInput.verticalScrollbar = scroller;
 
+            if (UIManager.ConsoleFont != null)
+            {
+                tmpInput.textComponent.font = UIManager.ConsoleFont;
+#if MONO
+                (tmpInput.placeholder as TextMeshProUGUI).font = UIManager.ConsoleFont;
+#else
+                tmpInput.placeholder.TryCast<TextMeshProUGUI>().font = UIManager.ConsoleFont;
+#endif
+            }
+
             tmpInput.readOnly = true;
 
             m_textInput = inputObj.GetComponent<TMP_InputField>();
 
-            #endregion
+#endregion
 
             #region BOTTOM BAR
 
@@ -233,12 +243,20 @@ namespace UnityExplorer.UI.PageModel
 
             var unityToggleObj = UIFactory.CreateToggle(bottomBarObj, out Toggle unityToggle, out Text unityToggleText);
 #if CPP
-            unityToggle.onValueChanged.AddListener(new Action<bool>((bool val) => { LogUnity = val; }));
+            unityToggle.onValueChanged.AddListener(new Action<bool>(ToggleLogUnity));
 #else
-            unityToggle.onValueChanged.AddListener((bool val) => { LogUnity = val; });
+            unityToggle.onValueChanged.AddListener(ToggleLogUnity);
 #endif
+            unityToggle.isOn = LogUnity;
             unityToggleText.text = "Print Unity Debug?";
             unityToggleText.alignment = TextAnchor.MiddleLeft;
+
+            void ToggleLogUnity(bool val)
+            {
+                LogUnity = val;
+                ModConfig.Instance.Log_Unity_Debug = val;
+                ModConfig.SaveSettings();
+            }
 
             var unityToggleLayout = unityToggleObj.AddComponent<LayoutElement>();
             unityToggleLayout.minWidth = 200;
@@ -249,9 +267,7 @@ namespace UnityExplorer.UI.PageModel
             pos.y = -8;
             unityToggleRect.localPosition = pos;
 
-            #endregion
+#endregion
         }
-
-        
     }
 }

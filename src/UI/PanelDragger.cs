@@ -336,7 +336,7 @@ namespace UnityExplorer.UI
         {
             try
             {
-                string path = @"Mods\Explorer\cursor.png";
+                string path = ExplorerCore.EXPLORER_FOLDER + @"\cursor.png";
                 byte[] data = File.ReadAllBytes(path);
 
                 Texture2D tex = new Texture2D(32, 32);

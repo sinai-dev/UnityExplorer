@@ -44,7 +44,7 @@ namespace UnityExplorer.Console
                 return;
             }
 
-            if (!ConsolePage.EnableSuggestions)
+            if (!ConsolePage.EnableAutocompletes)
             {
                 if (m_mainObj.activeSelf)
                 {
@@ -267,7 +267,7 @@ namespace UnityExplorer.Console
         {
             var parent = UIManager.CanvasRoot;
 
-            var obj = UIFactory.CreateScrollView(parent, out GameObject content, new Color(0.1f, 0.1f, 0.1f, 0.95f));
+            var obj = UIFactory.CreateScrollView(parent, out GameObject content, out _, new Color(0.1f, 0.1f, 0.1f, 0.95f));
 
             m_mainObj = obj;
 

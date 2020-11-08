@@ -155,13 +155,13 @@ namespace UnityExplorer.Inspectors.GOInspector
             var childTitleLayout = compTitleObj.AddComponent<LayoutElement>();
             childTitleLayout.minHeight = 30;
 
-            s_compListPageHandler = new PageHandler();
-            s_compListPageHandler.ConstructUI(vertGroupObj);
-            s_compListPageHandler.OnPageChanged += OnCompListPageTurn;
-
-            var compScrollObj = UIFactory.CreateScrollView(vertGroupObj, out s_compListContent, new Color(0.07f, 0.07f, 0.07f));
+            var compScrollObj = UIFactory.CreateScrollView(vertGroupObj, out s_compListContent, out SliderScrollbar scroller, new Color(0.07f, 0.07f, 0.07f));
             var contentLayout = compScrollObj.AddComponent<LayoutElement>();
             contentLayout.minHeight = 50;
+
+            s_compListPageHandler = new PageHandler(scroller);
+            s_compListPageHandler.ConstructUI(vertGroupObj);
+            s_compListPageHandler.OnPageChanged += OnCompListPageTurn;
         }
 
         internal void AddCompListButton()

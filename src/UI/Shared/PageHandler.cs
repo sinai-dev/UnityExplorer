@@ -13,12 +13,20 @@ namespace UnityExplorer.UI.Shared
         Right
     }
 
+    // TODO:
+    // - Input for setting page directly
+
     public class PageHandler : IEnumerator
     {
-        public PageHandler()
+        public PageHandler(SliderScrollbar scroll)
         {
             ItemsPerPage = ModConfig.Instance?.Default_Page_Limit ?? 20;
+            m_scrollbar = scroll;
         }
+
+        public event Action OnPageChanged;
+
+        private SliderScrollbar m_scrollbar;
 
         // For now this is just set when the PageHandler is created, based on config.
         // At some point I might make it possible to change this after creation again.
@@ -28,8 +36,16 @@ namespace UnityExplorer.UI.Shared
         public object Current => m_currentIndex;
         private int m_currentIndex = 0;
 
+        public int CurrentPage
+        {
+            get => m_currentPage;
+            set
+            {
+                if (value < LastPage)
+                    m_currentPage = value;
+            }
+        }
         private int m_currentPage;
-        public event Action OnPageChanged;
 
         // ui
         private GameObject m_pageUIHolder;
@@ -111,13 +127,13 @@ namespace UnityExplorer.UI.Shared
 
         public void TurnPage(Turn direction)
         {
+            bool didTurn = false;
             if (direction == Turn.Left)
             {
                 if (m_currentPage > 0)
                 {
                     m_currentPage--;
-                    OnPageChanged?.Invoke();
-                    RefreshUI();
+                    didTurn = true;
                 }
             }
             else
@@ -125,9 +141,14 @@ namespace UnityExplorer.UI.Shared
                 if (m_currentPage < LastPage)
                 {
                     m_currentPage++;
-                    OnPageChanged?.Invoke();
-                    RefreshUI();
+                    didTurn = true;
                 }
+            }
+            if (didTurn)
+            {
+                m_scrollbar.m_scrollbar.value = 1;
+                OnPageChanged?.Invoke();
+                RefreshUI();
             }
         }
 
@@ -147,7 +168,7 @@ namespace UnityExplorer.UI.Shared
             m_pageUIHolder = UIFactory.CreateHorizontalGroup(parent);
 
             Image image = m_pageUIHolder.GetComponent<Image>();
-            image.color = new Color(0f, 0f, 0f, 0f);
+            image.color = new Color(0.2f, 0.2f, 0.2f, 0.5f);
 
             HorizontalLayoutGroup mainGroup = m_pageUIHolder.GetComponent<HorizontalLayoutGroup>();
             mainGroup.childForceExpandHeight = true;
@@ -156,12 +177,12 @@ namespace UnityExplorer.UI.Shared
             mainGroup.childControlHeight = true;
 
             LayoutElement mainLayout = m_pageUIHolder.AddComponent<LayoutElement>();
-            mainLayout.minHeight = 20;
+            mainLayout.minHeight = 25;
             mainLayout.flexibleHeight = 0;
             mainLayout.minWidth = 100;
-            mainLayout.flexibleWidth = 30;
+            mainLayout.flexibleWidth = 5000;
 
-            GameObject leftBtnObj = UIFactory.CreateButton(m_pageUIHolder);
+            GameObject leftBtnObj = UIFactory.CreateButton(m_pageUIHolder, new Color(0.15f, 0.15f, 0.15f));
             Button leftBtn = leftBtnObj.GetComponent<Button>();
 #if CPP
             leftBtn.onClick.AddListener(new Action(() => { TurnPage(Turn.Left); }));
@@ -171,19 +192,19 @@ namespace UnityExplorer.UI.Shared
             Text leftBtnText = leftBtnObj.GetComponentInChildren<Text>();
             leftBtnText.text = "◄";
             LayoutElement leftBtnLayout = leftBtnObj.AddComponent<LayoutElement>();
-            leftBtnLayout.flexibleHeight = 0;
-            leftBtnLayout.flexibleWidth = 0;
-            leftBtnLayout.minWidth = 30;
-            leftBtnLayout.minHeight = 20;
+            leftBtnLayout.flexibleHeight = 0f;
+            leftBtnLayout.flexibleWidth = 1500f;
+            leftBtnLayout.minWidth = 25f;
+            leftBtnLayout.minHeight = 25f;
 
             GameObject labelObj = UIFactory.CreateLabel(m_pageUIHolder, TextAnchor.MiddleCenter);
             m_currentPageLabel = labelObj.GetComponent<Text>();
             m_currentPageLabel.text = "Page 1 / TODO";
             LayoutElement textLayout = labelObj.AddComponent<LayoutElement>();
-            textLayout.minWidth = 60f;
-            textLayout.flexibleWidth = 5000f;
+            textLayout.minWidth = 100f;
+            textLayout.flexibleWidth = 40f;
 
-            GameObject rightBtnObj = UIFactory.CreateButton(m_pageUIHolder);
+            GameObject rightBtnObj = UIFactory.CreateButton(m_pageUIHolder, new Color(0.15f, 0.15f, 0.15f));
             Button rightBtn = rightBtnObj.GetComponent<Button>();
 #if CPP
             rightBtn.onClick.AddListener(new Action(() => { TurnPage(Turn.Right); }));
@@ -194,9 +215,9 @@ namespace UnityExplorer.UI.Shared
             rightBtnText.text = "►";
             LayoutElement rightBtnLayout = rightBtnObj.AddComponent<LayoutElement>();
             rightBtnLayout.flexibleHeight = 0;
-            rightBtnLayout.flexibleWidth = 0;
-            rightBtnLayout.minWidth = 30;
-            rightBtnLayout.minHeight = 20;
+            rightBtnLayout.flexibleWidth = 1500f;
+            rightBtnLayout.minWidth = 25f;
+            rightBtnLayout.minHeight = 25;
 
             ListCount = 0;
         }

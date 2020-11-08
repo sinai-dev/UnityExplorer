@@ -7,10 +7,10 @@ namespace UnityExplorer.UI
 {
     public static class UIFactory
     {
-        private static Vector2 thickSize = new Vector2(160f, 30f);
-        private static Vector2 thinSize = new Vector2(160f, 20f);
-        private static Color defaultTextColor = new Color(0.95f, 0.95f, 0.95f, 1f);
-        private static Font m_defaultFont;
+        internal static Vector2 thickSize = new Vector2(160f, 30f);
+        internal static Vector2 thinSize = new Vector2(160f, 20f);
+        internal static Color defaultTextColor = new Color(0.95f, 0.95f, 0.95f, 1f);
+        internal static Font m_defaultFont;
 
         public static GameObject CreateUIObject(string name, GameObject parent, Vector2 size = default)
         {
@@ -25,6 +25,26 @@ namespace UnityExplorer.UI
             SetParentAndAlign(obj, parent);
 
             return obj;
+        }
+
+        private static void SetParentAndAlign(GameObject child, GameObject parent)
+        {
+            if (parent == null)
+            {
+                return;
+            }
+            child.transform.SetParent(parent.transform, false);
+            SetLayerRecursively(child);
+        }
+
+        public static void SetLayerRecursively(GameObject go)
+        {
+            go.layer = 5;
+            Transform transform = go.transform;
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                SetLayerRecursively(transform.GetChild(i).gameObject);
+            }
         }
 
         private static void SetDefaultTextValues(Text lbl)
@@ -42,10 +62,10 @@ namespace UnityExplorer.UI
         public static void SetDefaultColorTransitionValues(Selectable selectable)
         {
             ColorBlock colors = selectable.colors;
-            colors.normalColor = new Color(0.4f, 0.4f, 0.4f);
+            colors.normalColor = new Color(0.35f, 0.35f, 0.35f);
             colors.highlightedColor = new Color(0.45f, 0.45f, 0.45f);
-            colors.pressedColor = new Color(0.1f, 0.1f, 0.1f);
-            colors.disabledColor = new Color(0.7f, 0.7f, 0.7f);
+            colors.pressedColor = new Color(0.25f, 0.25f, 0.25f);
+            //colors.disabledColor = new Color(0.6f, 0.6f, 0.6f);
 
             // fix to make all buttons become de-selected after being clicked.
             // this is because i'm not setting any ColorBlock.selectedColor, because it is commonly stripped.
@@ -67,26 +87,6 @@ namespace UnityExplorer.UI
             }
 
             selectable.colors = colors;
-        }
-
-        private static void SetParentAndAlign(GameObject child, GameObject parent)
-        {
-            if (parent == null)
-            {
-                return;
-            }
-            child.transform.SetParent(parent.transform, false);
-            SetLayerRecursively(child);
-        }
-
-        public static void SetLayerRecursively(GameObject go)
-        {
-            go.layer = 5;
-            Transform transform = go.transform;
-            for (int i = 0; i < transform.childCount; i++)
-            {
-                SetLayerRecursively(transform.GetChild(i).gameObject);
-            }
         }
 
         public static GameObject CreatePanel(GameObject parent, string name, out GameObject content)
@@ -232,7 +232,7 @@ namespace UnityExplorer.UI
 
             Image image = buttonObj.AddComponent<Image>();
             image.type = Image.Type.Sliced;
-            image.color = new Color(1, 1, 1, 1);
+            image.color = new Color(1, 1, 1, 0.75f);
 
             SetDefaultColorTransitionValues(buttonObj.AddComponent<Button>());
 
@@ -256,74 +256,6 @@ namespace UnityExplorer.UI
 
             return buttonObj;
         }
-
-        //public static GameObject CreateSlider(GameObject parent)
-        //{
-        //    GameObject sliderObj = CreateUIObject("Slider", parent, thinSize);
-
-        //    GameObject bgObj = CreateUIObject("Background", sliderObj);
-        //    GameObject fillAreaObj = CreateUIObject("Fill Area", sliderObj);
-        //    GameObject fillObj = CreateUIObject("Fill", fillAreaObj);
-        //    GameObject handleSlideAreaObj = CreateUIObject("Handle Slide Area", sliderObj);
-        //    GameObject handleObj = CreateUIObject("Handle", handleSlideAreaObj);
-
-        //    Image bgImage = bgObj.AddComponent<Image>();
-        //    bgImage.type = Image.Type.Sliced;
-        //    bgImage.color = new Color(0.15f, 0.15f, 0.15f, 1.0f);
-
-        //    RectTransform bgRect = bgObj.GetComponent<RectTransform>();
-        //    bgRect.anchorMin = new Vector2(0f, dynamic ? 0f : 0.25f);
-        //    bgRect.anchorMax = new Vector2(1f, dynamic ? 1f : 0.75f);
-        //    bgRect.sizeDelta = new Vector2(0f, 0f);
-
-        //    RectTransform fillAreaRect = fillAreaObj.GetComponent<RectTransform>();
-        //    fillAreaRect.anchorMin = new Vector2(0f, 0.25f);
-        //    fillAreaRect.anchorMax = new Vector2(1f, 0.75f);
-        //    fillAreaRect.anchoredPosition = new Vector2(-5f, 0f);
-        //    fillAreaRect.sizeDelta = new Vector2(-20f, 0f);
-
-        //    Image fillImage = fillObj.AddComponent<Image>();
-        //    fillImage.type = Image.Type.Sliced;
-        //    fillImage.color = dynamic ? Color.clear : new Color(0.3f, 0.3f, 0.3f, 1.0f);
-
-        //    fillObj.GetComponent<RectTransform>().sizeDelta = new Vector2(10f, 0f);
-
-        //    RectTransform handleSlideRect = handleSlideAreaObj.GetComponent<RectTransform>();
-        //    handleSlideRect.anchorMin = new Vector2(0f, 0f);
-        //    handleSlideRect.anchorMax = new Vector2(1f, 1f);
-        //    handleSlideRect.offsetMin = new Vector2(15f, 20f);
-        //    handleSlideRect.offsetMax = new Vector2(-15f, 0f);
-        //    handleSlideRect.sizeDelta = new Vector2(dynamic ? -30f : -20f, 0f);
-
-        //    Image handleImage = handleObj.AddComponent<Image>();
-        //    handleImage.color = new Color(0.5f, 0.5f, 0.5f, 1.0f);
-
-        //    var handleRect = handleObj.GetComponent<RectTransform>();
-        //    handleRect.sizeDelta = new Vector2(dynamic ? 25f : 20f, dynamic ? 25f : 0f);
-
-        //    if (dynamic)
-        //    {
-        //        handleRect.offsetMin = new Vector2(-15f, -20f);
-        //        handleRect.offsetMax = Vector2.zero;
-
-        //        var sliderBarLayout = sliderObj.AddComponent<LayoutElement>();
-        //        sliderBarLayout.minWidth = 25;
-        //        sliderBarLayout.flexibleWidth = 0;
-        //        sliderBarLayout.minHeight = 25;
-        //        sliderBarLayout.flexibleHeight = 5000;
-
-        //        bgRect.offsetMax = new Vector2(-15f, 0f);
-        //    }
-
-        //    Slider slider = sliderObj.AddComponent<Slider>();
-        //    slider.fillRect = fillObj.GetComponent<RectTransform>();
-        //    slider.handleRect = handleObj.GetComponent<RectTransform>();
-        //    slider.targetGraphic = handleImage;
-        //    slider.direction = dynamic ? Slider.Direction.BottomToTop : Slider.Direction.LeftToRight;
-        //    SetDefaultColorTransitionValues(slider);
-
-        //    return sliderObj;
-        //}
 
         public static GameObject CreateSlider(GameObject parent)
         {
@@ -686,23 +618,15 @@ namespace UnityExplorer.UI
             dropdown.template = templateObj.GetComponent<RectTransform>();
             dropdown.captionText = labelText;
             dropdown.itemText = itemLabelText;
-            itemLabelText.text = "1";
-            //dropdown.options.Add(new Dropdown.OptionData
-            //{
-            //    text = "2"
-            //});
-            //dropdown.options.Add(new Dropdown.OptionData
-            //{
-            //    text = "3"
-            //});
+            itemLabelText.text = "DEFAULT";
 
             dropdown.RefreshShownValue();
 
             RectTransform labelRect = labelObj.GetComponent<RectTransform>();
             labelRect.anchorMin = Vector2.zero;
             labelRect.anchorMax = Vector2.one;
-            labelRect.offsetMin = new Vector2(10f, 6f);
-            labelRect.offsetMax = new Vector2(-28f, -7f);
+            labelRect.offsetMin = new Vector2(10f, 2f);
+            labelRect.offsetMax = new Vector2(-28f, -2f);
 
             RectTransform templateRect = templateObj.GetComponent<RectTransform>();
             templateRect.anchorMin = new Vector2(0f, 0f);
@@ -744,7 +668,7 @@ namespace UnityExplorer.UI
             return dropdownObj;
         }
 
-        public static GameObject CreateScrollView(GameObject parent, out GameObject content, Color color = default)
+        public static GameObject CreateScrollView(GameObject parent, out GameObject content, out SliderScrollbar scroller, Color color = default)
         {
             GameObject mainObj = CreateUIObject("DynamicScrollView", parent);
 
@@ -814,7 +738,7 @@ namespace UnityExplorer.UI
                 child.gameObject.SetActive(false);
             }
 
-            CreateScrollSlider(scrollBar, out Slider scrollSlider);
+            SliderScrollbar.CreateSliderScrollbar(scrollBar, out Slider scrollSlider);
 
             // Back to the main scrollview ScrollRect, setting it up now that we have all references.
 
@@ -831,160 +755,9 @@ namespace UnityExplorer.UI
             scrollRect.content = contentRect;
 
             // Create a custom DynamicScrollbar module
-            new SliderScrollbar(hiddenScroll, scrollSlider);
+            scroller = new SliderScrollbar(hiddenScroll, scrollSlider);
 
             return mainObj;
         }
-
-        public static GameObject CreateScrollSlider(GameObject parent, out Slider slider)
-        {
-            GameObject sliderObj = CreateUIObject("Slider", parent, thinSize);
-
-            GameObject bgObj = CreateUIObject("Background", sliderObj);
-            GameObject fillAreaObj = CreateUIObject("Fill Area", sliderObj);
-            GameObject fillObj = CreateUIObject("Fill", fillAreaObj);
-            GameObject handleSlideAreaObj = CreateUIObject("Handle Slide Area", sliderObj);
-            GameObject handleObj = CreateUIObject("Handle", handleSlideAreaObj);
-
-            Image bgImage = bgObj.AddComponent<Image>();
-            bgImage.type = Image.Type.Sliced;
-            bgImage.color = new Color(0.05f, 0.05f, 0.05f, 1.0f);
-
-            RectTransform bgRect = bgObj.GetComponent<RectTransform>();
-            bgRect.anchorMin = Vector2.zero;
-            bgRect.anchorMax = Vector2.one;
-            bgRect.sizeDelta = Vector2.zero;
-            bgRect.offsetMax = new Vector2(-10f, 0f);
-
-            RectTransform fillAreaRect = fillAreaObj.GetComponent<RectTransform>();
-            fillAreaRect.anchorMin = new Vector2(0f, 0.25f);
-            fillAreaRect.anchorMax = new Vector2(1f, 0.75f);
-            fillAreaRect.anchoredPosition = new Vector2(-5f, 0f);
-            fillAreaRect.sizeDelta = new Vector2(-20f, 0f);
-
-            Image fillImage = fillObj.AddComponent<Image>();
-            fillImage.type = Image.Type.Sliced;
-            fillImage.color = Color.clear;
-
-            fillObj.GetComponent<RectTransform>().sizeDelta = new Vector2(10f, 0f);
-
-            RectTransform handleSlideRect = handleSlideAreaObj.GetComponent<RectTransform>();
-            handleSlideRect.anchorMin = new Vector2(0f, 0f);
-            handleSlideRect.anchorMax = new Vector2(1f, 1f);
-            handleSlideRect.offsetMin = new Vector2(15f, 25f);
-            handleSlideRect.offsetMax = new Vector2(-15f, 0f);
-            handleSlideRect.sizeDelta = new Vector2(-30f, -25f);
-
-            Image handleImage = handleObj.AddComponent<Image>();
-            handleImage.color = new Color(0.5f, 0.5f, 0.5f, 1.0f);
-
-            var handleRect = handleObj.GetComponent<RectTransform>();
-            handleRect.sizeDelta = new Vector2(15f, 25f);
-            handleRect.offsetMin = new Vector2(-13f, -23f);
-            handleRect.offsetMax = new Vector2(3f, -2f);
-
-            var sliderBarLayout = sliderObj.AddComponent<LayoutElement>();
-            sliderBarLayout.minWidth = 25;
-            sliderBarLayout.flexibleWidth = 0;
-            sliderBarLayout.minHeight = 25;
-            sliderBarLayout.flexibleHeight = 5000;
-
-            slider = sliderObj.AddComponent<Slider>();
-            slider.fillRect = fillObj.GetComponent<RectTransform>();
-            slider.handleRect = handleObj.GetComponent<RectTransform>();
-            slider.targetGraphic = handleImage;
-            slider.direction = Slider.Direction.BottomToTop;
-            SetDefaultColorTransitionValues(slider);
-
-            return sliderObj;
-        }
-
-        //public static GameObject CreateScrollView(GameObject parent, out GameObject content, Color color = default)
-        //{
-        //    GameObject scrollObj = CreateUIObject("Scroll View", parent);
-
-        //    LayoutElement mainLayout = scrollObj.AddComponent<LayoutElement>();
-        //    mainLayout.flexibleWidth = 999;
-        //    mainLayout.flexibleHeight = 999;
-        //    mainLayout.preferredHeight = 200;
-        //    mainLayout.preferredWidth = 200;
-
-        //    GameObject viewportObj = CreateUIObject("Viewport", scrollObj);
-
-        //    VerticalLayoutGroup viewportGroup = viewportObj.AddComponent<VerticalLayoutGroup>();
-        //    viewportGroup.childControlHeight = true;
-        //    viewportGroup.childControlWidth = true;
-        //    viewportGroup.childForceExpandHeight = true;
-        //    viewportGroup.childForceExpandWidth = true;
-
-        //    content = CreateUIObject("Content", viewportObj);
-
-        //    VerticalLayoutGroup contentGroup = content.AddComponent<VerticalLayoutGroup>();
-        //    contentGroup.padding.left = 5;
-        //    contentGroup.padding.right = 5;
-        //    contentGroup.padding.top = 5;
-        //    contentGroup.padding.bottom = 5;
-        //    contentGroup.childControlHeight = false;
-        //    contentGroup.childControlWidth = true;
-        //    contentGroup.childForceExpandHeight = false;
-        //    contentGroup.childForceExpandWidth = true;
-
-        //    GameObject horiScroll = CreateScrollbar(scrollObj);
-        //    horiScroll.name = "Scrollbar Horizontal";
-        //    SetParentAndAlign(horiScroll, scrollObj);
-
-        //    RectTransform horiRect = horiScroll.GetComponent<RectTransform>();
-        //    horiRect.anchorMin = Vector2.zero;
-        //    horiRect.anchorMax = Vector2.right;
-        //    horiRect.pivot = Vector2.zero;
-        //    horiRect.sizeDelta = new Vector2(0f, horiRect.sizeDelta.y);
-
-        //    GameObject vertScroll = CreateScrollbar(scrollObj);
-        //    vertScroll.name = "Scrollbar Vertical";
-        //    SetParentAndAlign(vertScroll, scrollObj);
-        //    vertScroll.GetComponent<Scrollbar>().SetDirection(Scrollbar.Direction.BottomToTop, true);
-
-        //    RectTransform vertRect = vertScroll.GetComponent<RectTransform>();
-        //    vertRect.anchorMin = Vector2.right;
-        //    vertRect.anchorMax = Vector2.one;
-        //    vertRect.pivot = Vector2.one;
-        //    vertRect.sizeDelta = new Vector2(vertRect.sizeDelta.x, 0f);
-
-        //    RectTransform viewportRect = viewportObj.GetComponent<RectTransform>();
-        //    viewportRect.anchorMin = Vector2.zero;
-        //    viewportRect.anchorMax = Vector2.one;
-        //    viewportRect.sizeDelta = Vector2.zero;
-        //    viewportRect.pivot = Vector2.up;
-
-        //    RectTransform contentRect = content.GetComponent<RectTransform>();
-        //    contentRect.anchorMin = Vector2.up;
-        //    contentRect.anchorMax = Vector2.one;
-        //    contentRect.pivot = Vector2.up;
-
-        //    ScrollRect scrollRect = scrollObj.AddComponent<ScrollRect>();
-        //    scrollRect.content = contentRect;
-        //    scrollRect.viewport = viewportRect;
-        //    scrollRect.horizontalScrollbar = horiScroll.GetComponent<Scrollbar>();
-        //    scrollRect.verticalScrollbar = vertScroll.GetComponent<Scrollbar>();
-        //    scrollRect.horizontalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
-        //    scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
-        //    scrollRect.horizontalScrollbarSpacing = -3f;
-        //    scrollRect.verticalScrollbarSpacing = -3f;
-        //    scrollRect.scrollSensitivity = 25;
-
-        //    Image scrollImage = scrollObj.AddComponent<Image>();
-        //    scrollImage.type = Image.Type.Filled;
-        //    scrollImage.color = (color == default) ? new Color(0.3f, 0.3f, 0.3f, 1f) : color;
-
-        //    Image viewportImage = viewportObj.AddComponent<Image>();
-        //    //viewportImage.sprite = Theme.mask;
-        //    viewportImage.type = Image.Type.Sliced;
-        //    viewportImage.color = new Color(1, 1, 1, 1);
-
-        //    Mask mask = viewportObj.AddComponent<Mask>();
-        //    mask.showMaskGraphic = false;
-
-        //    return scrollObj;
-        //}
     }
 }

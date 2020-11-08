@@ -137,7 +137,8 @@ namespace UnityExplorer.Inspectors
 
             if (!handles.Contains(m_currentSceneHandle))
             {
-                m_sceneDropdown.transform.Find("Label").GetComponent<Text>().text = names[0];
+                //m_sceneDropdown.transform.Find("Label").GetComponent<Text>().text = names[0];
+                m_sceneDropdown.itemText.text = names[0];
                 SetTargetScene(handles[0]);
             }
         }
@@ -406,9 +407,9 @@ namespace UnityExplorer.Inspectors
 #else
             inspectButton.onClick.AddListener(() => { InspectorManager.Instance.Inspect(m_selectedSceneObject); });
 #endif
-            GameObject scrollObj = UIFactory.CreateScrollView(leftPane, out m_sceneListContent, new Color(0.1f, 0.1f, 0.1f));
+            GameObject scrollObj = UIFactory.CreateScrollView(leftPane, out m_sceneListContent, out SliderScrollbar scroller, new Color(0.1f, 0.1f, 0.1f));
 
-            m_sceneListPageHandler = new PageHandler();
+            m_sceneListPageHandler = new PageHandler(scroller);
             m_sceneListPageHandler.ConstructUI(leftPane);
             m_sceneListPageHandler.OnPageChanged += OnSceneListPageTurn;
 

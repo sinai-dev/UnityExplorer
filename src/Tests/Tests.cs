@@ -59,7 +59,7 @@ namespace UnityExplorer.Tests
             GameObject.DontDestroyOnLoad(TestSprite);
 
             //// test loading a tex from file
-            //var dataToLoad = System.IO.File.ReadAllBytes(@"Mods\Explorer\Tex_Nemundis_Nebula.png");
+            //var dataToLoad = System.IO.File.ReadAllBytes(@"Mods\UnityExplorer\Tex_Nemundis_Nebula.png");
             //ExplorerCore.Log($"Tex load success: {TestTexture.LoadImage(dataToLoad, false)}");
 
             ILHashSetTest = new Il2CppSystem.Collections.Generic.HashSet<string>();

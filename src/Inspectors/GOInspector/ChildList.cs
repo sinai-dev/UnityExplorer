@@ -141,20 +141,20 @@ namespace UnityExplorer.Inspectors.GOInspector
             var childTitleLayout = childTitleObj.AddComponent<LayoutElement>();
             childTitleLayout.minHeight = 30;
 
-            s_childListPageHandler = new PageHandler();
-            s_childListPageHandler.ConstructUI(vertGroupObj);
-            s_childListPageHandler.OnPageChanged += OnChildListPageTurn;
-
-            var childrenScrollObj = UIFactory.CreateScrollView(vertGroupObj, out s_childListContent, new Color(0.07f, 0.07f, 0.07f));
+            var childrenScrollObj = UIFactory.CreateScrollView(vertGroupObj, out s_childListContent, out SliderScrollbar scroller, new Color(0.07f, 0.07f, 0.07f));
             var contentLayout = childrenScrollObj.GetComponent<LayoutElement>();
             contentLayout.minHeight = 50;
+
+            s_childListPageHandler = new PageHandler(scroller);
+            s_childListPageHandler.ConstructUI(vertGroupObj);
+            s_childListPageHandler.OnPageChanged += OnChildListPageTurn;
         }
 
         internal void AddChildListButton()
         {
             int thisIndex = s_childListTexts.Count;
 
-            GameObject btnGroupObj = UIFactory.CreateHorizontalGroup(s_childListContent, new Color(0.1f, 0.1f, 0.1f));
+            GameObject btnGroupObj = UIFactory.CreateHorizontalGroup(s_childListContent, new Color(0.07f, 0.07f, 0.07f));
             HorizontalLayoutGroup btnGroup = btnGroupObj.GetComponent<HorizontalLayoutGroup>();
             btnGroup.childForceExpandWidth = true;
             btnGroup.childControlWidth = true;
@@ -170,8 +170,8 @@ namespace UnityExplorer.Inspectors.GOInspector
             LayoutElement mainBtnLayout = mainButtonObj.AddComponent<LayoutElement>();
             mainBtnLayout.minHeight = 25;
             mainBtnLayout.flexibleHeight = 0;
-            mainBtnLayout.minWidth = 240;
-            mainBtnLayout.flexibleWidth = 0;
+            mainBtnLayout.minWidth = 25;
+            mainBtnLayout.flexibleWidth = 999;
             Button mainBtn = mainButtonObj.GetComponent<Button>();
             ColorBlock mainColors = mainBtn.colors;
             mainColors.normalColor = new Color(0.07f, 0.07f, 0.07f);

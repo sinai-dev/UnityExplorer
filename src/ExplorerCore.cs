@@ -5,6 +5,7 @@ using UnityExplorer.UI;
 using UnityExplorer.UI.PageModel;
 using UnityEngine;
 using UnityExplorer.Inspectors;
+using System.IO;
 
 namespace UnityExplorer
 {
@@ -28,6 +29,8 @@ namespace UnityExplorer
             "BepInEx";
 #endif
 
+        public const string EXPLORER_FOLDER = @"Mods\UnityExplorer";
+
         public static ExplorerCore Instance { get; private set; }
 
         public static bool ShowMenu
@@ -49,6 +52,9 @@ namespace UnityExplorer
             }
 
             Instance = this;
+
+            if (!Directory.Exists(EXPLORER_FOLDER))
+                Directory.CreateDirectory(EXPLORER_FOLDER);
 
             ModConfig.OnLoad();
 
@@ -99,7 +105,7 @@ namespace UnityExplorer
 
                 if (ShowMenu)
                 {
-                    ForceUnlockCursor.Update();
+                    //ForceUnlockCursor.Update();
                     UIManager.Update();
                 }
             }
@@ -140,14 +146,14 @@ namespace UnityExplorer
             {
                 case LogType.Assert:
                 case LogType.Log:
-                    Log(message);
+                    Log(message, true);
                     break;
                 case LogType.Warning:
-                    LogWarning(message);
+                    LogWarning(message, true);
                     break;
                 case LogType.Exception:
                 case LogType.Error:
-                    LogError(message);
+                    LogError(message, true);
                     break;
             }
         }

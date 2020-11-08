@@ -28,7 +28,7 @@ namespace UnityExplorer.Helpers
 
         public static string ToStringLong(this Vector3 vec)
         {
-            return $"X: {vec.x:F3}, Y: {vec.y:F3}, Z: {vec.z:F3}";
+            return $"{vec.x:F3}, {vec.y:F3}, {vec.z:F3}";
         }
 
         public static string GetTransformPath(this Transform t, bool includeThisName = false)

@@ -4,6 +4,7 @@ using UnityExplorer.Console;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.UI.PageModel;
+using UnityExplorer.Config;
 
 namespace UnityExplorer.UI
 {
@@ -120,6 +121,8 @@ namespace UnityExplorer.UI
             panelRect.anchorMin = new Vector2(0.25f, 0.1f);
             panelRect.anchorMax = new Vector2(0.78f, 0.95f);
 
+            MainPanel.AddComponent<Mask>();
+
             ConstructTitleBar(content);
 
             ConstructNavbar(content);
@@ -187,12 +190,18 @@ namespace UnityExplorer.UI
             btnLayout.flexibleWidth = 2;
 
             Text hideText = hideBtnObj.GetComponentInChildren<Text>();
-            // Todo use actual keycode from mod config, update on OnSettingsChanged or whatever
-            hideText.text = "Hide (F7)";
             hideText.color = Color.white;
             hideText.resizeTextForBestFit = true;
             hideText.resizeTextMinSize = 8;
             hideText.resizeTextMaxSize = 16;
+            hideText.text = $"Hide ({ModConfig.Instance.Main_Menu_Toggle})";
+
+            ModConfig.OnConfigChanged += ModConfig_OnConfigChanged; 
+            
+            void ModConfig_OnConfigChanged()
+            {
+                hideText.text = $"Hide ({ModConfig.Instance.Main_Menu_Toggle})";
+            }
         }
 
         private void ConstructNavbar(GameObject content)

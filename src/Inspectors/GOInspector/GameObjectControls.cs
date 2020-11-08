@@ -424,6 +424,8 @@ namespace UnityExplorer.Inspectors.GOInspector
             var valueInputObj = UIFactory.CreateTMPInput(topBarObj, 14, 0, (int)TextAlignmentOptions.MidlineLeft);
             var valueInput = valueInputObj.GetComponent<TMP_InputField>();
             valueInput.readOnly = true;
+            valueInput.richText = true;
+            valueInput.isRichTextEditingAllowed = true;
             var valueInputLayout = valueInputObj.AddComponent<LayoutElement>();
             valueInputLayout.minHeight = 25;
             valueInputLayout.flexibleHeight = 0;
@@ -509,12 +511,16 @@ namespace UnityExplorer.Inspectors.GOInspector
             // Slider
 
             var sliderObj = UIFactory.CreateSlider(rowObject);
+            sliderObj.transform.Find("Fill Area").gameObject.SetActive(false);
             var sliderLayout = sliderObj.AddComponent<LayoutElement>();
             sliderLayout.minHeight = 20;
             sliderLayout.flexibleHeight = 0;
             sliderLayout.minWidth = 200;
             sliderLayout.flexibleWidth = 9000;
             var slider = sliderObj.GetComponent<Slider>();
+            var sliderColors = slider.colors;
+            sliderColors.normalColor = new Color(0.65f, 0.65f, 0.65f);
+            slider.colors = sliderColors;
             slider.minValue = -2;
             slider.maxValue = 2;
             slider.value = 0;
@@ -578,7 +584,11 @@ namespace UnityExplorer.Inspectors.GOInspector
 
             var instantiateBtnObj = UIFactory.CreateButton(bottomRow, new Color(0.2f, 0.2f, 0.2f));
             var instantiateBtn = instantiateBtnObj.GetComponent<Button>();
+#if MONO
             instantiateBtn.onClick.AddListener(InstantiateBtn);
+#else
+            instantiateBtn.onClick.AddListener(new Action(InstantiateBtn));
+#endif
             var instantiateText = instantiateBtnObj.GetComponentInChildren<Text>();
             instantiateText.text = "Instantiate";
             instantiateText.fontSize = 14;
@@ -597,7 +607,11 @@ namespace UnityExplorer.Inspectors.GOInspector
 
             var dontDestroyBtnObj = UIFactory.CreateButton(bottomRow, new Color(0.2f, 0.2f, 0.2f));
             var dontDestroyBtn = dontDestroyBtnObj.GetComponent<Button>();
+#if MONO
             dontDestroyBtn.onClick.AddListener(DontDestroyOnLoadBtn);
+#else
+            dontDestroyBtn.onClick.AddListener(new Action(DontDestroyOnLoadBtn));
+#endif
             var dontDestroyText = dontDestroyBtnObj.GetComponentInChildren<Text>();
             dontDestroyText.text = "Set DontDestroyOnLoad";
             dontDestroyText.fontSize = 14;
@@ -615,7 +629,11 @@ namespace UnityExplorer.Inspectors.GOInspector
 
             var destroyBtnObj = UIFactory.CreateButton(bottomRow, new Color(0.2f, 0.2f, 0.2f));
             var destroyBtn = destroyBtnObj.GetComponent<Button>();
+#if MONO
             destroyBtn.onClick.AddListener(DestroyBtn);
+#else
+            destroyBtn.onClick.AddListener(new Action(DestroyBtn));
+#endif
             var destroyText = destroyBtnObj.GetComponentInChildren<Text>();
             destroyText.text = "Destroy";
             destroyText.fontSize = 14;
@@ -633,6 +651,6 @@ namespace UnityExplorer.Inspectors.GOInspector
             }
         }
 
-        #endregion
+#endregion
     }
 }
