@@ -229,6 +229,7 @@ namespace UnityExplorer.UI.PageModel
             void ClearCallback()
             {
                 m_textInput.text = "";
+                AllMessages.Clear();
             }
 
             var clearBtnColors = clearButton.colors;
