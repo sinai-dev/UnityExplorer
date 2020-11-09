@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Config;
 using UnityExplorer.UI.Shared;
-using UnityExplorer.Unstrip.ColorUtility;
+using UnityExplorer.Unstrip;
 
 namespace UnityExplorer.UI.PageModel
 {
@@ -169,7 +169,7 @@ namespace UnityExplorer.UI.PageModel
             labelLayout.minWidth = 150;
             labelLayout.minHeight = 25;
 
-            var toggleObj = UIFactory.CreateToggle(rowObj, out m_unlockMouseToggle, out Text toggleText);
+            UIFactory.CreateToggle(rowObj, out m_unlockMouseToggle, out Text toggleText);
             m_unlockMouseToggle.isOn = ModConfig.Instance.Force_Unlock_Mouse;
             toggleText.text = "";
         }

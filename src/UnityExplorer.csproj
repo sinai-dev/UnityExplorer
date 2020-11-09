@@ -25,18 +25,18 @@
     <Prefer32Bit>false</Prefer32Bit>
     <RootNamespace>UnityExplorer</RootNamespace>
     <AssemblyName>UnityExplorer</AssemblyName>
+    <!-- Set this to the BepInEx Il2Cpp Game folder, without the ending '\' character. -->
+    <BIECppGameFolder>D:\Steam\steamapps\common\Outward</BIECppGameFolder>
+    <!-- Set this to the BepInEx Mono Game folder, without the ending '\' character. -->
+    <BIEMonoGameFolder>D:\source\Unity Projects\Test\_BUILD_MONO</BIEMonoGameFolder>
+    <!-- Set this to the BepInEx Mono Managed folder, without the ending '\' character. -->
+    <BIEMonoManagedFolder>D:\source\Unity Projects\Test\_BUILD_MONO\Test_Data\Managed</BIEMonoManagedFolder>
     <!-- Set this to the MelonLoader Il2Cpp Game folder, without the ending '\' character. -->
     <MLCppGameFolder>D:\Steam\steamapps\common\VRChat</MLCppGameFolder>
     <!-- Set this to the MelonLoader Mono Game folder, without the ending '\' character. -->
     <MLMonoGameFolder>D:\source\Unity Projects\Test\_BUILD_MONO</MLMonoGameFolder>
-    <!-- Set this to the Mono Managed folder, without the ending '\' character. -->
+    <!-- Set this to the MelonLoader Mono Managed folder, without the ending '\' character. -->
     <MLMonoManagedFolder>D:\source\Unity Projects\Test\_BUILD_MONO\Test_Data\Managed</MLMonoManagedFolder>
-    <!-- Set this to the BepInEx Il2Cpp Game folder, without the ending '\' character. -->
-    <BIECppGameFolder>D:\Steam\steamapps\common\Outward_Il2Cpp</BIECppGameFolder>
-    <!-- Set this to the BepInEx Mono Game folder, without the ending '\' character. -->
-    <BIEMonoGameFolder>D:\source\Unity Projects\Test\_BUILD_MONO</BIEMonoGameFolder>
-    <!-- Set this to the BepInEx Managed folder, without the ending '\' character. -->
-    <BIEMonoManagedFolder>D:\source\Unity Projects\Test\_BUILD_MONO\Test_Data\Managed</BIEMonoManagedFolder>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>
@@ -108,10 +108,6 @@
       <HintPath>$(MLMonoGameFolder)\MelonLoader\MelonLoader.ModHandler.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <!--<Reference Include="netstandard">
-      <HintPath>$(MLMonoManagedFolder)\netstandard.dll</HintPath>
-      <Private>False</Private>
-    </Reference>-->
     <Reference Include="Unity.TextMeshPro">
       <HintPath>$(MLMonoManagedFolder)\Unity.TextMeshPro.dll</HintPath>
       <Private>False</Private>
@@ -163,10 +159,6 @@
       <HintPath>$(BIEMonoGameFolder)\BepInEx\core\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <!--<Reference Include="netstandard">
-      <HintPath>$(BIEMonoManagedFolder)\netstandard.dll</HintPath>
-      <Private>False</Private>
-    </Reference>-->
     <Reference Include="Unity.TextMeshPro">
       <HintPath>$(BIEMonoManagedFolder)\Unity.TextMeshPro.dll</HintPath>
       <Private>False</Private>
@@ -388,13 +380,13 @@
     <Compile Include="UI\Shared\PageHandler.cs" />
     <Compile Include="UI\Shared\SyntaxColors.cs" />
     <Compile Include="UI\UIManager.cs" />
-    <Compile Include="Unstrip\AssetBundle\AssetBundleUnstrip.cs" />
-    <Compile Include="Unstrip\ColorUtility\ColorUtilityUnstrip.cs" />
-    <Compile Include="Unstrip\ImageConversion\ImageConversionUnstrip.cs" />
+    <Compile Include="Unstrip\AssetBundleUnstrip.cs" />
+    <Compile Include="Unstrip\ColorUtilityUnstrip.cs" />
+    <Compile Include="Unstrip\ImageConversionUnstrip.cs" />
     <Compile Include="Helpers\ICallHelper.cs" />
-    <Compile Include="Unstrip\LayerMask\LayerMaskUnstrip.cs" />
-    <Compile Include="Unstrip\Resources\ResourcesUnstrip.cs" />
-    <Compile Include="Unstrip\Scene\SceneUnstrip.cs" />
+    <Compile Include="Unstrip\LayerMaskUnstrip.cs" />
+    <Compile Include="Unstrip\ResourcesUnstrip.cs" />
+    <Compile Include="Unstrip\SceneUnstrip.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\UIFactory.cs" />
   </ItemGroup>

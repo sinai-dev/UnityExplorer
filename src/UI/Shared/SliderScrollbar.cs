@@ -35,11 +35,6 @@ public class SliderScrollbar
 		this.m_slider.Set(1f, false);
 	}
 
-	~SliderScrollbar()
-    {
-		Instances.Remove(this);
-    }
-
 	internal void Update()
 	{
 		this.RefreshVisibility();
@@ -47,39 +42,36 @@ public class SliderScrollbar
 
 	internal void RefreshVisibility()
 	{
-		if (this.m_slider && this.m_scrollbar)
-		{
-            bool shouldShow = !Mathf.Approximately(this.m_scrollbar.size, 1);
-            var obj = this.m_slider.handleRect.gameObject;
-
-            if (obj.activeSelf != shouldShow)
-            {
-                obj.SetActive(shouldShow);
-
-                if (shouldShow)
-					this.m_slider.Set(this.m_scrollbar.value, false);
-				else
-                    m_slider.Set(1f, false);
-            }
+        if (!m_slider || !m_scrollbar)
+        {
+            Instances.Remove(this);
+            return;
         }
-	}
+
+        bool shouldShow = !Mathf.Approximately(this.m_scrollbar.size, 1);
+        var obj = this.m_slider.handleRect.gameObject;
+
+        if (obj.activeSelf != shouldShow)
+        {
+            obj.SetActive(shouldShow);
+
+            if (shouldShow)
+                this.m_slider.Set(this.m_scrollbar.value, false);
+            else
+                m_slider.Set(1f, false);
+        }
+    }
 
 	public void OnScrollbarValueChanged(float _value)
 	{
-		//this.RefreshVisibility();
-		if (this.m_slider && this.m_slider.value != _value)
-		{
+		if (this.m_slider.value != _value)
 			this.m_slider.Set(_value, false);
-		}
 	}
 
 	public void OnSliderValueChanged(float _value)
 	{
-		if (this.m_scrollbar)
-		{
-			this.m_scrollbar.value = _value;
-		}
-	}
+        this.m_scrollbar.value = _value;
+    }
 
     #region UI CONSTRUCTION
 

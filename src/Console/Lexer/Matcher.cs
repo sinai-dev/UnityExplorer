@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using UnityExplorer.Unstrip.ColorUtility;
+using UnityExplorer.Unstrip;
 using UnityEngine;
 
 namespace UnityExplorer.Console.Lexer

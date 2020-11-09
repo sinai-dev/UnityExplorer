@@ -8,7 +8,7 @@ using UnityEngine.UI;
 using UnityExplorer.Helpers;
 using UnityExplorer.Inspectors;
 using UnityExplorer.UI.Shared;
-using UnityExplorer.Unstrip.Resources;
+using UnityExplorer.Unstrip;
 #if CPP
 using UnhollowerRuntimeLib;
 #endif
@@ -263,17 +263,17 @@ namespace UnityExplorer.UI.PageModel
 #endif
             var results = new List<object>();
 
-            // prefer filter comparers
+            // perform filter comparers
 
             string nameFilter = null;
             if (!string.IsNullOrEmpty(m_nameInput.text))
                 nameFilter = m_nameInput.text.ToLower();
 
-            bool canFilterScene = (m_sceneFilter != SceneFilter.Any || m_childFilter != ChildFilter.Any)
+            bool canGetGameObject = (m_sceneFilter != SceneFilter.Any || m_childFilter != ChildFilter.Any)
                 && (m_context == SearchContext.GameObject || typeof(Component).IsAssignableFrom(searchType));
 
             string sceneFilter = null;
-            if (!canFilterScene)
+            if (!canGetGameObject)
             {
                 if (m_context != SearchContext.UnityObject && (m_sceneFilter != SceneFilter.Any || m_childFilter != ChildFilter.Any))
                     ExplorerCore.LogWarning($"Type '{searchType}' cannot have Scene or Child filters applied to it");
@@ -292,7 +292,7 @@ namespace UnityExplorer.UI.PageModel
                 if (!string.IsNullOrEmpty(nameFilter) && !obj.name.ToLower().Contains(nameFilter))
                     continue;
 
-                if (canFilterScene)
+                if (canGetGameObject)
                 {
 #if MONO
                     var go = m_context == SearchContext.GameObject
@@ -303,6 +303,9 @@ namespace UnityExplorer.UI.PageModel
                             ? obj.TryCast<GameObject>()
                             : obj.TryCast<Component>().gameObject;
 #endif
+
+                    if (!go)
+                        continue;
 
                     // scene check
                     if (m_sceneFilter != SceneFilter.Any)
@@ -484,7 +487,7 @@ namespace UnityExplorer.UI.PageModel
             customTypeLayout.minHeight = 25;
             customTypeLayout.flexibleHeight = 0;
             m_customTypeInput = customTypeObj.GetComponent<TMP_InputField>();
-            m_customTypeInput.placeholder.gameObject.GetComponent<TextMeshProUGUI>().text = "eg. UnityEngine.Camera";
+            m_customTypeInput.placeholder.gameObject.GetComponent<TextMeshProUGUI>().text = "eg. UnityEngine.Texture2D, etc...";
             m_customTypeInput.onFocusSelectAll = true;
 #if MONO
             m_customTypeInput.onSelect.AddListener((string val) => { OnContextButtonClicked(SearchContext.Custom); });
@@ -507,13 +510,14 @@ namespace UnityExplorer.UI.PageModel
 
             var nameLabelObj = UIFactory.CreateLabel(nameRowObj, TextAnchor.MiddleLeft);
             var nameLabelText = nameLabelObj.GetComponent<Text>();
-            nameLabelText.text = "Search by name:";
+            nameLabelText.text = "Name contains:";
             var nameLabelLayout = nameLabelObj.AddComponent<LayoutElement>();
             nameLabelLayout.minWidth = 125;
             nameLabelLayout.minHeight = 25;
 
             var nameInputObj = UIFactory.CreateTMPInput(nameRowObj, 14, 0, (int)TextAlignmentOptions.MidlineLeft);
             m_nameInput = nameInputObj.GetComponent<TMP_InputField>();
+            //m_nameInput.placeholder.gameObject.GetComponent<TextMeshProUGUI>().text = "";
             var nameInputLayout = nameInputObj.AddComponent<LayoutElement>();
             nameInputLayout.minWidth = 150;
             nameInputLayout.flexibleWidth = 5000;

@@ -6,6 +6,7 @@ using UnityExplorer.UI.PageModel;
 using UnityEngine;
 using UnityExplorer.Inspectors;
 using System.IO;
+using UnityExplorer.Unstrip;
 
 namespace UnityExplorer
 {

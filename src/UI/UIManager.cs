@@ -8,7 +8,7 @@ using TMPro;
 using System.Reflection;
 using UnityExplorer.Helpers;
 #if CPP
-using UnityExplorer.Unstrip.AssetBundle;
+using UnityExplorer.Unstrip;
 #endif
 
 namespace UnityExplorer.UI

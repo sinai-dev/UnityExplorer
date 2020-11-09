@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityExplorer.Inspectors;
 
-namespace UnityExplorer.Unstrip.Scenes
+namespace UnityExplorer.Unstrip
 {
     public class SceneUnstrip
     {
@@ -31,11 +31,11 @@ namespace UnityExplorer.Unstrip.Scenes
 
             return new GameObject[0];
         }
-
-        //Scene.GetRootGameObjects();
 #endif
 
 #if CPP
+        //Scene.GetRootGameObjects();
+
         internal delegate void d_GetRootGameObjects(int handle, IntPtr list);
 
         public static GameObject[] GetRootGameObjects(Scene scene) => GetRootGameObjects(scene.handle);

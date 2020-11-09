@@ -7,7 +7,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Input;
-using UnityExplorer.Unstrip.Resources;
+using UnityExplorer.Unstrip;
 
 namespace UnityExplorer.Inspectors.GOInspector
 {

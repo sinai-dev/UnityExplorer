@@ -8,7 +8,7 @@ using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityExplorer.Helpers;
 
-namespace UnityExplorer.Unstrip.AssetBundle
+namespace UnityExplorer.Unstrip
 {
     public class AssetBundle
     {

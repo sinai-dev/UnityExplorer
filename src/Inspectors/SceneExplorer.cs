@@ -7,7 +7,7 @@ using UnityExplorer.UI.Shared;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using UnityExplorer.Unstrip.Scenes;
+using UnityExplorer.Unstrip;
 
 namespace UnityExplorer.Inspectors
 {

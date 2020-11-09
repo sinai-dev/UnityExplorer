@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using UnityExplorer.Input;
 using System.IO;
 #if CPP
-using UnityExplorer.Unstrip.ImageConversion;
+using UnityExplorer.Unstrip;
 #endif
 
 namespace UnityExplorer.UI

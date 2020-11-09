@@ -5,7 +5,7 @@ using UnityEngine;
 using UnhollowerBaseLib;
 #endif
 
-namespace UnityExplorer.Unstrip.LayerMasks
+namespace UnityExplorer.Unstrip
 {
     public static class LayerMaskUnstrip
     {
@@ -14,7 +14,7 @@ namespace UnityExplorer.Unstrip.LayerMasks
 
         public static string LayerToName(int layer)
         {
-            d_LayerToName iCall = ICallHelper.GetICall<d_LayerToName>("UnityEngine.LayerMask::LayerToName");
+            var iCall = ICallHelper.GetICall<d_LayerToName>("UnityEngine.LayerMask::LayerToName");
             return IL2CPP.Il2CppStringToManaged(iCall.Invoke(layer));
         }
 #else

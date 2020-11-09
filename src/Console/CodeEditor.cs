@@ -12,7 +12,7 @@ using UnityExplorer.UI.PageModel;
 using System.Collections.Generic;
 using System.Reflection;
 #if CPP
-using UnityExplorer.Unstrip.Resources;
+using UnityExplorer.Unstrip;
 using UnityExplorer.Helpers;
 using UnhollowerRuntimeLib;
 #endif
@@ -421,7 +421,7 @@ The following helper methods are available:
         private static Color caretColor = new Color32(255, 255, 255, 255);
         private static Color textColor = new Color32(255, 255, 255, 255);
         private static Color backgroundColor = new Color32(37, 37, 37, 255);
-        private static Color lineHighlightColor = new Color32(50, 50, 50, 255);
+        //private static Color lineHighlightColor = new Color32(50, 50, 50, 255);
         private static Color lineNumberBackgroundColor = new Color32(25, 25, 25, 255);
         private static Color lineNumberTextColor = new Color32(180, 180, 180, 255);
         private static Color scrollbarColor = new Color32(45, 50, 50, 255);

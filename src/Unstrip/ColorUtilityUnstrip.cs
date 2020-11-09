@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using UnityEngine;
 
-namespace UnityExplorer.Unstrip.ColorUtility
+namespace UnityExplorer.Unstrip
 {
     public static class ColorUtilityUnstrip
     {

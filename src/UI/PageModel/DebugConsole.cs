@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityExplorer.Unstrip.ColorUtility;
+using UnityExplorer.Unstrip;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;

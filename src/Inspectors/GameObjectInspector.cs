@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityExplorer.Helpers;
 using UnityExplorer.UI;
-using UnityExplorer.Unstrip.LayerMasks;
+using UnityExplorer.Unstrip;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -115,9 +115,7 @@ namespace UnityExplorer.Inspectors
             s_controls.RefreshControls();
 
             if (GameObjectControls.s_sliderChangedWanted)
-            {
                 GameObjectControls.UpdateSliderControl();
-            }
         }
 
         private void RefreshTopInfo()
@@ -139,6 +137,7 @@ namespace UnityExplorer.Inspectors
                     m_lastPath = path;
                     m_pathInput.text = path;
                     m_hiddenPathText.text = path;
+                    m_pathInput.ForceLabelUpdate();
                 }
             }
             else if (m_pathGroupObj.activeSelf)
@@ -266,6 +265,7 @@ namespace UnityExplorer.Inspectors
             m_hiddenPathText = pathHiddenTextObj.GetComponent<Text>();
             m_hiddenPathText.color = Color.clear;
             m_hiddenPathText.fontSize = 14;
+            m_hiddenPathText.lineSpacing = 1.5f;
             m_hiddenPathText.raycastTarget = false;
             var hiddenFitter = pathHiddenTextObj.AddComponent<ContentSizeFitter>();
             hiddenFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
@@ -291,6 +291,11 @@ namespace UnityExplorer.Inspectors
             pathInputLayout.flexibleHeight = 75;
             pathInputLayout.preferredWidth = 400;
             pathInputLayout.flexibleWidth = 9999;
+            var textRect = m_pathInput.textComponent.GetComponent<RectTransform>();
+            textRect.offsetMin = new Vector2(3, 3);
+            textRect.offsetMax = new Vector2(3, 3);
+            m_pathInput.textComponent.color = new Color(0.75f, 0.75f, 0.75f);
+            m_pathInput.textComponent.lineSpacing = 1.5f;
 
             // name row
 

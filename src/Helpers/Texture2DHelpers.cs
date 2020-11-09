@@ -3,7 +3,7 @@ using UnityEngine;
 using System.IO;
 using System.Reflection;
 #if CPP
-using UnityExplorer.Unstrip.ImageConversion;
+using UnityExplorer.Unstrip;
 #endif
 
 namespace UnityExplorer.Helpers
