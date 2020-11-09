@@ -5,7 +5,7 @@
 //using System.Text;
 //using UnityExplorer.UI;
 
-//namespace UnityExplorer.CacheObject
+//namespace UnityExplorer.Inspectors.Reflection
 //{
 //    public class CacheEnumerated : CacheObjectBase
 //    {

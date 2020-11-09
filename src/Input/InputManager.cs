@@ -8,7 +8,6 @@ using UnhollowerBaseLib;
 
 namespace UnityExplorer.Input
 {
-    [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Unity style")]
     public static class InputManager
     {
         private static IHandleInput m_inputModule;

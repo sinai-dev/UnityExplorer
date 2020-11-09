@@ -7,13 +7,13 @@ using UnityExplorer.Unstrip;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.Inspectors.GOInspector;
+using UnityExplorer.Inspectors.GameObjects;
 
 namespace UnityExplorer.Inspectors
 {
     public class GameObjectInspector : InspectorBase
     {
-        public override string TabLabel => $" [G] {TargetGO?.name}";
+        public override string TabLabel => $" <color=cyan>[G]</color> {TargetGO?.name}";
 
         public static GameObjectInspector ActiveInstance { get; private set; }
 
@@ -35,12 +35,15 @@ namespace UnityExplorer.Inspectors
             set => s_content = value;
         }
 
-        public static TMP_InputField m_nameInput;
         private static string m_lastName;
-        public static TMP_InputField m_pathInput;
+        public static TMP_InputField m_nameInput;
+
         private static string m_lastPath;
+        public static TMP_InputField m_pathInput;
+        private static RectTransform m_pathInputRect;
         private static GameObject m_pathGroupObj;
         private static Text m_hiddenPathText;
+        private static RectTransform m_hiddenPathRect;
 
         private static Toggle m_enabledToggle;
         private static Text m_enabledText;
@@ -77,15 +80,15 @@ namespace UnityExplorer.Inspectors
             }
         }
 
-        public override void SetContentActive()
+        public override void SetActive()
         {
-            base.SetContentActive();
+            base.SetActive();
             ActiveInstance = this;
         }
 
-        public override void SetContentInactive()
+        public override void SetInactive()
         {
-            base.SetContentInactive();
+            base.SetInactive();
             ActiveInstance = null;
         }
 
@@ -103,7 +106,7 @@ namespace UnityExplorer.Inspectors
         {
             base.Update();
 
-            if (m_pendingDestroy || ActiveInstance != this)
+            if (m_pendingDestroy || !this.IsActive)
                 return;
 
             RefreshTopInfo();
@@ -135,9 +138,12 @@ namespace UnityExplorer.Inspectors
                 if (m_lastPath != path)
                 {
                     m_lastPath = path;
+
                     m_pathInput.text = path;
                     m_hiddenPathText.text = path;
-                    m_pathInput.ForceLabelUpdate();
+
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(m_pathInputRect);
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(m_hiddenPathRect);
                 }
             }
             else if (m_pathGroupObj.activeSelf)
@@ -271,8 +277,8 @@ namespace UnityExplorer.Inspectors
             hiddenFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             var hiddenLayout = pathHiddenTextObj.AddComponent<LayoutElement>();
             hiddenLayout.minHeight = 25;
-            hiddenLayout.flexibleHeight = 75;
-            hiddenLayout.minWidth = 400;
+            hiddenLayout.flexibleHeight = 125;
+            hiddenLayout.minWidth = 250;
             hiddenLayout.flexibleWidth = 9000;
             var hiddenGroup = pathHiddenTextObj.AddComponent<HorizontalLayoutGroup>();
             hiddenGroup.childForceExpandWidth = true;
@@ -297,13 +303,16 @@ namespace UnityExplorer.Inspectors
             m_pathInput.textComponent.color = new Color(0.75f, 0.75f, 0.75f);
             m_pathInput.textComponent.lineSpacing = 1.5f;
 
+            m_pathInputRect = m_pathInput.GetComponent<RectTransform>();
+            m_hiddenPathRect = m_hiddenPathText.GetComponent<RectTransform>();
+
             // name row
 
             var nameRowObj = UIFactory.CreateHorizontalGroup(scrollContent, new Color(0.1f, 0.1f, 0.1f));
             var nameGroup = nameRowObj.GetComponent<HorizontalLayoutGroup>();
             nameGroup.childForceExpandHeight = false;
             nameGroup.childForceExpandWidth = false;
-            nameGroup.childControlHeight = false;
+            nameGroup.childControlHeight = true;
             nameGroup.childControlWidth = true;
             nameGroup.spacing = 5;
             var nameRect = nameRowObj.GetComponent<RectTransform>();

@@ -324,13 +324,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Inspectors\MouseInspector.cs" />
-    <Compile Include="Inspectors\ReflectionInspector\CacheObject\CacheEnumerated.cs" />
-    <Compile Include="Inspectors\ReflectionInspector\CacheObject\CacheFactory.cs" />
-    <Compile Include="Inspectors\ReflectionInspector\CacheObject\CacheField.cs" />
-    <Compile Include="Inspectors\ReflectionInspector\CacheObject\CacheMember.cs" />
-    <Compile Include="Inspectors\ReflectionInspector\CacheObject\CacheMethod.cs" />
-    <Compile Include="Inspectors\ReflectionInspector\CacheObject\CacheProperty.cs" />
-    <Compile Include="Inspectors\ReflectionInspector\CacheObject\CacheObjectBase.cs" />
+    <Compile Include="Inspectors\Reflection\CacheObject\CacheEnumerated.cs" />
+    <Compile Include="Inspectors\Reflection\CacheObject\CacheFactory.cs" />
+    <Compile Include="Inspectors\Reflection\CacheObject\CacheField.cs" />
+    <Compile Include="Inspectors\Reflection\CacheObject\CacheMember.cs" />
+    <Compile Include="Inspectors\Reflection\CacheObject\CacheMethod.cs" />
+    <Compile Include="Inspectors\Reflection\CacheObject\CacheProperty.cs" />
+    <Compile Include="Inspectors\Reflection\CacheObject\CacheObjectBase.cs" />
     <Compile Include="Helpers\Texture2DHelpers.cs" />
     <Compile Include="Config\ModConfig.cs" />
     <Compile Include="ExplorerCore.cs" />
@@ -338,9 +338,9 @@
     <Compile Include="ExplorerMelonMod.cs" />
     <Compile Include="Helpers\ReflectionHelpers.cs" />
     <Compile Include="Helpers\UnityHelpers.cs" />
-    <Compile Include="Inspectors\GOInspector\ChildList.cs" />
-    <Compile Include="Inspectors\GOInspector\ComponentList.cs" />
-    <Compile Include="Inspectors\GOInspector\GameObjectControls.cs" />
+    <Compile Include="Inspectors\GameObject\ChildList.cs" />
+    <Compile Include="Inspectors\GameObject\ComponentList.cs" />
+    <Compile Include="Inspectors\GameObject\GameObjectControls.cs" />
     <Compile Include="UI\ForceUnlockCursor.cs" />
     <Compile Include="Input\IHandleInput.cs" />
     <Compile Include="Tests\Tests.cs" />
@@ -369,13 +369,13 @@
     <Compile Include="UI\PageModel\HomePage.cs" />
     <Compile Include="Inspectors\GameObjectInspector.cs" />
     <Compile Include="Inspectors\InspectorBase.cs" />
-    <Compile Include="Inspectors\ReflectionInspector\InstanceInspector.cs" />
-    <Compile Include="Inspectors\ReflectionInspector\StaticInspector.cs" />
+    <Compile Include="Inspectors\Reflection\InstanceInspector.cs" />
+    <Compile Include="Inspectors\Reflection\StaticInspector.cs" />
     <Compile Include="UI\PageModel\OptionsPage.cs" />
     <Compile Include="Inspectors\SceneExplorer.cs" />
     <Compile Include="UI\PageModel\SearchPage.cs" />
     <Compile Include="UI\PanelDragger.cs" />
-    <Compile Include="UI\InteractiveValue\InteractiveValue.cs" />
+    <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveValue.cs" />
     <Compile Include="UI\Shared\SliderScrollbar.cs" />
     <Compile Include="UI\Shared\PageHandler.cs" />
     <Compile Include="UI\Shared\SyntaxColors.cs" />

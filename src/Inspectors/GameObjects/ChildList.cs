@@ -9,7 +9,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Input;
 
-namespace UnityExplorer.Inspectors.GOInspector
+namespace UnityExplorer.Inspectors.GameObjects
 {
     public class ChildList
     {

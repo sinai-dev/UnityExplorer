@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
+using UnityExplorer.Inspectors.Reflection;
 
 namespace UnityExplorer.Inspectors
 {
@@ -82,23 +83,29 @@ namespace UnityExplorer.Inspectors
 
             InspectorBase inspector;
             if (obj is GameObject go)
-            {
                 inspector = new GameObjectInspector(go);
-            }
             else
-            {
                 inspector = new InstanceInspector(obj);
-            }
 
             m_currentInspectors.Add(inspector);
-            inspector.SetContentInactive();
-
             SetInspectorTab(inspector);
         }
 
         public void Inspect(Type type)
         {
-            // TODO static type inspection
+            foreach (var tab in m_currentInspectors)
+            {
+                if (ReferenceEquals(tab.Target as Type, type))
+                {
+                    SetInspectorTab(tab);
+                    return;
+                }
+            }
+
+            var inspector = new StaticInspector(type);
+
+            m_currentInspectors.Add(inspector);
+            SetInspectorTab(inspector);
         }
 
         public void SetInspectorTab(InspectorBase inspector)
@@ -107,7 +114,7 @@ namespace UnityExplorer.Inspectors
 
             m_activeInspector = inspector;
 
-            inspector.SetContentActive();
+            inspector.SetActive();
 
             Color activeColor = new Color(0, 0.25f, 0, 1);
             ColorBlock colors = inspector.tabButton.colors;
@@ -119,11 +126,9 @@ namespace UnityExplorer.Inspectors
         public void UnsetInspectorTab()
         {
             if (m_activeInspector == null)
-            {
                 return;
-            }
 
-            m_activeInspector.SetContentInactive();
+            m_activeInspector.SetInactive();
 
             ColorBlock colors = m_activeInspector.tabButton.colors;
             colors.normalColor = new Color(0.2f, 0.2f, 0.2f, 1);

@@ -8,11 +8,11 @@ namespace UnityExplorer.Inspectors
     public abstract class InspectorBase
     {
         public object Target;
-        // just to cache a cast
         public UnityEngine.Object UnityTarget;
 
         public abstract string TabLabel { get; }
 
+        public bool IsActive { get; private set; }
         public abstract GameObject Content { get; set; }
         public Button tabButton;
         public Text tabText;
@@ -33,13 +33,15 @@ namespace UnityExplorer.Inspectors
             AddInspectorTab();
         }
 
-        public virtual void SetContentActive()
+        public virtual void SetActive()
         {
+            this.IsActive = true;
             Content?.SetActive(true);
         }
 
-        public virtual void SetContentInactive()
+        public virtual void SetInactive()
         {
+            this.IsActive = false;
             Content?.SetActive(false);
         }
 
@@ -64,11 +66,6 @@ namespace UnityExplorer.Inspectors
             {
                 GameObject.Destroy(tabGroup);
             }
-
-            //if (Content)
-            //{
-            //    GameObject.Destroy(Content);
-            //}
 
             int thisIndex = -1;
             if (InspectorManager.Instance.m_currentInspectors.Contains(this))

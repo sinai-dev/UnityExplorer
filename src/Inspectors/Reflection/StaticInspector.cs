@@ -1,16 +1,14 @@
 ﻿using System;
-using UnityExplorer.Helpers;
 
-namespace UnityExplorer.Inspectors
+namespace UnityExplorer.Inspectors.Reflection
 {
-    public class InstanceInspector : ReflectionInspector
+    public class StaticInspector : ReflectionInspector
     {
-        // todo
-        public override string TabLabel => $" [R] {base.TabLabel}";
+        public override string TabLabel => $" <color=cyan>[S]</color> {base.TabLabel}";
 
-        public InstanceInspector(object target) : base(target)
+        public StaticInspector(Type type) : base(type)
         {
-
+            // TODO
         }
 
         public override void Update()
