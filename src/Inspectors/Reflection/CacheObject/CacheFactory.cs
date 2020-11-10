@@ -54,19 +54,9 @@ namespace UnityExplorer.Inspectors.Reflection
             {
                 var pType = param.ParameterType;
 
-                if (pType.IsByRef && !pType.IsPrimitive && pType != typeof(string))
+                if (pType.IsByRef && pType.HasElementType)
                 {
-                    if (pType.IsArray || pType.Name.Contains("Array"))
-                        return false;
-
-                    try
-                    {
-                        pType = pType.GetElementType();
-                    }
-                    catch
-                    {
-                        return false;
-                    }
+                    pType = pType.GetElementType();
                 }
 
                 if (pType != null && (pType.IsPrimitive || pType == typeof(string)))
