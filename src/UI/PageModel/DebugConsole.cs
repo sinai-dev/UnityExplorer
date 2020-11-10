@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityExplorer.Unstrip;
-using TMPro;
+//using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Config;
@@ -19,7 +19,7 @@ namespace UnityExplorer.UI.PageModel
 
         internal static readonly List<string> s_preInitMessages = new List<string>();
 
-        private TMP_InputField m_textInput;
+        private InputField m_textInput;
 
         public DebugConsole(GameObject parent)
         {
@@ -98,7 +98,7 @@ namespace UnityExplorer.UI.PageModel
             logAreaLayout.preferredHeight = 190;
             logAreaLayout.flexibleHeight = 0;
 
-            var inputObj = UIFactory.CreateTMPInput(logAreaObj);
+            var inputObj = UIFactory.CreateInputField(logAreaObj, 14, 0, 1);
 
             var mainInputGroup = inputObj.GetComponent<VerticalLayoutGroup>();
             mainInputGroup.padding.left = 8;
@@ -125,23 +125,24 @@ namespace UnityExplorer.UI.PageModel
             scrollColors.normalColor = new Color(0.5f, 0.5f, 0.5f, 1.0f);
             scroller.colors = scrollColors;
 
-            var tmpInput = inputObj.GetComponent<TMP_InputField>();
-            tmpInput.scrollSensitivity = 15;
-            tmpInput.verticalScrollbar = scroller;
+            var tmpInput = inputObj.GetComponent<InputField>();
+            //tmpInput.scrollSensitivity = 15;
+            //tmpInput.verticalScrollbar = scroller;
+            tmpInput.readOnly = true;
 
             if (UIManager.ConsoleFont != null)
             {
                 tmpInput.textComponent.font = UIManager.ConsoleFont;
 #if MONO
-                (tmpInput.placeholder as TextMeshProUGUI).font = UIManager.ConsoleFont;
+                (tmpInput.placeholder as Text).font = UIManager.ConsoleFont;
 #else
-                tmpInput.placeholder.TryCast<TextMeshProUGUI>().font = UIManager.ConsoleFont;
+                tmpInput.placeholder.TryCast<Text>().font = UIManager.ConsoleFont;
 #endif
             }
 
             tmpInput.readOnly = true;
 
-            m_textInput = inputObj.GetComponent<TMP_InputField>();
+            m_textInput = inputObj.GetComponent<InputField>();
 
 #endregion
 

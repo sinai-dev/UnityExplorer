@@ -35,6 +35,17 @@ public class SliderScrollbar
 		this.m_slider.Set(1f, false);
 	}
 
+    internal bool CheckDestroyed()
+    {
+        if (!m_slider || !m_scrollbar)
+        {
+            Instances.Remove(this);
+            return true;
+        }
+
+        return false;
+    }
+
 	internal void Update()
 	{
 		this.RefreshVisibility();
@@ -42,11 +53,8 @@ public class SliderScrollbar
 
 	internal void RefreshVisibility()
 	{
-        if (!m_slider || !m_scrollbar)
-        {
-            Instances.Remove(this);
+        if (!m_slider.gameObject.activeInHierarchy)
             return;
-        }
 
         bool shouldShow = !Mathf.Approximately(this.m_scrollbar.size, 1);
         var obj = this.m_slider.handleRect.gameObject;
@@ -85,7 +93,7 @@ public class SliderScrollbar
         GameObject handleSlideAreaObj = UIFactory.CreateUIObject("Handle Slide Area", sliderObj);
         GameObject handleObj = UIFactory.CreateUIObject("Handle", handleSlideAreaObj);
 
-        Image bgImage = bgObj.AddComponent<Image>();
+        Image bgImage = bgObj.AddGraphic<Image>();
         bgImage.type = Image.Type.Sliced;
         bgImage.color = new Color(0.05f, 0.05f, 0.05f, 1.0f);
 
@@ -101,7 +109,7 @@ public class SliderScrollbar
         fillAreaRect.anchoredPosition = new Vector2(-5f, 0f);
         fillAreaRect.sizeDelta = new Vector2(-20f, 0f);
 
-        Image fillImage = fillObj.AddComponent<Image>();
+        Image fillImage = fillObj.AddGraphic<Image>();
         fillImage.type = Image.Type.Sliced;
         fillImage.color = Color.clear;
 
@@ -114,7 +122,7 @@ public class SliderScrollbar
         handleSlideRect.offsetMax = new Vector2(-15f, 0f);
         handleSlideRect.sizeDelta = new Vector2(-30f, -30f);
 
-        Image handleImage = handleObj.AddComponent<Image>();
+        Image handleImage = handleObj.AddGraphic<Image>();
         handleImage.color = new Color(0.5f, 0.5f, 0.5f, 1.0f);
 
         var handleRect = handleObj.GetComponent<RectTransform>();

@@ -4,7 +4,7 @@ using System.Linq;
 using UnityExplorer.Helpers;
 using UnityExplorer.UI;
 using UnityExplorer.Unstrip;
-using TMPro;
+//using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Inspectors.GameObjects;
@@ -36,10 +36,10 @@ namespace UnityExplorer.Inspectors
         }
 
         private static string m_lastName;
-        public static TMP_InputField m_nameInput;
+        public static InputField m_nameInput;
 
         private static string m_lastPath;
-        public static TMP_InputField m_pathInput;
+        public static InputField m_pathInput;
         private static RectTransform m_pathInputRect;
         private static GameObject m_pathGroupObj;
         private static Text m_hiddenPathText;
@@ -271,7 +271,7 @@ namespace UnityExplorer.Inspectors
             m_hiddenPathText = pathHiddenTextObj.GetComponent<Text>();
             m_hiddenPathText.color = Color.clear;
             m_hiddenPathText.fontSize = 14;
-            m_hiddenPathText.lineSpacing = 1.5f;
+            //m_hiddenPathText.lineSpacing = 1.5f;
             m_hiddenPathText.raycastTarget = false;
             var hiddenFitter = pathHiddenTextObj.AddComponent<ContentSizeFitter>();
             hiddenFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
@@ -286,10 +286,10 @@ namespace UnityExplorer.Inspectors
             hiddenGroup.childForceExpandHeight = true;
             hiddenGroup.childControlHeight = true;
 
-            var pathInputObj = UIFactory.CreateTMPInput(pathHiddenTextObj, 14, 0, (int)TextAlignmentOptions.MidlineLeft);
+            var pathInputObj = UIFactory.CreateInputField(pathHiddenTextObj);
             var pathInputRect = pathInputObj.GetComponent<RectTransform>();
             pathInputRect.sizeDelta = new Vector2(pathInputRect.sizeDelta.x, 25);
-            m_pathInput = pathInputObj.GetComponent<TMP_InputField>();
+            m_pathInput = pathInputObj.GetComponent<InputField>();
             m_pathInput.text = TargetGO.transform.GetTransformPath();
             m_pathInput.readOnly = true;
             var pathInputLayout = pathInputObj.AddComponent<LayoutElement>();
@@ -301,7 +301,7 @@ namespace UnityExplorer.Inspectors
             textRect.offsetMin = new Vector2(3, 3);
             textRect.offsetMax = new Vector2(3, 3);
             m_pathInput.textComponent.color = new Color(0.75f, 0.75f, 0.75f);
-            m_pathInput.textComponent.lineSpacing = 1.5f;
+            //m_pathInput.textComponent.lineSpacing = 1.5f;
 
             m_pathInputRect = m_pathInput.GetComponent<RectTransform>();
             m_hiddenPathRect = m_hiddenPathText.GetComponent<RectTransform>();
@@ -321,8 +321,8 @@ namespace UnityExplorer.Inspectors
             nameLayout.minHeight = 25;
             nameLayout.flexibleHeight = 0;
 
-            var nameTextObj = UIFactory.CreateTMPLabel(nameRowObj, TextAlignmentOptions.Midline);
-            var nameTextText = nameTextObj.GetComponent<TextMeshProUGUI>();
+            var nameTextObj = UIFactory.CreateLabel(nameRowObj, TextAnchor.MiddleCenter);
+            var nameTextText = nameTextObj.GetComponent<Text>();
             nameTextText.text = "Name:";
             nameTextText.fontSize = 14;
             nameTextText.color = Color.grey;
@@ -332,12 +332,12 @@ namespace UnityExplorer.Inspectors
             nameTextLayout.minWidth = 55;
             nameTextLayout.flexibleWidth = 0;
 
-            var nameInputObj = UIFactory.CreateTMPInput(nameRowObj, 14, 0, (int)TextAlignmentOptions.MidlineLeft);
+            var nameInputObj = UIFactory.CreateInputField(nameRowObj);
             var nameInputRect = nameInputObj.GetComponent<RectTransform>();
             nameInputRect.sizeDelta = new Vector2(nameInputRect.sizeDelta.x, 25);
-            m_nameInput = nameInputObj.GetComponent<TMP_InputField>();
+            m_nameInput = nameInputObj.GetComponent<InputField>();
             m_nameInput.text = TargetGO.name;
-            m_nameInput.lineType = TMP_InputField.LineType.SingleLine;
+            m_nameInput.lineType = InputField.LineType.SingleLine;
 
             var applyNameBtnObj = UIFactory.CreateButton(nameRowObj);
             var applyNameBtn = applyNameBtnObj.GetComponent<Button>();

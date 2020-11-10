@@ -9,7 +9,7 @@ using UnityExplorer.UI.Shared;
 using System.Reflection;
 using UnityExplorer.UI;
 using UnityEngine.UI;
-using TMPro;
+//using TMPro;
 
 namespace UnityExplorer.Inspectors
 {
@@ -23,9 +23,9 @@ namespace UnityExplorer.Inspectors
         // all cached members of the target
         internal CacheMember[] m_allMembers;
         // filtered members based on current filters
-        internal CacheMember[] m_membersFiltered;
+        //internal CacheMember[] m_membersFiltered;
         // actual shortlist of displayed members
-        internal CacheMember[] m_membersShortlist;
+        //internal CacheMember[] m_membersShortlist;
 
         // UI members
 
@@ -36,16 +36,20 @@ namespace UnityExplorer.Inspectors
             set => m_content = value;
         }
 
-        internal PageHandler m_pageHandler;
+        //internal PageHandler m_pageHandler;
 
         // Blacklists
         private static readonly HashSet<string> s_typeAndMemberBlacklist = new HashSet<string>
         {
+            // these cause a crash
             "Type.DeclaringMethod",
             "Rigidbody2D.Cast",
+            "Collider2D.Cast",
+            "Collider2D.Raycast",
         };
         private static readonly HashSet<string> s_methodStartsWithBlacklist = new HashSet<string>
         {
+            // these are redundant
             "get_",
             "set_",
         };
@@ -136,7 +140,8 @@ namespace UnityExplorer.Inspectors
 
                         // check blacklisted members
                         var sig = $"{member.DeclaringType.Name}.{member.Name}";
-                        if (s_typeAndMemberBlacklist.Any(it => it == sig))
+
+                        if (s_typeAndMemberBlacklist.Any(it => sig.Contains(it)))
                             continue;
 
                         if (s_methodStartsWithBlacklist.Any(it => member.Name.StartsWith(it)))
@@ -144,7 +149,14 @@ namespace UnityExplorer.Inspectors
 
                         if (mi != null)
                         {
-                            AppendParams(mi.GetParameters());
+                            try
+                            {
+                                AppendParams(mi.GetParameters());
+                            }
+                            catch (Exception e)
+                            {
+                                ExplorerCore.Log(e);
+                            }
                         }
                         else if (pi != null)
                         {
@@ -194,7 +206,7 @@ namespace UnityExplorer.Inspectors
 
             m_allMembers = list.ToArray();
 
-            ExplorerCore.Log("Cached " + m_allMembers.Length + " members");
+            // ExplorerCore.Log("Cached " + m_allMembers.Length + " members");
         }
 
         #region UI CONSTRUCTION
@@ -243,8 +255,8 @@ namespace UnityExplorer.Inspectors
             typeLabelTextLayout.flexibleWidth = 0;
             typeLabelTextLayout.minHeight = 25;
 
-            var typeLabelInputObj = UIFactory.CreateTMPInput(typeRowObj, 14, 0, (int)TextAlignmentOptions.MidlineLeft);
-            var typeLabelInput = typeLabelInputObj.GetComponent<TMP_InputField>();
+            var typeLabelInputObj = UIFactory.CreateInputField(typeRowObj);
+            var typeLabelInput = typeLabelInputObj.GetComponent<InputField>();
             typeLabelInput.readOnly = true;
             var typeLabelLayout = typeLabelInputObj.AddComponent<LayoutElement>();
             typeLabelLayout.minWidth = 150;

@@ -108,10 +108,14 @@
       <HintPath>$(MLMonoGameFolder)\MelonLoader\MelonLoader.ModHandler.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.TextMeshPro">
+    <!-- <Reference Include="Unity.TextMeshPro">
       <HintPath>$(MLMonoManagedFolder)\Unity.TextMeshPro.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.TextCoreModule">
+      <HintPath>$(MLMonoManagedFolder)\UnityEngine.TextCoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference> -->
     <Reference Include="UnityEngine">
       <HintPath>$(MLMonoManagedFolder)\UnityEngine.dll</HintPath>
       <Private>False</Private>
@@ -122,10 +126,6 @@
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
       <HintPath>$(MLMonoManagedFolder)\UnityEngine.PhysicsModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.TextCoreModule">
-      <HintPath>$(MLMonoManagedFolder)\UnityEngine.TextCoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
@@ -159,10 +159,14 @@
       <HintPath>$(BIEMonoGameFolder)\BepInEx\core\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.TextMeshPro">
+    <!-- <Reference Include="Unity.TextMeshPro">
       <HintPath>$(BIEMonoManagedFolder)\Unity.TextMeshPro.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.TextCoreModule">
+      <HintPath>$(BIEMonoManagedFolder)\UnityEngine.TextCoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference> -->
     <Reference Include="UnityEngine.AssetBundleModule">
       <HintPath>$(BIEMonoManagedFolder)\UnityEngine.AssetBundleModule.dll</HintPath>
       <Private>False</Private>
@@ -177,10 +181,6 @@
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
       <HintPath>$(BIEMonoManagedFolder)\UnityEngine.PhysicsModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.TextCoreModule">
-      <HintPath>$(BIEMonoManagedFolder)\UnityEngine.TextCoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
@@ -222,10 +222,14 @@
       <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\Il2CppSystem.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.TextMeshPro">
+    <!-- <Reference Include="Unity.TextMeshPro">
       <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\Unity.TextMeshPro.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.TextCoreModule">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.TextCoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference> -->
     <Reference Include="UnityEngine">
       <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
@@ -236,10 +240,6 @@
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
       <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.PhysicsModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.TextCoreModule">
-      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.TextCoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
@@ -285,10 +285,14 @@
       <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\Il2CppSystem.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.TextMeshPro">
+    <!-- <Reference Include="Unity.TextMeshPro">
       <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\Unity.TextMeshPro.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.TextCoreModule">
+      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.TextCoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference> -->
     <Reference Include="UnityEngine">
       <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.dll</HintPath>
       <Private>False</Private>
@@ -299,10 +303,6 @@
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
       <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.PhysicsModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.TextCoreModule">
-      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.TextCoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
@@ -338,9 +338,9 @@
     <Compile Include="ExplorerMelonMod.cs" />
     <Compile Include="Helpers\ReflectionHelpers.cs" />
     <Compile Include="Helpers\UnityHelpers.cs" />
-    <Compile Include="Inspectors\GameObject\ChildList.cs" />
-    <Compile Include="Inspectors\GameObject\ComponentList.cs" />
-    <Compile Include="Inspectors\GameObject\GameObjectControls.cs" />
+    <Compile Include="Inspectors\GameObjects\ChildList.cs" />
+    <Compile Include="Inspectors\GameObjects\ComponentList.cs" />
+    <Compile Include="Inspectors\GameObjects\GameObjectControls.cs" />
     <Compile Include="UI\ForceUnlockCursor.cs" />
     <Compile Include="Input\IHandleInput.cs" />
     <Compile Include="Tests\Tests.cs" />

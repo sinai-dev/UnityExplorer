@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
+//using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Config;
@@ -14,10 +14,10 @@ namespace UnityExplorer.UI.PageModel
     {
         public override string Name => "Options";
 
-        private TMP_InputField m_keycodeInput;
+        private InputField m_keycodeInput;
         private Toggle m_unlockMouseToggle;
-        private TMP_InputField m_pageLimitInput;
-        private TMP_InputField m_defaultOutputInput;
+        private InputField m_pageLimitInput;
+        private InputField m_defaultOutputInput;
 
         public override void Init()
         {
@@ -138,12 +138,12 @@ namespace UnityExplorer.UI.PageModel
             labelLayout.minWidth = 150;
             labelLayout.minHeight = 25;
 
-            var keycodeInputObj = UIFactory.CreateTMPInput(rowObj, 14, 0, (int)TextAlignmentOptions.MidlineLeft);
+            var keycodeInputObj = UIFactory.CreateInputField(rowObj);
             
-            m_keycodeInput = keycodeInputObj.GetComponent<TMP_InputField>();
+            m_keycodeInput = keycodeInputObj.GetComponent<InputField>();
             m_keycodeInput.text = ModConfig.Instance.Main_Menu_Toggle.ToString();
 
-            m_keycodeInput.placeholder.gameObject.GetComponent<TextMeshProUGUI>().text = "KeyCode, eg. F7";
+            m_keycodeInput.placeholder.gameObject.GetComponent<Text>().text = "KeyCode, eg. F7";
         }
 
         internal void ConstructMouseUnlockOpt(GameObject parent)
@@ -197,12 +197,12 @@ namespace UnityExplorer.UI.PageModel
             labelLayout.minWidth = 150;
             labelLayout.minHeight = 25;
 
-            var inputObj = UIFactory.CreateTMPInput(rowObj, 14, 0, (int)TextAlignmentOptions.MidlineLeft);
+            var inputObj = UIFactory.CreateInputField(rowObj);
 
-            m_pageLimitInput = inputObj.GetComponent<TMP_InputField>();
+            m_pageLimitInput = inputObj.GetComponent<InputField>();
             m_pageLimitInput.text = ModConfig.Instance.Default_Page_Limit.ToString();
 
-            m_pageLimitInput.placeholder.gameObject.GetComponent<TextMeshProUGUI>().text = "Integer, eg. 20";
+            m_pageLimitInput.placeholder.gameObject.GetComponent<Text>().text = "Integer, eg. 20";
         }
 
         internal void ConstructOutputPathOpt(GameObject parent)
@@ -228,12 +228,12 @@ namespace UnityExplorer.UI.PageModel
             labelLayout.minWidth = 150;
             labelLayout.minHeight = 25;
 
-            var inputObj = UIFactory.CreateTMPInput(rowObj, 14, 0, (int)TextAlignmentOptions.MidlineLeft);
+            var inputObj = UIFactory.CreateInputField(rowObj);
 
-            m_defaultOutputInput = inputObj.GetComponent<TMP_InputField>();
+            m_defaultOutputInput = inputObj.GetComponent<InputField>();
             m_defaultOutputInput.text = ModConfig.Instance.Default_Output_Path.ToString();
 
-            m_defaultOutputInput.placeholder.gameObject.GetComponent<TextMeshProUGUI>().text = @"Directory, eg. Mods\UnityExplorer";
+            m_defaultOutputInput.placeholder.gameObject.GetComponent<Text>().text = @"Directory, eg. Mods\UnityExplorer";
         }
 
 #endregion

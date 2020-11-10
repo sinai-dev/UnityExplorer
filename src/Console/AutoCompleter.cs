@@ -129,46 +129,51 @@ namespace UnityExplorer.Console
 
         private static void UpdatePosition()
         {
-            var editor = ConsolePage.Instance.m_codeEditor;
-
-            if (editor.InputField.text.Length < 1)
+            try
             {
-                return;
-            }
+                var editor = ConsolePage.Instance.m_codeEditor;
 
-            int caretPos = editor.InputField.caretPosition;
-            while (caretPos >= editor.inputText.textInfo.characterInfo.Length)
-            {
-                caretPos--;
-            }
+                var textGen = editor.inputText.cachedTextGenerator;
 
-            if (caretPos == m_lastCaretPos)
-            {
-                return;
-            }
+                //if (textGen.characters.Count < 1)
+                //    return;
 
-            m_lastCaretPos = caretPos;
+                int caretPos = editor.InputField.caretPosition;
 
-            if (caretPos >= 0 && caretPos < editor.inputText.textInfo.characterInfo.Length)
-            {
-                var pos = editor.inputText.textInfo.characterInfo[caretPos].bottomLeft;
+                if (caretPos >= 1)
+                    caretPos--;
 
-                pos = editor.InputField.transform.TransformPoint(pos);
+                if (caretPos < 0 || caretPos == m_lastCaretPos)
+                    return;
 
-                // fix position when scrolled down
-                var scrollSize = editor.InputField.verticalScrollbar.size;
-                var scrollValue = editor.InputField.verticalScrollbar.value;
+                m_lastCaretPos = caretPos;
 
-                scrollSize += (1 - scrollSize) * (1 - scrollValue);
+                var pos = textGen.characters[caretPos].cursorPos;
 
-                if (!Mathf.Approximately(scrollSize, 1))
-                {
-                    var height = editor.InputField.textViewport.rect.height;
+                // todo this calculation isnt the right one to use. It's wrong if we hide the Debug Console.
 
-                    pos.y += (1 / scrollSize * height) - height;
-                }
+                var posOffset = MainMenu.Instance.MainPanel.transform.position;
+
+                pos = (Vector2)posOffset + pos + new Vector2(25, 35);
+
+                //// fix position when scrolled down
+                //var scrollSize = editor.InputField.verticalScrollbar.size;
+                //var scrollValue = editor.InputField.verticalScrollbar.value;
+
+                //scrollSize += (1 - scrollSize) * (1 - scrollValue);
+
+                //if (!Mathf.Approximately(scrollSize, 1))
+                //{
+                //    var height = editor.InputField.textViewport.rect.height;
+
+                //    pos.y += (1 / scrollSize * height) - height;
+                //}
 
                 m_mainObj.transform.position = new Vector3(pos.x, pos.y - 3, 0);
+            }
+            catch //(Exception e)
+            {
+                //ExplorerCore.Log(e.ToString());
             }
         }
 
@@ -307,7 +312,7 @@ namespace UnityExplorer.Console
 
                 var hiddenChild = UIFactory.CreateUIObject("HiddenText", buttonObj);
                 hiddenChild.SetActive(false);
-                var hiddenText = hiddenChild.AddComponent<Text>();
+                var hiddenText = hiddenChild.AddGraphic<Text>();
                 m_hiddenSuggestionTexts.Add(hiddenText);
 
 #if CPP

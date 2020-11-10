@@ -336,20 +336,22 @@ namespace UnityExplorer.UI
         {
             try
             {
-                string path = ExplorerCore.EXPLORER_FOLDER + @"\cursor.png";
-                byte[] data = File.ReadAllBytes(path);
+                //string path = ExplorerCore.EXPLORER_FOLDER + @"\cursor.png";
+                //byte[] data = File.ReadAllBytes(path);
 
-                Texture2D tex = new Texture2D(32, 32);
-                tex.LoadImage(data, false);
-                UnityEngine.Object.DontDestroyOnLoad(tex);
+                //Texture2D tex = new Texture2D(32, 32);
+                //tex.LoadImage(data, false);
+                //UnityEngine.Object.DontDestroyOnLoad(tex);
 
-                Sprite sprite = UIManager.CreateSprite(tex, new Rect(0, 0, 32, 32));
-                UnityEngine.Object.DontDestroyOnLoad(sprite);
+                //Sprite sprite = UIManager.CreateSprite(tex, new Rect(0, 0, 32, 32));
+                //UnityEngine.Object.DontDestroyOnLoad(sprite);
+
+                var sprite = UIManager.ResizeCursor;
 
                 m_resizeCursorImage = new GameObject("ResizeCursorImage");
                 m_resizeCursorImage.transform.SetParent(UIManager.CanvasRoot.transform);
 
-                Image image = m_resizeCursorImage.AddComponent<Image>();
+                Image image = m_resizeCursorImage.AddGraphic<Image>();
                 image.sprite = sprite;
                 RectTransform rect = image.transform.GetComponent<RectTransform>();
                 rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 32);

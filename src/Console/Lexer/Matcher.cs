@@ -8,7 +8,7 @@ namespace UnityExplorer.Console.Lexer
     {
         public abstract Color HighlightColor { get; }
 
-        public string HexColor => htmlColor ?? (htmlColor = "<#" + HighlightColor.ToHex() + ">");
+        public string HexColor => htmlColor ?? (htmlColor = "<color=#" + HighlightColor.ToHex() + ">");
         private string htmlColor = null;
 
         public virtual IEnumerable<char> StartChars { get { yield break; } }

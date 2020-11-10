@@ -39,6 +39,10 @@ namespace UnityExplorer.Unstrip
         {
             var iCall = ICallHelper.GetICall<d_LoadAssetWithSubAssets_Internal>("UnityEngine.AssetBundle::LoadAssetWithSubAssets_Internal");
             var ptr = iCall.Invoke(m_bundlePtr, IL2CPP.ManagedStringToIl2Cpp(""), Il2CppType.Of<UnityEngine.Object>().Pointer);
+
+            if (ptr == IntPtr.Zero)
+                return new UnityEngine.Object[0];
+
             return new Il2CppReferenceArray<UnityEngine.Object>(ptr);
         }
 
@@ -50,6 +54,10 @@ namespace UnityExplorer.Unstrip
         {
             var iCall = ICallHelper.GetICall<d_LoadAsset_Internal>("UnityEngine.AssetBundle::LoadAsset_Internal");
             var ptr = iCall.Invoke(m_bundlePtr, IL2CPP.ManagedStringToIl2Cpp(name), Il2CppType.Of<T>().Pointer);
+
+            if (ptr == IntPtr.Zero)
+                return null;
+
             return new UnityEngine.Object(ptr).TryCast<T>();
         }
     }

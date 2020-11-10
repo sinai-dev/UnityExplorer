@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using UnityExplorer.Inspectors;
 using UnityExplorer.UI.PageModel;
 using System.IO;
-using TMPro;
+//using TMPro;
 using System.Reflection;
 using UnityExplorer.Helpers;
 #if CPP
@@ -19,36 +19,29 @@ namespace UnityExplorer.UI
         public static EventSystem EventSys { get; private set; }
         public static StandaloneInputModule InputModule { get; private set; }
 
-        public static TMP_FontAsset ConsoleFont { get; private set; }
+        internal static Material UIMaterial { get; private set; }
+        internal static Sprite ResizeCursor { get; private set; }
+        internal static Font ConsoleFont { get; private set; }
+        internal static Font DefaultFont { get; private set; }
 
         public static void Init()
         {
-            var bundlePath = ExplorerCore.EXPLORER_FOLDER + @"\tmp.bundle";
+            var bundlePath = ExplorerCore.EXPLORER_FOLDER + @"\explorerui.bundle";
             if (File.Exists(bundlePath))
             {
                 var bundle = AssetBundle.LoadFromFile(bundlePath);
 
-                bundle.LoadAllAssets();
-                ExplorerCore.Log("Loaded TMP bundle");
+                UIMaterial = bundle.LoadAsset<Material>("UIMaterial");
+                ResizeCursor = bundle.LoadAsset<Sprite>("cursor");
 
-                if (TMP_Settings.instance == null)
-                {
-                    var settings = bundle.LoadAsset<TMP_Settings>("TMP Settings");
+                ConsoleFont = bundle.LoadAsset<Font>("CONSOLA");
+                DefaultFont = bundle.LoadAsset<Font>("CONSOLA");
 
-#if MONO
-                    typeof(TMP_Settings)
-                        .GetField("s_Instance", ReflectionHelpers.CommonFlags)
-                        .SetValue(null, settings);
-#else
-                    TMP_Settings.s_Instance = settings;
-#endif
-                }
-
-                ConsoleFont = bundle.LoadAsset<TMP_FontAsset>("CONSOLA SDF");
+                ExplorerCore.Log("Loaded UI bundle");
             }
-            else if (TMP_Settings.instance == null)
+            else
             {
-                ExplorerCore.LogWarning(@"This game does not seem to have the TMP Resources package, and the TMP AssetBundle was not found at 'Mods\UnityExplorer\tmp.bundle\'!");
+                ExplorerCore.LogWarning("Could not find the ExplorerUI Bundle! It should exist at '" + bundlePath + "'");
                 return;
             }
 
@@ -107,12 +100,14 @@ namespace UnityExplorer.UI
                 PanelDragger.Instance.Update();
             }
 
-            foreach (var slider in SliderScrollbar.Instances)
+            for (int i = 0; i < SliderScrollbar.Instances.Count; i++)
             {
-                if (slider.m_slider.gameObject.activeInHierarchy)
-                {
+                var slider = SliderScrollbar.Instances[i];
+
+                if (slider.CheckDestroyed())
+                    i--;
+                else
                     slider.Update();
-                }
             }
         }
 

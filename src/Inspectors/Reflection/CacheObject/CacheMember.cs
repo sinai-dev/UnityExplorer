@@ -172,7 +172,7 @@ namespace UnityExplorer.Inspectors.Reflection
             }
             else if (MemInfo is PropertyInfo pi)
             {
-                if (pi.GetAccessors()[0].IsStatic)
+                if (pi.GetAccessors(true)[0].IsStatic)
                 {
                     isStatic = true;
                     memberColor = SyntaxColors.Prop_Static;

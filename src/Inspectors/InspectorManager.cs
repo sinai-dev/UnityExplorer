@@ -7,7 +7,7 @@ using UnityExplorer.UI.PageModel;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using TMPro;
+//using TMPro;
 using UnityExplorer.Inspectors.Reflection;
 
 namespace UnityExplorer.Inspectors
@@ -277,9 +277,9 @@ namespace UnityExplorer.Inspectors
 
             // time scale input
 
-            var timeInputObj = UIFactory.CreateTMPInput(timeGroupObj, 14, 0, (int)TextAlignmentOptions.MidlineLeft);
-            var timeInput = timeInputObj.GetComponent<TMP_InputField>();
-            timeInput.characterValidation = TMP_InputField.CharacterValidation.Decimal;
+            var timeInputObj = UIFactory.CreateInputField(timeGroupObj);
+            var timeInput = timeInputObj.GetComponent<InputField>();
+            timeInput.characterValidation = InputField.CharacterValidation.Decimal;
             var timeInputLayout = timeInputObj.AddComponent<LayoutElement>();
             timeInputLayout.minWidth = 90;
             timeInputLayout.flexibleWidth = 0;

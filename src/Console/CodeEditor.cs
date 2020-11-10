@@ -3,7 +3,6 @@ using System.Linq;
 using System.Text;
 using UnityExplorer.Input;
 using UnityExplorer.Console.Lexer;
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -23,29 +22,20 @@ namespace UnityExplorer.Console
     {
         private readonly InputLexer inputLexer = new InputLexer();
 
-        public TMP_InputField InputField { get; internal set; }
+        public InputField InputField { get; internal set; }
 
-        public TextMeshProUGUI inputText;
-        private TextMeshProUGUI inputHighlightText;
-        private TextMeshProUGUI lineText;
+        public Text inputText;
+        private Text inputHighlightText;
         private Image background;
-        private Image lineNumberBackground;
         private Image scrollbar;
-
-        //private readonly RectTransform inputTextTransform;
-        //private readonly RectTransform lineHighlightTransform;
-        //private bool lineHighlightLocked;
-        //private Image lineHighlight;
 
         public int LineCount { get; private set; }
         public int CurrentLine { get; private set; }
-        public int CurrentColumn { get; private set; }
         public int CurrentIndent { get; private set; }
 
         private static readonly StringBuilder highlightedBuilder = new StringBuilder(4096);
-        private static readonly StringBuilder lineBuilder = new StringBuilder();
 
-        private static readonly KeyCode[] lineChangeKeys =
+        private static readonly KeyCode[] onFocusKeys =
         {
             KeyCode.Return, KeyCode.Backspace, KeyCode.UpArrow,
             KeyCode.DownArrow, KeyCode.LeftArrow, KeyCode.RightArrow
@@ -69,7 +59,7 @@ namespace UnityExplorer.Console
                     inputHighlightText.text = string.Empty;
                 }
 
-                inputText.ForceMeshUpdate(false);
+                //inputText.ForceMeshUpdate(false);
             }
         }
 
@@ -98,14 +88,6 @@ The following helper methods are available:
         {
             ConstructUI();
 
-            if (!AllReferencesAssigned())
-            {
-                throw new Exception("References are missing!");
-            }
-
-            //inputTextTransform = inputText.GetComponent<RectTransform>();
-            //lineHighlightTransform = lineHighlight.GetComponent<RectTransform>();
-
             ApplyTheme();
             inputLexer.UseMatchers(CSharpLexer.DelimiterSymbols, CSharpLexer.Matchers);
 
@@ -113,7 +95,7 @@ The following helper methods are available:
 #if CPP
             InputField.onValueChanged.AddListener(new Action<string>((string s) => { OnInputChanged(); }));
 #else
-            this.InputField.onValueChanged.AddListener((string s) => { OnInputChanged(); });
+            this.InputField.onValueChanged.AddListener((string s) => { OnInputChanged(s); });
 #endif
         }
 
@@ -125,12 +107,12 @@ The following helper methods are available:
                 AutoIndentCaret();
             }
 
-            if (EventSystem.current?.currentSelectedGameObject?.name == "InputField (TMP)")
+            if (EventSystem.current?.currentSelectedGameObject?.name == "InputField")
             {
                 bool focusKeyPressed = false;
 
                 // Check for any focus key pressed
-                foreach (KeyCode key in lineChangeKeys)
+                foreach (KeyCode key in onFocusKeys)
                 {
                     if (InputManager.GetKeyDown(key))
                     {
@@ -139,20 +121,18 @@ The following helper methods are available:
                     }
                 }
 
-                // Update line highlight
                 if (focusKeyPressed || InputManager.GetMouseButton(0))
                 {
-                    //UpdateHighlight();
                     ConsolePage.Instance.OnInputChanged();
                 }
             }
         }
 
-        public void OnInputChanged(bool forceUpdate = false)
+        public void OnInputChanged(string newInput, bool forceUpdate = false)
         {
-            string newText = InputField.text;
+            string newText = newInput;
 
-            UpdateIndent();
+            UpdateIndent(newInput);
 
             if (!forceUpdate && string.IsNullOrEmpty(newText))
             {
@@ -163,152 +143,39 @@ The following helper methods are available:
                 inputHighlightText.text = SyntaxHighlightContent(newText);
             }
 
-            UpdateLineNumbers();
-            //UpdateHighlight();
-
             ConsolePage.Instance.OnInputChanged();
         }
 
-        //public void SetLineHighlight(int lineNumber, bool lockLineHighlight)
-        //{
-        //    if (lineNumber < 1 || lineNumber > LineCount)
-        //    {
-        //        return;
-        //    }
-
-        //    lineHighlightTransform.anchoredPosition = new Vector2(5,
-        //        (inputText.textInfo.lineInfo[inputText.textInfo.characterInfo[0].lineNumber].lineHeight *
-        //        //-(lineNumber - 1)) - 4f +
-        //        -(lineNumber - 1)) +
-        //        inputTextTransform.anchoredPosition.y);
-
-        //    lineHighlightLocked = lockLineHighlight;
-        //}
-
-        private void UpdateLineNumbers()
-        {
-            int currentLineCount = inputText.textInfo.lineCount;
-
-            int currentLineNumber = 1;
-
-            if (currentLineCount != LineCount)
-            {
-                try
-                {
-                    lineBuilder.Length = 0;
-
-                    for (int i = 1; i < currentLineCount + 2; i++)
-                    {
-                        if (i - 1 > 0 && i - 1 < currentLineCount - 1)
-                        {
-                            int characterStart = inputText.textInfo.lineInfo[i - 1].firstCharacterIndex;
-                            int characterCount = inputText.textInfo.lineInfo[i - 1].characterCount;
-
-                            if (characterStart >= 0 && characterStart < inputText.text.Length &&
-                                characterCount != 0 && !inputText.text.Substring(characterStart, characterCount).Contains("\n"))
-                            {
-                                lineBuilder.Append("\n");
-                                continue;
-                            }
-                        }
-
-                        lineBuilder.Append(currentLineNumber);
-                        lineBuilder.Append('\n');
-
-                        currentLineNumber++;
-
-                        if (i - 1 == 0 && i - 1 < currentLineCount - 1)
-                        {
-                            int characterStart = inputText.textInfo.lineInfo[i - 1].firstCharacterIndex;
-                            int characterCount = inputText.textInfo.lineInfo[i - 1].characterCount;
-
-                            if (characterStart >= 0 && characterStart < inputText.text.Length &&
-                                characterCount != 0 && !inputText.text.Substring(characterStart, characterCount).Contains("\n"))
-                            {
-                                lineBuilder.Append("\n");
-                                continue;
-                            }
-                        }
-                    }
-
-                    lineText.text = lineBuilder.ToString();
-                    LineCount = currentLineCount;
-                }
-                catch { }
-            }
-        }
-
-        private void UpdateIndent()
+        private void UpdateIndent(string newText)
         {
             int caret = InputField.caretPosition;
 
-            if (caret < 0 || caret >= inputText.textInfo.characterInfo.Length)
+            int len = newText.Length;
+            if (caret < 0 || caret >= len)
             {
-                while (caret >= 0 && caret >= inputText.textInfo.characterInfo.Length)
-                {
+                while (caret >= 0 && caret >= len)
                     caret--;
-                }
 
-                if (caret < 0 || caret >= inputText.textInfo.characterInfo.Length)
-                {
+                if (caret < 0)
                     return;
-                }
             }
 
-            CurrentLine = inputText.textInfo.characterInfo[caret].lineNumber;
-
-            int charCount = 0;
-            for (int i = 0; i < CurrentLine; i++)
-            {
-                charCount += inputText.textInfo.lineInfo[i].characterCount;
-            }
-
-            CurrentColumn = caret - charCount;
             CurrentIndent = 0;
 
-            for (int i = 0; i < caret && i < InputField.text.Length; i++)
+            for (int i = 0; i < caret && i < newText.Length; i++)
             {
-                char character = InputField.text[i];
+                char character = newText[i];
 
                 if (character == CSharpLexer.indentIncreaseCharacter)
-                {
                     CurrentIndent++;
-                }
 
                 if (character == CSharpLexer.indentDecreaseCharacter)
-                {
                     CurrentIndent--;
-                }
             }
 
             if (CurrentIndent < 0)
-            {
                 CurrentIndent = 0;
-            }
         }
-
-        //private void UpdateHighlight()
-        //{
-        //    if (lineHighlightLocked)
-        //    {
-        //        return;
-        //    }
-
-        //    try
-        //    {
-        //        int caret = InputField.caretPosition - 1;
-
-        //        float lineHeight = inputText.textInfo.lineInfo[inputText.textInfo.characterInfo[0].lineNumber].lineHeight;
-        //        int lineNumber = inputText.textInfo.characterInfo[caret].lineNumber;
-        //        float offset = lineNumber + inputTextTransform.anchoredPosition.y;
-
-        //        lineHighlightTransform.anchoredPosition = new Vector2(5, -(offset * lineHeight));
-        //    }
-        //    catch //(Exception e)
-        //    {
-        //        //ExplorerCore.LogWarning("Exception on Update Line Highlight: " + e);
-        //    }
-        //}
 
         private const string CLOSE_COLOR_TAG = "</color>";
 
@@ -325,7 +192,7 @@ The following helper methods are available:
                     highlightedBuilder.Append(inputText[i]);
                 }
 
-                highlightedBuilder.Append(match.htmlColor);
+                highlightedBuilder.Append($"{match.htmlColor}");
 
                 for (int i = match.startIndex; i < match.endIndex; i++)
                 {
@@ -388,20 +255,21 @@ The following helper methods are available:
                     // insert the actual auto indent now
                     InputField.text = InputField.text.Insert(caretPos, indent);
 
-                    InputField.stringPosition = caretPos + indent.Length;
+                    //InputField.stringPosition = caretPos + indent.Length;
+                    InputField.caretPosition = caretPos + indent.Length;
                 }
             }
 
             // Update line column and indent positions
-            UpdateIndent();
+            UpdateIndent(InputField.text);
 
             inputText.text = InputField.text;
-            inputText.SetText(InputField.text, true);
+            //inputText.SetText(InputField.text, true);
             inputText.Rebuild(CanvasUpdate.Prelayout);
             InputField.ForceLabelUpdate();
             InputField.Rebuild(CanvasUpdate.Prelayout);
 
-            OnInputChanged(true);
+            OnInputChanged(inputText.text, true);
         }
 
         private string GetAutoIndentTab(int amount)
@@ -418,12 +286,7 @@ The following helper methods are available:
 
         // ============== Theme ============== //
 
-        private static Color caretColor = new Color32(255, 255, 255, 255);
-        private static Color textColor = new Color32(255, 255, 255, 255);
         private static Color backgroundColor = new Color32(37, 37, 37, 255);
-        //private static Color lineHighlightColor = new Color32(50, 50, 50, 255);
-        private static Color lineNumberBackgroundColor = new Color32(25, 25, 25, 255);
-        private static Color lineNumberTextColor = new Color32(180, 180, 180, 255);
         private static Color scrollbarColor = new Color32(45, 50, 50, 255);
 
         private void ApplyTheme()
@@ -434,33 +297,12 @@ The following helper methods are available:
             highlightTextRect.offsetMin = Vector2.zero;
             highlightTextRect.offsetMax = Vector2.zero;
 
-            InputField.caretColor = caretColor;
-            inputText.color = textColor;
-            inputHighlightText.color = textColor;
+            InputField.caretColor = Color.white;
+            inputText.color = new Color(1, 1, 1, 0.51f);
+            inputHighlightText.color = Color.white;
             background.color = backgroundColor;
-            //lineHighlight.color = lineHighlightColor;
-            lineNumberBackground.color = lineNumberBackgroundColor;
-            lineText.color = lineNumberTextColor;
             scrollbar.color = scrollbarColor;
         }
-
-        private bool AllReferencesAssigned()
-        {
-            if (!InputField ||
-                !inputText ||
-                !inputHighlightText ||
-                !lineText ||
-                !background ||
-                //!lineHighlight ||
-                !lineNumberBackground ||
-                !scrollbar)
-            {
-                // One or more references are not assigned
-                return false;
-            }
-            return true;
-        }
-
 
         // ========== UI CONSTRUCTION =========== //
 
@@ -589,81 +431,38 @@ The following helper methods are available:
             mainBgRect.offsetMin = Vector2.zero;
             mainBgRect.offsetMax = Vector2.zero;
 
-            var mainBgImage = mainBg.AddComponent<Image>();
+            var mainBgImage = mainBg.AddGraphic<Image>();
 
-            //var lineHighlight = UIFactory.CreateUIObject("LineHighlight", consoleBase);
+            var inputObj = UIFactory.CreateInputField(consoleBase, 14, 0);
 
-            //var lineHighlightRect = lineHighlight.GetComponent<RectTransform>();
-            //lineHighlightRect.pivot = new Vector2(0.5f, 1);
-            //lineHighlightRect.anchorMin = new Vector2(0, 1);
-            //lineHighlightRect.anchorMax = new Vector2(1, 1);
-            //lineHighlightRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 21);
-
-            //var lineHighlightImage = lineHighlight.GetComponent<Image>();
-            //if (!lineHighlightImage)
-            //{
-            //    lineHighlightImage = lineHighlight.AddComponent<Image>();
-            //}
-
-            var linesBg = UIFactory.CreateUIObject("LinesBackground", consoleBase);
-            var linesBgRect = linesBg.GetComponent<RectTransform>();
-            linesBgRect.anchorMin = Vector2.zero;
-            linesBgRect.anchorMax = new Vector2(0, 1);
-            linesBgRect.offsetMin = new Vector2(-17.5f, 0);
-            linesBgRect.offsetMax = new Vector2(17.5f, 0);
-            linesBgRect.sizeDelta = new Vector2(65, 0);
-
-            var linesBgImage = linesBg.AddComponent<Image>();
-
-            var inputObj = UIFactory.CreateTMPInput(consoleBase);
-
-            var inputField = inputObj.GetComponent<TMP_InputField>();
-            inputField.richText = false;
-            inputField.restoreOriginalTextOnEscape = false;
+            var inputField = inputObj.GetComponent<InputField>();
+            //inputField.richText = false;
+            //inputField.restoreOriginalTextOnEscape = false;
 
             var inputRect = inputObj.GetComponent<RectTransform>();
-            inputRect.pivot = new Vector2(0.5f, 0.5f);
+            inputRect.pivot = new Vector2(0, 1);
             inputRect.anchorMin = Vector2.zero;
-            inputRect.anchorMax = new Vector2(0.92f, 1);
+            inputRect.anchorMax = Vector2.one;
             inputRect.offsetMin = new Vector2(20, 0);
             inputRect.offsetMax = new Vector2(14, 0);
-            inputRect.anchoredPosition = new Vector2(40, 0);
 
-            var textAreaObj = inputObj.transform.Find("TextArea");
-            var textAreaRect = textAreaObj.GetComponent<RectTransform>();
-            textAreaRect.pivot = new Vector2(0.5f, 0.5f);
-            textAreaRect.anchorMin = Vector2.zero;
-            textAreaRect.anchorMax = Vector2.one;
+            var mainTextObj = inputField.textComponent.gameObject;
 
-            var mainTextObj = textAreaObj.transform.Find("Text");
-            var mainTextRect = mainTextObj.GetComponent<RectTransform>();
-            mainTextRect.pivot = new Vector2(0.5f, 0.5f);
-            mainTextRect.anchorMin = Vector2.zero;
-            mainTextRect.anchorMax = Vector2.one;
-            mainTextRect.offsetMin = Vector2.zero;
-            mainTextRect.offsetMax = Vector2.zero;
+            var mainTextInput = mainTextObj.GetComponent<Text>();
 
-            var mainTextInput = mainTextObj.GetComponent<TextMeshProUGUI>();
-            //mainTextInput.fontSize = 18;
-
-            var placeHolderText = textAreaObj.transform.Find("Placeholder").GetComponent<TextMeshProUGUI>();
-            placeHolderText.text = CodeEditor.STARTUP_TEXT;
-
-            var linesTextObj = UIFactory.CreateUIObject("LinesText", mainTextObj.gameObject);
-            var linesTextRect = linesTextObj.GetComponent<RectTransform>();
-
-            var linesTextInput = linesTextObj.AddComponent<TextMeshProUGUI>();
-            linesTextInput.fontSize = 18;
+            var placeHolderText = inputField.placeholder.GetComponent<Text>();
+            placeHolderText.text = STARTUP_TEXT;
 
             var highlightTextObj = UIFactory.CreateUIObject("HighlightText", mainTextObj.gameObject);
             var highlightTextRect = highlightTextObj.GetComponent<RectTransform>();
+            highlightTextRect.pivot = new Vector2(0, 1);
             highlightTextRect.anchorMin = Vector2.zero;
             highlightTextRect.anchorMax = Vector2.one;
-            highlightTextRect.offsetMin = Vector2.zero;
-            highlightTextRect.offsetMax = Vector2.zero;
+            highlightTextRect.offsetMin = new Vector2(20, 0);
+            highlightTextRect.offsetMax = new Vector2(14, 0);
 
-            var highlightTextInput = highlightTextObj.AddComponent<TextMeshProUGUI>();
-            //highlightTextInput.fontSize = 18;
+            var highlightTextInput = highlightTextObj.AddGraphic<Text>();
+            highlightTextInput.supportRichText = true;
 
             var scroll = UIFactory.CreateScrollbar(consoleBase);
 
@@ -681,19 +480,7 @@ The following helper methods are available:
 
             var scrollImage = scroll.GetComponent<Image>();
 
-            var tmpInput = inputObj.GetComponent<TMP_InputField>();
-            tmpInput.scrollSensitivity = 15;
-            tmpInput.verticalScrollbar = scroller;
-
-            // set lines text anchors here after UI is fleshed out
-            linesTextRect.pivot = Vector2.zero;
-            linesTextRect.anchorMin = new Vector2(0, 0);
-            linesTextRect.anchorMax = new Vector2(1, 1);
-            linesTextRect.offsetMin = Vector2.zero;
-            linesTextRect.offsetMax = Vector2.zero;
-            linesTextRect.anchoredPosition = new Vector2(-40, 0);
-
-            tmpInput.GetComponentInChildren<RectMask2D>().enabled = false;
+            inputField.GetComponentInChildren<RectMask2D>().enabled = false;
             inputObj.GetComponent<Image>().enabled = false;
 
             #endregion
@@ -723,66 +510,18 @@ The following helper methods are available:
 #endif
             void CompileCallback()
             {
-                if (!string.IsNullOrEmpty(tmpInput.text))
+                if (!string.IsNullOrEmpty(inputField.text))
                 {
-                    ConsolePage.Instance.Evaluate(tmpInput.text.Trim());
+                    ConsolePage.Instance.Evaluate(inputField.text.Trim());
                 }
             }
 
             #endregion
 
-            #region FONT
+            mainTextInput.supportRichText = false;
 
-            TMP_FontAsset fontToUse = UIManager.ConsoleFont;
-            if (fontToUse == null)
-            {
-#if CPP
-                UnityEngine.Object[] fonts = ResourcesUnstrip.FindObjectsOfTypeAll(Il2CppType.Of<TMP_FontAsset>());
-                foreach (UnityEngine.Object font in fonts)
-                {
-                    TMP_FontAsset fontCast = font.Il2CppCast(typeof(TMP_FontAsset)) as TMP_FontAsset;
-
-                    if (fontCast.name.Contains("LiberationSans"))
-                    {
-                        fontToUse = fontCast;
-                        break;
-                    }
-                }
-#else
-                var fonts = Resources.FindObjectsOfTypeAll<TMP_FontAsset>();
-                foreach (var font in fonts)
-                {
-                    if (font.name.Contains("LiberationSans"))
-                    {
-                        fontToUse = font;
-                        break;
-                    }
-                }
-#endif
-            }
-
-            if (fontToUse != null)
-            {
-                UnityEngine.TextCore.FaceInfo faceInfo = fontToUse.faceInfo;
-                fontToUse.tabSize = 10;
-                faceInfo.tabWidth = 10;
-#if CPP
-                fontToUse.faceInfo = faceInfo;
-#else
-                typeof(TMP_FontAsset)
-                    .GetField("m_FaceInfo", BindingFlags.NonPublic | BindingFlags.Instance)
-                    .SetValue(fontToUse, faceInfo);
-#endif
-
-                tmpInput.fontAsset = fontToUse;
-
-                mainTextInput.font = fontToUse;
-                mainTextInput.fontSize = 18;
-
-                highlightTextInput.font = fontToUse;
-                highlightTextInput.fontSize = 18;
-            }
-            #endregion
+            mainTextInput.font = UIManager.ConsoleFont;
+            highlightTextInput.font = UIManager.ConsoleFont;
 
             // assign references
 
@@ -790,10 +529,7 @@ The following helper methods are available:
 
             this.inputText = mainTextInput;
             this.inputHighlightText = highlightTextInput;
-            this.lineText = linesTextInput;
             this.background = mainBgImage;
-            //this.lineHighlight = lineHighlightImage;
-            this.lineNumberBackground = linesBgImage;
             this.scrollbar = scrollImage;
         }
     }

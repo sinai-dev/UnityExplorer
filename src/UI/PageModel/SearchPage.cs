@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
+//using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -51,9 +51,9 @@ namespace UnityExplorer.UI.PageModel
         private Text m_resultCountText;
 
         internal SearchContext m_context;
-        private TMP_InputField m_customTypeInput;
+        private InputField m_customTypeInput;
 
-        private TMP_InputField m_nameInput;
+        private InputField m_nameInput;
 
         private Button m_selectedContextButton;
         private readonly Dictionary<SearchContext, Button> m_contextButtons = new Dictionary<SearchContext, Button>();
@@ -94,10 +94,14 @@ namespace UnityExplorer.UI.PageModel
 
         public override void Update()
         {
-            // todo update scene filter options
             if (HaveScenesChanged())
             {
                 RefreshSceneDropdown();
+            }
+
+            if (m_customTypeInput.isFocused && m_context != SearchContext.Custom)
+            {
+                OnContextButtonClicked(SearchContext.Custom);
             }
         }
 
@@ -480,20 +484,20 @@ namespace UnityExplorer.UI.PageModel
 
             // custom type input
 
-            var customTypeObj = UIFactory.CreateTMPInput(contextRowObj, 13, 0, (int)TextAlignmentOptions.MidlineLeft);
+            var customTypeObj = UIFactory.CreateInputField(contextRowObj);
             var customTypeLayout = customTypeObj.AddComponent<LayoutElement>();
             customTypeLayout.minWidth = 250;
             customTypeLayout.flexibleWidth = 2000;
             customTypeLayout.minHeight = 25;
             customTypeLayout.flexibleHeight = 0;
-            m_customTypeInput = customTypeObj.GetComponent<TMP_InputField>();
-            m_customTypeInput.placeholder.gameObject.GetComponent<TextMeshProUGUI>().text = "eg. UnityEngine.Texture2D, etc...";
-            m_customTypeInput.onFocusSelectAll = true;
-#if MONO
-            m_customTypeInput.onSelect.AddListener((string val) => { OnContextButtonClicked(SearchContext.Custom); });
-#else
-            m_customTypeInput.onSelect.AddListener(new Action<string>((string val) => { OnContextButtonClicked(SearchContext.Custom); }));
-#endif
+            m_customTypeInput = customTypeObj.GetComponent<InputField>();
+            m_customTypeInput.placeholder.gameObject.GetComponent<Text>().text = "eg. UnityEngine.Texture2D, etc...";
+            //m_customTypeInput.onFocusSelectAll = true;
+//#if MONO
+//            m_customTypeInput.onSelect.AddListener((string val) => { OnContextButtonClicked(SearchContext.Custom); });
+//#else
+//            m_customTypeInput.onSelect.AddListener(new Action<string>((string val) => { OnContextButtonClicked(SearchContext.Custom); }));
+//#endif
 
             // search input
 
@@ -515,8 +519,8 @@ namespace UnityExplorer.UI.PageModel
             nameLabelLayout.minWidth = 125;
             nameLabelLayout.minHeight = 25;
 
-            var nameInputObj = UIFactory.CreateTMPInput(nameRowObj, 14, 0, (int)TextAlignmentOptions.MidlineLeft);
-            m_nameInput = nameInputObj.GetComponent<TMP_InputField>();
+            var nameInputObj = UIFactory.CreateInputField(nameRowObj);
+            m_nameInput = nameInputObj.GetComponent<InputField>();
             //m_nameInput.placeholder.gameObject.GetComponent<TextMeshProUGUI>().text = "";
             var nameInputLayout = nameInputObj.AddComponent<LayoutElement>();
             nameInputLayout.minWidth = 150;

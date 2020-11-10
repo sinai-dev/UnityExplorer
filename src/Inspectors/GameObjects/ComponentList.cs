@@ -5,7 +5,7 @@ using UnityExplorer.Helpers;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Shared;
 using UnityExplorer.Unstrip;
-using TMPro;
+//using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Input;

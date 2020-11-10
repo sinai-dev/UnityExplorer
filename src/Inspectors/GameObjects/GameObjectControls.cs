@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityExplorer.Helpers;
 using UnityExplorer.UI;
-using TMPro;
+//using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Input;
@@ -20,7 +20,7 @@ namespace UnityExplorer.Inspectors.GameObjects
             Instance = this;
         }
 
-        private static TMP_InputField s_setParentInput;
+        private static InputField s_setParentInput;
 
         private static ControlEditor s_positionControl;
         private static ControlEditor s_localPosControl;
@@ -31,9 +31,9 @@ namespace UnityExplorer.Inspectors.GameObjects
 
         internal struct ControlEditor
         {
-            public TMP_InputField fullValue;
+            public InputField fullValue;
             public Slider[] sliders;
-            public TMP_InputField[] inputs;
+            public InputField[] inputs;
             public Text[] values;
         }
 
@@ -185,7 +185,7 @@ namespace UnityExplorer.Inspectors.GameObjects
 
             // get relevant input for controltype + value
 
-            TMP_InputField[] inputs = null;
+            InputField[] inputs = null;
             switch (controlType)
             {
                 case ControlType.position:
@@ -197,7 +197,7 @@ namespace UnityExplorer.Inspectors.GameObjects
                 case ControlType.localScale:
                     inputs = s_scaleControl.inputs; break;
             }
-            TMP_InputField input = inputs[(int)vectorValue];
+            InputField input = inputs[(int)vectorValue];
 
             float val = float.Parse(input.text);
 
@@ -357,9 +357,9 @@ namespace UnityExplorer.Inspectors.GameObjects
             setParentLabelLayout.minHeight = 25;
             setParentLabelLayout.flexibleWidth = 0;
 
-            var setParentInputObj = UIFactory.CreateTMPInput(setParentGroupObj, 14, 0, (int)TextAlignmentOptions.MidlineLeft);
-            s_setParentInput = setParentInputObj.GetComponent<TMP_InputField>();
-            var placeholderInput = setParentInputObj.transform.Find("TextArea/Placeholder").GetComponent<TextMeshProUGUI>();
+            var setParentInputObj = UIFactory.CreateInputField(setParentGroupObj);
+            s_setParentInput = setParentInputObj.GetComponent<InputField>();
+            var placeholderInput = s_setParentInput.placeholder.GetComponent<Text>();
             placeholderInput.text = "Enter a GameObject name or path...";
             var setParentInputLayout = setParentInputObj.AddComponent<LayoutElement>();
             setParentInputLayout.minHeight = 25;
@@ -421,11 +421,11 @@ namespace UnityExplorer.Inspectors.GameObjects
 
             // readonly value input
 
-            var valueInputObj = UIFactory.CreateTMPInput(topBarObj, 14, 0, (int)TextAlignmentOptions.MidlineLeft);
-            var valueInput = valueInputObj.GetComponent<TMP_InputField>();
+            var valueInputObj = UIFactory.CreateInputField(topBarObj);
+            var valueInput = valueInputObj.GetComponent<InputField>();
             valueInput.readOnly = true;
-            valueInput.richText = true;
-            valueInput.isRichTextEditingAllowed = true;
+            //valueInput.richText = true;
+            //valueInput.isRichTextEditingAllowed = true;
             var valueInputLayout = valueInputObj.AddComponent<LayoutElement>();
             valueInputLayout.minHeight = 25;
             valueInputLayout.flexibleHeight = 0;
@@ -435,7 +435,7 @@ namespace UnityExplorer.Inspectors.GameObjects
             editor.fullValue = valueInput;
 
             editor.sliders = new Slider[3];
-            editor.inputs = new TMP_InputField[3];
+            editor.inputs = new InputField[3];
             editor.values = new Text[3];
 
             var xRow = ConstructEditorRow(parent, editor, type, VectorValue.x);
@@ -540,9 +540,9 @@ namespace UnityExplorer.Inspectors.GameObjects
             inputHolderGroup.childForceExpandWidth = false;
             inputHolderGroup.childControlWidth = true;
 
-            var inputObj = UIFactory.CreateTMPInput(inputHolder, 14, 0, (int)TextAlignmentOptions.MidlineLeft);
-            var input = inputObj.GetComponent<TMP_InputField>();
-            input.characterValidation = TMP_InputField.CharacterValidation.Decimal;
+            var inputObj = UIFactory.CreateInputField(inputHolder);
+            var input = inputObj.GetComponent<InputField>();
+            input.characterValidation = InputField.CharacterValidation.Decimal;
 
             var inputLayout = inputObj.AddComponent<LayoutElement>();
             inputLayout.minHeight = 25;
