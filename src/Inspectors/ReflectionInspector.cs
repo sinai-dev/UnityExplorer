@@ -149,14 +149,7 @@ namespace UnityExplorer.Inspectors
 
                         if (mi != null)
                         {
-                            try
-                            {
-                                AppendParams(mi.GetParameters());
-                            }
-                            catch (Exception e)
-                            {
-                                ExplorerCore.Log(e);
-                            }
+                            AppendParams(mi.GetParameters());
                         }
                         else if (pi != null)
                         {
