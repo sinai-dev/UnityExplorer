@@ -355,9 +355,8 @@
     <Compile Include="UI\PageModel\ConsolePage.cs" />
     <Compile Include="Console\AutoCompleter.cs" />
     <Compile Include="Console\CodeEditor.cs" />
-    <Compile Include="Console\CSharpLexer.cs" />
     <Compile Include="Console\Lexer\CommentMatch.cs" />
-    <Compile Include="Console\Lexer\InputLexer.cs" />
+    <Compile Include="Console\CSharpLexer.cs" />
     <Compile Include="Console\Lexer\KeywordMatch.cs" />
     <Compile Include="Console\Lexer\StringMatch.cs" />
     <Compile Include="Console\Lexer\Matcher.cs" />

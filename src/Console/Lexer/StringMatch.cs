@@ -3,35 +3,24 @@ using UnityEngine;
 
 namespace UnityExplorer.Console.Lexer
 {
-    public sealed class StringMatch : Matcher
+    public class StringMatch : Matcher
     {
         public override Color HighlightColor => new Color(0.79f, 0.52f, 0.32f, 1.0f);
 
-        public override IEnumerable<char> StartChars { get { yield return '"'; } }
-        public override IEnumerable<char> EndChars { get { yield return '"'; } }
+        public override IEnumerable<char> StartChars => new[] { '"' };
+        public override IEnumerable<char> EndChars => new[] { '"' };
 
-        public override bool IsImplicitMatch(InputLexer lexer)
+        public override bool IsImplicitMatch(CSharpLexer lexer)
         {
             if (lexer.ReadNext() == '"')
             {
-                while (!IsClosingQuoteOrEndFile(lexer, lexer.ReadNext()))
-                {
-                    ;
-                }
+                while (!IsClosingQuoteOrEndFile(lexer, lexer.ReadNext())) { }
 
                 return true;
             }
             return false;
         }
 
-        private bool IsClosingQuoteOrEndFile(InputLexer lexer, char character)
-        {
-            if (lexer.EndOfStream == true ||
-                character == '"')
-            {
-                return true;
-            }
-            return false;
-        }
+        private bool IsClosingQuoteOrEndFile(CSharpLexer lexer, char character) => lexer.EndOfStream || character == '"';
     }
 }

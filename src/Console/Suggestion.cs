@@ -9,25 +9,22 @@ namespace UnityExplorer.Console
 {
     public struct Suggestion
     {
-        public string Full => Prefix + Addition;
+        public enum Contexts
+        {
+            Namespace,
+            Keyword,
+            Other
+        }
+
+        // ~~~~ Instance ~~~~
 
         public readonly string Prefix;
         public readonly string Addition;
         public readonly Contexts Context;
 
-        public Color TextColor
-        {
-            get
-            {
-                switch (Context)
-                {
-                    case Contexts.Namespace: return Color.grey;
-                    case Contexts.Keyword: return systemBlue;
-                    default: return Color.white;
-                }
-            }
-        }
-        private static readonly Color systemBlue = new Color(80f / 255f, 150f / 255f, 215f / 255f);
+        public string Full => Prefix + Addition;
+
+        public Color TextColor => GetTextColor();
 
         public Suggestion(string addition, string prefix, Contexts type)
         {
@@ -36,15 +33,25 @@ namespace UnityExplorer.Console
             Context = type;
         }
 
-        public enum Contexts
+        private Color GetTextColor()
         {
-            Namespace,
-            Keyword,
-            Other
+            switch (Context)
+            {
+                case Contexts.Namespace: return Color.grey;
+                case Contexts.Keyword: return keywordColor;
+                default: return Color.white;
+            }
         }
+
+        // ~~~~ Static ~~~~
 
         public static HashSet<string> Namespaces => m_namspaces ?? GetNamespaces();
         private static HashSet<string> m_namspaces;
+
+        public static HashSet<string> Keywords => m_keywords ?? (m_keywords = new HashSet<string>(CSharpLexer.validKeywordMatcher.Keywords));
+        private static HashSet<string> m_keywords;
+
+        private static readonly Color keywordColor = new Color(80f / 255f, 150f / 255f, 215f / 255f);
 
         private static HashSet<string> GetNamespaces()
         {
@@ -57,26 +64,6 @@ namespace UnityExplorer.Console
             return m_namspaces = set;
 
             IEnumerable<Type> GetTypes(Assembly asm) => asm.TryGetTypes();
-        }
-
-        public static HashSet<string> Keywords => m_keywords ?? GetKeywords();
-        private static HashSet<string> m_keywords;
-
-        private static HashSet<string> GetKeywords()
-        {
-            if (CSharpLexer.validKeywordMatcher.keywordCache == null)
-            {
-                return new HashSet<string>();
-            }
-
-            HashSet<string> set = new HashSet<string>();
-
-            foreach (string keyword in CSharpLexer.validKeywordMatcher.keywordCache)
-            {
-                set.Add(keyword);
-            }
-
-            return m_keywords = set;
         }
     }
 }

@@ -133,7 +133,7 @@ namespace UnityExplorer.Console
             {
                 var editor = ConsolePage.Instance.m_codeEditor;
 
-                var textGen = editor.inputText.cachedTextGenerator;
+                var textGen = editor.InputText.cachedTextGenerator;
 
                 //if (textGen.characters.Count < 1)
                 //    return;

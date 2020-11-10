@@ -2,14 +2,14 @@
 
 namespace UnityExplorer.Console.Lexer
 {
-    public sealed class NumberMatch : Matcher
+    public class NumberMatch : Matcher
     {
         public override Color HighlightColor => new Color(0.58f, 0.33f, 0.33f, 1.0f);
 
-        public override bool IsImplicitMatch(InputLexer lexer)
+        public override bool IsImplicitMatch(CSharpLexer lexer)
         {
             if (!char.IsWhiteSpace(lexer.Previous) &&
-                !lexer.IsSpecialSymbol(lexer.Previous, SpecialCharacterPosition.End))
+                !lexer.IsSpecialSymbol(lexer.Previous, DelimiterType.End))
             {
                 return false;
             }

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace UnityExplorer.Console.Lexer
 {
-    public sealed class CommentMatch : Matcher
+    public class CommentMatch : Matcher
     {
         public string lineCommentStart = @"//";
         public string blockCommentStart = @"/*";
@@ -12,9 +12,9 @@ namespace UnityExplorer.Console.Lexer
         public override Color HighlightColor => new Color(0.34f, 0.65f, 0.29f, 1.0f);
         public override IEnumerable<char> StartChars => new char[] { lineCommentStart[0], blockCommentStart[0] };
         public override IEnumerable<char> EndChars => new char[] { blockCommentEnd[0] };
-        public override bool IsImplicitMatch(InputLexer lexer) => IsMatch(lexer, lineCommentStart) || IsMatch(lexer, blockCommentStart);
+        public override bool IsImplicitMatch(CSharpLexer lexer) => IsMatch(lexer, lineCommentStart) || IsMatch(lexer, blockCommentStart);
 
-        private bool IsMatch(InputLexer lexer, string commentType)
+        private bool IsMatch(CSharpLexer lexer, string commentType)
         {
             if (!string.IsNullOrEmpty(commentType))
             {
@@ -32,11 +32,8 @@ namespace UnityExplorer.Console.Lexer
 
                 if (match)
                 {
-                    // Read until end
-                    while (!IsEndLineOrEndFile(lexer, lexer.ReadNext()))
-                    {
-                        ;
-                    }
+                    // Read until end of line or file
+                    while (!IsEndLineOrEndFile(lexer, lexer.ReadNext())) { }
 
                     return true;
                 }
@@ -44,6 +41,6 @@ namespace UnityExplorer.Console.Lexer
             return false;
         }
 
-        private bool IsEndLineOrEndFile(InputLexer lexer, char character) => lexer.EndOfStream || character == '\n' || character == '\r';
+        private bool IsEndLineOrEndFile(CSharpLexer lexer, char character) => lexer.EndOfStream || character == '\n' || character == '\r';
     }
 }

@@ -3,23 +3,22 @@ using UnityEngine;
 
 namespace UnityExplorer.Console.Lexer
 {
-    public sealed class KeywordMatch : Matcher
+    // I use two different KeywordMatch instances (valid and invalid).
+    // This class just contains common implementations.
+    public class KeywordMatch : Matcher
     {
-        public string keywords;
+        public string[] Keywords;
 
         public override Color HighlightColor => highlightColor;
         public Color highlightColor;
 
         private readonly HashSet<string> shortlist = new HashSet<string>();
         private readonly Stack<string> removeList = new Stack<string>();
-        public string[] keywordCache = null;
 
-        public override bool IsImplicitMatch(InputLexer lexer)
+        public override bool IsImplicitMatch(CSharpLexer lexer)
         {
-            BuildKeywordCache();
-
             if (!char.IsWhiteSpace(lexer.Previous) &&
-                !lexer.IsSpecialSymbol(lexer.Previous, SpecialCharacterPosition.End))
+                !lexer.IsSpecialSymbol(lexer.Previous, DelimiterType.End))
             {
                 return false;
             }
@@ -29,11 +28,11 @@ namespace UnityExplorer.Console.Lexer
             int currentIndex = 0;
             char currentChar = lexer.ReadNext();
 
-            for (int i = 0; i < keywordCache.Length; i++)
+            for (int i = 0; i < Keywords.Length; i++)
             {
-                if (keywordCache[i][0] == currentChar)
+                if (Keywords[i][0] == currentChar)
                 {
-                    shortlist.Add(keywordCache[i]);
+                    shortlist.Add(Keywords[i]);
                 }
             }
 
@@ -54,7 +53,7 @@ namespace UnityExplorer.Console.Lexer
                 currentIndex++;
 
                 if (char.IsWhiteSpace(currentChar) ||
-                    lexer.IsSpecialSymbol(currentChar, SpecialCharacterPosition.Start))
+                    lexer.IsSpecialSymbol(currentChar, DelimiterType.Start))
                 {
                     RemoveLongStrings(currentIndex);
                     lexer.Rollback(1);
@@ -92,24 +91,6 @@ namespace UnityExplorer.Console.Lexer
             while (removeList.Count > 0)
             {
                 shortlist.Remove(removeList.Pop());
-            }
-        }
-
-        private void BuildKeywordCache()
-        {
-            if (keywordCache == null)
-            {
-                string[] kwSplit = keywords.Split(' ');
-
-                List<string> list = new List<string>();
-                foreach (string kw in kwSplit)
-                {
-                    if (!string.IsNullOrEmpty(kw) && kw.Length > 0)
-                    {
-                        list.Add(kw);
-                    }
-                }
-                keywordCache = list.ToArray();
             }
         }
     }

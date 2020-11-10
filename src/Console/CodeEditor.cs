@@ -18,50 +18,27 @@ using UnhollowerRuntimeLib;
 
 namespace UnityExplorer.Console
 {
+    // Handles most of the UI side of the C# console, including syntax highlighting.
+
     public class CodeEditor
     {
-        private readonly InputLexer inputLexer = new InputLexer();
-
         public InputField InputField { get; internal set; }
+        public Text InputText { get; internal set; }
+        public int CurrentIndent { get; private set; }
 
-        public Text inputText;
         private Text inputHighlightText;
         private Image background;
         private Image scrollbar;
 
-        public int LineCount { get; private set; }
-        public int CurrentLine { get; private set; }
-        public int CurrentIndent { get; private set; }
-
-        private static readonly StringBuilder highlightedBuilder = new StringBuilder(4096);
+        public string HighlightedText => inputHighlightText.text;
+        private readonly CSharpLexer highlightLexer;
+        private readonly StringBuilder sbHighlight;
 
         private static readonly KeyCode[] onFocusKeys =
         {
             KeyCode.Return, KeyCode.Backspace, KeyCode.UpArrow,
             KeyCode.DownArrow, KeyCode.LeftArrow, KeyCode.RightArrow
         };
-
-        public string HighlightedText => inputHighlightText.text;
-
-        public string Text
-        {
-            get { return InputField.text; }
-            set
-            {
-                if (!string.IsNullOrEmpty(value))
-                {
-                    InputField.text = value;
-                    inputHighlightText.text = value;
-                }
-                else
-                {
-                    InputField.text = string.Empty;
-                    inputHighlightText.text = string.Empty;
-                }
-
-                //inputText.ForceMeshUpdate(false);
-            }
-        }
 
         internal const string STARTUP_TEXT = @"Welcome to the UnityExplorer C# Console.
 
@@ -86,14 +63,14 @@ The following helper methods are available:
 
         public CodeEditor()
         {
-            ConstructUI();
+            sbHighlight = new StringBuilder();
+            highlightLexer = new CSharpLexer();
 
-            ApplyTheme();
-            inputLexer.UseMatchers(CSharpLexer.DelimiterSymbols, CSharpLexer.Matchers);
+            ConstructUI();
 
             // subscribe to text input changing
 #if CPP
-            InputField.onValueChanged.AddListener(new Action<string>((string s) => { OnInputChanged(); }));
+            InputField.onValueChanged.AddListener(new Action<string>((string s) => { OnInputChanged(s); }));
 #else
             this.InputField.onValueChanged.AddListener((string s) => { OnInputChanged(s); });
 #endif
@@ -166,10 +143,10 @@ The following helper methods are available:
             {
                 char character = newText[i];
 
-                if (character == CSharpLexer.indentIncreaseCharacter)
+                if (character == CSharpLexer.indentOpen)
                     CurrentIndent++;
 
-                if (character == CSharpLexer.indentDecreaseCharacter)
+                if (character == CSharpLexer.indentClose)
                     CurrentIndent--;
             }
 
@@ -183,33 +160,33 @@ The following helper methods are available:
         {
             int offset = 0;
 
-            highlightedBuilder.Length = 0;
+            sbHighlight.Length = 0;
 
-            foreach (LexerMatchInfo match in inputLexer.LexInputString(inputText))
+            foreach (LexerMatchInfo match in highlightLexer.GetMatches(inputText))
             {
                 for (int i = offset; i < match.startIndex; i++)
                 {
-                    highlightedBuilder.Append(inputText[i]);
+                    sbHighlight.Append(inputText[i]);
                 }
 
-                highlightedBuilder.Append($"{match.htmlColor}");
+                sbHighlight.Append($"{match.htmlColor}");
 
                 for (int i = match.startIndex; i < match.endIndex; i++)
                 {
-                    highlightedBuilder.Append(inputText[i]);
+                    sbHighlight.Append(inputText[i]);
                 }
 
-                highlightedBuilder.Append(CLOSE_COLOR_TAG);
+                sbHighlight.Append(CLOSE_COLOR_TAG);
 
                 offset = match.endIndex;
             }
 
             for (int i = offset; i < inputText.Length; i++)
             {
-                highlightedBuilder.Append(inputText[i]);
+                sbHighlight.Append(inputText[i]);
             }
 
-            inputText = highlightedBuilder.ToString();
+            inputText = sbHighlight.ToString();
 
             return inputText;
         }
@@ -242,8 +219,8 @@ The following helper methods are available:
                     }
 
                     // check if should add auto-close }
-                    int numOpen = InputField.text.Where(x => x == CSharpLexer.indentIncreaseCharacter).Count();
-                    int numClose = InputField.text.Where(x => x == CSharpLexer.indentDecreaseCharacter).Count();
+                    int numOpen = InputField.text.Where(x => x == CSharpLexer.indentOpen).Count();
+                    int numClose = InputField.text.Where(x => x == CSharpLexer.indentClose).Count();
 
                     if (numOpen > numClose)
                     {
@@ -263,13 +240,13 @@ The following helper methods are available:
             // Update line column and indent positions
             UpdateIndent(InputField.text);
 
-            inputText.text = InputField.text;
+            InputText.text = InputField.text;
             //inputText.SetText(InputField.text, true);
-            inputText.Rebuild(CanvasUpdate.Prelayout);
+            InputText.Rebuild(CanvasUpdate.Prelayout);
             InputField.ForceLabelUpdate();
             InputField.Rebuild(CanvasUpdate.Prelayout);
 
-            OnInputChanged(inputText.text, true);
+            OnInputChanged(InputText.text, true);
         }
 
         private string GetAutoIndentTab(int amount)
@@ -282,26 +259,6 @@ The following helper methods are available:
             }
 
             return tab;
-        }
-
-        // ============== Theme ============== //
-
-        private static Color backgroundColor = new Color32(37, 37, 37, 255);
-        private static Color scrollbarColor = new Color32(45, 50, 50, 255);
-
-        private void ApplyTheme()
-        {
-            var highlightTextRect = inputHighlightText.GetComponent<RectTransform>();
-            highlightTextRect.anchorMin = Vector2.zero;
-            highlightTextRect.anchorMax = Vector2.one;
-            highlightTextRect.offsetMin = Vector2.zero;
-            highlightTextRect.offsetMax = Vector2.zero;
-
-            InputField.caretColor = Color.white;
-            inputText.color = new Color(1, 1, 1, 0.51f);
-            inputHighlightText.color = Color.white;
-            background.color = backgroundColor;
-            scrollbar.color = scrollbarColor;
         }
 
         // ========== UI CONSTRUCTION =========== //
@@ -523,14 +480,27 @@ The following helper methods are available:
             mainTextInput.font = UIManager.ConsoleFont;
             highlightTextInput.font = UIManager.ConsoleFont;
 
+            // reset this after formatting finalized
+            highlightTextRect.anchorMin = Vector2.zero;
+            highlightTextRect.anchorMax = Vector2.one;
+            highlightTextRect.offsetMin = Vector2.zero;
+            highlightTextRect.offsetMax = Vector2.zero;
+
             // assign references
 
             this.InputField = inputField;
 
-            this.inputText = mainTextInput;
+            this.InputText = mainTextInput;
             this.inputHighlightText = highlightTextInput;
             this.background = mainBgImage;
             this.scrollbar = scrollImage;
+
+            // set some colors
+            InputField.caretColor = Color.white;
+            InputText.color = new Color(1, 1, 1, 0.51f);
+            inputHighlightText.color = Color.white;
+            background.color = new Color32(37, 37, 37, 255);
+            scrollbar.color = new Color32(45, 50, 50, 255);
         }
     }
 }

@@ -4,54 +4,32 @@ using UnityEngine;
 
 namespace UnityExplorer.Console.Lexer
 {
-    public sealed class SymbolMatch : Matcher
+    public class SymbolMatch : Matcher
     {
         public override Color HighlightColor => new Color(0.58f, 0.47f, 0.37f, 1.0f);
 
-        public string Symbols => @"[ ] ( ) . ? : + - * / % & | ^ ~ = < > ++ -- && || << >> == != <= >= 
- += -= *= /= %= &= |= ^= <<= >>= -> ?? =>";
+        private readonly string[] symbols = new[]
+        {
+            "[", "]", "(", ")", ".", "?", ":", "+", "-", "*", "/", "%", "&", "|", "^", "~", "=", "<", ">", 
+            "++", "--", "&&", "||", "<<", ">>", "==", "!=", "<=", ">=", "+=", "-=", "*=", "/=", "%=", "&=",
+            "|=", "^=", "<<=", ">>=", "->", "??", "=>",
+        };
 
         private static readonly List<string> shortlist = new List<string>();
         private static readonly Stack<string> removeList = new Stack<string>();
-        private string[] symbolCache = null;
 
-        public override IEnumerable<char> StartChars
-        {
-            get
-            {
-                BuildSymbolCache();
-                foreach (string symbol in symbolCache.Where(x => x.Length > 0))
-                {
-                    yield return symbol[0];
-                }
-            }
-        }
+        public override IEnumerable<char> StartChars => symbols.Select(s => s[0]);
+        public override IEnumerable<char> EndChars => symbols.Select(s => s[0]);
 
-        public override IEnumerable<char> EndChars
-        {
-            get
-            {
-                BuildSymbolCache();
-                foreach (string symbol in symbolCache.Where(x => x.Length > 0))
-                {
-                    yield return symbol[0];
-                }
-            }
-        }
-
-        public override bool IsImplicitMatch(InputLexer lexer)
+        public override bool IsImplicitMatch(CSharpLexer lexer)
         {
             if (lexer == null)
-            {
                 return false;
-            }
-
-            BuildSymbolCache();
 
             if (!char.IsWhiteSpace(lexer.Previous) &&
                 !char.IsLetter(lexer.Previous) &&
                 !char.IsDigit(lexer.Previous) &&
-                !lexer.IsSpecialSymbol(lexer.Previous, SpecialCharacterPosition.End))
+                !lexer.IsSpecialSymbol(lexer.Previous, DelimiterType.End))
             {
                 return false;
             }
@@ -61,18 +39,14 @@ namespace UnityExplorer.Console.Lexer
             int currentIndex = 0;
             char currentChar = lexer.ReadNext();
 
-            for (int i = symbolCache.Length - 1; i >= 0; i--)
+            for (int i = symbols.Length - 1; i >= 0; i--)
             {
-                if (symbolCache[i][0] == currentChar)
-                {
-                    shortlist.Add(symbolCache[i]);
-                }
+                if (symbols[i][0] == currentChar)
+                    shortlist.Add(symbols[i]);
             }
 
             if (shortlist.Count == 0)
-            {
                 return false;
-            }
 
             do
             {
@@ -88,7 +62,7 @@ namespace UnityExplorer.Console.Lexer
                 if (char.IsWhiteSpace(currentChar) ||
                     char.IsLetter(currentChar) ||
                     char.IsDigit(currentChar) ||
-                    lexer.IsSpecialSymbol(currentChar, SpecialCharacterPosition.Start))
+                    lexer.IsSpecialSymbol(currentChar, DelimiterType.Start))
                 {
                     RemoveLongStrings(currentIndex);
                     lexer.Rollback(1);
@@ -127,25 +101,6 @@ namespace UnityExplorer.Console.Lexer
             {
                 shortlist.Remove(removeList.Pop());
             }
-        }
-
-        private void BuildSymbolCache()
-        {
-            if (symbolCache != null)
-            {
-                return;
-            }
-
-            string[] symSplit = Symbols.Split(' ');
-            List<string> list = new List<string>();
-            foreach (string sym in symSplit)
-            {
-                if (!string.IsNullOrEmpty(sym) && sym.Length > 0)
-                {
-                    list.Add(sym);
-                }
-            }
-            symbolCache = list.ToArray();
         }
     }
 }

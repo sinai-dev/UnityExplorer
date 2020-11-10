@@ -78,18 +78,15 @@ namespace UnityExplorer.UI
             if (selectable is Button button)
             {
 #if CPP
-                button.onClick.AddListener(new Action(() =>
-                {
-                    button.OnDeselect(null);
-                }));
+                button.onClick.AddListener(new Action(Deselect));
 #else
 				button.onClick.AddListener(Deselect);
-
+#endif
                 void Deselect()
                 {
 					button.OnDeselect(null);
                 }
-#endif
+
             }
 
             selectable.colors = colors;

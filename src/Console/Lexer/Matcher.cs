@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityExplorer.Unstrip;
 using UnityEngine;
+using System.Linq;
 
 namespace UnityExplorer.Console.Lexer
 {
@@ -9,14 +10,14 @@ namespace UnityExplorer.Console.Lexer
         public abstract Color HighlightColor { get; }
 
         public string HexColor => htmlColor ?? (htmlColor = "<color=#" + HighlightColor.ToHex() + ">");
-        private string htmlColor = null;
+        private string htmlColor;
 
-        public virtual IEnumerable<char> StartChars { get { yield break; } }
-        public virtual IEnumerable<char> EndChars { get { yield break; } }
+        public virtual IEnumerable<char> StartChars => Enumerable.Empty<char>();
+        public virtual IEnumerable<char> EndChars => Enumerable.Empty<char>();
 
-        public abstract bool IsImplicitMatch(InputLexer lexer);
+        public abstract bool IsImplicitMatch(CSharpLexer lexer);
 
-        public bool IsMatch(InputLexer lexer)
+        public bool IsMatch(CSharpLexer lexer)
         {
             if (IsImplicitMatch(lexer))
             {
