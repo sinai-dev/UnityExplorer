@@ -22,22 +22,13 @@ namespace UnityExplorer.Inspectors.Reflection
             UpdateValue();
         }
 
-        public override void UpdateValue()
+        public override void UpdateReflection()
         {
             if (HasParameters && !m_isEvaluating)
             {
                 // Need to enter parameters first.
                 return;
             }
-
-            //if (IValue is InteractiveDictionary iDict)
-            //{
-            //    if (!iDict.EnsureDictionaryIsSupported())
-            //    {
-            //        ReflectionException = "Not supported due to TypeInitializationException";
-            //        return;
-            //    }
-            //}
 
             try
             {
@@ -49,18 +40,17 @@ namespace UnityExplorer.Inspectors.Reflection
 
                     IValue.Value = pi.GetValue(target, ParseArguments());
 
-                    base.UpdateValue();
+                    //base.UpdateValue();
+
+                    m_evaluated = true;
+                    ReflectionException = null;
                 }
                 else // create a dummy value for Write-Only properties.
                 {
                     if (IValue.ValueType == typeof(string))
-                    {
                         IValue.Value = "";
-                    }
                     else
-                    {
                         IValue.Value = Activator.CreateInstance(IValue.ValueType);
-                    }
                 }
             }
             catch (Exception e)

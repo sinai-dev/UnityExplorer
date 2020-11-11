@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using UnityExplorer.Console;
 
-namespace UnityExplorer.UI.PageModel
+namespace UnityExplorer.UI.Modules
 {
     public class ConsolePage : MainMenu.Page
     {
@@ -25,11 +25,15 @@ namespace UnityExplorer.UI.PageModel
         public static readonly string[] DefaultUsing = new string[]
         {
             "System",
-            "UnityEngine",
             "System.Linq",
             "System.Collections",
             "System.Collections.Generic",
-            "System.Reflection"
+            "System.Reflection",
+            "UnityEngine",
+#if CPP
+            "UnhollowerBaseLib",
+            "UnhollowerRuntimeLib",
+#endif
         };
 
         public override void Init()
@@ -42,21 +46,14 @@ namespace UnityExplorer.UI.PageModel
 
                 AutoCompleter.Init();
 
-                try
-                {
-                    ResetConsole();
+                ResetConsole();
 
-                    // Make sure compiler is supported on this platform
-                    m_evaluator.Compile("");
+                // Make sure compiler is supported on this platform
+                m_evaluator.Compile("");
 
-                    foreach (string use in DefaultUsing)
-                    {
-                        AddUsing(use);
-                    }
-                }
-                catch (Exception e)
+                foreach (string use in DefaultUsing)
                 {
-                    ExplorerCore.LogWarning($"Exception setting up Console: {e.GetType()}, {e.Message}\r\n{e.StackTrace}");
+                    AddUsing(use);
                 }
             }
             catch (Exception e)

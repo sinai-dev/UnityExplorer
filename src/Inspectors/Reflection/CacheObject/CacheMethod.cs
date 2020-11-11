@@ -41,6 +41,11 @@ namespace UnityExplorer.Inspectors.Reflection
             // CacheMethod cannot UpdateValue directly. Need to Evaluate.
         }
 
+        public override void UpdateReflection()
+        {
+            // CacheMethod cannot UpdateValue directly. Need to Evaluate.
+        }
+
         public void Evaluate()
         {
             MethodInfo mi;
@@ -61,6 +66,7 @@ namespace UnityExplorer.Inspectors.Reflection
                 ret = mi.Invoke(mi.IsStatic ? null : DeclaringInstance, ParseArguments());
                 m_evaluated = true;
                 m_isEvaluating = false;
+                ReflectionException = null;
             }
             catch (Exception e)
             {
@@ -122,77 +128,5 @@ namespace UnityExplorer.Inspectors.Reflection
 
             return mi;
         }
-
-        // ==== GUI DRAW ====
-
-        //public override void Draw(Rect window, float width)
-        //{
-        //    base.Draw(window, width);
-        //}
-
-        public void DrawValue(Rect window, float width)
-        {
-            string typeLabel = $"<color={SyntaxColors.Class_Instance}>{IValue.ValueType.FullName}</color>";
-
-            if (m_evaluated)
-            {
-                if (m_cachedReturnValue != null)
-                {
-                    //m_cachedReturnValue.IValue.DrawValue(window, width);
-                }
-                else
-                {
-                    GUILayout.Label($"null ({typeLabel})", new GUILayoutOption[0]);
-                }
-            }
-            else
-            {
-                GUILayout.Label($"<color=grey><i>Not yet evaluated</i></color> ({typeLabel})", new GUILayoutOption[0]);
-            }
-        }
-
-        //public void DrawGenericArgsInput()
-        //{
-        //    GUILayout.Label($"<b><color=orange>Generic Arguments:</color></b>", new GUILayoutOption[0]);
-
-        //    for (int i = 0; i < this.GenericArgs.Length; i++)
-        //    {
-        //        string types = "";
-        //        if (this.GenericConstraints[i].Length > 0)
-        //        {
-        //            foreach (var constraint in this.GenericConstraints[i])
-        //            {
-        //                if (types != "") types += ", ";
-
-        //                string type;
-
-        //                if (constraint == null)
-        //                    type = "Any";
-        //                else
-        //                    type = constraint.ToString();
-
-        //                types += $"<color={Syntax.Class_Instance}>{type}</color>";
-        //            }
-        //        }
-        //        else
-        //        {
-        //            types = $"<color={Syntax.Class_Instance}>Any</color>";
-        //        }
-        //        var input = this.GenericArgInput[i];
-
-        //        GUIHelper.BeginHorizontal(new GUILayoutOption[0]);
-
-        //        GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-        //        GUILayout.Label(
-        //            $"<color={Syntax.StructGreen}>{this.GenericArgs[i].Name}</color>",
-        //            new GUILayoutOption[] { GUILayout.Width(15) }
-        //        );
-        //        this.GenericArgInput[i] = GUIHelper.TextField(input, new GUILayoutOption[] { GUILayout.Width(150) });
-        //        GUI.skin.label.alignment = TextAnchor.MiddleLeft;
-        //        GUILayout.Label(types, new GUILayoutOption[0]);
-
-        //        GUILayout.EndHorizontal();
-        //    }
-        //}
     }
 }

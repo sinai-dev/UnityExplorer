@@ -24,7 +24,7 @@ namespace UnityExplorer.Inspectors.Reflection
         //    return ret;
         //}
 
-        public static CacheMember GetCacheObject(MemberInfo member, object declaringInstance)
+        public static CacheMember GetCacheObject(MemberInfo member, object declaringInstance, GameObject parentUIContent)
         {
             CacheMember ret;
 
@@ -44,6 +44,8 @@ namespace UnityExplorer.Inspectors.Reflection
             {
                 return null;
             }
+
+            ret.m_parentContent = parentUIContent;
 
             return ret;
         }

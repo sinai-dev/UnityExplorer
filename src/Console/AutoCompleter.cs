@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityExplorer.UI;
-using UnityExplorer.UI.PageModel;
+using UnityExplorer.UI.Modules;
 
 namespace UnityExplorer.Console
 {
@@ -132,44 +132,22 @@ namespace UnityExplorer.Console
             try
             {
                 var editor = ConsolePage.Instance.m_codeEditor;
-
                 var textGen = editor.InputText.cachedTextGenerator;
-
-                //if (textGen.characters.Count < 1)
-                //    return;
-
                 int caretPos = editor.InputField.caretPosition;
 
-                if (caretPos >= 1)
-                    caretPos--;
-
-                if (caretPos < 0 || caretPos == m_lastCaretPos)
+                if (caretPos == m_lastCaretPos)
                     return;
 
                 m_lastCaretPos = caretPos;
 
+                if (caretPos >= 1)
+                    caretPos--;
+
                 var pos = textGen.characters[caretPos].cursorPos;
 
-                // todo this calculation isnt the right one to use. It's wrong if we hide the Debug Console.
+                pos = editor.InputField.transform.TransformPoint(pos);
 
-                var posOffset = MainMenu.Instance.MainPanel.transform.position;
-
-                pos = (Vector2)posOffset + pos + new Vector2(25, 35);
-
-                //// fix position when scrolled down
-                //var scrollSize = editor.InputField.verticalScrollbar.size;
-                //var scrollValue = editor.InputField.verticalScrollbar.value;
-
-                //scrollSize += (1 - scrollSize) * (1 - scrollValue);
-
-                //if (!Mathf.Approximately(scrollSize, 1))
-                //{
-                //    var height = editor.InputField.textViewport.rect.height;
-
-                //    pos.y += (1 / scrollSize * height) - height;
-                //}
-
-                m_mainObj.transform.position = new Vector3(pos.x, pos.y - 3, 0);
+                m_mainObj.transform.position = new Vector3(pos.x + 10, pos.y - 20, 0);
             }
             catch //(Exception e)
             {

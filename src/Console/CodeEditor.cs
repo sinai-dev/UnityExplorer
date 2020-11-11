@@ -7,9 +7,10 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityExplorer.UI;
-using UnityExplorer.UI.PageModel;
+using UnityExplorer.UI.Modules;
 using System.Collections.Generic;
 using System.Reflection;
+using UnityExplorer.UI.Shared;
 #if CPP
 using UnityExplorer.Unstrip;
 using UnityExplorer.Helpers;
@@ -26,11 +27,9 @@ namespace UnityExplorer.Console
         public Text InputText { get; internal set; }
         public int CurrentIndent { get; private set; }
 
-        private Text inputHighlightText;
-        private Image background;
-        private Image scrollbar;
-
         public string HighlightedText => inputHighlightText.text;
+        private Text inputHighlightText;
+
         private readonly CSharpLexer highlightLexer;
         private readonly StringBuilder sbHighlight;
 
@@ -68,7 +67,6 @@ The following helper methods are available:
 
             ConstructUI();
 
-            // subscribe to text input changing
 #if CPP
             InputField.onValueChanged.AddListener(new Action<string>((string s) => { OnInputChanged(s); }));
 #else
@@ -364,51 +362,20 @@ The following helper methods are available:
 
             #region CONSOLE INPUT
 
-            var consoleBase = UIFactory.CreateUIObject("CodeEditor", ConsolePage.Instance.Content);
+            int fontSize = 16;
 
-            var consoleLayout = consoleBase.AddComponent<LayoutElement>();
-            consoleLayout.preferredHeight = 500;
-            consoleLayout.flexibleHeight = 50;
+            var inputObj = UIFactory.CreateSrollInputField(ConsolePage.Instance.Content, out InputFieldScroller consoleScroll, fontSize);
 
-            consoleBase.AddComponent<RectMask2D>();
-
-            var mainRect = consoleBase.GetComponent<RectTransform>();
-            mainRect.pivot = Vector2.one * 0.5f;
-            mainRect.anchorMin = Vector2.zero;
-            mainRect.anchorMax = Vector2.one;
-            mainRect.offsetMin = Vector2.zero;
-            mainRect.offsetMax = Vector2.zero;
-
-            var mainBg = UIFactory.CreateUIObject("MainBackground", consoleBase);
-
-            var mainBgRect = mainBg.GetComponent<RectTransform>();
-            mainBgRect.pivot = new Vector2(0, 1);
-            mainBgRect.anchorMin = Vector2.zero;
-            mainBgRect.anchorMax = Vector2.one;
-            mainBgRect.offsetMin = Vector2.zero;
-            mainBgRect.offsetMax = Vector2.zero;
-
-            var mainBgImage = mainBg.AddGraphic<Image>();
-
-            var inputObj = UIFactory.CreateInputField(consoleBase, 14, 0);
-
-            var inputField = inputObj.GetComponent<InputField>();
-            //inputField.richText = false;
-            //inputField.restoreOriginalTextOnEscape = false;
-
-            var inputRect = inputObj.GetComponent<RectTransform>();
-            inputRect.pivot = new Vector2(0, 1);
-            inputRect.anchorMin = Vector2.zero;
-            inputRect.anchorMax = Vector2.one;
-            inputRect.offsetMin = new Vector2(20, 0);
-            inputRect.offsetMax = new Vector2(14, 0);
+            var inputField = consoleScroll.inputField;
 
             var mainTextObj = inputField.textComponent.gameObject;
-
-            var mainTextInput = mainTextObj.GetComponent<Text>();
+            var mainTextInput = inputField.textComponent;
+            mainTextInput.supportRichText = false;
+            mainTextInput.color = new Color(1, 1, 1, 0.5f);
 
             var placeHolderText = inputField.placeholder.GetComponent<Text>();
             placeHolderText.text = STARTUP_TEXT;
+            placeHolderText.fontSize = fontSize;
 
             var highlightTextObj = UIFactory.CreateUIObject("HighlightText", mainTextObj.gameObject);
             var highlightTextRect = highlightTextObj.GetComponent<RectTransform>();
@@ -420,25 +387,7 @@ The following helper methods are available:
 
             var highlightTextInput = highlightTextObj.AddGraphic<Text>();
             highlightTextInput.supportRichText = true;
-
-            var scroll = UIFactory.CreateScrollbar(consoleBase);
-
-            var scrollRect = scroll.GetComponent<RectTransform>();
-            scrollRect.anchorMin = new Vector2(1, 0);
-            scrollRect.anchorMax = new Vector2(1, 1);
-            scrollRect.pivot = new Vector2(0.5f, 1);
-            scrollRect.offsetMin = new Vector2(-25f, 0);
-
-            var scroller = scroll.GetComponent<Scrollbar>();
-            scroller.direction = Scrollbar.Direction.TopToBottom;
-            var scrollColors = scroller.colors;
-            scrollColors.normalColor = new Color(0.6f, 0.6f, 0.6f, 1.0f);
-            scroller.colors = scrollColors;
-
-            var scrollImage = scroll.GetComponent<Image>();
-
-            inputField.GetComponentInChildren<RectMask2D>().enabled = false;
-            inputObj.GetComponent<Image>().enabled = false;
+            highlightTextInput.fontSize = fontSize;
 
             #endregion
 
@@ -475,9 +424,10 @@ The following helper methods are available:
 
             #endregion
 
-            mainTextInput.supportRichText = false;
+            //mainTextInput.supportRichText = false;
 
             mainTextInput.font = UIManager.ConsoleFont;
+            placeHolderText.font = UIManager.ConsoleFont;
             highlightTextInput.font = UIManager.ConsoleFont;
 
             // reset this after formatting finalized
@@ -492,15 +442,6 @@ The following helper methods are available:
 
             this.InputText = mainTextInput;
             this.inputHighlightText = highlightTextInput;
-            this.background = mainBgImage;
-            this.scrollbar = scrollImage;
-
-            // set some colors
-            InputField.caretColor = Color.white;
-            InputText.color = new Color(1, 1, 1, 0.51f);
-            inputHighlightText.color = Color.white;
-            background.color = new Color32(37, 37, 37, 255);
-            scrollbar.color = new Color32(45, 50, 50, 255);
         }
     }
 }

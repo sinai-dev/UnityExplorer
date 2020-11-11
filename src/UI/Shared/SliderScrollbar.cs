@@ -15,6 +15,7 @@ public class SliderScrollbar
 
 	internal readonly Scrollbar m_scrollbar;
 	internal readonly Slider m_slider;
+    internal readonly RectTransform m_scrollRect;
 
 	public SliderScrollbar(Scrollbar scrollbar, Slider slider)
     {
@@ -22,6 +23,7 @@ public class SliderScrollbar
 
 		this.m_scrollbar = scrollbar;
 		this.m_slider = slider;
+        this.m_scrollRect = scrollbar.transform.parent.GetComponent<RectTransform>();
 
 #if MONO
 		this.m_scrollbar.onValueChanged.AddListener(this.OnScrollbarValueChanged);
@@ -73,7 +75,7 @@ public class SliderScrollbar
 	public void OnScrollbarValueChanged(float _value)
 	{
 		if (this.m_slider.value != _value)
-			this.m_slider.Set(_value, false);
+            this.m_slider.Set(_value, false);
 	}
 
 	public void OnSliderValueChanged(float _value)

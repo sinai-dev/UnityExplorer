@@ -5,8 +5,9 @@ using UnityExplorer.Unstrip;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Config;
+using UnityExplorer.UI.Shared;
 
-namespace UnityExplorer.UI.PageModel
+namespace UnityExplorer.UI.Modules
 {
     public class DebugConsole
     {
@@ -98,51 +99,49 @@ namespace UnityExplorer.UI.PageModel
             logAreaLayout.preferredHeight = 190;
             logAreaLayout.flexibleHeight = 0;
 
-            var inputObj = UIFactory.CreateInputField(logAreaObj, 14, 0, 1);
+            //var inputObj = UIFactory.CreateInputField(logAreaObj, 14, 0, 1);
 
-            var mainInputGroup = inputObj.GetComponent<VerticalLayoutGroup>();
-            mainInputGroup.padding.left = 8;
-            mainInputGroup.padding.right = 8;
-            mainInputGroup.padding.top = 5;
-            mainInputGroup.padding.bottom = 5;
+            //var mainInputGroup = inputObj.GetComponent<VerticalLayoutGroup>();
+            //mainInputGroup.padding.left = 8;
+            //mainInputGroup.padding.right = 8;
+            //mainInputGroup.padding.top = 5;
+            //mainInputGroup.padding.bottom = 5;
 
-            var inputLayout = inputObj.AddComponent<LayoutElement>();
-            inputLayout.preferredWidth = 500;
-            inputLayout.flexibleWidth = 9999;
+            //var inputLayout = inputObj.AddComponent<LayoutElement>();
+            //inputLayout.preferredWidth = 500;
+            //inputLayout.flexibleWidth = 9999;
 
-            var inputImage = inputObj.GetComponent<Image>();
-            inputImage.color = new Color(0.05f, 0.05f, 0.05f, 1.0f);
+            //var inputImage = inputObj.GetComponent<Image>();
+            //inputImage.color = new Color(0.05f, 0.05f, 0.05f, 1.0f);
 
-            var scroll = UIFactory.CreateScrollbar(logAreaObj);
+            //var scroll = UIFactory.CreateScrollbar(logAreaObj);
 
-            var scrollLayout = scroll.AddComponent<LayoutElement>();
-            scrollLayout.preferredWidth = 25;
-            scrollLayout.flexibleWidth = 0;
+            //var scrollLayout = scroll.AddComponent<LayoutElement>();
+            //scrollLayout.preferredWidth = 25;
+            //scrollLayout.flexibleWidth = 0;
 
-            var scroller = scroll.GetComponent<Scrollbar>();
-            scroller.direction = Scrollbar.Direction.TopToBottom;
-            var scrollColors = scroller.colors;
-            scrollColors.normalColor = new Color(0.5f, 0.5f, 0.5f, 1.0f);
-            scroller.colors = scrollColors;
+            //var scroller = scroll.GetComponent<Scrollbar>();
+            //scroller.direction = Scrollbar.Direction.TopToBottom;
+            //var scrollColors = scroller.colors;
+            //scrollColors.normalColor = new Color(0.5f, 0.5f, 0.5f, 1.0f);
+            //scroller.colors = scrollColors;
 
-            var tmpInput = inputObj.GetComponent<InputField>();
-            //tmpInput.scrollSensitivity = 15;
-            //tmpInput.verticalScrollbar = scroller;
-            tmpInput.readOnly = true;
+            //var tmpInput = inputObj.GetComponent<InputField>();
+            //tmpInput.readOnly = true;
 
-            if (UIManager.ConsoleFont != null)
-            {
-                tmpInput.textComponent.font = UIManager.ConsoleFont;
-#if MONO
-                (tmpInput.placeholder as Text).font = UIManager.ConsoleFont;
-#else
-                tmpInput.placeholder.TryCast<Text>().font = UIManager.ConsoleFont;
-#endif
-            }
+            //if (UIManager.ConsoleFont)
+            //{
+            //    tmpInput.textComponent.font = UIManager.ConsoleFont;
+            //}
 
-            tmpInput.readOnly = true;
+            //tmpInput.readOnly = true;
 
-            m_textInput = inputObj.GetComponent<InputField>();
+            var inputScrollerObj = UIFactory.CreateSrollInputField(logAreaObj, out InputFieldScroller inputScroll, 14, new Color(0.05f, 0.05f, 0.05f));
+
+            inputScroll.inputField.textComponent.font = UIManager.ConsoleFont;
+            inputScroll.inputField.readOnly = true;
+
+            m_textInput = inputScroll.inputField;
 
 #endregion
 

@@ -9,10 +9,14 @@ using UnityExplorer.UI.Shared;
 using System.Reflection;
 using UnityExplorer.UI;
 using UnityEngine.UI;
-//using TMPro;
+using UnityExplorer.Config;
 
 namespace UnityExplorer.Inspectors
 {
+    // TODO:
+    // - Filters
+    // - Helper tools for Target object (for UnityEngine.Objects, Components, Textures, and maybe a general ToString helper)
+
     public class ReflectionInspector : InspectorBase
     {
         public override string TabLabel => m_targetTypeShortName;
@@ -23,9 +27,9 @@ namespace UnityExplorer.Inspectors
         // all cached members of the target
         internal CacheMember[] m_allMembers;
         // filtered members based on current filters
-        //internal CacheMember[] m_membersFiltered;
+        internal CacheMember[] m_membersFiltered;
         // actual shortlist of displayed members
-        //internal CacheMember[] m_membersShortlist;
+        internal readonly CacheMember[] m_displayedMembers = new CacheMember[ModConfig.Instance.Default_Page_Limit];
 
         // UI members
 
@@ -36,8 +40,10 @@ namespace UnityExplorer.Inspectors
             set => m_content = value;
         }
 
-        //internal PageHandler m_pageHandler;
-
+        internal PageHandler m_pageHandler;
+        internal SliderScrollbar m_sliderScroller;
+        internal GameObject m_scrollContent;
+        
         // Blacklists
         private static readonly HashSet<string> s_typeAndMemberBlacklist = new HashSet<string>
         {
@@ -65,9 +71,11 @@ namespace UnityExplorer.Inspectors
 
             m_targetTypeShortName = m_targetType.Name;
 
+            ConstructUI();
+
             CacheMembers(m_targetType);
 
-            ConstructUI();
+            RefreshDisplay();
         }
 
         // Methods
@@ -85,6 +93,50 @@ namespace UnityExplorer.Inspectors
 
             if (this.Content)
                 GameObject.Destroy(this.Content);
+        }
+
+        private void OnPageTurned()
+        {
+            RefreshDisplay();
+        }
+
+        public void RefreshDisplay()
+        {
+            // TODO TEMP
+            m_membersFiltered = m_allMembers;
+
+            var members = m_membersFiltered;
+
+            m_pageHandler.ListCount = members.Length;
+
+            int newCount = 0;
+
+            // disable current members
+            for (int i = 0; i < m_displayedMembers.Length; i++)
+            {
+                var mem = m_displayedMembers[i];
+                if (mem != null)
+                    mem.Disable();
+            }
+
+            foreach (var itemIndex in m_pageHandler)
+            {
+                newCount++;
+
+                // normalized index starting from 0
+                var i = itemIndex - m_pageHandler.StartIndex;
+
+                if (itemIndex >= members.Length)
+                {
+                    break;
+                }
+
+                CacheMember member = members[itemIndex];
+
+                member.Enable();
+
+                m_displayedMembers[i] = member;
+            }
         }
 
         public void CacheMembers(Type type)
@@ -175,7 +227,7 @@ namespace UnityExplorer.Inspectors
                         {
                             //ExplorerCore.Log($"Trying to cache member {sig}...");
 
-                            var cached = CacheFactory.GetCacheObject(member, target);
+                            var cached = CacheFactory.GetCacheObject(member, target, m_scrollContent);
 
                             if (cached != null)
                             {
@@ -271,28 +323,14 @@ namespace UnityExplorer.Inspectors
 
         internal void ConstructMemberList()
         {
-            // TEMPORARY 
+            var scrollobj = UIFactory.CreateScrollView(Content, out m_scrollContent, out m_sliderScroller, new Color(0.12f, 0.12f, 0.12f));
 
-            var scrollobj = UIFactory.CreateScrollView(Content, out GameObject scrollContent, out SliderScrollbar scroller, new Color(0.1f, 0.1f, 0.1f));
+            var scrollGroup = m_scrollContent.GetComponent<VerticalLayoutGroup>();
+            scrollGroup.spacing = 3;
 
-            foreach (var member in this.m_allMembers)
-            {
-                var rowObj = UIFactory.CreateHorizontalGroup(scrollContent, new Color(1, 1, 1, 0));
-                var rowGroup = rowObj.GetComponent<HorizontalLayoutGroup>();
-                rowGroup.childForceExpandWidth = true;
-                rowGroup.childControlWidth = true;
-                var rowLayout = rowObj.AddComponent<LayoutElement>();
-                rowLayout.minHeight = 25;
-                rowLayout.flexibleHeight = 0;
-                rowLayout.minWidth = 125;
-                rowLayout.flexibleWidth = 9000;
-
-                var labelObj = UIFactory.CreateLabel(rowObj, TextAnchor.MiddleLeft);
-
-                var label = labelObj.GetComponent<Text>();
-                label.text = member.RichTextName;
-
-            }
+            m_pageHandler = new PageHandler(m_sliderScroller);
+            m_pageHandler.ConstructUI(Content);
+            m_pageHandler.OnPageChanged += OnPageTurned;
         }
 
         #endregion

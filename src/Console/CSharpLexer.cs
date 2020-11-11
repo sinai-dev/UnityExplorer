@@ -27,8 +27,8 @@ namespace UnityExplorer.Console
         private int currentIndex;
         private int currentLookaheadIndex;
 
-        public char Current { get; private set; } = ' ';
-        public char Previous { get; private set; } = ' ';
+        public char Current { get; private set; }
+        public char Previous { get; private set; }
 
         public bool EndOfStream => currentLookaheadIndex >= inputString.Length;
 

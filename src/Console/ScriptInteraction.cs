@@ -1,7 +1,7 @@
 ﻿using System;
 using Mono.CSharp;
 using UnityExplorer.UI;
-using UnityExplorer.UI.PageModel;
+using UnityExplorer.UI.Modules;
 using UnityExplorer.Inspectors;
 
 namespace UnityExplorer.Console

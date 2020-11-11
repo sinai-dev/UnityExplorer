@@ -63,7 +63,7 @@ namespace UnityExplorer.Inspectors
 
             if (!TargetGO)
             {
-                ExplorerCore.LogWarning("GameObjectInspector cctor: Target GameObject is null!");
+                ExplorerCore.LogWarning("Target GameObject is null!");
                 return;
             }
 
@@ -292,6 +292,7 @@ namespace UnityExplorer.Inspectors
             m_pathInput = pathInputObj.GetComponent<InputField>();
             m_pathInput.text = TargetGO.transform.GetTransformPath();
             m_pathInput.readOnly = true;
+            m_pathInput.lineType = InputField.LineType.MultiLineNewline;
             var pathInputLayout = pathInputObj.AddComponent<LayoutElement>();
             pathInputLayout.minHeight = 25;
             pathInputLayout.flexibleHeight = 75;
@@ -337,7 +338,6 @@ namespace UnityExplorer.Inspectors
             nameInputRect.sizeDelta = new Vector2(nameInputRect.sizeDelta.x, 25);
             m_nameInput = nameInputObj.GetComponent<InputField>();
             m_nameInput.text = TargetGO.name;
-            m_nameInput.lineType = InputField.LineType.SingleLine;
 
             var applyNameBtnObj = UIFactory.CreateButton(nameRowObj);
             var applyNameBtn = applyNameBtnObj.GetComponent<Button>();

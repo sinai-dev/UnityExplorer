@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityExplorer.Helpers;
 using UnityExplorer.UI;
-using UnityExplorer.UI.PageModel;
+using UnityExplorer.UI.Modules;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;

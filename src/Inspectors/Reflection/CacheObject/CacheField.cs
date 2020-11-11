@@ -19,23 +19,17 @@ namespace UnityExplorer.Inspectors.Reflection
             UpdateValue();
         }
 
-        public override void UpdateValue()
+        public override void UpdateReflection()
         {
-            //if (IValue is InteractiveDictionary iDict)
-            //{
-            //    if (!iDict.EnsureDictionaryIsSupported())
-            //    {
-            //        ReflectionException = "Not supported due to TypeInitializationException";
-            //        return;
-            //    }
-            //}
-
             try
             {
                 var fi = MemInfo as FieldInfo;
                 IValue.Value = fi.GetValue(fi.IsStatic ? null : DeclaringInstance);
 
-                base.UpdateValue();
+                //base.UpdateValue();
+
+                m_evaluated = true;
+                ReflectionException = null;
             }
             catch (Exception e)
             {

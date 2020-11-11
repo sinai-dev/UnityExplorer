@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityExplorer.Helpers;
+using UnityExplorer.UI;
 using UnityExplorer.UI.Shared;
 
 namespace UnityExplorer.Inspectors.Reflection
@@ -28,10 +30,25 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public virtual void UpdateValue()
         {
-            GetButtonLabel();
+            if (!m_text)
+                return;
+
+            if (OwnerCacheObject is CacheMember ownerMember && !string.IsNullOrEmpty(ownerMember.ReflectionException))
+            {
+                m_text.text = "<color=red>" + ownerMember.ReflectionException + "</color>";
+                return;
+            }
+
+            if (Value == null)
+            {
+                m_text.text = "<color=red>null</color>";
+            }
+            else
+            {
+                GetButtonLabel();
+                m_text.text = ButtonLabel;
+            }
         }
-
-
 
         private MethodInfo GetToStringMethod()
         {
@@ -52,7 +69,7 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public string GetButtonLabel()
         {
-            if (Value == null) return null;
+            if (Value == null) return "";
 
             var valueType = ReflectionHelpers.GetActualType(Value);
 
@@ -100,5 +117,35 @@ namespace UnityExplorer.Inspectors.Reflection
 
             return m_btnLabel = label;
         }
+
+        #region UI CONSTRUCTION
+
+        internal GameObject m_UIContent;
+        internal Text m_text;
+
+        public void ConstructUI(GameObject parent)
+        {
+            // TEMPORARY
+            m_UIContent = UIFactory.CreateLabel(parent, TextAnchor.MiddleLeft);
+            var mainLayout = m_UIContent.AddComponent<LayoutElement>();
+            mainLayout.minWidth = 100;
+            mainLayout.flexibleWidth = 5000;
+            mainLayout.minHeight = 25;
+            m_text = m_UIContent.GetComponent<Text>();
+            
+            if (OwnerCacheObject != null)
+            {
+                if (!OwnerCacheObject.HasEvaluated)
+                {
+                    m_text.text = "Not yet evaluated";
+                }
+                else
+                {
+                    m_text.text = ButtonLabel;
+                }
+            }
+        }
+
+        #endregion
     }
 }

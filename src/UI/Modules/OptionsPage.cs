@@ -8,7 +8,7 @@ using UnityExplorer.Config;
 using UnityExplorer.UI.Shared;
 using UnityExplorer.Unstrip;
 
-namespace UnityExplorer.UI.PageModel
+namespace UnityExplorer.UI.Modules
 {
     public class OptionsPage : MainMenu.Page
     {

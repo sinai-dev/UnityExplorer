@@ -13,7 +13,7 @@ using UnityExplorer.Unstrip;
 using UnhollowerRuntimeLib;
 #endif
 
-namespace UnityExplorer.UI.PageModel
+namespace UnityExplorer.UI.Modules
 {
     internal enum SearchContext
     {

@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Inspectors;
 
-namespace UnityExplorer.UI.PageModel
+namespace UnityExplorer.UI.Modules
 {
     public class HomePage : MainMenu.Page
     {

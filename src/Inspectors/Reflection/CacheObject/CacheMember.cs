@@ -3,12 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Shared;
+#if CPP
+using UnhollowerBaseLib;
+#endif
 
 namespace UnityExplorer.Inspectors.Reflection
 {
-    public class CacheMember : CacheObjectBase
+    public abstract class CacheMember : CacheObjectBase
     {
         public MemberInfo MemInfo { get; set; }
         public Type DeclaringType { get; set; }
@@ -18,6 +22,7 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public override bool HasParameters => m_arguments != null && m_arguments.Length > 0;
         public override bool IsMember => true;
+        public override bool HasEvaluated => m_evaluated;
 
         public string RichTextName => m_richTextName ?? GetRichTextName();
         private string m_richTextName;
@@ -39,21 +44,25 @@ namespace UnityExplorer.Inspectors.Reflection
             DeclaringInstance = declaringInstance;
         }
 
-        //public virtual void InitMember(MemberInfo member, object declaringInstance)
-        //{
-        //    MemInfo = member;
-        //    DeclaringInstance = declaringInstance;
-        //    DeclaringType = member.DeclaringType;
-        //}
-
         public override void UpdateValue()
         {
+#if CPP
+            if (!IsReflectionSupported())
+                this.ReflectionException = "Type not supported with Reflection!";
+            else
+                UpdateReflection();
+#else
+            UpdateReflection();
+#endif
+
             base.UpdateValue();
         }
 
+        public abstract void UpdateReflection();
+
         public override void SetValue()
         {
-            // ...
+            // no implementation for base class
         }
 
         public object[] ParseArguments()
@@ -113,25 +122,6 @@ namespace UnityExplorer.Inspectors.Reflection
         }
 
         public static bool HasDefaultValue(ParameterInfo arg) => arg.DefaultValue != DBNull.Value;
-
-        //public void DrawArgsInput()
-        //{
-        //    for (int i = 0; i < this.m_arguments.Length; i++)
-        //    {
-        //        var name = this.m_arguments[i].Name;
-        //        var input = this.m_argumentInput[i];
-        //        var type = this.m_arguments[i].ParameterType.Name;
-
-        //        var label = $"<color={SyntaxColors.Class_Instance}>{type}</color> ";
-        //        label += $"<color={SyntaxColors.Local}>{name}</color>";
-        //        if (HasDefaultValue(this.m_arguments[i]))
-        //        {
-        //            label = $"<i>[{label} = {this.m_arguments[i].DefaultValue ?? "null"}]</i>";
-        //        }
-
-                
-        //    }
-        //}
 
         private bool GetCanWrite()
         {
@@ -218,5 +208,78 @@ namespace UnityExplorer.Inspectors.Reflection
 
             return m_richTextName;
         }
+
+#if CPP
+        internal bool IsReflectionSupported()
+        {
+            try
+            {
+                var baseType = this.IValue.ValueType;
+
+                var gArgs = baseType.GetGenericArguments();
+                if (gArgs.Length < 1)
+                    return true;
+
+                foreach (var arg in gArgs)
+                {
+                    if (!Check(arg))
+                        return false;
+                }
+
+                return true;
+
+                bool Check(Type type)
+                {
+                    if (!typeof(Il2CppSystem.Object).IsAssignableFrom(type))
+                        return true;
+
+                    var ptr = (IntPtr)typeof(Il2CppClassPointerStore<>)
+                        .MakeGenericType(type)
+                        .GetField("NativeClassPtr")
+                        .GetValue(null);
+
+                    if (ptr == IntPtr.Zero)
+                        return false;
+
+                    return Il2CppSystem.Type.internal_from_handle(IL2CPP.il2cpp_class_get_type(ptr)) is Il2CppSystem.Type;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+#endif
+
+        #region UI CONSTRUCTION 
+
+
+
+        internal override void ConstructUI()
+        {
+            base.ConstructUI();
+
+            //var refreshBtnObj = UIFactory.CreateButton(topRowObj, new Color(0.3f, 0.3f, 0.3f));
+            //var btnLayout = refreshBtnObj.AddComponent<LayoutElement>();
+            //btnLayout.minWidth = 30;
+            //btnLayout.minHeight = 20;
+            //btnLayout.flexibleWidth = 0;
+            //var refreshTxt = refreshBtnObj.GetComponentInChildren<Text>();
+            //refreshTxt.text = "⟳";
+            //refreshTxt.fontSize = 16;
+            //var refreshBtn = refreshBtnObj.GetComponent<Button>();
+            //refreshBtn.onClick.AddListener(() => { ExplorerCore.Log("todo Update!"); });
+
+            var labelObj = UIFactory.CreateLabel(m_topContent, TextAnchor.MiddleLeft);
+            var labellayout = labelObj.AddComponent<LayoutElement>();
+            labellayout.minWidth = 225;
+            labellayout.flexibleWidth = 0;
+
+            var label = labelObj.GetComponent<Text>();
+            label.horizontalOverflow = HorizontalWrapMode.Wrap;
+            label.text = this.RichTextName;
+        }
+
+        #endregion
     }
 }

@@ -2,11 +2,12 @@
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityExplorer.Inspectors;
-using UnityExplorer.UI.PageModel;
+using UnityExplorer.UI.Modules;
 using System.IO;
 //using TMPro;
 using System.Reflection;
 using UnityExplorer.Helpers;
+using UnityExplorer.UI.Shared;
 #if CPP
 using UnityExplorer.Unstrip;
 #endif
@@ -22,7 +23,6 @@ namespace UnityExplorer.UI
         internal static Material UIMaterial { get; private set; }
         internal static Sprite ResizeCursor { get; private set; }
         internal static Font ConsoleFont { get; private set; }
-        internal static Font DefaultFont { get; private set; }
 
         public static void Init()
         {
@@ -31,11 +31,12 @@ namespace UnityExplorer.UI
             {
                 var bundle = AssetBundle.LoadFromFile(bundlePath);
 
-                UIMaterial = bundle.LoadAsset<Material>("UIMaterial");
+                // Fix for games which don't ship with 'UI/Default' shader.
+                Graphic.defaultGraphicMaterial.shader = bundle.LoadAsset<Shader>("DefaultUI");
+
                 ResizeCursor = bundle.LoadAsset<Sprite>("cursor");
 
                 ConsoleFont = bundle.LoadAsset<Font>("CONSOLA");
-                DefaultFont = bundle.LoadAsset<Font>("CONSOLA");
 
                 ExplorerCore.Log("Loaded UI bundle");
             }
@@ -54,8 +55,8 @@ namespace UnityExplorer.UI
 
             // Force refresh of anchors
             Canvas.ForceUpdateCanvases();
-            CanvasRoot.SetActive(false);
-            CanvasRoot.SetActive(true);
+            //CanvasRoot.SetActive(false);
+            //CanvasRoot.SetActive(true);
         }
 
         public static void SetEventSystem()
@@ -108,6 +109,16 @@ namespace UnityExplorer.UI
                     i--;
                 else
                     slider.Update();
+            }
+
+            for (int i = 0; i < InputFieldScroller.Instances.Count; i++)
+            {
+                var input = InputFieldScroller.Instances[i];
+
+                if (input.sliderScroller.CheckDestroyed())
+                    i--;
+                else
+                    input.Update();
             }
         }
 

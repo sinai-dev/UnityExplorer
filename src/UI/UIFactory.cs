@@ -2,6 +2,7 @@
 //using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityExplorer.UI.Shared;
 
 namespace UnityExplorer.UI
 {
@@ -402,21 +403,40 @@ namespace UnityExplorer.UI
             return toggleObj;
         }
 
+        public static GameObject CreateSrollInputField(GameObject parent, out InputFieldScroller inputScroll, int fontSize = 14, Color color = default)
+        {
+            if (color == default)
+                color = new Color(0.15f, 0.15f, 0.15f);
+
+            var mainObj = CreateScrollView(parent, out GameObject scrollContent, out SliderScrollbar scroller, color);
+
+            var inputObj = CreateInputField(scrollContent, fontSize, 0);
+
+            var inputField = inputObj.GetComponent<InputField>();
+            inputField.lineType = InputField.LineType.MultiLineNewline;
+            inputField.targetGraphic.color = color;
+
+            inputScroll = new InputFieldScroller(scroller, inputField);
+
+            return mainObj;
+        }
+
         public static GameObject CreateInputField(GameObject parent, int fontSize = 14, int alignment = 3, int wrap = 0)
         {
             GameObject mainObj = CreateUIObject("InputField", parent);
 
             Image mainImage = mainObj.AddGraphic<Image>();
             mainImage.type = Image.Type.Sliced;
-            mainImage.color = new Color(38f / 255f, 38f / 255f, 38f / 255f, 1.0f);
+            mainImage.color = new Color(0.15f, 0.15f, 0.15f);
 
             InputField mainInput = mainObj.AddComponent<InputField>();
             Navigation nav = mainInput.navigation;
             nav.mode = Navigation.Mode.None;
             mainInput.navigation = nav;
-            mainInput.lineType = InputField.LineType.MultiLineNewline;
+            mainInput.lineType = InputField.LineType.SingleLine;
             mainInput.interactable = true;
             mainInput.transition = Selectable.Transition.ColorTint;
+            mainInput.targetGraphic = mainImage;
 
             ColorBlock mainColors = mainInput.colors;
             mainColors.normalColor = new Color(1, 1, 1, 1);
@@ -458,8 +478,8 @@ namespace UnityExplorer.UI
             placeHolderRect.offsetMax = Vector2.zero;
 
             LayoutElement placeholderLayout = placeHolderObj.AddComponent<LayoutElement>();
-            placeholderLayout.preferredWidth = 990;
-            placeholderLayout.flexibleWidth = 500;
+            placeholderLayout.minWidth = 500;
+            placeholderLayout.flexibleWidth = 5000;
 
             mainInput.placeholder = placeholderText;
 
@@ -479,8 +499,8 @@ namespace UnityExplorer.UI
             inputTextRect.offsetMax = Vector2.zero;
 
             LayoutElement inputTextLayout = inputTextObj.AddComponent<LayoutElement>();
-            inputTextLayout.preferredWidth = 990;
-            inputTextLayout.flexibleWidth = 500;
+            inputTextLayout.minWidth = 500;
+            inputTextLayout.flexibleWidth = 5000;
 
             mainInput.textComponent = inputText;
 
@@ -671,19 +691,19 @@ namespace UnityExplorer.UI
             contentLayout.padding.bottom = 5;
             contentLayout.spacing = 5;
 
-            GameObject scrollBar = CreateUIObject("DynamicScrollbar", mainObj);
+            GameObject scrollBarObj = CreateUIObject("DynamicScrollbar", mainObj);
 
-            var scrollbarLayout = scrollBar.AddComponent<VerticalLayoutGroup>();
+            var scrollbarLayout = scrollBarObj.AddComponent<VerticalLayoutGroup>();
             scrollbarLayout.childForceExpandHeight = true;
             scrollbarLayout.childControlHeight = true;
 
-            RectTransform scrollBarRect = scrollBar.GetComponent<RectTransform>();
+            RectTransform scrollBarRect = scrollBarObj.GetComponent<RectTransform>();
             scrollBarRect.anchorMin = new Vector2(1.0f, 0.0f);
             scrollBarRect.anchorMax = new Vector2(1.0f, 1.0f);
             scrollBarRect.sizeDelta = new Vector2(15.0f, 0.0f);
             scrollBarRect.offsetMin = new Vector2(-15.0f, 0.0f);
 
-            GameObject hiddenBar = CreateScrollbar(scrollBar);
+            GameObject hiddenBar = CreateScrollbar(scrollBarObj);
             var hiddenScroll = hiddenBar.GetComponent<Scrollbar>();
             hiddenScroll.SetDirection(Scrollbar.Direction.BottomToTop, true);
 
@@ -693,7 +713,7 @@ namespace UnityExplorer.UI
                 child.gameObject.SetActive(false);
             }
 
-            SliderScrollbar.CreateSliderScrollbar(scrollBar, out Slider scrollSlider);
+            SliderScrollbar.CreateSliderScrollbar(scrollBarObj, out Slider scrollSlider);
 
             // Back to the main scrollview ScrollRect, setting it up now that we have all references.
 

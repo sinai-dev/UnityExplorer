@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityExplorer.Console;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.UI.PageModel;
+using UnityExplorer.UI.Modules;
 using UnityExplorer.Config;
 
 namespace UnityExplorer.UI
@@ -56,7 +56,6 @@ namespace UnityExplorer.UI
 
             Pages.Add(new HomePage());
             Pages.Add(new SearchPage());
-            // TODO remove page on games where it failed to init?
             Pages.Add(new ConsolePage());
             Pages.Add(new OptionsPage());
 
@@ -65,14 +64,35 @@ namespace UnityExplorer.UI
             foreach (Page page in Pages)
             {
                 page.Init();
-                page.Content?.SetActive(false);
             }
 
-            SetPage(Pages[0]);
+            // hide menu until each page has init layout (bit of a hack)
+            initPos = MainPanel.transform.position;
+            MainPanel.transform.position = new Vector3(9999, 9999);
         }
+
+        internal Vector3 initPos;
+        internal bool pageLayoutInit;
+        internal int layoutInitIndex;
 
         public void Update()
         {
+            if (!pageLayoutInit)
+            {
+                if (layoutInitIndex < Pages.Count)
+                {
+                    SetPage(Pages[layoutInitIndex]);
+                    layoutInitIndex++;
+                }
+                else
+                {
+                    pageLayoutInit = true;
+                    MainPanel.transform.position = initPos;
+                    SetPage(Pages[0]);
+                }
+                return;
+            }
+
             m_activePage?.Update();
         }
 
