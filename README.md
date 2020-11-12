@@ -4,7 +4,8 @@
 
 <p align="center">
   An in-game explorer and a suite of debugging tools for <a href="https://docs.unity3d.com/Manual/IL2CPP.html">IL2CPP</a> and <b>Mono</b> Unity games, to aid with modding development.
-
+</p>
+<p align="center">
   <a href="../../releases/latest">
     <img src="https://img.shields.io/github/release/sinai-dev/Explorer.svg" />
   </a>
