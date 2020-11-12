@@ -69,7 +69,7 @@ You can access the settings via the "Options" page of the main menu, or directly
 * Default: `F7`
 * See [this article](https://docs.unity3d.com/ScriptReference/KeyCode.html) for a full list of all accepted KeyCodes.
 
-`Force_Unlock_Mouse` (bool)
+`Force Unlock Mouse` (bool)
 * Default: `true`
 * Forces the cursor to be unlocked and visible while the UnityExplorer menu is open, and prevents anything else taking control.
 
