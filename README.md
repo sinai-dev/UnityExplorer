@@ -35,7 +35,7 @@
 ## Features
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/sinai-dev/Explorer/master/overview.png">  
+  <img src="overview.png">  
 </p>
 
 * <b>Scene Explorer</b>: Simple menu to traverse the Transform heirarchy of the scene. 
