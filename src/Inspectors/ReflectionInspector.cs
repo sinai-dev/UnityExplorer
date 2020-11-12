@@ -158,7 +158,7 @@ namespace UnityExplorer.Inspectors
             RefreshDisplay();
         }
 
-        public void RefreshDisplay(bool fast = false)
+        public void RefreshDisplay()
         {
             // temp because not doing filtering yet
             m_membersFiltered = m_allMembers;
@@ -166,17 +166,14 @@ namespace UnityExplorer.Inspectors
             var members = m_membersFiltered;
             m_pageHandler.ListCount = members.Length;
 
-            if (!fast)
+            // disable current members
+            for (int i = 0; i < m_displayedMembers.Length; i++)
             {
-                // disable current members
-                for (int i = 0; i < m_displayedMembers.Length; i++)
-                {
-                    var mem = m_displayedMembers[i];
-                    if (mem != null)
-                        mem.Disable();
-                    else
-                        break;
-                }
+                var mem = m_displayedMembers[i];
+                if (mem != null)
+                    mem.Disable();
+                else
+                    break;
             }
 
             if (members.Length < 1)
@@ -188,7 +185,6 @@ namespace UnityExplorer.Inspectors
                     break;
 
                 CacheMember member = members[itemIndex];
-
                 m_displayedMembers[itemIndex - m_pageHandler.StartIndex] = member;
                 member.Enable();
             }
@@ -211,7 +207,7 @@ namespace UnityExplorer.Inspectors
                     labelWidth = width;
             }
 
-            float valueWidth = m_scrollContentRect.rect.width - labelWidth - 10;
+            float valueWidth = m_scrollContentRect.rect.width - labelWidth - 20;
 
             foreach (var cache in m_displayedMembers)
             {
@@ -382,6 +378,7 @@ namespace UnityExplorer.Inspectors
             var typeLabel = UIFactory.CreateLabel(typeRowObj, TextAnchor.MiddleLeft);
             var typeLabelText = typeLabel.GetComponent<Text>();
             typeLabelText.text = "Type:";
+            typeLabelText.horizontalOverflow = HorizontalWrapMode.Overflow;
             var typeLabelTextLayout = typeLabel.AddComponent<LayoutElement>();
             typeLabelTextLayout.minWidth = 60;
             typeLabelTextLayout.flexibleWidth = 0;
@@ -395,15 +392,40 @@ namespace UnityExplorer.Inspectors
             typeLabelLayout.flexibleWidth = 5000;
 
             typeLabelInput.text = UISyntaxHighlight.GetHighlight(m_targetType, true);
+
+            // Helper tools
+
+            if (this is InstanceInspector ii)
+            {
+                ii.ConstructInstanceHelpers(Content);
+            }
         }
 
         internal void ConstructFilterArea()
         {
+            var filterAreaObj = UIFactory.CreateVerticalGroup(Content, new Color(0.1f, 0.1f, 0.1f));
+            var filterLayout = filterAreaObj.AddComponent<LayoutElement>();
+            filterLayout.minHeight = 25;
+            var filterGroup = filterAreaObj.GetComponent<VerticalLayoutGroup>();
+            filterGroup.childForceExpandWidth = true;
+            filterGroup.childForceExpandHeight = false;
+            filterGroup.childControlWidth = true;
+            filterGroup.childControlHeight = true;
+
+            // name filter
 
 
-            // todo instance inspector has extra filters
 
-            // todo instance inspector "helper tools"
+            // membertype filter
+
+
+
+            // Instance filters
+
+            if (this is InstanceInspector ii)
+            {
+                ii.ConstructInstanceFilters(filterAreaObj);
+            }
         }
 
         internal void ConstructMemberList()

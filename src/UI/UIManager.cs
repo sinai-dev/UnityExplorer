@@ -32,7 +32,11 @@ namespace UnityExplorer.UI
                 var bundle = AssetBundle.LoadFromFile(bundlePath);
 
                 // Fix for games which don't ship with 'UI/Default' shader.
-                Graphic.defaultGraphicMaterial.shader = bundle.LoadAsset<Shader>("DefaultUI");
+                if (Graphic.defaultGraphicMaterial.shader?.name != "UI/Default")
+                {
+                    ExplorerCore.Log("This game does not ship with the 'UI/Default' shader, using manual Default Shader...");
+                    Graphic.defaultGraphicMaterial.shader = bundle.LoadAsset<Shader>("DefaultUI");
+                }
 
                 ResizeCursor = bundle.LoadAsset<Sprite>("cursor");
 

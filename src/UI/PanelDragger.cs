@@ -131,9 +131,9 @@ namespace UnityExplorer.UI
 
         #region RESIZE
 
-        private const int RESIZE_THICKNESS = 10;
+        private const int RESIZE_THICKNESS = 15;
 
-        private readonly Vector2 minResize = new Vector2(733, 542);
+        private readonly Vector2 minResize = new Vector2(630, 540);
 
         private bool WasResizing { get; set; }
         private ResizeTypes m_currentResizeType = ResizeTypes.NONE;
@@ -339,16 +339,6 @@ namespace UnityExplorer.UI
         {
             try
             {
-                //string path = ExplorerCore.EXPLORER_FOLDER + @"\cursor.png";
-                //byte[] data = File.ReadAllBytes(path);
-
-                //Texture2D tex = new Texture2D(32, 32);
-                //tex.LoadImage(data, false);
-                //UnityEngine.Object.DontDestroyOnLoad(tex);
-
-                //Sprite sprite = UIManager.CreateSprite(tex, new Rect(0, 0, 32, 32));
-                //UnityEngine.Object.DontDestroyOnLoad(sprite);
-
                 var sprite = UIManager.ResizeCursor;
 
                 m_resizeCursorImage = new GameObject("ResizeCursorImage");
@@ -356,6 +346,7 @@ namespace UnityExplorer.UI
 
                 Image image = m_resizeCursorImage.AddComponent<Image>();
                 image.sprite = sprite;
+                image.material = Graphic.defaultGraphicMaterial;
                 RectTransform rect = image.transform.GetComponent<RectTransform>();
                 rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 32);
                 rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 32);

@@ -42,7 +42,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_ML_Cpp|AnyCPU' ">
     <!-- <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion> -->
-    <OutputPath>..\Release\Explorer.MelonLoader.Il2Cpp\</OutputPath>
+    <OutputPath>..\Release\UnityExplorer.MelonLoader.Il2Cpp\</OutputPath>
     <DefineConstants>CPP,ML</DefineConstants>
     <IsCpp>true</IsCpp>
     <IsMelonLoader>true</IsMelonLoader>
@@ -50,7 +50,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_ML_Mono|AnyCPU' ">
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <OutputPath>..\Release\Explorer.MelonLoader.Mono\</OutputPath>
+    <OutputPath>..\Release\UnityExplorer.MelonLoader.Mono\</OutputPath>
     <DefineConstants>MONO,ML</DefineConstants>
     <Prefer32Bit>false</Prefer32Bit>
     <IsCpp>false</IsCpp>
@@ -59,7 +59,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_BIE_Cpp|AnyCPU' ">
     <!-- <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion> -->
-    <OutputPath>..\Release\Explorer.BepInEx.Il2Cpp\</OutputPath>
+    <OutputPath>..\Release\UnityExplorer.BepInEx.Il2Cpp\</OutputPath>
     <DefineConstants>CPP,BIE</DefineConstants>
     <IsCpp>true</IsCpp>
     <IsMelonLoader>false</IsMelonLoader>
@@ -67,7 +67,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_BIE_Mono|AnyCPU' ">
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <OutputPath>..\Release\Explorer.BepInEx.Mono\</OutputPath>
+    <OutputPath>..\Release\UnityExplorer.BepInEx.Mono\</OutputPath>
     <DefineConstants>MONO,BIE</DefineConstants>
     <IsCpp>false</IsCpp>
     <IsMelonLoader>false</IsMelonLoader>

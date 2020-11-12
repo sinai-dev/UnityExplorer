@@ -34,7 +34,7 @@ namespace UnityExplorer.Tests
         }
         private static bool m_setOnlyProperty;
 
-        public Texture2D TestTexture = UIManager.MakeSolidTexture(Color.white, 200, 200);
+        public Texture2D TestTexture;
         public static Sprite TestSprite;
 
         public static int StaticProperty => 5;
@@ -48,12 +48,13 @@ namespace UnityExplorer.Tests
         public TestClass()
         {
 #if CPP
+            TestTexture = UIManager.MakeSolidTexture(Color.white, 200, 200);
             TestTexture.name = "TestTexture";
 
-            //var r = new Rect(0, 0, TestTexture.width, TestTexture.height);
-            //var v2 = Vector2.zero;
-            //var v4 = Vector4.zero;
-            //TestSprite = Sprite.CreateSprite_Injected(TestTexture, ref r, ref v2, 100f, 0u, SpriteMeshType.Tight, ref v4, false);
+            var r = new Rect(0, 0, TestTexture.width, TestTexture.height);
+            var v2 = Vector2.zero;
+            var v4 = Vector4.zero;
+            TestSprite = Sprite.CreateSprite_Injected(TestTexture, ref r, ref v2, 100f, 0u, SpriteMeshType.Tight, ref v4, false);
 
             GameObject.DontDestroyOnLoad(TestTexture);
             GameObject.DontDestroyOnLoad(TestSprite);

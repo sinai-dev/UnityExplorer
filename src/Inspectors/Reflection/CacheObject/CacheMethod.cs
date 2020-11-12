@@ -10,11 +10,13 @@ namespace UnityExplorer.Inspectors.Reflection
 {
     public class CacheMethod : CacheMember
     {
-        private CacheObjectBase m_cachedReturnValue;
+        //private CacheObjectBase m_cachedReturnValue;
 
         public override bool HasParameters => base.HasParameters || GenericArgs.Length > 0;
 
         public override bool IsStatic => (MemInfo as MethodInfo).IsStatic;
+
+        public override int ParamCount => base.ParamCount + m_genericArgInput.Length;
 
         public Type[] GenericArgs { get; private set; }
         public Type[][] GenericConstraints { get; private set; }
@@ -38,7 +40,7 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public override void UpdateValue()
         {
-            // CacheMethod cannot UpdateValue directly. Need to Evaluate.
+            base.UpdateValue();
         }
 
         public override void UpdateReflection()
@@ -74,17 +76,20 @@ namespace UnityExplorer.Inspectors.Reflection
                 ReflectionException = ReflectionHelpers.ExceptionToString(e);
             }
 
-            if (ret != null)
-            {
-                //m_cachedReturnValue = CacheFactory.GetTypeAndCacheObject(ret);
+            IValue.Value = ret;
+            IValue.UpdateValue();
 
-                //m_cachedReturnValue = CacheFactory.GetCacheObject(ret);
-                m_cachedReturnValue.UpdateValue();
-            }
-            else
-            {
-                m_cachedReturnValue = null;
-            }
+            //if (ret != null)
+            //{
+            //    //m_cachedReturnValue = CacheFactory.GetTypeAndCacheObject(ret);
+            //    //m_cachedReturnValue = CacheFactory.GetCacheObject(ret);
+            //    // m_cachedReturnValue.UpdateValue();
+
+            //}
+            //else
+            //{
+            //    m_cachedReturnValue = null;
+            //}
         }
 
         private MethodInfo MakeGenericMethodFromInput()

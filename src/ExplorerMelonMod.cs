@@ -1,5 +1,6 @@
 ﻿#if ML
 using MelonLoader;
+using UnityExplorer.UI.Modules;
 
 namespace UnityExplorer
 {
@@ -22,6 +23,11 @@ namespace UnityExplorer
         public override void OnUpdate()
         {
             ExplorerCore.Update();
+        }
+
+        public override void OnApplicationQuit()
+        {
+            DebugConsole.OnQuit();
         }
 
         //public override void OnGUI()

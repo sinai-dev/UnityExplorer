@@ -6,6 +6,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Config;
 using UnityExplorer.UI.Shared;
+using System.IO;
+using System.Linq;
 
 namespace UnityExplorer.UI.Modules
 {
@@ -14,10 +16,14 @@ namespace UnityExplorer.UI.Modules
         public static DebugConsole Instance { get; private set; }
 
         public static bool LogUnity { get; set; } = ModConfig.Instance.Log_Unity_Debug;
+        public static bool SaveToDisk { get; set; } = ModConfig.Instance.Save_Logs_To_Disk;
+
+        internal static bool m_savedToDiskChecked;
 
         public static readonly List<string> AllMessages = new List<string>();
         public static readonly List<Text> MessageHolders = new List<Text>();
 
+        // logs that occured before the actual UI was ready.
         internal static readonly List<string> s_preInitMessages = new List<string>();
 
         private InputField m_textInput;
@@ -25,9 +31,6 @@ namespace UnityExplorer.UI.Modules
         public DebugConsole(GameObject parent)
         {
             Instance = this;
-
-            //AllMessages = new List<string>();
-            //MessageHolders = new List<Text>();
 
             ConstructUI(parent);
 
@@ -40,6 +43,37 @@ namespace UnityExplorer.UI.Modules
                 preAppend += msg;
             }
             m_textInput.text = preAppend;
+        }
+
+        public static void OnQuit()
+        {
+            if (m_savedToDiskChecked)
+                return;
+
+            m_savedToDiskChecked = true;
+
+            if (!SaveToDisk)
+                return;
+
+            var path = ExplorerCore.EXPLORER_FOLDER + @"\Logs";
+
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+
+            // delete oldest log
+            var files = Directory.GetFiles(path);
+            if (files.Length >= 10)
+            {
+                var sorted = files.ToList();
+                // sort by datetime.ToString will put the oldest one first
+                sorted.Sort();
+                File.Delete(sorted[0]);
+            }
+
+            var fileName = "UnityExplorer " + DateTime.Now.ToString("u") + ".txt";
+            fileName = ExplorerCore.RemoveInvalidFilenameChars(fileName);
+
+            File.WriteAllText(path + @"\" + fileName, Instance.m_textInput.text);
         }
 
         public static void Log(string message)
@@ -98,43 +132,6 @@ namespace UnityExplorer.UI.Modules
             var logAreaLayout = logAreaObj.AddComponent<LayoutElement>();
             logAreaLayout.preferredHeight = 190;
             logAreaLayout.flexibleHeight = 0;
-
-            //var inputObj = UIFactory.CreateInputField(logAreaObj, 14, 0, 1);
-
-            //var mainInputGroup = inputObj.GetComponent<VerticalLayoutGroup>();
-            //mainInputGroup.padding.left = 8;
-            //mainInputGroup.padding.right = 8;
-            //mainInputGroup.padding.top = 5;
-            //mainInputGroup.padding.bottom = 5;
-
-            //var inputLayout = inputObj.AddComponent<LayoutElement>();
-            //inputLayout.preferredWidth = 500;
-            //inputLayout.flexibleWidth = 9999;
-
-            //var inputImage = inputObj.GetComponent<Image>();
-            //inputImage.color = new Color(0.05f, 0.05f, 0.05f, 1.0f);
-
-            //var scroll = UIFactory.CreateScrollbar(logAreaObj);
-
-            //var scrollLayout = scroll.AddComponent<LayoutElement>();
-            //scrollLayout.preferredWidth = 25;
-            //scrollLayout.flexibleWidth = 0;
-
-            //var scroller = scroll.GetComponent<Scrollbar>();
-            //scroller.direction = Scrollbar.Direction.TopToBottom;
-            //var scrollColors = scroller.colors;
-            //scrollColors.normalColor = new Color(0.5f, 0.5f, 0.5f, 1.0f);
-            //scroller.colors = scrollColors;
-
-            //var tmpInput = inputObj.GetComponent<InputField>();
-            //tmpInput.readOnly = true;
-
-            //if (UIManager.ConsoleFont)
-            //{
-            //    tmpInput.textComponent.font = UIManager.ConsoleFont;
-            //}
-
-            //tmpInput.readOnly = true;
 
             var inputScrollerObj = UIFactory.CreateSrollInputField(logAreaObj, out InputFieldScroller inputScroll, 14, new Color(0.05f, 0.05f, 0.05f));
 
@@ -260,7 +257,7 @@ namespace UnityExplorer.UI.Modules
             }
 
             var unityToggleLayout = unityToggleObj.AddComponent<LayoutElement>();
-            unityToggleLayout.minWidth = 200;
+            unityToggleLayout.minWidth = 170;
             unityToggleLayout.flexibleWidth = 0;
 
             var unityToggleRect = unityToggleObj.transform.Find("Background").GetComponent<RectTransform>();
@@ -268,7 +265,35 @@ namespace UnityExplorer.UI.Modules
             pos.y = -8;
             unityToggleRect.localPosition = pos;
 
-#endregion
+//            // Save to disk button
+
+//            var saveToDiskObj = UIFactory.CreateToggle(bottomBarObj, out Toggle diskToggle, out Text diskToggleText);
+//#if CPP
+//            diskToggle.onValueChanged.AddListener(new Action<bool>(ToggleDisk));
+//#else
+//            diskToggle.onValueChanged.AddListener(ToggleDisk);
+//#endif
+//            diskToggle.isOn = SaveToDisk;
+//            diskToggleText.text = "Save logs to 'Mods\\UnityExplorer\\Logs'?";
+//            diskToggleText.alignment = TextAnchor.MiddleLeft;
+
+//            void ToggleDisk(bool val)
+//            {
+//                SaveToDisk = val;
+//                ModConfig.Instance.Save_Logs_To_Disk = val;
+//                ModConfig.SaveSettings();
+//            }
+
+//            var diskToggleLayout = saveToDiskObj.AddComponent<LayoutElement>();
+//            diskToggleLayout.minWidth = 340;
+//            diskToggleLayout.flexibleWidth = 0;
+
+//            var saveToDiskRect = saveToDiskObj.transform.Find("Background").GetComponent<RectTransform>();
+//            pos = unityToggleRect.localPosition;
+//            pos.y = -8;
+//            saveToDiskRect.localPosition = pos;
+
+            #endregion
         }
     }
 }

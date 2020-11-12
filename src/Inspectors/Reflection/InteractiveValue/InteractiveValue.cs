@@ -19,6 +19,9 @@ namespace UnityExplorer.Inspectors.Reflection
         public object Value { get; set; }
         public Type ValueType;
 
+        // might not need
+        public virtual bool HasSubContent => false;
+
         public string RichTextValue => m_richValue ?? GetRichTextValue();
         internal string m_richValue;
         internal string m_richValueType;
@@ -69,7 +72,6 @@ namespace UnityExplorer.Inspectors.Reflection
             return m_toStringMethod;
         }
 
-
         public string GetRichTextValue()
         {
             if (Value != null)
@@ -77,14 +79,15 @@ namespace UnityExplorer.Inspectors.Reflection
 
             m_richValueType = UISyntaxHighlight.GetHighlight(ValueType, true);
 
+            if (OwnerCacheObject is CacheMember cm && !cm.HasEvaluated)
+                return $"<i><color=grey>Not yet evaluated</color> ({m_richValueType})</i>";
+
             if (Value == null) return $"<color=grey>null</color> ({m_richValueType})";
 
             string label;
 
-            if (ValueType == typeof(TextAsset))
+            if (ValueType == typeof(TextAsset) && Value is TextAsset textAsset)
             {
-                var textAsset = Value as TextAsset;
-
                 label = textAsset.text;
 
                 if (label.Length > 10)
@@ -128,8 +131,9 @@ namespace UnityExplorer.Inspectors.Reflection
 
         internal GameObject m_UIContent;
         internal Text m_text;
+        internal GameObject m_subContentParent;
 
-        public void ConstructUI(GameObject parent)
+        public virtual void ConstructUI(GameObject parent, GameObject subGroup)
         {
             m_UIContent = UIFactory.CreateLabel(parent, TextAnchor.MiddleLeft);
             var mainLayout = m_UIContent.AddComponent<LayoutElement>();
@@ -138,8 +142,7 @@ namespace UnityExplorer.Inspectors.Reflection
             mainLayout.minHeight = 25;
             m_text = m_UIContent.GetComponent<Text>();
 
-            GetRichTextValue();
-            m_text.text = $"<i><color=grey>Not yet evaluated</color> ({m_richValueType})</i>";
+            m_subContentParent = subGroup;
         }
 
 #endregion

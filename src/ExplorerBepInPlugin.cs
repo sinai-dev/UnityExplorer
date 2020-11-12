@@ -8,6 +8,7 @@ using HarmonyLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityExplorer.UI.Modules;
 #if CPP
 using UnhollowerRuntimeLib;
 using BepInEx.IL2CPP;
@@ -46,6 +47,10 @@ namespace UnityExplorer
             ExplorerCore.Update();
         }
 
+        internal void OnApplicationQuit()
+        {
+            DebugConsole.OnQuit();
+        }
     }
 #endif
 
@@ -108,7 +113,11 @@ namespace UnityExplorer
                     lastSceneName = scene.name;
                     DoSceneChange(scene, scene);
                 }
+            }
 
+            internal void OnApplicationQuit()
+            {
+                DebugConsole.OnQuit();
             }
         }
     }

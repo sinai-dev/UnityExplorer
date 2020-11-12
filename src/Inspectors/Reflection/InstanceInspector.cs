@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 using UnityExplorer.Helpers;
 
 namespace UnityExplorer.Inspectors.Reflection
@@ -9,17 +10,16 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public InstanceInspector(object target) : base(target)
         {
+            // needed?
         }
 
-        public override void Update()
+        public void ConstructInstanceHelpers(GameObject parent)
         {
-            base.Update();
+            // todo
+        }
 
-            if (m_pendingDestroy || InspectorManager.Instance.m_activeInspector != this)
-            {
-                return;
-            }
-
+        public void ConstructInstanceFilters(GameObject parent)
+        {
             // todo
         }
     }

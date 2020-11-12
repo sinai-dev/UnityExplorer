@@ -20,6 +20,7 @@ namespace UnityExplorer.Config
         public int      Default_Page_Limit  = 25;
         public string   Default_Output_Path = ExplorerCore.EXPLORER_FOLDER;
         public bool     Log_Unity_Debug     = false;
+        public bool     Save_Logs_To_Disk   = true;
 
         public static event Action OnConfigChanged;
 

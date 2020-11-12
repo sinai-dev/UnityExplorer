@@ -559,7 +559,7 @@ namespace UnityExplorer.UI
             templateImage.color = new Color(0.15f, 0.15f, 0.15f, 1.0f);
 
             ScrollRect scrollRect = templateObj.AddComponent<ScrollRect>();
-            scrollRect.scrollSensitivity = 25;
+            scrollRect.scrollSensitivity = 35;
             scrollRect.content = contentObj.GetComponent<RectTransform>();
             scrollRect.viewport = viewportObj.GetComponent<RectTransform>();
             scrollRect.horizontal = false;
@@ -715,7 +715,7 @@ namespace UnityExplorer.UI
             scrollRect.vertical = true;
             scrollRect.verticalScrollbar = hiddenScroll;
             scrollRect.movementType = ScrollRect.MovementType.Clamped;
-            scrollRect.scrollSensitivity = 25;
+            scrollRect.scrollSensitivity = 35;
             scrollRect.horizontalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
             scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
 

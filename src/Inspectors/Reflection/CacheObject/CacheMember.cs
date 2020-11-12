@@ -20,9 +20,12 @@ namespace UnityExplorer.Inspectors.Reflection
         public object DeclaringInstance { get; set; }
 
         public virtual bool IsStatic { get; private set; }
-
-        public override bool HasParameters => m_arguments != null && m_arguments.Length > 0;
+        
         public override bool IsMember => true;
+
+        public override bool HasParameters => ParamCount > 0;
+        public virtual int ParamCount => m_arguments.Length;
+
         public override bool HasEvaluated => m_evaluated;
 
         public string RichTextName => m_richTextName ?? GetRichTextName();
@@ -47,28 +50,24 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public override void UpdateValue()
         {
-            if (HasParameters && !m_isEvaluating)
+            if (!HasParameters || m_isEvaluating)
             {
-                // need to enter args first
-                return;
-            }
-
-            try
-            {
+                try
+                {
 #if CPP
-                if (!IsReflectionSupported())
-                    throw new Exception("Type not supported with Reflection");
+                    if (!IsReflectionSupported())
+                        throw new Exception("Type not supported with Reflection");
 #endif
-                UpdateReflection();
-
+                    UpdateReflection();
 #if CPP
-                if (IValue.Value != null)
-                    IValue.Value = IValue.Value.Il2CppCast(ReflectionHelpers.GetActualType(IValue.Value));
+                    if (IValue.Value != null)
+                        IValue.Value = IValue.Value.Il2CppCast(ReflectionHelpers.GetActualType(IValue.Value));
 #endif
-            }
-            catch (Exception e)
-            {
-                ReflectionException = ReflectionHelpers.ExceptionToString(e, true);
+                }
+                catch (Exception e)
+                {
+                    ReflectionException = ReflectionHelpers.ExceptionToString(e, true);
+                }
             }
 
             base.UpdateValue();
@@ -227,7 +226,7 @@ namespace UnityExplorer.Inspectors.Reflection
         internal RectTransform m_topRowRect;
         internal LayoutElement m_leftLayout;
         internal LayoutElement m_rightLayout;
-        //internal GameObject m_subGroup;
+        internal GameObject m_subContent;
 
         internal override void ConstructUI()
         {
@@ -272,7 +271,7 @@ namespace UnityExplorer.Inspectors.Reflection
             leftRect.offsetMax = Vector2.zero;
             leftRect.sizeDelta = Vector2.zero;
             m_leftLayout = labelObj.AddComponent<LayoutElement>();
-            m_leftLayout.preferredWidth = 225;
+            m_leftLayout.preferredWidth = 125;
             m_leftLayout.minHeight = 25;
             m_leftLayout.flexibleHeight = 100;
             var labelFitter = labelObj.AddComponent<ContentSizeFitter>();
@@ -284,50 +283,78 @@ namespace UnityExplorer.Inspectors.Reflection
 
             // right group
 
-            m_rightGroup = UIFactory.CreateHorizontalGroup(topGroupObj, new Color(1, 1, 1, 0));
+            m_rightGroup = UIFactory.CreateVerticalGroup(topGroupObj, new Color(1, 1, 1, 0));
             m_rightLayout = m_rightGroup.AddComponent<LayoutElement>();
             m_rightLayout.minHeight = 25;
             m_rightLayout.flexibleHeight = 480;
-            m_rightLayout.minWidth = 300;
+            m_rightLayout.minWidth = 125;
             m_rightLayout.flexibleWidth = 5000;
-            var rightGroup = m_rightGroup.GetComponent<HorizontalLayoutGroup>();
-            rightGroup.childForceExpandHeight = false;
-            rightGroup.childForceExpandWidth = true;
+            var rightGroup = m_rightGroup.GetComponent<VerticalLayoutGroup>();
+            rightGroup.childForceExpandHeight = true;
+            rightGroup.childForceExpandWidth = false;
             rightGroup.childControlHeight = true;
             rightGroup.childControlWidth = true;
             rightGroup.spacing = 4;
 
-            // todo check for HasParameters, etc
-
-            if (!HasParameters && IsMember)
+            // evaluate button
+            if (this is CacheMethod || HasParameters)
             {
-                //var refreshBtnObj = UIFactory.CreateButton(topRowObj, new Color(0.3f, 0.3f, 0.3f));
-                //var btnLayout = refreshBtnObj.AddComponent<LayoutElement>();
-                //btnLayout.minWidth = 30;
-                //btnLayout.minHeight = 20;
-                //btnLayout.flexibleWidth = 0;
-                //var refreshTxt = refreshBtnObj.GetComponentInChildren<Text>();
-                //refreshTxt.text = "⟳";
-                //refreshTxt.fontSize = 16;
-                //var refreshBtn = refreshBtnObj.GetComponent<Button>();
-                //refreshBtn.onClick.AddListener(() => { ExplorerCore.Log("todo Update!"); });
+                var color = HasParameters ? new Color(0.4f, 0.4f, 0.4f) : new Color(0.3f, 0.6f, 0.3f);
+
+                var evalButtonObj = UIFactory.CreateButton(m_rightGroup, color);
+                var evalLayout = evalButtonObj.AddComponent<LayoutElement>();
+                evalLayout.minWidth = 100;
+                evalLayout.minHeight = 22;
+                evalLayout.flexibleWidth = 0;
+                var evalText = evalButtonObj.GetComponentInChildren<Text>();
+                evalText.text = HasParameters
+                    ? $"Evaluate ({ParamCount})"
+                    : "Evaluate";
+
+                var evalButton = evalButtonObj.GetComponent<Button>();
+                var colors = evalButton.colors;
+                colors.highlightedColor = new Color(0.4f, 0.7f, 0.4f);
+                evalButton.colors = colors;
+#if CPP
+                evalButton.onClick.AddListener(new Action(OnMainEvaluateButton));
+#else
+                evalButton.onClick.AddListener(OnMainEvaluateButton);
+#endif
+
+                void OnMainEvaluateButton()
+                {
+                    if (HasParameters)
+                    {
+                        // todo show parameter input
+                        ExplorerCore.Log("TODO params");
+                    }
+                    else
+                    {
+                        // method with no parameters
+                        (this as CacheMethod).Evaluate();
+                    }
+                }
             }
 
-            IValue.ConstructUI(m_rightGroup);
+            // subcontent
 
-            // todo subcontent
+            // todo check if IValue actually has subcontent
 
-            //m_subContent = UIFactory.CreateHorizontalGroup(m_parentContent, new Color(1, 1, 1, 0));
-            //var subGroup = m_subContent.GetComponent<HorizontalLayoutGroup>();
-            //subGroup.childForceExpandWidth = true;
-            //subGroup.childControlWidth = true;
-            //var subLayout = m_subContent.AddComponent<LayoutElement>();
-            //subLayout.minHeight = 25;
-            //subLayout.flexibleHeight = 500;
-            //subLayout.minWidth = 125;
-            //subLayout.flexibleWidth = 9000;
+            m_subContent = UIFactory.CreateHorizontalGroup(m_parentContent, new Color(1, 1, 1, 0));
+            var subGroup = m_subContent.GetComponent<HorizontalLayoutGroup>();
+            subGroup.childForceExpandWidth = true;
+            subGroup.childControlWidth = true;
+            var subLayout = m_subContent.AddComponent<LayoutElement>();
+            subLayout.minHeight = 50;
+            subLayout.flexibleHeight = 500;
+            subLayout.minWidth = 125;
+            subLayout.flexibleWidth = 9000;
 
-            //m_subContent.SetActive(false);
+            m_subContent.SetActive(false);
+
+            // Construct InteractiveValue UI
+
+            IValue.ConstructUI(m_rightGroup, m_subContent);
         }
 
         #endregion

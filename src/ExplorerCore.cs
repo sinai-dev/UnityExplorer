@@ -41,7 +41,7 @@ namespace UnityExplorer
         }
         public static bool m_showMenu;
 
-        private static bool m_doneUIInit;
+        private static bool s_doneUIInit;
         private static float m_timeSinceStartup;
 
         public ExplorerCore()
@@ -92,23 +92,18 @@ namespace UnityExplorer
 
         public static void Update()
         {
-            if (!m_doneUIInit)
+            if (!s_doneUIInit)
                 CheckUIInit();
 
             if (MouseInspector.Enabled)
-            {
                 MouseInspector.UpdateInspect();
-            }
             else
             {
                 if (InputManager.GetKeyDown(ModConfig.Instance.Main_Menu_Toggle))
                     ShowMenu = !ShowMenu;
 
-                if (ShowMenu)
-                {
-                    //ForceUnlockCursor.Update();
+                if (ShowMenu && s_doneUIInit)
                     UIManager.Update();
-                }
             }
         }
 
@@ -118,7 +113,7 @@ namespace UnityExplorer
 
             if (m_timeSinceStartup > 0.1f)
             {
-                m_doneUIInit = true;
+                s_doneUIInit = true;
                 try
                 {
                     UIManager.Init();
@@ -202,6 +197,17 @@ namespace UnityExplorer
 #else
                         ExplorerBepInPlugin.Logging?.LogError(message?.ToString());
 #endif
+        }
+
+
+        public static string RemoveInvalidFilenameChars(string s)
+        {
+            var invalid = System.IO.Path.GetInvalidFileNameChars();
+            foreach (var c in invalid)
+            {
+                s = s.Replace(c.ToString(), "");
+            }
+            return s;
         }
     }
 }
