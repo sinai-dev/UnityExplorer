@@ -95,7 +95,7 @@ public class SliderScrollbar
         GameObject handleSlideAreaObj = UIFactory.CreateUIObject("Handle Slide Area", sliderObj);
         GameObject handleObj = UIFactory.CreateUIObject("Handle", handleSlideAreaObj);
 
-        Image bgImage = bgObj.AddGraphic<Image>();
+        Image bgImage = bgObj.AddComponent<Image>();
         bgImage.type = Image.Type.Sliced;
         bgImage.color = new Color(0.05f, 0.05f, 0.05f, 1.0f);
 
@@ -111,7 +111,7 @@ public class SliderScrollbar
         fillAreaRect.anchoredPosition = new Vector2(-5f, 0f);
         fillAreaRect.sizeDelta = new Vector2(-20f, 0f);
 
-        Image fillImage = fillObj.AddGraphic<Image>();
+        Image fillImage = fillObj.AddComponent<Image>();
         fillImage.type = Image.Type.Sliced;
         fillImage.color = Color.clear;
 
@@ -124,7 +124,7 @@ public class SliderScrollbar
         handleSlideRect.offsetMax = new Vector2(-15f, 0f);
         handleSlideRect.sizeDelta = new Vector2(-30f, -30f);
 
-        Image handleImage = handleObj.AddGraphic<Image>();
+        Image handleImage = handleObj.AddComponent<Image>();
         handleImage.color = new Color(0.5f, 0.5f, 0.5f, 1.0f);
 
         var handleRect = handleObj.GetComponent<RectTransform>();

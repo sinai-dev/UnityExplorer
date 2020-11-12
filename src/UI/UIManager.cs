@@ -20,7 +20,7 @@ namespace UnityExplorer.UI
         public static EventSystem EventSys { get; private set; }
         public static StandaloneInputModule InputModule { get; private set; }
 
-        internal static Material UIMaterial { get; private set; }
+        //internal static Material UIMaterial { get; private set; }
         internal static Sprite ResizeCursor { get; private set; }
         internal static Font ConsoleFont { get; private set; }
 

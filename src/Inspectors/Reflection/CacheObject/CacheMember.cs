@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Shared;
+using UnityExplorer.Helpers;
 #if CPP
 using UnhollowerBaseLib;
 #endif
@@ -46,14 +47,29 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public override void UpdateValue()
         {
+            if (HasParameters && !m_isEvaluating)
+            {
+                // need to enter args first
+                return;
+            }
+
+            try
+            {
 #if CPP
-            if (!IsReflectionSupported())
-                this.ReflectionException = "Type not supported with Reflection!";
-            else
-                UpdateReflection();
-#else
-            UpdateReflection();
+                if (!IsReflectionSupported())
+                    throw new Exception("Type not supported with Reflection");
 #endif
+                UpdateReflection();
+
+#if CPP
+                if (IValue.Value != null)
+                    IValue.Value = IValue.Value.Il2CppCast(ReflectionHelpers.GetActualType(IValue.Value));
+#endif
+            }
+            catch (Exception e)
+            {
+                ReflectionException = ReflectionHelpers.ExceptionToString(e, true);
+            }
 
             base.UpdateValue();
         }
@@ -137,76 +153,7 @@ namespace UnityExplorer.Inspectors.Reflection
 
         private string GetRichTextName()
         {
-            string memberColor = "";
-            bool isStatic = false;
-
-            if (MemInfo is FieldInfo fi)
-            {
-                if (fi.IsStatic)
-                {
-                    isStatic = true;
-                    memberColor = SyntaxColors.Field_Static;
-                }
-                else
-                    memberColor = SyntaxColors.Field_Instance;
-            }
-            else if (MemInfo is MethodInfo mi)
-            {
-                if (mi.IsStatic)
-                {
-                    isStatic = true;
-                    memberColor = SyntaxColors.Method_Static;
-                }
-                else
-                    memberColor = SyntaxColors.Method_Instance;
-            }
-            else if (MemInfo is PropertyInfo pi)
-            {
-                if (pi.GetAccessors(true)[0].IsStatic)
-                {
-                    isStatic = true;
-                    memberColor = SyntaxColors.Prop_Static;
-                }
-                else
-                    memberColor = SyntaxColors.Prop_Instance;
-            }
-
-            string classColor;
-            if (MemInfo.DeclaringType.IsValueType)
-            {
-                classColor = SyntaxColors.StructGreen;
-            }
-            else if (MemInfo.DeclaringType.IsAbstract && MemInfo.DeclaringType.IsSealed)
-            {
-                classColor = SyntaxColors.Class_Static;
-            }
-            else
-            {
-                classColor = SyntaxColors.Class_Instance;
-            }
-
-            m_richTextName = $"<color={classColor}>{MemInfo.DeclaringType.Name}</color>.";
-            if (isStatic) m_richTextName += "<i>";
-            m_richTextName += $"<color={memberColor}>{MemInfo.Name}</color>";
-            if (isStatic) m_richTextName += "</i>";
-
-            // generic method args
-            if (this is CacheMethod cm && cm.GenericArgs.Length > 0)
-            {
-                m_richTextName += "<";
-
-                var args = "";
-                for (int i = 0; i < cm.GenericArgs.Length; i++)
-                {
-                    if (args != "") args += ", ";
-                    args += $"<color={SyntaxColors.StructGreen}>{cm.GenericArgs[i].Name}</color>";
-                }
-                m_richTextName += args;
-
-                m_richTextName += ">";
-            }
-
-            return m_richTextName;
+            return m_richTextName = UISyntaxHighlight.GetHighlight(MemInfo.DeclaringType, false, MemInfo);
         }
 
 #if CPP
@@ -251,33 +198,136 @@ namespace UnityExplorer.Inspectors.Reflection
         }
 #endif
 
-        #region UI CONSTRUCTION 
+        #region UI 
 
+        internal float GetMemberLabelWidth(RectTransform scrollRect)
+        {
+            var textGenSettings = m_memLabelText.GetGenerationSettings(m_topRowRect.rect.size);
+            textGenSettings.scaleFactor = InputFieldScroller.canvasScaler.scaleFactor;
 
+            var textGen = m_memLabelText.cachedTextGeneratorForLayout;
+            float preferredWidth = textGen.GetPreferredWidth(RichTextName, textGenSettings);
+
+            float max = scrollRect.rect.width * 0.5f;
+
+            if (preferredWidth > max) preferredWidth = max;
+
+            return preferredWidth < 125f ? 125f : preferredWidth;
+        }
+
+        internal void SetWidths(float labelWidth, float valueWidth)
+        {
+            m_leftLayout.preferredWidth = labelWidth;
+            m_rightLayout.preferredWidth = valueWidth;
+        }
+
+        internal GameObject m_leftGroup;
+        internal GameObject m_rightGroup;
+        internal Text m_memLabelText;
+        internal RectTransform m_topRowRect;
+        internal LayoutElement m_leftLayout;
+        internal LayoutElement m_rightLayout;
+        //internal GameObject m_subGroup;
 
         internal override void ConstructUI()
         {
             base.ConstructUI();
 
-            //var refreshBtnObj = UIFactory.CreateButton(topRowObj, new Color(0.3f, 0.3f, 0.3f));
-            //var btnLayout = refreshBtnObj.AddComponent<LayoutElement>();
-            //btnLayout.minWidth = 30;
-            //btnLayout.minHeight = 20;
-            //btnLayout.flexibleWidth = 0;
-            //var refreshTxt = refreshBtnObj.GetComponentInChildren<Text>();
-            //refreshTxt.text = "⟳";
-            //refreshTxt.fontSize = 16;
-            //var refreshBtn = refreshBtnObj.GetComponent<Button>();
-            //refreshBtn.onClick.AddListener(() => { ExplorerCore.Log("todo Update!"); });
+            var topGroupObj = UIFactory.CreateHorizontalGroup(m_mainContent, new Color(1, 1, 1, 0));
+            m_topRowRect = topGroupObj.GetComponent<RectTransform>();
+            var topLayout = topGroupObj.AddComponent<LayoutElement>();
+            topLayout.minHeight = 25;
+            topLayout.flexibleHeight = 0;
+            topLayout.minWidth = 300;
+            topLayout.flexibleWidth = 5000;
+            var topGroup = topGroupObj.GetComponent<HorizontalLayoutGroup>();
+            topGroup.childForceExpandHeight = false;
+            topGroup.childForceExpandWidth = false;
+            topGroup.childControlHeight = true;
+            topGroup.childControlWidth = true;
+            topGroup.spacing = 10;
 
-            var labelObj = UIFactory.CreateLabel(m_topContent, TextAnchor.MiddleLeft);
-            var labellayout = labelObj.AddComponent<LayoutElement>();
-            labellayout.minWidth = 225;
-            labellayout.flexibleWidth = 0;
+            // left group
 
-            var label = labelObj.GetComponent<Text>();
-            label.horizontalOverflow = HorizontalWrapMode.Wrap;
-            label.text = this.RichTextName;
+            m_leftGroup = UIFactory.CreateHorizontalGroup(topGroupObj, new Color(1, 1, 1, 0));
+            var leftLayout = m_leftGroup.AddComponent<LayoutElement>();
+            leftLayout.minHeight = 25;
+            leftLayout.flexibleHeight = 0;
+            leftLayout.minWidth = 125;
+            leftLayout.flexibleWidth = 200;
+            var leftGroup = m_leftGroup.GetComponent<HorizontalLayoutGroup>();
+            leftGroup.childForceExpandHeight = true;
+            leftGroup.childForceExpandWidth = false;
+            leftGroup.childControlHeight = true;
+            leftGroup.childControlWidth = true;
+            leftGroup.spacing = 4;
+
+            // member label
+
+            var labelObj = UIFactory.CreateLabel(m_leftGroup, TextAnchor.MiddleLeft);
+            var leftRect = labelObj.GetComponent<RectTransform>();
+            leftRect.anchorMin = Vector2.zero;
+            leftRect.anchorMax = Vector2.one;
+            leftRect.offsetMin = Vector2.zero;
+            leftRect.offsetMax = Vector2.zero;
+            leftRect.sizeDelta = Vector2.zero;
+            m_leftLayout = labelObj.AddComponent<LayoutElement>();
+            m_leftLayout.preferredWidth = 225;
+            m_leftLayout.minHeight = 25;
+            m_leftLayout.flexibleHeight = 100;
+            var labelFitter = labelObj.AddComponent<ContentSizeFitter>();
+            labelFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            labelFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+            m_memLabelText = labelObj.GetComponent<Text>();
+            m_memLabelText.horizontalOverflow = HorizontalWrapMode.Wrap;
+            m_memLabelText.text = this.RichTextName;
+
+            // right group
+
+            m_rightGroup = UIFactory.CreateHorizontalGroup(topGroupObj, new Color(1, 1, 1, 0));
+            m_rightLayout = m_rightGroup.AddComponent<LayoutElement>();
+            m_rightLayout.minHeight = 25;
+            m_rightLayout.flexibleHeight = 480;
+            m_rightLayout.minWidth = 300;
+            m_rightLayout.flexibleWidth = 5000;
+            var rightGroup = m_rightGroup.GetComponent<HorizontalLayoutGroup>();
+            rightGroup.childForceExpandHeight = false;
+            rightGroup.childForceExpandWidth = true;
+            rightGroup.childControlHeight = true;
+            rightGroup.childControlWidth = true;
+            rightGroup.spacing = 4;
+
+            // todo check for HasParameters, etc
+
+            if (!HasParameters && IsMember)
+            {
+                //var refreshBtnObj = UIFactory.CreateButton(topRowObj, new Color(0.3f, 0.3f, 0.3f));
+                //var btnLayout = refreshBtnObj.AddComponent<LayoutElement>();
+                //btnLayout.minWidth = 30;
+                //btnLayout.minHeight = 20;
+                //btnLayout.flexibleWidth = 0;
+                //var refreshTxt = refreshBtnObj.GetComponentInChildren<Text>();
+                //refreshTxt.text = "⟳";
+                //refreshTxt.fontSize = 16;
+                //var refreshBtn = refreshBtnObj.GetComponent<Button>();
+                //refreshBtn.onClick.AddListener(() => { ExplorerCore.Log("todo Update!"); });
+            }
+
+            IValue.ConstructUI(m_rightGroup);
+
+            // todo subcontent
+
+            //m_subContent = UIFactory.CreateHorizontalGroup(m_parentContent, new Color(1, 1, 1, 0));
+            //var subGroup = m_subContent.GetComponent<HorizontalLayoutGroup>();
+            //subGroup.childForceExpandWidth = true;
+            //subGroup.childControlWidth = true;
+            //var subLayout = m_subContent.AddComponent<LayoutElement>();
+            //subLayout.minHeight = 25;
+            //subLayout.flexibleHeight = 500;
+            //subLayout.minWidth = 125;
+            //subLayout.flexibleWidth = 9000;
+
+            //m_subContent.SetActive(false);
         }
 
         #endregion

@@ -237,8 +237,11 @@ namespace UnityExplorer.Helpers
 #endif
         }
 
-        public static string ExceptionToString(Exception e)
+        public static string ExceptionToString(Exception e, bool innerMost = false)
         {
+            while (innerMost && e.InnerException != null)
+                e = e.InnerException;
+
             return e.GetType() + ", " + e.Message;
         }
     }

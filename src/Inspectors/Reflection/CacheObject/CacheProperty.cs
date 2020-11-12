@@ -30,32 +30,23 @@ namespace UnityExplorer.Inspectors.Reflection
                 return;
             }
 
-            try
+            var pi = MemInfo as PropertyInfo;
+
+            if (pi.CanRead)
             {
-                var pi = MemInfo as PropertyInfo;
+                var target = pi.GetAccessors(true)[0].IsStatic ? null : DeclaringInstance;
 
-                if (pi.CanRead)
-                {
-                    var target = pi.GetAccessors()[0].IsStatic ? null : DeclaringInstance;
+                IValue.Value = pi.GetValue(target, ParseArguments());
 
-                    IValue.Value = pi.GetValue(target, ParseArguments());
-
-                    //base.UpdateValue();
-
-                    m_evaluated = true;
-                    ReflectionException = null;
-                }
-                else // create a dummy value for Write-Only properties.
-                {
-                    if (IValue.ValueType == typeof(string))
-                        IValue.Value = "";
-                    else
-                        IValue.Value = Activator.CreateInstance(IValue.ValueType);
-                }
+                m_evaluated = true;
+                ReflectionException = null;
             }
-            catch (Exception e)
+            else // create a dummy value for Write-Only properties.
             {
-                ReflectionException = ReflectionHelpers.ExceptionToString(e);
+                if (IValue.ValueType == typeof(string))
+                    IValue.Value = "";
+                else
+                    IValue.Value = Activator.CreateInstance(IValue.ValueType);
             }
         }
 

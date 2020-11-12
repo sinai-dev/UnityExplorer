@@ -16,10 +16,6 @@ namespace UnityExplorer.UI.Modules
         public CodeEditor m_codeEditor;
         public ScriptEvaluator m_evaluator;
 
-        public static bool EnableAutocompletes { get; set; } = true;
-        public static bool EnableAutoIndent { get; set; } = true;
-
-        public static List<Suggestion> AutoCompletes = new List<Suggestion>();
         public static List<string> UsingDirectives;
 
         public static readonly string[] DefaultUsing = new string[]
@@ -113,26 +109,6 @@ namespace UnityExplorer.UI.Modules
             m_evaluator = new ScriptEvaluator(new StringWriter(new StringBuilder())) { InteractiveBaseClass = typeof(ScriptInteraction) };
 
             UsingDirectives = new List<string>();
-        }
-
-        internal void OnInputChanged()
-        {
-            if (!EnableAutocompletes)
-                return;
-
-            AutoCompleter.CheckAutocomplete();
-            AutoCompleter.SetSuggestions(AutoCompletes.ToArray());
-        }
-
-        public void UseAutocomplete(string suggestion)
-        {
-            int cursorIndex = m_codeEditor.InputField.caretPosition;
-            string input = m_codeEditor.InputField.text;
-            input = input.Insert(cursorIndex, suggestion);
-            m_codeEditor.InputField.text = input;
-            m_codeEditor.InputField.caretPosition += suggestion.Length;
-
-            AutoCompleter.ClearAutocompletes();
         }
 
         private class VoidType

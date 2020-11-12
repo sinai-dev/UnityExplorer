@@ -19,7 +19,47 @@ namespace UnityExplorer.Inspectors
 
     public class ReflectionInspector : InspectorBase
     {
+        #region STATIC
+
+        public static ReflectionInspector ActiveInstance { get; private set; }
+
+        static ReflectionInspector()
+        {
+            PanelDragger.OnFinishResize += OnContainerResized;
+            SceneExplorer.OnToggleShow += OnContainerResized;
+        }
+
+        private static void OnContainerResized()
+        {
+            if (ActiveInstance == null)
+                return;
+
+            ActiveInstance.m_widthUpdateWanted = true;
+        }
+
+        // Blacklists
+        private static readonly HashSet<string> s_typeAndMemberBlacklist = new HashSet<string>
+        {
+            // these cause a crash
+            "Type.DeclaringMethod",
+            "Rigidbody2D.Cast",
+            "Collider2D.Cast",
+            "Collider2D.Raycast",
+        };
+        private static readonly HashSet<string> s_methodStartsWithBlacklist = new HashSet<string>
+        {
+            // these are redundant
+            "get_",
+            "set_",
+        };
+
+        #endregion
+
+        #region INSTANCE
+
         public override string TabLabel => m_targetTypeShortName;
+
+        public bool AutoUpdate { get; set; }
 
         internal readonly Type m_targetType;
         internal readonly string m_targetTypeShortName;
@@ -43,22 +83,10 @@ namespace UnityExplorer.Inspectors
         internal PageHandler m_pageHandler;
         internal SliderScrollbar m_sliderScroller;
         internal GameObject m_scrollContent;
-        
-        // Blacklists
-        private static readonly HashSet<string> s_typeAndMemberBlacklist = new HashSet<string>
-        {
-            // these cause a crash
-            "Type.DeclaringMethod",
-            "Rigidbody2D.Cast",
-            "Collider2D.Cast",
-            "Collider2D.Raycast",
-        };
-        private static readonly HashSet<string> s_methodStartsWithBlacklist = new HashSet<string>
-        {
-            // these are redundant
-            "get_",
-            "set_",
-        };
+        internal RectTransform m_scrollContentRect;
+
+        internal bool m_widthUpdateWanted;
+        internal bool m_widthUpdateWaiting;
 
         // Ctor
 
@@ -80,11 +108,41 @@ namespace UnityExplorer.Inspectors
 
         // Methods
 
+        public override void SetActive()
+        {
+            base.SetActive();
+            ActiveInstance = this;
+        }
+
+        public override void SetInactive()
+        {
+            base.SetInactive();
+            ActiveInstance = null;
+        }
+
         public override void Update()
         {
             base.Update();
 
-            // todo
+            if (AutoUpdate)
+            {
+                foreach (var member in m_displayedMembers)
+                {
+                    member.UpdateValue();
+                }
+            }
+
+            if (m_widthUpdateWanted)
+            {
+                if (!m_widthUpdateWaiting)
+                    m_widthUpdateWaiting = true;
+                else
+                {
+                    UpdateWidths();
+                    m_widthUpdateWaiting = false;
+                    m_widthUpdateWanted = false;
+                }
+            }
         }
 
         public override void Destroy()
@@ -100,42 +158,66 @@ namespace UnityExplorer.Inspectors
             RefreshDisplay();
         }
 
-        public void RefreshDisplay()
+        public void RefreshDisplay(bool fast = false)
         {
-            // TODO TEMP
+            // temp because not doing filtering yet
             m_membersFiltered = m_allMembers;
 
             var members = m_membersFiltered;
-
             m_pageHandler.ListCount = members.Length;
 
-            int newCount = 0;
-
-            // disable current members
-            for (int i = 0; i < m_displayedMembers.Length; i++)
+            if (!fast)
             {
-                var mem = m_displayedMembers[i];
-                if (mem != null)
-                    mem.Disable();
+                // disable current members
+                for (int i = 0; i < m_displayedMembers.Length; i++)
+                {
+                    var mem = m_displayedMembers[i];
+                    if (mem != null)
+                        mem.Disable();
+                    else
+                        break;
+                }
             }
+
+            if (members.Length < 1)
+                return;
 
             foreach (var itemIndex in m_pageHandler)
             {
-                newCount++;
-
-                // normalized index starting from 0
-                var i = itemIndex - m_pageHandler.StartIndex;
-
                 if (itemIndex >= members.Length)
-                {
                     break;
-                }
 
                 CacheMember member = members[itemIndex];
 
+                m_displayedMembers[itemIndex - m_pageHandler.StartIndex] = member;
                 member.Enable();
+            }
 
-                m_displayedMembers[i] = member;
+            m_widthUpdateWanted = true;
+        }
+
+        internal void UpdateWidths()
+        {
+            float labelWidth = 125;
+
+            foreach (var cache in m_displayedMembers)
+            {
+                if (cache == null)
+                    break;
+
+                var width = cache.GetMemberLabelWidth(m_scrollContentRect);
+
+                if (width > labelWidth)
+                    labelWidth = width;
+            }
+
+            float valueWidth = m_scrollContentRect.rect.width - labelWidth - 10;
+
+            foreach (var cache in m_displayedMembers)
+            {
+                if (cache == null)
+                    break;
+                cache.SetWidths(labelWidth, valueWidth);
             }
         }
 
@@ -249,7 +331,12 @@ namespace UnityExplorer.Inspectors
                 }
             }
 
-            m_allMembers = list.ToArray();
+            var sorted = new List<CacheMember>();
+            sorted.AddRange(list.Where(x => x is CacheMethod));
+            sorted.AddRange(list.Where(x => x is CacheProperty));
+            sorted.AddRange(list.Where(x => x is CacheField));
+
+            m_allMembers = sorted.ToArray();
 
             // ExplorerCore.Log("Cached " + m_allMembers.Length + " members");
         }
@@ -307,23 +394,23 @@ namespace UnityExplorer.Inspectors
             typeLabelLayout.minWidth = 150;
             typeLabelLayout.flexibleWidth = 5000;
 
-            string classColor = SyntaxColors.Class_Instance;
-            if (m_targetType.IsSealed && m_targetType.IsAbstract)
-                classColor = SyntaxColors.Class_Static;
-            else if (m_targetType.IsValueType)
-                classColor = SyntaxColors.StructGreen;
-
-            typeLabelInput.text = $"<color=grey>{m_targetType.Namespace}.</color><color={classColor}>{m_targetType.Name}</color>";
+            typeLabelInput.text = UISyntaxHighlight.GetHighlight(m_targetType, true);
         }
 
         internal void ConstructFilterArea()
         {
 
+
+            // todo instance inspector has extra filters
+
+            // todo instance inspector "helper tools"
         }
 
         internal void ConstructMemberList()
         {
             var scrollobj = UIFactory.CreateScrollView(Content, out m_scrollContent, out m_sliderScroller, new Color(0.12f, 0.12f, 0.12f));
+
+            m_scrollContentRect = m_scrollContent.GetComponent<RectTransform>();
 
             var scrollGroup = m_scrollContent.GetComponent<VerticalLayoutGroup>();
             scrollGroup.spacing = 3;
@@ -332,6 +419,8 @@ namespace UnityExplorer.Inspectors
             m_pageHandler.ConstructUI(Content);
             m_pageHandler.OnPageChanged += OnPageTurned;
         }
+
+        #endregion
 
         #endregion
     }

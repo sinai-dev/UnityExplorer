@@ -378,7 +378,7 @@
     <Compile Include="UI\Shared\InputFieldScroller.cs" />
     <Compile Include="UI\Shared\SliderScrollbar.cs" />
     <Compile Include="UI\Shared\PageHandler.cs" />
-    <Compile Include="UI\Shared\SyntaxColors.cs" />
+    <Compile Include="UI\Shared\UISyntaxHighlight.cs" />
     <Compile Include="UI\UIManager.cs" />
     <Compile Include="Unstrip\AssetBundleUnstrip.cs" />
     <Compile Include="Unstrip\ColorUtilityUnstrip.cs" />

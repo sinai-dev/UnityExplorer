@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityExplorer.Helpers;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Shared;
+using UnityExplorer.Unstrip;
 
 namespace UnityExplorer.Inspectors.Reflection
 {
@@ -17,11 +19,12 @@ namespace UnityExplorer.Inspectors.Reflection
         public object Value { get; set; }
         public Type ValueType;
 
-        public string ButtonLabel => m_btnLabel ?? GetButtonLabel();
-        private string m_btnLabel;
+        public string RichTextValue => m_richValue ?? GetRichTextValue();
+        internal string m_richValue;
+        internal string m_richValueType;
 
         public MethodInfo ToStringMethod => m_toStringMethod ?? GetToStringMethod();
-        private MethodInfo m_toStringMethod;
+        internal MethodInfo m_toStringMethod;
 
         public virtual void Init()
         {
@@ -39,15 +42,14 @@ namespace UnityExplorer.Inspectors.Reflection
                 return;
             }
 
-            if (Value == null)
-            {
-                m_text.text = "<color=red>null</color>";
-            }
-            else
-            {
-                GetButtonLabel();
-                m_text.text = ButtonLabel;
-            }
+            GetRichTextValue();
+
+            m_text.text = RichTextValue;
+
+            //if (Value == null)
+            //    m_text.text = $"<color=red>null</color> {m_richValueType}";
+            //else
+            //    m_text.text = RichTextValue;
         }
 
         private MethodInfo GetToStringMethod()
@@ -67,85 +69,79 @@ namespace UnityExplorer.Inspectors.Reflection
             return m_toStringMethod;
         }
 
-        public string GetButtonLabel()
-        {
-            if (Value == null) return "";
 
-            var valueType = ReflectionHelpers.GetActualType(Value);
+        public string GetRichTextValue()
+        {
+            if (Value != null)
+                ValueType = Value.GetType();
+
+            m_richValueType = UISyntaxHighlight.GetHighlight(ValueType, true);
+
+            if (Value == null) return $"<color=grey>null</color> ({m_richValueType})";
 
             string label;
 
-            if (valueType == typeof(TextAsset))
+            if (ValueType == typeof(TextAsset))
             {
                 var textAsset = Value as TextAsset;
 
                 label = textAsset.text;
 
                 if (label.Length > 10)
-                {
                     label = $"{label.Substring(0, 10)}...";
-                }
 
-                label = $"\"{label}\" {textAsset.name} (<color={SyntaxColors.Class_Instance}>UnityEngine.TextAsset</color>)";
+                label = $"\"{label}\" {textAsset.name} ({m_richValueType})";
+            }
+            else if (ValueType == typeof(EventSystem))
+            {
+                label = m_richValueType;
             }
             else
             {
-                label = (string)ToStringMethod?.Invoke(Value, null) ?? Value.ToString();
+                var toString = (string)ToStringMethod.Invoke(Value, null);
 
-                var classColor = valueType.IsAbstract && valueType.IsSealed
-                    ? SyntaxColors.Class_Static
-                    : SyntaxColors.Class_Instance;
+                var temp = toString.Replace(ValueType.FullName, "").Trim();
 
-                string typeLabel = $"<color={classColor}>{valueType.FullName}</color>";
-
-                if (Value is UnityEngine.Object)
+                if (string.IsNullOrEmpty(temp))
                 {
-                    label = label.Replace($"({valueType.FullName})", $"({typeLabel})");
+                    label = m_richValueType;
                 }
                 else
                 {
-                    if (!label.Contains(valueType.FullName))
-                    {
-                        label += $" ({typeLabel})";
-                    }
+                    if (toString.Length > 200)
+                        toString = toString.Substring(0, 200) + "...";
+
+                    label = toString;
+
+                    var unityType = $"({ValueType.FullName})";
+                    if (Value is UnityEngine.Object && label.Contains(unityType))
+                        label = label.Replace(unityType, $"({m_richValueType})");
                     else
-                    {
-                        label = label.Replace(valueType.FullName, typeLabel);
-                    }
+                        label += $" ({m_richValueType})";
                 }
             }
 
-            return m_btnLabel = label;
+            return m_richValue = label;
         }
 
-        #region UI CONSTRUCTION
+#region UI CONSTRUCTION
 
         internal GameObject m_UIContent;
         internal Text m_text;
 
         public void ConstructUI(GameObject parent)
         {
-            // TEMPORARY
             m_UIContent = UIFactory.CreateLabel(parent, TextAnchor.MiddleLeft);
             var mainLayout = m_UIContent.AddComponent<LayoutElement>();
-            mainLayout.minWidth = 100;
+            mainLayout.minWidth = 200;
             mainLayout.flexibleWidth = 5000;
             mainLayout.minHeight = 25;
             m_text = m_UIContent.GetComponent<Text>();
-            
-            if (OwnerCacheObject != null)
-            {
-                if (!OwnerCacheObject.HasEvaluated)
-                {
-                    m_text.text = "Not yet evaluated";
-                }
-                else
-                {
-                    m_text.text = ButtonLabel;
-                }
-            }
+
+            GetRichTextValue();
+            m_text.text = $"<i><color=grey>Not yet evaluated</color> ({m_richValueType})</i>";
         }
 
-        #endregion
+#endregion
     }
 }

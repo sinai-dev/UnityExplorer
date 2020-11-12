@@ -15,6 +15,8 @@ namespace UnityExplorer.Inspectors
     {
         public static SceneExplorer Instance;
 
+        internal static Action OnToggleShow;
+
         public SceneExplorer()
         { 
             Instance = this; 
@@ -55,6 +57,7 @@ namespace UnityExplorer.Inspectors
                 return m_dontDestroyObject;
             }
         }
+
         internal static GameObject m_dontDestroyObject;
 
         public void Init()
@@ -459,6 +462,8 @@ namespace UnityExplorer.Inspectors
                     scrollObj.SetActive(true);
                     Update();
                 }
+
+                OnToggleShow?.Invoke();
             }
         }
 

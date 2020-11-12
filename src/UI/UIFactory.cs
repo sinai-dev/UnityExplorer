@@ -48,13 +48,6 @@ namespace UnityExplorer.UI
             }
         }
 
-        public static T AddGraphic<T>(this GameObject obj) where T : Graphic
-        {
-            var ret = obj.AddComponent<T>();
-            ret.material = UIManager.UIMaterial;
-            return ret;
-        }
-
         private static void SetDefaultTextValues(Text lbl)
         {
             lbl.color = defaultTextColor;
@@ -103,7 +96,7 @@ namespace UnityExplorer.UI
             rect.anchoredPosition = Vector2.zero;
             rect.sizeDelta = Vector2.zero;
 
-            Image image = panelObj.AddGraphic<Image>();
+            Image image = panelObj.AddComponent<Image>();
             image.type = Image.Type.Filled;
             image.color = new Color(0.05f, 0.05f, 0.05f);
 
@@ -120,7 +113,7 @@ namespace UnityExplorer.UI
             content = new GameObject("Content");
             content.transform.parent = panelObj.transform;
 
-            Image image2 = content.AddGraphic<Image>();
+            Image image2 = content.AddComponent<Image>();
             image2.type = Image.Type.Filled;
             image2.color = new Color(0.1f, 0.1f, 0.1f);
 
@@ -147,7 +140,7 @@ namespace UnityExplorer.UI
             gridGroup.cellSize = cellSize;
             gridGroup.spacing = spacing;
 
-            Image image = groupObj.AddGraphic<Image>();
+            Image image = groupObj.AddComponent<Image>();
             if (color != default)
             {
                 image.color = color;
@@ -168,7 +161,7 @@ namespace UnityExplorer.UI
             horiGroup.childAlignment = TextAnchor.UpperLeft;
             horiGroup.childControlWidth = false;
 
-            Image image = groupObj.AddGraphic<Image>();
+            Image image = groupObj.AddComponent<Image>();
             if (color != default)
             {
                 image.color = color;
@@ -189,7 +182,7 @@ namespace UnityExplorer.UI
             horiGroup.childAlignment = TextAnchor.UpperLeft;
             horiGroup.childControlWidth = false;
 
-            Image image = groupObj.AddGraphic<Image>();
+            Image image = groupObj.AddComponent<Image>();
             if (color != default)
             {
                 image.color = color;
@@ -206,7 +199,7 @@ namespace UnityExplorer.UI
         //{
         //    GameObject labelObj = CreateUIObject("Label", parent, thinSize);
 
-        //    TextMeshProUGUI text = labelObj.AddGraphic<TextMeshProUGUI>();
+        //    TextMeshProUGUI text = labelObj.AddComponent<TextMeshProUGUI>();
 
         //    text.alignment = alignment;
         //    text.richText = true;
@@ -218,7 +211,7 @@ namespace UnityExplorer.UI
         {
             GameObject labelObj = CreateUIObject("Label", parent, thinSize);
 
-            Text text = labelObj.AddGraphic<Text>();
+            Text text = labelObj.AddComponent<Text>();
             SetDefaultTextValues(text);
             text.alignment = alignment;
             text.supportRichText = true;
@@ -234,7 +227,7 @@ namespace UnityExplorer.UI
             textObj.AddComponent<RectTransform>();
             SetParentAndAlign(textObj, buttonObj);
 
-            Image image = buttonObj.AddGraphic<Image>();
+            Image image = buttonObj.AddComponent<Image>();
             image.type = Image.Type.Sliced;
             image.color = new Color(1, 1, 1, 0.75f);
 
@@ -248,7 +241,7 @@ namespace UnityExplorer.UI
                 btn.colors = colors;
             }
 
-            Text text = textObj.AddGraphic<Text>();
+            Text text = textObj.AddComponent<Text>();
             text.text = "Button";
             SetDefaultTextValues(text);
             text.alignment = TextAnchor.MiddleCenter;
@@ -271,7 +264,7 @@ namespace UnityExplorer.UI
             GameObject handleSlideAreaObj = CreateUIObject("Handle Slide Area", sliderObj);
             GameObject handleObj = CreateUIObject("Handle", handleSlideAreaObj);
 
-            Image bgImage = bgObj.AddGraphic<Image>();
+            Image bgImage = bgObj.AddComponent<Image>();
             bgImage.type = Image.Type.Sliced;
             bgImage.color = new Color(0.15f, 0.15f, 0.15f, 1.0f);
 
@@ -286,7 +279,7 @@ namespace UnityExplorer.UI
             fillAreaRect.anchoredPosition = new Vector2(-5f, 0f);
             fillAreaRect.sizeDelta = new Vector2(-20f, 0f);
 
-            Image fillImage = fillObj.AddGraphic<Image>();
+            Image fillImage = fillObj.AddComponent<Image>();
             fillImage.type = Image.Type.Sliced;
             fillImage.color = new Color(0.3f, 0.3f, 0.3f, 1.0f);
 
@@ -297,7 +290,7 @@ namespace UnityExplorer.UI
             handleSlideRect.anchorMin = new Vector2(0f, 0f);
             handleSlideRect.anchorMax = new Vector2(1f, 1f);
 
-            Image handleImage = handleObj.AddGraphic<Image>();
+            Image handleImage = handleObj.AddComponent<Image>();
             handleImage.color = new Color(0.5f, 0.5f, 0.5f, 1.0f);
 
             handleObj.GetComponent<RectTransform>().sizeDelta = new Vector2(20f, 0f);
@@ -319,11 +312,11 @@ namespace UnityExplorer.UI
             GameObject slideAreaObj = CreateUIObject("Sliding Area", scrollObj);
             GameObject handleObj = CreateUIObject("Handle", slideAreaObj);
 
-            Image scrollImage = scrollObj.AddGraphic<Image>();
+            Image scrollImage = scrollObj.AddComponent<Image>();
             scrollImage.type = Image.Type.Sliced;
             scrollImage.color = new Color(0.1f, 0.1f, 0.1f);
 
-            Image handleImage = handleObj.AddGraphic<Image>();
+            Image handleImage = handleObj.AddComponent<Image>();
             handleImage.type = Image.Type.Sliced;
             handleImage.color = new Color(0.4f, 0.4f, 0.4f);
 
@@ -368,14 +361,14 @@ namespace UnityExplorer.UI
             }
 #endif
 
-            Image bgImage = bgObj.AddGraphic<Image>();
+            Image bgImage = bgObj.AddComponent<Image>();
             bgImage.type = Image.Type.Sliced;
             bgImage.color = new Color(0.1f, 0.1f, 0.1f, 1.0f);
 
-            Image checkImage = checkObj.AddGraphic<Image>();
+            Image checkImage = checkObj.AddComponent<Image>();
             checkImage.color = new Color(90f / 255f, 115f / 255f, 90f / 255f, 1.0f);
 
-            text = labelObj.AddGraphic<Text>();
+            text = labelObj.AddComponent<Text>();
             text.text = "Toggle";
             SetDefaultTextValues(text);
 
@@ -425,7 +418,7 @@ namespace UnityExplorer.UI
         {
             GameObject mainObj = CreateUIObject("InputField", parent);
 
-            Image mainImage = mainObj.AddGraphic<Image>();
+            Image mainImage = mainObj.AddComponent<Image>();
             mainImage.type = Image.Type.Sliced;
             mainImage.color = new Color(0.15f, 0.15f, 0.15f);
 
@@ -463,7 +456,7 @@ namespace UnityExplorer.UI
             // mainInput.textViewport = textArea.GetComponent<RectTransform>();
 
             GameObject placeHolderObj = CreateUIObject("Placeholder", textArea);
-            Text placeholderText = placeHolderObj.AddGraphic<Text>();
+            Text placeholderText = placeHolderObj.AddComponent<Text>();
             SetDefaultTextValues(placeholderText);
             placeholderText.text = "...";
             placeholderText.color = new Color(0.5f, 0.5f, 0.5f, 1.0f);
@@ -484,7 +477,7 @@ namespace UnityExplorer.UI
             mainInput.placeholder = placeholderText;
 
             GameObject inputTextObj = CreateUIObject("Text", textArea);
-            Text inputText = inputTextObj.AddGraphic<Text>();
+            Text inputText = inputTextObj.AddComponent<Text>();
             SetDefaultTextValues(inputText);
             inputText.text = "";
             inputText.color = new Color(1f, 1f, 1f, 1f);
@@ -532,11 +525,11 @@ namespace UnityExplorer.UI
             scrollRectTransform.pivot = Vector2.one;
             scrollRectTransform.sizeDelta = new Vector2(scrollRectTransform.sizeDelta.x, 0f);
 
-            Text itemLabelText = itemLabelObj.AddGraphic<Text>();
+            Text itemLabelText = itemLabelObj.AddComponent<Text>();
             SetDefaultTextValues(itemLabelText);
             itemLabelText.alignment = TextAnchor.MiddleLeft;
 
-            var arrowText = arrowObj.AddGraphic<Text>();
+            var arrowText = arrowObj.AddComponent<Text>();
             SetDefaultTextValues(arrowText);
             arrowText.text = "▼";
             var arrowRect = arrowObj.GetComponent<RectTransform>();
@@ -545,7 +538,7 @@ namespace UnityExplorer.UI
             arrowRect.sizeDelta = new Vector2(20f, 20f);
             arrowRect.anchoredPosition = new Vector2(-15f, 0f);
 
-            Image itemBgImage = itemBgObj.AddGraphic<Image>();
+            Image itemBgImage = itemBgObj.AddComponent<Image>();
             itemBgImage.color = new Color(0.25f, 0.45f, 0.25f, 1.0f);
 
             Toggle itemToggle = itemObj.AddComponent<Toggle>();
@@ -561,7 +554,7 @@ namespace UnityExplorer.UI
 #else
 			itemToggle.onValueChanged.AddListener((bool val) => { itemToggle.OnDeselect(null); });
 #endif
-            Image templateImage = templateObj.AddGraphic<Image>();
+            Image templateImage = templateObj.AddComponent<Image>();
             templateImage.type = Image.Type.Sliced;
             templateImage.color = new Color(0.15f, 0.15f, 0.15f, 1.0f);
 
@@ -577,14 +570,14 @@ namespace UnityExplorer.UI
 
             viewportObj.AddComponent<Mask>().showMaskGraphic = false;
 
-            Image viewportImage = viewportObj.AddGraphic<Image>();
+            Image viewportImage = viewportObj.AddComponent<Image>();
             viewportImage.type = Image.Type.Sliced;
 
-            Text labelText = labelObj.AddGraphic<Text>();
+            Text labelText = labelObj.AddComponent<Text>();
             SetDefaultTextValues(labelText);
             labelText.alignment = TextAnchor.MiddleLeft;
 
-            Image dropdownImage = dropdownObj.AddGraphic<Image>();
+            Image dropdownImage = dropdownObj.AddComponent<Image>();
             dropdownImage.color = new Color(0.2f, 0.2f, 0.2f, 1);
             dropdownImage.type = Image.Type.Sliced;
 
@@ -653,7 +646,7 @@ namespace UnityExplorer.UI
             mainLayout.flexibleWidth = 5000;
             mainLayout.flexibleHeight = 5000;
 
-            Image mainImage = mainObj.AddGraphic<Image>();
+            Image mainImage = mainObj.AddComponent<Image>();
             mainImage.type = Image.Type.Filled;
             mainImage.color = (color == default) ? new Color(0.3f, 0.3f, 0.3f, 1f) : color;
 
@@ -666,7 +659,7 @@ namespace UnityExplorer.UI
             viewportRect.sizeDelta = new Vector2(-15.0f, 0.0f);
             viewportRect.offsetMax = new Vector2(-20.0f, 0.0f); 
 
-            viewportObj.AddGraphic<Image>().color = Color.white;
+            viewportObj.AddComponent<Image>().color = Color.white;
             viewportObj.AddComponent<Mask>().showMaskGraphic = false;
 
             content = CreateUIObject("Content", viewportObj);

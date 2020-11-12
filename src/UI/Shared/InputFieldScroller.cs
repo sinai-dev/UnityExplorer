@@ -90,7 +90,7 @@ namespace UnityExplorer.UI.Shared
 
             // Preferred text rect height
             var textGen = inputField.textComponent.cachedTextGeneratorForLayout;
-            float preferredHeight = (textGen.GetPreferredHeight(m_lastText, texGenSettings) / scaleFactor) + 10;
+            float preferredHeight = textGen.GetPreferredHeight(m_lastText, texGenSettings) + 10;
 
             // Default text rect height (fit to scroll parent or expand to fit text)
             float minHeight = Mathf.Max(preferredHeight, sliderScroller.m_scrollRect.rect.height - 25);

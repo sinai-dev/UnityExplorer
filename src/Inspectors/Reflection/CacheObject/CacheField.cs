@@ -21,20 +21,11 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public override void UpdateReflection()
         {
-            try
-            {
-                var fi = MemInfo as FieldInfo;
-                IValue.Value = fi.GetValue(fi.IsStatic ? null : DeclaringInstance);
+            var fi = MemInfo as FieldInfo;
+            IValue.Value = fi.GetValue(fi.IsStatic ? null : DeclaringInstance);
 
-                //base.UpdateValue();
-
-                m_evaluated = true;
-                ReflectionException = null;
-            }
-            catch (Exception e)
-            {
-                ReflectionException = ReflectionHelpers.ExceptionToString(e);
-            }
+            m_evaluated = true;
+            ReflectionException = null;
         }
 
         public override void SetValue()

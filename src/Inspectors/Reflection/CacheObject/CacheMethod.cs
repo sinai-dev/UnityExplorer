@@ -19,7 +19,7 @@ namespace UnityExplorer.Inspectors.Reflection
         public Type[] GenericArgs { get; private set; }
         public Type[][] GenericConstraints { get; private set; }
 
-        public string[] GenericArgInput = new string[0];
+        public string[] m_genericArgInput = new string[0];
 
         public CacheMethod(MethodInfo methodInfo, object declaringInstance) : base(methodInfo, declaringInstance)
         {
@@ -28,7 +28,7 @@ namespace UnityExplorer.Inspectors.Reflection
             GenericConstraints = GenericArgs.Select(x => x.GetGenericParameterConstraints())
                                             .ToArray();
 
-            GenericArgInput = new string[GenericArgs.Length];
+            m_genericArgInput = new string[GenericArgs.Length];
 
             m_arguments = methodInfo.GetParameters();
             m_argumentInput = new string[m_arguments.Length];
@@ -94,7 +94,7 @@ namespace UnityExplorer.Inspectors.Reflection
             var list = new List<Type>();
             for (int i = 0; i < GenericArgs.Length; i++)
             {
-                var input = GenericArgInput[i];
+                var input = m_genericArgInput[i];
                 if (ReflectionHelpers.GetTypeByName(input) is Type t)
                 {
                     if (GenericConstraints[i].Length == 0)
@@ -118,7 +118,7 @@ namespace UnityExplorer.Inspectors.Reflection
                 else
                 {
                     ExplorerCore.LogWarning($"Generic argument #{i}, could not get any type by the name of '{input}'!" +
-                        $" Make sure you use the full name, including the NameSpace.");
+                        $" Make sure you use the full name including the namespace.");
                     return null;
                 }
             }

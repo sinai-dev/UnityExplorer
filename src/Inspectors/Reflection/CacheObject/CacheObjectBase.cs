@@ -41,7 +41,6 @@ namespace UnityExplorer.Inspectors.Reflection
             if (!m_constructedUI)
             {
                 ConstructUI();
-                IValue.ConstructUI(m_topContent);
                 UpdateValue();
             }
 
@@ -65,8 +64,6 @@ namespace UnityExplorer.Inspectors.Reflection
         internal bool m_constructedUI;
         internal GameObject m_parentContent;
         internal GameObject m_mainContent;
-        internal GameObject m_topContent;
-        //internal GameObject m_subContent;
 
         // Make base UI holder for CacheObject, this doesnt actually display anything.
         internal virtual void ConstructUI()
@@ -81,32 +78,9 @@ namespace UnityExplorer.Inspectors.Reflection
             rowGroup.childControlHeight = true;
             var rowLayout = m_mainContent.AddComponent<LayoutElement>();
             rowLayout.minHeight = 25;
-            rowLayout.flexibleHeight = 0;
+            rowLayout.flexibleHeight = 500;
             rowLayout.minWidth = 200;
             rowLayout.flexibleWidth = 5000;
-
-            m_topContent = UIFactory.CreateHorizontalGroup(m_mainContent, new Color(1, 1, 1, 0));
-            var topLayout = m_topContent.AddComponent<LayoutElement>();
-            topLayout.minHeight = 25;
-            topLayout.flexibleHeight = 0;
-            var topGroup = m_topContent.GetComponent<HorizontalLayoutGroup>();
-            topGroup.childForceExpandHeight = false;
-            topGroup.childForceExpandWidth = true;
-            topGroup.childControlHeight = true;
-            topGroup.childControlWidth = true;
-            topGroup.spacing = 4;
-
-            //m_subContent = UIFactory.CreateHorizontalGroup(m_parentContent, new Color(1, 1, 1, 0));
-            //var subGroup = m_subContent.GetComponent<HorizontalLayoutGroup>();
-            //subGroup.childForceExpandWidth = true;
-            //subGroup.childControlWidth = true;
-            //var subLayout = m_subContent.AddComponent<LayoutElement>();
-            //subLayout.minHeight = 25;
-            //subLayout.flexibleHeight = 500;
-            //subLayout.minWidth = 125;
-            //subLayout.flexibleWidth = 9000;
-
-            //m_subContent.SetActive(false);
         }
 
         #endregion

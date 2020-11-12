@@ -7,7 +7,6 @@ using UnityExplorer.UI.Modules;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-//using TMPro;
 using UnityExplorer.Inspectors.Reflection;
 
 namespace UnityExplorer.Inspectors
@@ -28,8 +27,6 @@ namespace UnityExplorer.Inspectors
         public GameObject m_tabBarContent;
         public GameObject m_inspectorContent;
 
-        private readonly List<Text> testTexts = new List<Text>();
-
         public void Update()
         {
             for (int i = 0; i < m_currentInspectors.Count; i++)
@@ -38,12 +35,6 @@ namespace UnityExplorer.Inspectors
                     break;
 
                 m_currentInspectors[i].Update();
-            }
-
-            // ======= test ======== //
-            foreach (var text in testTexts)
-            {
-                text.text = Time.time.ToString();
             }
         }
 

@@ -15,11 +15,11 @@ namespace UnityExplorer.Console
             "mscorlib", "System.Core", "System", "System.Xml"
         };
 
-        private readonly TextWriter _logger;
+        private readonly TextWriter tw;
 
-        public ScriptEvaluator(TextWriter logger) : base(BuildContext(logger))
+        public ScriptEvaluator(TextWriter tw) : base(BuildContext(tw))
         {
-            _logger = logger;
+            this.tw = tw;
 
             ImportAppdomainAssemblies(ReferenceAssembly);
             AppDomain.CurrentDomain.AssemblyLoad += OnAssemblyLoad;
@@ -28,7 +28,7 @@ namespace UnityExplorer.Console
         public void Dispose()
         {
             AppDomain.CurrentDomain.AssemblyLoad -= OnAssemblyLoad;
-            _logger.Dispose();
+            tw.Dispose();
         }
 
         private void OnAssemblyLoad(object sender, AssemblyLoadEventArgs args)

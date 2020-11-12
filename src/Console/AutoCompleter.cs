@@ -44,7 +44,7 @@ namespace UnityExplorer.Console
                 return;
             }
 
-            if (!ConsolePage.EnableAutocompletes)
+            if (!CodeEditor.EnableAutocompletes)
             {
                 if (m_mainObj.activeSelf)
                 {
@@ -187,9 +187,9 @@ namespace UnityExplorer.Console
 
         public static void ClearAutocompletes()
         {
-            if (ConsolePage.AutoCompletes.Any())
+            if (CodeEditor.AutoCompletes.Any())
             {
-                ConsolePage.AutoCompletes.Clear();
+                CodeEditor.AutoCompletes.Clear();
             }
         }
 
@@ -198,7 +198,7 @@ namespace UnityExplorer.Console
             try
             {
                 // Credit ManylMarco
-                ConsolePage.AutoCompletes.Clear();
+                CodeEditor.AutoCompletes.Clear();
                 string[] completions = ConsolePage.Instance.m_evaluator.GetCompletions(input, out string prefix);
                 if (completions != null)
                 {
@@ -207,7 +207,7 @@ namespace UnityExplorer.Console
                         prefix = input;
                     }
 
-                    ConsolePage.AutoCompletes.AddRange(completions
+                    CodeEditor.AutoCompletes.AddRange(completions
                         .Where(x => !string.IsNullOrEmpty(x))
                         .Select(x => new Suggestion(x, prefix, Suggestion.Contexts.Other))
                         );
@@ -226,7 +226,7 @@ namespace UnityExplorer.Console
                         x.Substring(0, trimmed.Length),
                         Suggestion.Contexts.Namespace));
 
-                ConsolePage.AutoCompletes.AddRange(namespaces);
+                CodeEditor.AutoCompletes.AddRange(namespaces);
 
                 IEnumerable<Suggestion> keywords = Suggestion.Keywords
                     .Where(x => x.StartsWith(trimmed) && x.Length > trimmed.Length)
@@ -235,7 +235,7 @@ namespace UnityExplorer.Console
                         x.Substring(0, trimmed.Length),
                         Suggestion.Contexts.Keyword));
 
-                ConsolePage.AutoCompletes.AddRange(keywords);
+                CodeEditor.AutoCompletes.AddRange(keywords);
             }
             catch (Exception ex)
             {
@@ -290,7 +290,7 @@ namespace UnityExplorer.Console
 
                 var hiddenChild = UIFactory.CreateUIObject("HiddenText", buttonObj);
                 hiddenChild.SetActive(false);
-                var hiddenText = hiddenChild.AddGraphic<Text>();
+                var hiddenText = hiddenChild.AddComponent<Text>();
                 m_hiddenSuggestionTexts.Add(hiddenText);
 
 #if CPP
@@ -301,9 +301,7 @@ namespace UnityExplorer.Console
 
                 void UseAutocompleteButton()
                 {
-                    ConsolePage.Instance.UseAutocomplete(hiddenText.text);
-                    EventSystem.current.SetSelectedGameObject(ConsolePage.Instance.m_codeEditor.InputField.gameObject,
-                        null);
+                    ConsolePage.Instance.m_codeEditor.UseAutocomplete(hiddenText.text);
                 }
 
                 m_suggestionButtons.Add(buttonObj);

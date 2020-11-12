@@ -150,7 +150,7 @@ namespace UnityExplorer.UI.Modules
 
                     var text = m_resultListTexts[i];
 
-                    var name = $"<color={SyntaxColors.Class_Instance}>{ReflectionHelpers.GetActualType(obj).Name}</color>";
+                    var name = $"<color={UISyntaxHighlight.Class_Instance}>{ReflectionHelpers.GetActualType(obj).Name}</color>";
 
                     if (m_context != SearchContext.Instance && m_context != SearchContext.StaticClass)
                     {

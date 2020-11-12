@@ -18,6 +18,8 @@ namespace UnityExplorer.UI
 
         public RectTransform Panel { get; set; }
 
+        public static event Action OnFinishResize;
+
         private static bool s_loadedCursorImage;
 
         public PanelDragger(RectTransform dragArea, RectTransform panelToDrag)
@@ -330,6 +332,7 @@ namespace UnityExplorer.UI
         {
             WasResizing = false;
             UpdateResizeCache();
+            OnFinishResize?.Invoke();
         }
 
         private void LoadCursorImage()
@@ -351,7 +354,7 @@ namespace UnityExplorer.UI
                 m_resizeCursorImage = new GameObject("ResizeCursorImage");
                 m_resizeCursorImage.transform.SetParent(UIManager.CanvasRoot.transform);
 
-                Image image = m_resizeCursorImage.AddGraphic<Image>();
+                Image image = m_resizeCursorImage.AddComponent<Image>();
                 image.sprite = sprite;
                 RectTransform rect = image.transform.GetComponent<RectTransform>();
                 rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 32);

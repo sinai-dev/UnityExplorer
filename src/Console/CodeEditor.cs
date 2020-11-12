@@ -11,11 +11,6 @@ using UnityExplorer.UI.Modules;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityExplorer.UI.Shared;
-#if CPP
-using UnityExplorer.Unstrip;
-using UnityExplorer.Helpers;
-using UnhollowerRuntimeLib;
-#endif
 
 namespace UnityExplorer.Console
 {
@@ -27,11 +22,21 @@ namespace UnityExplorer.Console
         public Text InputText { get; internal set; }
         public int CurrentIndent { get; private set; }
 
+        public static bool EnableCtrlRShortcut { get; set; } = true;
+        public static bool EnableAutoIndent { get; set; } = true;
+        public static bool EnableAutocompletes { get; set; } = true;
+        public static List<Suggestion> AutoCompletes = new List<Suggestion>();
+
         public string HighlightedText => inputHighlightText.text;
         private Text inputHighlightText;
 
         private readonly CSharpLexer highlightLexer;
         private readonly StringBuilder sbHighlight;
+
+        internal int m_lastCaretPos;
+        internal int m_fixCaretPos;
+        internal bool m_fixwanted;
+        internal float m_lastSelectAlpha;
 
         private static readonly KeyCode[] onFocusKeys =
         {
@@ -76,31 +81,74 @@ The following helper methods are available:
 
         public void Update()
         {
-            // Check for new line
-            if (ConsolePage.EnableAutoIndent && InputManager.GetKeyDown(KeyCode.Return))
+            if (EnableCtrlRShortcut)
             {
-                AutoIndentCaret();
-            }
-
-            if (EventSystem.current?.currentSelectedGameObject?.name == "InputField")
-            {
-                bool focusKeyPressed = false;
-
-                // Check for any focus key pressed
-                foreach (KeyCode key in onFocusKeys)
+                if ((InputManager.GetKey(KeyCode.LeftControl) || InputManager.GetKey(KeyCode.RightControl))
+                    && InputManager.GetKeyDown(KeyCode.R))
                 {
-                    if (InputManager.GetKeyDown(key))
+                    var text = InputField.text.Trim();
+                    if (!string.IsNullOrEmpty(text))
                     {
-                        focusKeyPressed = true;
-                        break;
+                        ConsolePage.Instance.Evaluate(text);
+                        return;
                     }
                 }
+            }
 
-                if (focusKeyPressed || InputManager.GetMouseButton(0))
+            if (EnableAutoIndent && InputManager.GetKeyDown(KeyCode.Return))
+                AutoIndentCaret();
+
+            if (EnableAutocompletes && InputField.isFocused)
+            {
+                if (InputManager.GetMouseButton(0) || onFocusKeys.Any(it => InputManager.GetKeyDown(it)))
+                    UpdateAutocompletes();
+            }
+
+            if (m_fixCaretPos > 0)
+            {
+                if (!m_fixwanted)
+                    m_fixwanted = true;
+                else
                 {
-                    ConsolePage.Instance.OnInputChanged();
+                    InputField.caretPosition = m_fixCaretPos;
+                    InputField.selectionFocusPosition = m_fixCaretPos;
+
+                    m_fixwanted = false;
+                    m_fixCaretPos = -1;
+
+                    var color = InputField.selectionColor;
+                    color.a = m_lastSelectAlpha;
+                    InputField.selectionColor = color;
                 }
             }
+            else if (InputField.caretPosition > 0)
+            {
+                m_lastCaretPos = InputField.caretPosition;
+            }
+        }
+
+        internal void UpdateAutocompletes()
+        {
+            AutoCompleter.CheckAutocomplete();
+            AutoCompleter.SetSuggestions(AutoCompletes.ToArray());
+        }
+
+        public void UseAutocomplete(string suggestion)
+        {
+            EventSystem.current.SetSelectedGameObject(ConsolePage.Instance.m_codeEditor.InputField.gameObject, null);
+
+            string input = InputField.text;
+            input = input.Insert(m_lastCaretPos, suggestion);
+            InputField.text = input;
+
+            m_fixCaretPos = m_lastCaretPos += suggestion.Length;
+
+            var color = InputField.selectionColor;
+            m_lastSelectAlpha = color.a;
+            color.a = 0f;
+            InputField.selectionColor = color;
+
+            AutoCompleter.ClearAutocompletes();
         }
 
         public void OnInputChanged(string newInput, bool forceUpdate = false)
@@ -110,15 +158,11 @@ The following helper methods are available:
             UpdateIndent(newInput);
 
             if (!forceUpdate && string.IsNullOrEmpty(newText))
-            {
                 inputHighlightText.text = string.Empty;
-            }
             else
-            {
                 inputHighlightText.text = SyntaxHighlightContent(newText);
-            }
 
-            ConsolePage.Instance.OnInputChanged();
+            UpdateAutocompletes();
         }
 
         private void UpdateIndent(string newText)
@@ -298,11 +342,31 @@ The following helper methods are available:
 
             var topBarLabel = UIFactory.CreateLabel(topBarObj, TextAnchor.MiddleLeft);
             var topBarLabelLayout = topBarLabel.AddComponent<LayoutElement>();
-            topBarLabelLayout.preferredWidth = 800;
-            topBarLabelLayout.flexibleWidth = 10;
+            topBarLabelLayout.preferredWidth = 150;
+            topBarLabelLayout.flexibleWidth = 5000;
             var topBarText = topBarLabel.GetComponent<Text>();
             topBarText.text = "C# Console";
             topBarText.fontSize = 20;
+
+            // Enable Ctrl+R toggle
+
+            var ctrlRToggleObj = UIFactory.CreateToggle(topBarObj, out Toggle ctrlRToggle, out Text ctrlRToggleText);
+#if CPP
+            ctrlRToggle.onValueChanged.AddListener(new Action<bool>(CtrlRToggleCallback));
+#else
+            ctrlRToggle.onValueChanged.AddListener(CtrlRToggleCallback);
+#endif
+            void CtrlRToggleCallback(bool val)
+            {
+                EnableCtrlRShortcut = val;
+            }
+
+            ctrlRToggleText.text = "Run on Ctrl+R";
+            ctrlRToggleText.alignment = TextAnchor.UpperLeft;
+            var ctrlRLayout = ctrlRToggleObj.AddComponent<LayoutElement>();
+            ctrlRLayout.minWidth = 140;
+            ctrlRLayout.flexibleWidth = 0;
+            ctrlRLayout.minHeight = 25;
 
             // Enable Suggestions toggle
 
@@ -314,24 +378,16 @@ The following helper methods are available:
 #endif
             void SuggestToggleCallback(bool val)
             {
-                ConsolePage.EnableAutocompletes = val;
+                EnableAutocompletes = val;
                 AutoCompleter.Update();
             }
 
             suggestToggleText.text = "Suggestions";
             suggestToggleText.alignment = TextAnchor.UpperLeft;
-            var suggestTextPos = suggestToggleText.transform.localPosition;
-            suggestTextPos.y = -14;
-            suggestToggleText.transform.localPosition = suggestTextPos;
-
             var suggestLayout = suggestToggleObj.AddComponent<LayoutElement>();
             suggestLayout.minWidth = 120;
             suggestLayout.flexibleWidth = 0;
-
-            var suggestRect = suggestToggleObj.transform.Find("Background");
-            var suggestPos = suggestRect.localPosition;
-            suggestPos.y = -14;
-            suggestRect.localPosition = suggestPos;
+            suggestLayout.minHeight = 25;
 
             // Enable Auto-indent toggle
 
@@ -341,22 +397,15 @@ The following helper methods are available:
 #else
             autoIndentToggle.onValueChanged.AddListener(OnIndentChanged);
 #endif
-            void OnIndentChanged(bool val) => ConsolePage.EnableAutoIndent = val;
+            void OnIndentChanged(bool val) => EnableAutoIndent = val;
 
             autoIndentToggleText.text = "Auto-indent";
             autoIndentToggleText.alignment = TextAnchor.UpperLeft;
-            var autoIndentTextPos = autoIndentToggleText.transform.localPosition;
-            autoIndentTextPos.y = -14;
-            autoIndentToggleText.transform.localPosition = autoIndentTextPos;
 
             var autoIndentLayout = autoIndentToggleObj.AddComponent<LayoutElement>();
             autoIndentLayout.minWidth = 120;
             autoIndentLayout.flexibleWidth = 0;
-
-            var autoIndentRect = autoIndentToggleObj.transform.Find("Background");
-            suggestPos = autoIndentRect.localPosition;
-            suggestPos.y = -14;
-            autoIndentRect.localPosition = suggestPos;
+            autoIndentLayout.minHeight = 25;
 
             #endregion
 
@@ -385,7 +434,7 @@ The following helper methods are available:
             highlightTextRect.offsetMin = new Vector2(20, 0);
             highlightTextRect.offsetMax = new Vector2(14, 0);
 
-            var highlightTextInput = highlightTextObj.AddGraphic<Text>();
+            var highlightTextInput = highlightTextObj.AddComponent<Text>();
             highlightTextInput.supportRichText = true;
             highlightTextInput.fontSize = fontSize;
 

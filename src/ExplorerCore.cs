@@ -123,6 +123,9 @@ namespace UnityExplorer
                 {
                     UIManager.Init();
                     Log("Initialized UnityExplorer UI.");
+
+                    // temp debug
+                    InspectorManager.Instance.Inspect(Tests.TestClass.Instance);
                 }
                 catch (Exception e)
                 {

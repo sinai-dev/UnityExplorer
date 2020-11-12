@@ -77,7 +77,7 @@ namespace UnityExplorer.Inspectors.GameObjects
 
                     var text = s_compListTexts[i];
 
-                    text.text = ReflectionHelpers.GetActualType(comp).FullName;
+                    text.text = UISyntaxHighlight.GetHighlight(ReflectionHelpers.GetActualType(comp), true);
 
                     var toggle = s_compToggles[i];
                     if (comp is Behaviour behaviour)
@@ -192,7 +192,7 @@ namespace UnityExplorer.Inspectors.GameObjects
             toggleLayout.minHeight = 25;
             toggleLayout.flexibleHeight = 0;
             var checkImg = toggleObj.transform.Find("Background/Checkmark").GetComponent<Image>();
-            checkImg.color = SyntaxColors.Class_Instance.ToColor();
+            checkImg.color = UISyntaxHighlight.Class_Instance.ToColor();
             checkImg.color *= 0.66f;
 #if CPP
             toggle.onValueChanged.AddListener(new Action<bool>((bool val) => { OnCompToggleClicked(thisIndex, val); }));
@@ -226,7 +226,7 @@ namespace UnityExplorer.Inspectors.GameObjects
             Text mainText = mainButtonObj.GetComponentInChildren<Text>();
             mainText.alignment = TextAnchor.MiddleLeft;
             mainText.horizontalOverflow = HorizontalWrapMode.Overflow;
-            mainText.color = SyntaxColors.Class_Instance.ToColor();
+            //mainText.color = SyntaxColors.Class_Instance.ToColor();
             mainText.resizeTextForBestFit = true;
             mainText.resizeTextMaxSize = 14;
             mainText.resizeTextMinSize = 8;
