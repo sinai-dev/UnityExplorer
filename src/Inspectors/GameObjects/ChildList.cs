@@ -177,11 +177,7 @@ namespace UnityExplorer.Inspectors.GameObjects
             mainColors.normalColor = new Color(0.07f, 0.07f, 0.07f);
             mainColors.highlightedColor = new Color(0.2f, 0.2f, 0.2f, 1);
             mainBtn.colors = mainColors;
-#if CPP
-            mainBtn.onClick.AddListener(new Action(() => { OnChildListObjectClicked(thisIndex); }));
-#else
             mainBtn.onClick.AddListener(() => { OnChildListObjectClicked(thisIndex); });
-#endif
 
             Text mainText = mainButtonObj.GetComponentInChildren<Text>();
             mainText.alignment = TextAnchor.MiddleLeft;

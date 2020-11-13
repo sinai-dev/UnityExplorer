@@ -33,11 +33,7 @@ namespace UnityExplorer.UI.Shared
             this.sliderScroller = sliderScroller;
             this.inputField = inputField;
 
-#if MONO
             inputField.onValueChanged.AddListener(OnTextChanged);
-#else
-            inputField.onValueChanged.AddListener(new Action<string>(OnTextChanged));
-#endif
 
             inputRect = inputField.GetComponent<RectTransform>();
             layoutElement = inputField.gameObject.AddComponent<LayoutElement>();

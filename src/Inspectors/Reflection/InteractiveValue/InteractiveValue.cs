@@ -48,7 +48,7 @@ namespace UnityExplorer.Inspectors.Reflection
             GetLabelForValue();
             m_text.text = RichTextValue;
 
-            bool shouldShowInspect = !InspectorBase.IsNullOrDestroyed(this.Value, true);
+            bool shouldShowInspect = !Value.IsNullOrDestroyed(true);
             if (m_inspectButton.activeSelf != shouldShowInspect)
                 m_inspectButton.SetActive(shouldShowInspect);
         }
@@ -164,14 +164,11 @@ namespace UnityExplorer.Inspectors.Reflection
             var inspectText = m_inspectButton.GetComponentInChildren<Text>();
             inspectText.text = "Inspect";
             var inspectBtn = m_inspectButton.GetComponent<Button>();
-#if CPP
-            inspectBtn.onClick.AddListener(new Action(OnInspectClicked));
-#else
+
             inspectBtn.onClick.AddListener(OnInspectClicked);
-#endif
             void OnInspectClicked()
             {
-                if (!InspectorBase.IsNullOrDestroyed(this.Value))
+                if (!Value.IsNullOrDestroyed())
                     InspectorManager.Instance.Inspect(this.Value);
             }
 

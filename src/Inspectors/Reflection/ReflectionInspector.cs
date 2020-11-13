@@ -472,7 +472,7 @@ namespace UnityExplorer.Inspectors
             nameInputLayout.minWidth = 100;
             nameInputLayout.minHeight = 25;
             var nameInput = nameInputObj.GetComponent<InputField>();
-            nameInput.onValueChanged.AddListener(new Action<string>((string val) => { FilterMembers(val); }));
+            nameInput.onValueChanged.AddListener((string val) => { FilterMembers(val); });
             m_nameFilterText = nameInput.textComponent;
 
             // membertype filter

@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityExplorer.Helpers;
 using UnityExplorer.UI;
 
 namespace UnityExplorer.Inspectors
@@ -22,7 +23,7 @@ namespace UnityExplorer.Inspectors
         {
             Target = target;
 
-            if (IsNullOrDestroyed(Target))
+            if (Target.IsNullOrDestroyed())
             {
                 Destroy();
                 return;
@@ -45,7 +46,7 @@ namespace UnityExplorer.Inspectors
 
         public virtual void Update()
         {
-            if (IsNullOrDestroyed(Target))
+            if (Target.IsNullOrDestroyed())
             {
                 Destroy();
                 return;
@@ -84,28 +85,7 @@ namespace UnityExplorer.Inspectors
             }
         }
 
-        public static bool IsNullOrDestroyed(object obj, bool suppressWarning = false)
-        {
-            var unityObj = obj as UnityEngine.Object;
-            if (obj == null)
-            {
-                if (!suppressWarning)
-                    ExplorerCore.LogWarning("The target instance is null!");
-
-                return true;
-            }
-            else if (obj is UnityEngine.Object)
-            {
-                if (!unityObj)
-                {
-                    if (!suppressWarning)
-                        ExplorerCore.LogWarning("The target UnityEngine.Object was destroyed!");
-
-                    return true;
-                }
-            }
-            return false;
-        }
+        
 
         #region UI CONSTRUCTION
 
@@ -133,11 +113,9 @@ namespace UnityExplorer.Inspectors
             tabText.alignment = TextAnchor.MiddleLeft;
 
             tabButton = targetButtonObj.GetComponent<Button>();
-#if CPP
-            tabButton.onClick.AddListener(new Action(() => { InspectorManager.Instance.SetInspectorTab(this); }));
-#else
+
             tabButton.onClick.AddListener(() => { InspectorManager.Instance.SetInspectorTab(this); });
-#endif
+
             var closeBtnObj = UIFactory.CreateButton(tabGroupObj);
             var closeBtnLayout = closeBtnObj.AddComponent<LayoutElement>();
             closeBtnLayout.minWidth = 20;
@@ -147,11 +125,8 @@ namespace UnityExplorer.Inspectors
             closeBtnText.color = new Color(1, 0, 0, 1);
 
             var closeBtn = closeBtnObj.GetComponent<Button>();
-#if CPP
-            closeBtn.onClick.AddListener(new Action(() => { Destroy(); }));
-#else
-            closeBtn.onClick.AddListener(() => { Destroy(); });
-#endif
+
+            closeBtn.onClick.AddListener(Destroy);
 
             var closeColors = closeBtn.colors;
             closeColors.normalColor = new Color(0.2f, 0.2f, 0.2f, 1);

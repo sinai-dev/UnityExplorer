@@ -18,12 +18,27 @@ namespace UnityExplorer.Helpers
             }
         }
 
-        public static string ActiveSceneName
+        public static bool IsNullOrDestroyed(this object obj, bool suppressWarning = false)
         {
-            get
+            var unityObj = obj as Object;
+            if (obj == null)
             {
-                return UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+                if (!suppressWarning)
+                    ExplorerCore.LogWarning("The target instance is null!");
+
+                return true;
             }
+            else if (obj is Object)
+            {
+                if (!unityObj)
+                {
+                    if (!suppressWarning)
+                        ExplorerCore.LogWarning("The target UnityEngine.Object was destroyed!");
+
+                    return true;
+                }
+            }
+            return false;
         }
 
         public static string ToStringLong(this Vector3 vec)

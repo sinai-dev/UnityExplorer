@@ -319,12 +319,8 @@ namespace UnityExplorer.Inspectors.Reflection
                 var colors = evalButton.colors;
                 colors.highlightedColor = new Color(0.4f, 0.7f, 0.4f);
                 evalButton.colors = colors;
-#if CPP
-                evalButton.onClick.AddListener(new Action(OnMainEvaluateButton));
-#else
-                evalButton.onClick.AddListener(OnMainEvaluateButton);
-#endif
 
+                evalButton.onClick.AddListener(OnMainEvaluateButton);
                 void OnMainEvaluateButton()
                 {
                     if (HasParameters)

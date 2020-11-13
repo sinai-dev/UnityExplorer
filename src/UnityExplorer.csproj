@@ -323,6 +323,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers\EventHelper.cs" />
     <Compile Include="Inspectors\MouseInspector.cs" />
     <Compile Include="Inspectors\Reflection\CacheObject\CacheEnumerated.cs" />
     <Compile Include="Inspectors\Reflection\CacheObject\CacheFactory.cs" />

@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Config;
+using UnityExplorer.Helpers;
 using UnityExplorer.UI.Shared;
 using UnityExplorer.Unstrip;
 
@@ -108,11 +109,8 @@ namespace UnityExplorer.UI.Modules
             var applyColors = applyBtn.colors;
             applyColors.normalColor = new Color(0.3f, 0.7f, 0.3f);
             applyBtn.colors = applyColors;
-#if MONO
+
             applyBtn.onClick.AddListener(OnApply);
-#else
-            applyBtn.onClick.AddListener(new Action(OnApply));
-#endif
         }
 
         internal void ConstructKeycodeOpt(GameObject parent)

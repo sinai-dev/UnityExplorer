@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.UI.Modules;
 using UnityExplorer.Config;
+using UnityExplorer.Helpers;
 
 namespace UnityExplorer.UI
 {
@@ -210,11 +211,7 @@ namespace UnityExplorer.UI
             GameObject hideBtnObj = UIFactory.CreateButton(titleBar);
 
             Button hideBtn = hideBtnObj.GetComponent<Button>();
-#if CPP
-            hideBtn.onClick.AddListener(new Action(() => { ExplorerCore.ShowMenu = false; }));
-#else
             hideBtn.onClick.AddListener(() => { ExplorerCore.ShowMenu = false; });
-#endif
             ColorBlock colorBlock = hideBtn.colors;
             colorBlock.normalColor = new Color(65f / 255f, 23f / 255f, 23f / 255f);
             colorBlock.pressedColor = new Color(35f / 255f, 10f / 255f, 10f / 255f);
@@ -266,11 +263,7 @@ namespace UnityExplorer.UI
 
                 page.RefNavbarButton = btn;
 
-#if CPP
-                btn.onClick.AddListener(new Action(() => { SetPage(page); }));
-#else
                 btn.onClick.AddListener(() => { SetPage(page); });
-#endif
 
                 Text text = btnObj.GetComponentInChildren<Text>();
                 text.text = page.Name;

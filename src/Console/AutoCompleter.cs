@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityExplorer.Helpers;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Modules;
 
@@ -292,12 +293,7 @@ namespace UnityExplorer.Console
                 hiddenChild.SetActive(false);
                 var hiddenText = hiddenChild.AddComponent<Text>();
                 m_hiddenSuggestionTexts.Add(hiddenText);
-
-#if CPP
-                btn.onClick.AddListener(new Action(UseAutocompleteButton));
-#else
                 btn.onClick.AddListener(UseAutocompleteButton);
-#endif
 
                 void UseAutocompleteButton()
                 {

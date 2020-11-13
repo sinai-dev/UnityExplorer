@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityExplorer.Config;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityExplorer.Helpers;
 
 namespace UnityExplorer.UI.Shared
 {
@@ -184,11 +185,9 @@ namespace UnityExplorer.UI.Shared
 
             GameObject leftBtnObj = UIFactory.CreateButton(m_pageUIHolder, new Color(0.15f, 0.15f, 0.15f));
             Button leftBtn = leftBtnObj.GetComponent<Button>();
-#if CPP
-            leftBtn.onClick.AddListener(new Action(() => { TurnPage(Turn.Left); }));
-#else
+
             leftBtn.onClick.AddListener(() => { TurnPage(Turn.Left); });
-#endif
+
             Text leftBtnText = leftBtnObj.GetComponentInChildren<Text>();
             leftBtnText.text = "◄";
             LayoutElement leftBtnLayout = leftBtnObj.AddComponent<LayoutElement>();
@@ -206,11 +205,9 @@ namespace UnityExplorer.UI.Shared
 
             GameObject rightBtnObj = UIFactory.CreateButton(m_pageUIHolder, new Color(0.15f, 0.15f, 0.15f));
             Button rightBtn = rightBtnObj.GetComponent<Button>();
-#if CPP
-            rightBtn.onClick.AddListener(new Action(() => { TurnPage(Turn.Right); }));
-#else
+
             rightBtn.onClick.AddListener(() => { TurnPage(Turn.Right); });
-#endif
+
             Text rightBtnText = rightBtnObj.GetComponentInChildren<Text>();
             rightBtnText.text = "►";
             LayoutElement rightBtnLayout = rightBtnObj.AddComponent<LayoutElement>();

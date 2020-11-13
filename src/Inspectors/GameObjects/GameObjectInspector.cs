@@ -251,11 +251,9 @@ namespace UnityExplorer.Inspectors
 
             var backButtonObj = UIFactory.CreateButton(m_pathGroupObj);
             var backButton = backButtonObj.GetComponent<Button>();
-#if CPP
-            backButton.onClick.AddListener(new Action(OnBackButtonClicked));
-#else
+
             backButton.onClick.AddListener(OnBackButtonClicked);
-#endif
+
             var backColors = backButton.colors;
             backColors.normalColor = new Color(0.15f, 0.15f, 0.15f);
             backButton.colors = backColors;
@@ -341,11 +339,9 @@ namespace UnityExplorer.Inspectors
 
             var applyNameBtnObj = UIFactory.CreateButton(nameRowObj);
             var applyNameBtn = applyNameBtnObj.GetComponent<Button>();
-#if CPP
-            applyNameBtn.onClick.AddListener(new Action(OnApplyNameClicked));
-#else
+
             applyNameBtn.onClick.AddListener(OnApplyNameClicked);
-#endif
+
             var applyNameText = applyNameBtnObj.GetComponentInChildren<Text>();
             applyNameText.text = "Apply";
             applyNameText.fontSize = 14;
@@ -372,11 +368,8 @@ namespace UnityExplorer.Inspectors
             toggleLayout.flexibleWidth = 0;
             m_enabledText.text = "Enabled";
             m_enabledText.color = Color.green;
-#if CPP
-            m_enabledToggle.onValueChanged.AddListener(new Action<bool>(OnEnableToggled));
-#else
+
             m_enabledToggle.onValueChanged.AddListener(OnEnableToggled);
-#endif
 
             // layer and scene row
 
@@ -408,11 +401,8 @@ namespace UnityExplorer.Inspectors
             layerDropdownLayout.minWidth = 120;
             layerDropdownLayout.flexibleWidth = 2000;
             layerDropdownLayout.minHeight = 25;
-#if CPP
-            m_layerDropdown.onValueChanged.AddListener(new Action<int>(OnLayerSelected));
-#else
+
             m_layerDropdown.onValueChanged.AddListener(OnLayerSelected);
-#endif
 
             var scenelabelObj = UIFactory.CreateLabel(sceneLayerRow, TextAnchor.MiddleCenter);
             var sceneLabel = scenelabelObj.GetComponent<Text>();

@@ -299,11 +299,7 @@ namespace UnityExplorer.Inspectors.GameObjects
             contentGroup.childControlWidth = true;
 
             // ~~ add hide button callback now that we have scroll reference ~~
-#if CPP
-            hideButton.onClick.AddListener(new Action(OnHideClicked));
-#else
             hideButton.onClick.AddListener(OnHideClicked);
-#endif
             void OnHideClicked()
             {
                 if (hideText.text == "Show")
@@ -368,11 +364,7 @@ namespace UnityExplorer.Inspectors.GameObjects
 
             var applyButtonObj = UIFactory.CreateButton(setParentGroupObj);
             var applyButton = applyButtonObj.GetComponent<Button>();
-#if CPP
-            applyButton.onClick.AddListener(new Action(OnSetParentClicked));
-#else
             applyButton.onClick.AddListener(OnSetParentClicked);
-#endif
             var applyText = applyButtonObj.GetComponentInChildren<Text>();
             applyText.text = "Apply";
             var applyLayout = applyButtonObj.AddComponent<LayoutElement>();
@@ -446,11 +438,7 @@ namespace UnityExplorer.Inspectors.GameObjects
             zRow.SetActive(false);
 
             // add expand callback now that we have group reference
-#if CPP
-            expandButton.onClick.AddListener(new Action(ToggleExpand));
-#else
             expandButton.onClick.AddListener(ToggleExpand);
-#endif
             void ToggleExpand()
             {
                 if (xRow.activeSelf)
@@ -524,11 +512,7 @@ namespace UnityExplorer.Inspectors.GameObjects
             slider.minValue = -2;
             slider.maxValue = 2;
             slider.value = 0;
-#if CPP
-            slider.onValueChanged.AddListener(new Action<float>((float val) => { OnSliderControlChanged(val, slider, type, vectorValue); }));
-#else
             slider.onValueChanged.AddListener((float val) => { OnSliderControlChanged(val, slider, type, vectorValue); });
-#endif
             editor.sliders[(int)vectorValue] = slider;
 
             // input field
@@ -563,11 +547,7 @@ namespace UnityExplorer.Inspectors.GameObjects
             applyLayout.minWidth = 60;
             applyLayout.minHeight = 25;
 
-#if MONO
             applyBtn.onClick.AddListener(() => { OnVectorControlInputApplied(type, vectorValue); });
-#else
-            applyBtn.onClick.AddListener(new Action(() => { OnVectorControlInputApplied(type, vectorValue); }));
-#endif
 
             return rowObject;
         }
@@ -584,11 +564,9 @@ namespace UnityExplorer.Inspectors.GameObjects
 
             var instantiateBtnObj = UIFactory.CreateButton(bottomRow, new Color(0.2f, 0.2f, 0.2f));
             var instantiateBtn = instantiateBtnObj.GetComponent<Button>();
-#if MONO
+
             instantiateBtn.onClick.AddListener(InstantiateBtn);
-#else
-            instantiateBtn.onClick.AddListener(new Action(InstantiateBtn));
-#endif
+
             var instantiateText = instantiateBtnObj.GetComponentInChildren<Text>();
             instantiateText.text = "Instantiate";
             instantiateText.fontSize = 14;
@@ -607,11 +585,9 @@ namespace UnityExplorer.Inspectors.GameObjects
 
             var dontDestroyBtnObj = UIFactory.CreateButton(bottomRow, new Color(0.2f, 0.2f, 0.2f));
             var dontDestroyBtn = dontDestroyBtnObj.GetComponent<Button>();
-#if MONO
+
             dontDestroyBtn.onClick.AddListener(DontDestroyOnLoadBtn);
-#else
-            dontDestroyBtn.onClick.AddListener(new Action(DontDestroyOnLoadBtn));
-#endif
+
             var dontDestroyText = dontDestroyBtnObj.GetComponentInChildren<Text>();
             dontDestroyText.text = "Set DontDestroyOnLoad";
             dontDestroyText.fontSize = 14;
@@ -629,11 +605,9 @@ namespace UnityExplorer.Inspectors.GameObjects
 
             var destroyBtnObj = UIFactory.CreateButton(bottomRow, new Color(0.2f, 0.2f, 0.2f));
             var destroyBtn = destroyBtnObj.GetComponent<Button>();
-#if MONO
+
             destroyBtn.onClick.AddListener(DestroyBtn);
-#else
-            destroyBtn.onClick.AddListener(new Action(DestroyBtn));
-#endif
+
             var destroyText = destroyBtnObj.GetComponentInChildren<Text>();
             destroyText.text = "Destroy";
             destroyText.fontSize = 14;

@@ -194,11 +194,7 @@ namespace UnityExplorer.Inspectors.GameObjects
             var checkImg = toggleObj.transform.Find("Background/Checkmark").GetComponent<Image>();
             checkImg.color = UISyntaxHighlight.Class_Instance.ToColor();
             checkImg.color *= 0.66f;
-#if CPP
-            toggle.onValueChanged.AddListener(new Action<bool>((bool val) => { OnCompToggleClicked(thisIndex, val); }));
-#else
             toggle.onValueChanged.AddListener((bool val) => { OnCompToggleClicked(thisIndex, val); });
-#endif
             toggleText.text = "";
             s_compToggles.Add(toggle);
 
@@ -215,11 +211,7 @@ namespace UnityExplorer.Inspectors.GameObjects
             mainColors.normalColor = new Color(0.07f, 0.07f, 0.07f);
             mainColors.highlightedColor = new Color(0.2f, 0.2f, 0.2f, 1);
             mainBtn.colors = mainColors;
-#if CPP
-            mainBtn.onClick.AddListener(new Action(() => { OnCompListObjectClicked(thisIndex); }));
-#else
             mainBtn.onClick.AddListener(() => { OnCompListObjectClicked(thisIndex); });
-#endif
 
             // Component button text
 

@@ -492,12 +492,6 @@ namespace UnityExplorer.UI.Modules
             customTypeLayout.flexibleHeight = 0;
             m_customTypeInput = customTypeObj.GetComponent<InputField>();
             m_customTypeInput.placeholder.gameObject.GetComponent<Text>().text = "eg. UnityEngine.Texture2D, etc...";
-            //m_customTypeInput.onFocusSelectAll = true;
-//#if MONO
-//            m_customTypeInput.onSelect.AddListener((string val) => { OnContextButtonClicked(SearchContext.Custom); });
-//#else
-//            m_customTypeInput.onSelect.AddListener(new Action<string>((string val) => { OnContextButtonClicked(SearchContext.Custom); }));
-//#endif
 
             // search input
 
@@ -558,11 +552,7 @@ namespace UnityExplorer.UI.Modules
             sceneDropLayout.minWidth = 220;
             sceneDropLayout.minHeight = 25;
 
-#if MONO
             m_sceneDropdown.onValueChanged.AddListener(OnSceneDropdownChanged);
-#else
-            m_sceneDropdown.onValueChanged.AddListener(new Action<int>(OnSceneDropdownChanged));
-#endif
             void OnSceneDropdownChanged(int value)
             {
                 if (value < 4)
@@ -598,11 +588,7 @@ namespace UnityExplorer.UI.Modules
             childDrop.options.Add(new Dropdown.OptionData { text = "Root Objects Only" });
             childDrop.options.Add(new Dropdown.OptionData { text = "Children Only" });
 
-#if MONO
             childDrop.onValueChanged.AddListener(OnChildDropdownChanged);
-#else
-            childDrop.onValueChanged.AddListener(new Action<int>(OnChildDropdownChanged));
-#endif
             void OnChildDropdownChanged(int value)
             {
                 m_childFilter = (ChildFilter)value;
@@ -617,11 +603,8 @@ namespace UnityExplorer.UI.Modules
             searchBtnLayout.minHeight = 30;
             searchBtnLayout.flexibleHeight = 0;
             var searchBtn = searchBtnObj.GetComponent<Button>();
-#if MONO
+
             searchBtn.onClick.AddListener(OnUnitySearchClicked);
-#else
-            searchBtn.onClick.AddListener(new Action(OnUnitySearchClicked));
-#endif
         }
 
         internal void AddContextButton(GameObject parent, string label, SearchContext context, float width = 110)
@@ -632,11 +615,7 @@ namespace UnityExplorer.UI.Modules
 
             m_contextButtons.Add(context, btn);
 
-#if MONO
             btn.onClick.AddListener(() => { OnContextButtonClicked(context); });
-#else
-            btn.onClick.AddListener(new Action(() => { OnContextButtonClicked(context); }));
-#endif
 
             var btnLayout = btnObj.AddComponent<LayoutElement>();
             btnLayout.minHeight = 25;
@@ -719,11 +698,8 @@ namespace UnityExplorer.UI.Modules
             mainColors.normalColor = new Color(0.1f, 0.1f, 0.1f);
             mainColors.highlightedColor = new Color(0.2f, 0.2f, 0.2f, 1);
             mainBtn.colors = mainColors;
-#if CPP
-            mainBtn.onClick.AddListener(new Action(() => { OnResultClicked(thisIndex); }));
-#else
+
             mainBtn.onClick.AddListener(() => { OnResultClicked(thisIndex); });
-#endif
 
             Text mainText = mainButtonObj.GetComponentInChildren<Text>();
             mainText.alignment = TextAnchor.MiddleLeft;

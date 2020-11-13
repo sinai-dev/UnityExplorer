@@ -25,15 +25,10 @@ public class SliderScrollbar
 		this.m_slider = slider;
         this.m_scrollRect = scrollbar.transform.parent.GetComponent<RectTransform>();
 
-#if MONO
-		this.m_scrollbar.onValueChanged.AddListener(this.OnScrollbarValueChanged);
-		this.m_slider.onValueChanged.AddListener(this.OnSliderValueChanged);
-#else
-		this.m_scrollbar.onValueChanged.AddListener(new Action<float>(this.OnScrollbarValueChanged));
-		this.m_slider.onValueChanged.AddListener(new Action<float>(this.OnSliderValueChanged));
-#endif
+        this.m_scrollbar.onValueChanged.AddListener(this.OnScrollbarValueChanged);
+        this.m_slider.onValueChanged.AddListener(this.OnSliderValueChanged);
 
-		this.RefreshVisibility();
+        this.RefreshVisibility();
 		this.m_slider.Set(1f, false);
 	}
 

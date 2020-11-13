@@ -45,7 +45,7 @@ namespace UnityExplorer.Inspectors
 #endif
             UnityEngine.Object unityObj = obj as UnityEngine.Object;
 
-            if (InspectorBase.IsNullOrDestroyed(obj))
+            if (obj.IsNullOrDestroyed())
             {
                 return;
             }
@@ -289,11 +289,9 @@ namespace UnityExplorer.Inspectors
 
 //            var applyBtnObj = UIFactory.CreateButton(timeGroupObj);
 //            var applyBtn = applyBtnObj.GetComponent<Button>();
-//#if MONO
+
 //            applyBtn.onClick.AddListener(SetTimeScale);
-//#else
-//            applyBtn.onClick.AddListener(new Action(SetTimeScale));
-//#endif
+
 //            var applyText = applyBtnObj.GetComponentInChildren<Text>();
 //            applyText.text = "Apply";
 //            applyText.fontSize = 14;
@@ -323,11 +321,8 @@ namespace UnityExplorer.Inspectors
             var inspectText = inspectObj.GetComponentInChildren<Text>();
             inspectText.text = "Mouse Inspect";
             inspectText.fontSize = 13;
-#if MONO
+
             inspectBtn.onClick.AddListener(OnInspectMouseClicked);
-#else
-            inspectBtn.onClick.AddListener(new Action(OnInspectMouseClicked));
-#endif
 
             void OnInspectMouseClicked()
             {

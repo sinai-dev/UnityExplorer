@@ -2,6 +2,7 @@
 //using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityExplorer.Helpers;
 using UnityExplorer.UI.Shared;
 
 namespace UnityExplorer.UI
@@ -71,11 +72,7 @@ namespace UnityExplorer.UI
             // this is because i'm not setting any ColorBlock.selectedColor, because it is commonly stripped.
             if (selectable is Button button)
             {
-#if CPP
-                button.onClick.AddListener(new Action(Deselect));
-#else
-				button.onClick.AddListener(Deselect);
-#endif
+                button.onClick.AddListener(Deselect);
                 void Deselect()
                 {
 					button.OnDeselect(null);
@@ -347,19 +344,12 @@ namespace UnityExplorer.UI
             toggle = toggleObj.AddComponent<Toggle>();
             toggle.isOn = true;
             Toggle toggleComp = toggle;
-#if CPP
-            toggle.onValueChanged.AddListener(new Action<bool>((bool val) =>
+
+            toggle.onValueChanged.AddListener(Deselect);
+            void Deselect(bool _)
             {
                 toggleComp.OnDeselect(null);
-            }));
-#else
-			toggle.onValueChanged.AddListener(Deselect);
-
-			void Deselect(bool _)
-            {
-				toggleComp.OnDeselect(null);
             }
-#endif
 
             Image bgImage = bgObj.AddComponent<Image>();
             bgImage.type = Image.Type.Sliced;
@@ -549,11 +539,7 @@ namespace UnityExplorer.UI
             colors.highlightedColor = new Color(0.25f, 0.45f, 0.25f, 1.0f);
             itemToggle.colors = colors;
 
-#if CPP
-            itemToggle.onValueChanged.AddListener(new Action<bool>((bool val) => { itemToggle.OnDeselect(null); }));
-#else
-			itemToggle.onValueChanged.AddListener((bool val) => { itemToggle.OnDeselect(null); });
-#endif
+            itemToggle.onValueChanged.AddListener((bool val) => { itemToggle.OnDeselect(null); });
             Image templateImage = templateObj.AddComponent<Image>();
             templateImage.type = Image.Type.Sliced;
             templateImage.color = new Color(0.15f, 0.15f, 0.15f, 1.0f);

@@ -8,6 +8,7 @@ using UnityExplorer.Config;
 using UnityExplorer.UI.Shared;
 using System.IO;
 using System.Linq;
+using UnityExplorer.Helpers;
 
 namespace UnityExplorer.UI.Modules
 {
@@ -184,11 +185,8 @@ namespace UnityExplorer.UI.Modules
             hideBtnText.text = "Hide";
 
             var hideButton = hideButtonObj.GetComponent<Button>();
-#if CPP
-            hideButton.onClick.AddListener(new Action(HideCallback));
-#else
+
             hideButton.onClick.AddListener(HideCallback);
-#endif
             void HideCallback()
             {
                 if (logAreaObj.activeSelf)
@@ -221,12 +219,8 @@ namespace UnityExplorer.UI.Modules
             clearBtnText.text = "Clear";
 
             var clearButton = clearButtonObj.GetComponent<Button>();
-#if CPP
-            clearButton.onClick.AddListener(new Action(ClearCallback));
-#else
-            clearButton.onClick.AddListener(ClearCallback);
-#endif
 
+            clearButton.onClick.AddListener(ClearCallback);
             void ClearCallback()
             {
                 m_textInput.text = "";
@@ -244,11 +238,9 @@ namespace UnityExplorer.UI.Modules
             // Unity log toggle
 
             var unityToggleObj = UIFactory.CreateToggle(bottomBarObj, out Toggle unityToggle, out Text unityToggleText);
-#if CPP
-            unityToggle.onValueChanged.AddListener(new Action<bool>(ToggleLogUnity));
-#else
+
             unityToggle.onValueChanged.AddListener(ToggleLogUnity);
-#endif
+
             unityToggle.isOn = LogUnity;
             unityToggleText.text = "Print Unity Debug?";
             unityToggleText.alignment = TextAnchor.MiddleLeft;
@@ -269,33 +261,31 @@ namespace UnityExplorer.UI.Modules
             pos.y = -8;
             unityToggleRect.localPosition = pos;
 
-//            // Save to disk button
+            //            // Save to disk button
 
-//            var saveToDiskObj = UIFactory.CreateToggle(bottomBarObj, out Toggle diskToggle, out Text diskToggleText);
-//#if CPP
-//            diskToggle.onValueChanged.AddListener(new Action<bool>(ToggleDisk));
-//#else
-//            diskToggle.onValueChanged.AddListener(ToggleDisk);
-//#endif
-//            diskToggle.isOn = SaveToDisk;
-//            diskToggleText.text = "Save logs to 'Mods\\UnityExplorer\\Logs'?";
-//            diskToggleText.alignment = TextAnchor.MiddleLeft;
+            //            var saveToDiskObj = UIFactory.CreateToggle(bottomBarObj, out Toggle diskToggle, out Text diskToggleText);
 
-//            void ToggleDisk(bool val)
-//            {
-//                SaveToDisk = val;
-//                ModConfig.Instance.Save_Logs_To_Disk = val;
-//                ModConfig.SaveSettings();
-//            }
+            //            diskToggle.onValueChanged.AddListener(ToggleDisk);
 
-//            var diskToggleLayout = saveToDiskObj.AddComponent<LayoutElement>();
-//            diskToggleLayout.minWidth = 340;
-//            diskToggleLayout.flexibleWidth = 0;
+            //            diskToggle.isOn = SaveToDisk;
+            //            diskToggleText.text = "Save logs to 'Mods\\UnityExplorer\\Logs'?";
+            //            diskToggleText.alignment = TextAnchor.MiddleLeft;
 
-//            var saveToDiskRect = saveToDiskObj.transform.Find("Background").GetComponent<RectTransform>();
-//            pos = unityToggleRect.localPosition;
-//            pos.y = -8;
-//            saveToDiskRect.localPosition = pos;
+            //            void ToggleDisk(bool val)
+            //            {
+            //                SaveToDisk = val;
+            //                ModConfig.Instance.Save_Logs_To_Disk = val;
+            //                ModConfig.SaveSettings();
+            //            }
+
+            //            var diskToggleLayout = saveToDiskObj.AddComponent<LayoutElement>();
+            //            diskToggleLayout.minWidth = 340;
+            //            diskToggleLayout.flexibleWidth = 0;
+
+            //            var saveToDiskRect = saveToDiskObj.transform.Find("Background").GetComponent<RectTransform>();
+            //            pos = unityToggleRect.localPosition;
+            //            pos.y = -8;
+            //            saveToDiskRect.localPosition = pos;
 
             #endregion
         }

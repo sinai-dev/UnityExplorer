@@ -11,6 +11,7 @@ using UnityExplorer.UI.Modules;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityExplorer.UI.Shared;
+using UnityExplorer.Helpers;
 
 namespace UnityExplorer.Console
 {
@@ -72,11 +73,7 @@ The following helper methods are available:
 
             ConstructUI();
 
-#if CPP
-            InputField.onValueChanged.AddListener(new Action<string>((string s) => { OnInputChanged(s); }));
-#else
-            this.InputField.onValueChanged.AddListener((string s) => { OnInputChanged(s); });
-#endif
+            InputField.onValueChanged.AddListener((string s) => { OnInputChanged(s); });
         }
 
         public void Update()
@@ -354,11 +351,7 @@ The following helper methods are available:
             // Enable Ctrl+R toggle
 
             var ctrlRToggleObj = UIFactory.CreateToggle(topBarObj, out Toggle ctrlRToggle, out Text ctrlRToggleText);
-#if CPP
-            ctrlRToggle.onValueChanged.AddListener(new Action<bool>(CtrlRToggleCallback));
-#else
             ctrlRToggle.onValueChanged.AddListener(CtrlRToggleCallback);
-#endif
             void CtrlRToggleCallback(bool val)
             {
                 EnableCtrlRShortcut = val;
@@ -374,11 +367,7 @@ The following helper methods are available:
             // Enable Suggestions toggle
 
             var suggestToggleObj = UIFactory.CreateToggle(topBarObj, out Toggle suggestToggle, out Text suggestToggleText);
-#if CPP
-            suggestToggle.onValueChanged.AddListener(new Action<bool>(SuggestToggleCallback));
-#else
             suggestToggle.onValueChanged.AddListener(SuggestToggleCallback);
-#endif
             void SuggestToggleCallback(bool val)
             {
                 EnableAutocompletes = val;
@@ -395,11 +384,7 @@ The following helper methods are available:
             // Enable Auto-indent toggle
 
             var autoIndentToggleObj = UIFactory.CreateToggle(topBarObj, out Toggle autoIndentToggle, out Text autoIndentToggleText);
-#if CPP
-            autoIndentToggle.onValueChanged.AddListener(new Action<bool>(OnIndentChanged));
-#else
             autoIndentToggle.onValueChanged.AddListener(OnIndentChanged);
-#endif
             void OnIndentChanged(bool val) => EnableAutoIndent = val;
 
             autoIndentToggleText.text = "Auto-indent";
@@ -461,11 +446,7 @@ The following helper methods are available:
             btnText.color = Color.white;
 
             // Set compile button callback now that we have the Input Field reference
-#if CPP
-            compileButton.onClick.AddListener(new Action(CompileCallback));
-#else
             compileButton.onClick.AddListener(CompileCallback);
-#endif
             void CompileCallback()
             {
                 if (!string.IsNullOrEmpty(inputField.text))
