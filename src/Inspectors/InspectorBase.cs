@@ -123,6 +123,7 @@ namespace UnityExplorer.Inspectors
             tabGroupObj.AddComponent<Mask>();
 
             var targetButtonObj = UIFactory.CreateButton(tabGroupObj);
+            targetButtonObj.AddComponent<Mask>();
             var targetButtonLayout = targetButtonObj.AddComponent<LayoutElement>();
             targetButtonLayout.minWidth = 165;
             targetButtonLayout.flexibleWidth = 0;

@@ -83,7 +83,14 @@ namespace UnityExplorer.Helpers
                 if (type.Namespace.StartsWith("System.") || type.Namespace.StartsWith("Il2CppSystem."))
                     return ilObject.GetType();
 
-                var getType = Type.GetType(ilObject.GetIl2CppType().AssemblyQualifiedName);
+                var il2cppType = ilObject.GetIl2CppType();
+
+                // check if type is injected
+                IntPtr classPtr = il2cpp_object_get_class(ilObject.Pointer);
+                if (RuntimeSpecificsStore.IsInjected(classPtr))
+                    return GetTypeByName(il2cppType.FullName);
+
+                var getType = Type.GetType(il2cppType.AssemblyQualifiedName);
 
                 if (getType != null)
                     return getType;

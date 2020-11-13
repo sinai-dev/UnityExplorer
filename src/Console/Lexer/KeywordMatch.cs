@@ -17,8 +17,8 @@ namespace UnityExplorer.Console.Lexer
 
         public override bool IsImplicitMatch(CSharpLexer lexer)
         {
-            if (!char.IsWhiteSpace(lexer.Previous) ||
-                lexer.IsSpecialSymbol(lexer.Previous, DelimiterType.End))
+            if (!char.IsWhiteSpace(lexer.Previous) &&
+                !lexer.IsSpecialSymbol(lexer.Previous, DelimiterType.End))
             {
                 return false;
             }

@@ -23,10 +23,10 @@ namespace UnityExplorer
 
         public static bool ShowMenu
         {
-            get => m_showMenu;
+            get => s_showMenu;
             set => SetShowMenu(value);
         }
-        public static bool m_showMenu;
+        public static bool s_showMenu;
 
         private static bool s_doneUIInit;
         private static float s_timeSinceStartup;
@@ -100,13 +100,13 @@ namespace UnityExplorer
 #if CPP
             try
             {
-                Application.add_logMessageReceived(new Action<string, string, LogType>(LogCallback));
+                Application.add_logMessageReceived(new Action<string, string, LogType>(OnUnityLog));
                 SceneManager.add_sceneLoaded(new Action<Scene, LoadSceneMode>((Scene a, LoadSceneMode b) => { OnSceneLoaded(); }));
                 SceneManager.add_activeSceneChanged(new Action<Scene, Scene>((Scene a, Scene b) => { OnSceneLoaded(); }));
             }
             catch { }
 #else
-            Application.logMessageReceived += LogCallback;
+            Application.logMessageReceived += OnUnityLog;
             SceneManager.sceneLoaded += (Scene a, LoadSceneMode b) => { OnSceneLoaded(); }; 
             SceneManager.activeSceneChanged += (Scene a, Scene b) => { OnSceneLoaded(); };
 #endif
@@ -119,7 +119,7 @@ namespace UnityExplorer
 
         private static void SetShowMenu(bool show)
         {
-            m_showMenu = show;
+            s_showMenu = show;
 
             if (UIManager.CanvasRoot)
             {
@@ -134,7 +134,7 @@ namespace UnityExplorer
             ForceUnlockCursor.UpdateCursorControl();
         }
 
-        private void LogCallback(string message, string stackTrace, LogType type)
+        private void OnUnityLog(string message, string stackTrace, LogType type)
         {
             if (!DebugConsole.LogUnity)
                 return;

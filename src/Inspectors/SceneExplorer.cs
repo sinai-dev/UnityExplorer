@@ -33,6 +33,7 @@ namespace UnityExplorer.Inspectors
         private int m_lastCount;
 
         private Dropdown m_sceneDropdown;
+        private Text m_sceneDropdownText;
         private Text m_scenePathText;
         private GameObject m_mainInspectBtn;
         private GameObject m_backButtonObj;
@@ -135,9 +136,9 @@ namespace UnityExplorer.Inspectors
                 m_sceneDropdown.options.Add(new Dropdown.OptionData { text = scene });
             }
 
-            if (!names.Contains(m_sceneDropdown.itemText.text))
+            if (!names.Contains(m_sceneDropdownText.text))
             {
-                m_sceneDropdown.transform.Find("Label").GetComponent<Text>().text = names[0];
+                m_sceneDropdownText.text = names[0];
                 SetTargetScene(handles[0]);
             }
         }
@@ -316,6 +317,8 @@ namespace UnityExplorer.Inspectors
             dropdownLayout.flexibleHeight = 0;
             dropdownLayout.minWidth = 320;
             dropdownLayout.flexibleWidth = 2;
+
+            m_sceneDropdownText = m_sceneDropdown.transform.Find("Label").GetComponent<Text>();
 
 #if CPP
             m_sceneDropdown.onValueChanged.AddListener(new Action<int>((int val) => { SetSceneFromDropdown(val); }));

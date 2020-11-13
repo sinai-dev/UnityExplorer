@@ -31,6 +31,9 @@ namespace UnityExplorer.Inspectors.Reflection
         public string RichTextName => m_richTextName ?? GetRichTextName();
         private string m_richTextName;
 
+        public string NameForFiltering => m_nameForFilter ?? (m_nameForFilter = $"{MemInfo.DeclaringType.Name}.{MemInfo.Name}".ToLower());
+        private string m_nameForFilter;
+
         public override bool CanWrite => m_canWrite ?? GetCanWrite();
         private bool? m_canWrite;
 

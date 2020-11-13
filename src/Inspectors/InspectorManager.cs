@@ -105,14 +105,14 @@ namespace UnityExplorer.Inspectors
 
         public void SetInspectorTab(InspectorBase inspector)
         {
+            MainMenu.Instance.SetPage(HomePage.Instance);
+
             if (m_activeInspector == inspector)
                 return;
 
             UnsetInspectorTab();
 
-            MainMenu.Instance.SetPage(HomePage.Instance);
             m_activeInspector = inspector;
-
             inspector.SetActive();
 
             Color activeColor = new Color(0, 0.25f, 0, 1);

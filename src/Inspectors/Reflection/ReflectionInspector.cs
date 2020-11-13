@@ -83,6 +83,8 @@ namespace UnityExplorer.Inspectors
             set => m_content = value;
         }
 
+        internal Text m_nameFilterText;
+
         internal PageHandler m_pageHandler;
         internal SliderScrollbar m_sliderScroller;
         internal GameObject m_scrollContent;
@@ -100,13 +102,13 @@ namespace UnityExplorer.Inspectors
             else
                 m_targetType = ReflectionHelpers.GetActualType(target);
 
-            m_targetTypeShortName = m_targetType.Name;
+            m_targetTypeShortName = UISyntaxHighlight.ParseFullSyntax(m_targetType, false);
 
             ConstructUI();
 
             CacheMembers(m_targetType);
 
-            RefreshDisplay();
+            FilterMembers();
         }
 
         // Methods
@@ -121,6 +123,19 @@ namespace UnityExplorer.Inspectors
         {
             base.SetInactive();
             ActiveInstance = null;
+        }
+
+        public override void Destroy()
+        {
+            base.Destroy();
+
+            if (this.Content)
+                GameObject.Destroy(this.Content);
+        }
+
+        private void OnPageTurned()
+        {
+            RefreshDisplay();
         }
 
         public override void Update()
@@ -148,24 +163,30 @@ namespace UnityExplorer.Inspectors
             }
         }
 
-        public override void Destroy()
+        public void FilterMembers(string nameFilter = null)
         {
-            base.Destroy();
+            var list = new List<CacheMember>();
 
-            if (this.Content)
-                GameObject.Destroy(this.Content);
-        }
+            nameFilter = nameFilter?.ToLower() ?? m_nameFilterText.text.ToLower();
 
-        private void OnPageTurned()
-        {
-            RefreshDisplay();
+            foreach (var mem in m_allMembers)
+            {
+                // name filter
+                if (!string.IsNullOrEmpty(nameFilter) && !mem.NameForFiltering.Contains(nameFilter))
+                    continue;
+
+                list.Add(mem);
+            }
+
+            if (m_membersFiltered == null || m_membersFiltered.Length != list.Count)
+            {
+                m_membersFiltered = list.ToArray();
+                RefreshDisplay();
+            }
         }
 
         public void RefreshDisplay()
         {
-            // temp because not doing filtering yet
-            m_membersFiltered = m_allMembers;
-
             var members = m_membersFiltered;
             m_pageHandler.ListCount = members.Length;
 
@@ -360,65 +381,99 @@ namespace UnityExplorer.Inspectors
 
             ConstructTopArea();
 
-            ConstructFilterArea();
-
             ConstructMemberList();
         }
 
         internal void ConstructTopArea()
         {
-            var typeRowObj = UIFactory.CreateHorizontalGroup(Content, new Color(1, 1, 1, 0));
-            var typeRowGroup = typeRowObj.GetComponent<HorizontalLayoutGroup>();
-            typeRowGroup.childForceExpandWidth = true;
-            typeRowGroup.childForceExpandHeight = true;
-            typeRowGroup.childControlHeight = true;
-            typeRowGroup.childControlWidth = true;
-            var typeRowLayout = typeRowObj.AddComponent<LayoutElement>();
-            typeRowLayout.minHeight = 25;
-            typeRowLayout.flexibleHeight = 0;
-            typeRowLayout.minWidth = 200;
-            typeRowLayout.flexibleWidth = 5000;
+            var topGroupObj = UIFactory.CreateVerticalGroup(Content, new Color(0.1f, 0.1f, 0.1f));
+            var topGroup = topGroupObj.GetComponent<VerticalLayoutGroup>();
+            topGroup.childForceExpandWidth = true;
+            topGroup.childForceExpandHeight = true;
+            topGroup.childControlWidth = true;
+            topGroup.childControlHeight = true;
+            topGroup.spacing = 8;
+            topGroup.padding.left = 4;
+            topGroup.padding.right = 4;
 
-            var typeLabel = UIFactory.CreateLabel(typeRowObj, TextAnchor.MiddleLeft);
+            var nameRowObj = UIFactory.CreateHorizontalGroup(topGroupObj, new Color(1, 1, 1, 0));
+            var nameRow = nameRowObj.GetComponent<HorizontalLayoutGroup>();
+            nameRow.childForceExpandWidth = true;
+            nameRow.childForceExpandHeight = true;
+            nameRow.childControlHeight = true;
+            nameRow.childControlWidth = true;
+            nameRow.padding.top = 2;
+            var nameRowLayout = nameRowObj.AddComponent<LayoutElement>();
+            nameRowLayout.minHeight = 25;
+            nameRowLayout.flexibleHeight = 0;
+            nameRowLayout.minWidth = 200;
+            nameRowLayout.flexibleWidth = 5000;
+
+            var typeLabel = UIFactory.CreateLabel(nameRowObj, TextAnchor.MiddleLeft);
             var typeLabelText = typeLabel.GetComponent<Text>();
             typeLabelText.text = "Type:";
             typeLabelText.horizontalOverflow = HorizontalWrapMode.Overflow;
             var typeLabelTextLayout = typeLabel.AddComponent<LayoutElement>();
-            typeLabelTextLayout.minWidth = 60;
+            typeLabelTextLayout.minWidth = 40;
             typeLabelTextLayout.flexibleWidth = 0;
             typeLabelTextLayout.minHeight = 25;
 
-            var typeLabelInputObj = UIFactory.CreateInputField(typeRowObj);
-            var typeLabelInput = typeLabelInputObj.GetComponent<InputField>();
-            typeLabelInput.readOnly = true;
-            var typeLabelLayout = typeLabelInputObj.AddComponent<LayoutElement>();
-            typeLabelLayout.minWidth = 150;
-            typeLabelLayout.flexibleWidth = 5000;
-
-            typeLabelInput.text = UISyntaxHighlight.ParseFullSyntax(m_targetType, true);
+            var typeDisplayObj = UIFactory.CreateLabel(nameRowObj, TextAnchor.MiddleLeft);
+            var typeDisplayText = typeDisplayObj.GetComponent<Text>();
+            typeDisplayText.text = UISyntaxHighlight.ParseFullSyntax(m_targetType, true);
+            var typeDisplayLayout = typeDisplayObj.AddComponent<LayoutElement>();
+            typeDisplayLayout.minHeight = 25;
+            typeDisplayLayout.flexibleWidth = 5000;
 
             // Helper tools
 
-            if (this is InstanceInspector instanceInspector)
+            if (this is InstanceInspector)
             {
-                instanceInspector.ConstructInstanceHelpers(Content);
+                (this as InstanceInspector).ConstructInstanceHelpers(topGroupObj);
             }
-        }
 
-        internal void ConstructFilterArea()
-        {
-            var filterAreaObj = UIFactory.CreateVerticalGroup(Content, new Color(0.1f, 0.1f, 0.1f));
+            // Filters
+
+            var filterAreaObj = UIFactory.CreateVerticalGroup(topGroupObj, new Color(1,1,1,0));
             var filterLayout = filterAreaObj.AddComponent<LayoutElement>();
-            filterLayout.minHeight = 25;
+            filterLayout.minHeight = 60;
             var filterGroup = filterAreaObj.GetComponent<VerticalLayoutGroup>();
             filterGroup.childForceExpandWidth = true;
             filterGroup.childForceExpandHeight = false;
             filterGroup.childControlWidth = true;
             filterGroup.childControlHeight = true;
+            filterGroup.spacing = 4;
 
             // name filter
 
+            var nameFilterRowObj = UIFactory.CreateHorizontalGroup(filterAreaObj, new Color(1, 1, 1, 0));
+            var nameFilterGroup = nameFilterRowObj.GetComponent<HorizontalLayoutGroup>();
+            nameFilterGroup.childForceExpandHeight = false;
+            nameFilterGroup.childForceExpandWidth = false;
+            nameFilterGroup.childControlWidth = true;
+            nameFilterGroup.childControlHeight = true;
+            nameFilterGroup.spacing = 5;
+            var nameFilterLayout = nameFilterRowObj.AddComponent<LayoutElement>();
+            nameFilterLayout.minHeight = 25;
+            nameFilterLayout.flexibleHeight = 0;
+            nameFilterLayout.flexibleWidth = 5000;
 
+            var nameLabelObj = UIFactory.CreateLabel(nameFilterRowObj, TextAnchor.MiddleLeft);
+            var nameLabelLayout = nameLabelObj.AddComponent<LayoutElement>();
+            nameLabelLayout.minWidth = 130;
+            nameLabelLayout.minHeight = 25;
+            nameLabelLayout.flexibleWidth = 0;
+            var nameLabelText = nameLabelObj.GetComponent<Text>();
+            nameLabelText.text = "Name contains:";
+
+            var nameInputObj = UIFactory.CreateInputField(nameFilterRowObj, 14, (int)TextAnchor.MiddleLeft, (int)HorizontalWrapMode.Overflow);
+            var nameInputLayout = nameInputObj.AddComponent<LayoutElement>();
+            nameInputLayout.flexibleWidth = 5000;
+            nameInputLayout.minWidth = 100;
+            nameInputLayout.minHeight = 25;
+            var nameInput = nameInputObj.GetComponent<InputField>();
+            nameInput.onValueChanged.AddListener(new Action<string>((string val) => { FilterMembers(val); }));
+            m_nameFilterText = nameInput.textComponent;
 
             // membertype filter
 
@@ -426,9 +481,9 @@ namespace UnityExplorer.Inspectors
 
             // Instance filters
 
-            if (this is InstanceInspector instanceInspector)
+            if (this is InstanceInspector)
             {
-                instanceInspector.ConstructInstanceFilters(filterAreaObj);
+                (this as InstanceInspector).ConstructInstanceFilters(filterAreaObj);
             }
         }
 
