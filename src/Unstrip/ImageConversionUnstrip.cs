@@ -19,20 +19,6 @@ namespace UnityExplorer.Unstrip
                 .Invoke(tex.Pointer);
 
             return new Il2CppStructArray<byte>(ptr);
-
-            //// This is a bit of a hack. The iCall actually returns an Il2CppStructArray<byte>...
-
-            // byte[] data = ICallHelper.GetICall<d_EncodeToPNG>("UnityEngine.ImageConversion::EncodeToPNG")
-            //                  .Invoke(tex.Pointer);
-
-            //// However, if you try to use that result with for example File.WriteAllBytes, it won't work.
-            //// Simple fix: iterate into a new managed array.
-
-            //byte[] safeData = new byte[data.Length];
-            //for (int i = 0; i < data.Length; i++)
-            //    safeData[i] = (byte)data[i];
-
-            //return safeData;
         }
 
         // bool ImageConversion.LoadImage(this Texture2D tex, byte[] data, bool markNonReadable);
