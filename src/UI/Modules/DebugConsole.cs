@@ -29,6 +29,7 @@ namespace UnityExplorer.UI.Modules
         internal static readonly List<string> s_preInitMessages = new List<string>();
 
         private InputField m_textInput;
+        internal const int MAX_TEXT_LEN = 10000;
 
         public DebugConsole(GameObject parent)
         {
@@ -102,7 +103,15 @@ namespace UnityExplorer.UI.Modules
                 message = $"<color=#{hexColor}>{message}</color>";
             
             if (Instance?.m_textInput)
-                Instance.m_textInput.text = $"{message}\n{Instance.m_textInput.text}";
+            {
+                var input = Instance.m_textInput;
+                var wanted = $"{message}\n{input.text}";
+
+                if (wanted.Length > MAX_TEXT_LEN)
+                    wanted = wanted.Substring(0, MAX_TEXT_LEN);
+
+                input.text = wanted;
+            }
             else
                 s_preInitMessages.Add(message);
         }

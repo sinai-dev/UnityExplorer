@@ -4,7 +4,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityExplorer.Unstrip;
 
-namespace UnityExplorer.UI.Shared
+namespace UnityExplorer.UI
 {
     public class UISyntaxHighlight
     {
@@ -47,9 +47,7 @@ namespace UnityExplorer.UI.Shared
         {
             string ret = "";
 
-            if (type.IsGenericParameter
-                || type.GetGenericArguments().Any(it => it.IsGenericParameter)
-                || (type.HasElementType && type.GetElementType().IsGenericParameter))
+            if (type.IsGenericParameter || (type.HasElementType && type.GetElementType().IsGenericParameter))
             {
                 ret = $"<color={Enum}>{type.Name}</color>";
             }
