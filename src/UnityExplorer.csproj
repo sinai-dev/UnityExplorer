@@ -24,7 +24,6 @@
     <PlatformTarget>x64</PlatformTarget>
     <Prefer32Bit>false</Prefer32Bit>
     <RootNamespace>UnityExplorer</RootNamespace>
-    <AssemblyName>UnityExplorer</AssemblyName>
     <!-- Set this to the BepInEx Il2Cpp Game folder, without the ending '\' character. -->
     <BIECppGameFolder>D:\Steam\steamapps\common\Outward</BIECppGameFolder>
     <!-- Set this to the BepInEx Mono Game folder, without the ending '\' character. -->
@@ -44,6 +43,7 @@
     <!-- <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion> -->
     <OutputPath>..\Release\UnityExplorer.MelonLoader.Il2Cpp\</OutputPath>
     <DefineConstants>CPP,ML</DefineConstants>
+    <AssemblyName>UnityExplorer.ML.IL2CPP</AssemblyName>
     <IsCpp>true</IsCpp>
     <IsMelonLoader>true</IsMelonLoader>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -52,6 +52,7 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <OutputPath>..\Release\UnityExplorer.MelonLoader.Mono\</OutputPath>
     <DefineConstants>MONO,ML</DefineConstants>
+    <AssemblyName>UnityExplorer.ML.Mono</AssemblyName>
     <Prefer32Bit>false</Prefer32Bit>
     <IsCpp>false</IsCpp>
     <IsMelonLoader>true</IsMelonLoader>
@@ -69,6 +70,7 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <OutputPath>..\Release\UnityExplorer.BepInEx.Mono\</OutputPath>
     <DefineConstants>MONO,BIE</DefineConstants>
+    <AssemblyName>UnityExplorer.BIE.Mono</AssemblyName>
     <IsCpp>false</IsCpp>
     <IsMelonLoader>false</IsMelonLoader>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -353,7 +355,7 @@
     <Compile Include="Inspectors\InspectorManager.cs" />
     <Compile Include="Inspectors\Reflection\ReflectionInspector.cs" />
     <Compile Include="UI\MainMenu.cs" />
-    <Compile Include="UI\Modules\ConsolePage.cs" />
+    <Compile Include="UI\Modules\CSConsolePage.cs" />
     <Compile Include="CSConsole\AutoCompleter.cs" />
     <Compile Include="CSConsole\CodeEditor.cs" />
     <Compile Include="CSConsole\Lexer\CommentMatch.cs" />

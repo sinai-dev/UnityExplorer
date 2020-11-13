@@ -86,7 +86,7 @@ The following helper methods are available:
                     var text = InputField.text.Trim();
                     if (!string.IsNullOrEmpty(text))
                     {
-                        ConsolePage.Instance.Evaluate(text);
+                        CSConsolePage.Instance.Evaluate(text);
                         return;
                     }
                 }
@@ -105,7 +105,7 @@ The following helper methods are available:
             {
                 if (!m_fixwanted)
                 {
-                    EventSystem.current.SetSelectedGameObject(ConsolePage.Instance.m_codeEditor.InputField.gameObject, null);
+                    EventSystem.current.SetSelectedGameObject(CSConsolePage.Instance.m_codeEditor.InputField.gameObject, null);
                     m_fixwanted = true; 
                 }
                 else
@@ -308,13 +308,13 @@ The following helper methods are available:
 
         public void ConstructUI()
         {
-            ConsolePage.Instance.Content = UIFactory.CreateUIObject("C# Console", MainMenu.Instance.PageViewport);
+            CSConsolePage.Instance.Content = UIFactory.CreateUIObject("C# Console", MainMenu.Instance.PageViewport);
 
-            var mainLayout = ConsolePage.Instance.Content.AddComponent<LayoutElement>();
-            mainLayout.preferredHeight = 9900;
+            var mainLayout = CSConsolePage.Instance.Content.AddComponent<LayoutElement>();
+            mainLayout.preferredHeight = 500;
             mainLayout.flexibleHeight = 9000;
 
-            var mainGroup = ConsolePage.Instance.Content.AddComponent<VerticalLayoutGroup>();
+            var mainGroup = CSConsolePage.Instance.Content.AddComponent<VerticalLayoutGroup>();
             mainGroup.childControlHeight = true;
             mainGroup.childControlWidth = true;
             mainGroup.childForceExpandHeight = true;
@@ -324,7 +324,7 @@ The following helper methods are available:
 
             // Main group object
 
-            var topBarObj = UIFactory.CreateHorizontalGroup(ConsolePage.Instance.Content);
+            var topBarObj = UIFactory.CreateHorizontalGroup(CSConsolePage.Instance.Content);
             LayoutElement topBarLayout = topBarObj.AddComponent<LayoutElement>();
             topBarLayout.minHeight = 50;
             topBarLayout.flexibleHeight = 0;
@@ -402,7 +402,7 @@ The following helper methods are available:
 
             int fontSize = 16;
 
-            var inputObj = UIFactory.CreateSrollInputField(ConsolePage.Instance.Content, out InputFieldScroller consoleScroll, fontSize);
+            var inputObj = UIFactory.CreateSrollInputField(CSConsolePage.Instance.Content, out InputFieldScroller consoleScroll, fontSize);
 
             var inputField = consoleScroll.inputField;
 
@@ -431,7 +431,7 @@ The following helper methods are available:
 
             #region COMPILE BUTTON
 
-            var compileBtnObj = UIFactory.CreateButton(ConsolePage.Instance.Content);
+            var compileBtnObj = UIFactory.CreateButton(CSConsolePage.Instance.Content);
             var compileBtnLayout = compileBtnObj.AddComponent<LayoutElement>();
             compileBtnLayout.preferredWidth = 80;
             compileBtnLayout.flexibleWidth = 0;
@@ -452,7 +452,7 @@ The following helper methods are available:
             {
                 if (!string.IsNullOrEmpty(inputField.text))
                 {
-                    ConsolePage.Instance.Evaluate(inputField.text.Trim());
+                    CSConsolePage.Instance.Evaluate(inputField.text.Trim());
                 }
             }
 

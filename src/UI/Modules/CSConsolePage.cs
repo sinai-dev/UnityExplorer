@@ -7,11 +7,11 @@ using UnityExplorer.CSConsole;
 
 namespace UnityExplorer.UI.Modules
 {
-    public class ConsolePage : MainMenu.Page
+    public class CSConsolePage : MainMenu.Page
     {
         public override string Name => "C# Console";
 
-        public static ConsolePage Instance { get; private set; }
+        public static CSConsolePage Instance { get; private set; }
 
         public CodeEditor m_codeEditor;
         public ScriptEvaluator m_evaluator;

@@ -35,7 +35,9 @@ namespace UnityExplorer.UI
 
             ResizeTypes type;
             Vector3 resizePos = Panel.InverseTransformPoint(rawMousePos);
+
             Vector3 dragPos = DragableArea.InverseTransformPoint(rawMousePos);
+            bool inDragPos = DragableArea.rect.Contains(dragPos);
 
             if (WasHoveringResize && s_resizeCursorImage)
             {
@@ -45,7 +47,7 @@ namespace UnityExplorer.UI
             // If Mouse pressed this frame
             if (InputManager.GetMouseButtonDown(0))
             {
-                if (DragableArea.rect.Contains(dragPos))
+                if (inDragPos)
                 {
                     OnBeginDrag();
                     return;
@@ -82,7 +84,7 @@ namespace UnityExplorer.UI
                 {
                     OnEndResize();
                 }
-                else if (MouseInResizeArea(resizePos) && (type = GetResizeType(resizePos)) != ResizeTypes.NONE)
+                else if (!inDragPos && MouseInResizeArea(resizePos) && (type = GetResizeType(resizePos)) != ResizeTypes.NONE)
                 {
                     OnHoverResize(type);
                 }

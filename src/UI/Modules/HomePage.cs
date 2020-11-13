@@ -38,11 +38,11 @@ namespace UnityExplorer.UI.Modules
 
             Content = UIFactory.CreateHorizontalGroup(parent);
             var mainGroup = Content.GetComponent<HorizontalLayoutGroup>();
-            mainGroup.padding.left = 3;
-            mainGroup.padding.right = 3;
-            mainGroup.padding.top = 3;
-            mainGroup.padding.bottom = 3;
-            mainGroup.spacing = 5;
+            mainGroup.padding.left = 1;
+            mainGroup.padding.right = 1;
+            mainGroup.padding.top = 1;
+            mainGroup.padding.bottom = 1;
+            mainGroup.spacing = 3;
             mainGroup.childForceExpandHeight = true;
             mainGroup.childForceExpandWidth = true;
             mainGroup.childControlHeight = true;

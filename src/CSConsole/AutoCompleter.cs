@@ -132,7 +132,7 @@ namespace UnityExplorer.CSConsole
         {
             try
             {
-                var editor = ConsolePage.Instance.m_codeEditor;
+                var editor = CSConsolePage.Instance.m_codeEditor;
 
                 if (!editor.InputField.isFocused)
                     return;
@@ -164,7 +164,7 @@ namespace UnityExplorer.CSConsole
 
         public static void CheckAutocomplete()
         {
-            var m_codeEditor = ConsolePage.Instance.m_codeEditor;
+            var m_codeEditor = CSConsolePage.Instance.m_codeEditor;
             string input = m_codeEditor.InputField.text;
             int caretIndex = m_codeEditor.InputField.caretPosition;
 
@@ -204,7 +204,7 @@ namespace UnityExplorer.CSConsole
             {
                 // Credit ManylMarco
                 CodeEditor.AutoCompletes.Clear();
-                string[] completions = ConsolePage.Instance.m_evaluator.GetCompletions(input, out string prefix);
+                string[] completions = CSConsolePage.Instance.m_evaluator.GetCompletions(input, out string prefix);
                 if (completions != null)
                 {
                     if (prefix == null)
@@ -301,7 +301,7 @@ namespace UnityExplorer.CSConsole
 
                 void UseAutocompleteButton()
                 {
-                    ConsolePage.Instance.m_codeEditor.UseAutocomplete(hiddenText.text);
+                    CSConsolePage.Instance.m_codeEditor.UseAutocomplete(hiddenText.text);
                 }
 
                 m_suggestionButtons.Add(buttonObj);

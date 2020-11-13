@@ -294,11 +294,11 @@ namespace UnityExplorer.Inspectors
             leftLayout.flexibleWidth = 0;
 
             VerticalLayoutGroup leftGroup = leftPane.GetComponent<VerticalLayoutGroup>();
-            leftGroup.padding.left = 8;
-            leftGroup.padding.right = 8;
+            leftGroup.padding.left = 4;
+            leftGroup.padding.right = 4;
             leftGroup.padding.top = 8;
-            leftGroup.padding.bottom = 8;
-            leftGroup.spacing = 5;
+            leftGroup.padding.bottom = 4;
+            leftGroup.spacing = 4;
             leftGroup.childControlWidth = true;
             leftGroup.childControlHeight = true;
             leftGroup.childForceExpandWidth = true;
@@ -430,7 +430,7 @@ namespace UnityExplorer.Inspectors
                     Hiding = true;
 
                     hideText.text = "►";
-                    leftLayout.minWidth = 20;
+                    leftLayout.minWidth = 15;
                     titleObj.SetActive(false);
                     sceneDropdownObj.SetActive(false);
                     scenePathGroupObj.SetActive(false);

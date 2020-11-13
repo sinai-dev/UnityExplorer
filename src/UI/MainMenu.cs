@@ -57,7 +57,7 @@ namespace UnityExplorer.UI
 
             Pages.Add(new HomePage());
             Pages.Add(new SearchPage());
-            Pages.Add(new ConsolePage());
+            Pages.Add(new CSConsolePage());
             Pages.Add(new OptionsPage());
 
             ConstructMenu();
@@ -118,7 +118,7 @@ namespace UnityExplorer.UI
             m_activePage?.Content?.SetActive(false);
 
             // unique case for console page, at the moment this will just go here
-            if (m_activePage is ConsolePage)
+            if (m_activePage is CSConsolePage)
                 AutoCompleter.m_mainObj?.SetActive(false);
 
             m_activePage = page;
@@ -186,7 +186,7 @@ namespace UnityExplorer.UI
             titleGroup.padding.bottom = 3;
 
             LayoutElement titleLayout = titleBar.AddComponent<LayoutElement>();
-            titleLayout.minHeight = 35;
+            titleLayout.minHeight = 25;
             titleLayout.flexibleHeight = 0;
 
             // Explorer label
@@ -198,9 +198,8 @@ namespace UnityExplorer.UI
             text.resizeTextForBestFit = true;
             text.resizeTextMinSize = 12;
             text.resizeTextMaxSize = 20;
-
             LayoutElement textLayout = textObj.AddComponent<LayoutElement>();
-            textLayout.flexibleWidth = 50;
+            textLayout.flexibleWidth = 5000;
 
             // Add PanelDragger using the label object
 
@@ -226,7 +225,7 @@ namespace UnityExplorer.UI
             hideText.color = Color.white;
             hideText.resizeTextForBestFit = true;
             hideText.resizeTextMinSize = 8;
-            hideText.resizeTextMaxSize = 16;
+            hideText.resizeTextMaxSize = 14;
             hideText.text = $"Hide ({ModConfig.Instance.Main_Menu_Toggle})";
 
             ModConfig.OnConfigChanged += ModConfig_OnConfigChanged; 
@@ -242,10 +241,6 @@ namespace UnityExplorer.UI
             GameObject navbarObj = UIFactory.CreateHorizontalGroup(content);
 
             HorizontalLayoutGroup navGroup = navbarObj.GetComponent<HorizontalLayoutGroup>();
-            navGroup.padding.left = 3;
-            navGroup.padding.right = 3;
-            navGroup.padding.top = 3;
-            navGroup.padding.bottom = 3;
             navGroup.spacing = 5;
             navGroup.childControlHeight = true;
             navGroup.childControlWidth = true;
@@ -253,7 +248,7 @@ namespace UnityExplorer.UI
             navGroup.childForceExpandWidth = true;
 
             LayoutElement navLayout = navbarObj.AddComponent<LayoutElement>();
-            navLayout.minHeight = 35;
+            navLayout.minHeight = 25;
             navLayout.flexibleHeight = 0;
 
             foreach (Page page in Pages)

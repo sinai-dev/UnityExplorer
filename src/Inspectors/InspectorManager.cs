@@ -153,7 +153,7 @@ namespace UnityExplorer.Inspectors
             mainGroup.childForceExpandWidth = true;
             mainGroup.childControlHeight = true;
             mainGroup.childControlWidth = true;
-            mainGroup.spacing = 2;
+            mainGroup.spacing = 4;
             mainGroup.padding.left = 4;
             mainGroup.padding.right = 4;
             mainGroup.padding.top = 4;
@@ -184,10 +184,10 @@ namespace UnityExplorer.Inspectors
             m_tabBarContent = UIFactory.CreateGridGroup(mainObj, new Vector2(185, 20), new Vector2(5, 2), new Color(0.1f, 0.1f, 0.1f, 1));
 
             var gridGroup = m_tabBarContent.GetComponent<GridLayoutGroup>();
-            gridGroup.padding.top = 4;
-            gridGroup.padding.left = 4;
-            gridGroup.padding.right = 4;
-            gridGroup.padding.bottom = 4;
+            gridGroup.padding.top = 3;
+            gridGroup.padding.left = 3;
+            gridGroup.padding.right = 3;
+            gridGroup.padding.bottom = 3;
 
             // inspector content area
 
@@ -204,10 +204,10 @@ namespace UnityExplorer.Inspectors
             contentGroup.childForceExpandWidth = true;
             contentGroup.childControlHeight = true;
             contentGroup.childControlWidth = true;
-            contentGroup.padding.top = 5;
-            contentGroup.padding.left = 5;
-            contentGroup.padding.right = 5;
-            contentGroup.padding.bottom = 5;
+            contentGroup.padding.top = 2;
+            contentGroup.padding.left = 2;
+            contentGroup.padding.right = 2;
+            contentGroup.padding.bottom = 2;
 
             var contentLayout = m_inspectorContent.AddComponent<LayoutElement>();
             contentLayout.preferredHeight = 900;

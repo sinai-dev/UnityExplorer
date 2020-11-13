@@ -15,17 +15,17 @@ namespace UnityExplorer.CSConsole
 
         public static void AddUsing(string directive)
         {
-            ConsolePage.Instance.AddUsing(directive);
+            CSConsolePage.Instance.AddUsing(directive);
         }
 
         public static void GetUsing()
         {
-            ExplorerCore.Log(ConsolePage.Instance.m_evaluator.GetUsing());
+            ExplorerCore.Log(CSConsolePage.Instance.m_evaluator.GetUsing());
         }
 
         public static void Reset()
         {
-            ConsolePage.Instance.ResetConsole();
+            CSConsolePage.Instance.ResetConsole();
         }
 
         public static object CurrentTarget()

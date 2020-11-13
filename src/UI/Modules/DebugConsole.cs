@@ -160,7 +160,7 @@ namespace UnityExplorer.UI.Modules
 
             var bottomBarObj = UIFactory.CreateHorizontalGroup(mainObj);
             LayoutElement topBarLayout = bottomBarObj.AddComponent<LayoutElement>();
-            topBarLayout.minHeight = 40;
+            topBarLayout.minHeight = 30;
             topBarLayout.flexibleHeight = 0;
 
             var bottomGroup = bottomBarObj.GetComponent<HorizontalLayoutGroup>();
@@ -202,7 +202,7 @@ namespace UnityExplorer.UI.Modules
                 {
                     logAreaObj.SetActive(false);
                     hideBtnText.text = "Show";
-                    mainLayout.minHeight = 40;
+                    mainLayout.minHeight = 30;
                 }
                 else
                 {
@@ -267,7 +267,7 @@ namespace UnityExplorer.UI.Modules
 
             var unityToggleRect = unityToggleObj.transform.Find("Background").GetComponent<RectTransform>();
             var pos = unityToggleRect.localPosition;
-            pos.y = -8;
+            pos.y = -4;
             unityToggleRect.localPosition = pos;
 
             //            // Save to disk button

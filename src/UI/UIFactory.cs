@@ -93,15 +93,7 @@ namespace UnityExplorer.UI
             rect.anchoredPosition = Vector2.zero;
             rect.sizeDelta = Vector2.zero;
 
-            Image image = panelObj.AddComponent<Image>();
-            image.type = Image.Type.Filled;
-            image.color = new Color(0.05f, 0.05f, 0.05f);
-
             VerticalLayoutGroup group = panelObj.AddComponent<VerticalLayoutGroup>();
-            group.padding.left = 3;
-            group.padding.right = 3;
-            group.padding.bottom = 3;
-            group.padding.top = 3;
             group.childControlHeight = true;
             group.childControlWidth = true;
             group.childForceExpandHeight = true;
@@ -114,12 +106,14 @@ namespace UnityExplorer.UI
             image2.type = Image.Type.Filled;
             image2.color = new Color(0.1f, 0.1f, 0.1f);
 
+            content.gameObject.AddComponent<Mask>();
+
             VerticalLayoutGroup group2 = content.AddComponent<VerticalLayoutGroup>();
-            group2.padding.left = 5;
-            group2.padding.right = 5;
-            group2.padding.bottom = 5;
-            group2.padding.top = 5;
-            group2.spacing = 5;
+            group2.padding.left = 3;
+            group2.padding.right = 3;
+            group2.padding.bottom = 3;
+            group2.padding.top = 3;
+            group2.spacing = 3;
             group2.childControlHeight = true;
             group2.childControlWidth = true;
             group2.childForceExpandHeight = false;
