@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityExplorer.Console;
+using UnityExplorer.CSConsole;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.UI.Modules;

@@ -5,7 +5,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityExplorer.Helpers;
 
-namespace UnityExplorer.Console
+namespace UnityExplorer.CSConsole
 {
     public struct Suggestion
     {

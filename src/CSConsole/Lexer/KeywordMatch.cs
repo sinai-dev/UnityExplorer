@@ -1,34 +1,23 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
-namespace UnityExplorer.Console.Lexer
+namespace UnityExplorer.CSConsole.Lexer
 {
-    public class SymbolMatch : Matcher
+    // I use two different KeywordMatch instances (valid and invalid).
+    // This class just contains common implementations.
+    public class KeywordMatch : Matcher
     {
-        public override Color HighlightColor => new Color(0.58f, 0.47f, 0.37f, 1.0f);
+        public string[] Keywords;
 
-        private readonly string[] symbols = new[]
-        {
-            "[", "]", "(", ")", ".", "?", ":", "+", "-", "*", "/", "%", "&", "|", "^", "~", "=", "<", ">", 
-            "++", "--", "&&", "||", "<<", ">>", "==", "!=", "<=", ">=", "+=", "-=", "*=", "/=", "%=", "&=",
-            "|=", "^=", "<<=", ">>=", "->", "??", "=>",
-        };
+        public override Color HighlightColor => highlightColor;
+        public Color highlightColor;
 
-        private static readonly List<string> shortlist = new List<string>();
-        private static readonly Stack<string> removeList = new Stack<string>();
-
-        public override IEnumerable<char> StartChars => symbols.Select(s => s[0]);
-        public override IEnumerable<char> EndChars => symbols.Select(s => s[0]);
+        private readonly HashSet<string> shortlist = new HashSet<string>();
+        private readonly Stack<string> removeList = new Stack<string>();
 
         public override bool IsImplicitMatch(CSharpLexer lexer)
         {
-            if (lexer == null)
-                return false;
-
             if (!char.IsWhiteSpace(lexer.Previous) &&
-                !char.IsLetter(lexer.Previous) &&
-                !char.IsDigit(lexer.Previous) &&
                 !lexer.IsSpecialSymbol(lexer.Previous, DelimiterType.End))
             {
                 return false;
@@ -39,14 +28,18 @@ namespace UnityExplorer.Console.Lexer
             int currentIndex = 0;
             char currentChar = lexer.ReadNext();
 
-            for (int i = symbols.Length - 1; i >= 0; i--)
+            for (int i = 0; i < Keywords.Length; i++)
             {
-                if (symbols[i][0] == currentChar)
-                    shortlist.Add(symbols[i]);
+                if (Keywords[i][0] == currentChar)
+                {
+                    shortlist.Add(Keywords[i]);
+                }
             }
 
             if (shortlist.Count == 0)
+            {
                 return false;
+            }
 
             do
             {
@@ -60,8 +53,6 @@ namespace UnityExplorer.Console.Lexer
                 currentIndex++;
 
                 if (char.IsWhiteSpace(currentChar) ||
-                    char.IsLetter(currentChar) ||
-                    char.IsDigit(currentChar) ||
                     lexer.IsSpecialSymbol(currentChar, DelimiterType.Start))
                 {
                     RemoveLongStrings(currentIndex);
@@ -69,11 +60,11 @@ namespace UnityExplorer.Console.Lexer
                     break;
                 }
 
-                foreach (string symbol in shortlist)
+                foreach (string keyword in shortlist)
                 {
-                    if (currentIndex >= symbol.Length || symbol[currentIndex] != currentChar)
+                    if (currentIndex >= keyword.Length || keyword[currentIndex] != currentChar)
                     {
-                        removeList.Push(symbol);
+                        removeList.Push(keyword);
                     }
                 }
 

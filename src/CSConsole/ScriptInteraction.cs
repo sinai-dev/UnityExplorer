@@ -4,7 +4,7 @@ using UnityExplorer.UI;
 using UnityExplorer.UI.Modules;
 using UnityExplorer.Inspectors;
 
-namespace UnityExplorer.Console
+namespace UnityExplorer.CSConsole
 {
     public class ScriptInteraction : InteractiveBase
     {

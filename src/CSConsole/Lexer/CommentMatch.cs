@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace UnityExplorer.Console.Lexer
+namespace UnityExplorer.CSConsole.Lexer
 {
     public class CommentMatch : Matcher
     {

@@ -6,7 +6,7 @@ using Mono.CSharp;
 
 // Thanks to ManlyMarco for this
 
-namespace UnityExplorer.Console
+namespace UnityExplorer.CSConsole
 {
     public class ScriptEvaluator : Evaluator, IDisposable
     {

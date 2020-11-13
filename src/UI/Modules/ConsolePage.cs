@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using UnityExplorer.Console;
+using UnityExplorer.CSConsole;
 
 namespace UnityExplorer.UI.Modules
 {

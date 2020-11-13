@@ -3,7 +3,7 @@ using UnityExplorer.Unstrip;
 using UnityEngine;
 using System.Linq;
 
-namespace UnityExplorer.Console.Lexer
+namespace UnityExplorer.CSConsole.Lexer
 {
     public abstract class Matcher
     {

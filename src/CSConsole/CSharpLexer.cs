@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
-using UnityExplorer.Console.Lexer;
+using UnityExplorer.CSConsole.Lexer;
 
-namespace UnityExplorer.Console
+namespace UnityExplorer.CSConsole
 {
     public struct LexerMatchInfo
     {

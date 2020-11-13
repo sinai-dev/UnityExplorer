@@ -8,7 +8,7 @@ using UnityExplorer.Helpers;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Modules;
 
-namespace UnityExplorer.Console
+namespace UnityExplorer.CSConsole
 {
     public class AutoCompleter
     {
@@ -133,8 +133,12 @@ namespace UnityExplorer.Console
             try
             {
                 var editor = ConsolePage.Instance.m_codeEditor;
+
+                if (!editor.InputField.isFocused)
+                    return;
+                
                 var textGen = editor.InputText.cachedTextGenerator;
-                int caretPos = editor.InputField.caretPosition;
+                int caretPos = editor.m_lastCaretPos;
 
                 if (caretPos == m_lastCaretPos)
                     return;

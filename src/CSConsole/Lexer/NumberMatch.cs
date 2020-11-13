@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace UnityExplorer.Console.Lexer
+namespace UnityExplorer.CSConsole.Lexer
 {
     public class NumberMatch : Matcher
     {

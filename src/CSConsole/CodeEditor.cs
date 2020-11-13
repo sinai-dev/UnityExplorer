@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Text;
 using UnityExplorer.Input;
-using UnityExplorer.Console.Lexer;
+using UnityExplorer.CSConsole.Lexer;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -13,7 +13,7 @@ using System.Reflection;
 using UnityExplorer.UI.Shared;
 using UnityExplorer.Helpers;
 
-namespace UnityExplorer.Console
+namespace UnityExplorer.CSConsole
 {
     // Handles most of the UI side of the C# console, including syntax highlighting.
 
@@ -104,7 +104,10 @@ The following helper methods are available:
             if (m_fixCaretPos > 0)
             {
                 if (!m_fixwanted)
-                    m_fixwanted = true;
+                {
+                    EventSystem.current.SetSelectedGameObject(ConsolePage.Instance.m_codeEditor.InputField.gameObject, null);
+                    m_fixwanted = true; 
+                }
                 else
                 {
                     InputField.caretPosition = m_fixCaretPos;
@@ -132,8 +135,6 @@ The following helper methods are available:
 
         public void UseAutocomplete(string suggestion)
         {
-            EventSystem.current.SetSelectedGameObject(ConsolePage.Instance.m_codeEditor.InputField.gameObject, null);
-
             string input = InputField.text;
             input = input.Insert(m_lastCaretPos, suggestion);
             InputField.text = input;
