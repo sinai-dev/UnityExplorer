@@ -7,29 +7,16 @@ using UnityEngine;
 using UnityExplorer.Inspectors;
 using System.IO;
 using UnityExplorer.Unstrip;
+using UnityEngine.SceneManagement;
 
 namespace UnityExplorer
 {
     public class ExplorerCore
     {
-        public const string NAME = "UnityExplorer " + VERSION + " (" + PLATFORM + ", " + MODLOADER + ")";
+        public const string NAME = "UnityExplorer";
         public const string VERSION = "3.0.0";
         public const string AUTHOR = "Sinai";
         public const string GUID = "com.sinai.unityexplorer";
-
-        public const string PLATFORM =
-#if CPP
-            "Il2Cpp";
-#else
-            "Mono";
-#endif
-        public const string MODLOADER =
-#if ML
-            "MelonLoader";
-#else
-            "BepInEx";
-#endif
-
         public const string EXPLORER_FOLDER = @"Mods\UnityExplorer";
 
         public static ExplorerCore Instance { get; private set; }
@@ -42,7 +29,7 @@ namespace UnityExplorer
         public static bool m_showMenu;
 
         private static bool s_doneUIInit;
-        private static float m_timeSinceStartup;
+        private static float s_timeSinceStartup;
 
         public ExplorerCore()
         {
@@ -62,32 +49,11 @@ namespace UnityExplorer
             InputManager.Init();
             ForceUnlockCursor.Init();
 
-#if CPP
-            Application.add_logMessageReceived(new Action<string, string, LogType>(LogCallback));
-#else
-            Application.logMessageReceived += LogCallback;
-#endif
+            SetupEvents();
 
             ShowMenu = true;
 
-            Log($"{NAME} initialized.");
-        }
-
-        private static void SetShowMenu(bool show)
-        {
-            m_showMenu = show;
-
-            if (UIManager.CanvasRoot)
-            {
-                UIManager.CanvasRoot.SetActive(show);
-
-                if (show)
-                    ForceUnlockCursor.SetEventSystem();
-                else
-                    ForceUnlockCursor.ReleaseEventSystem();
-            }
-
-            ForceUnlockCursor.UpdateCursorControl();
+            Log($"{NAME} {VERSION} initialized.");
         }
 
         public static void Update()
@@ -109,9 +75,9 @@ namespace UnityExplorer
 
         private static void CheckUIInit()
         {
-            m_timeSinceStartup += Time.deltaTime;
+            s_timeSinceStartup += Time.deltaTime;
 
-            if (m_timeSinceStartup > 0.1f)
+            if (s_timeSinceStartup > 0.1f)
             {
                 s_doneUIInit = true;
                 try
@@ -129,9 +95,43 @@ namespace UnityExplorer
             }
         }
 
-        public static void OnSceneChange()
+        private void SetupEvents()
+        {
+#if CPP
+            try
+            {
+                Application.add_logMessageReceived(new Action<string, string, LogType>(LogCallback));
+                SceneManager.add_sceneLoaded(new Action<Scene, LoadSceneMode>((Scene a, LoadSceneMode b) => { OnSceneLoaded(); }));
+                SceneManager.add_activeSceneChanged(new Action<Scene, Scene>((Scene a, Scene b) => { OnSceneLoaded(); }));
+            }
+            catch { }
+#else
+            Application.logMessageReceived += LogCallback;
+            SceneManager.sceneLoaded += (Scene a, LoadSceneMode b) => { OnSceneLoaded(); }; 
+            SceneManager.activeSceneChanged += (Scene a, Scene b) => { OnSceneLoaded(); };
+#endif
+        }
+
+        internal void OnSceneLoaded()
         {
             UIManager.OnSceneChange();
+        }
+
+        private static void SetShowMenu(bool show)
+        {
+            m_showMenu = show;
+
+            if (UIManager.CanvasRoot)
+            {
+                UIManager.CanvasRoot.SetActive(show);
+
+                if (show)
+                    ForceUnlockCursor.SetEventSystem();
+                else
+                    ForceUnlockCursor.ReleaseEventSystem();
+            }
+
+            ForceUnlockCursor.UpdateCursorControl();
         }
 
         private void LogCallback(string message, string stackTrace, LogType type)

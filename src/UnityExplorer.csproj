@@ -350,7 +350,7 @@
     <Compile Include="Input\NoInput.cs" />
     <Compile Include="UI\Modules\DebugConsole.cs" />
     <Compile Include="Inspectors\InspectorManager.cs" />
-    <Compile Include="Inspectors\ReflectionInspector.cs" />
+    <Compile Include="Inspectors\Reflection\ReflectionInspector.cs" />
     <Compile Include="UI\MainMenu.cs" />
     <Compile Include="UI\Modules\ConsolePage.cs" />
     <Compile Include="Console\AutoCompleter.cs" />
@@ -366,7 +366,7 @@
     <Compile Include="Console\ScriptEvaluator.cs" />
     <Compile Include="Console\ScriptInteraction.cs" />
     <Compile Include="UI\Modules\HomePage.cs" />
-    <Compile Include="Inspectors\GameObjectInspector.cs" />
+    <Compile Include="Inspectors\GameObjects\GameObjectInspector.cs" />
     <Compile Include="Inspectors\InspectorBase.cs" />
     <Compile Include="Inspectors\Reflection\InstanceInspector.cs" />
     <Compile Include="Inspectors\Reflection\StaticInspector.cs" />

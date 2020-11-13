@@ -152,7 +152,7 @@ namespace UnityExplorer.Inspectors.Reflection
 
         private string GetRichTextName()
         {
-            return m_richTextName = UISyntaxHighlight.GetHighlight(MemInfo.DeclaringType, false, MemInfo);
+            return m_richTextName = UISyntaxHighlight.ParseFullSyntax(MemInfo.DeclaringType, false, MemInfo);
         }
 
 #if CPP
@@ -179,12 +179,7 @@ namespace UnityExplorer.Inspectors.Reflection
                     if (!typeof(Il2CppSystem.Object).IsAssignableFrom(type))
                         return true;
 
-                    var ptr = (IntPtr)typeof(Il2CppClassPointerStore<>)
-                        .MakeGenericType(type)
-                        .GetField("NativeClassPtr")
-                        .GetValue(null);
-
-                    if (ptr == IntPtr.Zero)
+                    if (!ReflectionHelpers.Il2CppTypeNotNull(type, out IntPtr ptr))
                         return false;
 
                     return Il2CppSystem.Type.internal_from_handle(IL2CPP.il2cpp_class_get_type(ptr)) is Il2CppSystem.Type;
@@ -207,7 +202,7 @@ namespace UnityExplorer.Inspectors.Reflection
             var textGen = m_memLabelText.cachedTextGeneratorForLayout;
             float preferredWidth = textGen.GetPreferredWidth(RichTextName, textGenSettings);
 
-            float max = scrollRect.rect.width * 0.5f;
+            float max = scrollRect.rect.width * 0.4f;
 
             if (preferredWidth > max) preferredWidth = max;
 
@@ -245,6 +240,10 @@ namespace UnityExplorer.Inspectors.Reflection
             topGroup.childControlHeight = true;
             topGroup.childControlWidth = true;
             topGroup.spacing = 10;
+            topGroup.padding.left = 3;
+            topGroup.padding.right = 3;
+            topGroup.padding.top = 0;
+            topGroup.padding.bottom = 0;
 
             // left group
 
@@ -295,6 +294,8 @@ namespace UnityExplorer.Inspectors.Reflection
             rightGroup.childControlHeight = true;
             rightGroup.childControlWidth = true;
             rightGroup.spacing = 4;
+            rightGroup.padding.top = 2;
+            rightGroup.padding.bottom = 2;
 
             // evaluate button
             if (this is CacheMethod || HasParameters)

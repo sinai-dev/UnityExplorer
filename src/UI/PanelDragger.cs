@@ -20,8 +20,6 @@ namespace UnityExplorer.UI
 
         public static event Action OnFinishResize;
 
-        private static bool s_loadedCursorImage;
-
         public PanelDragger(RectTransform dragArea, RectTransform panelToDrag)
         {
             Instance = this;
@@ -39,7 +37,7 @@ namespace UnityExplorer.UI
             Vector3 resizePos = Panel.InverseTransformPoint(rawMousePos);
             Vector3 dragPos = DragableArea.InverseTransformPoint(rawMousePos);
 
-            if (WasHoveringResize && m_resizeCursorImage)
+            if (WasHoveringResize && s_resizeCursorImage)
             {
                 UpdateHoverImagePos();
             }
@@ -141,7 +139,7 @@ namespace UnityExplorer.UI
 
         private bool WasHoveringResize { get; set; }
         private ResizeTypes m_lastResizeHoverType;
-        public GameObject m_resizeCursorImage;
+        public static GameObject s_resizeCursorImage;
 
         private Rect m_resizeRect;
 
@@ -202,48 +200,33 @@ namespace UnityExplorer.UI
         private ResizeTypes GetResizeType(Vector2 mousePos)
         {
             // Calculate which part of the resize area we're in, if any.
-            // We do this via a bitmask with the ResizeTypes enum.
-            // We can return Top/Right/Bottom/Left, or a corner like TopLeft.
 
-            int mask = 0;
+            ResizeTypes mask = 0;
 
             if (m_resizeMask[ResizeTypes.Top].Contains(mousePos))
-            {
-                mask |= (int)ResizeTypes.Top;
-            }
+                mask |= ResizeTypes.Top;
             else if (m_resizeMask[ResizeTypes.Bottom].Contains(mousePos))
-            {
-                mask |= (int)ResizeTypes.Bottom;
-            }
+                mask |= ResizeTypes.Bottom;
 
             if (m_resizeMask[ResizeTypes.Left].Contains(mousePos))
-            {
-                mask |= (int)ResizeTypes.Left;
-            }
+                mask |= ResizeTypes.Left;
             else if (m_resizeMask[ResizeTypes.Right].Contains(mousePos))
-            {
-                mask |= (int)ResizeTypes.Right;
-            }
+                mask |= ResizeTypes.Right;
 
-            return (ResizeTypes)mask;
+            return mask;
         }
 
         public void OnHoverResize(ResizeTypes resizeType)
         {
             if (WasHoveringResize && m_lastResizeHoverType == resizeType)
-            {
                 return;
-            }
-
-            if (!s_loadedCursorImage)
-                LoadCursorImage();
 
             // we are entering resize, or the resize type has changed.
 
             WasHoveringResize = true;
             m_lastResizeHoverType = resizeType;
 
-            m_resizeCursorImage.SetActive(true);
+            s_resizeCursorImage.SetActive(true);
 
             // set the rotation for the resize icon
             float iconRotation = 0f;
@@ -260,9 +243,9 @@ namespace UnityExplorer.UI
                     iconRotation = 135f; break;
             }
 
-            Quaternion rot = m_resizeCursorImage.transform.rotation;
+            Quaternion rot = s_resizeCursorImage.transform.rotation;
             rot.eulerAngles = new Vector3(0, 0, iconRotation);
-            m_resizeCursorImage.transform.rotation = rot;
+            s_resizeCursorImage.transform.rotation = rot;
 
             UpdateHoverImagePos();
         }
@@ -271,13 +254,13 @@ namespace UnityExplorer.UI
         private void UpdateHoverImagePos()
         {
             RectTransform t = UIManager.CanvasRoot.GetComponent<RectTransform>();
-            m_resizeCursorImage.transform.localPosition = t.InverseTransformPoint(InputManager.MousePosition);
+            s_resizeCursorImage.transform.localPosition = t.InverseTransformPoint(InputManager.MousePosition);
         }
 
         public void OnHoverResizeEnd()
         {
             WasHoveringResize = false;
-            m_resizeCursorImage.SetActive(false);
+            s_resizeCursorImage.SetActive(false);
         }
 
         public void OnBeginResize(ResizeTypes resizeType)
@@ -335,25 +318,23 @@ namespace UnityExplorer.UI
             OnFinishResize?.Invoke();
         }
 
-        private void LoadCursorImage()
+        internal static void LoadCursorImage()
         {
             try
             {
                 var sprite = UIManager.ResizeCursor;
 
-                m_resizeCursorImage = new GameObject("ResizeCursorImage");
-                m_resizeCursorImage.transform.SetParent(UIManager.CanvasRoot.transform);
+                s_resizeCursorImage = new GameObject("ResizeCursorImage");
+                s_resizeCursorImage.transform.SetParent(UIManager.CanvasRoot.transform);
 
-                Image image = m_resizeCursorImage.AddComponent<Image>();
+                Image image = s_resizeCursorImage.AddComponent<Image>();
                 image.sprite = sprite;
                 image.material = Graphic.defaultGraphicMaterial;
                 RectTransform rect = image.transform.GetComponent<RectTransform>();
                 rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 32);
                 rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 32);
 
-                //m_resizeCursorImage.SetActive(false);
-
-                s_loadedCursorImage = true;
+                s_resizeCursorImage.SetActive(false);
             }
             catch (Exception e)
             {

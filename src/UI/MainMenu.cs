@@ -98,37 +98,53 @@ namespace UnityExplorer.UI
 
         public void SetPage(Page page)
         {
-            if (m_activePage == page || page == null)
-            {
+            if (page == null || m_activePage == page)
                 return;
-            }
+
+            // WIP, was going to hide current page if you press current page's button,
+            // but the main panel does not resize so its just a big empty gap there.
+            // Could be good if I resize that gap, not bothering for now. 
+            // Would need a fix in PanelDragger as well.
+
+            //if (m_activePage == page)
+            //{
+            //    SetButtonInactiveColors(page.RefNavbarButton);
+            //    m_activePage.Content.SetActive(false);
+            //    m_activePage = null;
+            //    return;
+            //}
 
             m_activePage?.Content?.SetActive(false);
+
+            // unique case for console page, at the moment this will just go here
             if (m_activePage is ConsolePage)
-            {
                 AutoCompleter.m_mainObj?.SetActive(false);
-            }
 
             m_activePage = page;
 
             m_activePage.Content?.SetActive(true);
 
             Button button = page.RefNavbarButton;
-
-            ColorBlock colors = button.colors;
-            colors.normalColor = m_navButtonSelected;
-            //try { colors.selectedColor = m_navButtonSelected; } catch { }
-            button.colors = colors;
+            SetButtonActiveColors(button);
 
             if (m_lastNavButtonPressed && m_lastNavButtonPressed != button)
-            {
-                ColorBlock oldColors = m_lastNavButtonPressed.colors;
-                oldColors.normalColor = m_navButtonNormal;
-                //try { oldColors.selectedColor = m_navButtonNormal; } catch { }
-                m_lastNavButtonPressed.colors = oldColors;
-            }
+                SetButtonInactiveColors(m_lastNavButtonPressed);
 
             m_lastNavButtonPressed = button;
+        }
+
+        internal void SetButtonActiveColors(Button button)
+        {
+            ColorBlock colors = button.colors;
+            colors.normalColor = m_navButtonSelected;
+            button.colors = colors;
+        }
+
+        internal void SetButtonInactiveColors(Button button)
+        {
+            ColorBlock colors = button.colors;
+            colors.normalColor = m_navButtonNormal;
+            button.colors = colors;
         }
 
         #region UI Construction

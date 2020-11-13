@@ -30,26 +30,14 @@ namespace UnityExplorer
         {
             Instance = this;
 
-            SceneManager.activeSceneChanged += DoSceneChange;
-
             new ExplorerCore();
 
             // HarmonyInstance.PatchAll();
         }
 
-        internal static void DoSceneChange(Scene arg0, Scene arg1)
-        {
-            ExplorerCore.OnSceneChange();
-        }
-
         internal void Update()
         {
             ExplorerCore.Update();
-        }
-
-        internal void OnApplicationQuit()
-        {
-            DebugConsole.OnQuit();
         }
     }
 #endif
@@ -63,9 +51,6 @@ namespace UnityExplorer
         public static ManualLogSource Logging => Instance?.Log;
 
         public static readonly Harmony HarmonyInstance = new Harmony(ExplorerCore.GUID);
-
-        // temporary for Il2Cpp until scene change delegate works
-        private static string lastSceneName;
 
         // Init
         public override void Load()
@@ -85,12 +70,7 @@ namespace UnityExplorer
 
             new ExplorerCore();
 
-            HarmonyInstance.PatchAll();
-        }
-
-        internal static void DoSceneChange(Scene arg0, Scene arg1)
-        {
-            ExplorerCore.OnSceneChange();
+            // HarmonyInstance.PatchAll();
         }
 
         // BepInEx Il2Cpp mod class doesn't have monobehaviour methods yet, so wrap them in a dummy.
@@ -106,18 +86,6 @@ namespace UnityExplorer
             internal void Update()
             {
                 ExplorerCore.Update();
-
-                var scene = SceneManager.GetActiveScene();
-                if (scene.name != lastSceneName)
-                {
-                    lastSceneName = scene.name;
-                    DoSceneChange(scene, scene);
-                }
-            }
-
-            internal void OnApplicationQuit()
-            {
-                DebugConsole.OnQuit();
             }
         }
     }

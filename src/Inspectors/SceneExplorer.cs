@@ -62,7 +62,7 @@ namespace UnityExplorer.Inspectors
 
         public void Init()
         {
-            RefreshActiveScenes();
+            RefreshSceneSelector();
         }
 
         public void Update()
@@ -72,7 +72,7 @@ namespace UnityExplorer.Inspectors
                 return;
             }
 
-            RefreshActiveScenes();
+            RefreshSceneSelector();
 
             if (!m_selectedSceneObject)
             {
@@ -104,10 +104,10 @@ namespace UnityExplorer.Inspectors
         internal void OnSceneChange()
         {
             m_sceneDropdown.OnCancel(null);
-            RefreshActiveScenes();
+            RefreshSceneSelector();
         }
 
-        private void RefreshActiveScenes()
+        private void RefreshSceneSelector()
         {
             var names = new List<string>();
             var handles = new List<int>();
@@ -132,16 +132,12 @@ namespace UnityExplorer.Inspectors
 
             foreach (string scene in names)
             {
-                m_sceneDropdown.options.Add(new Dropdown.OptionData
-                {
-                    text = scene
-                });
+                m_sceneDropdown.options.Add(new Dropdown.OptionData { text = scene });
             }
 
-            if (!handles.Contains(m_currentSceneHandle))
+            if (!names.Contains(m_sceneDropdown.itemText.text))
             {
-                //m_sceneDropdown.transform.Find("Label").GetComponent<Text>().text = names[0];
-                m_sceneDropdown.itemText.text = names[0];
+                m_sceneDropdown.transform.Find("Label").GetComponent<Text>().text = names[0];
                 SetTargetScene(handles[0]);
             }
         }

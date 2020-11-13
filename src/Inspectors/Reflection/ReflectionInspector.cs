@@ -40,11 +40,14 @@ namespace UnityExplorer.Inspectors
         // Blacklists
         private static readonly HashSet<string> s_typeAndMemberBlacklist = new HashSet<string>
         {
-            // these cause a crash
+#if CPP
+            // these cause a crash in IL2CPP
             "Type.DeclaringMethod",
             "Rigidbody2D.Cast",
             "Collider2D.Cast",
             "Collider2D.Raycast",
+            "Texture2D.SetPixelDataImpl",
+#endif
         };
         private static readonly HashSet<string> s_methodStartsWithBlacklist = new HashSet<string>
         {
@@ -53,9 +56,9 @@ namespace UnityExplorer.Inspectors
             "set_",
         };
 
-        #endregion
+#endregion
 
-        #region INSTANCE
+#region INSTANCE
 
         public override string TabLabel => m_targetTypeShortName;
 
@@ -253,6 +256,9 @@ namespace UnityExplorer.Inspectors
                 {
                     try
                     {
+                        //ExplorerCore.Log($"Trying to cache member {sig}...");
+                        //ExplorerCore.Log(member.DeclaringType.FullName + "." + member.Name);
+
                         // make sure member type is Field, Method or Property (4 / 8 / 16)
                         int m = (int)member.MemberType;
                         if (m < 4 || m > 16)
@@ -303,8 +309,6 @@ namespace UnityExplorer.Inspectors
 
                         try
                         {
-                            //ExplorerCore.Log($"Trying to cache member {sig}...");
-
                             var cached = CacheFactory.GetCacheObject(member, target, m_scrollContent);
 
                             if (cached != null)
@@ -337,7 +341,7 @@ namespace UnityExplorer.Inspectors
             // ExplorerCore.Log("Cached " + m_allMembers.Length + " members");
         }
 
-        #region UI CONSTRUCTION
+#region UI CONSTRUCTION
 
         internal void ConstructUI()
         {
@@ -391,13 +395,13 @@ namespace UnityExplorer.Inspectors
             typeLabelLayout.minWidth = 150;
             typeLabelLayout.flexibleWidth = 5000;
 
-            typeLabelInput.text = UISyntaxHighlight.GetHighlight(m_targetType, true);
+            typeLabelInput.text = UISyntaxHighlight.ParseFullSyntax(m_targetType, true);
 
             // Helper tools
 
-            if (this is InstanceInspector ii)
+            if (this is InstanceInspector instanceInspector)
             {
-                ii.ConstructInstanceHelpers(Content);
+                instanceInspector.ConstructInstanceHelpers(Content);
             }
         }
 
@@ -422,9 +426,9 @@ namespace UnityExplorer.Inspectors
 
             // Instance filters
 
-            if (this is InstanceInspector ii)
+            if (this is InstanceInspector instanceInspector)
             {
-                ii.ConstructInstanceFilters(filterAreaObj);
+                instanceInspector.ConstructInstanceFilters(filterAreaObj);
             }
         }
 
@@ -436,14 +440,16 @@ namespace UnityExplorer.Inspectors
 
             var scrollGroup = m_scrollContent.GetComponent<VerticalLayoutGroup>();
             scrollGroup.spacing = 3;
+            scrollGroup.padding.left = 0;
+            scrollGroup.padding.right = 0;
 
             m_pageHandler = new PageHandler(m_sliderScroller);
             m_pageHandler.ConstructUI(Content);
             m_pageHandler.OnPageChanged += OnPageTurned;
         }
 
-        #endregion
+#endregion
 
-        #endregion
+#endregion
     }
 }

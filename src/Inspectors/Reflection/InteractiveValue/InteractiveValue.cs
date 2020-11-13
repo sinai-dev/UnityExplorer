@@ -22,7 +22,7 @@ namespace UnityExplorer.Inspectors.Reflection
         // might not need
         public virtual bool HasSubContent => false;
 
-        public string RichTextValue => m_richValue ?? GetRichTextValue();
+        public string RichTextValue => m_richValue ?? GetLabelForValue();
         internal string m_richValue;
         internal string m_richValueType;
 
@@ -45,39 +45,20 @@ namespace UnityExplorer.Inspectors.Reflection
                 return;
             }
 
-            GetRichTextValue();
-
+            GetLabelForValue();
             m_text.text = RichTextValue;
 
-            //if (Value == null)
-            //    m_text.text = $"<color=red>null</color> {m_richValueType}";
-            //else
-            //    m_text.text = RichTextValue;
+            bool shouldShowInspect = !InspectorBase.IsNullOrDestroyed(this.Value, true);
+            if (m_inspectButton.activeSelf != shouldShowInspect)
+                m_inspectButton.SetActive(shouldShowInspect);
         }
 
-        private MethodInfo GetToStringMethod()
-        {
-            try
-            {
-                m_toStringMethod = ReflectionHelpers.GetActualType(Value).GetMethod("ToString", new Type[0])
-                                   ?? typeof(object).GetMethod("ToString", new Type[0]);
-
-                // test invoke
-                m_toStringMethod.Invoke(Value, null);
-            }
-            catch
-            {
-                m_toStringMethod = typeof(object).GetMethod("ToString", new Type[0]);
-            }
-            return m_toStringMethod;
-        }
-
-        public string GetRichTextValue()
+        public string GetLabelForValue()
         {
             if (Value != null)
                 ValueType = Value.GetType();
 
-            m_richValueType = UISyntaxHighlight.GetHighlight(ValueType, true);
+            m_richValueType = UISyntaxHighlight.ParseFullSyntax(ValueType, true);
 
             if (OwnerCacheObject is CacheMember cm && !cm.HasEvaluated)
                 return $"<i><color=grey>Not yet evaluated</color> ({m_richValueType})</i>";
@@ -103,7 +84,11 @@ namespace UnityExplorer.Inspectors.Reflection
             {
                 var toString = (string)ToStringMethod.Invoke(Value, null);
 
-                var temp = toString.Replace(ValueType.FullName, "").Trim();
+                var fullnametemp = ValueType.ToString();
+                if (fullnametemp.StartsWith("Il2CppSystem"))
+                    fullnametemp = fullnametemp.Substring(6, fullnametemp.Length - 6);
+
+                var temp = toString.Replace(fullnametemp, "").Trim();
 
                 if (string.IsNullOrEmpty(temp))
                 {
@@ -127,20 +112,78 @@ namespace UnityExplorer.Inspectors.Reflection
             return m_richValue = label;
         }
 
-#region UI CONSTRUCTION
+        private MethodInfo GetToStringMethod()
+        {
+            try
+            {
+                m_toStringMethod = ReflectionHelpers.GetActualType(Value).GetMethod("ToString", new Type[0])
+                                   ?? typeof(object).GetMethod("ToString", new Type[0]);
 
-        internal GameObject m_UIContent;
+                // test invoke
+                m_toStringMethod.Invoke(Value, null);
+            }
+            catch
+            {
+                m_toStringMethod = typeof(object).GetMethod("ToString", new Type[0]);
+            }
+            return m_toStringMethod;
+        }
+
+        #region UI CONSTRUCTION
+
+        internal GameObject m_mainContent;
+        internal GameObject m_inspectButton;
         internal Text m_text;
         internal GameObject m_subContentParent;
 
         public virtual void ConstructUI(GameObject parent, GameObject subGroup)
         {
-            m_UIContent = UIFactory.CreateLabel(parent, TextAnchor.MiddleLeft);
-            var mainLayout = m_UIContent.AddComponent<LayoutElement>();
-            mainLayout.minWidth = 200;
-            mainLayout.flexibleWidth = 5000;
+            m_mainContent = UIFactory.CreateHorizontalGroup(parent, new Color(1, 1, 1, 0));
+            var mainGroup = m_mainContent.GetComponent<HorizontalLayoutGroup>();
+
+            mainGroup.childForceExpandWidth = true;
+            mainGroup.childControlWidth = true;
+            mainGroup.childForceExpandHeight = false;
+            mainGroup.childControlHeight = true;
+            mainGroup.spacing = 4;
+            mainGroup.childAlignment = TextAnchor.UpperLeft;
+            var mainLayout = m_mainContent.AddComponent<LayoutElement>();
+            mainLayout.flexibleWidth = 9000;
+            mainLayout.minWidth = 175;
             mainLayout.minHeight = 25;
-            m_text = m_UIContent.GetComponent<Text>();
+            mainLayout.flexibleHeight = 0;
+
+            // inspect button
+
+            m_inspectButton = UIFactory.CreateButton(m_mainContent, new Color(0.3f, 0.3f, 0.3f, 0.2f));
+            var inspectLayout = m_inspectButton.AddComponent<LayoutElement>();
+            inspectLayout.minWidth = 60;
+            inspectLayout.minHeight = 25;
+            inspectLayout.flexibleHeight = 0;
+            inspectLayout.flexibleWidth = 0;
+            var inspectText = m_inspectButton.GetComponentInChildren<Text>();
+            inspectText.text = "Inspect";
+            var inspectBtn = m_inspectButton.GetComponent<Button>();
+#if CPP
+            inspectBtn.onClick.AddListener(new Action(OnInspectClicked));
+#else
+            inspectBtn.onClick.AddListener(OnInspectClicked);
+#endif
+            void OnInspectClicked()
+            {
+                if (!InspectorBase.IsNullOrDestroyed(this.Value))
+                    InspectorManager.Instance.Inspect(this.Value);
+            }
+
+            m_inspectButton.SetActive(false);
+
+            // value label / tostring
+
+            var labelObj = UIFactory.CreateLabel(m_mainContent, TextAnchor.MiddleLeft);
+            m_text = labelObj.GetComponent<Text>();
+            var labelLayout = labelObj.AddComponent<LayoutElement>();
+            labelLayout.flexibleWidth = 9000;
+            labelLayout.minHeight = 25;
 
             m_subContentParent = subGroup;
         }

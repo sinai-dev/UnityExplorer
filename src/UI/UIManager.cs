@@ -56,11 +56,10 @@ namespace UnityExplorer.UI
             // Create submodules
             new MainMenu();
             MouseInspector.ConstructUI();
+            PanelDragger.LoadCursorImage();
 
             // Force refresh of anchors
             Canvas.ForceUpdateCanvases();
-            //CanvasRoot.SetActive(false);
-            //CanvasRoot.SetActive(true);
         }
 
         public static void SetEventSystem()

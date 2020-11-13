@@ -18,12 +18,13 @@ namespace UnityExplorer.UI.Modules
         public static bool LogUnity { get; set; } = ModConfig.Instance.Log_Unity_Debug;
         public static bool SaveToDisk { get; set; } = ModConfig.Instance.Save_Logs_To_Disk;
 
-        internal static bool m_savedToDiskChecked;
+        internal static StreamWriter s_streamWriter;
 
         public static readonly List<string> AllMessages = new List<string>();
         public static readonly List<Text> MessageHolders = new List<Text>();
 
         // logs that occured before the actual UI was ready.
+        // these ones include the hex color codes.
         internal static readonly List<string> s_preInitMessages = new List<string>();
 
         private InputField m_textInput;
@@ -34,6 +35,7 @@ namespace UnityExplorer.UI.Modules
 
             ConstructUI(parent);
 
+            // append messages that logged before we were set up
             string preAppend = "";
             for (int i = s_preInitMessages.Count - 1; i >= 0; i--)
             {
@@ -43,14 +45,8 @@ namespace UnityExplorer.UI.Modules
                 preAppend += msg;
             }
             m_textInput.text = preAppend;
-        }
 
-        public static void OnQuit()
-        {
-            if (m_savedToDiskChecked)
-                return;
-
-            m_savedToDiskChecked = true;
+            // set up IO
 
             if (!SaveToDisk)
                 return;
@@ -60,20 +56,28 @@ namespace UnityExplorer.UI.Modules
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
 
-            // delete oldest log
+            // clean old log(s)
             var files = Directory.GetFiles(path);
             if (files.Length >= 10)
             {
                 var sorted = files.ToList();
-                // sort by datetime.ToString will put the oldest one first
+                // sort by 'datetime.ToString("u")' will put the oldest ones first
                 sorted.Sort();
-                File.Delete(sorted[0]);
+                for (int i = 0; i < files.Length - 9; i++)
+                    File.Delete(files[i]);
             }
 
             var fileName = "UnityExplorer " + DateTime.Now.ToString("u") + ".txt";
             fileName = ExplorerCore.RemoveInvalidFilenameChars(fileName);
 
-            File.WriteAllText(path + @"\" + fileName, Instance.m_textInput.text);
+            var stream = File.Create(path + @"\" + fileName);
+            s_streamWriter = new StreamWriter(stream)
+            {
+                AutoFlush = true
+            };
+
+            foreach (var msg in AllMessages)
+                s_streamWriter.WriteLine(msg);
         }
 
         public static void Log(string message)
@@ -91,6 +95,7 @@ namespace UnityExplorer.UI.Modules
             message = $"{AllMessages.Count}: {message}";
 
             AllMessages.Add(message);
+            s_streamWriter?.WriteLine(message);
 
             if (hexColor != null)
                 message = $"<color=#{hexColor}>{message}</color>";
@@ -139,7 +144,6 @@ namespace UnityExplorer.UI.Modules
             inputScroll.inputField.readOnly = true;
 
             m_textInput = inputScroll.inputField;
-
 #endregion
 
             #region BOTTOM BAR

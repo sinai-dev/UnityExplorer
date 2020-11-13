@@ -45,12 +45,10 @@ namespace UnityExplorer.Inspectors
 #endif
             UnityEngine.Object unityObj = obj as UnityEngine.Object;
 
-            if (InspectorBase.ObjectNullOrDestroyed(obj, unityObj))
+            if (InspectorBase.IsNullOrDestroyed(obj))
             {
                 return;
             }
-
-            MainMenu.Instance.SetPage(HomePage.Instance);
 
             // check if currently inspecting this object
             foreach (InspectorBase tab in m_currentInspectors)
@@ -84,7 +82,13 @@ namespace UnityExplorer.Inspectors
 
         public void Inspect(Type type)
         {
-            foreach (var tab in m_currentInspectors)
+            if (type == null)
+            { 
+                ExplorerCore.LogWarning("The provided type was null!");
+                return;
+            }
+
+            foreach (var tab in m_currentInspectors.Where(x => x is StaticInspector))
             {
                 if (ReferenceEquals(tab.Target as Type, type))
                 {
@@ -101,8 +105,12 @@ namespace UnityExplorer.Inspectors
 
         public void SetInspectorTab(InspectorBase inspector)
         {
+            if (m_activeInspector == inspector)
+                return;
+
             UnsetInspectorTab();
 
+            MainMenu.Instance.SetPage(HomePage.Instance);
             m_activeInspector = inspector;
 
             inspector.SetActive();

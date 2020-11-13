@@ -77,7 +77,7 @@ namespace UnityExplorer.Inspectors.GameObjects
 
                     var text = s_compListTexts[i];
 
-                    text.text = UISyntaxHighlight.GetHighlight(ReflectionHelpers.GetActualType(comp), true);
+                    text.text = UISyntaxHighlight.ParseFullSyntax(ReflectionHelpers.GetActualType(comp), true);
 
                     var toggle = s_compToggles[i];
                     if (comp is Behaviour behaviour)

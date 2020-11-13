@@ -41,7 +41,7 @@ namespace UnityExplorer.UI.Shared
             get => m_currentPage;
             set
             {
-                if (value < LastPage)
+                if (value < PageCount)
                     m_currentPage = value;
             }
         }
@@ -60,11 +60,11 @@ namespace UnityExplorer.UI.Shared
             {
                 m_listCount = value;
 
-                if (LastPage <= 0 && m_pageUIHolder.activeSelf)
+                if (PageCount <= 0 && m_pageUIHolder.activeSelf)
                 {
                     m_pageUIHolder.SetActive(false);
                 }
-                else if (LastPage > 0 && !m_pageUIHolder.activeSelf)
+                else if (PageCount > 0 && !m_pageUIHolder.activeSelf)
                 {
                     m_pageUIHolder.SetActive(true);
                 }
@@ -73,7 +73,7 @@ namespace UnityExplorer.UI.Shared
             }
         }
 
-        public int LastPage => (int)Math.Ceiling(ListCount / (decimal)ItemsPerPage) - 1;
+        public int PageCount => (int)Math.Ceiling(ListCount / (decimal)ItemsPerPage) - 1;
 
         // The index of the first element of the current page
         public int StartIndex
@@ -138,7 +138,7 @@ namespace UnityExplorer.UI.Shared
             }
             else
             {
-                if (m_currentPage < LastPage)
+                if (m_currentPage < PageCount)
                 {
                     m_currentPage++;
                     didTurn = true;
@@ -160,7 +160,7 @@ namespace UnityExplorer.UI.Shared
 
         public void RefreshUI()
         {
-            m_currentPageLabel.text = $"Page {m_currentPage + 1} / {LastPage + 1}";
+            m_currentPageLabel.text = $"Page {m_currentPage + 1} / {PageCount + 1}";
         }
 
         public void ConstructUI(GameObject parent)

@@ -35,14 +35,65 @@ namespace UnityExplorer.Helpers
         public static Type BehaviourType    => typeof(Behaviour);
 #endif
 
+        public static Type GetTypeByName(string fullName)
+        {
+            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                foreach (var type in asm.TryGetTypes())
+                {
+                    if (type.FullName == fullName)
+                    {
+                        return type;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public static Type[] GetAllBaseTypes(object obj) => GetAllBaseTypes(GetActualType(obj));
+
+        public static Type[] GetAllBaseTypes(Type type)
+        {
+            List<Type> list = new List<Type>();
+
+            while (type != null)
+            {
+                list.Add(type);
+                type = type.BaseType;
+            }
+
+            return list.ToArray();
+        }
+
+        public static Type GetActualType(object obj)
+        {
+            if (obj == null)
+                return null;
+
+            var type = obj.GetType();
+#if CPP
+            if (obj is Il2CppSystem.Object ilObject)
+            {
+                if (obj is ILType)
+                    return typeof(ILType);
+
+                // Il2CppSystem-namespace objects should just return GetType,
+                // because using GetIl2CppType returns the System namespace type instead.
+                if (type.Namespace.StartsWith("System.") || type.Namespace.StartsWith("Il2CppSystem."))
+                    return ilObject.GetType();
+
+                var getType = Type.GetType(ilObject.GetIl2CppType().AssemblyQualifiedName);
+
+                if (getType != null)
+                    return getType;
+            }
+#endif
+            return type;
+        }
+
 #if CPP
         private static readonly Dictionary<Type, IntPtr> ClassPointers = new Dictionary<Type, IntPtr>();
-
-        [DllImport("GameAssembly", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public static extern bool il2cpp_class_is_assignable_from(IntPtr klass, IntPtr oklass);
-
-        [DllImport("GameAssembly", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public static extern IntPtr il2cpp_object_get_class(IntPtr obj);
 
         public static object Il2CppCast(this object obj, Type castTo)
         {
@@ -51,30 +102,8 @@ namespace UnityExplorer.Helpers
                 return obj;
             }
 
-            if (!typeof(Il2CppSystem.Object).IsAssignableFrom(castTo))
-            {
+            if (!Il2CppTypeNotNull(castTo, out IntPtr castToPtr))
                 return obj;
-            }
-
-            IntPtr castToPtr;
-            if (!ClassPointers.ContainsKey(castTo))
-            {
-                castToPtr = (IntPtr)typeof(Il2CppClassPointerStore<>)
-                    .MakeGenericType(new Type[] { castTo })
-                    .GetField("NativeClassPtr", BF.Public | BF.Static)
-                    .GetValue(null);
-
-                ClassPointers.Add(castTo, castToPtr);
-            }
-            else
-            {
-                castToPtr = ClassPointers[castTo];
-            }
-
-            if (castToPtr == IntPtr.Zero)
-            {
-                return obj;
-            }
 
             IntPtr classPtr = il2cpp_object_get_class(ilObj.Pointer);
 
@@ -86,6 +115,35 @@ namespace UnityExplorer.Helpers
 
             return Activator.CreateInstance(castTo, ilObj.Pointer);
         }
+
+        public static bool Il2CppTypeNotNull(Type type)
+        {
+            return Il2CppTypeNotNull(type, out _);
+        }
+
+        public static bool Il2CppTypeNotNull(Type type, out IntPtr il2cppPtr)
+        {
+            if (!ClassPointers.ContainsKey(type))
+            {
+                il2cppPtr = (IntPtr)typeof(Il2CppClassPointerStore<>)
+                    .MakeGenericType(new Type[] { type })
+                    .GetField("NativeClassPtr", BF.Public | BF.Static)
+                    .GetValue(null);
+
+                ClassPointers.Add(type, il2cppPtr);
+            }
+            else
+                il2cppPtr = ClassPointers[type];
+
+            return il2cppPtr != IntPtr.Zero;
+        }
+
+        [DllImport("GameAssembly", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        public static extern bool il2cpp_class_is_assignable_from(IntPtr klass, IntPtr oklass);
+
+        [DllImport("GameAssembly", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        public static extern IntPtr il2cpp_object_get_class(IntPtr obj);
+
 #endif
 
         public static IEnumerable<Type> TryGetTypes(this Assembly asm)
@@ -109,60 +167,6 @@ namespace UnityExplorer.Helpers
             {
                 return Enumerable.Empty<Type>();
             }
-        }
-
-        public static Type GetTypeByName(string fullName)
-        {
-            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                foreach (var type in asm.TryGetTypes())
-                {
-                    if (type.FullName == fullName)
-                    {
-                        return type;
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        public static Type GetActualType(object obj)
-        {
-            if (obj == null)
-                return null;
-
-#if CPP
-            // Need to use GetIl2CppType for Il2CppSystem Objects
-            if (obj is Il2CppSystem.Object ilObject)
-            {
-                // Prevent weird behaviour when inspecting an Il2CppSystem.Type object.
-                if (ilObject is ILType)
-                {
-                    return typeof(ILType);
-                }
-
-                return Type.GetType(ilObject.GetIl2CppType().AssemblyQualifiedName) ?? obj.GetType();
-            }
-#endif
-
-            // It's a normal object, this is fine
-            return obj.GetType();
-        }
-
-        public static Type[] GetAllBaseTypes(object obj) => GetAllBaseTypes(GetActualType(obj));
-
-        public static Type[] GetAllBaseTypes(Type type)
-        {
-            List<Type> list = new List<Type>();
-
-            while (type != null)
-            {
-                list.Add(type);
-                type = type.BaseType;
-            }
-
-            return list.ToArray();
         }
 
         public static bool LoadModule(string module)

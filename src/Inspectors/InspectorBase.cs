@@ -8,7 +8,6 @@ namespace UnityExplorer.Inspectors
     public abstract class InspectorBase
     {
         public object Target;
-        public UnityEngine.Object UnityTarget;
 
         public abstract string TabLabel { get; }
 
@@ -22,9 +21,8 @@ namespace UnityExplorer.Inspectors
         public InspectorBase(object target)
         {
             Target = target;
-            UnityTarget = target as UnityEngine.Object;
 
-            if (ObjectNullOrDestroyed(Target, UnityTarget))
+            if (IsNullOrDestroyed(Target))
             {
                 Destroy();
                 return;
@@ -47,7 +45,7 @@ namespace UnityExplorer.Inspectors
 
         public virtual void Update()
         {
-            if (ObjectNullOrDestroyed(Target, UnityTarget))
+            if (IsNullOrDestroyed(Target))
             {
                 Destroy();
                 return;
@@ -86,14 +84,13 @@ namespace UnityExplorer.Inspectors
             }
         }
 
-        public static bool ObjectNullOrDestroyed(object obj, UnityEngine.Object unityObj, bool suppressWarning = false)
+        public static bool IsNullOrDestroyed(object obj, bool suppressWarning = false)
         {
+            var unityObj = obj as UnityEngine.Object;
             if (obj == null)
             {
                 if (!suppressWarning)
-                {
                     ExplorerCore.LogWarning("The target instance is null!");
-                }
 
                 return true;
             }
@@ -102,9 +99,7 @@ namespace UnityExplorer.Inspectors
                 if (!unityObj)
                 {
                     if (!suppressWarning)
-                    {
                         ExplorerCore.LogWarning("The target UnityEngine.Object was destroyed!");
-                    }
 
                     return true;
                 }

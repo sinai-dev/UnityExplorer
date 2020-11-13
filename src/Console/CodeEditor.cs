@@ -181,14 +181,17 @@ The following helper methods are available:
 
             CurrentIndent = 0;
 
+            bool stringState = false;
+
             for (int i = 0; i < caret && i < newText.Length; i++)
             {
                 char character = newText[i];
 
-                if (character == CSharpLexer.indentOpen)
+                if (character == '"')
+                    stringState = !stringState;
+                else if (!stringState && character == CSharpLexer.indentOpen)
                     CurrentIndent++;
-
-                if (character == CSharpLexer.indentClose)
+                else if (!stringState && character == CSharpLexer.indentClose)
                     CurrentIndent--;
             }
 

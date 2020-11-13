@@ -15,25 +15,15 @@ namespace UnityExplorer
             new ExplorerCore();
         }
 
-        public override void OnLevelWasLoaded(int level)
-        {
-            ExplorerCore.OnSceneChange();
-        }
-
         public override void OnUpdate()
         {
             ExplorerCore.Update();
         }
 
-        public override void OnApplicationQuit()
+        public override void OnLevelWasLoaded(int level)
         {
-            DebugConsole.OnQuit();
+            ExplorerCore.Instance.OnSceneLoaded();
         }
-
-        //public override void OnGUI()
-        //{
-        //    ExplorerCore.OnGUI();
-        //}
     }
 }
 #endif
