@@ -94,7 +94,7 @@ If you'd like to build this yourself, you will need to have installed BepInEx an
 2. Open the `src\Explorer.csproj` file in a text editor.
 3. Set the relevant `GameFolder` values for the versions you want to build, eg. set `MLCppGameFolder` if you want to build for a MelonLoader IL2CPP game.
 4. Open the `src\Explorer.sln` project.
-5. Select `Solution 'Explorer' (1 of 1 project)` in the Solution Explorer panel, and set the <b>Active config</b> property to the version you want to build, then build it.
+5. Select `Solution 'UnityExplorer' (1 of 1 project)` in the Solution Explorer panel, and set the <b>Active config</b> property to the version you want to build, then build it.
 5. The DLLs are built to the `Release\` folder in the root of the repository.
 6. If ILRepack fails or is missing, use the NuGet package manager to re-install `ILRepack.Lib.MSBuild.Task`, then re-build.
 

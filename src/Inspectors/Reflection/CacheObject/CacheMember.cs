@@ -361,12 +361,13 @@ namespace UnityExplorer.Inspectors.Reflection
             rowLayout.minHeight = 25;
             rowLayout.flexibleWidth = 5000;
             var rowGroup = rowObj.GetComponent<HorizontalLayoutGroup>();
-            rowGroup.childForceExpandHeight = true;
+            rowGroup.childForceExpandHeight = false;
+            rowGroup.childForceExpandWidth = true;
             rowGroup.spacing = 4;
 
             var argLabelObj = UIFactory.CreateLabel(rowObj, TextAnchor.MiddleLeft);
-            //var argLayout = argLabelObj.AddComponent<LayoutElement>();
-            //argLayout.minWidth = 20;
+            var argLabelLayout = argLabelObj.AddComponent<LayoutElement>();
+            argLabelLayout.minHeight = 25;
             var argText = argLabelObj.GetComponent<Text>();
             var argTypeTxt = UISyntaxHighlight.ParseFullSyntax(arg.ParameterType, false);
             argText.text = $"{argTypeTxt} <color={UISyntaxHighlight.Local}>{arg.Name}</color>";
@@ -374,6 +375,11 @@ namespace UnityExplorer.Inspectors.Reflection
             var argInputObj = UIFactory.CreateInputField(rowObj, 14, (int)TextAnchor.MiddleLeft, 1);
             var argInputLayout = argInputObj.AddComponent<LayoutElement>();
             argInputLayout.flexibleWidth = 1200;
+            argInputLayout.preferredWidth = 150;
+            argInputLayout.minWidth = 20;
+            argInputLayout.minHeight = 25;
+            argInputLayout.flexibleHeight = 0;
+            argInputLayout.layoutPriority = 2;
 
             var argInput = argInputObj.GetComponent<InputField>();
             argInput.onValueChanged.AddListener((string val) => { m_argumentInput[i] = val; });

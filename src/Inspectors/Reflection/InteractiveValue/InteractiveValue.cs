@@ -45,11 +45,13 @@ namespace UnityExplorer.Inspectors.Reflection
             if (OwnerCacheObject is CacheMember ownerMember && !string.IsNullOrEmpty(ownerMember.ReflectionException))
             {
                 m_text.text = "<color=red>" + ownerMember.ReflectionException + "</color>";
-                return;
+                Value = null;
             }
-
-            GetLabelForValue();
-            m_text.text = RichTextValue;
+            else
+            {
+                GetLabelForValue();
+                m_text.text = RichTextValue;
+            }
 
             bool shouldShowInspect = !Value.IsNullOrDestroyed(true);
             if (m_inspectButton.activeSelf != shouldShowInspect)

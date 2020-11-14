@@ -78,20 +78,10 @@ namespace UnityExplorer.Inspectors.Reflection
                 ReflectionException = ReflectionHelpers.ExceptionToString(e);
             }
 
+            // todo do InitValue again for new value, in case type changed fundamentally.
+
             IValue.Value = ret;
             IValue.OnValueUpdated();
-
-            //if (ret != null)
-            //{
-            //    //m_cachedReturnValue = CacheFactory.GetTypeAndCacheObject(ret);
-            //    //m_cachedReturnValue = CacheFactory.GetCacheObject(ret);
-            //    // m_cachedReturnValue.UpdateValue();
-
-            //}
-            //else
-            //{
-            //    m_cachedReturnValue = null;
-            //}
         }
 
         private MethodInfo MakeGenericMethodFromInput()

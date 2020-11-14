@@ -566,7 +566,7 @@ namespace UnityExplorer.Inspectors
 
             if (setEnabled)
             {
-                colors.normalColor = new Color(0.2f, 0.4f, 0.2f);
+                colors.normalColor = new Color(0.2f, 0.6f, 0.2f);
                 m_memberFilter = type;
                 m_lastActiveMemButton = btn;
             }
