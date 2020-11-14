@@ -86,9 +86,7 @@ namespace UnityExplorer.Inspectors.Reflection
         public object[] ParseArguments()
         {
             if (m_arguments.Length < 1)
-            {
                 return new object[0];
-            }
 
             var parsedArgs = new List<object>();
             for (int i = 0; i < m_arguments.Length; i++)
@@ -97,9 +95,7 @@ namespace UnityExplorer.Inspectors.Reflection
                 var type = m_arguments[i].ParameterType;
 
                 if (type.IsByRef)
-                {
                     type = type.GetElementType();
-                }
 
                 if (!string.IsNullOrEmpty(input))
                 {
@@ -120,7 +116,7 @@ namespace UnityExplorer.Inspectors.Reflection
                         }
                         catch
                         {
-                            ExplorerCore.Log($"Argument #{i} '{m_arguments[i].Name}' ({type.Name}), could not parse input '{input}'.");
+                            ExplorerCore.Log($"Could not parse input '{input}' for argument #{i} '{m_arguments[i].Name}' ({type.FullName})");
                         }
                     }
                 }
@@ -300,45 +296,11 @@ namespace UnityExplorer.Inspectors.Reflection
             rightGroup.padding.top = 2;
             rightGroup.padding.bottom = 2;
 
-            // evaluate button
-            if (this is CacheMethod || HasParameters)
-            {
-                var color = HasParameters ? new Color(0.4f, 0.4f, 0.4f) : new Color(0.3f, 0.6f, 0.3f);
+            ConstructArgInput(out GameObject argsHolder);
 
-                var evalButtonObj = UIFactory.CreateButton(m_rightGroup, color);
-                var evalLayout = evalButtonObj.AddComponent<LayoutElement>();
-                evalLayout.minWidth = 100;
-                evalLayout.minHeight = 22;
-                evalLayout.flexibleWidth = 0;
-                var evalText = evalButtonObj.GetComponentInChildren<Text>();
-                evalText.text = HasParameters
-                    ? $"Evaluate ({ParamCount})"
-                    : "Evaluate";
-
-                var evalButton = evalButtonObj.GetComponent<Button>();
-                var colors = evalButton.colors;
-                colors.highlightedColor = new Color(0.4f, 0.7f, 0.4f);
-                evalButton.colors = colors;
-
-                evalButton.onClick.AddListener(OnMainEvaluateButton);
-                void OnMainEvaluateButton()
-                {
-                    if (HasParameters)
-                    {
-                        // todo show parameter input
-                        ExplorerCore.Log("TODO params");
-                    }
-                    else
-                    {
-                        // method with no parameters
-                        (this as CacheMethod).Evaluate();
-                    }
-                }
-            }
+            ConstructEvaluateButtons(argsHolder);
 
             // subcontent
-
-            // todo check if IValue actually has subcontent
 
             m_subContent = UIFactory.CreateHorizontalGroup(m_parentContent, new Color(1, 1, 1, 0));
             var subGroup = m_subContent.GetComponent<HorizontalLayoutGroup>();
@@ -352,9 +314,172 @@ namespace UnityExplorer.Inspectors.Reflection
 
             m_subContent.SetActive(false);
 
-            // Construct InteractiveValue UI
+            // Construct InteractiveValue's actual UI
 
             IValue.ConstructUI(m_rightGroup, m_subContent);
+        }
+
+        internal void ConstructArgInput(out GameObject argsHolder)
+        {
+            argsHolder = null;
+
+            if (HasParameters)
+            {
+                argsHolder = UIFactory.CreateVerticalGroup(m_rightGroup, new Color(1, 1, 1, 0));
+                var argsGroup = argsHolder.GetComponent<VerticalLayoutGroup>();
+                argsGroup.spacing = 4;
+
+                if (this is CacheMethod cm && cm.GenericArgs.Length > 0)
+                {
+                    cm.ConstructGenericArgInput(argsHolder);
+                }
+
+                // todo normal args
+
+                if (m_arguments.Length > 0)
+                {
+                    var titleObj = UIFactory.CreateLabel(argsHolder, TextAnchor.MiddleLeft);
+                    var titleText = titleObj.GetComponent<Text>();
+                    titleText.text = "<b>Arguments:</b>";
+
+                    for (int i = 0; i < m_arguments.Length; i++)
+                    {
+                        AddArgRow(i, argsHolder);
+                    }
+                }
+
+                argsHolder.SetActive(false);
+            }
+        }
+
+        internal void AddArgRow(int i, GameObject parent)
+        {
+            var arg = m_arguments[i];
+
+            var rowObj = UIFactory.CreateHorizontalGroup(parent, new Color(1, 1, 1, 0));
+            var rowLayout = rowObj.AddComponent<LayoutElement>();
+            rowLayout.minHeight = 25;
+            rowLayout.flexibleWidth = 5000;
+            var rowGroup = rowObj.GetComponent<HorizontalLayoutGroup>();
+            rowGroup.childForceExpandHeight = true;
+            rowGroup.spacing = 4;
+
+            var argLabelObj = UIFactory.CreateLabel(rowObj, TextAnchor.MiddleLeft);
+            //var argLayout = argLabelObj.AddComponent<LayoutElement>();
+            //argLayout.minWidth = 20;
+            var argText = argLabelObj.GetComponent<Text>();
+            var argTypeTxt = UISyntaxHighlight.ParseFullSyntax(arg.ParameterType, false);
+            argText.text = $"{argTypeTxt} <color={UISyntaxHighlight.Local}>{arg.Name}</color>";
+
+            var argInputObj = UIFactory.CreateInputField(rowObj, 14, (int)TextAnchor.MiddleLeft, 1);
+            var argInputLayout = argInputObj.AddComponent<LayoutElement>();
+            argInputLayout.flexibleWidth = 1200;
+
+            var argInput = argInputObj.GetComponent<InputField>();
+            argInput.onValueChanged.AddListener((string val) => { m_argumentInput[i] = val; });
+
+            if (arg.IsOptional)
+            {
+                var phInput = argInput.placeholder.GetComponent<Text>();
+                phInput.text = " = " + arg.DefaultValue?.ToString() ?? "null";
+            }
+        }
+
+        internal void ConstructEvaluateButtons(GameObject argsHolder)
+        {
+            if (HasParameters)
+            {
+                var evalGroupObj = UIFactory.CreateHorizontalGroup(m_rightGroup, new Color(1, 1, 1, 0));
+                var evalGroup = evalGroupObj.GetComponent<HorizontalLayoutGroup>();
+                evalGroup.childForceExpandWidth = false;
+                evalGroup.childForceExpandHeight = false;
+                evalGroup.spacing = 5;
+                var evalGroupLayout = evalGroupObj.AddComponent<LayoutElement>();
+                evalGroupLayout.minHeight = 25;
+                evalGroupLayout.flexibleHeight = 0;
+                evalGroupLayout.flexibleWidth = 5000;
+
+                var evalButtonObj = UIFactory.CreateButton(evalGroupObj, new Color(0.4f, 0.4f, 0.4f));
+                var evalLayout = evalButtonObj.AddComponent<LayoutElement>();
+                evalLayout.minWidth = 100;
+                evalLayout.minHeight = 22;
+                evalLayout.flexibleWidth = 0;
+                var evalText = evalButtonObj.GetComponentInChildren<Text>();
+                evalText.text = $"Evaluate ({ParamCount})";
+
+                var evalButton = evalButtonObj.GetComponent<Button>();
+                var colors = evalButton.colors;
+                colors.highlightedColor = new Color(0.4f, 0.7f, 0.4f);
+                evalButton.colors = colors;
+
+                var cancelButtonObj = UIFactory.CreateButton(evalGroupObj, new Color(0.6f, 0.3f, 0.3f));
+                var cancelLayout = cancelButtonObj.AddComponent<LayoutElement>();
+                cancelLayout.minWidth = 100;
+                cancelLayout.minHeight = 22;
+                cancelLayout.flexibleWidth = 0;
+                var cancelText = cancelButtonObj.GetComponentInChildren<Text>();
+                cancelText.text = "Cancel";
+
+                cancelButtonObj.SetActive(false);
+
+                evalButton.onClick.AddListener(() =>
+                {
+                    if (!m_isEvaluating)
+                    {
+                        argsHolder.SetActive(true);
+                        m_isEvaluating = true;
+                        evalText.text = "Evaluate";
+                        colors = evalButton.colors;
+                        colors.normalColor = new Color(0.3f, 0.6f, 0.3f);
+                        evalButton.colors = colors;
+
+                        cancelButtonObj.SetActive(true);
+                    }
+                    else
+                    {
+                        if (this is CacheMethod cm)
+                            cm.Evaluate();
+                        else
+                            UpdateValue();
+                    }
+                });
+
+                var cancelButton = cancelButtonObj.GetComponent<Button>();
+                cancelButton.onClick.AddListener(() =>
+                {
+                    cancelButtonObj.SetActive(false);
+                    argsHolder.SetActive(false);
+                    m_isEvaluating = false;
+
+                    evalText.text = $"Evaluate ({ParamCount})";
+                    colors = evalButton.colors;
+                    colors.normalColor = new Color(0.4f, 0.4f, 0.4f);
+                    evalButton.colors = colors;
+                });
+            }
+            else if (this is CacheMethod)
+            {
+                // simple method evaluate button
+
+                var evalButtonObj = UIFactory.CreateButton(m_rightGroup, new Color(0.3f, 0.6f, 0.3f));
+                var evalLayout = evalButtonObj.AddComponent<LayoutElement>();
+                evalLayout.minWidth = 100;
+                evalLayout.minHeight = 22;
+                evalLayout.flexibleWidth = 0;
+                var evalText = evalButtonObj.GetComponentInChildren<Text>();
+                evalText.text = "Evaluate";
+
+                var evalButton = evalButtonObj.GetComponent<Button>();
+                var colors = evalButton.colors;
+                colors.highlightedColor = new Color(0.4f, 0.7f, 0.4f);
+                evalButton.colors = colors;
+
+                evalButton.onClick.AddListener(OnMainEvaluateButton);
+                void OnMainEvaluateButton()
+                {
+                    (this as CacheMethod).Evaluate();
+                }
+            }
         }
 
         #endregion

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Input;
 using System.IO;
+using UnityExplorer.Inspectors;
 #if CPP
 using UnityExplorer.Unstrip;
 #endif
@@ -27,6 +28,8 @@ namespace UnityExplorer.UI
             Panel = panelToDrag;
 
             UpdateResizeCache();
+
+            SceneExplorer.OnToggleShow += OnEndResize;
         }
 
         public void Update()
@@ -133,7 +136,7 @@ namespace UnityExplorer.UI
 
         private const int RESIZE_THICKNESS = 15;
 
-        private readonly Vector2 minResize = new Vector2(630, 540);
+        internal readonly Vector2 minResize = new Vector2(400, 400);
 
         private bool WasResizing { get; set; }
         private ResizeTypes m_currentResizeType = ResizeTypes.NONE;
@@ -172,26 +175,20 @@ namespace UnityExplorer.UI
             int halfThick = RESIZE_THICKNESS / 2;
             int dblThick = RESIZE_THICKNESS * 2;
 
-            // calculate main outer rect
-            // the resize area is both outside and inside the panel,
-            // to give a bit of buffer and make it easier to use.
-
-            // outer rect is the outer-most bounds of our resize area
-            Rect outer = new Rect(Panel.rect.x - halfThick,
+            m_resizeRect = new Rect(Panel.rect.x - halfThick,
                 Panel.rect.y - halfThick,
                 Panel.rect.width + dblThick,
                 Panel.rect.height + dblThick);
-            m_resizeRect = outer;
 
             // calculate the four cross sections to use as flags
 
-            m_resizeMask[ResizeTypes.Bottom] = new Rect(outer.x, outer.y, outer.width, RESIZE_THICKNESS);
+            m_resizeMask[ResizeTypes.Bottom] = new Rect(m_resizeRect.x, m_resizeRect.y, m_resizeRect.width, RESIZE_THICKNESS);
 
-            m_resizeMask[ResizeTypes.Left] = new Rect(outer.x, outer.y, RESIZE_THICKNESS, outer.height);
+            m_resizeMask[ResizeTypes.Left] = new Rect(m_resizeRect.x, m_resizeRect.y, RESIZE_THICKNESS, m_resizeRect.height);
 
-            m_resizeMask[ResizeTypes.Top] = new Rect(outer.x, outer.y + Panel.rect.height, outer.width, RESIZE_THICKNESS);
+            m_resizeMask[ResizeTypes.Top] = new Rect(m_resizeRect.x, m_resizeRect.y + Panel.rect.height, m_resizeRect.width, RESIZE_THICKNESS);
 
-            m_resizeMask[ResizeTypes.Right] = new Rect(outer.x + Panel.rect.width, outer.y, RESIZE_THICKNESS, outer.height);
+            m_resizeMask[ResizeTypes.Right] = new Rect(m_resizeRect.x + Panel.rect.width, m_resizeRect.y, RESIZE_THICKNESS, m_resizeRect.height);
         }
 
         private bool MouseInResizeArea(Vector2 mousePos)
@@ -297,6 +294,9 @@ namespace UnityExplorer.UI
                 anchorMax.y -= diffY;
             else if (m_currentResizeType.HasFlag(ResizeTypes.Bottom))
                 anchorMin.y -= diffY;
+
+            //Panel.anchorMin = new Vector2(anchorMin.x, anchorMin.y);
+            //Panel.anchorMax = new Vector2(anchorMax.x, anchorMax.y);
 
             var newWidth = (anchorMax.x - anchorMin.x) * Screen.width;
             var newHeight = (anchorMax.y - anchorMin.y) * Screen.height;

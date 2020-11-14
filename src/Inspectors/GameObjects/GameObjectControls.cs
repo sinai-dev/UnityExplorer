@@ -314,14 +314,14 @@ namespace UnityExplorer.Inspectors.GameObjects
                 }
             }
 
-            // set parent 
-            ConstructSetParent(contentObj);
-
             // transform controls
             ConstructVector3Editor(contentObj, "Position", ControlType.position, out s_positionControl);
             ConstructVector3Editor(contentObj, "Local Position", ControlType.localPosition, out s_localPosControl);
             ConstructVector3Editor(contentObj, "Rotation", ControlType.eulerAngles, out s_rotationControl);
             ConstructVector3Editor(contentObj, "Scale", ControlType.localScale, out s_scaleControl);
+
+            // set parent 
+            ConstructSetParent(contentObj);
 
             // bottom row buttons
             ConstructBottomButtons(contentObj);

@@ -21,20 +21,6 @@ namespace UnityExplorer.Helpers
     {
         public static BF CommonFlags = BF.Public | BF.Instance | BF.NonPublic | BF.Static;
 
-#if CPP
-        public static ILType GameObjectType => Il2CppType.Of<GameObject>();
-        public static ILType TransformType => Il2CppType.Of<Transform>();
-        public static ILType ObjectType => Il2CppType.Of<UnityEngine.Object>();
-        public static ILType ComponentType => Il2CppType.Of<Component>();
-        public static ILType BehaviourType => Il2CppType.Of<Behaviour>();
-#else
-        public static Type GameObjectType   => typeof(GameObject);
-        public static Type TransformType    => typeof(Transform);
-        public static Type ObjectType       => typeof(UnityEngine.Object);
-        public static Type ComponentType    => typeof(Component);
-        public static Type BehaviourType    => typeof(Behaviour);
-#endif
-
         public static Type GetTypeByName(string fullName)
         {
             foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
@@ -78,10 +64,13 @@ namespace UnityExplorer.Helpers
                 if (obj is ILType)
                     return typeof(ILType);
 
-                // Il2CppSystem-namespace objects should just return GetType,
-                // because using GetIl2CppType returns the System namespace type instead.
-                if (type.Namespace.StartsWith("System.") || type.Namespace.StartsWith("Il2CppSystem."))
-                    return ilObject.GetType();
+               if (!string.IsNullOrEmpty(type.Namespace))
+               {
+                    // Il2CppSystem-namespace objects should just return GetType,
+                    // because using GetIl2CppType returns the System namespace type instead.
+                    if (type.Namespace.StartsWith("System.") || type.Namespace.StartsWith("Il2CppSystem."))
+                        return ilObject.GetType();
+               }
 
                 var il2cppType = ilObject.GetIl2CppType();
 

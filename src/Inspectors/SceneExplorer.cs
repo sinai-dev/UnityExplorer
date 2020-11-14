@@ -430,23 +430,26 @@ namespace UnityExplorer.Inspectors
                     Hiding = true;
 
                     hideText.text = "►";
-                    leftLayout.minWidth = 15;
                     titleObj.SetActive(false);
                     sceneDropdownObj.SetActive(false);
                     scenePathGroupObj.SetActive(false);
                     scrollObj.SetActive(false);
                     m_sceneListPageHandler.Hide();
+
+                    leftLayout.minWidth = 15;
                 }
                 else
                 {
                     Hiding = false;
 
                     hideText.text = "Hide Scene Explorer";
-                    leftLayout.minWidth = 350;
                     titleObj.SetActive(true);
                     sceneDropdownObj.SetActive(true);
                     scenePathGroupObj.SetActive(true);
                     scrollObj.SetActive(true);
+
+                    leftLayout.minWidth = 350;
+
                     Update();
                 }
 

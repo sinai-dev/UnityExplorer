@@ -93,6 +93,9 @@ namespace UnityExplorer.UI
             rect.anchoredPosition = Vector2.zero;
             rect.sizeDelta = Vector2.zero;
 
+            var img = panelObj.AddComponent<Image>();
+            img.color = Color.white;
+
             VerticalLayoutGroup group = panelObj.AddComponent<VerticalLayoutGroup>();
             group.childControlHeight = true;
             group.childControlWidth = true;
@@ -105,8 +108,6 @@ namespace UnityExplorer.UI
             Image image2 = content.AddComponent<Image>();
             image2.type = Image.Type.Filled;
             image2.color = new Color(0.1f, 0.1f, 0.1f);
-
-            content.gameObject.AddComponent<Mask>();
 
             VerticalLayoutGroup group2 = content.AddComponent<VerticalLayoutGroup>();
             group2.padding.left = 3;
@@ -150,7 +151,8 @@ namespace UnityExplorer.UI
 
             VerticalLayoutGroup horiGroup = groupObj.AddComponent<VerticalLayoutGroup>();
             horiGroup.childAlignment = TextAnchor.UpperLeft;
-            horiGroup.childControlWidth = false;
+            horiGroup.childControlWidth = true;
+            horiGroup.childControlHeight = true;
 
             Image image = groupObj.AddComponent<Image>();
             if (color != default)
@@ -171,7 +173,8 @@ namespace UnityExplorer.UI
 
             HorizontalLayoutGroup horiGroup = groupObj.AddComponent<HorizontalLayoutGroup>();
             horiGroup.childAlignment = TextAnchor.UpperLeft;
-            horiGroup.childControlWidth = false;
+            horiGroup.childControlWidth = true;
+            horiGroup.childControlHeight = true;
 
             Image image = groupObj.AddComponent<Image>();
             if (color != default)
@@ -327,7 +330,7 @@ namespace UnityExplorer.UI
             return scrollObj;
         }
 
-        public static GameObject CreateToggle(GameObject parent, out Toggle toggle, out Text text)
+        public static GameObject CreateToggle(GameObject parent, out Toggle toggle, out Text text, Color bgColor = default)
         {
             GameObject toggleObj = CreateUIObject("Toggle", parent, thinSize);
 
@@ -336,7 +339,7 @@ namespace UnityExplorer.UI
             GameObject labelObj = CreateUIObject("Label", toggleObj);
 
             toggle = toggleObj.AddComponent<Toggle>();
-            toggle.isOn = true;
+            //toggle.isOn = true;
             Toggle toggleComp = toggle;
 
             toggle.onValueChanged.AddListener(Deselect);
@@ -346,11 +349,12 @@ namespace UnityExplorer.UI
             }
 
             Image bgImage = bgObj.AddComponent<Image>();
-            bgImage.type = Image.Type.Sliced;
-            bgImage.color = new Color(0.1f, 0.1f, 0.1f, 1.0f);
+            bgImage.color = bgColor == default 
+                ? new Color(0.2f, 0.2f, 0.2f, 1.0f) 
+                : bgColor;
 
             Image checkImage = checkObj.AddComponent<Image>();
-            checkImage.color = new Color(90f / 255f, 115f / 255f, 90f / 255f, 1.0f);
+            checkImage.color = new Color(0.3f, 0.5f, 0.3f, 1.0f);
 
             text = labelObj.AddComponent<Text>();
             text.text = "Toggle";
@@ -363,7 +367,7 @@ namespace UnityExplorer.UI
             RectTransform bgRect = bgObj.GetComponent<RectTransform>();
             bgRect.anchorMin = new Vector2(0f, 1f);
             bgRect.anchorMax = new Vector2(0f, 1f);
-            bgRect.anchoredPosition = new Vector2(10f, -10f);
+            bgRect.anchoredPosition = new Vector2(13f, -13f);
             bgRect.sizeDelta = new Vector2(20f, 20f);
 
             RectTransform checkRect = checkObj.GetComponent<RectTransform>();
@@ -375,8 +379,8 @@ namespace UnityExplorer.UI
             RectTransform labelRect = labelObj.GetComponent<RectTransform>();
             labelRect.anchorMin = new Vector2(0f, 0f);
             labelRect.anchorMax = new Vector2(1f, 1f);
-            labelRect.offsetMin = new Vector2(23f, 1f);
-            labelRect.offsetMax = new Vector2(-5f, -2f);
+            labelRect.offsetMin = new Vector2(28f, 2f);
+            labelRect.offsetMax = new Vector2(-5f, -5f);
             return toggleObj;
         }
 

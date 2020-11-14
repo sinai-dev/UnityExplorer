@@ -7,17 +7,20 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityExplorer.Helpers;
 using UnityExplorer.UI;
-using UnityExplorer.UI.Shared;
-using UnityExplorer.Unstrip;
 
 namespace UnityExplorer.Inspectors.Reflection
 {
     public class InteractiveValue
     {
+        public InteractiveValue(Type valueType)
+        {
+            this.ValueType = valueType;
+        }
+
         public CacheObjectBase OwnerCacheObject;
 
         public object Value { get; set; }
-        public Type ValueType;
+        public readonly Type ValueType;
 
         // might not need
         public virtual bool HasSubContent => false;
@@ -31,10 +34,10 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public virtual void Init()
         {
-            UpdateValue();
+            OnValueUpdated();
         }
 
-        public virtual void UpdateValue()
+        public virtual void OnValueUpdated()
         {
             if (!m_text)
                 return;
@@ -55,10 +58,9 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public string GetLabelForValue()
         {
-            if (Value != null)
-                ValueType = Value.GetType();
+            var valueType = Value?.GetType() ?? this.ValueType;
 
-            m_richValueType = UISyntaxHighlight.ParseFullSyntax(ValueType, true);
+            m_richValueType = UISyntaxHighlight.ParseFullSyntax(valueType, true);
 
             if (OwnerCacheObject is CacheMember cm && !cm.HasEvaluated)
                 return $"<i><color=grey>Not yet evaluated</color> ({m_richValueType})</i>";
@@ -67,7 +69,7 @@ namespace UnityExplorer.Inspectors.Reflection
 
             string label;
 
-            if (ValueType == typeof(TextAsset) && Value is TextAsset textAsset)
+            if (valueType == typeof(TextAsset) && Value is TextAsset textAsset)
             {
                 label = textAsset.text;
 
@@ -76,7 +78,7 @@ namespace UnityExplorer.Inspectors.Reflection
 
                 label = $"\"{label}\" {textAsset.name} ({m_richValueType})";
             }
-            else if (ValueType == typeof(EventSystem))
+            else if (valueType == typeof(EventSystem))
             {
                 label = m_richValueType;
             }
@@ -84,7 +86,7 @@ namespace UnityExplorer.Inspectors.Reflection
             {
                 var toString = (string)ToStringMethod.Invoke(Value, null);
 
-                var fullnametemp = ValueType.ToString();
+                var fullnametemp = valueType.ToString();
                 if (fullnametemp.StartsWith("Il2CppSystem"))
                     fullnametemp = fullnametemp.Substring(6, fullnametemp.Length - 6);
 
@@ -101,7 +103,7 @@ namespace UnityExplorer.Inspectors.Reflection
 
                     label = toString;
 
-                    var unityType = $"({ValueType.FullName})";
+                    var unityType = $"({valueType.FullName})";
                     if (Value is UnityEngine.Object && label.Contains(unityType))
                         label = label.Replace(unityType, $"({m_richValueType})");
                     else

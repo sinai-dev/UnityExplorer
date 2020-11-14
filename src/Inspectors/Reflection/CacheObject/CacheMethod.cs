@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using UnityExplorer.UI.Shared;
+using UnityEngine.UI;
+using UnityExplorer.UI;
 using UnityExplorer.Helpers;
 
 namespace UnityExplorer.Inspectors.Reflection
@@ -28,6 +29,7 @@ namespace UnityExplorer.Inspectors.Reflection
             GenericArgs = methodInfo.GetGenericArguments();
 
             GenericConstraints = GenericArgs.Select(x => x.GetGenericParameterConstraints())
+                                            .Where(x => x != null)
                                             .ToArray();
 
             m_genericArgInput = new string[GenericArgs.Length];
@@ -77,7 +79,7 @@ namespace UnityExplorer.Inspectors.Reflection
             }
 
             IValue.Value = ret;
-            IValue.UpdateValue();
+            IValue.OnValueUpdated();
 
             //if (ret != null)
             //{
@@ -133,5 +135,68 @@ namespace UnityExplorer.Inspectors.Reflection
 
             return mi;
         }
+
+        #region UI CONSTRUCTION
+
+        internal void ConstructGenericArgInput(GameObject parent)
+        {
+            var titleObj = UIFactory.CreateLabel(parent, TextAnchor.MiddleLeft);
+            var titleText = titleObj.GetComponent<Text>();
+            titleText.text = "<b>Generic Arguments:</b>";
+
+            for (int i = 0; i < GenericArgs.Length; i++)
+            {
+                AddGenericArgRow(i, parent);
+            }
+        }
+
+        internal void AddGenericArgRow(int i, GameObject parent)
+        {
+            var arg = GenericArgs[i];
+
+            string constrainTxt = "";
+            if (this.GenericConstraints[i].Length > 0)
+            {
+                foreach (var constraint in this.GenericConstraints[i])
+                {
+                    if (constrainTxt != "") 
+                        constrainTxt += ", ";
+
+                    constrainTxt += $"{UISyntaxHighlight.ParseFullSyntax(constraint, false)}";
+                }
+            }
+            else
+                constrainTxt = $"Any";
+
+            var rowObj = UIFactory.CreateHorizontalGroup(parent, new Color(1, 1, 1, 0));
+            var rowLayout = rowObj.AddComponent<LayoutElement>();
+            rowLayout.minHeight = 25;
+            rowLayout.flexibleWidth = 5000;
+            var rowGroup = rowObj.GetComponent<HorizontalLayoutGroup>();
+            rowGroup.childForceExpandHeight = true;
+            rowGroup.spacing = 4;
+
+            var argLabelObj = UIFactory.CreateLabel(rowObj, TextAnchor.MiddleLeft);
+            //var argLayout = argLabelObj.AddComponent<LayoutElement>();
+            //argLayout.minWidth = 20;
+            var argText = argLabelObj.GetComponent<Text>();
+            argText.text = $"{constrainTxt} <color={UISyntaxHighlight.Enum}>{arg.Name}</color>";
+
+            var argInputObj = UIFactory.CreateInputField(rowObj, 14, (int)TextAnchor.MiddleLeft, 1);
+            var argInputLayout = argInputObj.AddComponent<LayoutElement>();
+            argInputLayout.flexibleWidth = 1200;
+
+            var argInput = argInputObj.GetComponent<InputField>();
+            argInput.onValueChanged.AddListener((string val) => { m_genericArgInput[i] = val; });
+
+            //var constraintLabelObj = UIFactory.CreateLabel(rowObj, TextAnchor.MiddleLeft);
+            //var constraintLayout = constraintLabelObj.AddComponent<LayoutElement>();
+            //constraintLayout.minWidth = 60;
+            //constraintLayout.flexibleWidth = 100;
+            //var constraintText = constraintLabelObj.GetComponent<Text>();
+            //constraintText.text = ;
+        }
+
+        #endregion
     }
 }

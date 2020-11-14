@@ -24,14 +24,18 @@ namespace UnityExplorer.Inspectors.Reflection
         {
             if (valueType == null && value == null)
             {
+                ExplorerCore.LogWarning("CacheObjectBase: Trying to init with no default value or valueType!");
+                ExplorerCore.Log(Environment.StackTrace);
                 return;
             }
 
-            // TEMP
-            IValue = new InteractiveValue
+            // temp (havent made rest of InteractiveValue classes yet, just using base class always)
+
+            valueType = ReflectionHelpers.GetActualType(value) ?? valueType;
+
+            IValue = new InteractiveValue(valueType)
             {
-                OwnerCacheObject = this,
-                ValueType = ReflectionHelpers.GetActualType(value) ?? valueType,
+                OwnerCacheObject = this
             };
             UpdateValue();
         }
@@ -45,6 +49,7 @@ namespace UnityExplorer.Inspectors.Reflection
             }
 
             m_mainContent.SetActive(true);
+            m_mainContent.transform.SetAsLastSibling();
         }
 
         public virtual void Disable()
@@ -54,7 +59,7 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public virtual void UpdateValue()
         {
-            IValue.UpdateValue();
+            IValue.OnValueUpdated();
         }
 
         public virtual void SetValue() => throw new NotImplementedException();

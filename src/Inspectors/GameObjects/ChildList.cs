@@ -21,11 +21,14 @@ namespace UnityExplorer.Inspectors.GameObjects
         }
 
         public static PageHandler s_childListPageHandler;
+        private static GameObject s_childListContent;
+
         private static GameObject[] s_allChildren = new GameObject[0];
         private static readonly List<GameObject> s_childrenShortlist = new List<GameObject>();
-        private static GameObject s_childListContent;
-        private static readonly List<Text> s_childListTexts = new List<Text>();
         private static int s_lastChildCount;
+
+        private static readonly List<Text> s_childListTexts = new List<Text>();
+        private static readonly List<Toggle> s_childListToggles = new List<Toggle>();
 
         internal void RefreshChildObjectList()
         {
@@ -86,6 +89,9 @@ namespace UnityExplorer.Inspectors.GameObjects
                     text.text = name;
                     text.color = obj.activeSelf ? Color.green : Color.red;
 
+                    var tog = s_childListToggles[i];
+                    tog.isOn = obj.activeSelf;
+
                     var label = text.transform.parent.parent.gameObject;
                     if (!label.activeSelf)
                     {
@@ -115,6 +121,18 @@ namespace UnityExplorer.Inspectors.GameObjects
                 return;
 
             Instance.RefreshChildObjectList();
+        }
+
+        internal static void OnToggleClicked(int index, bool newVal)
+        {
+            if (GameObjectInspector.ActiveInstance == null)
+                return;
+
+            if (index >= s_childrenShortlist.Count || !s_childrenShortlist[index])
+                return;
+
+            var obj = s_childrenShortlist[index];
+            obj.SetActive(newVal);
         }
 
         #region UI CONSTRUCTION
@@ -165,6 +183,15 @@ namespace UnityExplorer.Inspectors.GameObjects
             btnLayout.minHeight = 25;
             btnLayout.flexibleHeight = 0;
             btnGroupObj.AddComponent<Mask>();
+
+            var toggleObj = UIFactory.CreateToggle(btnGroupObj, out Toggle toggle, out Text toggleText, new Color(0.3f, 0.3f, 0.3f));
+            var toggleLayout = toggleObj.AddComponent<LayoutElement>();
+            toggleLayout.minHeight = 25;
+            toggleLayout.minWidth = 25;
+            toggleText.text = "";
+            toggle.isOn = false;
+            s_childListToggles.Add(toggle);
+            toggle.onValueChanged.AddListener((bool val) => { OnToggleClicked(thisIndex, val); });
 
             GameObject mainButtonObj = UIFactory.CreateButton(btnGroupObj);
             LayoutElement mainBtnLayout = mainButtonObj.AddComponent<LayoutElement>();

@@ -183,20 +183,14 @@ namespace UnityExplorer.Inspectors.GameObjects
 
             // Behaviour enabled toggle
 
-            var toggleObj = UIFactory.CreateToggle(btnGroupObj, out Toggle toggle, out Text toggleText);
-            var togBg = toggleObj.transform.Find("Background").GetComponent<Image>();
-            togBg.color = new Color(0.1f, 0.1f, 0.1f, 1);
+            var toggleObj = UIFactory.CreateToggle(btnGroupObj, out Toggle toggle, out Text toggleText, new Color(0.3f, 0.3f, 0.3f));
             var toggleLayout = toggleObj.AddComponent<LayoutElement>();
-            toggleLayout.minWidth = 25;
-            toggleLayout.flexibleWidth = 0;
             toggleLayout.minHeight = 25;
-            toggleLayout.flexibleHeight = 0;
-            var checkImg = toggleObj.transform.Find("Background/Checkmark").GetComponent<Image>();
-            checkImg.color = UISyntaxHighlight.Class_Instance.ToColor();
-            checkImg.color *= 0.66f;
-            toggle.onValueChanged.AddListener((bool val) => { OnCompToggleClicked(thisIndex, val); });
+            toggleLayout.minWidth = 25;
             toggleText.text = "";
+            toggle.isOn = false;
             s_compToggles.Add(toggle);
+            toggle.onValueChanged.AddListener((bool val) => { OnCompToggleClicked(thisIndex, val); });
 
             // Main component button
 

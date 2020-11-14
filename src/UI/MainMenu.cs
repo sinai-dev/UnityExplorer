@@ -195,9 +195,7 @@ namespace UnityExplorer.UI
 
             Text text = textObj.GetComponent<Text>();
             text.text = $"<b>UnityExplorer</b> <i>v{ExplorerCore.VERSION}</i>";
-            text.resizeTextForBestFit = true;
-            text.resizeTextMinSize = 12;
-            text.resizeTextMaxSize = 20;
+            text.fontSize = 15;
             LayoutElement textLayout = textObj.AddComponent<LayoutElement>();
             textLayout.flexibleWidth = 5000;
 

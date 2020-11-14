@@ -58,11 +58,9 @@ namespace UnityExplorer.Inspectors
 
 #endregion
 
-#region INSTANCE
+        #region INSTANCE
 
         public override string TabLabel => m_targetTypeShortName;
-
-        public bool AutoUpdate { get; set; }
 
         internal readonly Type m_targetType;
         internal readonly string m_targetTypeShortName;
@@ -70,9 +68,11 @@ namespace UnityExplorer.Inspectors
         // all cached members of the target
         internal CacheMember[] m_allMembers;
         // filtered members based on current filters
-        internal CacheMember[] m_membersFiltered;
+        internal readonly List<CacheMember> m_membersFiltered = new List<CacheMember>();
         // actual shortlist of displayed members
         internal readonly CacheMember[] m_displayedMembers = new CacheMember[ModConfig.Instance.Default_Page_Limit];
+
+        internal bool m_autoUpdate;
 
         // UI members
 
@@ -84,6 +84,8 @@ namespace UnityExplorer.Inspectors
         }
 
         internal Text m_nameFilterText;
+        internal MemberTypes m_memberFilter;
+        internal Button m_lastActiveMemButton;
 
         internal PageHandler m_pageHandler;
         internal SliderScrollbar m_sliderScroller;
@@ -138,14 +140,35 @@ namespace UnityExplorer.Inspectors
             RefreshDisplay();
         }
 
+        private void OnMemberFilterClicked(MemberTypes type, Button button)
+        {
+            if (m_lastActiveMemButton)
+            {
+                var lastColors = m_lastActiveMemButton.colors;
+                lastColors.normalColor = new Color(0.2f, 0.2f, 0.2f);
+                m_lastActiveMemButton.colors = lastColors;
+            }
+
+            m_memberFilter = type;
+            m_lastActiveMemButton = button;
+
+            var colors = m_lastActiveMemButton.colors;
+            colors.normalColor = new Color(0.2f, 0.6f, 0.2f);
+            m_lastActiveMemButton.colors = colors;
+
+            FilterMembers(null, true);
+            m_sliderScroller.m_slider.value = 1f;
+        }
+
         public override void Update()
         {
             base.Update();
 
-            if (AutoUpdate)
+            if (m_autoUpdate)
             {
                 foreach (var member in m_displayedMembers)
                 {
+                    if (member == null) break;
                     member.UpdateValue();
                 }
             }
@@ -163,32 +186,42 @@ namespace UnityExplorer.Inspectors
             }
         }
 
-        public void FilterMembers(string nameFilter = null)
+        public void FilterMembers(string nameFilter = null, bool force = false)
         {
-            var list = new List<CacheMember>();
+            int lastCount = m_membersFiltered.Count;
+            m_membersFiltered.Clear();
 
             nameFilter = nameFilter?.ToLower() ?? m_nameFilterText.text.ToLower();
 
             foreach (var mem in m_allMembers)
             {
-                // name filter
-                if (!string.IsNullOrEmpty(nameFilter) && !mem.NameForFiltering.Contains(nameFilter))
+                // membertype filter
+                if (m_memberFilter != MemberTypes.All && mem.MemInfo.MemberType != m_memberFilter)
                     continue;
 
-                list.Add(mem);
+                if (this is InstanceInspector ii && ii.m_scopeFilter != MemberScopes.All)
+                {
+                    if (mem.IsStatic && ii.m_scopeFilter != MemberScopes.Static)
+                        continue;
+                    else if (!mem.IsStatic && ii.m_scopeFilter != MemberScopes.Instance)
+                        continue;
+                }
+
+                // name filter
+                    if (!string.IsNullOrEmpty(nameFilter) && !mem.NameForFiltering.Contains(nameFilter))
+                    continue;
+
+                m_membersFiltered.Add(mem);
             }
 
-            if (m_membersFiltered == null || m_membersFiltered.Length != list.Count)
-            {
-                m_membersFiltered = list.ToArray();
+            if (force || lastCount != m_membersFiltered.Count)
                 RefreshDisplay();
-            }
         }
 
         public void RefreshDisplay()
         {
             var members = m_membersFiltered;
-            m_pageHandler.ListCount = members.Length;
+            m_pageHandler.ListCount = members.Count;
 
             // disable current members
             for (int i = 0; i < m_displayedMembers.Length; i++)
@@ -200,12 +233,12 @@ namespace UnityExplorer.Inspectors
                     break;
             }
 
-            if (members.Length < 1)
+            if (members.Count < 1)
                 return;
 
             foreach (var itemIndex in m_pageHandler)
             {
-                if (itemIndex >= members.Length)
+                if (itemIndex >= members.Count)
                     break;
 
                 CacheMember member = members[itemIndex];
@@ -362,7 +395,7 @@ namespace UnityExplorer.Inspectors
             // ExplorerCore.Log("Cached " + m_allMembers.Length + " members");
         }
 
-#region UI CONSTRUCTION
+        #region UI CONSTRUCTION
 
         internal void ConstructUI()
         {
@@ -386,17 +419,7 @@ namespace UnityExplorer.Inspectors
 
         internal void ConstructTopArea()
         {
-            var topGroupObj = UIFactory.CreateVerticalGroup(Content, new Color(0.1f, 0.1f, 0.1f));
-            var topGroup = topGroupObj.GetComponent<VerticalLayoutGroup>();
-            topGroup.childForceExpandWidth = true;
-            topGroup.childForceExpandHeight = true;
-            topGroup.childControlWidth = true;
-            topGroup.childControlHeight = true;
-            topGroup.spacing = 8;
-            topGroup.padding.left = 4;
-            topGroup.padding.right = 4;
-
-            var nameRowObj = UIFactory.CreateHorizontalGroup(topGroupObj, new Color(1, 1, 1, 0));
+            var nameRowObj = UIFactory.CreateHorizontalGroup(Content, new Color(1, 1, 1, 0));
             var nameRow = nameRowObj.GetComponent<HorizontalLayoutGroup>();
             nameRow.childForceExpandWidth = true;
             nameRow.childForceExpandHeight = true;
@@ -429,20 +452,31 @@ namespace UnityExplorer.Inspectors
 
             if (this is InstanceInspector)
             {
-                (this as InstanceInspector).ConstructInstanceHelpers(topGroupObj);
+                (this as InstanceInspector).ConstructInstanceHelpers();
             }
 
+            ConstructFilterArea();
+
+            ConstructOptionsArea();
+        }
+
+        internal void ConstructFilterArea()
+        {
             // Filters
 
-            var filterAreaObj = UIFactory.CreateVerticalGroup(topGroupObj, new Color(1,1,1,0));
+            var filterAreaObj = UIFactory.CreateVerticalGroup(Content, new Color(0.1f, 0.1f, 0.1f));
             var filterLayout = filterAreaObj.AddComponent<LayoutElement>();
             filterLayout.minHeight = 60;
             var filterGroup = filterAreaObj.GetComponent<VerticalLayoutGroup>();
             filterGroup.childForceExpandWidth = true;
-            filterGroup.childForceExpandHeight = false;
+            filterGroup.childForceExpandHeight = true;
             filterGroup.childControlWidth = true;
             filterGroup.childControlHeight = true;
             filterGroup.spacing = 4;
+            filterGroup.padding.left = 4;
+            filterGroup.padding.right = 4;
+            filterGroup.padding.top = 4;
+            filterGroup.padding.bottom = 4;
 
             // name filter
 
@@ -460,11 +494,12 @@ namespace UnityExplorer.Inspectors
 
             var nameLabelObj = UIFactory.CreateLabel(nameFilterRowObj, TextAnchor.MiddleLeft);
             var nameLabelLayout = nameLabelObj.AddComponent<LayoutElement>();
-            nameLabelLayout.minWidth = 130;
+            nameLabelLayout.minWidth = 100;
             nameLabelLayout.minHeight = 25;
             nameLabelLayout.flexibleWidth = 0;
             var nameLabelText = nameLabelObj.GetComponent<Text>();
-            nameLabelText.text = "Name contains:";
+            nameLabelText.text = "Filter names:";
+            nameLabelText.color = Color.grey;
 
             var nameInputObj = UIFactory.CreateInputField(nameFilterRowObj, 14, (int)TextAnchor.MiddleLeft, (int)HorizontalWrapMode.Overflow);
             var nameInputLayout = nameInputObj.AddComponent<LayoutElement>();
@@ -477,7 +512,31 @@ namespace UnityExplorer.Inspectors
 
             // membertype filter
 
+            var memberFilterRowObj = UIFactory.CreateHorizontalGroup(filterAreaObj, new Color(1, 1, 1, 0));
+            var memFilterGroup = memberFilterRowObj.GetComponent<HorizontalLayoutGroup>();
+            memFilterGroup.childForceExpandHeight = false;
+            memFilterGroup.childForceExpandWidth = false;
+            memFilterGroup.childControlWidth = true;
+            memFilterGroup.childControlHeight = true;
+            memFilterGroup.spacing = 5;
+            var memFilterLayout = memberFilterRowObj.AddComponent<LayoutElement>();
+            memFilterLayout.minHeight = 25;
+            memFilterLayout.flexibleHeight = 0;
+            memFilterLayout.flexibleWidth = 5000;
 
+            var memLabelObj = UIFactory.CreateLabel(memberFilterRowObj, TextAnchor.MiddleLeft);
+            var memLabelLayout = memLabelObj.AddComponent<LayoutElement>();
+            memLabelLayout.minWidth = 100;
+            memLabelLayout.minHeight = 25;
+            memLabelLayout.flexibleWidth = 0;
+            var memLabelText = memLabelObj.GetComponent<Text>();
+            memLabelText.text = "Filter members:";
+            memLabelText.color = Color.grey;
+
+            AddFilterButton(memberFilterRowObj, MemberTypes.All);
+            AddFilterButton(memberFilterRowObj, MemberTypes.Method);
+            AddFilterButton(memberFilterRowObj, MemberTypes.Property, true);
+            AddFilterButton(memberFilterRowObj, MemberTypes.Field);
 
             // Instance filters
 
@@ -485,6 +544,73 @@ namespace UnityExplorer.Inspectors
             {
                 (this as InstanceInspector).ConstructInstanceFilters(filterAreaObj);
             }
+        }
+
+        private void AddFilterButton(GameObject parent, MemberTypes type, bool setEnabled = false)
+        {
+            var btnObj = UIFactory.CreateButton(parent, new Color(0.2f, 0.2f, 0.2f));
+
+            var btnLayout = btnObj.AddComponent<LayoutElement>();
+            btnLayout.minHeight = 25;
+            btnLayout.minWidth = 70;
+
+            var text = btnObj.GetComponentInChildren<Text>();
+            text.text = type.ToString();
+
+            var btn = btnObj.GetComponent<Button>();
+
+            btn.onClick.AddListener(() => { OnMemberFilterClicked(type, btn); });
+
+            var colors = btn.colors;
+            colors.highlightedColor = new Color(0.3f, 0.7f, 0.3f);
+
+            if (setEnabled)
+            {
+                colors.normalColor = new Color(0.2f, 0.4f, 0.2f);
+                m_memberFilter = type;
+                m_lastActiveMemButton = btn;
+            }
+
+            btn.colors = colors;
+        }
+
+        internal void ConstructOptionsArea()
+        {
+            var optionsRowObj = UIFactory.CreateHorizontalGroup(Content, new Color(1,1,1,0));
+            var optionsLayout = optionsRowObj.AddComponent<LayoutElement>();
+            optionsLayout.minHeight = 25;
+            var optionsGroup = optionsRowObj.GetComponent<HorizontalLayoutGroup>();
+            optionsGroup.childForceExpandHeight = true;
+            optionsGroup.childForceExpandWidth = false;
+            optionsGroup.childAlignment = TextAnchor.MiddleLeft;
+            optionsGroup.spacing = 10;
+
+            // update button
+
+            var updateButtonObj = UIFactory.CreateButton(optionsRowObj, new Color(0.2f, 0.2f, 0.2f));
+            var updateBtnLayout = updateButtonObj.AddComponent<LayoutElement>();
+            updateBtnLayout.minWidth = 110;
+            updateBtnLayout.flexibleWidth = 0;
+            var updateText = updateButtonObj.GetComponentInChildren<Text>();
+            updateText.text = "Update Values";
+            var updateBtn = updateButtonObj.GetComponent<Button>();
+            updateBtn.onClick.AddListener(() => 
+            {
+                bool orig = m_autoUpdate;
+                m_autoUpdate = true;
+                Update();
+                if (!orig) m_autoUpdate = orig;
+            });
+
+            // auto update
+
+            var autoUpdateObj = UIFactory.CreateToggle(optionsRowObj, out Toggle autoUpdateToggle, out Text autoUpdateText);
+            var autoUpdateLayout = autoUpdateObj.AddComponent<LayoutElement>();
+            autoUpdateLayout.minWidth = 150;
+            autoUpdateLayout.minHeight = 25;
+            autoUpdateText.text = "Auto-update?";
+            autoUpdateToggle.isOn = false;
+            autoUpdateToggle.onValueChanged.AddListener((bool val) => { m_autoUpdate = val; });
         }
 
         internal void ConstructMemberList()
@@ -503,8 +629,8 @@ namespace UnityExplorer.Inspectors
             m_pageHandler.OnPageChanged += OnPageTurned;
         }
 
-#endregion
+        #endregion // end UI
 
-#endregion
+        #endregion // end instance
     }
 }

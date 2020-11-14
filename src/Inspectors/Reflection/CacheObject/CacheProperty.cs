@@ -10,7 +10,7 @@ namespace UnityExplorer.Inspectors.Reflection
 {
     public class CacheProperty : CacheMember
     {
-        public override bool IsStatic => (MemInfo as PropertyInfo).GetAccessors()[0].IsStatic;
+        public override bool IsStatic => (MemInfo as PropertyInfo).GetAccessors(true)[0].IsStatic;
 
         public CacheProperty(PropertyInfo propertyInfo, object declaringInstance) : base(propertyInfo, declaringInstance) 
         {
@@ -41,12 +41,9 @@ namespace UnityExplorer.Inspectors.Reflection
                 m_evaluated = true;
                 ReflectionException = null;
             }
-            else // create a dummy value for Write-Only properties.
+            else 
             {
-                if (IValue.ValueType == typeof(string))
-                    IValue.Value = "";
-                else
-                    IValue.Value = Activator.CreateInstance(IValue.ValueType);
+                // todo write-only properties
             }
         }
 

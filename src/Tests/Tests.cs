@@ -34,7 +34,7 @@ namespace UnityExplorer.Tests
         }
         private static bool m_setOnlyProperty;
 
-        public Texture2D TestTexture;
+        public Texture TestTexture;
         public static Sprite TestSprite;
 
         public static int StaticProperty => 5;
@@ -54,7 +54,7 @@ namespace UnityExplorer.Tests
             var r = new Rect(0, 0, TestTexture.width, TestTexture.height);
             var v2 = Vector2.zero;
             var v4 = Vector4.zero;
-            TestSprite = Sprite.CreateSprite_Injected(TestTexture, ref r, ref v2, 100f, 0u, SpriteMeshType.Tight, ref v4, false);
+            TestSprite = Sprite.CreateSprite_Injected((Texture2D)TestTexture, ref r, ref v2, 100f, 0u, SpriteMeshType.Tight, ref v4, false);
 
             GameObject.DontDestroyOnLoad(TestTexture);
             GameObject.DontDestroyOnLoad(TestSprite);
@@ -70,7 +70,7 @@ namespace UnityExplorer.Tests
 #endif
         }
 
-        public static string TestRefInOutGeneric<T>(ref string arg0, in int arg1, out string arg2)
+        public static string TestRefInOutGeneric<T>(ref string arg0, in int arg1, out string arg2) where T : Component
         {
             arg2 = "this is arg2";
 

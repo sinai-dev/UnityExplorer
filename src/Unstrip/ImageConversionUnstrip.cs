@@ -1,14 +1,16 @@
-﻿#if CPP
-using System;
+﻿using System;
 using System.IO;
 using UnityExplorer.Helpers;
-using UnhollowerBaseLib;
 using UnityEngine;
+#if CPP
+using UnhollowerBaseLib;
+#endif
 
 namespace UnityExplorer.Unstrip
 {
     public static class ImageConversionUnstrip
     {
+#if CPP
         // byte[] ImageConversion.EncodeToPNG(this Texture2D image);
 
         internal delegate IntPtr d_EncodeToPNG(IntPtr tex);
@@ -36,6 +38,7 @@ namespace UnityExplorer.Unstrip
 
             return ret;
         }
+#endif
 
         // Helper for LoadImage from filepath
 
@@ -51,5 +54,3 @@ namespace UnityExplorer.Unstrip
         }
     }
 }
-
-#endif

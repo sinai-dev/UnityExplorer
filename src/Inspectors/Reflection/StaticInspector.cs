@@ -6,9 +6,6 @@ namespace UnityExplorer.Inspectors.Reflection
     {
         public override string TabLabel => $" <color=cyan>[S]</color> {base.TabLabel}";
 
-        public StaticInspector(Type type) : base(type)
-        {
-            // needed?
-        }
+        public StaticInspector(Type type) : base(type) { }
     }
 }
