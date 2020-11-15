@@ -10,6 +10,8 @@ namespace UnityExplorer.Inspectors.Reflection
 {
     public class CacheProperty : CacheMember
     {
+        public override Type FallbackType => (MemInfo as PropertyInfo).PropertyType;
+
         public override bool IsStatic => (MemInfo as PropertyInfo).GetAccessors(true)[0].IsStatic;
 
         public CacheProperty(PropertyInfo propertyInfo, object declaringInstance) : base(propertyInfo, declaringInstance) 
@@ -17,9 +19,7 @@ namespace UnityExplorer.Inspectors.Reflection
             this.m_arguments = propertyInfo.GetIndexParameters();
             this.m_argumentInput = new string[m_arguments.Length];
 
-            base.InitValue(null, propertyInfo.PropertyType);
-
-            UpdateValue();
+            CreateIValue(null, propertyInfo.PropertyType);
         }
 
         public override void UpdateReflection()

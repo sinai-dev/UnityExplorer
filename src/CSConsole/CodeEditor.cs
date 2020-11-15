@@ -105,7 +105,7 @@ The following helper methods are available:
             {
                 if (!m_fixwanted)
                 {
-                    EventSystem.current.SetSelectedGameObject(CSConsolePage.Instance.m_codeEditor.InputField.gameObject, null);
+                    EventSystem.current.SetSelectedGameObject(InputField.gameObject, null);
                     m_fixwanted = true; 
                 }
                 else

@@ -7,22 +7,34 @@ using UnityExplorer.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
+
 namespace UnityExplorer.Inspectors.Reflection
 {
-    public class CacheEnumerated : CacheObjectBase, INestedValue
+    public enum PairTypes
     {
-        public override Type FallbackType => ParentEnumeration.m_baseEntryType;
-        public override bool CanWrite => RefIList != null && ParentEnumeration.OwnerCacheObject.CanWrite;
+        Key,
+        Value
+    }
 
-        public int Index { get; set; }
-        public IList RefIList { get; set; }
-        public InteractiveEnumerable ParentEnumeration { get; set; }
+    public class CachePaired : CacheObjectBase, INestedValue
+    {
+        public override Type FallbackType => PairType == PairTypes.Key
+            ? ParentDictionary.m_typeOfKeys
+            : ParentDictionary.m_typeofValues;
 
-        public CacheEnumerated(int index, InteractiveEnumerable parentEnumeration, IList refIList, GameObject parentContent)
+        public override bool CanWrite => false; // todo?
+
+        public PairTypes PairType;
+        public int Index { get; private set; }
+        public InteractiveDictionary ParentDictionary { get; private set; }
+        internal IDictionary RefIDIct;
+
+        public CachePaired(int index, InteractiveDictionary parentDict, IDictionary refIDict, PairTypes pairType, GameObject parentContent)
         {
-            this.ParentEnumeration = parentEnumeration;
-            this.Index = index;
-            this.RefIList = refIList;
+            Index = index;
+            ParentDictionary = parentDict;
+            RefIDIct = refIDict;
+            this.PairType = pairType;
             this.m_parentContent = parentContent;
         }
 
@@ -32,18 +44,12 @@ namespace UnityExplorer.Inspectors.Reflection
             IValue.OwnerCacheObject = this;
         }
 
-        public override void SetValue()
-        {
-            RefIList[Index] = IValue.Value;
-            ParentEnumeration.Value = RefIList;
-
-            ParentEnumeration.OwnerCacheObject.SetValue();
-        }
-
         public void UpdateSubcontentHeight()
         {
-            ParentEnumeration.UpdateSubcontentHeight();
+            ParentDictionary.UpdateSubcontentHeight();
         }
+
+        #region UI CONSTRUCTION
 
         internal override void ConstructUI()
         {
@@ -56,13 +62,15 @@ namespace UnityExplorer.Inspectors.Reflection
 
             var indexLabelObj = UIFactory.CreateLabel(rowObj, TextAnchor.MiddleLeft);
             var indexLayout = indexLabelObj.AddComponent<LayoutElement>();
-            indexLayout.minWidth = 20;
+            indexLayout.minWidth = 80;
             indexLayout.flexibleWidth = 30;
             indexLayout.minHeight = 25;
             var indexText = indexLabelObj.GetComponent<Text>();
-            indexText.text = this.Index + ":";
+            indexText.text = $"{this.PairType} {this.Index}:";
 
             IValue.m_mainContentParent = rowObj;
         }
+
+        #endregion
     }
 }

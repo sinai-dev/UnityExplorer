@@ -27,7 +27,7 @@ namespace UnityExplorer.UI.Shared
 
         public event Action OnPageChanged;
 
-        private SliderScrollbar m_scrollbar;
+        private readonly SliderScrollbar m_scrollbar;
 
         // For now this is just set when the PageHandler is created, based on config.
         // At some point I might make it possible to change this after creation again.
@@ -147,7 +147,9 @@ namespace UnityExplorer.UI.Shared
             }
             if (didTurn)
             {
-                m_scrollbar.m_scrollbar.value = 1;
+                if (m_scrollbar != null)
+                    m_scrollbar.m_scrollbar.value = 1;
+
                 OnPageChanged?.Invoke();
                 RefreshUI();
             }

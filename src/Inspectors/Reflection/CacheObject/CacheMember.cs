@@ -15,40 +15,47 @@ namespace UnityExplorer.Inspectors.Reflection
 {
     public abstract class CacheMember : CacheObjectBase
     {
+        public override bool IsMember => true;
+
+        public override Type FallbackType { get; }
+
         public MemberInfo MemInfo { get; set; }
         public Type DeclaringType { get; set; }
         public object DeclaringInstance { get; set; }
-
         public virtual bool IsStatic { get; private set; }
-        
-        public override bool IsMember => true;
 
-        public override bool HasParameters => ParamCount > 0;
-        public virtual int ParamCount => m_arguments.Length;
-
-        public override bool HasEvaluated => m_evaluated;
-
-        public string RichTextName => m_richTextName ?? GetRichTextName();
-        private string m_richTextName;
-
-        public string NameForFiltering => m_nameForFilter ?? (m_nameForFilter = $"{MemInfo.DeclaringType.Name}.{MemInfo.Name}".ToLower());
-        private string m_nameForFilter;
+        public string ReflectionException { get; set; }
 
         public override bool CanWrite => m_canWrite ?? GetCanWrite();
         private bool? m_canWrite;
 
-        public string ReflectionException { get; set; }
-
+        public override bool HasParameters => ParamCount > 0;
+        public virtual int ParamCount => m_arguments.Length;
+        public override bool HasEvaluated => m_evaluated;
         public bool m_evaluated = false;
         public bool m_isEvaluating;
         public ParameterInfo[] m_arguments = new ParameterInfo[0];
         public string[] m_argumentInput = new string[0];
+
+        public string NameForFiltering => m_nameForFilter ?? (m_nameForFilter = $"{MemInfo.DeclaringType.Name}.{MemInfo.Name}".ToLower());
+        private string m_nameForFilter;
+
+        public string RichTextName => m_richTextName ?? GetRichTextName();
+        private string m_richTextName;
 
         public CacheMember(MemberInfo memberInfo, object declaringInstance)
         {
             MemInfo = memberInfo;
             DeclaringType = memberInfo.DeclaringType;
             DeclaringInstance = declaringInstance;
+        }
+
+        public override void CreateIValue(object value, Type fallbackType)
+        {
+            IValue = InteractiveValue.Create(value, fallbackType);
+            IValue.OwnerCacheObject = this;
+            IValue.m_mainContentParent = this.m_rightGroup;
+            IValue.m_subContentParent = this.m_subContent;
         }
 
         public override void UpdateValue()
@@ -122,7 +129,7 @@ namespace UnityExplorer.Inspectors.Reflection
                 }
 
                 // No input, see if there is a default value.
-                if (HasDefaultValue(m_arguments[i]))
+                if (m_arguments[i].IsOptional)
                 {
                     parsedArgs.Add(m_arguments[i].DefaultValue);
                     continue;
@@ -134,8 +141,6 @@ namespace UnityExplorer.Inspectors.Reflection
 
             return parsedArgs.ToArray();
         }
-
-        public static bool HasDefaultValue(ParameterInfo arg) => arg.DefaultValue != DBNull.Value;
 
         private bool GetCanWrite()
         {
@@ -159,7 +164,7 @@ namespace UnityExplorer.Inspectors.Reflection
         {
             try
             {
-                var baseType = this.IValue.ValueType;
+                var baseType = ReflectionHelpers.GetActualType(IValue.Value) ?? IValue.FallbackType;
 
                 var gArgs = baseType.GetGenericArguments();
                 if (gArgs.Length < 1)
@@ -214,13 +219,12 @@ namespace UnityExplorer.Inspectors.Reflection
             m_rightLayout.preferredWidth = valueWidth;
         }
 
-        internal GameObject m_leftGroup;
-        internal GameObject m_rightGroup;
-        internal Text m_memLabelText;
         internal RectTransform m_topRowRect;
+        internal Text m_memLabelText;
+        internal GameObject m_leftGroup;
         internal LayoutElement m_leftLayout;
+        internal GameObject m_rightGroup;
         internal LayoutElement m_rightLayout;
-        internal GameObject m_subContent;
 
         internal override void ConstructUI()
         {
@@ -292,31 +296,15 @@ namespace UnityExplorer.Inspectors.Reflection
             rightGroup.childForceExpandWidth = false;
             rightGroup.childControlHeight = true;
             rightGroup.childControlWidth = true;
-            rightGroup.spacing = 4;
-            rightGroup.padding.top = 2;
+            rightGroup.spacing = 2;
+            rightGroup.padding.top = 4;
             rightGroup.padding.bottom = 2;
 
             ConstructArgInput(out GameObject argsHolder);
 
             ConstructEvaluateButtons(argsHolder);
 
-            // subcontent
-
-            m_subContent = UIFactory.CreateHorizontalGroup(m_parentContent, new Color(1, 1, 1, 0));
-            var subGroup = m_subContent.GetComponent<HorizontalLayoutGroup>();
-            subGroup.childForceExpandWidth = true;
-            subGroup.childControlWidth = true;
-            var subLayout = m_subContent.AddComponent<LayoutElement>();
-            subLayout.minHeight = 50;
-            subLayout.flexibleHeight = 500;
-            subLayout.minWidth = 125;
-            subLayout.flexibleWidth = 9000;
-
-            m_subContent.SetActive(false);
-
-            // Construct InteractiveValue's actual UI
-
-            IValue.ConstructUI(m_rightGroup, m_subContent);
+            IValue.m_mainContentParent = m_rightGroup;
         }
 
         internal void ConstructArgInput(out GameObject argsHolder)
@@ -418,13 +406,13 @@ namespace UnityExplorer.Inspectors.Reflection
                 colors.highlightedColor = new Color(0.4f, 0.7f, 0.4f);
                 evalButton.colors = colors;
 
-                var cancelButtonObj = UIFactory.CreateButton(evalGroupObj, new Color(0.6f, 0.3f, 0.3f));
+                var cancelButtonObj = UIFactory.CreateButton(evalGroupObj, new Color(0.3f, 0.3f, 0.3f));
                 var cancelLayout = cancelButtonObj.AddComponent<LayoutElement>();
                 cancelLayout.minWidth = 100;
                 cancelLayout.minHeight = 22;
                 cancelLayout.flexibleWidth = 0;
                 var cancelText = cancelButtonObj.GetComponentInChildren<Text>();
-                cancelText.text = "Cancel";
+                cancelText.text = "Close";
 
                 cancelButtonObj.SetActive(false);
 

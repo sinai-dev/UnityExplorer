@@ -13,10 +13,6 @@ using UnityExplorer.Config;
 
 namespace UnityExplorer.Inspectors
 {
-    // TODO:
-    // - Filters
-    // - Helper tools for Target object (for UnityEngine.Objects, Components, Textures, and maybe a general ToString helper)
-
     public class ReflectionInspector : InspectorBase
     {
         #region STATIC
@@ -95,8 +91,6 @@ namespace UnityExplorer.Inspectors
         internal bool m_widthUpdateWanted;
         internal bool m_widthUpdateWaiting;
 
-        // Ctor
-
         public ReflectionInspector(object target) : base(target)
         {
             if (this is StaticInspector)
@@ -112,8 +106,6 @@ namespace UnityExplorer.Inspectors
 
             FilterMembers();
         }
-
-        // Methods
 
         public override void SetActive()
         {
@@ -310,13 +302,13 @@ namespace UnityExplorer.Inspectors
                 {
                     try
                     {
-                        //ExplorerCore.Log($"Trying to cache member {sig}...");
-                        //ExplorerCore.Log(member.DeclaringType.FullName + "." + member.Name);
-
                         // make sure member type is Field, Method or Property (4 / 8 / 16)
                         int m = (int)member.MemberType;
                         if (m < 4 || m > 16)
                             continue;
+
+                        //ExplorerCore.Log($"Trying to cache member {sig}...");
+                        //ExplorerCore.Log(member.DeclaringType.FullName + "." + member.Name);
 
                         var pi = member as PropertyInfo;
                         var mi = member as MethodInfo;
@@ -338,28 +330,20 @@ namespace UnityExplorer.Inspectors
                             continue;
 
                         if (mi != null)
-                        {
                             AppendParams(mi.GetParameters());
-                        }
                         else if (pi != null)
-                        {
                             AppendParams(pi.GetIndexParameters());
-                        }
 
                         void AppendParams(ParameterInfo[] _args)
                         {
                             sig += " (";
                             foreach (var param in _args)
-                            {
                                 sig += $"{param.ParameterType.Name} {param.Name}, ";
-                            }
                             sig += ")";
                         }
 
                         if (cachedSigs.Contains(sig))
-                        {
                             continue;
-                        }
 
                         try
                         {
@@ -385,10 +369,18 @@ namespace UnityExplorer.Inspectors
                 }
             }
 
+            var typeList = types.ToList();
+
             var sorted = new List<CacheMember>();
-            sorted.AddRange(list.Where(x => x is CacheMethod));
-            sorted.AddRange(list.Where(x => x is CacheProperty));
-            sorted.AddRange(list.Where(x => x is CacheField));
+            sorted.AddRange(list.Where(it => it is CacheMethod)
+                             .OrderBy(it => typeList.IndexOf(it.DeclaringType))
+                             .ThenBy(it => it.NameForFiltering));
+            sorted.AddRange(list.Where(it => it is CacheProperty)
+                             .OrderBy(it => typeList.IndexOf(it.DeclaringType))
+                             .ThenBy(it => it.NameForFiltering));
+            sorted.AddRange(list.Where(it => it is CacheField)
+                             .OrderBy(it => typeList.IndexOf(it.DeclaringType))
+                             .ThenBy(it => it.NameForFiltering));
 
             m_allMembers = sorted.ToArray();
 
@@ -623,6 +615,7 @@ namespace UnityExplorer.Inspectors
             scrollGroup.spacing = 3;
             scrollGroup.padding.left = 0;
             scrollGroup.padding.right = 0;
+            scrollGroup.childForceExpandHeight = true;
 
             m_pageHandler = new PageHandler(m_sliderScroller);
             m_pageHandler.ConstructUI(Content);

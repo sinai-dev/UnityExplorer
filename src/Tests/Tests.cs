@@ -26,20 +26,54 @@ namespace UnityExplorer.Tests
         public static TestClass Instance => m_instance ?? (m_instance = new TestClass());
         private static TestClass m_instance;
 
-        public static bool ReadSetOnlyProperty => m_setOnlyProperty;
+        public Dictionary<string, List<string>> AComboTest = new Dictionary<string, List<string>>
+        {
+            {
+                "key",
+                new List<string>
+                {
+                    "1",
+                    "2"
+                }
+            }
+        };
+
+        public object AmbigObject;
+
+        public List<List<List<string>>> ANestedNestedList = new List<List<List<string>>>
+        {
+            new List<List<string>>
+            {
+                new List<string>
+                {
+                    "one",
+                    "two",
+                },
+                new List<string>
+                {
+                    "three",
+                    "four"
+                }
+            },
+            new List<List<string>>
+            {
+                new List<string>
+                {
+                    "five",
+                    "six"
+                }
+            }
+        };
 
         public static bool SetOnlyProperty
         {
             set => m_setOnlyProperty = value;
         }
         private static bool m_setOnlyProperty;
+        public static bool ReadSetOnlyProperty => m_setOnlyProperty;
 
         public Texture TestTexture;
         public static Sprite TestSprite;
-
-        public static int StaticProperty => 5;
-        public static int StaticField = 5;
-        public int NonStaticField;
 
 #if CPP
         public static Il2CppSystem.Collections.Generic.HashSet<string> ILHashSetTest;
@@ -47,6 +81,16 @@ namespace UnityExplorer.Tests
 
         public TestClass()
         {
+            int a = 0;
+            foreach (var list in ANestedNestedList)
+            {
+                foreach (var list2 in list)
+                {
+                    for (int i = 0; i < 33; i++)
+                        list2.Add(a++.ToString());
+                }
+            }
+
 #if CPP
             TestTexture = UIManager.MakeSolidTexture(Color.white, 200, 200);
             TestTexture.name = "TestTexture";

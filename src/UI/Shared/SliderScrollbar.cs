@@ -13,6 +13,8 @@ public class SliderScrollbar
 {
 	internal static readonly List<SliderScrollbar> Instances = new List<SliderScrollbar>();
 
+    public bool IsActive { get; private set; }
+
 	internal readonly Scrollbar m_scrollbar;
 	internal readonly Slider m_slider;
     internal readonly RectTransform m_scrollRect;
@@ -46,21 +48,25 @@ public class SliderScrollbar
 	internal void Update()
 	{
 		this.RefreshVisibility();
-	}
+    }
 
 	internal void RefreshVisibility()
 	{
         if (!m_slider.gameObject.activeInHierarchy)
+        {
+            IsActive = false;
             return;
+        }
 
         bool shouldShow = !Mathf.Approximately(this.m_scrollbar.size, 1);
         var obj = this.m_slider.handleRect.gameObject;
 
-        if (obj.activeSelf != shouldShow)
+        if (IsActive != shouldShow)
         {
-            obj.SetActive(shouldShow);
+            IsActive = shouldShow;
+            obj.SetActive(IsActive);
 
-            if (shouldShow)
+            if (IsActive)
                 this.m_slider.Set(this.m_scrollbar.value, false);
             else
                 m_slider.Set(1f, false);

@@ -10,7 +10,7 @@ using UnityEngine.UI;
 
 namespace UnityExplorer.Inspectors.Reflection
 {
-    public class CacheObjectBase
+    public abstract class CacheObjectBase
     {
         public InteractiveValue IValue;
 
@@ -19,26 +19,9 @@ namespace UnityExplorer.Inspectors.Reflection
         public virtual bool IsMember => false;
         public virtual bool HasEvaluated => true;
 
-        // TODO
-        public virtual void InitValue(object value, Type valueType)
-        {
-            if (valueType == null && value == null)
-            {
-                ExplorerCore.LogWarning("CacheObjectBase: Trying to init with no default value or valueType!");
-                ExplorerCore.Log(Environment.StackTrace);
-                return;
-            }
+        public abstract Type FallbackType { get; }
 
-            // temp (havent made rest of InteractiveValue classes yet, just using base class always)
-
-            valueType = ReflectionHelpers.GetActualType(value) ?? valueType;
-
-            IValue = new InteractiveValue(valueType)
-            {
-                OwnerCacheObject = this
-            };
-            UpdateValue();
-        }
+        public abstract void CreateIValue(object value, Type fallbackType);
 
         public virtual void Enable()
         {
@@ -54,11 +37,31 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public virtual void Disable()
         {
-            m_mainContent.SetActive(false);
+            m_mainContent?.SetActive(false);
+        }
+
+        public void Destroy()
+        {
+            GameObject.Destroy(this.m_mainContent);
         }
 
         public virtual void UpdateValue()
         {
+            var value = IValue.Value;
+
+            // see if current value has changed types fundamentally
+            var type = value == null 
+                ? FallbackType
+                : ReflectionHelpers.GetActualType(value);
+            var ivalueType = InteractiveValue.GetIValueForType(type);
+
+            if (ivalueType != IValue.IValueType)
+            {
+                IValue.OnDestroy();
+                CreateIValue(value, FallbackType);
+                m_subContent.SetActive(false);
+            }
+
             IValue.OnValueUpdated();
         }
 
@@ -68,7 +71,9 @@ namespace UnityExplorer.Inspectors.Reflection
 
         internal bool m_constructedUI;
         internal GameObject m_parentContent;
+        internal RectTransform m_mainRect;
         internal GameObject m_mainContent;
+        internal GameObject m_subContent;
 
         // Make base UI holder for CacheObject, this doesnt actually display anything.
         internal virtual void ConstructUI()
@@ -76,16 +81,36 @@ namespace UnityExplorer.Inspectors.Reflection
             m_constructedUI = true;
 
             m_mainContent = UIFactory.CreateVerticalGroup(m_parentContent, new Color(0.1f, 0.1f, 0.1f));
-            var rowGroup = m_mainContent.GetComponent<VerticalLayoutGroup>();
-            rowGroup.childForceExpandWidth = true;
-            rowGroup.childControlWidth = true;
-            rowGroup.childForceExpandHeight = false;
-            rowGroup.childControlHeight = true;
-            var rowLayout = m_mainContent.AddComponent<LayoutElement>();
-            rowLayout.minHeight = 25;
-            rowLayout.flexibleHeight = 500;
-            rowLayout.minWidth = 200;
-            rowLayout.flexibleWidth = 5000;
+            m_mainContent.name = "CacheObjectBase.MainContent";
+            m_mainRect = m_mainContent.GetComponent<RectTransform>();
+            m_mainRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 25);
+            var mainGroup = m_mainContent.GetComponent<VerticalLayoutGroup>();
+            mainGroup.childForceExpandWidth = true;
+            mainGroup.childControlWidth = true;
+            mainGroup.childForceExpandHeight = true;
+            mainGroup.childControlHeight = true;
+            var mainLayout = m_mainContent.AddComponent<LayoutElement>();
+            mainLayout.minHeight = 25;
+            mainLayout.flexibleHeight = 9999;
+            mainLayout.minWidth = 200;
+            mainLayout.flexibleWidth = 5000;
+
+            // subcontent
+
+            m_subContent = UIFactory.CreateVerticalGroup(m_mainContent, new Color(0.085f, 0.085f, 0.085f));
+            m_subContent.name = "CacheObjectBase.SubContent";
+            var subGroup = m_subContent.GetComponent<VerticalLayoutGroup>();
+            subGroup.childForceExpandWidth = true;
+            subGroup.childForceExpandHeight = false;
+            var subLayout = m_subContent.AddComponent<LayoutElement>();
+            subLayout.minHeight = 30;
+            subLayout.flexibleHeight = 9999;
+            subLayout.minWidth = 125;
+            subLayout.flexibleWidth = 9000;
+
+            m_subContent.SetActive(false);
+
+            IValue.m_subContentParent = m_subContent;
         }
 
         #endregion

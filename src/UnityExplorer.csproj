@@ -330,6 +330,7 @@
     <Compile Include="Inspectors\Reflection\CacheObject\CacheEnumerated.cs" />
     <Compile Include="Inspectors\Reflection\CacheObject\CacheFactory.cs" />
     <Compile Include="Inspectors\Reflection\CacheObject\CacheField.cs" />
+    <Compile Include="Inspectors\Reflection\CacheObject\CachePaired.cs" />
     <Compile Include="Inspectors\Reflection\CacheObject\CacheMember.cs" />
     <Compile Include="Inspectors\Reflection\CacheObject\CacheMethod.cs" />
     <Compile Include="Inspectors\Reflection\CacheObject\CacheProperty.cs" />
@@ -344,6 +345,9 @@
     <Compile Include="Inspectors\GameObjects\ChildList.cs" />
     <Compile Include="Inspectors\GameObjects\ComponentList.cs" />
     <Compile Include="Inspectors\GameObjects\GameObjectControls.cs" />
+    <Compile Include="Inspectors\Reflection\CacheObject\INestedValue.cs" />
+    <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveDictionary.cs" />
+    <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveEnumerable.cs" />
     <Compile Include="UI\ForceUnlockCursor.cs" />
     <Compile Include="Input\IHandleInput.cs" />
     <Compile Include="Tests\Tests.cs" />
@@ -379,6 +383,7 @@
     <Compile Include="UI\PanelDragger.cs" />
     <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveValue.cs" />
     <Compile Include="UI\Shared\InputFieldScroller.cs" />
+    <Compile Include="UI\Shared\ScrollRectEx.cs" />
     <Compile Include="UI\Shared\SliderScrollbar.cs" />
     <Compile Include="UI\Shared\PageHandler.cs" />
     <Compile Include="UI\UISyntaxHighlight.cs" />

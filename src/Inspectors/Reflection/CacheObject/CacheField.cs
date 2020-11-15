@@ -12,11 +12,11 @@ namespace UnityExplorer.Inspectors.Reflection
     {
         public override bool IsStatic => (MemInfo as FieldInfo).IsStatic;
 
+        public override Type FallbackType => (MemInfo as FieldInfo).FieldType;
+
         public CacheField(FieldInfo fieldInfo, object declaringInstance) : base(fieldInfo, declaringInstance)
         {
-            base.InitValue(null, fieldInfo.FieldType);
-
-            UpdateValue();
+            CreateIValue(null, fieldInfo.FieldType);
         }
 
         public override void UpdateReflection()

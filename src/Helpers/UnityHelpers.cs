@@ -18,7 +18,7 @@ namespace UnityExplorer.Helpers
             }
         }
 
-        public static bool IsNullOrDestroyed(this object obj, bool suppressWarning = false)
+        public static bool IsNullOrDestroyed(this object obj, bool suppressWarning = true)
         {
             var unityObj = obj as Object;
             if (obj == null)

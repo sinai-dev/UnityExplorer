@@ -30,17 +30,14 @@ namespace UnityExplorer.UI
 
         internal static string GetClassColor(Type type)
         {
-            string classColor;
             if (type.IsAbstract && type.IsSealed)
-                classColor = Class_Static;
+                return Class_Static;
             else if (type.IsEnum || type.IsGenericParameter)
-                classColor = Enum;
+                return Enum;
             else if (type.IsValueType)
-                classColor = StructGreen;
+                return StructGreen;
             else
-                classColor = Class_Instance;
-
-            return classColor;
+                return Class_Instance;
         }
 
         public static string ParseFullSyntax(Type type, bool includeNamespace, MemberInfo memberInfo = null)

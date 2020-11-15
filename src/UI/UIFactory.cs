@@ -542,7 +542,7 @@ namespace UnityExplorer.UI
             templateImage.type = Image.Type.Sliced;
             templateImage.color = new Color(0.15f, 0.15f, 0.15f, 1.0f);
 
-            ScrollRect scrollRect = templateObj.AddComponent<ScrollRect>();
+            var scrollRect = templateObj.AddComponent<ScrollRect>();
             scrollRect.scrollSensitivity = 35;
             scrollRect.content = contentObj.GetComponent<RectTransform>();
             scrollRect.viewport = viewportObj.GetComponent<RectTransform>();
@@ -626,7 +626,7 @@ namespace UnityExplorer.UI
 
             var mainLayout = mainObj.AddComponent<LayoutElement>();
             mainLayout.minWidth = 100;
-            mainLayout.minHeight = 100;
+            mainLayout.minHeight = 30;
             mainLayout.flexibleWidth = 5000;
             mainLayout.flexibleHeight = 5000;
 
@@ -708,6 +708,8 @@ namespace UnityExplorer.UI
 
             // Create a custom DynamicScrollbar module
             scroller = new SliderScrollbar(hiddenScroll, scrollSlider);
+
+            //scrollRect.sliderScrollbar = scroller;
 
             return mainObj;
         }

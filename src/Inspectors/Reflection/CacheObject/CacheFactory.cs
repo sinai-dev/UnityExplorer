@@ -7,23 +7,6 @@ namespace UnityExplorer.Inspectors.Reflection
 {
     public static class CacheFactory
     {
-        // Don't think I need these with new structure.
-        // Will possibly need something for CacheEnumerated / InteractiveEnumeration though.
-
-        //public static CacheObjectBase GetCacheObject(object obj)
-        //{
-        //    if (obj == null) return null;
-
-        //    return GetCacheObject(obj, ReflectionHelpers.GetActualType(obj));
-        //}
-
-        //public static CacheObjectBase GetCacheObject(object obj, Type type)
-        //{
-        //    var ret = new CacheObjectBase();
-        //    ret.InitValue(obj, type);
-        //    return ret;
-        //}
-
         public static CacheMember GetCacheObject(MemberInfo member, object declaringInstance, GameObject parentUIContent)
         {
             CacheMember ret;

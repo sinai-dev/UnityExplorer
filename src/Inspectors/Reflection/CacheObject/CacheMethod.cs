@@ -13,6 +13,8 @@ namespace UnityExplorer.Inspectors.Reflection
     {
         //private CacheObjectBase m_cachedReturnValue;
 
+        public override Type FallbackType => (MemInfo as MethodInfo).ReturnType;
+
         public override bool HasParameters => base.HasParameters || GenericArgs.Length > 0;
 
         public override bool IsStatic => (MemInfo as MethodInfo).IsStatic;
@@ -37,12 +39,7 @@ namespace UnityExplorer.Inspectors.Reflection
             m_arguments = methodInfo.GetParameters();
             m_argumentInput = new string[m_arguments.Length];
 
-            base.InitValue(null, methodInfo.ReturnType);
-        }
-
-        public override void UpdateValue()
-        {
-            base.UpdateValue();
+            CreateIValue(null, methodInfo.ReturnType);
         }
 
         public override void UpdateReflection()
@@ -78,10 +75,8 @@ namespace UnityExplorer.Inspectors.Reflection
                 ReflectionException = ReflectionHelpers.ExceptionToString(e);
             }
 
-            // todo do InitValue again for new value, in case type changed fundamentally.
-
             IValue.Value = ret;
-            IValue.OnValueUpdated();
+            UpdateValue();
         }
 
         private MethodInfo MakeGenericMethodFromInput()

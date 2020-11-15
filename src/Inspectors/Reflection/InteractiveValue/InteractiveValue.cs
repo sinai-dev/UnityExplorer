@@ -10,20 +10,66 @@ using UnityExplorer.UI;
 
 namespace UnityExplorer.Inspectors.Reflection
 {
+    // WIP
+    public enum IValueTypes
+    {
+        Any,
+        Enumerable,
+        Dictionary,
+    }
+
     public class InteractiveValue
     {
-        public InteractiveValue(Type valueType)
+        // ~~~~~~~~~ Static ~~~~~~~~~
+
+        // WIP
+        internal static Dictionary<IValueTypes, Type> s_typeDict = new Dictionary<IValueTypes, Type>
         {
-            this.ValueType = valueType;
+            { IValueTypes.Any,          typeof(InteractiveValue) },
+            { IValueTypes.Dictionary,   typeof(InteractiveDictionary) },
+            { IValueTypes.Enumerable,   typeof(InteractiveEnumerable) },
+        };
+
+        // WIP
+        public static IValueTypes GetIValueForType(Type type)
+        {
+            if (type.IsPrimitive || type == typeof(string))
+                return IValueTypes.Any; // TODO Primitive
+            else if (typeof(Transform).IsAssignableFrom(type))
+                return IValueTypes.Any; // TODO Transform
+            else if (ReflectionHelpers.IsDictionary(type))
+                return IValueTypes.Dictionary;
+            else if (ReflectionHelpers.IsEnumerable(type))
+                return IValueTypes.Enumerable;
+            else
+                return IValueTypes.Any;
+        }
+
+        public static InteractiveValue Create(object value, Type fallbackType)
+        {
+            var type = ReflectionHelpers.GetActualType(value) ?? fallbackType;
+            var iType = GetIValueForType(type);
+
+            return (InteractiveValue)Activator.CreateInstance(s_typeDict[iType], new object[] { value, type });
+        }
+
+        // ~~~~~~~~~ Instance ~~~~~~~~~
+
+        public InteractiveValue(object value, Type valueType)
+        {
+            this.Value = value;
+            this.FallbackType = valueType;
         }
 
         public CacheObjectBase OwnerCacheObject;
 
         public object Value { get; set; }
-        public readonly Type ValueType;
+        public readonly Type FallbackType;
 
-        // might not need
+        public virtual IValueTypes IValueType => IValueTypes.Any; 
+
         public virtual bool HasSubContent => false;
+        public virtual bool WantInspectBtn => true;
 
         public string RichTextValue => m_richValue ?? GetLabelForValue();
         internal string m_richValue;
@@ -32,42 +78,100 @@ namespace UnityExplorer.Inspectors.Reflection
         public MethodInfo ToStringMethod => m_toStringMethod ?? GetToStringMethod();
         internal MethodInfo m_toStringMethod;
 
-        public virtual void Init()
+        public bool m_UIConstructed;
+
+        public virtual void OnDestroy()
         {
-            OnValueUpdated();
+            if (this.m_valueContent)
+            {
+                m_valueContent.transform.SetParent(null, false);
+                m_valueContent.SetActive(false); 
+                GameObject.Destroy(this.m_valueContent.gameObject);
+
+                //if (OwnerCacheObject.m_subContent)
+                //{
+                //    var subTrans = this.OwnerCacheObject.m_subContent.transform;
+                //    for (int i = subTrans.childCount - 1; i >= 0; i--)
+                //    {
+                //        var child = subTrans.GetChild(i);
+                //        GameObject.Destroy(child.gameObject);
+                //    }
+                //}
+            }
         }
 
         public virtual void OnValueUpdated()
         {
-            if (!m_text)
-                return;
+            if (!m_UIConstructed)
+                ConstructUI(m_mainContentParent, m_subContentParent);
 
             if (OwnerCacheObject is CacheMember ownerMember && !string.IsNullOrEmpty(ownerMember.ReflectionException))
             {
-                m_text.text = "<color=red>" + ownerMember.ReflectionException + "</color>";
+                m_baseLabel.text = "<color=red>" + ownerMember.ReflectionException + "</color>";
                 Value = null;
             }
             else
             {
                 GetLabelForValue();
-                m_text.text = RichTextValue;
+                m_baseLabel.text = RichTextValue;
             }
 
-            bool shouldShowInspect = !Value.IsNullOrDestroyed(true);
-            if (m_inspectButton.activeSelf != shouldShowInspect)
-                m_inspectButton.SetActive(shouldShowInspect);
+            bool shouldShowBtns = !Value.IsNullOrDestroyed();
+
+            if (WantInspectBtn && m_inspectButton.activeSelf != shouldShowBtns)
+                m_inspectButton.SetActive(shouldShowBtns);
+
+            if (HasSubContent)
+            {
+                if (m_subExpandBtn.gameObject.activeSelf != shouldShowBtns)
+                    m_subExpandBtn.gameObject.SetActive(shouldShowBtns);
+
+                if (!shouldShowBtns && m_subContentParent.activeSelf)
+                    ToggleSubcontent();
+            }
+        }
+
+        public virtual void ConstructSubcontent() 
+        {
+            m_subContentConstructed = true;
+        }
+
+        public void ToggleSubcontent()
+        {
+            if (!this.m_subContentParent.activeSelf)
+            {
+                this.m_subContentParent.SetActive(true);
+                this.m_subContentParent.transform.SetAsLastSibling();
+                m_subExpandBtn.GetComponentInChildren<Text>().text = "▼";
+            }
+            else
+            {
+                this.m_subContentParent.SetActive(false);
+                m_subExpandBtn.GetComponentInChildren<Text>().text = "▲";
+            }
+
+            OnToggleSubcontent(m_subContentParent.activeSelf);
+        }
+
+        internal virtual void OnToggleSubcontent(bool toggle)
+        {
+            if (!m_subContentConstructed)
+                ConstructSubcontent();
         }
 
         public string GetLabelForValue()
         {
-            var valueType = Value?.GetType() ?? this.ValueType;
+            var valueType = Value?.GetType() ?? this.FallbackType;
 
             m_richValueType = UISyntaxHighlight.ParseFullSyntax(valueType, true);
 
             if (OwnerCacheObject is CacheMember cm && !cm.HasEvaluated)
                 return $"<i><color=grey>Not yet evaluated</color> ({m_richValueType})</i>";
 
-            if (Value == null) return $"<color=grey>null</color> ({m_richValueType})";
+            if (Value.IsNullOrDestroyed())
+            {
+                return $"<color=grey>null</color> ({m_richValueType})";
+            }
 
             string label;
 
@@ -135,31 +239,58 @@ namespace UnityExplorer.Inspectors.Reflection
 
         #region UI CONSTRUCTION
 
-        internal GameObject m_mainContent;
-        internal GameObject m_inspectButton;
-        internal Text m_text;
+        internal GameObject m_mainContentParent;
         internal GameObject m_subContentParent;
+
+        internal GameObject m_valueContent;
+        internal GameObject m_inspectButton;
+        internal Text m_baseLabel;
+
+        internal Button m_subExpandBtn;
+        internal bool m_subContentConstructed;
 
         public virtual void ConstructUI(GameObject parent, GameObject subGroup)
         {
-            m_mainContent = UIFactory.CreateHorizontalGroup(parent, new Color(1, 1, 1, 0));
-            var mainGroup = m_mainContent.GetComponent<HorizontalLayoutGroup>();
+            m_UIConstructed = true;
 
-            mainGroup.childForceExpandWidth = true;
+            m_valueContent = UIFactory.CreateHorizontalGroup(parent, new Color(1, 1, 1, 0));
+            m_valueContent.name = "InteractiveValue.ValueContent";
+            var mainRect = m_valueContent.GetComponent<RectTransform>();
+            mainRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 25);
+            var mainGroup = m_valueContent.GetComponent<HorizontalLayoutGroup>();
+            mainGroup.childForceExpandWidth = false;
             mainGroup.childControlWidth = true;
             mainGroup.childForceExpandHeight = false;
             mainGroup.childControlHeight = true;
             mainGroup.spacing = 4;
             mainGroup.childAlignment = TextAnchor.UpperLeft;
-            var mainLayout = m_mainContent.AddComponent<LayoutElement>();
+            var mainLayout = m_valueContent.AddComponent<LayoutElement>();
             mainLayout.flexibleWidth = 9000;
             mainLayout.minWidth = 175;
             mainLayout.minHeight = 25;
             mainLayout.flexibleHeight = 0;
 
+            // subcontent expand button TODO
+            if (HasSubContent)
+            {
+                var subBtnObj = UIFactory.CreateButton(m_valueContent, new Color(0.3f, 0.3f, 0.3f));
+                var btnLayout = subBtnObj.AddComponent<LayoutElement>();
+                btnLayout.minHeight = 25;
+                btnLayout.minWidth = 25;
+                btnLayout.flexibleWidth = 0;
+                btnLayout.flexibleHeight = 0;
+                var btnText = subBtnObj.GetComponentInChildren<Text>();
+                btnText.text = "▲";
+                m_subExpandBtn = subBtnObj.GetComponent<Button>();
+                m_subExpandBtn.onClick.AddListener(() =>
+                {
+                    ToggleSubcontent();
+                });
+            }
+
             // inspect button
 
-            m_inspectButton = UIFactory.CreateButton(m_mainContent, new Color(0.3f, 0.3f, 0.3f, 0.2f));
+            m_inspectButton = UIFactory.CreateButton(m_valueContent, new Color(0.3f, 0.3f, 0.3f, 0.2f));
             var inspectLayout = m_inspectButton.AddComponent<LayoutElement>();
             inspectLayout.minWidth = 60;
             inspectLayout.minHeight = 25;
@@ -172,16 +303,16 @@ namespace UnityExplorer.Inspectors.Reflection
             inspectBtn.onClick.AddListener(OnInspectClicked);
             void OnInspectClicked()
             {
-                if (!Value.IsNullOrDestroyed())
+                if (!Value.IsNullOrDestroyed(false))
                     InspectorManager.Instance.Inspect(this.Value);
             }
 
             m_inspectButton.SetActive(false);
 
-            // value label / tostring
+            // value label
 
-            var labelObj = UIFactory.CreateLabel(m_mainContent, TextAnchor.MiddleLeft);
-            m_text = labelObj.GetComponent<Text>();
+            var labelObj = UIFactory.CreateLabel(m_valueContent, TextAnchor.MiddleLeft);
+            m_baseLabel = labelObj.GetComponent<Text>();
             var labelLayout = labelObj.AddComponent<LayoutElement>();
             labelLayout.flexibleWidth = 9000;
             labelLayout.minHeight = 25;

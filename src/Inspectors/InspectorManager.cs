@@ -45,7 +45,7 @@ namespace UnityExplorer.Inspectors
 #endif
             UnityEngine.Object unityObj = obj as UnityEngine.Object;
 
-            if (obj.IsNullOrDestroyed())
+            if (obj.IsNullOrDestroyed(false))
             {
                 return;
             }

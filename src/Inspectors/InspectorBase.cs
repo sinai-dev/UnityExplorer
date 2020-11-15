@@ -23,7 +23,7 @@ namespace UnityExplorer.Inspectors
         {
             Target = target;
 
-            if (Target.IsNullOrDestroyed())
+            if (Target.IsNullOrDestroyed(false))
             {
                 Destroy();
                 return;
@@ -46,7 +46,7 @@ namespace UnityExplorer.Inspectors
 
         public virtual void Update()
         {
-            if (Target.IsNullOrDestroyed())
+            if (Target.IsNullOrDestroyed(false))
             {
                 Destroy();
                 return;
