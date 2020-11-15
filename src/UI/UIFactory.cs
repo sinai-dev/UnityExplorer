@@ -339,7 +339,7 @@ namespace UnityExplorer.UI
             GameObject labelObj = CreateUIObject("Label", toggleObj);
 
             toggle = toggleObj.AddComponent<Toggle>();
-            //toggle.isOn = true;
+            toggle.isOn = true;
             Toggle toggleComp = toggle;
 
             toggle.onValueChanged.AddListener(Deselect);

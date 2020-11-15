@@ -496,25 +496,6 @@ namespace UnityExplorer.Inspectors.GameObjects
             valueLabelLayout.flexibleWidth = 0;
             valueLabelLayout.minHeight = 25;
 
-            // Slider
-
-            var sliderObj = UIFactory.CreateSlider(rowObject);
-            sliderObj.transform.Find("Fill Area").gameObject.SetActive(false);
-            var sliderLayout = sliderObj.AddComponent<LayoutElement>();
-            sliderLayout.minHeight = 20;
-            sliderLayout.flexibleHeight = 0;
-            sliderLayout.minWidth = 200;
-            sliderLayout.flexibleWidth = 9000;
-            var slider = sliderObj.GetComponent<Slider>();
-            var sliderColors = slider.colors;
-            sliderColors.normalColor = new Color(0.65f, 0.65f, 0.65f);
-            slider.colors = sliderColors;
-            slider.minValue = -2;
-            slider.maxValue = 2;
-            slider.value = 0;
-            slider.onValueChanged.AddListener((float val) => { OnSliderControlChanged(val, slider, type, vectorValue); });
-            editor.sliders[(int)vectorValue] = slider;
-
             // input field
 
             var inputHolder = UIFactory.CreateVerticalGroup(rowObject, new Color(1, 1, 1, 0));
@@ -548,6 +529,25 @@ namespace UnityExplorer.Inspectors.GameObjects
             applyLayout.minHeight = 25;
 
             applyBtn.onClick.AddListener(() => { OnVectorControlInputApplied(type, vectorValue); });
+
+            // Slider
+
+            var sliderObj = UIFactory.CreateSlider(rowObject);
+            sliderObj.transform.Find("Fill Area").gameObject.SetActive(false);
+            var sliderLayout = sliderObj.AddComponent<LayoutElement>();
+            sliderLayout.minHeight = 20;
+            sliderLayout.flexibleHeight = 0;
+            sliderLayout.minWidth = 200;
+            sliderLayout.flexibleWidth = 9000;
+            var slider = sliderObj.GetComponent<Slider>();
+            var sliderColors = slider.colors;
+            sliderColors.normalColor = new Color(0.65f, 0.65f, 0.65f);
+            slider.colors = sliderColors;
+            slider.minValue = -2;
+            slider.maxValue = 2;
+            slider.value = 0;
+            slider.onValueChanged.AddListener((float val) => { OnSliderControlChanged(val, slider, type, vectorValue); });
+            editor.sliders[(int)vectorValue] = slider;
 
             return rowObject;
         }

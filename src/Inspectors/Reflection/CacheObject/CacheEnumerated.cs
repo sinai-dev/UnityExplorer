@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 namespace UnityExplorer.Inspectors.Reflection
 {
-    public class CacheEnumerated : CacheObjectBase, INestedValue
+    public class CacheEnumerated : CacheObjectBase
     {
         public override Type FallbackType => ParentEnumeration.m_baseEntryType;
         public override bool CanWrite => RefIList != null && ParentEnumeration.OwnerCacheObject.CanWrite;
@@ -38,11 +38,6 @@ namespace UnityExplorer.Inspectors.Reflection
             ParentEnumeration.Value = RefIList;
 
             ParentEnumeration.OwnerCacheObject.SetValue();
-        }
-
-        public void UpdateSubcontentHeight()
-        {
-            ParentEnumeration.UpdateSubcontentHeight();
         }
 
         internal override void ConstructUI()

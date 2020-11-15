@@ -63,6 +63,8 @@ namespace UnityExplorer.Inspectors.Reflection
             }
 
             IValue.OnValueUpdated();
+
+            IValue.RefreshElementsAfterUpdate();
         }
 
         public virtual void SetValue() => throw new NotImplementedException();

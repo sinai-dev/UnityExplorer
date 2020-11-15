@@ -347,7 +347,17 @@ namespace UnityExplorer.Inspectors
 
                         try
                         {
-                            var cached = CacheFactory.GetCacheObject(member, target, m_scrollContent);
+                            CacheMember cached;
+                            if (mi != null && CacheMember.CanProcessArgs(mi.GetParameters()))
+                                cached = new CacheMethod(mi, target);
+                            else if (pi != null && CacheMember.CanProcessArgs(pi.GetIndexParameters()))
+                                cached = new CacheProperty(pi, target);
+                            else if (member is FieldInfo fi)
+                                cached = new CacheField(fi, target);
+                            else
+                                continue;
+
+                            cached.m_parentContent = m_scrollContent;
 
                             if (cached != null)
                             {

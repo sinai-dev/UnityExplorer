@@ -43,7 +43,7 @@ namespace UnityExplorer.Inspectors.Reflection
             }
             else 
             {
-                // todo write-only properties
+                // todo write-only properties?
             }
         }
 

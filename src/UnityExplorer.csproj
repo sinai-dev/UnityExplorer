@@ -328,7 +328,6 @@
     <Compile Include="Helpers\EventHelper.cs" />
     <Compile Include="Inspectors\MouseInspector.cs" />
     <Compile Include="Inspectors\Reflection\CacheObject\CacheEnumerated.cs" />
-    <Compile Include="Inspectors\Reflection\CacheObject\CacheFactory.cs" />
     <Compile Include="Inspectors\Reflection\CacheObject\CacheField.cs" />
     <Compile Include="Inspectors\Reflection\CacheObject\CachePaired.cs" />
     <Compile Include="Inspectors\Reflection\CacheObject\CacheMember.cs" />
@@ -345,9 +344,11 @@
     <Compile Include="Inspectors\GameObjects\ChildList.cs" />
     <Compile Include="Inspectors\GameObjects\ComponentList.cs" />
     <Compile Include="Inspectors\GameObjects\GameObjectControls.cs" />
-    <Compile Include="Inspectors\Reflection\CacheObject\INestedValue.cs" />
+    <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveBool.cs" />
     <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveDictionary.cs" />
     <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveEnumerable.cs" />
+    <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveNumber.cs" />
+    <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveString.cs" />
     <Compile Include="UI\ForceUnlockCursor.cs" />
     <Compile Include="Input\IHandleInput.cs" />
     <Compile Include="Tests\Tests.cs" />

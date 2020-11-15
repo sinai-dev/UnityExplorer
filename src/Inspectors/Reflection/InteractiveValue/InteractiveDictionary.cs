@@ -31,6 +31,7 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public override IValueTypes IValueType => IValueTypes.Dictionary;
         public override bool HasSubContent => true;
+        public override bool SubContentWanted => (RefIDictionary?.Count ?? 1) > 0;
         public override bool WantInspectBtn => false;
 
         internal IDictionary RefIDictionary;
@@ -44,8 +45,6 @@ namespace UnityExplorer.Inspectors.Reflection
         internal readonly KeyValuePair<CachePaired, CachePaired>[] m_displayedEntries
             = new KeyValuePair<CachePaired, CachePaired>[ModConfig.Instance.Default_Page_Limit];
 
-        //internal readonly List<CacheKeyValuePair> m_entries = new List<CacheKeyValuePair>();
-        //internal CacheKeyValuePair[] m_displayedEntries = new CacheKeyValuePair[ModConfig.Instance.Default_Page_Limit];
         internal bool m_recacheWanted = true;
 
         public override void OnDestroy()
@@ -176,7 +175,7 @@ namespace UnityExplorer.Inspectors.Reflection
                 entry.Value.Enable();
             }
 
-            UpdateSubcontentHeight();
+            //UpdateSubcontentHeight();
         }
 
         internal override void OnToggleSubcontent(bool active)
@@ -191,38 +190,6 @@ namespace UnityExplorer.Inspectors.Reflection
             }
 
             RefreshDisplay();
-        }
-
-        public void UpdateSubcontentHeight()
-        {
-            Canvas.ForceUpdateCanvases();
-
-            float totalHeight = 0f;
-            if (m_subContentParent.activeSelf)
-            {
-                foreach (var itemIndex in m_pageHandler)
-                {
-                    if (itemIndex >= m_entries.Count)
-                        break;
-
-                    var entry = m_entries[itemIndex];
-                    LayoutRebuilder.ForceRebuildLayoutImmediate(entry.Key.m_mainRect);
-                    LayoutRebuilder.ForceRebuildLayoutImmediate(entry.Value.m_mainRect);
-
-                    totalHeight += Mathf.Max(entry.Key.m_mainRect.rect.height, entry.Value.m_mainRect.rect.height);
-                }
-            }
-
-            m_listLayout.minHeight = Mathf.Min(350f, totalHeight);
-            //m_mainLayout.minHeight = totalHeight;
-
-            LayoutRebuilder.ForceRebuildLayoutImmediate(OwnerCacheObject.m_mainRect);
-
-            if (OwnerCacheObject is INestedValue nestedValue)
-            {
-                // nested enumerable
-                nestedValue.UpdateSubcontentHeight();
-            }
         }
 
         #region UI CONSTRUCTION

@@ -16,7 +16,7 @@ namespace UnityExplorer.Inspectors.Reflection
         Value
     }
 
-    public class CachePaired : CacheObjectBase, INestedValue
+    public class CachePaired : CacheObjectBase
     {
         public override Type FallbackType => PairType == PairTypes.Key
             ? ParentDictionary.m_typeOfKeys
@@ -27,13 +27,13 @@ namespace UnityExplorer.Inspectors.Reflection
         public PairTypes PairType;
         public int Index { get; private set; }
         public InteractiveDictionary ParentDictionary { get; private set; }
-        internal IDictionary RefIDIct;
+        internal IDictionary RefIDict;
 
         public CachePaired(int index, InteractiveDictionary parentDict, IDictionary refIDict, PairTypes pairType, GameObject parentContent)
         {
             Index = index;
             ParentDictionary = parentDict;
-            RefIDIct = refIDict;
+            RefIDict = refIDict;
             this.PairType = pairType;
             this.m_parentContent = parentContent;
         }
@@ -42,11 +42,6 @@ namespace UnityExplorer.Inspectors.Reflection
         {
             IValue = InteractiveValue.Create(value, fallbackType);
             IValue.OwnerCacheObject = this;
-        }
-
-        public void UpdateSubcontentHeight()
-        {
-            ParentDictionary.UpdateSubcontentHeight();
         }
 
         #region UI CONSTRUCTION

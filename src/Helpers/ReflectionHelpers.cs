@@ -8,7 +8,7 @@ using UnityEngine;
 using BF = System.Reflection.BindingFlags;
 using System.Diagnostics.CodeAnalysis;
 #if CPP
-using ILType = Il2CppSystem.Type;
+using CppType = Il2CppSystem.Type;
 using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
 using System.Runtime.InteropServices;
@@ -61,16 +61,16 @@ namespace UnityExplorer.Helpers
 #if CPP
             if (obj is Il2CppSystem.Object ilObject)
             {
-                if (obj is ILType)
-                    return typeof(ILType);
+                if (ilObject is CppType)
+                    return typeof(CppType);
 
-               if (!string.IsNullOrEmpty(type.Namespace))
-               {
+                if (!string.IsNullOrEmpty(type.Namespace))
+                {
                     // Il2CppSystem-namespace objects should just return GetType,
                     // because using GetIl2CppType returns the System namespace type instead.
                     if (type.Namespace.StartsWith("System.") || type.Namespace.StartsWith("Il2CppSystem."))
                         return ilObject.GetType();
-               }
+                }
 
                 var il2cppType = ilObject.GetIl2CppType();
 
@@ -79,8 +79,8 @@ namespace UnityExplorer.Helpers
                 if (RuntimeSpecificsStore.IsInjected(classPtr))
                     return GetTypeByName(il2cppType.FullName);
 
-                var getType = Type.GetType(il2cppType.AssemblyQualifiedName);
-
+                // this should be fine for all other il2cpp objects
+                var getType = GetMonoType(il2cppType);
                 if (getType != null)
                     return getType;
             }
@@ -89,6 +89,18 @@ namespace UnityExplorer.Helpers
         }
 
 #if CPP
+        private static readonly Dictionary<CppType, Type> Il2CppToMonoType = new Dictionary<CppType, Type>();
+
+        public static Type GetMonoType(CppType cppType)
+        {
+            if (Il2CppToMonoType.ContainsKey(cppType))
+                return Il2CppToMonoType[cppType];
+
+            var getType = Type.GetType(cppType.AssemblyQualifiedName);
+            Il2CppToMonoType.Add(cppType, getType);
+            return getType;
+        }
+
         private static readonly Dictionary<Type, IntPtr> ClassPointers = new Dictionary<Type, IntPtr>();
 
         public static object Il2CppCast(this object obj, Type castTo)

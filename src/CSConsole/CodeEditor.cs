@@ -388,11 +388,11 @@ The following helper methods are available:
             autoIndentToggle.onValueChanged.AddListener(OnIndentChanged);
             void OnIndentChanged(bool val) => EnableAutoIndent = val;
 
-            autoIndentToggleText.text = "Auto-indent";
+            autoIndentToggleText.text = "Auto-indent on Enter";
             autoIndentToggleText.alignment = TextAnchor.UpperLeft;
 
             var autoIndentLayout = autoIndentToggleObj.AddComponent<LayoutElement>();
-            autoIndentLayout.minWidth = 120;
+            autoIndentLayout.minWidth = 180;
             autoIndentLayout.flexibleWidth = 0;
             autoIndentLayout.minHeight = 25;
 

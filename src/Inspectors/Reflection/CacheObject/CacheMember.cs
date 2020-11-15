@@ -50,6 +50,23 @@ namespace UnityExplorer.Inspectors.Reflection
             DeclaringInstance = declaringInstance;
         }
 
+        public static bool CanProcessArgs(ParameterInfo[] parameters)
+        {
+            foreach (var param in parameters)
+            {
+                var pType = param.ParameterType;
+
+                if (pType.IsByRef && pType.HasElementType)
+                    pType = pType.GetElementType();
+
+                if (pType != null && (pType.IsPrimitive || pType == typeof(string)))
+                    continue;
+                else
+                    return false;
+            }
+            return true;
+        }
+
         public override void CreateIValue(object value, Type fallbackType)
         {
             IValue = InteractiveValue.Create(value, fallbackType);

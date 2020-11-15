@@ -39,11 +39,12 @@ namespace UnityExplorer.Inspectors
         private GameObject m_mainInspectBtn;
         private GameObject m_backButtonObj;
 
-        public PageHandler m_sceneListPageHandler;
-        private GameObject m_sceneListContent;
-        private GameObject[] m_allSceneListObjects = new GameObject[0];
-        private readonly List<GameObject> m_sceneShortList = new List<GameObject>();
-        private readonly List<Text> m_sceneListTexts = new List<Text>();
+        public PageHandler m_pageHandler;
+        private GameObject m_pageContent;
+        private GameObject[] m_allObjects = new GameObject[0];
+        private readonly List<GameObject> m_shortList = new List<GameObject>();
+        private readonly List<Text> m_shortListTexts = new List<Text>();
+        private readonly List<Toggle> m_shortListToggles = new List<Toggle>();
 
         public static int DontDestroyHandle => DontDestroyObject.scene.handle;
 
@@ -200,18 +201,22 @@ namespace UnityExplorer.Inspectors
 
         private void SetSceneObjectList(GameObject[] objects)
         {
-            m_allSceneListObjects = objects;
+            m_allObjects = objects;
             RefreshSceneObjectList();
         }
 
         private void SceneListObjectClicked(int index)
         {
-            if (index >= m_sceneShortList.Count || !m_sceneShortList[index])
+            if (index >= m_shortList.Count || !m_shortList[index])
             {
                 return;
             }
 
-            SetTargetObject(m_sceneShortList[index]);
+            var obj = m_shortList[index];
+            if (obj.transform.childCount > 0)
+                SetTargetObject(obj);
+            else
+                InspectorManager.Instance.Inspect(obj);
         }
 
         private void OnSceneListPageTurn()
@@ -219,30 +224,39 @@ namespace UnityExplorer.Inspectors
             RefreshSceneObjectList();
         }
 
+        private void OnToggleClicked(int index, bool val)
+        {
+            if (index >= m_shortList.Count || !m_shortList[index])
+                return;
+
+            var obj = m_shortList[index];
+            obj.SetActive(val);
+        }
+
         private void RefreshSceneObjectList()
         {
             m_timeOfLastSceneUpdate = Time.realtimeSinceStartup;
 
-            var objects = m_allSceneListObjects;
-            m_sceneListPageHandler.ListCount = objects.Length;
+            var objects = m_allObjects;
+            m_pageHandler.ListCount = objects.Length;
 
             //int startIndex = m_sceneListPageHandler.StartIndex;
 
             int newCount = 0;
 
-            foreach (var itemIndex in m_sceneListPageHandler)
+            foreach (var itemIndex in m_pageHandler)
             {
                 newCount++;
 
                 // normalized index starting from 0
-                var i = itemIndex - m_sceneListPageHandler.StartIndex;
+                var i = itemIndex - m_pageHandler.StartIndex;
 
                 if (itemIndex >= objects.Length)
                 {
-                    if (i > m_lastCount || i >= m_sceneListTexts.Count)
+                    if (i > m_lastCount || i >= m_shortListTexts.Count)
                         break;
 
-                    GameObject label = m_sceneListTexts[i].transform.parent.parent.gameObject;
+                    GameObject label = m_shortListTexts[i].transform.parent.parent.gameObject;
                     if (label.activeSelf)
                         label.SetActive(false);
                 }
@@ -253,17 +267,17 @@ namespace UnityExplorer.Inspectors
                     if (!obj)
                         continue;
 
-                    if (i >= m_sceneShortList.Count)
+                    if (i >= m_shortList.Count)
                     {
-                        m_sceneShortList.Add(obj);
+                        m_shortList.Add(obj);
                         AddObjectListButton();
                     }
                     else
                     {
-                        m_sceneShortList[i] = obj;
+                        m_shortList[i] = obj;
                     }
 
-                    var text = m_sceneListTexts[i];
+                    var text = m_shortListTexts[i];
 
                     var name = obj.name;
 
@@ -272,6 +286,9 @@ namespace UnityExplorer.Inspectors
 
                     text.text = name;
                     text.color = obj.activeSelf ? Color.green : Color.red;
+
+                    var tog = m_shortListToggles[i];
+                    tog.isOn = obj.activeSelf;
 
                     var label = text.transform.parent.parent.gameObject;
                     if (!label.activeSelf)
@@ -397,14 +414,17 @@ namespace UnityExplorer.Inspectors
             inspectButtonLayout.minWidth = 65;
             inspectButtonLayout.flexibleWidth = 0;
             Button inspectButton = m_mainInspectBtn.GetComponent<Button>();
+            colors = inspectButton.colors;
+            colors.normalColor = new Color(0.12f, 0.12f, 0.12f);
+            inspectButton.colors = colors;
 
             inspectButton.onClick.AddListener(() => { InspectorManager.Instance.Inspect(m_selectedSceneObject); });
 
-            GameObject scrollObj = UIFactory.CreateScrollView(leftPane, out m_sceneListContent, out SliderScrollbar scroller, new Color(0.1f, 0.1f, 0.1f));
+            GameObject scrollObj = UIFactory.CreateScrollView(leftPane, out m_pageContent, out SliderScrollbar scroller, new Color(0.1f, 0.1f, 0.1f));
 
-            m_sceneListPageHandler = new PageHandler(scroller);
-            m_sceneListPageHandler.ConstructUI(leftPane);
-            m_sceneListPageHandler.OnPageChanged += OnSceneListPageTurn;
+            m_pageHandler = new PageHandler(scroller);
+            m_pageHandler.ConstructUI(leftPane);
+            m_pageHandler.OnPageChanged += OnSceneListPageTurn;
 
             // hide button
 
@@ -434,7 +454,7 @@ namespace UnityExplorer.Inspectors
                     sceneDropdownObj.SetActive(false);
                     scenePathGroupObj.SetActive(false);
                     scrollObj.SetActive(false);
-                    m_sceneListPageHandler.Hide();
+                    m_pageHandler.Hide();
 
                     leftLayout.minWidth = 15;
                 }
@@ -459,9 +479,9 @@ namespace UnityExplorer.Inspectors
 
         private void AddObjectListButton()
         {
-            int thisIndex = m_sceneListTexts.Count();
+            int thisIndex = m_shortListTexts.Count();
 
-            GameObject btnGroupObj = UIFactory.CreateHorizontalGroup(m_sceneListContent, new Color(0.1f, 0.1f, 0.1f));
+            GameObject btnGroupObj = UIFactory.CreateHorizontalGroup(m_pageContent, new Color(0.1f, 0.1f, 0.1f));
             HorizontalLayoutGroup btnGroup = btnGroupObj.GetComponent<HorizontalLayoutGroup>();
             btnGroup.childForceExpandWidth = true;
             btnGroup.childControlWidth = true;
@@ -472,6 +492,15 @@ namespace UnityExplorer.Inspectors
             btnLayout.minHeight = 25;
             btnLayout.flexibleHeight = 0;
             btnGroupObj.AddComponent<Mask>();
+
+            var toggleObj = UIFactory.CreateToggle(btnGroupObj, out Toggle toggle, out Text toggleText, new Color(0.1f, 0.1f, 0.1f));
+            var toggleLayout = toggleObj.AddComponent<LayoutElement>();
+            toggleLayout.minHeight = 25;
+            toggleLayout.minWidth = 25;
+            toggleText.text = "";
+            toggle.isOn = false;
+            m_shortListToggles.Add(toggle);
+            toggle.onValueChanged.AddListener((bool val) => { OnToggleClicked(thisIndex, val); });
 
             GameObject mainButtonObj = UIFactory.CreateButton(btnGroupObj);
             LayoutElement mainBtnLayout = mainButtonObj.AddComponent<LayoutElement>();
@@ -490,7 +519,7 @@ namespace UnityExplorer.Inspectors
             Text mainText = mainButtonObj.GetComponentInChildren<Text>();
             mainText.alignment = TextAnchor.MiddleLeft;
             mainText.horizontalOverflow = HorizontalWrapMode.Overflow;
-            m_sceneListTexts.Add(mainText);
+            m_shortListTexts.Add(mainText);
 
             GameObject inspectBtnObj = UIFactory.CreateButton(btnGroupObj);
             LayoutElement inspectBtnLayout = inspectBtnObj.AddComponent<LayoutElement>();
@@ -508,9 +537,9 @@ namespace UnityExplorer.Inspectors
             mainColors.highlightedColor = new Color(0.2f, 0.2f, 0.2f, 0.5f);
             inspectBtn.colors = inspectColors;
 
-            inspectBtn.onClick.AddListener(() => { InspectorManager.Instance.Inspect(m_sceneShortList[thisIndex]); });
+            inspectBtn.onClick.AddListener(() => { InspectorManager.Instance.Inspect(m_shortList[thisIndex]); });
         }
 
-#endregion
+        #endregion
     }
 }

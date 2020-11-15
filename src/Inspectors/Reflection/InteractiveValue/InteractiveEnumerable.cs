@@ -25,6 +25,7 @@ namespace UnityExplorer.Inspectors.Reflection
         public override IValueTypes IValueType => IValueTypes.Enumerable;
 
         public override bool HasSubContent => true;
+        public override bool SubContentWanted => (RefIList?.Count ?? 1) > 0;
         public override bool WantInspectBtn => false;
 
         internal IEnumerable RefIEnumerable;
@@ -137,7 +138,7 @@ namespace UnityExplorer.Inspectors.Reflection
                 entry.Enable();
             }
 
-            UpdateSubcontentHeight();
+            //UpdateSubcontentHeight();
         }
 
         internal override void OnToggleSubcontent(bool active)
@@ -152,36 +153,6 @@ namespace UnityExplorer.Inspectors.Reflection
             }
 
             RefreshDisplay();
-        }
-
-        public void UpdateSubcontentHeight()
-        {
-            Canvas.ForceUpdateCanvases();
-
-            float totalHeight = 0f;
-            if (m_subContentParent.activeSelf)
-            {
-                foreach (var itemIndex in m_pageHandler)
-                {
-                    if (itemIndex >= m_entries.Count)
-                        break;
-
-                    var entry = m_entries[itemIndex];
-                    LayoutRebuilder.ForceRebuildLayoutImmediate(entry.m_mainRect);
-                    totalHeight += entry.m_mainRect.rect.height;
-                }
-            }
-
-            m_listLayout.minHeight = Mathf.Min(350f, totalHeight);
-            //m_mainLayout.minHeight = totalHeight;
-
-            LayoutRebuilder.ForceRebuildLayoutImmediate(OwnerCacheObject.m_mainRect);
-
-            if (OwnerCacheObject is INestedValue nestedValue)
-            {
-                // nested enumerable
-                nestedValue.UpdateSubcontentHeight();
-            }
         }
 
         #region UI CONSTRUCTION

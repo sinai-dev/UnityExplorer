@@ -16,6 +16,13 @@ namespace UnityExplorer.Inspectors.Reflection
         Any,
         Enumerable,
         Dictionary,
+        Bool,
+        String,
+        Number,
+        Enum,
+        Flags,
+        UnityStruct,
+        Color, // maybe
     }
 
     public class InteractiveValue
@@ -28,15 +35,22 @@ namespace UnityExplorer.Inspectors.Reflection
             { IValueTypes.Any,          typeof(InteractiveValue) },
             { IValueTypes.Dictionary,   typeof(InteractiveDictionary) },
             { IValueTypes.Enumerable,   typeof(InteractiveEnumerable) },
+            { IValueTypes.Bool,         typeof(InteractiveBool) },
+            { IValueTypes.String,       typeof(InteractiveString) },
+            { IValueTypes.Number,       typeof(InteractiveNumber) },
         };
 
         // WIP
         public static IValueTypes GetIValueForType(Type type)
         {
-            if (type.IsPrimitive || type == typeof(string))
-                return IValueTypes.Any; // TODO Primitive
+            if (type == typeof(bool))
+                return IValueTypes.Bool;
+            else if (type == typeof(string))
+                return IValueTypes.String;
+            else if (type.IsPrimitive)
+                return IValueTypes.Number;
             else if (typeof(Transform).IsAssignableFrom(type))
-                return IValueTypes.Any; // TODO Transform
+                return IValueTypes.Any; 
             else if (ReflectionHelpers.IsDictionary(type))
                 return IValueTypes.Dictionary;
             else if (ReflectionHelpers.IsEnumerable(type))
@@ -69,6 +83,7 @@ namespace UnityExplorer.Inspectors.Reflection
         public virtual IValueTypes IValueType => IValueTypes.Any; 
 
         public virtual bool HasSubContent => false;
+        public virtual bool SubContentWanted => false;
         public virtual bool WantInspectBtn => true;
 
         public string RichTextValue => m_richValue ?? GetLabelForValue();
@@ -87,16 +102,6 @@ namespace UnityExplorer.Inspectors.Reflection
                 m_valueContent.transform.SetParent(null, false);
                 m_valueContent.SetActive(false); 
                 GameObject.Destroy(this.m_valueContent.gameObject);
-
-                //if (OwnerCacheObject.m_subContent)
-                //{
-                //    var subTrans = this.OwnerCacheObject.m_subContent.transform;
-                //    for (int i = subTrans.childCount - 1; i >= 0; i--)
-                //    {
-                //        var child = subTrans.GetChild(i);
-                //        GameObject.Destroy(child.gameObject);
-                //    }
-                //}
             }
         }
 
@@ -115,18 +120,28 @@ namespace UnityExplorer.Inspectors.Reflection
                 GetLabelForValue();
                 m_baseLabel.text = RichTextValue;
             }
+        }
 
-            bool shouldShowBtns = !Value.IsNullOrDestroyed();
+        public void RefreshElementsAfterUpdate()
+        {
+            if (WantInspectBtn)
+            {
+                bool shouldShowInspect = !Value.IsNullOrDestroyed();
 
-            if (WantInspectBtn && m_inspectButton.activeSelf != shouldShowBtns)
-                m_inspectButton.SetActive(shouldShowBtns);
+                if (m_inspectButton.activeSelf != shouldShowInspect)
+                    m_inspectButton.SetActive(shouldShowInspect);
+            }
+
+            bool subContentWanted = SubContentWanted;
+            if (OwnerCacheObject is CacheMember cm && !cm.HasEvaluated)
+                subContentWanted = false;
 
             if (HasSubContent)
             {
-                if (m_subExpandBtn.gameObject.activeSelf != shouldShowBtns)
-                    m_subExpandBtn.gameObject.SetActive(shouldShowBtns);
+                if (m_subExpandBtn.gameObject.activeSelf != subContentWanted)
+                    m_subExpandBtn.gameObject.SetActive(subContentWanted);
 
-                if (!shouldShowBtns && m_subContentParent.activeSelf)
+                if (!subContentWanted && m_subContentParent.activeSelf)
                     ToggleSubcontent();
             }
         }
@@ -151,6 +166,8 @@ namespace UnityExplorer.Inspectors.Reflection
             }
 
             OnToggleSubcontent(m_subContentParent.activeSelf);
+
+            RefreshElementsAfterUpdate();
         }
 
         internal virtual void OnToggleSubcontent(bool toggle)
