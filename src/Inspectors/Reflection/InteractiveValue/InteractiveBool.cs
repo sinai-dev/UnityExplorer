@@ -11,11 +11,8 @@ namespace UnityExplorer.Inspectors.Reflection
 {
     public class InteractiveBool : InteractiveValue
     {
-        public InteractiveBool(object value, Type valueType) : base(value, valueType)
-        {
-        }
+        public InteractiveBool(object value, Type valueType) : base(value, valueType) { }
 
-        public override IValueTypes IValueType => IValueTypes.Bool;
         public override bool HasSubContent => false;
         public override bool SubContentWanted => false;
         public override bool WantInspectBtn => false;

@@ -49,13 +49,14 @@ namespace UnityExplorer.Inspectors.Reflection
         {
             var value = IValue.Value;
 
-            // see if current value has changed types fundamentally
+            // if the type has changed fundamentally, make a new interactivevalue for it
             var type = value == null 
                 ? FallbackType
                 : ReflectionHelpers.GetActualType(value);
+
             var ivalueType = InteractiveValue.GetIValueForType(type);
 
-            if (ivalueType != IValue.IValueType)
+            if (ivalueType != IValue.GetType())
             {
                 IValue.OnDestroy();
                 CreateIValue(value, FallbackType);

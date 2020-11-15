@@ -29,10 +29,18 @@ namespace UnityExplorer.Inspectors.Reflection
             }
         }
 
-        public override IValueTypes IValueType => IValueTypes.Dictionary;
-        public override bool HasSubContent => true;
-        public override bool SubContentWanted => (RefIDictionary?.Count ?? 1) > 0;
         public override bool WantInspectBtn => false;
+        public override bool HasSubContent => true;
+        // todo fix for il2cpp
+        public override bool SubContentWanted
+        {
+            get
+            {
+                if (m_recacheWanted)
+                    return true;
+                else return m_entries.Count > 0;
+            }
+        }
 
         internal IDictionary RefIDictionary;
 

@@ -10,53 +10,25 @@ using UnityExplorer.UI;
 
 namespace UnityExplorer.Inspectors.Reflection
 {
-    // WIP
-    public enum IValueTypes
-    {
-        Any,
-        Enumerable,
-        Dictionary,
-        Bool,
-        String,
-        Number,
-        Enum,
-        Flags,
-        UnityStruct,
-        Color, // maybe
-    }
-
     public class InteractiveValue
     {
-        // ~~~~~~~~~ Static ~~~~~~~~~
-
         // WIP
-        internal static Dictionary<IValueTypes, Type> s_typeDict = new Dictionary<IValueTypes, Type>
-        {
-            { IValueTypes.Any,          typeof(InteractiveValue) },
-            { IValueTypes.Dictionary,   typeof(InteractiveDictionary) },
-            { IValueTypes.Enumerable,   typeof(InteractiveEnumerable) },
-            { IValueTypes.Bool,         typeof(InteractiveBool) },
-            { IValueTypes.String,       typeof(InteractiveString) },
-            { IValueTypes.Number,       typeof(InteractiveNumber) },
-        };
-
-        // WIP
-        public static IValueTypes GetIValueForType(Type type)
+        public static Type GetIValueForType(Type type)
         {
             if (type == typeof(bool))
-                return IValueTypes.Bool;
+                return typeof(InteractiveBool);
             else if (type == typeof(string))
-                return IValueTypes.String;
+                return typeof(InteractiveString);
             else if (type.IsPrimitive)
-                return IValueTypes.Number;
+                return typeof(InteractiveNumber);
             else if (typeof(Transform).IsAssignableFrom(type))
-                return IValueTypes.Any; 
+                return typeof(InteractiveValue);
             else if (ReflectionHelpers.IsDictionary(type))
-                return IValueTypes.Dictionary;
+                return typeof(InteractiveDictionary);
             else if (ReflectionHelpers.IsEnumerable(type))
-                return IValueTypes.Enumerable;
+                return typeof(InteractiveEnumerable);
             else
-                return IValueTypes.Any;
+                return typeof(InteractiveValue);
         }
 
         public static InteractiveValue Create(object value, Type fallbackType)
@@ -64,7 +36,7 @@ namespace UnityExplorer.Inspectors.Reflection
             var type = ReflectionHelpers.GetActualType(value) ?? fallbackType;
             var iType = GetIValueForType(type);
 
-            return (InteractiveValue)Activator.CreateInstance(s_typeDict[iType], new object[] { value, type });
+            return (InteractiveValue)Activator.CreateInstance(iType, new object[] { value, type });
         }
 
         // ~~~~~~~~~ Instance ~~~~~~~~~
@@ -79,8 +51,6 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public object Value { get; set; }
         public readonly Type FallbackType;
-
-        public virtual IValueTypes IValueType => IValueTypes.Any; 
 
         public virtual bool HasSubContent => false;
         public virtual bool SubContentWanted => false;

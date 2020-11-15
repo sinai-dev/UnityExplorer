@@ -22,8 +22,6 @@ namespace UnityExplorer.Inspectors.Reflection
                 m_baseEntryType = typeof(object);
         }
 
-        public override IValueTypes IValueType => IValueTypes.Enumerable;
-
         public override bool WantInspectBtn => false;
         public override bool HasSubContent => true;
         public override bool SubContentWanted
