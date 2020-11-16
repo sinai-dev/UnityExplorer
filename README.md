@@ -30,7 +30,6 @@
 
 <b>IL2CPP Issues:</b>
 * Some methods may still fail with a `MissingMethodException`, please let me know if you experience this (with full debug log please).
-* Reflection may fail with certain types, see [here](https://github.com/knah/IL2CPPAssemblyUnhollower#known-issues) for more details.
 
 ## Features
 
