@@ -198,6 +198,8 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public override void RefreshUIForValue()
         {
+            InitializeStructInfo();
+
             base.RefreshUIForValue();
 
             if (m_subContentConstructed)
@@ -212,8 +214,6 @@ namespace UnityExplorer.Inspectors.Reflection
 
             StructInfo.RefreshUI(m_inputs, this.Value);
         }
-
-        #region STRUCT INFO HANDLERS
 
         internal Type m_lastStructType;
 
@@ -232,14 +232,19 @@ namespace UnityExplorer.Inspectors.Reflection
                     var child = m_subContentParent.transform.GetChild(i);
                     GameObject.Destroy(child.gameObject);
                 }
+
+                m_UIConstructed = false;
             }
 
             m_lastStructType = type;
 
             StructInfo = StructInfoFactory.Create(type);
-        }
 
-        #endregion
+            if (m_subContentParent.activeSelf)
+            {
+                ConstructSubcontent();
+            }
+        }
 
         #region UI CONSTRUCTION
 

@@ -134,7 +134,7 @@ namespace UnityExplorer.Tests
             }
 
 #if CPP
-            TestTexture = UIManager.MakeSolidTexture(Color.white, 200, 200);
+            TestTexture = UIManager.MakeSolidTexture(Color.white, 1000, 600);
             TestTexture.name = "TestTexture";
 
             var r = new Rect(0, 0, TestTexture.width, TestTexture.height);

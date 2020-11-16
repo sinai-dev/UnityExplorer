@@ -45,8 +45,6 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public override void RefreshUIForValue()
         {
-            //base.RefreshUIForValue();
-
             GetDefaultLabel();
             m_baseLabel.text = DefaultLabel;
 

@@ -12,7 +12,6 @@ namespace UnityExplorer.Inspectors.Reflection
 {
     public class InteractiveValue
     {
-        // WIP
         public static Type GetIValueForType(Type type)
         {
             if (type == typeof(bool))
@@ -68,9 +67,6 @@ namespace UnityExplorer.Inspectors.Reflection
         public string DefaultLabel => m_defaultLabel ?? GetDefaultLabel();
         internal string m_defaultLabel;
         internal string m_richValueType;
-
-        public MethodInfo ToStringMethod => m_toStringMethod ?? GetToStringMethod();
-        internal MethodInfo m_toStringMethod;
 
         public bool m_UIConstructed;
 
@@ -203,7 +199,8 @@ namespace UnityExplorer.Inspectors.Reflection
             }
             else
             {
-                var toString = (string)ToStringMethod.Invoke(Value, null);
+                var toString = (string)valueType.GetMethod("ToString", new Type[0])?.Invoke(Value, null) 
+                                ?? Value.ToString();
 
                 var fullnametemp = valueType.ToString();
                 if (fullnametemp.StartsWith("Il2CppSystem"))
@@ -231,23 +228,6 @@ namespace UnityExplorer.Inspectors.Reflection
             }
 
             return m_defaultLabel = label;
-        }
-
-        private MethodInfo GetToStringMethod()
-        {
-            try
-            {
-                m_toStringMethod = ReflectionHelpers.GetActualType(Value).GetMethod("ToString", new Type[0])
-                                   ?? typeof(object).GetMethod("ToString", new Type[0]);
-
-                // test invoke
-                m_toStringMethod.Invoke(Value, null);
-            }
-            catch
-            {
-                m_toStringMethod = typeof(object).GetMethod("ToString", new Type[0]);
-            }
-            return m_toStringMethod;
         }
 
         #region UI CONSTRUCTION

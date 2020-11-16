@@ -24,9 +24,28 @@ namespace UnityExplorer.Inspectors.Reflection
 
         internal KeyValuePair<int,string>[] m_values = new KeyValuePair<int, string>[0];
 
+        internal Type m_lastEnumType;
+
         internal void GetNames()
         {
             var type = Value?.GetType() ?? FallbackType;
+
+            if (m_lastEnumType == type)
+                return;
+
+            m_lastEnumType = type;
+
+            if (m_subContentConstructed)
+            {
+                // changing types, destroy subcontent
+                for (int i = 0; i < m_subContentParent.transform.childCount; i++)
+                {
+                    var child = m_subContentParent.transform.GetChild(i);
+                    GameObject.Destroy(child.gameObject);
+                }
+
+                m_subContentConstructed = false;
+            }
 
             if (!s_enumNamesCache.ContainsKey(type))
             {
@@ -52,6 +71,8 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public override void OnValueUpdated()
         {
+            GetNames();
+
             base.OnValueUpdated();
         }
 

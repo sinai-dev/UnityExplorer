@@ -45,24 +45,109 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public void ConstructInstanceHelpers()
         {
-            // On second thought, I'm not sure about this, seems unnecessary (and bloaty)
-            // I might do the Texture2D helper (view/save image) but idk about anything else.
+            // WIP
+
+            //if (m_targetType == typeof(Texture2D))
+            //    ConstructTextureHelper();
+
+            // todo other helpers
 
             //if (typeof(Component).IsAssignableFrom(m_targetType))
             //{
-            //    // component helpers (ref GO)
-            //    var tempObj = UIFactory.CreateLabel(Content, TextAnchor.MiddleLeft);
-            //    var text = tempObj.GetComponent<Text>();
-            //    text.text = "TODO comp helpers";
             //}
             //else if (typeof(UnityEngine.Object).IsAssignableFrom(m_targetType))
             //{
-            //    // unityengine.object helpers (name, instantiate, destroy?)
-            //    var tempObj = UIFactory.CreateLabel(Content, TextAnchor.MiddleLeft);
-            //    var text = tempObj.GetComponent<Text>();
-            //    text.text = "TODO unity object helpers";
             //}
         }
+
+        //internal bool showingTextureHelper;
+        //internal bool constructedTextureViewer;
+
+        //internal void ConstructTextureHelper()
+        //{
+        //    var rowObj = UIFactory.CreateHorizontalGroup(Content, new Color(0.1f, 0.1f, 0.1f));
+        //    var rowLayout = rowObj.AddComponent<LayoutElement>();
+        //    rowLayout.minHeight = 25;
+        //    rowLayout.flexibleHeight = 0;
+        //    var rowGroup = rowObj.GetComponent<HorizontalLayoutGroup>();
+        //    rowGroup.childForceExpandHeight = true;
+        //    rowGroup.childForceExpandWidth = false;
+        //    rowGroup.padding.top = 3;
+        //    rowGroup.padding.left = 3;
+        //    rowGroup.padding.bottom = 3;
+        //    rowGroup.padding.right = 3;
+        //    rowGroup.spacing = 5;
+
+        //    var showBtnObj = UIFactory.CreateButton(rowObj, new Color(0.2f, 0.2f, 0.2f));
+        //    var showBtnLayout = showBtnObj.AddComponent<LayoutElement>();
+        //    showBtnLayout.minWidth = 50;
+        //    showBtnLayout.flexibleWidth = 0;
+        //    var showText = showBtnObj.GetComponentInChildren<Text>();
+        //    showText.text = "Show";
+        //    var showBtn = showBtnObj.GetComponent<Button>();
+
+        //    var labelObj = UIFactory.CreateLabel(rowObj, TextAnchor.MiddleLeft);
+        //    var labelText = labelObj.GetComponent<Text>();
+        //    labelText.text = "Texture Viewer";
+
+        //    var textureViewerObj = UIFactory.CreateScrollView(Content, out GameObject scrollContent, out _, new Color(0.1f, 0.1f, 0.1f));
+        //    var viewerGroup = scrollContent.GetComponent<VerticalLayoutGroup>();
+        //    viewerGroup.childForceExpandHeight = false;
+        //    viewerGroup.childForceExpandWidth = false;
+        //    viewerGroup.childControlHeight = true;
+        //    viewerGroup.childControlWidth = true;
+        //    var mainLayout = textureViewerObj.GetComponent<LayoutElement>();
+        //    mainLayout.flexibleHeight = -1;
+        //    mainLayout.flexibleWidth = 2000;
+        //    mainLayout.minHeight = 25;
+
+        //    textureViewerObj.SetActive(false);
+
+        //    showBtn.onClick.AddListener(() =>
+        //    {
+        //        showingTextureHelper = !showingTextureHelper;
+
+        //        if (showingTextureHelper)
+        //        {
+        //            if (!constructedTextureViewer)
+        //                ConstructTextureViewerArea(scrollContent);
+
+        //            showText.text = "Hide";
+        //            textureViewerObj.SetActive(true);
+        //        }
+        //        else
+        //        {
+        //            showText.text = "Show";
+        //            textureViewerObj.SetActive(false);
+        //        }
+        //    });
+        //}
+
+        //internal void ConstructTextureViewerArea(GameObject parent)
+        //{
+        //    constructedTextureViewer = true;
+
+        //    var tex = Target as Texture2D;
+
+        //    if (!tex)
+        //    {
+        //        ExplorerCore.LogWarning("Could not cast the target instance to Texture2D!");
+        //        return;
+        //    }
+
+        //    var imageObj = UIFactory.CreateUIObject("TextureViewerImage", parent, new Vector2(1, 1));
+        //    var image = imageObj.AddComponent<Image>();
+        //    var sprite = UIManager.CreateSprite(tex);
+        //    image.sprite = sprite;
+
+        //    var fitter = imageObj.AddComponent<ContentSizeFitter>();
+        //    fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        //    //fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        //    var imageLayout = imageObj.AddComponent<LayoutElement>();
+        //    imageLayout.preferredHeight = sprite.rect.height;
+        //    imageLayout.preferredWidth = sprite.rect.width;
+        //}
 
         public void ConstructInstanceFilters(GameObject parent)
         {
