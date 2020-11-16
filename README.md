@@ -26,7 +26,7 @@
 | Mod Loader  | IL2CPP | Mono |
 | ----------- | ------ | ---- |
 | [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.MelonLoader.Il2Cpp.zip) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.MelonLoader.Mono.zip) | 
-| [BepInEx](https://github.com/BepInEx/BepInEx) | ❔ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.BepInEx.Il2Cpp.zip) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.BepInEx.Mono.zip) |
+| [BepInEx](https://github.com/BepInEx/BepInEx) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.BepInEx.Il2Cpp.zip) | ✔️ [link](https://github.com/sinai-dev/Explorer/releases/latest/download/Explorer.BepInEx.Mono.zip) |
 
 <b>IL2CPP Issues:</b>
 * Some methods may still fail with a `MissingMethodException`, please let me know if you experience this (with full debug log please).
@@ -53,7 +53,7 @@
 1. Download the UnityExplorer release for BepInEx IL2CPP or Mono above.
 2. Take the `UnityExplorer.dll` file and put it in `[GameFolder]\BepInEx\plugins\`
 3. Take the `UnityExplorer\` folder (with `explorerui.bundle`) and put it in `[GameFolder]\Mods\`, so it looks like `[GameFolder]\Mods\UnityExplorer\explorerui.bundle`.
-4. In IL2CPP, it is highly recommended to get the base Unity libs for the game's Unity version and put them in the `BepInEx\unhollowed\base\` folder.
+4. In IL2CPP, it is highly recommended to get the base Unity libs for the game's Unity version and put them in the `BepInEx\unhollowed\base\` folder. 
 
 ### MelonLoader
 
@@ -81,6 +81,7 @@ You can access the settings via the "Options" page of the main menu, or directly
 `Default Output Path` (string)
 * Default: `Mods\Explorer`
 * Where output is generated to, by default (for Texture PNG saving, etc).
+* Currently this is not actually used for anything, but it will be soon.
 
 `Log Unity Debug` (bool)
 * Default: `false`
