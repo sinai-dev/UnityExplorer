@@ -33,8 +33,6 @@
 
 ## Features
 
-[Click here for an image overview of UnityExplorer](https://raw.githubusercontent.com/sinai-dev/UnityExplorer/master/overview.png)
-
 * <b>Scene Explorer</b>: Simple menu to traverse the Transform heirarchy of the scene. 
 * <b>GameObject Inspector</b>: Various helpful tools to see and manipulate the GameObject, similar to what you can do in the Editor.
 * <b>Reflection Inspector</b>: Inspect Properties and Fields. Can also set primitive values and evaluate primitive methods.
