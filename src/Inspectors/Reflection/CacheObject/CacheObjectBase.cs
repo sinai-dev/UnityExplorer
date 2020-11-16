@@ -43,7 +43,8 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public void Destroy()
         {
-            GameObject.Destroy(this.m_mainContent);
+            if (this.m_mainContent)
+                GameObject.Destroy(this.m_mainContent);
         }
 
         public virtual void UpdateValue()

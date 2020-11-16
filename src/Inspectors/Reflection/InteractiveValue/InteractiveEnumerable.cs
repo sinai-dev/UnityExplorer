@@ -49,18 +49,13 @@ namespace UnityExplorer.Inspectors.Reflection
             RefIEnumerable = Value as IEnumerable;
             RefIList = Value as IList;
 
-            if (Value != null)
+            if (m_subContentParent.activeSelf)
             {
-                if (m_subContentParent.activeSelf)
-                {
-                    GetCacheEntries();
-                    RefreshDisplay();
-                }
-                else
-                    m_recacheWanted = true;
+                GetCacheEntries();
+                RefreshDisplay();
             }
             else
-                m_entries.Clear();
+                m_recacheWanted = true;
 
             base.OnValueUpdated();
         }
@@ -108,7 +103,7 @@ namespace UnityExplorer.Inspectors.Reflection
             }
 
 #if CPP
-            if (RefIEnumerable == null && !Value.IsNullOrDestroyed())
+            if (RefIEnumerable == null && Value != null)
                 RefIEnumerable = EnumerateWithReflection();
 #endif
 

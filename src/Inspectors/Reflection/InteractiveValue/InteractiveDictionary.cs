@@ -65,18 +65,13 @@ namespace UnityExplorer.Inspectors.Reflection
         {
             RefIDictionary = Value as IDictionary;
 
-            if (Value != null)
+            if (m_subContentParent.activeSelf)
             {
-                if (m_subContentParent.activeSelf)
-                {
-                    GetCacheEntries();
-                    RefreshDisplay();
-                }
-                else
-                    m_recacheWanted = true;
+                GetCacheEntries();
+                RefreshDisplay();
             }
             else
-                m_entries.Clear();
+                m_recacheWanted = true;
 
             base.OnValueUpdated();
         }
@@ -122,7 +117,7 @@ namespace UnityExplorer.Inspectors.Reflection
             }
 
 #if CPP
-            if (RefIDictionary == null && !Value.IsNullOrDestroyed())
+            if (RefIDictionary == null && Value != null)
                 RefIDictionary = EnumerateWithReflection();
 #endif
 
