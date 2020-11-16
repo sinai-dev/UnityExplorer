@@ -1,15 +1,35 @@
 ﻿using System;
 using System.Reflection;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using UnityExplorer.Helpers;
 using UnityEngine;
-using Explorer.Helpers;
 
-namespace Explorer.Input
+namespace UnityExplorer.Input
 {
-    public class InputSystem : IAbstractInput
+    public class InputSystem : IHandleInput
     {
+        public InputSystem()
+        {
+            ExplorerCore.Log("Initializing new InputSystem support...");
+
+            m_kbCurrentProp = TKeyboard.GetProperty("current");
+            m_kbIndexer = TKeyboard.GetProperty("Item", new Type[] { TKey });
+
+            var btnControl = ReflectionHelpers.GetTypeByName("UnityEngine.InputSystem.Controls.ButtonControl");
+            m_btnIsPressedProp = btnControl.GetProperty("isPressed");
+            m_btnWasPressedProp = btnControl.GetProperty("wasPressedThisFrame");
+
+            m_mouseCurrentProp = TMouse.GetProperty("current");
+            m_leftButtonProp = TMouse.GetProperty("leftButton");
+            m_rightButtonProp = TMouse.GetProperty("rightButton");
+
+            m_positionProp = ReflectionHelpers.GetTypeByName("UnityEngine.InputSystem.Pointer")
+                            .GetProperty("position");
+
+            m_readVector2InputMethod = ReflectionHelpers.GetTypeByName("UnityEngine.InputSystem.InputControl`1")
+                                      .MakeGenericType(typeof(Vector2))
+                                      .GetMethod("ReadValue");
+        }
+
         public static Type TKeyboard => m_tKeyboard ?? (m_tKeyboard = ReflectionHelpers.GetTypeByName("UnityEngine.InputSystem.Keyboard"));
         private static Type m_tKeyboard;
 
@@ -82,29 +102,6 @@ namespace Explorer.Input
                 // case 2: return (bool)_btnIsPressedProp.GetValue(MiddleMouseButton, null);
                 default: throw new NotImplementedException();
             }
-        }
-
-        public void Init()
-        {
-            ExplorerCore.Log("Initializing new InputSystem support...");
-
-            m_kbCurrentProp = TKeyboard.GetProperty("current");
-            m_kbIndexer = TKeyboard.GetProperty("Item", new Type[] { TKey });
-
-            var btnControl = ReflectionHelpers.GetTypeByName("UnityEngine.InputSystem.Controls.ButtonControl");
-            m_btnIsPressedProp = btnControl.GetProperty("isPressed");
-            m_btnWasPressedProp = btnControl.GetProperty("wasPressedThisFrame");
-
-            m_mouseCurrentProp = TMouse.GetProperty("current");
-            m_leftButtonProp = TMouse.GetProperty("leftButton");
-            m_rightButtonProp = TMouse.GetProperty("rightButton");
-
-            m_positionProp = ReflectionHelpers.GetTypeByName("UnityEngine.InputSystem.Pointer")
-                            .GetProperty("position");
-
-            m_readVector2InputMethod = ReflectionHelpers.GetTypeByName("UnityEngine.InputSystem.InputControl`1")
-                                      .MakeGenericType(typeof(Vector2))
-                                      .GetMethod("ReadValue");
         }
     }
 }

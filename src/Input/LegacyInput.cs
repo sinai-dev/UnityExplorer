@@ -1,15 +1,23 @@
 ﻿using System;
 using System.Reflection;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using UnityExplorer.Helpers;
 using UnityEngine;
-using Explorer.Helpers;
 
-namespace Explorer.Input
+namespace UnityExplorer.Input
 {
-    public class LegacyInput : IAbstractInput
+    public class LegacyInput : IHandleInput
     {
+        public LegacyInput()
+        {
+            ExplorerCore.Log("Initializing Legacy Input support...");
+
+            m_mousePositionProp = TInput.GetProperty("mousePosition");
+            m_getKeyMethod = TInput.GetMethod("GetKey", new Type[] { typeof(KeyCode) });
+            m_getKeyDownMethod = TInput.GetMethod("GetKeyDown", new Type[] { typeof(KeyCode) });
+            m_getMouseButtonMethod = TInput.GetMethod("GetMouseButton", new Type[] { typeof(int) });
+            m_getMouseButtonDownMethod = TInput.GetMethod("GetMouseButtonDown", new Type[] { typeof(int) });
+        }
+
         public static Type TInput => m_tInput ?? (m_tInput = ReflectionHelpers.GetTypeByName("UnityEngine.Input"));
         private static Type m_tInput;
 
@@ -28,16 +36,5 @@ namespace Explorer.Input
         public bool GetMouseButton(int btn) => (bool)m_getMouseButtonMethod.Invoke(null, new object[] { btn });
 
         public bool GetMouseButtonDown(int btn) => (bool)m_getMouseButtonDownMethod.Invoke(null, new object[] { btn });
-
-        public void Init()
-        {
-            ExplorerCore.Log("Initializing Legacy Input support...");
-
-            m_mousePositionProp = TInput.GetProperty("mousePosition");
-            m_getKeyMethod = TInput.GetMethod("GetKey", new Type[] { typeof(KeyCode) });
-            m_getKeyDownMethod = TInput.GetMethod("GetKeyDown", new Type[] { typeof(KeyCode) });
-            m_getMouseButtonMethod = TInput.GetMethod("GetMouseButton", new Type[] { typeof(int) });
-            m_getMouseButtonDownMethod = TInput.GetMethod("GetMouseButtonDown", new Type[] { typeof(int) });
-        }
     }
 }

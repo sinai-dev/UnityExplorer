@@ -7,72 +7,71 @@ using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using UnityExplorer.UI.Modules;
 #if CPP
 using UnhollowerRuntimeLib;
 using BepInEx.IL2CPP;
 #endif
 
-namespace Explorer
+namespace UnityExplorer
 {
-    [BepInPlugin(ExplorerCore.GUID, "Explorer", ExplorerCore.VERSION)]
-#if CPP
-    public class ExplorerBepInPlugin : BasePlugin
-#else
+#if MONO
+    [BepInPlugin(ExplorerCore.GUID, "UnityExplorer", ExplorerCore.VERSION)]
     public class ExplorerBepInPlugin : BaseUnityPlugin
-#endif
     {
         public static ExplorerBepInPlugin Instance;
 
-        public static ManualLogSource Logging =>
-#if CPP
-                                        Instance?.Log;
-#else
-                                        Instance?.Logger;
-#endif
+        public static ManualLogSource Logging => Instance?.Logger;
 
         public static readonly Harmony HarmonyInstance = new Harmony(ExplorerCore.GUID);
 
-#if CPP
-        // temporary for Il2Cpp until scene change delegate works
-        private static string lastSceneName;
-#endif
-
-        // Init
-#if CPP
-        public override void Load()
-        {
-#else
         internal void Awake()
         {
-#endif
             Instance = this;
 
+            new ExplorerCore();
+
+            // HarmonyInstance.PatchAll();
+        }
+
+        internal void Update()
+        {
+            ExplorerCore.Update();
+        }
+    }
+#endif
+
 #if CPP
+    [BepInPlugin(ExplorerCore.GUID, "UnityExplorer", ExplorerCore.VERSION)]
+    public class ExplorerBepInPlugin : BasePlugin
+    {
+        public static ExplorerBepInPlugin Instance;
+
+        public static ManualLogSource Logging => Instance?.Log;
+
+        public static readonly Harmony HarmonyInstance = new Harmony(ExplorerCore.GUID);
+
+        // Init
+        public override void Load()
+        {
+            Instance = this;
+
             ClassInjector.RegisterTypeInIl2Cpp<ExplorerBehaviour>();
 
             var obj = new GameObject(
                 "ExplorerBehaviour",
-                new Il2CppSystem.Type[]
-                {
-                    Il2CppType.Of<ExplorerBehaviour>()
-                }
+                new Il2CppSystem.Type[] { Il2CppType.Of<ExplorerBehaviour>() }
             );
+            obj.hideFlags = HideFlags.HideAndDontSave;
             GameObject.DontDestroyOnLoad(obj);
-#else
-            SceneManager.activeSceneChanged += DoSceneChange;
-#endif
 
             new ExplorerCore();
 
-            //HarmonyInstance.PatchAll();
+            // HarmonyInstance.PatchAll();
         }
 
-        internal static void DoSceneChange(Scene arg0, Scene arg1)
-        {
-            ExplorerCore.OnSceneChange();
-        }
-
-#if CPP // BepInEx Il2Cpp mod class doesn't have monobehaviour methods yet, so wrap them in a dummy.
+        // BepInEx Il2Cpp mod class doesn't have monobehaviour methods yet, so wrap them in a dummy.
         public class ExplorerBehaviour : MonoBehaviour
         {
             public ExplorerBehaviour(IntPtr ptr) : base(ptr) { }
@@ -82,28 +81,12 @@ namespace Explorer
                 Logging.LogMessage("ExplorerBehaviour.Awake");
             }
 
-#endif
             internal void Update()
             {
                 ExplorerCore.Update();
-
-#if CPP
-                var scene = SceneManager.GetActiveScene();
-                if (scene.name != lastSceneName)
-                {
-                    lastSceneName = scene.name;
-                    DoSceneChange(scene, scene);
-                }
-#endif
             }
-
-            internal void OnGUI()
-            {
-                ExplorerCore.OnGUI();
-            }
-#if CPP
         }
-#endif
     }
+#endif
 }
 #endif

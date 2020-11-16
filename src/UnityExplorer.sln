@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30128.74
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityExplorer", "UnityExplorer.csproj", "{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Release_BIE_Cpp|Any CPU = Release_BIE_Cpp|Any CPU
+		Release_BIE_Mono|Any CPU = Release_BIE_Mono|Any CPU
+		Release_ML_Cpp|Any CPU = Release_ML_Cpp|Any CPU
+		Release_ML_Mono|Any CPU = Release_ML_Mono|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE_Cpp|Any CPU.ActiveCfg = Release_BIE_Cpp|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE_Cpp|Any CPU.Build.0 = Release_BIE_Cpp|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE_Mono|Any CPU.ActiveCfg = Release_BIE_Mono|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE_Mono|Any CPU.Build.0 = Release_BIE_Mono|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_ML_Cpp|Any CPU.ActiveCfg = Release_ML_Cpp|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_ML_Cpp|Any CPU.Build.0 = Release_ML_Cpp|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_ML_Mono|Any CPU.ActiveCfg = Release_ML_Mono|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_ML_Mono|Any CPU.Build.0 = Release_ML_Mono|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DD5C0A5D-03F1-4CC3-8B4D-E10834908C5A}
+	EndGlobalSection
+EndGlobal

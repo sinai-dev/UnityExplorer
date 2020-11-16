@@ -1,11 +1,8 @@
 ﻿#if ML
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using MelonLoader;
 
-namespace Explorer
+namespace UnityExplorer
 {
     public class ExplorerMelonMod : MelonMod
     {
@@ -18,19 +15,14 @@ namespace Explorer
             new ExplorerCore();
         }
 
-        public override void OnLevelWasLoaded(int level)
-        {
-            ExplorerCore.OnSceneChange();
-        }
-
         public override void OnUpdate()
         {
             ExplorerCore.Update();
         }
 
-        public override void OnGUI()
+        public override void OnLevelWasLoaded(int level)
         {
-            ExplorerCore.OnGUI();
+            ExplorerCore.Instance.OnSceneLoaded();
         }
     }
 }

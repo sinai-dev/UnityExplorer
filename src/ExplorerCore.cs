@@ -1,35 +1,35 @@
-﻿using System.Collections;
-using System.Linq;
-using Explorer.Config;
-using Explorer.UI;
-using Explorer.UI.Inspectors;
-using Explorer.UI.Main;
-using Explorer.UI.Shared;
+﻿using System;
+using UnityExplorer.Config;
+using UnityExplorer.Input;
+using UnityExplorer.UI;
+using UnityExplorer.UI.Modules;
 using UnityEngine;
+using UnityExplorer.Inspectors;
+using System.IO;
+using UnityExplorer.Unstrip;
+using UnityEngine.SceneManagement;
 
-namespace Explorer
+namespace UnityExplorer
 {
     public class ExplorerCore
     {
-        public const string NAME    = "Explorer " + VERSION + " (" + PLATFORM + ", " + MODLOADER + ")";
-        public const string VERSION = "2.1.0";
-        public const string AUTHOR  = "Sinai";
-        public const string GUID    = "com.sinai.explorer";
-
-        public const string PLATFORM =
-#if CPP
-            "Il2Cpp";
-#else
-            "Mono";
-#endif
-        public const string MODLOADER =
-#if ML
-            "MelonLoader";
-#else
-            "BepInEx";
-#endif
+        public const string NAME = "UnityExplorer";
+        public const string VERSION = "3.0.0";
+        public const string AUTHOR = "Sinai";
+        public const string GUID = "com.sinai.unityexplorer";
+        public const string EXPLORER_FOLDER = @"Mods\UnityExplorer";
 
         public static ExplorerCore Instance { get; private set; }
+
+        public static bool ShowMenu
+        {
+            get => s_showMenu;
+            set => SetShowMenu(value);
+        }
+        public static bool s_showMenu;
+
+        private static bool s_doneUIInit;
+        private static float s_timeSinceStartup;
 
         public ExplorerCore()
         {
@@ -41,76 +41,129 @@ namespace Explorer
 
             Instance = this;
 
-            ModConfig.OnLoad();
+            if (!Directory.Exists(EXPLORER_FOLDER))
+                Directory.CreateDirectory(EXPLORER_FOLDER);
 
-            new MainMenu();
-            new WindowManager();
+            ModConfig.OnLoad();
 
             InputManager.Init();
             ForceUnlockCursor.Init();
 
+            SetupEvents();
+
             ShowMenu = true;
 
-            Log($"{NAME} initialized.");
-        }
-
-        public static bool ShowMenu
-        {
-            get => m_showMenu;
-            set => SetShowMenu(value);
-        }
-        public static bool m_showMenu;        
-
-        private static void SetShowMenu(bool show)
-        {
-            m_showMenu = show;
-            ForceUnlockCursor.UpdateCursorControl();
+            Log($"{NAME} {VERSION} initialized.");
         }
 
         public static void Update()
         {
-            if (InputManager.GetKeyDown(ModConfig.Instance.Main_Menu_Toggle))
-            {
-                ShowMenu = !ShowMenu;
-            }
+            if (!s_doneUIInit)
+                CheckUIInit();
 
-            if (ShowMenu)
+            if (MouseInspector.Enabled)
+                MouseInspector.UpdateInspect();
+            else
             {
-                ForceUnlockCursor.Update();
-                InspectUnderMouse.Update();
+                if (InputManager.GetKeyDown(ModConfig.Instance.Main_Menu_Toggle))
+                    ShowMenu = !ShowMenu;
 
-                MainMenu.Instance.Update();
-                WindowManager.Instance.Update();
+                if (ShowMenu && s_doneUIInit)
+                    UIManager.Update();
             }
         }
 
-        public static void OnGUI()
+        private static void CheckUIInit()
         {
-            if (!ShowMenu) return;
+            s_timeSinceStartup += Time.deltaTime;
 
-            var origSkin = GUI.skin;
-            GUI.skin = UIStyles.WindowSkin;
-
-            MainMenu.Instance.OnGUI();
-            WindowManager.Instance.OnGUI();
-            InspectUnderMouse.OnGUI();
-
-            if (!ResizeDrag.IsMouseInResizeArea && WindowManager.IsMouseInWindow)
+            if (s_timeSinceStartup > 0.1f)
             {
-                InputManager.ResetInputAxes();
+                s_doneUIInit = true;
+                try
+                {
+                    UIManager.Init();
+                    Log("Initialized UnityExplorer UI.");
+
+                    // temp debug
+                    InspectorManager.Instance.Inspect(Tests.TestClass.Instance);
+                }
+                catch (Exception e)
+                {
+                    LogWarning($"Exception setting up UI: {e}");
+                }
+            }
+        }
+
+        private void SetupEvents()
+        {
+#if CPP
+            try
+            {
+                Application.add_logMessageReceived(new Action<string, string, LogType>(OnUnityLog));
+                SceneManager.add_sceneLoaded(new Action<Scene, LoadSceneMode>((Scene a, LoadSceneMode b) => { OnSceneLoaded(); }));
+                SceneManager.add_activeSceneChanged(new Action<Scene, Scene>((Scene a, Scene b) => { OnSceneLoaded(); }));
+            }
+            catch { }
+#else
+            Application.logMessageReceived += OnUnityLog;
+            SceneManager.sceneLoaded += (Scene a, LoadSceneMode b) => { OnSceneLoaded(); }; 
+            SceneManager.activeSceneChanged += (Scene a, Scene b) => { OnSceneLoaded(); };
+#endif
+        }
+
+        internal void OnSceneLoaded()
+        {
+            UIManager.OnSceneChange();
+        }
+
+        private static void SetShowMenu(bool show)
+        {
+            s_showMenu = show;
+
+            if (UIManager.CanvasRoot)
+            {
+                UIManager.CanvasRoot.SetActive(show);
+
+                if (show)
+                    ForceUnlockCursor.SetEventSystem();
+                else
+                    ForceUnlockCursor.ReleaseEventSystem();
             }
 
-            GUI.skin = origSkin;
+            ForceUnlockCursor.UpdateCursorControl();
         }
 
-        public static void OnSceneChange()
+        private void OnUnityLog(string message, string stackTrace, LogType type)
         {
-            ScenePage.Instance?.OnSceneChange();
-            SearchPage.Instance?.OnSceneChange();
+            if (!DebugConsole.LogUnity)
+                return;
+
+            message = $"[UNITY] {message}";
+
+            switch (type)
+            {
+                case LogType.Assert:
+                case LogType.Log:
+                    Log(message, true);
+                    break;
+                case LogType.Warning:
+                    LogWarning(message, true);
+                    break;
+                case LogType.Exception:
+                case LogType.Error:
+                    LogError(message, true);
+                    break;
+            }
         }
 
-        public static void Log(object message)
+        public static void Log(object message, bool unity = false)
         {
+            DebugConsole.Log(message?.ToString());
+
+            if (unity)
+                return;
+
 #if ML
             MelonLoader.MelonLogger.Log(message?.ToString());
 #else
@@ -118,22 +171,43 @@ namespace Explorer
 #endif
         }
 
-        public static void LogWarning(object message)
+        public static void LogWarning(object message, bool unity = false)
         {
+            DebugConsole.Log(message?.ToString(), "FFFF00");
+
+            if (unity)
+                return;
+
 #if ML
             MelonLoader.MelonLogger.LogWarning(message?.ToString());
 #else
-            ExplorerBepInPlugin.Logging?.LogWarning(message?.ToString());
+                        ExplorerBepInPlugin.Logging?.LogWarning(message?.ToString());
 #endif
         }
 
-        public static void LogError(object message)
+        public static void LogError(object message, bool unity = false)
         {
+            DebugConsole.Log(message?.ToString(), "FF0000");
+
+            if (unity)
+                return;
+
 #if ML
             MelonLoader.MelonLogger.LogError(message?.ToString());
 #else
-            ExplorerBepInPlugin.Logging?.LogError(message?.ToString());
+                        ExplorerBepInPlugin.Logging?.LogError(message?.ToString());
 #endif
+        }
+
+
+        public static string RemoveInvalidFilenameChars(string s)
+        {
+            var invalid = System.IO.Path.GetInvalidFileNameChars();
+            foreach (var c in invalid)
+            {
+                s = s.Replace(c.ToString(), "");
+            }
+            return s;
         }
     }
 }
