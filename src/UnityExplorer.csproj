@@ -331,6 +331,7 @@
     <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveFlags.cs" />
     <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveNumber.cs" />
     <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveString.cs" />
+    <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveUnityStruct.cs" />
     <Compile Include="UI\ForceUnlockCursor.cs" />
     <Compile Include="Input\IHandleInput.cs" />
     <Compile Include="Tests\Tests.cs" />

@@ -28,6 +28,8 @@ namespace UnityExplorer.Inspectors.Reflection
                 else
                     return typeof(InteractiveEnum);
             }
+            else if (InteractiveUnityStruct.SupportsType(type))
+                return typeof(InteractiveUnityStruct);
             else if (typeof(Transform).IsAssignableFrom(type))
                 return typeof(InteractiveValue);
             else if (ReflectionHelpers.IsDictionary(type))
@@ -56,7 +58,7 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public CacheObjectBase Owner;
 
-        public object Value { get; set; }
+        public object Value;
         public readonly Type FallbackType;
 
         public virtual bool HasSubContent => false;

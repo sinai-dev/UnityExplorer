@@ -24,6 +24,12 @@ namespace UnityExplorer.Tests
 
     public class TestClass
     {
+        public Vector2 AATestVector2 = new Vector2(1, 2);
+        public Vector3 AATestVector3 = new Vector3(1, 2, 3);
+        public Vector4 AATestVector4 = new Vector4(1, 2, 3, 4);
+        public Rect AATestRect = new Rect(1, 2, 3, 4);
+        public Color AATestColor = new Color(0.1f, 0.2f, 0.3f, 0.4f);
+
         public bool ATestBoolMethod() => false;
 
         public bool this[int index]
@@ -138,12 +144,6 @@ namespace UnityExplorer.Tests
 
             GameObject.DontDestroyOnLoad(TestTexture);
             GameObject.DontDestroyOnLoad(TestSprite);
-
-            testRefArray = new Il2CppReferenceArray<Il2CppSystem.Object>(5);
-            for (int i = 0; i < 5; i++)
-            {
-                testRefArray[i] = "hi " + i;
-            }
 
             //// test loading a tex from file
             //var dataToLoad = System.IO.File.ReadAllBytes(@"Mods\UnityExplorer\Tex_Nemundis_Nebula.png");
