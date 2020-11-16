@@ -139,6 +139,12 @@ namespace UnityExplorer.Tests
             GameObject.DontDestroyOnLoad(TestTexture);
             GameObject.DontDestroyOnLoad(TestSprite);
 
+            testRefArray = new Il2CppReferenceArray<Il2CppSystem.Object>(5);
+            for (int i = 0; i < 5; i++)
+            {
+                testRefArray[i] = "hi " + i;
+            }
+
             //// test loading a tex from file
             //var dataToLoad = System.IO.File.ReadAllBytes(@"Mods\UnityExplorer\Tex_Nemundis_Nebula.png");
             //ExplorerCore.Log($"Tex load success: {TestTexture.LoadImage(dataToLoad, false)}");
