@@ -37,7 +37,8 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public virtual void Disable()
         {
-            m_mainContent?.SetActive(false);
+            if (m_mainContent)
+                m_mainContent.SetActive(false);
         }
 
         public void Destroy()

@@ -9,6 +9,7 @@ using UnityExplorer.Config;
 using UnityExplorer.Helpers;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Shared;
+using System.Reflection;
 
 namespace UnityExplorer.Inspectors.Reflection
 {
@@ -62,26 +63,22 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public override void OnValueUpdated()
         {
+            RefIDictionary = Value as IDictionary;
+
+            if (Value != null)
+            {
+                if (m_subContentParent.activeSelf)
+                {
+                    GetCacheEntries();
+                    RefreshDisplay();
+                }
+                else
+                    m_recacheWanted = true;
+            }
+            else
+                m_entries.Clear();
+
             base.OnValueUpdated();
-
-            if (!Value.IsNullOrDestroyed())
-            {
-                RefIDictionary = Value as IDictionary;
-                UpdateLabel();
-            }
-            else
-            {
-                m_baseLabel.text = base.GetLabelForValue();
-                RefIDictionary = null;
-            }
-
-            if (m_subContentParent.activeSelf)
-            {
-                GetCacheEntries();
-                RefreshDisplay();
-            }
-            else
-                m_recacheWanted = true;
         }
 
         internal void OnPageTurned()
@@ -89,15 +86,24 @@ namespace UnityExplorer.Inspectors.Reflection
             RefreshDisplay();
         }
 
-        internal void UpdateLabel()
+        public override void RefreshUIForValue()
         {
-            string count = "?";
-            if (m_recacheWanted && RefIDictionary != null)
-                count = RefIDictionary.Count.ToString();
-            else if (!m_recacheWanted)
-                count = m_entries.Count.ToString();
+            GetDefaultLabel();
 
-            m_baseLabel.text = $"[{count}] {m_richValueType}";
+            if (Value != null)
+            {
+                string count = "?";
+                if (m_recacheWanted && RefIDictionary != null)
+                    count = RefIDictionary.Count.ToString();
+                else if (!m_recacheWanted)
+                    count = m_entries.Count.ToString();
+
+                m_baseLabel.text = $"[{count}] {m_richValueType}";
+            }
+            else
+            {
+                m_baseLabel.text = DefaultLabel;
+            }
         }
 
         public void GetCacheEntries()
@@ -114,6 +120,11 @@ namespace UnityExplorer.Inspectors.Reflection
 
                 m_entries.Clear();
             }
+
+#if CPP
+            if (RefIDictionary == null && !Value.IsNullOrDestroyed())
+                RefIDictionary = EnumerateWithReflection();
+#endif
 
             if (RefIDictionary != null)
             {
@@ -194,11 +205,60 @@ namespace UnityExplorer.Inspectors.Reflection
             {
                 m_recacheWanted = false;
                 GetCacheEntries();
-                UpdateLabel();
+                RefreshUIForValue();
             }
 
             RefreshDisplay();
         }
+
+        #region CPP fixes
+#if CPP
+        // temp fix for Il2Cpp IDictionary until interfaces are fixed
+        private IDictionary EnumerateWithReflection()
+        {
+            var valueType = Value?.GetType() ?? FallbackType;
+
+            // get keys and values
+            var keys = valueType.GetProperty("Keys").GetValue(Value, null);
+            var values = valueType.GetProperty("Values").GetValue(Value, null);
+
+            // create lists to hold them
+            var keyList = new List<object>();
+            var valueList = new List<object>();
+
+            // store entries with reflection
+            EnumerateWithReflection(keys, keyList);
+            EnumerateWithReflection(values, valueList);
+
+            // make actual mono dictionary
+            var dict = (IDictionary)Activator.CreateInstance(typeof(Dictionary<,>)
+                                             .MakeGenericType(m_typeOfKeys, m_typeofValues));
+
+            // finally iterate into mono dictionary
+            for (int i = 0; i < keyList.Count; i++)
+                dict.Add(keyList[i], valueList[i]);
+
+            return dict;
+        }
+
+        private void EnumerateWithReflection(object collection, List<object> list)
+        {
+            // invoke GetEnumerator
+            var enumerator = collection.GetType().GetMethod("GetEnumerator").Invoke(collection, null);
+            // get the type of it
+            var enumeratorType = enumerator.GetType();
+            // reflect MoveNext and Current
+            var moveNext = enumeratorType.GetMethod("MoveNext");
+            var current = enumeratorType.GetProperty("Current");
+            // iterate
+            while ((bool)moveNext.Invoke(enumerator, null))
+            {
+                list.Add(current.GetValue(enumerator, null));
+            }
+        }
+#endif
+
+        #endregion
 
         #region UI CONSTRUCTION
 
@@ -228,10 +288,10 @@ namespace UnityExplorer.Inspectors.Reflection
             var scrollRect = scrollObj.GetComponent<RectTransform>();
             scrollRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 0);
 
-            m_listLayout = OwnerCacheObject.m_mainContent.GetComponent<LayoutElement>();
+            m_listLayout = Owner.m_mainContent.GetComponent<LayoutElement>();
             m_listLayout.minHeight = 25;
             m_listLayout.flexibleHeight = 0;
-            OwnerCacheObject.m_mainRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 25);
+            Owner.m_mainRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 25);
 
             var scrollGroup = m_listContent.GetComponent<VerticalLayoutGroup>();
             scrollGroup.childForceExpandHeight = true;

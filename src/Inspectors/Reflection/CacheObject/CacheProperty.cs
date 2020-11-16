@@ -43,7 +43,16 @@ namespace UnityExplorer.Inspectors.Reflection
             }
             else 
             {
-                // todo write-only properties?
+                if (FallbackType == typeof(string))
+                {
+                    IValue.Value = "";
+                }
+                else if (FallbackType.IsPrimitive)
+                {
+                    IValue.Value = Activator.CreateInstance(FallbackType);
+                }
+                m_evaluated = true;
+                ReflectionException = null;
             }
         }
 

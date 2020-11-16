@@ -11,26 +11,26 @@ namespace UnityExplorer.Unstrip
 #if MONO
         public static GameObject[] GetRootGameObjects(Scene scene) => scene.GetRootGameObjects();
 
-        public static GameObject[] GetRootGameObjects(int handle)
-        {
-            Scene scene = default;
-            if (handle == SceneExplorer.DontDestroyHandle)
-                scene = SceneExplorer.DontDestroyObject.scene;
-            else
-            {
-                for (int i = 0; i < SceneManager.sceneCount; i++)
-                {
-                    var iscene = SceneManager.GetSceneAt(i);
-                    if (iscene.handle == handle)
-                        scene = iscene;
-                }
-            }
+        //public static GameObject[] GetRootGameObjects(int handle)
+        //{
+        //    Scene scene = default;
+        //    if (handle == SceneExplorer.DontDestroyHandle)
+        //        scene = SceneExplorer.DontDestroyObject.scene;
+        //    else
+        //    {
+        //        for (int i = 0; i < SceneManager.sceneCount; i++)
+        //        {
+        //            var iscene = SceneManager.GetSceneAt(i);
+        //            if (iscene.handle == handle)
+        //                scene = iscene;
+        //        }
+        //    }
 
-            if (scene != default && scene.handle != -1)
-                return scene.GetRootGameObjects();
+        //    if (scene != default && scene.handle != -1)
+        //        return scene.GetRootGameObjects();
 
-            return new GameObject[0];
-        }
+        //    return new GameObject[0];
+        //}
 #endif
 
 #if CPP

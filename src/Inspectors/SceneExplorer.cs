@@ -29,8 +29,12 @@ namespace UnityExplorer.Inspectors
         private const float UPDATE_INTERVAL = 1f;
         private float m_timeOfLastSceneUpdate;
 
+        // private int m_currentSceneHandle = -1;
+        public static Scene DontDestroyScene => DontDestroyObject.scene;
+        internal Scene m_currentScene;
+        internal Scene[] m_currentScenes = new Scene[0];
+
         private GameObject m_selectedSceneObject;
-        private int m_currentSceneHandle = -1;
         private int m_lastCount;
 
         private Dropdown m_sceneDropdown;
@@ -46,7 +50,6 @@ namespace UnityExplorer.Inspectors
         private readonly List<Text> m_shortListTexts = new List<Text>();
         private readonly List<Toggle> m_shortListToggles = new List<Toggle>();
 
-        public static int DontDestroyHandle => DontDestroyObject.scene.handle;
 
         internal static GameObject DontDestroyObject
         {
@@ -79,9 +82,13 @@ namespace UnityExplorer.Inspectors
 
             if (!m_selectedSceneObject)
             {
-                if (m_currentSceneHandle != -1)
+                if (m_currentScene != default)
                 {
-                    SetSceneObjectList(SceneUnstrip.GetRootGameObjects(m_currentSceneHandle));
+#if CPP
+                    SetSceneObjectList(SceneUnstrip.GetRootGameObjects(m_currentScene.handle));
+#else
+                    SetSceneObjectList(m_currentScene.GetRootGameObjects());
+#endif
                 }
             }
             else
@@ -90,19 +97,21 @@ namespace UnityExplorer.Inspectors
             }
         }
 
-        public int GetSceneHandle(string sceneName)
-        {
-            if (sceneName == "DontDestroyOnLoad")
-                return DontDestroyHandle;
+//#if CPP
+//        public int GetSceneHandle(string sceneName)
+//        {
+//            if (sceneName == "DontDestroyOnLoad")
+//                return DontDestroyScene;
 
-            for (int i = 0; i < SceneManager.sceneCount; i++)
-            {
-                var scene = SceneManager.GetSceneAt(i);
-                if (scene.name == sceneName)
-                    return scene.handle;
-            }
-            return -1;
-        }
+//            for (int i = 0; i < SceneManager.sceneCount; i++)
+//            {
+//                var scene = SceneManager.GetSceneAt(i);
+//                if (scene.name == sceneName)
+//                    return scene.handle;
+//            }
+//            return -1;
+//        }
+//#endif
 
         internal void OnSceneChange()
         {
@@ -113,23 +122,21 @@ namespace UnityExplorer.Inspectors
         private void RefreshSceneSelector()
         {
             var names = new List<string>();
-            var handles = new List<int>();
+            var scenes = new List<Scene>();
 
             for (int i = 0; i < SceneManager.sceneCount; i++)
             {
                 Scene scene = SceneManager.GetSceneAt(i);
 
-                int handle = scene.handle;
-
-                if (scene == null || handle == -1 || string.IsNullOrEmpty(scene.name))
+                if (scene == default)
                     continue;
 
-                handles.Add(handle);
+                scenes.Add(scene);
                 names.Add(scene.name);
             }
 
             names.Add("DontDestroyOnLoad");
-            handles.Add(DontDestroyHandle);
+            scenes.Add(DontDestroyScene);
 
             m_sceneDropdown.options.Clear();
 
@@ -141,20 +148,27 @@ namespace UnityExplorer.Inspectors
             if (!names.Contains(m_sceneDropdownText.text))
             {
                 m_sceneDropdownText.text = names[0];
-                SetTargetScene(handles[0]);
+                SetTargetScene(scenes[0]);
             }
+
+            m_currentScenes = scenes.ToArray();
         }
 
-        public void SetTargetScene(string name) => SetTargetScene(GetSceneHandle(name));
+//#if CPP
+//        public void SetTargetScene(string name) => SetTargetScene(scene.handle);
+//#endif
 
-        public void SetTargetScene(int handle)
+        public void SetTargetScene(Scene scene)
         {
-            if (handle == -1)
+            if (scene == default)
                 return;
 
-            m_currentSceneHandle = handle;
-
-            GameObject[] rootObjs = SceneUnstrip.GetRootGameObjects(handle);
+            m_currentScene = scene;
+#if CPP
+            GameObject[] rootObjs = SceneUnstrip.GetRootGameObjects(scene.handle);
+#else
+            GameObject[] rootObjs = SceneUnstrip.GetRootGameObjects(scene);
+#endif
             SetSceneObjectList(rootObjs);
 
             m_selectedSceneObject = null;
@@ -301,7 +315,7 @@ namespace UnityExplorer.Inspectors
             m_lastCount = newCount;
         }
 
-        #region UI CONSTRUCTION
+#region UI CONSTRUCTION
 
         public void ConstructScenePane()
         {
@@ -341,8 +355,8 @@ namespace UnityExplorer.Inspectors
 
             void SetSceneFromDropdown(int val)
             {
-                string scene = m_sceneDropdown.options[val].text;
-                SetTargetScene(scene);
+                //string scene = m_sceneDropdown.options[val].text;
+                SetTargetScene(m_currentScenes[val]);
             }
 
             GameObject scenePathGroupObj = UIFactory.CreateHorizontalGroup(leftPane, new Color(1, 1, 1, 0f));
@@ -375,7 +389,7 @@ namespace UnityExplorer.Inspectors
                 if (!m_selectedSceneObject || !m_selectedSceneObject.transform.parent?.gameObject)
                 {
                     m_selectedSceneObject = null;
-                    SetTargetScene(m_currentSceneHandle);
+                    SetTargetScene(m_currentScene);
                 }
                 else
                 {
@@ -540,6 +554,6 @@ namespace UnityExplorer.Inspectors
             inspectBtn.onClick.AddListener(() => { InspectorManager.Instance.Inspect(m_shortList[thisIndex]); });
         }
 
-        #endregion
+#endregion
     }
 }

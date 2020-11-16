@@ -617,7 +617,7 @@ namespace UnityExplorer.Inspectors
 
         internal void ConstructMemberList()
         {
-            var scrollobj = UIFactory.CreateScrollView(Content, out m_scrollContent, out m_sliderScroller, new Color(0.12f, 0.12f, 0.12f));
+            var scrollobj = UIFactory.CreateScrollView(Content, out m_scrollContent, out m_sliderScroller, new Color(0.08f, 0.08f, 0.08f));
 
             m_scrollContentRect = m_scrollContent.GetComponent<RectTransform>();
 

@@ -18,61 +18,96 @@ namespace UnityExplorer.Inspectors.Reflection
         public override bool WantInspectBtn => false;
 
         internal Toggle m_toggle;
+        internal Button m_applyBtn;
 
         public override void OnValueUpdated()
         {
             base.OnValueUpdated();
+        }
 
-            if (!Value.IsNullOrDestroyed())
+        public override void RefreshUIForValue()
+        {
+            GetDefaultLabel();
+
+            if (Owner.HasEvaluated)
             {
-                if (OwnerCacheObject.CanWrite)
+                var val = (bool)Value;
+
+                if (Owner.CanWrite)
                 {
                     if (!m_toggle.gameObject.activeSelf)
                         m_toggle.gameObject.SetActive(true);
 
-                    var val = (bool)Value;
-                    if (m_toggle.isOn != val)
+                    if (!m_applyBtn.gameObject.activeSelf)
+                        m_applyBtn.gameObject.SetActive(true);
+
+                    if (val != m_toggle.isOn)
                         m_toggle.isOn = val;
                 }
 
-                RefreshUIElements();
+                var color = val
+                    ? "6bc981"  // on
+                    : "c96b6b"; // off
+
+                m_baseLabel.text = $"<color=#{color}>{val}</color>";
+            }
+            else
+            {
+                m_baseLabel.text = DefaultLabel;
             }
         }
 
-        internal void RefreshUIElements()
+        public override void OnException(CacheMember member)
         {
-            if (m_baseLabel)
-            {
-                var val = (bool)Value;
-                var color = val
-                    ? "00FF00"  // on
-                    : "FF0000"; // off
+            base.OnException(member);
 
-                m_baseLabel.text = $"<color=#{color}>{val}</color> ({m_richValueType})";
+            if (Owner.CanWrite)
+            {
+                if (m_toggle.gameObject.activeSelf)
+                    m_toggle.gameObject.SetActive(false);
+
+                if (m_applyBtn.gameObject.activeSelf)
+                    m_applyBtn.gameObject.SetActive(false);
             }
         }
 
         internal void OnToggleValueChanged(bool val)
         {
             Value = val;
-            OwnerCacheObject.SetValue();
-            RefreshUIElements();
+            RefreshUIForValue();
         }
 
         public override void ConstructUI(GameObject parent, GameObject subGroup)
         {
             base.ConstructUI(parent, subGroup);
 
-            if (OwnerCacheObject.CanWrite)
+            var baseLayout = m_baseLabel.gameObject.GetComponent<LayoutElement>();
+            baseLayout.flexibleWidth = 0;
+            baseLayout.minWidth = 50;
+
+            if (Owner.CanWrite)
             {
                 var toggleObj = UIFactory.CreateToggle(m_valueContent, out m_toggle, out _, new Color(0.1f, 0.1f, 0.1f));
-                toggleObj.SetActive(false);
                 var toggleLayout = toggleObj.AddComponent<LayoutElement>();
                 toggleLayout.minWidth = 24;
 
                 m_toggle.onValueChanged.AddListener(OnToggleValueChanged);
 
                 m_baseLabel.transform.SetAsLastSibling();
+
+                var applyBtnObj = UIFactory.CreateButton(m_valueContent, new Color(0.2f, 0.2f, 0.2f));
+                var applyLayout = applyBtnObj.AddComponent<LayoutElement>();
+                applyLayout.minWidth = 50;
+                applyLayout.minHeight = 25;
+                applyLayout.flexibleWidth = 0;
+                m_applyBtn = applyBtnObj.GetComponent<Button>();
+                m_applyBtn.onClick.AddListener(() => { Owner.SetValue(); });
+
+                var applyText = applyBtnObj.GetComponentInChildren<Text>();
+                applyText.text = "Apply";
+
+                toggleObj.SetActive(false);
+                applyBtnObj.SetActive(false);
             }
         }
     }

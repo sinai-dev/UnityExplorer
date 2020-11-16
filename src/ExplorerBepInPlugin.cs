@@ -61,11 +61,9 @@ namespace UnityExplorer
 
             var obj = new GameObject(
                 "ExplorerBehaviour",
-                new Il2CppSystem.Type[]
-                {
-                        Il2CppType.Of<ExplorerBehaviour>()
-                }
+                new Il2CppSystem.Type[] { Il2CppType.Of<ExplorerBehaviour>() }
             );
+            obj.hideFlags = HideFlags.HideAndDontSave;
             GameObject.DontDestroyOnLoad(obj);
 
             new ExplorerCore();

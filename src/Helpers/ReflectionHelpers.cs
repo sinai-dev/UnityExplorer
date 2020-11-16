@@ -77,7 +77,11 @@ namespace UnityExplorer.Helpers
                 // check if type is injected
                 IntPtr classPtr = il2cpp_object_get_class(ilObject.Pointer);
                 if (RuntimeSpecificsStore.IsInjected(classPtr))
-                    return GetTypeByName(il2cppType.FullName);
+                {
+                    var typeByName = GetTypeByName(il2cppType.FullName);
+                    if (typeByName != null)
+                        return typeByName;
+                }
 
                 // this should be fine for all other il2cpp objects
                 var getType = GetMonoType(il2cppType);
@@ -252,7 +256,13 @@ namespace UnityExplorer.Helpers
         public static string ExceptionToString(Exception e, bool innerMost = false)
         {
             while (innerMost && e.InnerException != null)
+            {
+#if CPP
+                if (e.InnerException is System.Runtime.CompilerServices.RuntimeWrappedException runtimeEx)
+                    break;
+#endif
                 e = e.InnerException;
+            }
 
             return e.GetType() + ", " + e.Message;
         }

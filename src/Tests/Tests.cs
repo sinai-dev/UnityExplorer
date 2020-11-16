@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityExplorer.UI;
 using UnityEngine;
+using System;
 #if CPP
 #endif
 
@@ -23,20 +24,53 @@ namespace UnityExplorer.Tests
 
     public class TestClass
     {
+        public bool ATestBoolMethod() => false;
+
+        public bool this[int index]
+        {
+            get => index % 2 == 0;
+            set => m_thisBool = value;
+        }
+        internal bool m_thisBool;
+
+        static int testInt;
+        public static List<string> ExceptionList
+        {
+            get
+            {
+                testInt++;
+                if (testInt % 2 == 0)
+                    throw new Exception("its even");
+                else
+                    return new List<string> { "one" };
+            }
+        }
+
+        static bool abool;
+        public static bool ATestExceptionBool
+        {
+            get
+            {
+                abool = !abool;
+                if (!abool)
+                    throw new Exception("false");
+                else
+                    return true;
+            }
+        }
+
+        public static string ExceptionString => throw new NotImplementedException();
+        
+        public static string ANullString = null;
+        public static float ATestFloat = 420.69f;
+        public static int ATestInt = -1;
+        public static string ATestString = "hello world";
+        public static uint ATestUInt = 1u;
+        public static byte ATestByte = 255;
+        public static ulong AReadonlyUlong = 82934UL;
+
         public static TestClass Instance => m_instance ?? (m_instance = new TestClass());
         private static TestClass m_instance;
-
-        public Dictionary<string, List<string>> AComboTest = new Dictionary<string, List<string>>
-        {
-            {
-                "key",
-                new List<string>
-                {
-                    "1",
-                    "2"
-                }
-            }
-        };
 
         public object AmbigObject;
 
@@ -76,7 +110,9 @@ namespace UnityExplorer.Tests
         public static Sprite TestSprite;
 
 #if CPP
-        public static Il2CppSystem.Collections.Generic.HashSet<string> ILHashSetTest;
+        public static Il2CppSystem.Collections.Generic.HashSet<string> CppHashSetTest;
+        public static Il2CppSystem.Collections.Generic.List<string> CppStringTest;
+        public static Il2CppSystem.Collections.IList CppIList;
 #endif
 
         public TestClass()
@@ -107,10 +143,14 @@ namespace UnityExplorer.Tests
             //var dataToLoad = System.IO.File.ReadAllBytes(@"Mods\UnityExplorer\Tex_Nemundis_Nebula.png");
             //ExplorerCore.Log($"Tex load success: {TestTexture.LoadImage(dataToLoad, false)}");
 
-            ILHashSetTest = new Il2CppSystem.Collections.Generic.HashSet<string>();
-            ILHashSetTest.Add("1");
-            ILHashSetTest.Add("2");
-            ILHashSetTest.Add("3");
+            CppHashSetTest = new Il2CppSystem.Collections.Generic.HashSet<string>();
+            CppHashSetTest.Add("1");
+            CppHashSetTest.Add("2");
+            CppHashSetTest.Add("3");
+
+            CppStringTest = new Il2CppSystem.Collections.Generic.List<string>();
+            CppStringTest.Add("1");
+            CppStringTest.Add("2");
 #endif
         }
 

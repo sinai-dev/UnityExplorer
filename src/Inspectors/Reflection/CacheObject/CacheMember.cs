@@ -48,6 +48,10 @@ namespace UnityExplorer.Inspectors.Reflection
             MemInfo = memberInfo;
             DeclaringType = memberInfo.DeclaringType;
             DeclaringInstance = declaringInstance;
+#if CPP
+            if (DeclaringInstance != null)
+                DeclaringInstance = DeclaringInstance.Il2CppCast(DeclaringType);
+#endif
         }
 
         public static bool CanProcessArgs(ParameterInfo[] parameters)
@@ -70,7 +74,7 @@ namespace UnityExplorer.Inspectors.Reflection
         public override void CreateIValue(object value, Type fallbackType)
         {
             IValue = InteractiveValue.Create(value, fallbackType);
-            IValue.OwnerCacheObject = this;
+            IValue.Owner = this;
             IValue.m_mainContentParent = this.m_rightGroup;
             IValue.m_subContentParent = this.m_subContent;
         }
@@ -384,7 +388,7 @@ namespace UnityExplorer.Inspectors.Reflection
             argInputLayout.minWidth = 20;
             argInputLayout.minHeight = 25;
             argInputLayout.flexibleHeight = 0;
-            argInputLayout.layoutPriority = 2;
+            //argInputLayout.layoutPriority = 2;
 
             var argInput = argInputObj.GetComponent<InputField>();
             argInput.onValueChanged.AddListener((string val) => { m_argumentInput[i] = val; });

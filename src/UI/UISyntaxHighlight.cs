@@ -44,6 +44,9 @@ namespace UnityExplorer.UI
         {
             string ret = "";
 
+            if (type == null)
+                return "????????????";
+
             if (type.IsGenericParameter || (type.HasElementType && type.GetElementType().IsGenericParameter))
             {
                 ret = $"<color={Enum}>{type.Name}</color>";

@@ -12,7 +12,7 @@ namespace UnityExplorer.Inspectors.Reflection
     public class CacheEnumerated : CacheObjectBase
     {
         public override Type FallbackType => ParentEnumeration.m_baseEntryType;
-        public override bool CanWrite => RefIList != null && ParentEnumeration.OwnerCacheObject.CanWrite;
+        public override bool CanWrite => RefIList != null && ParentEnumeration.Owner.CanWrite;
 
         public int Index { get; set; }
         public IList RefIList { get; set; }
@@ -29,7 +29,7 @@ namespace UnityExplorer.Inspectors.Reflection
         public override void CreateIValue(object value, Type fallbackType)
         {
             IValue = InteractiveValue.Create(value, fallbackType);
-            IValue.OwnerCacheObject = this;
+            IValue.Owner = this;
         }
 
         public override void SetValue()
@@ -37,7 +37,7 @@ namespace UnityExplorer.Inspectors.Reflection
             RefIList[Index] = IValue.Value;
             ParentEnumeration.Value = RefIList;
 
-            ParentEnumeration.OwnerCacheObject.SetValue();
+            ParentEnumeration.Owner.SetValue();
         }
 
         internal override void ConstructUI()

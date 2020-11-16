@@ -21,6 +21,13 @@ namespace UnityExplorer.Inspectors.Reflection
                 return typeof(InteractiveString);
             else if (type.IsPrimitive)
                 return typeof(InteractiveNumber);
+            else if (typeof(Enum).IsAssignableFrom(type))
+            {
+                if (type.GetCustomAttributes(typeof(FlagsAttribute), true) is object[] attributes && attributes.Length > 0)
+                    return typeof(InteractiveFlags);
+                else
+                    return typeof(InteractiveEnum);
+            }
             else if (typeof(Transform).IsAssignableFrom(type))
                 return typeof(InteractiveValue);
             else if (ReflectionHelpers.IsDictionary(type))
@@ -47,7 +54,7 @@ namespace UnityExplorer.Inspectors.Reflection
             this.FallbackType = valueType;
         }
 
-        public CacheObjectBase OwnerCacheObject;
+        public CacheObjectBase Owner;
 
         public object Value { get; set; }
         public readonly Type FallbackType;
@@ -56,8 +63,8 @@ namespace UnityExplorer.Inspectors.Reflection
         public virtual bool SubContentWanted => false;
         public virtual bool WantInspectBtn => true;
 
-        public string RichTextValue => m_richValue ?? GetLabelForValue();
-        internal string m_richValue;
+        public string DefaultLabel => m_defaultLabel ?? GetDefaultLabel();
+        internal string m_defaultLabel;
         internal string m_richValueType;
 
         public MethodInfo ToStringMethod => m_toStringMethod ?? GetToStringMethod();
@@ -73,6 +80,15 @@ namespace UnityExplorer.Inspectors.Reflection
                 m_valueContent.SetActive(false); 
                 GameObject.Destroy(this.m_valueContent.gameObject);
             }
+            if (this.m_subContentParent && SubContentWanted)
+            {
+                for (int i = 0; i < this.m_subContentParent.transform.childCount; i++)
+                {
+                    var child = m_subContentParent.transform.GetChild(i);
+                    if (child)
+                        GameObject.Destroy(child.gameObject);
+                }
+            }
         }
 
         public virtual void OnValueUpdated()
@@ -80,16 +96,26 @@ namespace UnityExplorer.Inspectors.Reflection
             if (!m_UIConstructed)
                 ConstructUI(m_mainContentParent, m_subContentParent);
 
-            if (OwnerCacheObject is CacheMember ownerMember && !string.IsNullOrEmpty(ownerMember.ReflectionException))
+            if (Owner is CacheMember ownerMember && !string.IsNullOrEmpty(ownerMember.ReflectionException))
             {
-                m_baseLabel.text = "<color=red>" + ownerMember.ReflectionException + "</color>";
-                Value = null;
+                OnException(ownerMember);
             }
             else
             {
-                GetLabelForValue();
-                m_baseLabel.text = RichTextValue;
+                RefreshUIForValue();
             }
+        }
+
+        public virtual void OnException(CacheMember member)
+        {
+            m_baseLabel.text = "<color=red>" + member.ReflectionException + "</color>";
+            Value = null;
+        }
+
+        public virtual void RefreshUIForValue()
+        {
+            GetDefaultLabel();
+            m_baseLabel.text = DefaultLabel;
         }
 
         public void RefreshElementsAfterUpdate()
@@ -103,7 +129,7 @@ namespace UnityExplorer.Inspectors.Reflection
             }
 
             bool subContentWanted = SubContentWanted;
-            if (OwnerCacheObject is CacheMember cm && !cm.HasEvaluated)
+            if (Owner is CacheMember cm && (!cm.HasEvaluated || !string.IsNullOrEmpty(cm.ReflectionException)))
                 subContentWanted = false;
 
             if (HasSubContent)
@@ -116,7 +142,7 @@ namespace UnityExplorer.Inspectors.Reflection
             }
         }
 
-        public virtual void ConstructSubcontent() 
+        public virtual void ConstructSubcontent()
         {
             m_subContentConstructed = true;
         }
@@ -146,23 +172,21 @@ namespace UnityExplorer.Inspectors.Reflection
                 ConstructSubcontent();
         }
 
-        public string GetLabelForValue()
+        public string GetDefaultLabel(bool updateType = true)
         {
             var valueType = Value?.GetType() ?? this.FallbackType;
+            if (updateType)
+                m_richValueType = UISyntaxHighlight.ParseFullSyntax(valueType, true);
 
-            m_richValueType = UISyntaxHighlight.ParseFullSyntax(valueType, true);
-
-            if (OwnerCacheObject is CacheMember cm && !cm.HasEvaluated)
-                return $"<i><color=grey>Not yet evaluated</color> ({m_richValueType})</i>";
+            if (!Owner.HasEvaluated)
+                return m_defaultLabel = $"<i><color=grey>Not yet evaluated</color> ({m_richValueType})</i>";
 
             if (Value.IsNullOrDestroyed())
-            {
-                return $"<color=grey>null</color> ({m_richValueType})";
-            }
+                return m_defaultLabel = $"<color=grey>null</color> ({m_richValueType})";
 
             string label;
 
-            if (valueType == typeof(TextAsset) && Value is TextAsset textAsset)
+            if (Value is TextAsset textAsset)
             {
                 label = textAsset.text;
 
@@ -171,7 +195,7 @@ namespace UnityExplorer.Inspectors.Reflection
 
                 label = $"\"{label}\" {textAsset.name} ({m_richValueType})";
             }
-            else if (valueType == typeof(EventSystem))
+            else if (Value is EventSystem)
             {
                 label = m_richValueType;
             }
@@ -204,7 +228,7 @@ namespace UnityExplorer.Inspectors.Reflection
                 }
             }
 
-            return m_richValue = label;
+            return m_defaultLabel = label;
         }
 
         private MethodInfo GetToStringMethod()

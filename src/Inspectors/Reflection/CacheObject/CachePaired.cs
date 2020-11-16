@@ -41,7 +41,7 @@ namespace UnityExplorer.Inspectors.Reflection
         public override void CreateIValue(object value, Type fallbackType)
         {
             IValue = InteractiveValue.Create(value, fallbackType);
-            IValue.OwnerCacheObject = this;
+            IValue.Owner = this;
         }
 
         #region UI CONSTRUCTION

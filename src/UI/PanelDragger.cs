@@ -295,8 +295,8 @@ namespace UnityExplorer.UI
             else if (m_currentResizeType.HasFlag(ResizeTypes.Bottom))
                 anchorMin.y -= diffY;
 
-            //Panel.anchorMin = new Vector2(anchorMin.x, anchorMin.y);
-            //Panel.anchorMax = new Vector2(anchorMax.x, anchorMax.y);
+            Panel.anchorMin = new Vector2(anchorMin.x, anchorMin.y);
+            Panel.anchorMax = new Vector2(anchorMax.x, anchorMax.y);
 
             var newWidth = (anchorMax.x - anchorMin.x) * Screen.width;
             var newHeight = (anchorMax.y - anchorMin.y) * Screen.height;
@@ -345,5 +345,15 @@ namespace UnityExplorer.UI
         }
 
         #endregion
+    }
+
+    // Just to allow Enum to do .HasFlag() in NET 3.5
+    public static class Net35FlagsEx
+    {
+        public static bool HasFlag(this Enum flags, Enum value)
+        {
+            ulong num = Convert.ToUInt64(value);
+            return (Convert.ToUInt64(flags) & num) == num;
+        }
     }
 }

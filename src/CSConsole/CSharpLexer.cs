@@ -34,7 +34,7 @@ namespace UnityExplorer.CSConsole
 
         public static char indentOpen = '{';
         public static char indentClose = '}';
-        private static readonly StringBuilder indentBuilder = new StringBuilder();
+        private static StringBuilder indentBuilder = new StringBuilder();
 
         public static char[] delimiters = new[]
         {
@@ -153,7 +153,7 @@ namespace UnityExplorer.CSConsole
 
         public static string GetIndentForInput(string input, int indent, out int caretPosition)
         {
-            indentBuilder.Clear();
+            indentBuilder = new StringBuilder();
 
             indent += 1;
 

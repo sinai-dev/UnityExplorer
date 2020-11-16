@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
@@ -45,30 +46,28 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public override void OnValueUpdated()
         {
+            RefIEnumerable = Value as IEnumerable;
+            RefIList = Value as IList;
+
+            if (Value != null)
+            {
+                if (m_subContentParent.activeSelf)
+                {
+                    GetCacheEntries();
+                    RefreshDisplay();
+                }
+                else
+                    m_recacheWanted = true;
+            }
+            else
+                m_entries.Clear();
+
             base.OnValueUpdated();
+        }
 
-            if (!Value.IsNullOrDestroyed())
-            {
-                RefIEnumerable = Value as IEnumerable; // todo il2cpp
-                RefIList = Value as IList;
-
-                UpdateLabel();
-            }
-            else
-            {
-                m_baseLabel.text = base.GetLabelForValue();
-
-                RefIEnumerable = null;
-                RefIList = null;
-            }
-
-            if (m_subContentParent.activeSelf)
-            {
-                GetCacheEntries();
-                RefreshDisplay();
-            }
-            else
-                m_recacheWanted = true;
+        public override void OnException(CacheMember member)
+        {
+            base.OnException(member);
         }
 
         private void OnPageTurned()
@@ -76,15 +75,24 @@ namespace UnityExplorer.Inspectors.Reflection
             RefreshDisplay();
         }
 
-        internal void UpdateLabel()
+        public override void RefreshUIForValue()
         {
-            string count = "?";
-            if (m_recacheWanted && RefIList != null)
-                count = RefIList.Count.ToString();
-            else if (!m_recacheWanted)
-                count = m_entries.Count.ToString();
+            GetDefaultLabel();
 
-            m_baseLabel.text = $"[{count}] {m_richValueType}";
+            if (Value != null)
+            {
+                string count = "?";
+                if (m_recacheWanted && RefIList != null)
+                    count = RefIList.Count.ToString();
+                else if (!m_recacheWanted)
+                    count = m_entries.Count.ToString();
+
+                m_baseLabel.text = $"[{count}] {m_richValueType}";
+            }
+            else
+            {
+                m_baseLabel.text = DefaultLabel;
+            }
         }
 
         public void GetCacheEntries()
@@ -98,6 +106,11 @@ namespace UnityExplorer.Inspectors.Reflection
 
                 m_entries.Clear();
             }
+
+#if CPP
+            if (RefIEnumerable == null && !Value.IsNullOrDestroyed())
+                RefIEnumerable = EnumerateWithReflection();
+#endif
 
             if (RefIEnumerable != null)
             {
@@ -155,11 +168,93 @@ namespace UnityExplorer.Inspectors.Reflection
             {
                 m_recacheWanted = false;
                 GetCacheEntries();
-                UpdateLabel();
+                RefreshUIForValue();
             }
 
             RefreshDisplay();
         }
+
+        #region CPP Helpers
+
+#if CPP
+        // some temp fixes for Il2Cpp IEnumerables until interfaces are fixed
+
+        private IEnumerable EnumerateWithReflection()
+        {
+            if (Value.IsNullOrDestroyed()) 
+                return null;
+
+            var genericDef = Value.GetType().GetGenericTypeDefinition();
+
+            if (genericDef == typeof(Il2CppSystem.Collections.Generic.List<>))
+                return CppListToMono(genericDef);
+            else if (genericDef == typeof(Il2CppSystem.Collections.Generic.HashSet<>))
+                return CppHashSetToMono();
+            else
+                return CppIListToMono();
+        }
+
+        // List<T>.ToArray()
+        private IEnumerable CppListToMono(Type genericTypeDef)
+        {
+            if (genericTypeDef == null) return null;
+
+            return genericTypeDef
+                    .MakeGenericType(new Type[] { this.m_baseEntryType })
+                    .GetMethod("ToArray")
+                    .Invoke(Value, new object[0]) as IEnumerable;
+        }
+
+        // HashSet.GetEnumerator
+        private IEnumerable CppHashSetToMono()
+        {
+            var set = new HashSet<object>();
+
+            // invoke GetEnumerator
+            var enumerator = Value.GetType().GetMethod("GetEnumerator").Invoke(Value, null);
+            // get the type of it
+            var enumeratorType = enumerator.GetType();
+            // reflect MoveNext and Current
+            var moveNext = enumeratorType.GetMethod("MoveNext");
+            var current = enumeratorType.GetProperty("Current");
+            // iterate
+            while ((bool)moveNext.Invoke(enumerator, null))
+                set.Add(current.GetValue(enumerator));
+
+            return set;
+        }
+
+        // IList.Item
+        private IList CppIListToMono()
+        {
+            try
+            {
+                var genericType = typeof(List<>).MakeGenericType(new Type[] { this.m_baseEntryType });
+                var list = (IList)Activator.CreateInstance(genericType);
+
+                for (int i = 0; ; i++)
+                {
+                    try
+                    {
+                        var itm = Value?.GetType()
+                            .GetProperty("Item")
+                            .GetValue(Value, new object[] { i });
+                        list.Add(itm);
+                    }
+                    catch { break; }
+                }
+
+                return list;
+            }
+            catch (Exception e)
+            {
+                ExplorerCore.Log("Exception converting Il2Cpp IList to Mono IList: " + e.GetType() + ", " + e.Message);
+                return null;
+            }
+        }
+#endif
+
+        #endregion
 
         #region UI CONSTRUCTION
 
@@ -187,10 +282,10 @@ namespace UnityExplorer.Inspectors.Reflection
             var scrollRect = scrollObj.GetComponent<RectTransform>();
             scrollRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 0);
 
-            m_listLayout = OwnerCacheObject.m_mainContent.GetComponent<LayoutElement>();
+            m_listLayout = Owner.m_mainContent.GetComponent<LayoutElement>();
             m_listLayout.minHeight = 25;
             m_listLayout.flexibleHeight = 0;
-            OwnerCacheObject.m_mainRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 25);
+            Owner.m_mainRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 25);
 
             var scrollGroup = m_listContent.GetComponent<VerticalLayoutGroup>();
             scrollGroup.childForceExpandHeight = true;
