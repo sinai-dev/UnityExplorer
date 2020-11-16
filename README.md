@@ -33,9 +33,7 @@
 
 ## Features
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/sinai-dev/UnityExplorer/master/overview.png">  
-</p>
+[Click here for an image overview of UnityExplorer](https://raw.githubusercontent.com/sinai-dev/UnityExplorer/master/overview.png)
 
 * <b>Scene Explorer</b>: Simple menu to traverse the Transform heirarchy of the scene. 
 * <b>GameObject Inspector</b>: Various helpful tools to see and manipulate the GameObject, similar to what you can do in the Editor.
