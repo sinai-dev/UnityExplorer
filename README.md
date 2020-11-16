@@ -30,13 +30,10 @@
 
 <b>IL2CPP Issues:</b>
 * Some methods may still fail with a `MissingMethodException`, please let me know if you experience this (with full debug log please).
-* Reflection may fail with certain types, see [here](https://github.com/knah/IL2CPPAssemblyUnhollower#known-issues) for more details.
 
 ## Features
 
-<p align="center">
-  <img src="overview.png">  
-</p>
+[Click here for an image overview of UnityExplorer](https://raw.githubusercontent.com/sinai-dev/UnityExplorer/master/overview.png)
 
 * <b>Scene Explorer</b>: Simple menu to traverse the Transform heirarchy of the scene. 
 * <b>GameObject Inspector</b>: Various helpful tools to see and manipulate the GameObject, similar to what you can do in the Editor.
