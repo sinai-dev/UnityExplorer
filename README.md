@@ -1,5 +1,5 @@
 <p align="center">
-  <img align="center" src="icon.png">
+  <img align="center" src="img/icon.png">
 </p>
 
 <p align="center">
@@ -32,6 +32,12 @@
 * Some methods may still fail with a `MissingMethodException`, please let me know if you experience this (with full debug log please).
 
 ## Features
+
+<p align="center">
+  <a href="https://raw.githubusercontent.com/sinai-dev/UnityExplorer/master/img/preview.png">
+    <img src="img/preview.png" />
+  </a>
+</p>
 
 * <b>Scene Explorer</b>: Simple menu to traverse the Transform heirarchy of the scene. 
 * <b>GameObject Inspector</b>: Various helpful tools to see and manipulate the GameObject, similar to what you can do in the Editor.
