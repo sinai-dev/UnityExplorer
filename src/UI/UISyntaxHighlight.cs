@@ -42,10 +42,10 @@ namespace UnityExplorer.UI
 
         public static string ParseFullSyntax(Type type, bool includeNamespace, MemberInfo memberInfo = null)
         {
-            string ret = "";
-
             if (type == null)
-                return "????????????";
+                throw new ArgumentNullException("type");
+
+            string ret = "";
 
             if (type.IsGenericParameter || (type.HasElementType && type.GetElementType().IsGenericParameter))
             {

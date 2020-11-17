@@ -5,6 +5,7 @@ using System.Text;
 using System.Reflection;
 using UnityExplorer.UI;
 using UnityExplorer.Helpers;
+using UnityEngine;
 
 namespace UnityExplorer.Inspectors.Reflection
 {
@@ -14,7 +15,7 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public override bool IsStatic => (MemInfo as PropertyInfo).GetAccessors(true)[0].IsStatic;
 
-        public CacheProperty(PropertyInfo propertyInfo, object declaringInstance) : base(propertyInfo, declaringInstance) 
+        public CacheProperty(PropertyInfo propertyInfo, object declaringInstance, GameObject parent) : base(propertyInfo, declaringInstance, parent)
         {
             this.m_arguments = propertyInfo.GetIndexParameters();
             this.m_argumentInput = new string[m_arguments.Length];

@@ -5,6 +5,7 @@ using System.Text;
 using System.Reflection;
 using UnityExplorer.UI;
 using UnityExplorer.Helpers;
+using UnityEngine;
 
 namespace UnityExplorer.Inspectors.Reflection
 {
@@ -14,7 +15,7 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public override Type FallbackType => (MemInfo as FieldInfo).FieldType;
 
-        public CacheField(FieldInfo fieldInfo, object declaringInstance) : base(fieldInfo, declaringInstance)
+        public CacheField(FieldInfo fieldInfo, object declaringInstance, GameObject parent) : base(fieldInfo, declaringInstance, parent)
         {
             CreateIValue(null, fieldInfo.FieldType);
         }

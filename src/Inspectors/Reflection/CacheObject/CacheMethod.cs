@@ -26,7 +26,7 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public string[] m_genericArgInput = new string[0];
 
-        public CacheMethod(MethodInfo methodInfo, object declaringInstance) : base(methodInfo, declaringInstance)
+        public CacheMethod(MethodInfo methodInfo, object declaringInstance, GameObject parent) : base(methodInfo, declaringInstance, parent)
         {
             GenericArgs = methodInfo.GetGenericArguments();
 

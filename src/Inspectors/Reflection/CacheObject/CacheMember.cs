@@ -43,11 +43,12 @@ namespace UnityExplorer.Inspectors.Reflection
         public string RichTextName => m_richTextName ?? GetRichTextName();
         private string m_richTextName;
 
-        public CacheMember(MemberInfo memberInfo, object declaringInstance)
+        public CacheMember(MemberInfo memberInfo, object declaringInstance, GameObject parentContent)
         {
             MemInfo = memberInfo;
             DeclaringType = memberInfo.DeclaringType;
             DeclaringInstance = declaringInstance;
+            this.m_parentContent = parentContent;
 #if CPP
             if (DeclaringInstance != null)
                 DeclaringInstance = DeclaringInstance.Il2CppCast(DeclaringType);

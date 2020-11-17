@@ -34,7 +34,7 @@ namespace UnityExplorer.Inspectors
         }
 
         // Blacklists
-        private static readonly HashSet<string> s_typeAndMemberBlacklist = new HashSet<string>
+        private static readonly HashSet<string> bl_typeAndMember = new HashSet<string>
         {
 #if CPP
             // these cause a crash in IL2CPP
@@ -45,14 +45,14 @@ namespace UnityExplorer.Inspectors
             "Texture2D.SetPixelDataImpl",
 #endif
         };
-        private static readonly HashSet<string> s_methodStartsWithBlacklist = new HashSet<string>
+        private static readonly HashSet<string> bl_memberNameStartsWith = new HashSet<string>
         {
             // these are redundant
             "get_",
             "set_",
         };
 
-#endregion
+        #endregion
 
         #region INSTANCE
 
@@ -132,24 +132,99 @@ namespace UnityExplorer.Inspectors
             RefreshDisplay();
         }
 
-        private void OnMemberFilterClicked(MemberTypes type, Button button)
+        internal bool IsBlacklisted(string sig) => bl_typeAndMember.Any(it => sig.Contains(it));
+        internal bool IsBlacklisted(MethodInfo method) => bl_memberNameStartsWith.Any(it => method.Name.StartsWith(it));
+
+        internal string GetSig(MemberInfo member) => $"{member.DeclaringType.Name}.{member.Name}";
+        internal string AppendArgsToSig(ParameterInfo[] args)
         {
-            if (m_lastActiveMemButton)
+            string ret = " (";
+            foreach (var param in args)
+                ret += $"{param.ParameterType.Name} {param.Name}, ";
+            ret += ")";
+            return ret;
+        }
+
+        public void CacheMembers(Type type)
+        {
+            var list = new List<CacheMember>();
+            var cachedSigs = new HashSet<string>();
+
+            var types = ReflectionHelpers.GetAllBaseTypes(type);
+
+            var flags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
+            if (this is InstanceInspector)
+                flags |= BindingFlags.Instance;
+
+            foreach (var declaringType in types)
             {
-                var lastColors = m_lastActiveMemButton.colors;
-                lastColors.normalColor = new Color(0.2f, 0.2f, 0.2f);
-                m_lastActiveMemButton.colors = lastColors;
+                var target = Target;
+#if CPP
+                target = target.Il2CppCast(declaringType);
+#endif
+                IEnumerable<MemberInfo> infos = declaringType.GetMethods(flags);
+                infos = infos.Concat(declaringType.GetProperties(flags));
+                infos = infos.Concat(declaringType.GetFields(flags));
+
+                foreach (var member in infos)
+                {
+                    try
+                    {
+                        //ExplorerCore.Log($"Trying to cache member {sig}...");
+                        //ExplorerCore.Log(member.DeclaringType.FullName + "." + member.Name);
+
+                        var sig = GetSig(member);
+
+                        var mi = member as MethodInfo;
+                        var pi = member as PropertyInfo;
+                        var fi = member as FieldInfo;
+
+                        if (IsBlacklisted(sig) || mi != null && IsBlacklisted(mi))
+                            continue;
+
+                        var args = mi?.GetParameters() ?? pi?.GetIndexParameters();
+                        if (args != null)
+                        {
+                            if (!CacheMember.CanProcessArgs(args))
+                                continue;
+
+                            sig += AppendArgsToSig(args);
+                        }
+
+                        if (cachedSigs.Contains(sig))
+                            continue;
+
+                        cachedSigs.Add(sig);
+
+                        if (mi != null)
+                            list.Add(new CacheMethod(mi, target, m_scrollContent));
+                        else if (pi != null)
+                            list.Add(new CacheProperty(pi, target, m_scrollContent));
+                        else
+                            list.Add(new CacheField(fi, target, m_scrollContent));
+                    }
+                    catch (Exception e)
+                    {
+                        ExplorerCore.LogWarning($"Exception caching member {member.DeclaringType.FullName}.{member.Name}!");
+                        ExplorerCore.Log(e.ToString());
+                    }
+                }
             }
 
-            m_memberFilter = type;
-            m_lastActiveMemButton = button;
+            var typeList = types.ToList();
 
-            var colors = m_lastActiveMemButton.colors;
-            colors.normalColor = new Color(0.2f, 0.6f, 0.2f);
-            m_lastActiveMemButton.colors = colors;
+            var sorted = new List<CacheMember>();
+            sorted.AddRange(list.Where(it => it is CacheMethod)
+                             .OrderBy(it => typeList.IndexOf(it.DeclaringType))
+                             .ThenBy(it => it.NameForFiltering));
+            sorted.AddRange(list.Where(it => it is CacheProperty)
+                             .OrderBy(it => typeList.IndexOf(it.DeclaringType))
+                             .ThenBy(it => it.NameForFiltering));
+            sorted.AddRange(list.Where(it => it is CacheField)
+                             .OrderBy(it => typeList.IndexOf(it.DeclaringType))
+                             .ThenBy(it => it.NameForFiltering));
 
-            FilterMembers(null, true);
-            m_sliderScroller.m_slider.value = 1f;
+            m_allMembers = sorted.ToArray();
         }
 
         public override void Update()
@@ -178,6 +253,26 @@ namespace UnityExplorer.Inspectors
             }
         }
 
+        private void OnMemberFilterClicked(MemberTypes type, Button button)
+        {
+            if (m_lastActiveMemButton)
+            {
+                var lastColors = m_lastActiveMemButton.colors;
+                lastColors.normalColor = new Color(0.2f, 0.2f, 0.2f);
+                m_lastActiveMemButton.colors = lastColors;
+            }
+
+            m_memberFilter = type;
+            m_lastActiveMemButton = button;
+
+            var colors = m_lastActiveMemButton.colors;
+            colors.normalColor = new Color(0.2f, 0.6f, 0.2f);
+            m_lastActiveMemButton.colors = colors;
+
+            FilterMembers(null, true);
+            m_sliderScroller.m_slider.value = 1f;
+        }
+
         public void FilterMembers(string nameFilter = null, bool force = false)
         {
             int lastCount = m_membersFiltered.Count;
@@ -200,7 +295,7 @@ namespace UnityExplorer.Inspectors
                 }
 
                 // name filter
-                    if (!string.IsNullOrEmpty(nameFilter) && !mem.NameForFiltering.Contains(nameFilter))
+                if (!string.IsNullOrEmpty(nameFilter) && !mem.NameForFiltering.Contains(nameFilter))
                     continue;
 
                 m_membersFiltered.Add(mem);
@@ -264,137 +359,6 @@ namespace UnityExplorer.Inspectors
                     break;
                 cache.SetWidths(labelWidth, valueWidth);
             }
-        }
-
-        public void CacheMembers(Type type)
-        {
-            var list = new List<CacheMember>();
-            var cachedSigs = new HashSet<string>();
-
-            var types = ReflectionHelpers.GetAllBaseTypes(type);
-
-            foreach (var declaringType in types)
-            {
-                MemberInfo[] infos;
-                try
-                {
-                    infos = declaringType.GetMembers(ReflectionHelpers.CommonFlags);
-                }
-                catch
-                {
-                    ExplorerCore.Log($"Exception getting members for type: {declaringType.FullName}");
-                    continue;
-                }
-
-                var target = Target;
-#if CPP
-                try
-                {
-                    target = target.Il2CppCast(declaringType);
-                }
-                catch //(Exception e)
-                {
-                    //ExplorerCore.LogWarning("Excepting casting " + target.GetType().FullName + " to " + declaringType.FullName);
-                }
-#endif
-
-                foreach (var member in infos)
-                {
-                    try
-                    {
-                        // make sure member type is Field, Method or Property (4 / 8 / 16)
-                        int m = (int)member.MemberType;
-                        if (m < 4 || m > 16)
-                            continue;
-
-                        //ExplorerCore.Log($"Trying to cache member {sig}...");
-                        //ExplorerCore.Log(member.DeclaringType.FullName + "." + member.Name);
-
-                        var pi = member as PropertyInfo;
-                        var mi = member as MethodInfo;
-
-                        if (this is StaticInspector)
-                        {
-                            if (member is FieldInfo fi && !fi.IsStatic) continue;
-                            else if (pi != null && !pi.GetAccessors(true)[0].IsStatic) continue;
-                            else if (mi != null && !mi.IsStatic) continue;
-                        }
-
-                        // check blacklisted members
-                        var sig = $"{member.DeclaringType.Name}.{member.Name}";
-
-                        if (s_typeAndMemberBlacklist.Any(it => sig.Contains(it)))
-                            continue;
-
-                        if (s_methodStartsWithBlacklist.Any(it => member.Name.StartsWith(it)))
-                            continue;
-
-                        if (mi != null)
-                            AppendParams(mi.GetParameters());
-                        else if (pi != null)
-                            AppendParams(pi.GetIndexParameters());
-
-                        void AppendParams(ParameterInfo[] _args)
-                        {
-                            sig += " (";
-                            foreach (var param in _args)
-                                sig += $"{param.ParameterType.Name} {param.Name}, ";
-                            sig += ")";
-                        }
-
-                        if (cachedSigs.Contains(sig))
-                            continue;
-
-                        try
-                        {
-                            CacheMember cached;
-                            if (mi != null && CacheMember.CanProcessArgs(mi.GetParameters()))
-                                cached = new CacheMethod(mi, target);
-                            else if (pi != null && CacheMember.CanProcessArgs(pi.GetIndexParameters()))
-                                cached = new CacheProperty(pi, target);
-                            else if (member is FieldInfo fi)
-                                cached = new CacheField(fi, target);
-                            else
-                                continue;
-
-                            cached.m_parentContent = m_scrollContent;
-
-                            if (cached != null)
-                            {
-                                cachedSigs.Add(sig);
-                                list.Add(cached);
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            ExplorerCore.LogWarning($"Exception caching member {sig}!");
-                            ExplorerCore.Log(e.ToString());
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        ExplorerCore.LogWarning($"Exception caching member {member.DeclaringType.FullName}.{member.Name}!");
-                        ExplorerCore.Log(e.ToString());
-                    }
-                }
-            }
-
-            var typeList = types.ToList();
-
-            var sorted = new List<CacheMember>();
-            sorted.AddRange(list.Where(it => it is CacheMethod)
-                             .OrderBy(it => typeList.IndexOf(it.DeclaringType))
-                             .ThenBy(it => it.NameForFiltering));
-            sorted.AddRange(list.Where(it => it is CacheProperty)
-                             .OrderBy(it => typeList.IndexOf(it.DeclaringType))
-                             .ThenBy(it => it.NameForFiltering));
-            sorted.AddRange(list.Where(it => it is CacheField)
-                             .OrderBy(it => typeList.IndexOf(it.DeclaringType))
-                             .ThenBy(it => it.NameForFiltering));
-
-            m_allMembers = sorted.ToArray();
-
-            // ExplorerCore.Log("Cached " + m_allMembers.Length + " members");
         }
 
         #region UI CONSTRUCTION
@@ -578,7 +542,7 @@ namespace UnityExplorer.Inspectors
 
         internal void ConstructOptionsArea()
         {
-            var optionsRowObj = UIFactory.CreateHorizontalGroup(Content, new Color(1,1,1,0));
+            var optionsRowObj = UIFactory.CreateHorizontalGroup(Content, new Color(1, 1, 1, 0));
             var optionsLayout = optionsRowObj.AddComponent<LayoutElement>();
             optionsLayout.minHeight = 25;
             var optionsGroup = optionsRowObj.GetComponent<HorizontalLayoutGroup>();
@@ -596,7 +560,7 @@ namespace UnityExplorer.Inspectors
             var updateText = updateButtonObj.GetComponentInChildren<Text>();
             updateText.text = "Update Values";
             var updateBtn = updateButtonObj.GetComponent<Button>();
-            updateBtn.onClick.AddListener(() => 
+            updateBtn.onClick.AddListener(() =>
             {
                 bool orig = m_autoUpdate;
                 m_autoUpdate = true;
