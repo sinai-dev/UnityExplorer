@@ -106,85 +106,17 @@
       <HintPath>$(MLMonoGameFolder)\MelonLoader\MelonLoader.ModHandler.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <!--<Reference Include="UnityEngine">
-      <HintPath>$(MLMonoManagedFolder)\UnityEngine.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>$(MLMonoManagedFolder)\UnityEngine.CoreModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>$(MLMonoManagedFolder)\UnityEngine.PhysicsModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>$(MLMonoManagedFolder)\UnityEngine.TextRenderingModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>$(MLMonoManagedFolder)\UnityEngine.UI.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.UIModule">
-      <HintPath>$(MLMonoManagedFolder)\UnityEngine.UIModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>$(MLMonoManagedFolder)\UnityEngine.IMGUIModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.ImageConversionModule">
-      <HintPath>$(MLMonoManagedFolder)\UnityEngine.ImageConversionModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>-->
   </ItemGroup>
   <!-- BepInEx Mono refs -->
   <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)'=='false|false'">
     <Reference Include="BepInEx">
-      <HintPath>$(BIEMonoGameFolder)\BepInEx\core\BepInEx.dll</HintPath>
+      <HintPath>..\lib\BepInEx.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="0Harmony">
-      <HintPath>$(BIEMonoGameFolder)\BepInEx\core\0Harmony.dll</HintPath>
+      <HintPath>..\lib\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <!--<Reference Include="UnityEngine.AssetBundleModule">
-      <HintPath>$(BIEMonoManagedFolder)\UnityEngine.AssetBundleModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>$(BIEMonoManagedFolder)\UnityEngine.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>$(BIEMonoManagedFolder)\UnityEngine.CoreModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>$(BIEMonoManagedFolder)\UnityEngine.PhysicsModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>$(BIEMonoManagedFolder)\UnityEngine.TextRenderingModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>$(BIEMonoManagedFolder)\UnityEngine.UI.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.UIModule">
-      <HintPath>$(BIEMonoManagedFolder)\UnityEngine.UIModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>$(BIEMonoManagedFolder)\UnityEngine.IMGUIModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.ImageConversionModule">
-      <HintPath>$(BIEMonoManagedFolder)\UnityEngine.ImageConversionModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>-->
   </ItemGroup>
   <!-- MelonLoader Il2Cpp refs -->
   <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)'=='true|true'">
@@ -204,14 +136,6 @@
       <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\Il2CppSystem.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <!-- <Reference Include="Unity.TextMeshPro">
-      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\Unity.TextMeshPro.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.TextCoreModule">
-      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.TextCoreModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference> -->
     <Reference Include="UnityEngine">
       <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
@@ -267,14 +191,6 @@
       <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\Il2CppSystem.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <!-- <Reference Include="Unity.TextMeshPro">
-      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\Unity.TextMeshPro.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.TextCoreModule">
-      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.TextCoreModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference> -->
     <Reference Include="UnityEngine">
       <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.dll</HintPath>
       <Private>False</Private>
