@@ -77,11 +77,6 @@ namespace UnityExplorer.UI
                 catch { }
 
                 // Setup Harmony Patches
-                TryPatch(typeof(EventSystem),
-                    "current",
-                    new HarmonyMethod(typeof(ForceUnlockCursor).GetMethod(nameof(Prefix_EventSystem_set_current))),
-                    true);
-
                 TryPatch(typeof(Cursor),
                     "lockState",
                     new HarmonyMethod(typeof(ForceUnlockCursor).GetMethod(nameof(Prefix_set_lockState))),
@@ -90,6 +85,17 @@ namespace UnityExplorer.UI
                 TryPatch(typeof(Cursor),
                     "visible",
                     new HarmonyMethod(typeof(ForceUnlockCursor).GetMethod(nameof(Prefix_set_visible))),
+                    true);
+
+#if BIE
+#if CPP
+                // temporarily disabling this patch in BepInEx il2cpp as it's causing a crash in some games.
+                return;
+#endif
+#endif
+                TryPatch(typeof(EventSystem),
+                    "current",
+                    new HarmonyMethod(typeof(ForceUnlockCursor).GetMethod(nameof(Prefix_EventSystem_set_current))),
                     true);
             }
             catch (Exception e)
@@ -120,10 +126,10 @@ namespace UnityExplorer.UI
                     harmony.Patch(prop.GetGetMethod(), postfix: patch);
                 }
             }
-            catch // (Exception e)
+            catch (Exception e)
             {
-                //string suf = setter ? "set_" : "get_";
-                //ExplorerCore.Log($"Unable to patch {type.Name}.{suf}{property}: {e.Message}");
+                string suf = setter ? "set_" : "get_";
+                ExplorerCore.Log($"Unable to patch {type.Name}.{suf}{property}: {e.Message}");
             }
         }
 
