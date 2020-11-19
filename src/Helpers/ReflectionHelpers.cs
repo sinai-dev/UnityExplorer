@@ -105,21 +105,19 @@ namespace UnityExplorer.Helpers
             return getType;
         }
 
-        private static readonly Dictionary<Type, IntPtr> ClassPointers = new Dictionary<Type, IntPtr>();
+        private static readonly Dictionary<Type, IntPtr> CppClassPointers = new Dictionary<Type, IntPtr>();
 
         public static object Il2CppCast(this object obj, Type castTo)
         {
             if (!(obj is Il2CppSystem.Object ilObj))
-            {
                 return obj;
-            }
 
             if (!Il2CppTypeNotNull(castTo, out IntPtr castToPtr))
                 return obj;
 
-            IntPtr classPtr = il2cpp_object_get_class(ilObj.Pointer);
+            IntPtr castFromPtr = il2cpp_object_get_class(ilObj.Pointer);
 
-            if (!il2cpp_class_is_assignable_from(castToPtr, classPtr))
+            if (!il2cpp_class_is_assignable_from(castToPtr, castFromPtr))
                 return obj;
 
             if (RuntimeSpecificsStore.IsInjected(castToPtr))
@@ -128,24 +126,21 @@ namespace UnityExplorer.Helpers
             return Activator.CreateInstance(castTo, ilObj.Pointer);
         }
 
-        public static bool Il2CppTypeNotNull(Type type)
-        {
-            return Il2CppTypeNotNull(type, out _);
-        }
+        public static bool Il2CppTypeNotNull(Type type) => Il2CppTypeNotNull(type, out _);
 
         public static bool Il2CppTypeNotNull(Type type, out IntPtr il2cppPtr)
         {
-            if (!ClassPointers.ContainsKey(type))
+            if (!CppClassPointers.ContainsKey(type))
             {
                 il2cppPtr = (IntPtr)typeof(Il2CppClassPointerStore<>)
                     .MakeGenericType(new Type[] { type })
                     .GetField("NativeClassPtr", BF.Public | BF.Static)
                     .GetValue(null);
 
-                ClassPointers.Add(type, il2cppPtr);
+                CppClassPointers.Add(type, il2cppPtr);
             }
             else
-                il2cppPtr = ClassPointers[type];
+                il2cppPtr = CppClassPointers[type];
 
             return il2cppPtr != IntPtr.Zero;
         }
@@ -181,31 +176,42 @@ namespace UnityExplorer.Helpers
             }
         }
 
+#if CPP
+        internal static void TryLoadGameModules()
+        {
+            LoadModule("Assembly-CSharp");
+            LoadModule("Assembly-CSharp-firstpass");
+        }
+
         public static bool LoadModule(string module)
         {
-#if CPP
 #if ML
-            string path = $@"MelonLoader\Managed\{module}.dll";
+            var path = $@"MelonLoader\Managed\{module}.dll";
 #else
             var path = $@"BepInEx\unhollowed\{module}.dll";
 #endif
-            if (!File.Exists(path))
-            {
+
+            return LoadModuleInternal(path);
+        }
+
+        internal static bool LoadModuleInternal(string fullPath)
+        {
+            if (!File.Exists(fullPath))
                 return false;
-            }
 
             try
             {
-                Assembly.Load(File.ReadAllBytes(path));
+                Assembly.Load(File.ReadAllBytes(fullPath));
                 return true;
             }
             catch (Exception e)
             {
-                ExplorerCore.Log(e.GetType() + ", " + e.Message);
+                Console.WriteLine(e.GetType() + ", " + e.Message);
             }
-#endif
+
             return false;
         }
+#endif
 
         public static bool IsEnumerable(Type t)
         {

@@ -45,19 +45,95 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public void ConstructInstanceHelpers()
         {
+            if (!typeof(Component).IsAssignableFrom(m_targetType) && !typeof(UnityEngine.Object).IsAssignableFrom(m_targetType))
+                return;
+
+            var rowObj = UIFactory.CreateHorizontalGroup(Content, new Color(0.1f, 0.1f, 0.1f));
+            var rowGroup = rowObj.GetComponent<HorizontalLayoutGroup>();
+            rowGroup.childForceExpandWidth = true;
+            rowGroup.childControlWidth = true;
+            rowGroup.spacing = 5;
+            rowGroup.padding.top = 2;
+            rowGroup.padding.bottom = 2;
+            rowGroup.padding.right = 2;
+            rowGroup.padding.left = 2;
+            var rowLayout = rowObj.AddComponent<LayoutElement>();
+            rowLayout.minHeight = 25;
+            rowLayout.flexibleWidth = 5000;
+
+            if (typeof(Component).IsAssignableFrom(m_targetType))
+            {
+                ConstructCompHelper(rowObj);
+            }
+
+            ConstructUObjHelper(rowObj);
+
             // WIP
 
             //if (m_targetType == typeof(Texture2D))
             //    ConstructTextureHelper();
+        }
 
-            // todo other helpers
+        internal void ConstructCompHelper(GameObject rowObj)
+        {
+            var labelObj = UIFactory.CreateLabel(rowObj, TextAnchor.MiddleLeft);
+            var labelLayout = labelObj.AddComponent<LayoutElement>();
+            labelLayout.minWidth = 90;
+            labelLayout.minHeight = 25;
+            labelLayout.flexibleWidth = 0;
+            var labelText = labelObj.GetComponent<Text>();
+            labelText.text = "GameObject:";
 
-            //if (typeof(Component).IsAssignableFrom(m_targetType))
-            //{
-            //}
-            //else if (typeof(UnityEngine.Object).IsAssignableFrom(m_targetType))
-            //{
-            //}
+#if MONO
+                var comp = Target as Component;
+#else
+            var comp = (Target as Il2CppSystem.Object).TryCast<Component>();
+#endif
+
+            var goBtnObj = UIFactory.CreateButton(rowObj, new Color(0.2f, 0.5f, 0.2f));
+            var goBtnLayout = goBtnObj.AddComponent<LayoutElement>();
+            goBtnLayout.minHeight = 25;
+            goBtnLayout.minWidth = 200;
+            goBtnLayout.flexibleWidth = 0;
+            var text = goBtnObj.GetComponentInChildren<Text>();
+            text.text = comp.name;
+            var btn = goBtnObj.GetComponent<Button>();
+            btn.onClick.AddListener(() => { InspectorManager.Instance.Inspect(comp.gameObject); });
+        }
+
+        internal void ConstructUObjHelper(GameObject rowObj)
+        {
+            var labelObj = UIFactory.CreateLabel(rowObj, TextAnchor.MiddleLeft);
+            var labelLayout = labelObj.AddComponent<LayoutElement>();
+            labelLayout.minWidth = 60;
+            labelLayout.minHeight = 25;
+            labelLayout.flexibleWidth = 0;
+            var labelText = labelObj.GetComponent<Text>();
+            labelText.text = "Name:";
+
+#if MONO
+            var uObj = Target as UnityEngine.Object;
+#else
+            var uObj = (Target as Il2CppSystem.Object).TryCast<UnityEngine.Object>();
+#endif
+
+            var inputObj = UIFactory.CreateInputField(rowObj, 14, 3, 1);
+            var inputLayout = inputObj.AddComponent<LayoutElement>();
+            inputLayout.minHeight = 25;
+            inputLayout.flexibleWidth = 2000;
+            var inputField = inputObj.GetComponent<InputField>();
+            inputField.readOnly = true;
+            inputField.text = uObj.name;
+
+            //var goBtnObj = UIFactory.CreateButton(rowObj, new Color(0.2f, 0.5f, 0.2f));
+            //var goBtnLayout = goBtnObj.AddComponent<LayoutElement>();
+            //goBtnLayout.minHeight = 25;
+            //goBtnLayout.minWidth = 200;
+            //goBtnLayout.flexibleWidth = 0;
+            //var text = goBtnObj.GetComponentInChildren<Text>();
+            //text.text = comp.name;
+            //var btn = goBtnObj.GetComponent<Button>();
+            //btn.onClick.AddListener(() => { InspectorManager.Instance.Inspect(comp.gameObject); });
         }
 
         //internal bool showingTextureHelper;

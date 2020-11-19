@@ -8,13 +8,14 @@ using UnityExplorer.Inspectors;
 using System.IO;
 using UnityExplorer.Unstrip;
 using UnityEngine.SceneManagement;
+using UnityExplorer.Helpers;
 
 namespace UnityExplorer
 {
     public class ExplorerCore
     {
         public const string NAME = "UnityExplorer";
-        public const string VERSION = "3.0.1";
+        public const string VERSION = "3.0.2";
         public const string AUTHOR = "Sinai";
         public const string GUID = "com.sinai.unityexplorer";
         public const string EXPLORER_FOLDER = @"Mods\UnityExplorer";
@@ -40,6 +41,10 @@ namespace UnityExplorer
             }
 
             Instance = this;
+
+#if CPP
+            ReflectionHelpers.TryLoadGameModules();
+#endif
 
             if (!Directory.Exists(EXPLORER_FOLDER))
                 Directory.CreateDirectory(EXPLORER_FOLDER);

@@ -179,7 +179,7 @@ namespace UnityExplorer.Inspectors
                         var pi = member as PropertyInfo;
                         var fi = member as FieldInfo;
 
-                        if (IsBlacklisted(sig) || mi != null && IsBlacklisted(mi))
+                        if (IsBlacklisted(sig) || (mi != null && IsBlacklisted(mi)))
                             continue;
 
                         var args = mi?.GetParameters() ?? pi?.GetIndexParameters();
@@ -581,7 +581,7 @@ namespace UnityExplorer.Inspectors
 
         internal void ConstructMemberList()
         {
-            var scrollobj = UIFactory.CreateScrollView(Content, out m_scrollContent, out m_sliderScroller, new Color(0.08f, 0.08f, 0.08f));
+            var scrollobj = UIFactory.CreateScrollView(Content, out m_scrollContent, out m_sliderScroller, new Color(0.05f, 0.05f, 0.05f));
 
             m_scrollContentRect = m_scrollContent.GetComponent<RectTransform>();
 
