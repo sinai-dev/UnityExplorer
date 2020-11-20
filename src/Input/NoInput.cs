@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace UnityExplorer.Input
 {
@@ -13,5 +14,10 @@ namespace UnityExplorer.Input
 
         public bool GetMouseButton(int btn) => false;
         public bool GetMouseButtonDown(int btn) => false;
+
+        public BaseInputModule UIModule => null;
+        public PointerEventData InputPointerEvent => null;
+        public void ActivateModule() { }
+        public void AddUIInputModule() { }
     }
 }

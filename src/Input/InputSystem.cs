@@ -2,6 +2,9 @@
 using System.Reflection;
 using UnityExplorer.Helpers;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityExplorer.UI;
+using System.Collections.Generic;
 
 namespace UnityExplorer.Input
 {
@@ -64,23 +67,45 @@ namespace UnityExplorer.Input
         private static PropertyInfo m_positionProp;
         private static MethodInfo m_readVector2InputMethod;
 
-        public Vector2 MousePosition => (Vector2)m_readVector2InputMethod.Invoke(MousePositionInfo, new object[0]);
-
-        public bool GetKeyDown(KeyCode key)
+        public Vector2 MousePosition
         {
-            var parsedKey = Enum.Parse(TKey, key.ToString());
-            var actualKey = m_kbIndexer.GetValue(CurrentKeyboard, new object[] { parsedKey });
-
-            return (bool)m_btnWasPressedProp.GetValue(actualKey, null);
+            get
+            {
+                try
+                {
+                    return (Vector2)m_readVector2InputMethod.Invoke(MousePositionInfo, new object[0]);
+                }
+                catch
+                {
+                    return Vector2.zero;
+                }
+            }
         }
 
-        public bool GetKey(KeyCode key)
-        {
-            var parsed = Enum.Parse(TKey, key.ToString());
-            var actualKey = m_kbIndexer.GetValue(CurrentKeyboard, new object[] { parsed });
+        internal static Dictionary<KeyCode, object> ActualKeyDict = new Dictionary<KeyCode, object>();
 
-            return (bool)m_btnIsPressedProp.GetValue(actualKey, null);
+        internal object GetActualKey(KeyCode key)
+        {
+            if (!ActualKeyDict.ContainsKey(key))
+            {
+                var s = key.ToString();
+                if (s.Contains("Control"))
+                    s = s.Replace("Control", "Ctrl");
+                else if (s.Contains("Return"))
+                    s = "Enter";
+
+                var parsed = Enum.Parse(TKey, s);
+                var actualKey = m_kbIndexer.GetValue(CurrentKeyboard, new object[] { parsed });
+
+                ActualKeyDict.Add(key, actualKey);
+            }
+
+            return ActualKeyDict[key];
         }
+
+        public bool GetKeyDown(KeyCode key) => (bool)m_btnWasPressedProp.GetValue(GetActualKey(key), null);
+
+        public bool GetKey(KeyCode key) => (bool)m_btnIsPressedProp.GetValue(GetActualKey(key), null);
 
         public bool GetMouseButtonDown(int btn)
         {
@@ -102,6 +127,45 @@ namespace UnityExplorer.Input
                 // case 2: return (bool)_btnIsPressedProp.GetValue(MiddleMouseButton, null);
                 default: throw new NotImplementedException();
             }
+        }
+
+        // UI Input
+
+        //public Type TInputSystemUIInputModule 
+        //    => m_tUIInputModule 
+        //    ?? (m_tUIInputModule = ReflectionHelpers.GetTypeByName("UnityEngine.InputSystem.UI.InputSystemUIInputModule"));
+        //internal Type m_tUIInputModule;
+
+        public BaseInputModule UIModule => null; // m_newInputModule;
+        //internal BaseInputModule m_newInputModule;
+
+        public PointerEventData InputPointerEvent => null;
+
+        public void AddUIInputModule()
+        {
+//            if (TInputSystemUIInputModule != null)
+//            {
+//#if CPP
+//                // m_newInputModule = UIManager.CanvasRoot.AddComponent(Il2CppType.From(TInputSystemUIInputModule)).TryCast<BaseInputModule>();
+//#else
+//                m_newInputModule = (BaseInputModule)UIManager.CanvasRoot.AddComponent(TInputSystemUIInputModule);
+//#endif
+//            }
+//            else
+//            {
+//                ExplorerCore.LogWarning("New input system: Could not find type by name 'UnityEngine.InputSystem.UI.InputSystemUIInputModule'");
+//            }
+        }
+
+        public void ActivateModule()
+        {
+//#if CPP
+//            // m_newInputModule.ActivateModule();
+//#else
+//            m_newInputModule.ActivateModule();
+//#endif
+
+
         }
     }
 }

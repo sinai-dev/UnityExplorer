@@ -63,6 +63,8 @@ namespace UnityExplorer.UI
                     throw new Exception("Could not find Type 'UnityEngine.Cursor'!");
                 }
 
+                ExplorerCore.Log("setting up forceunlockcursor patches...");
+
                 // Get current cursor state and enable cursor
                 try
                 {
@@ -100,7 +102,7 @@ namespace UnityExplorer.UI
             }
             catch (Exception e)
             {
-                ExplorerCore.Log($"Exception on CursorControl.Init! {e.GetType()}, {e.Message}");
+                ExplorerCore.Log($"Exception on ForceUnlockCursor.Init! {e.GetType()}, {e.Message}");
             }
         }
 
@@ -164,13 +166,20 @@ namespace UnityExplorer.UI
 
         public static void SetEventSystem()
         {
+            if (InputManager.CurrentType == InputType.InputSystem)
+                return;
+
             m_settingEventSystem = true;
-            UIManager.SetEventSystem();
+            EventSystem.current = UIManager.EventSys;
+            InputManager.ActivateUIModule();
             m_settingEventSystem = false;
         }
 
         public static void ReleaseEventSystem()
         {
+            if (InputManager.CurrentType == InputType.InputSystem)
+                return;
+
             if (m_lastEventSystem)
             {
                 m_settingEventSystem = true;

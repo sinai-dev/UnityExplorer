@@ -211,6 +211,8 @@ namespace UnityExplorer.Helpers
 
             return false;
         }
+#else
+        public static bool LoadModule(string module) => true;
 #endif
 
         public static bool IsEnumerable(Type t)

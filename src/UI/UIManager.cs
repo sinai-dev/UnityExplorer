@@ -8,6 +8,7 @@ using System.IO;
 using System.Reflection;
 using UnityExplorer.Helpers;
 using UnityExplorer.UI.Shared;
+using UnityExplorer.Input;
 #if CPP
 using UnityExplorer.Unstrip;
 #endif
@@ -18,37 +19,13 @@ namespace UnityExplorer.UI
     {
         public static GameObject CanvasRoot { get; private set; }
         public static EventSystem EventSys { get; private set; }
-        public static StandaloneInputModule InputModule { get; private set; }
 
-        //internal static Material UIMaterial { get; private set; }
         internal static Sprite ResizeCursor { get; private set; }
         internal static Font ConsoleFont { get; private set; }
 
         public static void Init()
         {
-            var bundlePath = ExplorerCore.EXPLORER_FOLDER + @"\explorerui.bundle";
-            if (File.Exists(bundlePath))
-            {
-                var bundle = AssetBundle.LoadFromFile(bundlePath);
-
-                // Fix for games which don't ship with 'UI/Default' shader.
-                if (Graphic.defaultGraphicMaterial.shader?.name != "UI/Default")
-                {
-                    ExplorerCore.Log("This game does not ship with the 'UI/Default' shader, using manual Default Shader...");
-                    Graphic.defaultGraphicMaterial.shader = bundle.LoadAsset<Shader>("DefaultUI");
-                }
-
-                ResizeCursor = bundle.LoadAsset<Sprite>("cursor");
-
-                ConsoleFont = bundle.LoadAsset<Font>("CONSOLA");
-
-                ExplorerCore.Log("Loaded UI bundle");
-            }
-            else
-            {
-                ExplorerCore.LogWarning("Could not find the ExplorerUI Bundle! It should exist at '" + bundlePath + "'");
-                return;
-            }
+            LoadBundle();
 
             // Create core UI Canvas and Event System handler
             CreateRootCanvas();
@@ -62,12 +39,6 @@ namespace UnityExplorer.UI
             Canvas.ForceUpdateCanvases();
         }
 
-        public static void SetEventSystem()
-        {
-            EventSystem.current = EventSys;
-            InputModule.ActivateModule();
-        }
-
         public static void OnSceneChange()
         {
             SceneExplorer.Instance?.OnSceneChange();
@@ -78,23 +49,20 @@ namespace UnityExplorer.UI
         {
             MainMenu.Instance?.Update();
 
-            if (EventSys && InputModule)
+            if (EventSys)
             {
                 if (EventSystem.current != EventSys)
                 {
                     ForceUnlockCursor.SetEventSystem();
-                    //ForceUnlockCursor.Unlock = true;
                 }
 
-                // Fix for games which override the InputModule pointer events (eg, VRChat)
 #if CPP
-                if (InputModule.m_InputPointerEvent != null)
+                // Fix for games which override the InputModule pointer events (eg, VRChat)
+                var evt = InputManager.InputPointerEvent;
+                if (evt != null)
                 {
-                    PointerEventData evt = InputModule.m_InputPointerEvent;
                     if (!evt.eligibleForClick && evt.selectedObject)
-                    {
                         evt.eligibleForClick = true;
-                    }
                 }
 #endif
             }
@@ -125,6 +93,33 @@ namespace UnityExplorer.UI
             }
         }
 
+        private static void LoadBundle()
+        {
+            var bundlePath = ExplorerCore.EXPLORER_FOLDER + @"\explorerui.bundle";
+            if (File.Exists(bundlePath))
+            {
+                var bundle = AssetBundle.LoadFromFile(bundlePath);
+
+                // Fix for games which don't ship with 'UI/Default' shader.
+                if (Graphic.defaultGraphicMaterial.shader?.name != "UI/Default")
+                {
+                    ExplorerCore.Log("This game does not ship with the 'UI/Default' shader, using manual Default Shader...");
+                    Graphic.defaultGraphicMaterial.shader = bundle.LoadAsset<Shader>("DefaultUI");
+                }
+
+                ResizeCursor = bundle.LoadAsset<Sprite>("cursor");
+
+                ConsoleFont = bundle.LoadAsset<Font>("CONSOLA");
+
+                ExplorerCore.Log("Loaded UI bundle");
+            }
+            else
+            {
+                ExplorerCore.LogWarning("Could not find the ExplorerUI Bundle! It should exist at '" + bundlePath + "'");
+                return;
+            }
+        }
+
         private static GameObject CreateRootCanvas()
         {
             GameObject rootObj = new GameObject("ExplorerCanvas");
@@ -135,8 +130,7 @@ namespace UnityExplorer.UI
             CanvasRoot.transform.position = new Vector3(0f, 0f, 1f);
 
             EventSys = rootObj.AddComponent<EventSystem>();
-            InputModule = rootObj.AddComponent<StandaloneInputModule>();
-            InputModule.ActivateModule();
+            InputManager.AddUIModule();
 
             Canvas canvas = rootObj.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceCamera;

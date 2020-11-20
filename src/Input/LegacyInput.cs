@@ -2,6 +2,8 @@
 using System.Reflection;
 using UnityExplorer.Helpers;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityExplorer.UI;
 
 namespace UnityExplorer.Input
 {
@@ -36,5 +38,27 @@ namespace UnityExplorer.Input
         public bool GetMouseButton(int btn) => (bool)m_getMouseButtonMethod.Invoke(null, new object[] { btn });
 
         public bool GetMouseButtonDown(int btn) => (bool)m_getMouseButtonDownMethod.Invoke(null, new object[] { btn });
+
+        // UI Input module
+
+        public BaseInputModule UIModule => m_inputModule;
+        internal StandaloneInputModule m_inputModule;
+
+        public PointerEventData InputPointerEvent =>
+#if CPP
+            m_inputModule.m_InputPointerEvent;
+#else
+            null;
+#endif
+
+        public void AddUIInputModule()
+        {
+            m_inputModule = UIManager.CanvasRoot.gameObject.AddComponent<StandaloneInputModule>();
+        }
+
+        public void ActivateModule()
+        {
+            m_inputModule.ActivateModule();
+        }
     }
 }

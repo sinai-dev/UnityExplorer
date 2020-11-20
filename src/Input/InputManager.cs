@@ -2,14 +2,24 @@
 using UnityEngine;
 using UnityExplorer.Helpers;
 using System.Diagnostics.CodeAnalysis;
+using UnityEngine.EventSystems;
 #if CPP
 using UnhollowerBaseLib;
 #endif
 
 namespace UnityExplorer.Input
 {
+    public enum InputType
+    {
+        InputSystem,
+        Legacy,
+        None
+    }
+
     public static class InputManager
     {
+        public static InputType CurrentType { get; private set; }
+
         private static IHandleInput m_inputModule;
 
         public static Vector3 MousePosition => m_inputModule.MousePosition;
@@ -20,23 +30,35 @@ namespace UnityExplorer.Input
         public static bool GetMouseButtonDown(int btn) => m_inputModule.GetMouseButtonDown(btn);
         public static bool GetMouseButton(int btn) => m_inputModule.GetMouseButton(btn);
 
+        public static BaseInputModule UIInput => m_inputModule.UIModule;
+        public static PointerEventData InputPointerEvent => m_inputModule.InputPointerEvent;
+
+        public static void ActivateUIModule() => m_inputModule.ActivateModule();
+
+        public static void AddUIModule()
+        {
+            m_inputModule.AddUIInputModule();
+            ActivateUIModule();
+        }
+
         public static void Init()
         {
-#if CPP
             if (InputSystem.TKeyboard != null || (ReflectionHelpers.LoadModule("Unity.InputSystem") && InputSystem.TKeyboard != null))
             {
                 m_inputModule = new InputSystem();
+                CurrentType = InputType.InputSystem;
             }
             else if (LegacyInput.TInput != null || (ReflectionHelpers.LoadModule("UnityEngine.InputLegacyModule") && LegacyInput.TInput != null))
             {
                 m_inputModule = new LegacyInput();
+                CurrentType = InputType.Legacy;
             }
-#endif
 
             if (m_inputModule == null)
             {
                 ExplorerCore.LogWarning("Could not find any Input module!");
                 m_inputModule = new NoInput();
+                CurrentType = InputType.None;
             }
         }
     }
