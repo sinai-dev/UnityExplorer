@@ -178,13 +178,9 @@ namespace UnityExplorer.UI
 
             Image image = groupObj.AddComponent<Image>();
             if (color != default)
-            {
                 image.color = color;
-            }
             else
-            {
                 image.color = new Color(44f / 255f, 44f / 255f, 44f / 255f);
-            }
 
             return groupObj;
         }
@@ -657,16 +653,16 @@ namespace UnityExplorer.UI
             contentFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
             contentFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-            var contentLayout = content.AddComponent<VerticalLayoutGroup>();
-            contentLayout.childForceExpandHeight = true;
-            contentLayout.childControlHeight = true;
-            contentLayout.childForceExpandWidth = true;
-            contentLayout.childControlWidth = true;
-            contentLayout.padding.left = 5;
-            contentLayout.padding.right = 5;
-            contentLayout.padding.top = 5;
-            contentLayout.padding.bottom = 5;
-            contentLayout.spacing = 5;
+            var contentGroup = content.AddComponent<VerticalLayoutGroup>();
+            contentGroup.childForceExpandHeight = true;
+            contentGroup.childControlHeight = true;
+            contentGroup.childForceExpandWidth = true;
+            contentGroup.childControlWidth = true;
+            contentGroup.padding.left = 5;
+            contentGroup.padding.right = 5;
+            contentGroup.padding.top = 5;
+            contentGroup.padding.bottom = 5;
+            contentGroup.spacing = 5;
 
             GameObject scrollBarObj = CreateUIObject("DynamicScrollbar", mainObj);
 

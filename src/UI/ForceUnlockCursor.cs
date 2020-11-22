@@ -63,8 +63,6 @@ namespace UnityExplorer.UI
                     throw new Exception("Could not find Type 'UnityEngine.Cursor'!");
                 }
 
-                ExplorerCore.Log("setting up forceunlockcursor patches...");
-
                 // Get current cursor state and enable cursor
                 try
                 {

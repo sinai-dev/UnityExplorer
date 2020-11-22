@@ -96,7 +96,10 @@ namespace UnityExplorer.Inspectors.Reflection
         private void SetValueFromDropdown()
         {
             var type = Value?.GetType() ?? FallbackType;
-            var value = Enum.Parse(type, m_dropdownText.text);
+            var index = m_dropdown.value;
+
+            var value = Enum.Parse(type, s_enumNamesCache[type][index].Value);
+
             if (value != null)
             {
                 Value = value;

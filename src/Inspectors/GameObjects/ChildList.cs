@@ -140,7 +140,7 @@ namespace UnityExplorer.Inspectors.GameObjects
         {
             var vertGroupObj = UIFactory.CreateVerticalGroup(parent, new Color(1, 1, 1, 0));
             var vertGroup = vertGroupObj.GetComponent<VerticalLayoutGroup>();
-            vertGroup.childForceExpandHeight = false;
+            vertGroup.childForceExpandHeight = true;
             vertGroup.childForceExpandWidth = false;
             vertGroup.childControlWidth = true;
             vertGroup.spacing = 5;

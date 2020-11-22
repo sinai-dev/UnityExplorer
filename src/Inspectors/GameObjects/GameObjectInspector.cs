@@ -164,7 +164,7 @@ namespace UnityExplorer.Inspectors
                 m_layerDropdown.value = TargetGO.layer;
             }
 
-            if (m_lastScene != TargetGO.scene.name)
+            if (string.IsNullOrEmpty(m_lastScene) || m_lastScene != TargetGO.scene.name)
             {
                 m_lastScene = TargetGO.scene.name;
 
@@ -217,10 +217,20 @@ namespace UnityExplorer.Inspectors
 
             s_content = UIFactory.CreateScrollView(parent, out GameObject scrollContent, out _, new Color(0.1f, 0.1f, 0.1f));
 
+            var parentLayout = scrollContent.transform.parent.gameObject.AddComponent<VerticalLayoutGroup>();
+            parentLayout.childForceExpandWidth = true;
+            parentLayout.childControlWidth = true;
+            parentLayout.childForceExpandHeight = true;
+            parentLayout.childControlHeight = true;
+
             var scrollGroup = scrollContent.GetComponent<VerticalLayoutGroup>();
             scrollGroup.childForceExpandHeight = true;
             scrollGroup.childControlHeight = true;
+            scrollGroup.childForceExpandWidth = true;
+            scrollGroup.childControlWidth = true;
             scrollGroup.spacing = 5;
+            var contentFitter = scrollContent.GetComponent<ContentSizeFitter>();
+            contentFitter.verticalFit = ContentSizeFitter.FitMode.Unconstrained;
 
             ConstructTopArea(scrollContent);
 
@@ -230,6 +240,9 @@ namespace UnityExplorer.Inspectors
 
             s_childList.ConstructChildList(midGroupObj);
             s_compList.ConstructCompList(midGroupObj);
+
+            LayoutRebuilder.ForceRebuildLayoutImmediate(s_content.GetComponent<RectTransform>());
+            Canvas.ForceUpdateCanvases();
         }
 
         private void ConstructTopArea(GameObject scrollContent)
@@ -431,11 +444,10 @@ namespace UnityExplorer.Inspectors
             midGroup.childControlWidth = true;
             midGroup.childForceExpandHeight = true;
             midGroup.childControlHeight = true;
-            var midlayout = midGroupObj.AddComponent<LayoutElement>();
-            midlayout.minHeight = 350;
-            midlayout.flexibleHeight = 10000;
-            midlayout.minWidth = 200;
-            midlayout.flexibleWidth = 25000;
+
+            var midLayout = midGroupObj.AddComponent<LayoutElement>();
+            midLayout.minHeight = 300;
+            midLayout.flexibleHeight = 5000;
 
             return midGroupObj;
         }

@@ -136,7 +136,7 @@ namespace UnityExplorer.Inspectors.GameObjects
         {
             var vertGroupObj = UIFactory.CreateVerticalGroup(parent, new Color(1, 1, 1, 0));
             var vertGroup = vertGroupObj.GetComponent<VerticalLayoutGroup>();
-            vertGroup.childForceExpandHeight = false;
+            vertGroup.childForceExpandHeight = true;
             vertGroup.childForceExpandWidth = false;
             vertGroup.childControlWidth = true;
             vertGroup.spacing = 5;
@@ -157,6 +157,7 @@ namespace UnityExplorer.Inspectors.GameObjects
             var compScrollObj = UIFactory.CreateScrollView(vertGroupObj, out s_compListContent, out SliderScrollbar scroller, new Color(0.07f, 0.07f, 0.07f));
             var contentLayout = compScrollObj.AddComponent<LayoutElement>();
             contentLayout.minHeight = 50;
+            contentLayout.flexibleHeight = 5000;
 
             s_compListPageHandler = new PageHandler(scroller);
             s_compListPageHandler.ConstructUI(vertGroupObj);
