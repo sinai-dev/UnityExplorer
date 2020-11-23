@@ -78,7 +78,13 @@ namespace UnityExplorer.Inspectors.Reflection
                 m_valueContent.SetActive(false); 
                 GameObject.Destroy(this.m_valueContent.gameObject);
             }
-            if (this.m_subContentParent && SubContentWanted)
+
+            DestroySubContent();
+        }
+
+        public virtual void DestroySubContent()
+        {
+            if (this.m_subContentParent && HasSubContent)
             {
                 for (int i = 0; i < this.m_subContentParent.transform.childCount; i++)
                 {
@@ -87,6 +93,8 @@ namespace UnityExplorer.Inspectors.Reflection
                         GameObject.Destroy(child.gameObject);
                 }
             }
+
+            m_subContentConstructed = false;
         }
 
         public virtual void OnValueUpdated()
@@ -95,18 +103,16 @@ namespace UnityExplorer.Inspectors.Reflection
                 ConstructUI(m_mainContentParent, m_subContentParent);
 
             if (Owner is CacheMember ownerMember && !string.IsNullOrEmpty(ownerMember.ReflectionException))
-            {
                 OnException(ownerMember);
-            }
             else
-            {
                 RefreshUIForValue();
-            }
         }
 
         public virtual void OnException(CacheMember member)
         {
-            m_baseLabel.text = "<color=red>" + member.ReflectionException + "</color>";
+            if (m_UIConstructed)
+                m_baseLabel.text = "<color=red>" + member.ReflectionException + "</color>";
+                
             Value = null;
         }
 

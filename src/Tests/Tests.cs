@@ -24,6 +24,12 @@ namespace UnityExplorer.Tests
 
     public class TestClass
     {
+        public string AAALongString = @"1
+2
+3
+4
+5";
+
         public Vector2 AATestVector2 = new Vector2(1, 2);
         public Vector3 AATestVector3 = new Vector3(1, 2, 3);
         public Vector4 AATestVector4 = new Vector4(1, 2, 3, 4);

@@ -35,7 +35,6 @@ namespace UnityExplorer.Helpers
         }
 #endif
 
-
         public static bool IsReadable(this Texture2D tex)
         {
             try
@@ -68,6 +67,10 @@ namespace UnityExplorer.Helpers
             return _newTex;
         }
 
+#if CPP
+        internal delegate void d_Blit2(IntPtr source, IntPtr dest);
+#endif
+
         public static Texture2D ForceReadTexture(Texture2D tex)
         {
             try
@@ -78,7 +81,13 @@ namespace UnityExplorer.Helpers
                 var rt = RenderTexture.GetTemporary(tex.width, tex.height, 0, RenderTextureFormat.ARGB32);
                 rt.filterMode = FilterMode.Point;
                 RenderTexture.active = rt;
+
+#if MONO
                 Graphics.Blit(tex, rt);
+#else
+                var iCall = ICallHelper.GetICall<d_Blit2>("UnityEngine.Graphics::Blit2");
+                iCall.Invoke(tex.Pointer, rt.Pointer);
+#endif
 
                 var _newTex = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
 

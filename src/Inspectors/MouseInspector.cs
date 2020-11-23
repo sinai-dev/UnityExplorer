@@ -3,18 +3,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityExplorer.Helpers;
 using UnityExplorer.Input;
 using UnityExplorer.UI;
+using UnityExplorer.Unstrip;
 
 namespace UnityExplorer.Inspectors
 {
     public class MouseInspector
     {
+        public enum MouseInspectMode
+        {
+            World,
+            UI
+        }
+
         public static bool Enabled { get; set; }
 
-        //internal static Text s_objUnderMouseName;
+        public static MouseInspectMode Mode { get; set; }
+
         internal static Text s_objNameLabel;
         internal static Text s_objPathLabel;
         internal static Text s_mousePosLabel;
@@ -29,6 +38,18 @@ namespace UnityExplorer.Inspectors
             Enabled = true;
             MainMenu.Instance.MainPanel.SetActive(false);
             s_UIContent.SetActive(true);
+
+            // recache Graphic Raycasters each time we start
+            var casters = ResourcesUnstrip.FindObjectsOfTypeAll(typeof(GraphicRaycaster));
+            m_gCasters = new GraphicRaycaster[casters.Length];
+            for (int i = 0; i < casters.Length; i++)
+            {
+#if CPP
+                m_gCasters[i] = casters[i].TryCast<GraphicRaycaster>();
+#else
+                m_gCasters[i] = casters[i] as GraphicRaycaster;
+#endif
+            }
         }
 
         public static void StopInspect()
@@ -40,49 +61,68 @@ namespace UnityExplorer.Inspectors
             ClearHitData();
         }
 
+        internal static GraphicRaycaster[] m_gCasters;
+
         public static void UpdateInspect()
         {
             if (InputManager.GetKeyDown(KeyCode.Escape))
             {
                 StopInspect();
+                return;
             }
 
             var mousePos = InputManager.MousePosition;
 
             if (mousePos != s_lastMousePos)
-            {
-                s_lastMousePos = mousePos;
-
-                var inversePos = UIManager.CanvasRoot.transform.InverseTransformPoint(mousePos);
-
-                s_mousePosLabel.text = $"<color=grey>Mouse Position:</color> {((Vector2)InputManager.MousePosition).ToString()}";
-
-                float yFix = mousePos.y < 120 ? 80 : -80;
-
-                s_UIContent.transform.localPosition = new Vector3(inversePos.x, inversePos.y + yFix, 0);
-            }
+                UpdatePosition(mousePos);
 
             if (!UnityHelpers.MainCamera)
                 return;
 
             // actual inspect raycast 
-            var ray = UnityHelpers.MainCamera.ScreenPointToRay(mousePos);
 
-            if (Physics.Raycast(ray, out RaycastHit hit, 1000f))
+            switch (Mode)
             {
-                var obj = hit.transform.gameObject;
+                case MouseInspectMode.UI:
+                    RaycastUI(mousePos); break;
+                case MouseInspectMode.World:
+                    RaycastWorld(mousePos); break;
+            }
+        }
 
-                if (obj != s_lastHit)
-                {
-                    s_lastHit = obj;
-                    s_objNameLabel.text = $"<b>Click to Inspect:</b> <color=cyan>{obj.name}</color>";
-                    s_objPathLabel.text = $"Path: {obj.transform.GetTransformPath(true)}";
-                }
+        internal static void OnHitGameObject(GameObject obj)
+        {
+            if (obj != s_lastHit)
+            {
+                s_lastHit = obj;
+                s_objNameLabel.text = $"<b>Click to Inspect:</b> <color=cyan>{obj.name}</color>";
+                s_objPathLabel.text = $"Path: {obj.transform.GetTransformPath(true)}";
+            }
 
-                if (InputManager.GetMouseButtonDown(0))
+            if (InputManager.GetMouseButtonDown(0))
+            {
+                StopInspect();
+                InspectorManager.Instance.Inspect(obj);
+            }
+        }
+
+        internal static void RaycastWorld(Vector2 mousePos)
+        {
+            var ray = UnityHelpers.MainCamera.ScreenPointToRay(mousePos);
+            var casts = Physics.RaycastAll(ray, 1000f);
+
+            if (casts.Length > 0)
+            {
+                foreach (var cast in casts)
                 {
-                    StopInspect();
-                    InspectorManager.Instance.Inspect(obj);
+                    if (cast.transform)
+                    {
+                        var obj = cast.transform.gameObject;
+
+                        OnHitGameObject(obj);
+
+                        break;
+                    }
                 }
             }
             else
@@ -92,6 +132,56 @@ namespace UnityExplorer.Inspectors
             }
         }
 
+        internal static void RaycastUI(Vector2 mousePos)
+        {
+            var ped = new PointerEventData(null)
+            {
+                position = mousePos
+            };
+
+#if MONO
+            var list = new List<RaycastResult>();
+#else
+            var list = new Il2CppSystem.Collections.Generic.List<RaycastResult>();
+#endif
+            foreach (var gr in m_gCasters)
+            {
+                gr.Raycast(ped, list);
+
+                if (list.Count > 0)
+                {
+                    foreach (var hit in list)
+                    {
+                        if (hit.gameObject)
+                        {
+                            var obj = hit.gameObject;
+
+                            OnHitGameObject(obj);
+
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    if (s_lastHit)
+                        ClearHitData();
+                }
+            }
+        }
+
+        internal static void UpdatePosition(Vector2 mousePos)
+        {
+            s_lastMousePos = mousePos;
+
+            var inversePos = UIManager.CanvasRoot.transform.InverseTransformPoint(mousePos);
+
+            s_mousePosLabel.text = $"<color=grey>Mouse Position:</color> {mousePos.ToString()}";
+
+            float yFix = mousePos.y < 120 ? 80 : -80;
+            s_UIContent.transform.localPosition = new Vector3(inversePos.x, inversePos.y + yFix, 0);
+        }
+
         internal static void ClearHitData()
         {
             s_lastHit = null;
@@ -99,7 +189,7 @@ namespace UnityExplorer.Inspectors
             s_objPathLabel.text = "";
         }
 
-        #region UI Construction
+#region UI Construction
 
         internal static void ConstructUI()
         {
@@ -112,7 +202,10 @@ namespace UnityExplorer.Inspectors
             baseRect.anchorMin = half;
             baseRect.anchorMax = half;
             baseRect.pivot = half;
-            baseRect.sizeDelta = new Vector2(700, 100);
+            baseRect.sizeDelta = new Vector2(700, 150);
+
+            var group = content.GetComponent<VerticalLayoutGroup>();
+            group.childForceExpandHeight = true;
 
             // Title text
 
@@ -131,13 +224,16 @@ namespace UnityExplorer.Inspectors
 
             var pathLabelObj = UIFactory.CreateLabel(content, TextAnchor.MiddleLeft);
             s_objPathLabel = pathLabelObj.GetComponent<Text>();
-            s_objPathLabel.color = Color.grey;
             s_objPathLabel.fontStyle = FontStyle.Italic;
-            s_objPathLabel.horizontalOverflow = HorizontalWrapMode.Overflow;
+            s_objPathLabel.horizontalOverflow = HorizontalWrapMode.Wrap;
+
+            var pathLayout = pathLabelObj.AddComponent<LayoutElement>();
+            pathLayout.minHeight = 75;
+            pathLayout.flexibleHeight = 0;
 
             s_UIContent.SetActive(false);
         }
 
-        #endregion
+#endregion
     }
 }

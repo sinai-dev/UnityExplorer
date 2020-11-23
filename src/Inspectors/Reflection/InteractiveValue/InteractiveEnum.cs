@@ -37,14 +37,7 @@ namespace UnityExplorer.Inspectors.Reflection
 
             if (m_subContentConstructed)
             {
-                // changing types, destroy subcontent
-                for (int i = 0; i < m_subContentParent.transform.childCount; i++)
-                {
-                    var child = m_subContentParent.transform.GetChild(i);
-                    GameObject.Destroy(child.gameObject);
-                }
-
-                m_subContentConstructed = false;
+                DestroySubContent();
             }
 
             if (!s_enumNamesCache.ContainsKey(type))

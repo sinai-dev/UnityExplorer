@@ -25,13 +25,13 @@
     <Prefer32Bit>false</Prefer32Bit>
     <RootNamespace>UnityExplorer</RootNamespace>
     <!-- Set this to the BepInEx Il2Cpp Game folder, without the ending '\' character. -->
-    <BIECppGameFolder>D:\Steam\steamapps\common\Outward</BIECppGameFolder>
+    <BIECppGameFolder>D:\source\Unity Projects\Test\_BUILD</BIECppGameFolder>
     <!-- Set this to the BepInEx Mono Game folder, without the ending '\' character. -->
     <BIEMonoGameFolder>D:\source\Unity Projects\Test\_BUILD_MONO</BIEMonoGameFolder>
     <!-- Set this to the BepInEx Mono Managed folder, without the ending '\' character. -->
     <BIEMonoManagedFolder>D:\source\Unity Projects\Test\_BUILD_MONO\Test_Data\Managed</BIEMonoManagedFolder>
     <!-- Set this to the MelonLoader Il2Cpp Game folder, without the ending '\' character. -->
-    <MLCppGameFolder>D:\Steam\steamapps\common\VRChat</MLCppGameFolder>
+    <MLCppGameFolder>D:\source\Unity Projects\Test\_BUILD</MLCppGameFolder>
     <!-- Set this to the MelonLoader Mono Game folder, without the ending '\' character. -->
     <MLMonoGameFolder>D:\source\Unity Projects\Test\_BUILD_MONO</MLMonoGameFolder>
     <!-- Set this to the MelonLoader Mono Managed folder, without the ending '\' character. -->

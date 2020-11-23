@@ -260,11 +260,8 @@ namespace UnityExplorer.UI.Modules
 
             if (searchType == null)
                 return;
-#if MONO
+
             var allObjects = ResourcesUnstrip.FindObjectsOfTypeAll(searchType);
-#else
-            var allObjects = ResourcesUnstrip.FindObjectsOfTypeAll(Il2CppType.From(searchType));
-#endif
             var results = new List<object>();
 
             // perform filter comparers

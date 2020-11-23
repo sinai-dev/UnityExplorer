@@ -231,23 +231,34 @@ namespace UnityExplorer.Inspectors
             invisGroup.spacing = 10;
 
             // inspect under mouse button
+            AddMouseInspectButton(topRowObj, MouseInspector.MouseInspectMode.UI);
+            AddMouseInspectButton(topRowObj, MouseInspector.MouseInspectMode.World);
+        }
 
+        private static void AddMouseInspectButton(GameObject topRowObj, MouseInspector.MouseInspectMode mode)
+        {
             var inspectObj = UIFactory.CreateButton(topRowObj);
             var inspectLayout = inspectObj.AddComponent<LayoutElement>();
             inspectLayout.minWidth = 120;
             inspectLayout.flexibleWidth = 0;
+
+            var inspectText = inspectObj.GetComponentInChildren<Text>();
+            inspectText.text = "Mouse Inspect";
+            inspectText.fontSize = 13;
+
+            if (mode == MouseInspector.MouseInspectMode.UI)
+                inspectText.text += " (UI)";
+
             var inspectBtn = inspectObj.GetComponent<Button>();
             var inspectColors = inspectBtn.colors;
             inspectColors.normalColor = new Color(0.2f, 0.2f, 0.2f);
             inspectBtn.colors = inspectColors;
-            var inspectText = inspectObj.GetComponentInChildren<Text>();
-            inspectText.text = "Mouse Inspect";
-            inspectText.fontSize = 13;
 
             inspectBtn.onClick.AddListener(OnInspectMouseClicked);
 
             void OnInspectMouseClicked()
             {
+                MouseInspector.Mode = mode;
                 MouseInspector.StartInspect();
             }
         }
