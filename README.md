@@ -92,10 +92,10 @@ You can access the settings via the "Options" page of the main menu, or directly
 
 If you'd like to build this yourself, you will need to have installed BepInEx and/or MelonLoader for at least one Unity game. If you want to build all 4 versions, you will need at least one IL2CPP and one Mono game, with BepInEx and MelonLoader installed for both.
 
-1. Install MelonLoader or BepInEx for your game.
-2. Open the `src\Explorer.csproj` file in a text editor.
-3. Set the relevant `GameFolder` values for the versions you want to build, eg. set `MLCppGameFolder` if you want to build for a MelonLoader IL2CPP game.
-4. Open the `src\Explorer.sln` project.
+1. Install BepInEx or MelonLoader for your game.
+2. Open the `src\UnityExplorer.csproj` file in a text editor.
+3. For IL2CPP builds, make sure you set `BIECppGameFolder` (for BepInEx) and/or `MLCppGameFolder` (for MelonLoader) so the project can locate the necessary references.
+4. Open the `src\UnityExplorer.sln` project.
 5. Select `Solution 'UnityExplorer' (1 of 1 project)` in the Solution Explorer panel, and set the <b>Active config</b> property to the version you want to build, then build it.
 5. The DLLs are built to the `Release\` folder in the root of the repository.
 6. If ILRepack fails or is missing, use the NuGet package manager to re-install `ILRepack.Lib.MSBuild.Task`, then re-build.
