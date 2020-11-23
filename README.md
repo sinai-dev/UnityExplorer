@@ -80,7 +80,7 @@ You can access the settings via the "Options" page of the main menu, or directly
 * <b>Requires a restart to take effect</b>, apart from Reflection Inspector tabs.
 
 `Default Output Path` (string)
-* Default: `Mods\Explorer`
+* Default: `Mods\UnityExplorer`
 * Where output is generated to, by default (for Texture PNG saving, etc).
 * Currently this is not actually used for anything, but it will be soon.
 
