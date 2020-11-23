@@ -10,8 +10,7 @@ namespace UnityExplorer.Helpers
 {
     public static class Texture2DHelpers
     {
-#if CPP // If Mono
-#else
+#if MONO
         private static bool isNewEncodeMethod = false;
         private static MethodInfo EncodeToPNGMethod => m_encodeToPNGMethod ?? GetEncodeToPNGMethod();
         private static MethodInfo m_encodeToPNGMethod;
@@ -52,7 +51,7 @@ namespace UnityExplorer.Helpers
             }
         }
 
-        public static Texture2D Copy(Texture2D orig, Rect rect) //, bool isDTXnmNormal = false)
+        public static Texture2D Copy(Texture2D orig, Rect rect)
         {
             Color[] pixels;
 
