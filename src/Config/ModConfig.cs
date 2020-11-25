@@ -1,18 +1,22 @@
 ﻿using System;
 using System.IO;
-using System.Xml.Serialization;
 using UnityEngine;
+using IniParser;
+using IniParser.Parser;
 
 namespace UnityExplorer.Config
 {
     public class ModConfig
     {
-        [XmlIgnore] public static readonly XmlSerializer Serializer = new XmlSerializer(typeof(ModConfig));
+        public static ModConfig Instance;
 
-        //[XmlIgnore] private const string EXPLORER_FOLDER = @"Mods\UnityExplorer";
-        [XmlIgnore] private const string SETTINGS_PATH = ExplorerCore.EXPLORER_FOLDER + @"\config.xml";
+        internal static readonly IniDataParser _parser = new IniDataParser();
+        internal const string INI_PATH = ExplorerCore.EXPLORER_FOLDER + @"\config.ini";
 
-        [XmlIgnore] public static ModConfig Instance;
+        static ModConfig()
+        {
+            _parser.Configuration.CommentString = "#";
+        }
 
         // Actual configs
         public KeyCode  Main_Menu_Toggle    = KeyCode.F7;
@@ -31,38 +35,66 @@ namespace UnityExplorer.Config
 
         public static void OnLoad()
         {
+            Instance = new ModConfig();
+
             if (LoadSettings())
                 return;
 
-            Instance = new ModConfig();
             SaveSettings();
         }
 
         public static bool LoadSettings()
         {
-            if (!File.Exists(SETTINGS_PATH))
+            if (!File.Exists(INI_PATH))
                 return false;
 
-            try
+            string ini = File.ReadAllText(INI_PATH);
+
+            var data = _parser.Parse(ini);
+
+            foreach (var config in data.Sections["Config"])
             {
-                using (var file = File.OpenRead(SETTINGS_PATH))
-                    Instance = (ModConfig)Serializer.Deserialize(file);
-            }
-            catch
-            {
-                return false;
+                switch (config.KeyName)
+                {
+                    case "Main_Menu_Toggle":
+                        Instance.Main_Menu_Toggle = (KeyCode)Enum.Parse(typeof(KeyCode), config.Value);
+                        break;
+                    case "Force_Unlock_Mouse":
+                        Instance.Force_Unlock_Mouse = bool.Parse(config.Value);
+                        break;
+                    case "Default_Page_Limit":
+                        Instance.Default_Page_Limit = int.Parse(config.Value);
+                        break;
+                    case "Log_Unity_Debug":
+                        Instance.Log_Unity_Debug = bool.Parse(config.Value);
+                        break;
+                    case "Save_Logs_To_Disk":
+                        Instance.Save_Logs_To_Disk = bool.Parse(config.Value);
+                        break;
+                    case "Default_Output_Path":
+                        Instance.Default_Output_Path = config.Value;
+                        break;
+                }
             }
 
-            return Instance != null;
+            return true;
         }
 
         public static void SaveSettings()
         {
-            if (File.Exists(SETTINGS_PATH))
-                File.Delete(SETTINGS_PATH);
+            var data = new IniParser.Model.IniData();
 
-            using (var file = File.Create(SETTINGS_PATH))
-                Serializer.Serialize(file, Instance);
+            data.Sections.AddSection("Config");
+
+            var sec = data.Sections["Config"];
+            sec.AddKey("Main_Menu_Toggle",      Instance.Main_Menu_Toggle.ToString());
+            sec.AddKey("Force_Unlock_Mouse",    Instance.Force_Unlock_Mouse.ToString());
+            sec.AddKey("Default_Page_Limit",    Instance.Default_Page_Limit.ToString());
+            sec.AddKey("Log_Unity_Debug",       Instance.Log_Unity_Debug.ToString());
+            sec.AddKey("Save_Logs_To_Disk",     Instance.Save_Logs_To_Disk.ToString());
+            sec.AddKey("Default_Output_Path",   Instance.Default_Output_Path);
+
+            File.WriteAllText(INI_PATH, data.ToString());
         }
     }
 }

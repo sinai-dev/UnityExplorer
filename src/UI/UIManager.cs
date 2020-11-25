@@ -4,7 +4,6 @@ using UnityEngine.UI;
 using UnityExplorer.Inspectors;
 using UnityExplorer.UI.Modules;
 using System.IO;
-//using TMPro;
 using System.Reflection;
 using UnityExplorer.Helpers;
 using UnityExplorer.UI.Shared;
@@ -20,8 +19,10 @@ namespace UnityExplorer.UI
         public static GameObject CanvasRoot { get; private set; }
         public static EventSystem EventSys { get; private set; }
 
-        internal static Sprite ResizeCursor { get; private set; }
         internal static Font ConsoleFont { get; private set; }
+
+        internal static Sprite ResizeCursor { get; private set; }
+        internal static Shader BackupShader { get; private set; }
 
         public static void Init()
         {
@@ -100,11 +101,13 @@ namespace UnityExplorer.UI
             {
                 var bundle = AssetBundle.LoadFromFile(bundlePath);
 
+                BackupShader = bundle.LoadAsset<Shader>("DefaultUI");
+
                 // Fix for games which don't ship with 'UI/Default' shader.
                 if (Graphic.defaultGraphicMaterial.shader?.name != "UI/Default")
                 {
                     ExplorerCore.Log("This game does not ship with the 'UI/Default' shader, using manual Default Shader...");
-                    Graphic.defaultGraphicMaterial.shader = bundle.LoadAsset<Shader>("DefaultUI");
+                    Graphic.defaultGraphicMaterial.shader = BackupShader;
                 }
 
                 ResizeCursor = bundle.LoadAsset<Sprite>("cursor");
