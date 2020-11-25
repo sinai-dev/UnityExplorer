@@ -64,7 +64,7 @@
 
 ## Mod Config
 
-You can access the settings via the "Options" page of the main menu, or directly from the config at `Mods\UnityExplorer\config.xml` (generated after first launch).
+You can access the settings via the "Options" page of the main menu, or directly from the config at `Mods\UnityExplorer\config.ini` (generated after first launch).
 
 `Main Menu Toggle` (KeyCode)
 * Default: `F7`

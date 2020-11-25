@@ -16,7 +16,7 @@ namespace UnityExplorer
     public class ExplorerCore
     {
         public const string NAME = "UnityExplorer";
-        public const string VERSION = "3.0.4";
+        public const string VERSION = "3.0.5";
         public const string AUTHOR = "Sinai";
         public const string GUID = "com.sinai.unityexplorer";
         public const string EXPLORER_FOLDER = @"Mods\UnityExplorer";
