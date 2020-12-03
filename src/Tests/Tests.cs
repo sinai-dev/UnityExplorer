@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using UnityExplorer.UI;
 using UnityEngine;
 using System;
+using System.Runtime.InteropServices;
+using System.Text;
 #if CPP
+using UnhollowerBaseLib;
+using UnityExplorer.Helpers;
 #endif
 
 namespace UnityExplorer.Tests
@@ -19,7 +23,6 @@ namespace UnityExplorer.Tests
             "three",
         };
         public static void StaticMethod() { }
-
     }
 
     public class TestClass
@@ -140,7 +143,8 @@ namespace UnityExplorer.Tests
             }
 
 #if CPP
-            TestTexture = UIManager.MakeSolidTexture(Color.white, 1000, 600);
+            //TestTexture = UIManager.MakeSolidTexture(Color.white, 1000, 600);
+            TestTexture = new Texture();
             TestTexture.name = "TestTexture";
 
             var r = new Rect(0, 0, TestTexture.width, TestTexture.height);

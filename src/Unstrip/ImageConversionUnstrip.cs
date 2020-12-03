@@ -10,6 +10,16 @@ namespace UnityExplorer.Unstrip
 {
     public static class ImageConversionUnstrip
     {
+        // LoadImage helper from a filepath
+
+        public static bool LoadImage(Texture2D tex, string filePath, bool markNonReadable)
+        {
+            if (!File.Exists(filePath))
+                return false;
+
+            return tex.LoadImage(File.ReadAllBytes(filePath), markNonReadable);
+        }
+
 #if CPP
         // byte[] ImageConversion.EncodeToPNG(this Texture2D image);
 
@@ -17,8 +27,12 @@ namespace UnityExplorer.Unstrip
 
         public static byte[] EncodeToPNG(this Texture2D tex)
         {
-            IntPtr ptr = ICallHelper.GetICall<d_EncodeToPNG>("UnityEngine.ImageConversion::EncodeToPNG")
-                .Invoke(tex.Pointer);
+            var iCall = ICallHelper.GetICall<d_EncodeToPNG>("UnityEngine.ImageConversion::EncodeToPNG");
+
+            IntPtr ptr = iCall.Invoke(tex.Pointer);
+
+            if (ptr == IntPtr.Zero)
+                return null;
 
             return new Il2CppStructArray<byte>(ptr);
         }
@@ -38,19 +52,23 @@ namespace UnityExplorer.Unstrip
 
             return ret;
         }
-#endif
 
-        // Helper for LoadImage from filepath
+        // Sprite Sprite.Create
 
-        public static bool LoadImage(Texture2D tex, string filePath, bool markNonReadable)
+        internal delegate IntPtr d_CreateSprite(IntPtr texture, ref Rect rect, ref Vector2 pivot, float pixelsPerUnit, 
+            uint extrude, int meshType, ref Vector4 border, bool generateFallbackPhysicsShape);
+
+        public static Sprite CreateSprite(Texture texture, Rect rect, Vector2 pivot, float pixelsPerUnit, uint extrude, Vector4 border)
         {
-            if (!File.Exists(filePath))
-            {
-                return false;
-            }
+            var iCall = ICallHelper.GetICall<d_CreateSprite>("UnityEngine.Sprite::CreateSprite_Injected");
 
-            byte[] data = File.ReadAllBytes(filePath);
-            return tex.LoadImage(data, markNonReadable);
+            var ptr = iCall.Invoke(texture.Pointer, ref rect, ref pivot, pixelsPerUnit, extrude, 1, ref border, false);
+
+            if (ptr == IntPtr.Zero)
+                return null;
+            else
+                return new Sprite(ptr);
         }
+#endif
     }
 }

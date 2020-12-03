@@ -149,37 +149,5 @@ namespace UnityExplorer.UI
 
             return rootObj;
         }
-
-        public static Sprite CreateSprite(Texture2D tex, Rect size = default)
-        {
-#if CPP
-            Vector2 pivot = Vector2.zero;
-            Vector4 border = Vector4.zero;
-
-            if (size == default)
-            {
-                size = new Rect(0, 0, tex.width, tex.height);
-            }
-
-            return Sprite.CreateSprite_Injected(tex, ref size, ref pivot, 100f, 0u, SpriteMeshType.Tight, ref border, false);
-#else
-            return Sprite.Create(tex, size, Vector2.zero);
-#endif
-        }
-
-        public static Texture2D MakeSolidTexture(Color color, int width, int height)
-        {
-            Color[] pixels = new Color[width * height];
-            for (int i = 0; i < pixels.Length; i++)
-            {
-                pixels[i] = color;
-            }
-
-            Texture2D tex = new Texture2D(width, height);
-            tex.SetPixels(pixels);
-            tex.Apply();
-
-            return tex;
-        }
     }
 }

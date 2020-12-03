@@ -71,6 +71,9 @@ namespace UnityExplorer.Inspectors.Reflection
             }
             catch (Exception e)
             {
+                while (e.InnerException != null)
+                    e = e.InnerException;
+
                 ExplorerCore.LogWarning($"Exception evaluating: {e.GetType()}, {e.Message}");
                 ReflectionException = ReflectionHelpers.ExceptionToString(e);
             }
