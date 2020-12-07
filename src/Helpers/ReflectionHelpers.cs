@@ -52,7 +52,7 @@ namespace UnityExplorer.Helpers
             return list.ToArray();
         }
 
-        public static Type GetActualType(object obj)
+        public static Type GetActualType(this object obj)
         {
             if (obj == null)
                 return null;
@@ -107,6 +107,19 @@ namespace UnityExplorer.Helpers
 
         private static readonly Dictionary<Type, IntPtr> CppClassPointers = new Dictionary<Type, IntPtr>();
 
+        /// <summary>
+        /// Attempt to cast the object to its underlying type.
+        /// </summary>
+        /// <param name="obj">The object you want to cast.</param>
+        /// <returns>The object, as the underlying type if successful or the input value if not.</returns>
+        public static object Il2CppCast(this object obj) => Il2CppCast(obj, GetActualType(obj));
+
+        /// <summary>
+        /// Attempt to cast the object to the provided type.
+        /// </summary>
+        /// <param name="obj">The object you want to cast.</param>
+        /// <param name="castTo">The Type you want to cast to.</param>
+        /// <returns>The object, as the type (or a normal C# object) if successful or the input value if not.</returns>
         public static object Il2CppCast(this object obj, Type castTo)
         {
             if (!(obj is Il2CppSystem.Object ilObj))
@@ -124,6 +137,39 @@ namespace UnityExplorer.Helpers
                 return UnhollowerBaseLib.Runtime.ClassInjectorBase.GetMonoObjectFromIl2CppPointer(ilObj.Pointer);
 
             return Activator.CreateInstance(castTo, ilObj.Pointer);
+        }
+
+        internal static readonly Dictionary<Type, MethodInfo> s_unboxMethods = new Dictionary<Type, MethodInfo>();
+
+        /// <summary>
+        /// Attempt to unbox the object to the underlying struct type.
+        /// </summary>
+        /// <param name="obj">The object which is a struct underneath.</param>
+        /// <returns>The struct if successful, otherwise null.</returns>
+        public static object Unbox(this object obj) => Unbox(obj, GetActualType(obj));
+
+        /// <summary>
+        /// Attempt to unbox the object to the struct type.
+        /// </summary>
+        /// <param name="obj">The object which is a struct underneath.</param>
+        /// <param name="type">The type of the struct you want to unbox to.</param>
+        /// <returns>The struct if successful, otherwise null.</returns>
+        public static object Unbox(this object obj, Type type)
+        {
+            if (!type.IsValueType)
+                return null;
+
+            if (!(obj is Il2CppSystem.Object))
+                return obj;
+
+            if (!s_unboxMethods.ContainsKey(type))
+            {
+                s_unboxMethods.Add(type, typeof(Il2CppObjectBase)
+                                            .GetMethod("Unbox")
+                                            .MakeGenericMethod(type));
+            }
+
+            return s_unboxMethods[type].Invoke(obj, new object[0]);
         }
 
         public static bool Il2CppTypeNotNull(Type type) => Il2CppTypeNotNull(type, out _);
@@ -215,50 +261,56 @@ namespace UnityExplorer.Helpers
         public static bool LoadModule(string module) => true;
 #endif
 
+#if CPP
+        internal static IntPtr s_cppEnumerableClassPtr;
+#endif
+
         public static bool IsEnumerable(Type t)
         {
             if (typeof(IEnumerable).IsAssignableFrom(t))
-            {
                 return true;
+#if CPP
+            try
+            {
+                if (s_cppEnumerableClassPtr == IntPtr.Zero)
+                    Il2CppTypeNotNull(typeof(Il2CppSystem.Collections.IEnumerable), out s_cppEnumerableClassPtr);
+
+                if (s_cppEnumerableClassPtr != IntPtr.Zero 
+                    && Il2CppTypeNotNull(t, out IntPtr classPtr) 
+                    && il2cpp_class_is_assignable_from(s_cppEnumerableClassPtr, classPtr))
+                {
+                    return true;
+                }
             }
+            catch { }
+#endif
+            return false;
+        }
 
 #if CPP
-            if (t.IsGenericType && t.GetGenericTypeDefinition() is Type g)
-            {
-                return typeof(Il2CppSystem.Collections.Generic.List<>).IsAssignableFrom(g)
-                    || typeof(Il2CppSystem.Collections.Generic.IList<>).IsAssignableFrom(g)
-                    || typeof(Il2CppSystem.Collections.Generic.HashSet<>).IsAssignableFrom(g);
-            }
-            else
-            {
-                return typeof(Il2CppSystem.Collections.IList).IsAssignableFrom(t);
-            }
-#else
-            return false;
+        internal static IntPtr s_cppDictionaryClassPtr;
 #endif
-        }
 
         public static bool IsDictionary(Type t)
         {
             if (typeof(IDictionary).IsAssignableFrom(t))
-            {
                 return true;
-            }
-
 #if CPP
-            if (t.IsGenericType && t.GetGenericTypeDefinition() is Type g)
+            try
             {
-                return typeof(Il2CppSystem.Collections.Generic.Dictionary<,>).IsAssignableFrom(g)
-                    || typeof(Il2CppSystem.Collections.Generic.IDictionary<,>).IsAssignableFrom(g);
+                if (s_cppDictionaryClassPtr == IntPtr.Zero)
+                    if (!Il2CppTypeNotNull(typeof(Il2CppSystem.Collections.IDictionary), out s_cppDictionaryClassPtr))
+                        return false;
+
+                if (Il2CppTypeNotNull(t, out IntPtr classPtr))
+                {
+                    if (il2cpp_class_is_assignable_from(s_cppDictionaryClassPtr, classPtr))
+                        return true;
+                }
             }
-            else
-            {
-                return typeof(Il2CppSystem.Collections.IDictionary).IsAssignableFrom(t)
-                    || typeof(Il2CppSystem.Collections.Hashtable).IsAssignableFrom(t);
-            }
-#else
-            return false;
+            catch { }
 #endif
+            return false;
         }
 
         public static string ExceptionToString(Exception e, bool innerMost = false)

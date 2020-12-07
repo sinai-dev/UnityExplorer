@@ -90,6 +90,7 @@ namespace UnityExplorer
                 {
                     UIManager.Init();
                     Log("Initialized UnityExplorer UI.");
+                    // InspectorManager.Instance.Inspect(Tests.TestClass.Instance);
                 }
                 catch (Exception e)
                 {

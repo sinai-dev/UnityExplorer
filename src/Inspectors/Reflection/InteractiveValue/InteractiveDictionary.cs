@@ -10,6 +10,9 @@ using UnityExplorer.Helpers;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Shared;
 using System.Reflection;
+#if CPP
+using CppDictionary = Il2CppSystem.Collections.IDictionary;
+#endif
 
 namespace UnityExplorer.Inspectors.Reflection
 {
@@ -44,7 +47,11 @@ namespace UnityExplorer.Inspectors.Reflection
         }
 
         internal IDictionary RefIDictionary;
-
+#if CPP
+        internal CppDictionary RefCppDictionary;
+#else
+        internal IDictionary RefCppDictionary = null;
+#endif
         internal Type m_typeOfKeys;
         internal Type m_typeofValues;
 
@@ -64,6 +71,11 @@ namespace UnityExplorer.Inspectors.Reflection
         public override void OnValueUpdated()
         {
             RefIDictionary = Value as IDictionary;
+
+#if CPP
+            try { RefCppDictionary = (Value as Il2CppSystem.Object).TryCast<CppDictionary>(); }
+            catch { }
+#endif
 
             if (m_subContentParent.activeSelf)
             {
@@ -128,13 +140,6 @@ namespace UnityExplorer.Inspectors.Reflection
                 foreach (var key in RefIDictionary.Keys)
                 {
                     var value = RefIDictionary[key];
-
-                    //if (index >= m_rowHolders.Count)
-                    //{
-                    //    AddRowHolder();
-                    //}
-
-                    //var holder = m_rowHolders[index];
 
                     var cacheKey = new CachePaired(index, this, this.RefIDictionary, PairTypes.Key, m_listContent);
                     cacheKey.CreateIValue(key, this.m_typeOfKeys);
@@ -206,9 +211,10 @@ namespace UnityExplorer.Inspectors.Reflection
             RefreshDisplay();
         }
 
-        #region CPP fixes
+#region CPP fixes
 #if CPP
         // temp fix for Il2Cpp IDictionary until interfaces are fixed
+
         private IDictionary EnumerateWithReflection()
         {
             var valueType = Value?.GetType() ?? FallbackType;
@@ -222,8 +228,8 @@ namespace UnityExplorer.Inspectors.Reflection
             var valueList = new List<object>();
 
             // store entries with reflection
-            EnumerateWithReflection(keys, keyList);
-            EnumerateWithReflection(values, valueList);
+            EnumerateCollection(keys, keyList);
+            EnumerateCollection(values, valueList);
 
             // make actual mono dictionary
             var dict = (IDictionary)Activator.CreateInstance(typeof(Dictionary<,>)
@@ -236,7 +242,7 @@ namespace UnityExplorer.Inspectors.Reflection
             return dict;
         }
 
-        private void EnumerateWithReflection(object collection, List<object> list)
+        private void EnumerateCollection(object collection, List<object> list)
         {
             // invoke GetEnumerator
             var enumerator = collection.GetType().GetMethod("GetEnumerator").Invoke(collection, null);
@@ -253,9 +259,9 @@ namespace UnityExplorer.Inspectors.Reflection
         }
 #endif
 
-        #endregion
+#endregion
 
-        #region UI CONSTRUCTION
+#region UI CONSTRUCTION
 
         internal GameObject m_listContent;
         internal LayoutElement m_listLayout;
@@ -309,6 +315,6 @@ namespace UnityExplorer.Inspectors.Reflection
         //    m_rowHolders.Add(obj);
         //}
 
-        #endregion
+#endregion
     }
 }

@@ -37,6 +37,11 @@ namespace UnityExplorer.Inspectors.Reflection
 
         internal IEnumerable RefIEnumerable;
         internal IList RefIList;
+#if CPP
+        internal Il2CppSystem.Collections.ICollection CppICollection;
+#else
+        internal ICollection CppICollection = null;
+#endif
 
         internal readonly Type m_baseEntryType;
 
@@ -48,6 +53,14 @@ namespace UnityExplorer.Inspectors.Reflection
         {
             RefIEnumerable = Value as IEnumerable;
             RefIList = Value as IList;
+
+#if CPP
+            if (Value != null && RefIList == null)
+            {
+                try { CppICollection = (Value as Il2CppSystem.Object).TryCast<Il2CppSystem.Collections.ICollection>(); }
+                catch { }
+            }
+#endif
 
             if (m_subContentParent.activeSelf)
             {
@@ -77,8 +90,8 @@ namespace UnityExplorer.Inspectors.Reflection
             if (Value != null)
             {
                 string count = "?";
-                if (m_recacheWanted && RefIList != null)
-                    count = RefIList.Count.ToString();
+                if (m_recacheWanted && (RefIList != null || CppICollection != null))
+                    count = RefIList?.Count.ToString() ?? CppICollection.Count.ToString();
                 else if (!m_recacheWanted)
                     count = m_entries.Count.ToString();
 
@@ -169,89 +182,62 @@ namespace UnityExplorer.Inspectors.Reflection
             RefreshDisplay();
         }
 
-        #region CPP Helpers
+#region CPP Helpers
 
 #if CPP
         // some temp fixes for Il2Cpp IEnumerables until interfaces are fixed
 
+        internal static readonly Dictionary<Type, MethodInfo> s_getEnumeratorMethods = new Dictionary<Type, MethodInfo>();
+
+        internal static readonly Dictionary<Type, EnumeratorInfo> s_enumeratorInfos = new Dictionary<Type, EnumeratorInfo>();
+        
+        internal class EnumeratorInfo
+        {
+            internal MethodInfo moveNext;
+            internal PropertyInfo current;
+        }
+
         private IEnumerable EnumerateWithReflection()
         {
-            if (Value.IsNullOrDestroyed()) 
+            if (Value == null) 
                 return null;
 
-            var genericDef = Value.GetType().GetGenericTypeDefinition();
-
-            if (genericDef == typeof(Il2CppSystem.Collections.Generic.List<>))
-                return CppListToMono(genericDef);
-            else if (genericDef == typeof(Il2CppSystem.Collections.Generic.HashSet<>))
-                return CppHashSetToMono();
-            else
-                return CppIListToMono();
-        }
-
-        // List<T>.ToArray()
-        private IEnumerable CppListToMono(Type genericTypeDef)
-        {
-            if (genericTypeDef == null) return null;
-
-            return genericTypeDef
-                    .MakeGenericType(new Type[] { this.m_baseEntryType })
-                    .GetMethod("ToArray")
-                    .Invoke(Value, new object[0]) as IEnumerable;
-        }
-
-        // HashSet.GetEnumerator
-        private IEnumerable CppHashSetToMono()
-        {
-            var set = new HashSet<object>();
-
-            // invoke GetEnumerator
-            var enumerator = Value.GetType().GetMethod("GetEnumerator").Invoke(Value, null);
-            // get the type of it
-            var enumeratorType = enumerator.GetType();
-            // reflect MoveNext and Current
-            var moveNext = enumeratorType.GetMethod("MoveNext");
-            var current = enumeratorType.GetProperty("Current");
-            // iterate
-            while ((bool)moveNext.Invoke(enumerator, null))
-                set.Add(current.GetValue(enumerator));
-
-            return set;
-        }
-
-        // IList.Item
-        private IList CppIListToMono()
-        {
-            try
+            // new test
+            var CppEnumerable = (Value as Il2CppSystem.Object)?.TryCast<Il2CppSystem.Collections.IEnumerable>();
+            if (CppEnumerable != null)
             {
-                var genericType = typeof(List<>).MakeGenericType(new Type[] { this.m_baseEntryType });
-                var list = (IList)Activator.CreateInstance(genericType);
+                var type = Value.GetType();
+                if (!s_getEnumeratorMethods.ContainsKey(type))
+                    s_getEnumeratorMethods.Add(type, type.GetMethod("GetEnumerator"));
+                
+                var enumerator = s_getEnumeratorMethods[type].Invoke(Value, null);
+                var enumeratorType = enumerator.GetType();
 
-                for (int i = 0; ; i++)
+                if (!s_enumeratorInfos.ContainsKey(enumeratorType))
                 {
-                    try
+                    s_enumeratorInfos.Add(enumeratorType, new EnumeratorInfo
                     {
-                        var itm = Value?.GetType()
-                            .GetProperty("Item")
-                            .GetValue(Value, new object[] { i });
-                        list.Add(itm);
-                    }
-                    catch { break; }
+                        current = enumeratorType.GetProperty("Current"),
+                        moveNext = enumeratorType.GetMethod("MoveNext"),
+                    });
                 }
+                var info = s_enumeratorInfos[enumeratorType];
+
+                // iterate
+                var list = new List<object>();
+                while ((bool)info.moveNext.Invoke(enumerator, null))
+                    list.Add(info.current.GetValue(enumerator));
 
                 return list;
             }
-            catch (Exception e)
-            {
-                ExplorerCore.Log("Exception converting Il2Cpp IList to Mono IList: " + e.GetType() + ", " + e.Message);
-                return null;
-            }
+
+            return null;
         }
 #endif
 
-        #endregion
+#endregion
 
-        #region UI CONSTRUCTION
+#region UI CONSTRUCTION
 
         internal GameObject m_listContent;
         internal LayoutElement m_listLayout;
@@ -296,6 +282,6 @@ namespace UnityExplorer.Inspectors.Reflection
             contentFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
         }
 
-        #endregion
+#endregion
     }
 }
