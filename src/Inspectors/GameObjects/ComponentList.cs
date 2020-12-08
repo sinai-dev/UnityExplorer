@@ -80,7 +80,11 @@ namespace UnityExplorer.Inspectors.GameObjects
                     text.text = UISyntaxHighlight.ParseFullSyntax(ReflectionHelpers.GetActualType(comp), true);
 
                     var toggle = s_compToggles[i];
+#if CPP
+                    if (comp.TryCast<Behaviour>() is Behaviour behaviour)
+#else
                     if (comp is Behaviour behaviour)
+#endif
                     {
                         if (!toggle.gameObject.activeSelf)
                             toggle.gameObject.SetActive(true);
@@ -130,7 +134,7 @@ namespace UnityExplorer.Inspectors.GameObjects
         }
 
 
-        #region UI CONSTRUCTION
+#region UI CONSTRUCTION
 
         internal void ConstructCompList(GameObject parent)
         {
@@ -168,34 +172,34 @@ namespace UnityExplorer.Inspectors.GameObjects
         {
             int thisIndex = s_compListTexts.Count;
 
-            GameObject btnGroupObj = UIFactory.CreateHorizontalGroup(s_compListContent, new Color(0.07f, 0.07f, 0.07f));
-            HorizontalLayoutGroup btnGroup = btnGroupObj.GetComponent<HorizontalLayoutGroup>();
-            btnGroup.childForceExpandWidth = true;
-            btnGroup.childControlWidth = true;
-            btnGroup.childForceExpandHeight = false;
-            btnGroup.childControlHeight = true;
-            btnGroup.childAlignment = TextAnchor.MiddleLeft;
-            LayoutElement btnLayout = btnGroupObj.AddComponent<LayoutElement>();
-            btnLayout.minWidth = 25;
-            btnLayout.flexibleWidth = 999;
-            btnLayout.minHeight = 25;
-            btnLayout.flexibleHeight = 0;
-            btnGroupObj.AddComponent<Mask>();
+            GameObject groupObj = UIFactory.CreateHorizontalGroup(s_compListContent, new Color(0.07f, 0.07f, 0.07f));
+            HorizontalLayoutGroup group = groupObj.GetComponent<HorizontalLayoutGroup>();
+            group.childForceExpandWidth = true;
+            group.childControlWidth = true;
+            group.childForceExpandHeight = false;
+            group.childControlHeight = true;
+            group.childAlignment = TextAnchor.MiddleLeft;
+            LayoutElement groupLayout = groupObj.AddComponent<LayoutElement>();
+            groupLayout.minWidth = 25;
+            groupLayout.flexibleWidth = 999;
+            groupLayout.minHeight = 25;
+            groupLayout.flexibleHeight = 0;
+            groupObj.AddComponent<Mask>();
 
             // Behaviour enabled toggle
 
-            var toggleObj = UIFactory.CreateToggle(btnGroupObj, out Toggle toggle, out Text toggleText, new Color(0.3f, 0.3f, 0.3f));
+            var toggleObj = UIFactory.CreateToggle(groupObj, out Toggle toggle, out Text toggleText, new Color(0.3f, 0.3f, 0.3f));
             var toggleLayout = toggleObj.AddComponent<LayoutElement>();
             toggleLayout.minHeight = 25;
             toggleLayout.minWidth = 25;
             toggleText.text = "";
-            toggle.isOn = false;
+            toggle.isOn = true;
             s_compToggles.Add(toggle);
             toggle.onValueChanged.AddListener((bool val) => { OnCompToggleClicked(thisIndex, val); });
 
             // Main component button
 
-            GameObject mainButtonObj = UIFactory.CreateButton(btnGroupObj);
+            GameObject mainButtonObj = UIFactory.CreateButton(groupObj);
             LayoutElement mainBtnLayout = mainButtonObj.AddComponent<LayoutElement>();
             mainBtnLayout.minHeight = 25;
             mainBtnLayout.flexibleHeight = 0;
@@ -224,6 +228,6 @@ namespace UnityExplorer.Inspectors.GameObjects
         }
 
 
-        #endregion
+#endregion
     }
 }
