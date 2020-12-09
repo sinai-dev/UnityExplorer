@@ -28,9 +28,6 @@
 | [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) | ✔️ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.MelonLoader.Il2Cpp.zip) | ✔️ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.MelonLoader.Mono.zip) | 
 | [BepInEx](https://github.com/BepInEx/BepInEx) | ✔️ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx.Il2Cpp.zip) | ✔️ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx.Mono.zip) |
 
-<b>IL2CPP Issues:</b>
-* Some methods may still fail with a `MissingMethodException`, please let me know if you experience this (with full debug log please).
-
 ## Features
 
 <p align="center">
