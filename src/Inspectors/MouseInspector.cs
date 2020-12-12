@@ -109,21 +109,12 @@ namespace UnityExplorer.Inspectors
         internal static void RaycastWorld(Vector2 mousePos)
         {
             var ray = UnityHelpers.MainCamera.ScreenPointToRay(mousePos);
-            var casts = Physics.RaycastAll(ray, 1000f);
+            Physics.Raycast(ray, out RaycastHit hit, 1000f);
 
-            if (casts.Length > 0)
+            if (hit.transform)
             {
-                foreach (var cast in casts)
-                {
-                    if (cast.transform)
-                    {
-                        var obj = cast.transform.gameObject;
-
-                        OnHitGameObject(obj);
-
-                        break;
-                    }
-                }
+                var obj = hit.transform.gameObject;
+                OnHitGameObject(obj);
             }
             else
             {
