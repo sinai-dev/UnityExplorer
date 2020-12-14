@@ -5,6 +5,7 @@ using UnityEngine;
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using UnityExplorer.Unstrip;
 #if CPP
 using UnhollowerBaseLib;
 using UnityExplorer.Helpers;
@@ -121,15 +122,15 @@ namespace UnityExplorer.Tests
         private static bool m_setOnlyProperty;
         public static bool ReadSetOnlyProperty => m_setOnlyProperty;
 
-        public Texture TestTexture;
+        public Texture2D TestTexture;
         public static Sprite TestSprite;
 
 #if CPP
         public static Il2CppSystem.Collections.Generic.HashSet<string> CppHashSetTest;
         public static Il2CppSystem.Collections.Generic.List<string> CppStringTest;
         public static Il2CppSystem.Collections.IList CppIList;
-        public static Il2CppSystem.Collections.Generic.Dictionary<string, string> CppDictTest;
-        public static Il2CppSystem.Collections.Generic.Dictionary<int, float> CppDictTest2;
+        //public static Il2CppSystem.Collections.Generic.Dictionary<string, string> CppDictTest;
+        //public static Il2CppSystem.Collections.Generic.Dictionary<int, float> CppDictTest2;
 #endif
 
         public TestClass()
@@ -156,35 +157,35 @@ namespace UnityExplorer.Tests
             CppStringTest.Add("1");
             CppStringTest.Add("2");
 
-            CppDictTest = new Il2CppSystem.Collections.Generic.Dictionary<string, string>();
-            CppDictTest.Add("key1", "value1");
-            CppDictTest.Add("key2", "value2");
-            CppDictTest.Add("key3", "value3");
+            //CppDictTest = new Il2CppSystem.Collections.Generic.Dictionary<string, string>();
+            //CppDictTest.Add("key1", "value1");
+            //CppDictTest.Add("key2", "value2");
+            //CppDictTest.Add("key3", "value3");
 
-            CppDictTest2 = new Il2CppSystem.Collections.Generic.Dictionary<int, float>();
-            CppDictTest2.Add(0, 0.5f);
-            CppDictTest2.Add(1, 0.5f);
-            CppDictTest2.Add(2, 0.5f);
+            //CppDictTest2 = new Il2CppSystem.Collections.Generic.Dictionary<int, float>();
+            //CppDictTest2.Add(0, 0.5f);
+            //CppDictTest2.Add(1, 0.5f);
+            //CppDictTest2.Add(2, 0.5f);
 #endif
         }
 
         private void TextureSpriteTest()
         {
-            //TestTexture = UIManager.MakeSolidTexture(Color.white, 1000, 600);
-            //TestTexture = new Texture();
-            //TestTexture.name = "TestTexture";
+            TestTexture = new Texture2D(32, 32, TextureFormat.ARGB32, false)
+            {
+                name = "TestTexture"
+            };
+            TestSprite = ImageConversionUnstrip.CreateSprite(TestTexture);
 
-            //var r = new Rect(0, 0, TestTexture.width, TestTexture.height);
-            //var v2 = Vector2.zero;
-            //var v4 = Vector4.zero;
-            //TestSprite = Sprite.CreateSprite_Injected((Texture2D)TestTexture, ref r, ref v2, 100f, 0u, SpriteMeshType.Tight, ref v4, false);
+            GameObject.DontDestroyOnLoad(TestTexture);
+            GameObject.DontDestroyOnLoad(TestSprite);
 
-            //GameObject.DontDestroyOnLoad(TestTexture);
-            //GameObject.DontDestroyOnLoad(TestSprite);
-
-            //// test loading a tex from file
-            //var dataToLoad = System.IO.File.ReadAllBytes(@"Mods\UnityExplorer\Tex_Nemundis_Nebula.png");
-            //ExplorerCore.Log($"Tex load success: {TestTexture.LoadImage(dataToLoad, false)}");
+            // test loading a tex from file
+            if (System.IO.File.Exists(@"D:\Downloads\test.png"))
+            {
+                var dataToLoad = System.IO.File.ReadAllBytes(@"D:\Downloads\test.png");
+                ExplorerCore.Log($"Tex load success: {TestTexture.LoadImage(dataToLoad, false)}");
+            }
         }
 
         public static string TestRefInOutGeneric<T>(ref string arg0, in int arg1, out string arg2) where T : Component

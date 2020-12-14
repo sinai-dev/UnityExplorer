@@ -363,6 +363,10 @@ namespace UnityExplorer.Inspectors
 
         #region UI CONSTRUCTION
 
+        internal GameObject m_filterAreaObj;
+        internal GameObject m_updateRowObj;
+        internal GameObject m_memberListObj;
+
         internal void ConstructUI()
         {
             var parent = InspectorManager.Instance.m_inspectorContent;
@@ -423,7 +427,7 @@ namespace UnityExplorer.Inspectors
 
             ConstructFilterArea();
 
-            ConstructOptionsArea();
+            ConstructUpdateRow();
         }
 
         internal void ConstructFilterArea()
@@ -443,6 +447,8 @@ namespace UnityExplorer.Inspectors
             filterGroup.padding.right = 4;
             filterGroup.padding.top = 4;
             filterGroup.padding.bottom = 4;
+
+            m_filterAreaObj = filterAreaObj;
 
             // name filter
 
@@ -540,7 +546,7 @@ namespace UnityExplorer.Inspectors
             btn.colors = colors;
         }
 
-        internal void ConstructOptionsArea()
+        internal void ConstructUpdateRow()
         {
             var optionsRowObj = UIFactory.CreateHorizontalGroup(Content, new Color(1, 1, 1, 0));
             var optionsLayout = optionsRowObj.AddComponent<LayoutElement>();
@@ -550,6 +556,8 @@ namespace UnityExplorer.Inspectors
             optionsGroup.childForceExpandWidth = false;
             optionsGroup.childAlignment = TextAnchor.MiddleLeft;
             optionsGroup.spacing = 10;
+
+            m_updateRowObj = optionsRowObj;
 
             // update button
 
@@ -578,11 +586,12 @@ namespace UnityExplorer.Inspectors
             autoUpdateToggle.isOn = false;
             autoUpdateToggle.onValueChanged.AddListener((bool val) => { m_autoUpdate = val; });
         }
-
+        
         internal void ConstructMemberList()
         {
             var scrollobj = UIFactory.CreateScrollView(Content, out m_scrollContent, out m_sliderScroller, new Color(0.05f, 0.05f, 0.05f));
 
+            m_memberListObj = scrollobj;
             m_scrollContentRect = m_scrollContent.GetComponent<RectTransform>();
 
             var scrollGroup = m_scrollContent.GetComponent<VerticalLayoutGroup>();

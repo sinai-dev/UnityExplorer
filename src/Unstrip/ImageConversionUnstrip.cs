@@ -43,14 +43,11 @@ namespace UnityExplorer.Unstrip
 
         public static bool LoadImage(this Texture2D tex, byte[] data, bool markNonReadable)
         {
-            Il2CppStructArray<byte> il2cppArray = new Il2CppStructArray<byte>(data.Length);
-            for (int i = 0; i < data.Length; i++)
-                il2cppArray[i] = data[i];
+            var il2cppArray = (Il2CppStructArray<byte>)data;
 
-            bool ret = ICallHelper.GetICall<d_LoadImage>("UnityEngine.ImageConversion::LoadImage")
-                .Invoke(tex.Pointer, il2cppArray.Pointer, markNonReadable);
-
-            return ret;
+            var iCall = ICallHelper.GetICall<d_LoadImage>("UnityEngine.ImageConversion::LoadImage");
+                
+            return iCall.Invoke(tex.Pointer, il2cppArray.Pointer, markNonReadable);
         }
 
         // Sprite Sprite.Create
@@ -70,5 +67,16 @@ namespace UnityExplorer.Unstrip
                 return new Sprite(ptr);
         }
 #endif
+
+        // Simpler CreateSprite helper
+
+        public static Sprite CreateSprite(Texture2D texture)
+        {
+#if CPP
+            return CreateSprite(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero, 100f, 0u, Vector4.zero);
+#else
+            return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
+#endif
+        }
     }
 }

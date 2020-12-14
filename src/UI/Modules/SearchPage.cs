@@ -9,6 +9,7 @@ using UnityExplorer.Helpers;
 using UnityExplorer.Inspectors;
 using UnityExplorer.UI.Shared;
 using UnityExplorer.Unstrip;
+using System.Reflection;
 #if CPP
 using UnhollowerRuntimeLib;
 #endif
@@ -21,7 +22,7 @@ namespace UnityExplorer.UI.Modules
         GameObject,
         Component,
         Custom,
-        Instance,
+        Singleton,
         StaticClass
     }
 
@@ -46,11 +47,16 @@ namespace UnityExplorer.UI.Modules
 
         public static SearchPage Instance;
 
+        internal SearchContext m_context;
+        private SceneFilter m_sceneFilter;
+        private ChildFilter m_childFilter;
+
+        internal bool m_isStaticClassSearching;
+
         // ui elements
 
         private Text m_resultCountText;
 
-        internal SearchContext m_context;
         private InputField m_customTypeInput;
 
         private InputField m_nameInput;
@@ -60,9 +66,6 @@ namespace UnityExplorer.UI.Modules
 
         private Dropdown m_sceneDropdown;
         private int m_lastSceneCount = -1;
-        private SceneFilter m_sceneFilter;
-
-        private ChildFilter m_childFilter;
 
         private GameObject m_extraFilterRow;
 
@@ -132,10 +135,9 @@ namespace UnityExplorer.UI.Modules
                 else
                 {
                     var obj = m_results[itemIndex];
+                    var unityObj = obj as UnityEngine.Object;
 
-                    var uObj = obj as UnityEngine.Object;
-
-                    if (obj == null || (uObj != null && !uObj))
+                    if (obj == null || (unityObj != null && !unityObj))
                         continue;
 
                     if (i >= m_resultShortList.Count)
@@ -150,17 +152,25 @@ namespace UnityExplorer.UI.Modules
 
                     var text = m_resultListTexts[i];
 
-                    var name = $"<color={UISyntaxHighlight.Class_Instance}>{ReflectionHelpers.GetActualType(obj).Name}</color>";
-
-                    if (m_context != SearchContext.Instance && m_context != SearchContext.StaticClass)
+                    if (m_context != SearchContext.StaticClass)
                     {
-                        if (uObj && !string.IsNullOrEmpty(uObj.name))
-                            name += $": {uObj.name}";
-                        else
-                            name += ": <i><color=grey>untitled</color></i>";
-                    }
+                        var name = UISyntaxHighlight.ParseFullSyntax(obj.GetActualType(), true);
 
-                    text.text = name;
+                        if (unityObj && m_context != SearchContext.Singleton && m_context != SearchContext.StaticClass)
+                        {
+                            if (unityObj && !string.IsNullOrEmpty(unityObj.name))
+                                name += $": {unityObj.name}";
+                            else
+                                name += ": <i><color=grey>untitled</color></i>";
+                        }
+
+                        text.text = name;
+                    }
+                    else
+                    {
+                        var type = obj as Type;
+                        text.text = UISyntaxHighlight.ParseFullSyntax(type, true);
+                    }
 
                     var label = text.transform.parent.parent.gameObject;
                     if (!label.activeSelf)
@@ -226,9 +236,101 @@ namespace UnityExplorer.UI.Modules
 
         // ~~~~~ UI Callbacks ~~~~~
 
-        internal void OnUnitySearchClicked()
+        internal void OnSearchClicked()
         {
             m_resultListPageHandler.CurrentPage = 0;
+
+            if (m_context == SearchContext.StaticClass)
+                StaticClassSearch();
+            else if (m_context == SearchContext.Singleton)
+                SingletonSearch();
+            else
+                UnityObjectSearch();
+
+            RefreshResultList();
+        }
+
+        internal void StaticClassSearch()
+        {
+            m_isStaticClassSearching = true;
+
+            var list = new List<Type>();
+
+            var nameFilter = "";
+            if (!string.IsNullOrEmpty(m_nameInput.text))
+                nameFilter = m_nameInput.text.ToLower();
+            
+            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                foreach (var type in asm.TryGetTypes().Where(it => it.IsSealed && it.IsAbstract))
+                {
+                    if (!string.IsNullOrEmpty(nameFilter) && !type.FullName.ToLower().Contains(nameFilter))
+                        continue;
+
+                    list.Add(type);
+                }
+            }
+
+            m_results = list.ToArray();
+        }
+
+        private void SingletonSearch()
+        {
+            m_isStaticClassSearching = false;
+
+            var instances = new List<object>();
+
+            var nameFilter = "";
+            if (!string.IsNullOrEmpty(m_nameInput.text))
+                nameFilter = m_nameInput.text.ToLower();
+
+            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                // All non-static classes
+                foreach (var type in asm.TryGetTypes().Where(it => !it.IsSealed && !it.IsAbstract))
+                {
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(nameFilter) && !type.FullName.ToLower().Contains(nameFilter))
+                            continue;
+
+                        // First look for an "Instance" Property
+                        if (type.GetProperty("Instance", ReflectionHelpers.CommonFlags) is PropertyInfo pi
+                            && pi.CanRead
+                            && pi.GetGetMethod(true).IsStatic)
+                        {
+                            var instance = pi.GetValue(null, null);
+                            if (instance != null)
+                                instances.Add(instance);
+                        }
+                        else
+                        {
+                            // Otherwise, look for a typical Instance backing field.
+                            FieldInfo fi;
+                            fi = type.GetField("m_instance", ReflectionHelpers.CommonFlags);
+                            if (fi == null)
+                                fi = type.GetField("s_instance", ReflectionHelpers.CommonFlags);
+                            if (fi == null)
+                                fi = type.GetField("_instance", ReflectionHelpers.CommonFlags);
+                            if (fi == null)
+                                fi = type.GetField("instance", ReflectionHelpers.CommonFlags);
+
+                            if (fi != null && fi.IsStatic)
+                            {
+                                var instance = fi.GetValue(null);
+                            }
+                        }
+                    }
+                    catch { }
+                }
+            }
+
+            m_results = instances.ToArray();
+        }
+
+        internal void UnityObjectSearch()
+        {
+            m_isStaticClassSearching = false;
 
             Type searchType = null;
             switch (m_context)
@@ -305,12 +407,12 @@ namespace UnityExplorer.UI.Modules
                             : obj.TryCast<Component>().gameObject;
 #endif
 
-                    if (!go)
-                        continue;
-
                     // scene check
                     if (m_sceneFilter != SceneFilter.Any)
                     {
+                        if (!go)
+                            continue;
+
                         switch (m_context)
                         {
                             case SearchContext.GameObject:
@@ -325,11 +427,17 @@ namespace UnityExplorer.UI.Modules
                         }
                     }
 
-                    // root object check (no parent)
-                    if (m_childFilter == ChildFilter.HasParent && !go.transform.parent)
-                        continue;
-                    else if (m_childFilter == ChildFilter.RootObject && go.transform.parent)
-                        continue;
+                    if (m_childFilter != ChildFilter.Any)
+                    {
+                        if (!go)
+                            continue;
+
+                        // root object check (no parent)
+                        if (m_childFilter == ChildFilter.HasParent && !go.transform.parent)
+                            continue;
+                        else if (m_childFilter == ChildFilter.RootObject && go.transform.parent)
+                            continue;
+                    }
                 }
 
                 results.Add(obj);
@@ -341,8 +449,6 @@ namespace UnityExplorer.UI.Modules
                 m_resultCountText.text = $"{m_results.Length} Results";
             else
                 m_resultCountText.text = "No results...";
-
-            RefreshResultList();
         }
 
         private void OnResultPageTurn()
@@ -490,6 +596,23 @@ namespace UnityExplorer.UI.Modules
             m_customTypeInput = customTypeObj.GetComponent<InputField>();
             m_customTypeInput.placeholder.gameObject.GetComponent<Text>().text = "eg. UnityEngine.Texture2D, etc...";
 
+            // static class and singleton buttons
+
+            var secondRow = UIFactory.CreateHorizontalGroup(optionsGroupObj, new Color(1, 1, 1, 0));
+            var secondGroup = secondRow.GetComponent<HorizontalLayoutGroup>();
+            secondGroup.childForceExpandWidth = false;
+            secondGroup.childForceExpandHeight = false;
+            secondGroup.spacing = 3;
+            var secondLayout = secondRow.AddComponent<LayoutElement>();
+            secondLayout.minHeight = 25;
+            var spacer = UIFactory.CreateUIObject("spacer", secondRow);
+            var spaceLayout = spacer.AddComponent<LayoutElement>();
+            spaceLayout.minWidth = 125;
+            spaceLayout.minHeight = 25;
+
+            AddContextButton(secondRow, "Static Class", SearchContext.StaticClass);
+            AddContextButton(secondRow, "Singleton", SearchContext.Singleton);
+
             // search input
 
             var nameRowObj = UIFactory.CreateHorizontalGroup(optionsGroupObj, new Color(1, 1, 1, 0));
@@ -601,7 +724,7 @@ namespace UnityExplorer.UI.Modules
             searchBtnLayout.flexibleHeight = 0;
             var searchBtn = searchBtnObj.GetComponent<Button>();
 
-            searchBtn.onClick.AddListener(OnUnitySearchClicked);
+            searchBtn.onClick.AddListener(OnSearchClicked);
         }
 
         internal void AddContextButton(GameObject parent, string label, SearchContext context, float width = 110)
