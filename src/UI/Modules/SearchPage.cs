@@ -248,6 +248,11 @@ namespace UnityExplorer.UI.Modules
                 UnityObjectSearch();
 
             RefreshResultList();
+
+            if (m_results.Length > 0)
+                m_resultCountText.text = $"{m_results.Length} Results";
+            else
+                m_resultCountText.text = "No results...";
         }
 
         internal void StaticClassSearch()
@@ -274,6 +279,20 @@ namespace UnityExplorer.UI.Modules
             m_results = list.ToArray();
         }
 
+        internal string[] s_instanceNames = new string[]
+        {
+            "m_instance",
+            "m_Instance",
+            "s_instance",
+            "s_Instance",
+            "_instance",
+            "_Instance",
+            "instance",
+            "Instance",
+            "<Instance>k__BackingField",
+            "<instance>k__BackingField",
+        };
+
         private void SingletonSearch()
         {
             m_isStaticClassSearching = false;
@@ -284,6 +303,8 @@ namespace UnityExplorer.UI.Modules
             if (!string.IsNullOrEmpty(m_nameInput.text))
                 nameFilter = m_nameInput.text.ToLower();
 
+            var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
+
             foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
             {
                 // All non-static classes
@@ -293,31 +314,36 @@ namespace UnityExplorer.UI.Modules
                     {
                         if (!string.IsNullOrEmpty(nameFilter) && !type.FullName.ToLower().Contains(nameFilter))
                             continue;
-
-                        // First look for an "Instance" Property
-                        if (type.GetProperty("Instance", ReflectionHelpers.CommonFlags) is PropertyInfo pi
-                            && pi.CanRead
-                            && pi.GetGetMethod(true).IsStatic)
+#if CPP
+                        // Only look for Properties in IL2CPP, not for Mono.
+                        PropertyInfo pi;
+                        foreach (var name in s_instanceNames)
                         {
-                            var instance = pi.GetValue(null, null);
-                            if (instance != null)
-                                instances.Add(instance);
+                            pi = type.GetProperty(name, flags);
+                            if (pi != null)
+                            {
+                                var instance = pi.GetValue(null, null);
+                                if (instance != null)
+                                {
+                                    instances.Add(instance);
+                                    continue;
+                                }
+                            }
                         }
-                        else
+#endif
+                        // Look for a typical Instance backing field.
+                        FieldInfo fi;
+                        foreach (var name in s_instanceNames)
                         {
-                            // Otherwise, look for a typical Instance backing field.
-                            FieldInfo fi;
-                            fi = type.GetField("m_instance", ReflectionHelpers.CommonFlags);
-                            if (fi == null)
-                                fi = type.GetField("s_instance", ReflectionHelpers.CommonFlags);
-                            if (fi == null)
-                                fi = type.GetField("_instance", ReflectionHelpers.CommonFlags);
-                            if (fi == null)
-                                fi = type.GetField("instance", ReflectionHelpers.CommonFlags);
-
-                            if (fi != null && fi.IsStatic)
+                            fi = type.GetField(name, flags);
+                            if (fi != null)
                             {
                                 var instance = fi.GetValue(null);
+                                if (instance != null)
+                                {
+                                    instances.Add(instance);
+                                    continue;
+                                }
                             }
                         }
                     }
@@ -444,11 +470,6 @@ namespace UnityExplorer.UI.Modules
             }
 
             m_results = results.ToArray();
-
-            if (m_results.Length > 0)
-                m_resultCountText.text = $"{m_results.Length} Results";
-            else
-                m_resultCountText.text = "No results...";
         }
 
         private void OnResultPageTurn()
