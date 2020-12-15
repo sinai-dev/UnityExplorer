@@ -57,7 +57,6 @@ namespace UnityExplorer.UI
             {
                 if (EventSystem.current != EventSys)
                 {
-                    ExplorerCore.Log("Forcing EventSystem to UnityExplorer's");
                     ForceUnlockCursor.SetEventSystem();
                 }
 
