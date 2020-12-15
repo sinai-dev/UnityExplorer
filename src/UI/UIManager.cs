@@ -46,6 +46,9 @@ namespace UnityExplorer.UI
             SearchPage.Instance?.OnSceneChange();
         }
 
+#if CPP
+        internal static float s_timeOfLastClick;
+#endif
         public static void Update()
         {
             MainMenu.Instance?.Update();
@@ -54,6 +57,7 @@ namespace UnityExplorer.UI
             {
                 if (EventSystem.current != EventSys)
                 {
+                    ExplorerCore.Log("Forcing EventSystem to UnityExplorer's");
                     ForceUnlockCursor.SetEventSystem();
                 }
 
@@ -62,8 +66,18 @@ namespace UnityExplorer.UI
                 var evt = InputManager.InputPointerEvent;
                 if (evt != null)
                 {
-                    if (!evt.eligibleForClick && evt.selectedObject)
-                        evt.eligibleForClick = true;
+                    if (Time.realtimeSinceStartup - s_timeOfLastClick > 0.1f)
+                    {
+                        s_timeOfLastClick = Time.realtimeSinceStartup;
+
+                        if (!evt.eligibleForClick && evt.selectedObject)
+                            evt.eligibleForClick = true;
+                    }
+                    else
+                    {
+                        if (evt.eligibleForClick)
+                            evt.eligibleForClick = false;
+                    }
                 }
 #endif
             }

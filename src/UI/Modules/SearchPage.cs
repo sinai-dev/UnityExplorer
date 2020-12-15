@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-//using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -50,8 +49,6 @@ namespace UnityExplorer.UI.Modules
         internal SearchContext m_context;
         private SceneFilter m_sceneFilter;
         private ChildFilter m_childFilter;
-
-        internal bool m_isStaticClassSearching;
 
         // ui elements
 
@@ -257,8 +254,6 @@ namespace UnityExplorer.UI.Modules
 
         internal void StaticClassSearch()
         {
-            m_isStaticClassSearching = true;
-
             var list = new List<Type>();
 
             var nameFilter = "";
@@ -295,8 +290,6 @@ namespace UnityExplorer.UI.Modules
 
         private void SingletonSearch()
         {
-            m_isStaticClassSearching = false;
-
             var instances = new List<object>();
 
             var nameFilter = "";
@@ -356,8 +349,6 @@ namespace UnityExplorer.UI.Modules
 
         internal void UnityObjectSearch()
         {
-            m_isStaticClassSearching = false;
-
             Type searchType = null;
             switch (m_context)
             {

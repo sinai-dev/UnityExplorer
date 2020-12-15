@@ -111,8 +111,11 @@ namespace UnityExplorer.Inspectors.GameObjects
         internal static void OnCompToggleClicked(int index, bool value)
         {
             var comp = s_compShortlist[index];
-
+#if CPP
+            comp.TryCast<Behaviour>().enabled = value;
+#else
             (comp as Behaviour).enabled = value;
+#endif
         }
 
         internal static void OnCompListObjectClicked(int index)
