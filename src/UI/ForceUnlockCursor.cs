@@ -87,12 +87,6 @@ namespace UnityExplorer.UI
                     new HarmonyMethod(typeof(ForceUnlockCursor).GetMethod(nameof(Prefix_set_visible))),
                     true);
 
-#if BIE
-#if CPP
-                // temporarily disabling this patch in BepInEx il2cpp as it's causing a crash in some games.
-                return;
-#endif
-#endif
                 TryPatch(typeof(EventSystem),
                     "current",
                     new HarmonyMethod(typeof(ForceUnlockCursor).GetMethod(nameof(Prefix_EventSystem_set_current))),
@@ -164,9 +158,22 @@ namespace UnityExplorer.UI
 
         public static void SetEventSystem()
         {
+            // temp disabled for new InputSystem
             if (InputManager.CurrentType == InputType.InputSystem)
                 return;
 
+            // Disable current event system object
+            if (m_lastEventSystem || EventSystem.current)
+            {
+                if (!m_lastEventSystem)
+                    m_lastEventSystem = EventSystem.current;
+
+                //ExplorerCore.Log("Disabling current event system...");
+                m_lastEventSystem.enabled = false;
+                m_lastEventSystem.gameObject.SetActive(false);
+            }
+
+            // Set to our current system
             m_settingEventSystem = true;
             EventSystem.current = UIManager.EventSys;
             InputManager.ActivateUIModule();
@@ -180,6 +187,9 @@ namespace UnityExplorer.UI
 
             if (m_lastEventSystem)
             {
+                m_lastEventSystem.enabled = true;
+                m_lastEventSystem.gameObject.SetActive(true);
+
                 m_settingEventSystem = true;
                 EventSystem.current = m_lastEventSystem;
                 m_lastInputModule?.ActivateModule();

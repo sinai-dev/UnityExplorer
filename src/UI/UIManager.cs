@@ -45,10 +45,6 @@ namespace UnityExplorer.UI
             SceneExplorer.Instance?.OnSceneChange();
             SearchPage.Instance?.OnSceneChange();
         }
-
-#if CPP
-        internal static float s_timeOfLastClick;
-#endif
         public static void Update()
         {
             MainMenu.Instance?.Update();
@@ -56,35 +52,20 @@ namespace UnityExplorer.UI
             if (EventSys)
             {
                 if (EventSystem.current != EventSys)
-                {
                     ForceUnlockCursor.SetEventSystem();
-                }
-
 #if CPP
-                // Fix for games which override the InputModule pointer events (eg, VRChat)
+                // Some IL2CPP games behave weird with multiple UI Input Systems, some fixes for them.
                 var evt = InputManager.InputPointerEvent;
                 if (evt != null)
                 {
-                    if (Time.realtimeSinceStartup - s_timeOfLastClick > 0.1f)
-                    {
-                        s_timeOfLastClick = Time.realtimeSinceStartup;
-
-                        if (!evt.eligibleForClick && evt.selectedObject)
-                            evt.eligibleForClick = true;
-                    }
-                    else
-                    {
-                        if (evt.eligibleForClick)
-                            evt.eligibleForClick = false;
-                    }
+                    if (!evt.eligibleForClick && evt.selectedObject)
+                        evt.eligibleForClick = true;
                 }
 #endif
             }
 
             if (PanelDragger.Instance != null)
-            {
                 PanelDragger.Instance.Update();
-            }
 
             for (int i = 0; i < SliderScrollbar.Instances.Count; i++)
             {
