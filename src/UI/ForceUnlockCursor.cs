@@ -170,7 +170,7 @@ namespace UnityExplorer.UI
 
                 //ExplorerCore.Log("Disabling current event system...");
                 m_lastEventSystem.enabled = false;
-                m_lastEventSystem.gameObject.SetActive(false);
+                //m_lastEventSystem.gameObject.SetActive(false);
             }
 
             // Set to our current system
@@ -188,7 +188,7 @@ namespace UnityExplorer.UI
             if (m_lastEventSystem)
             {
                 m_lastEventSystem.enabled = true;
-                m_lastEventSystem.gameObject.SetActive(true);
+                //m_lastEventSystem.gameObject.SetActive(true);
 
                 m_settingEventSystem = true;
                 EventSystem.current = m_lastEventSystem;
