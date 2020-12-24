@@ -272,7 +272,14 @@ namespace UnityExplorer.Inspectors.Reflection
                     if (File.Exists(path))
                         File.Delete(path);
 
-                    var data = tex.EncodeToPNG();
+                    if (!tex.IsReadable())
+                        tex = Texture2DHelpers.ForceReadTexture(tex);
+#if CPP
+                    byte[] data = tex.EncodeToPNG();
+#else
+                    byte[] data = tex.EncodeToPNGSafe();
+#endif
+
                     File.WriteAllBytes(path, data);
                 }
             });

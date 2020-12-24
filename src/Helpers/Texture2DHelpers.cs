@@ -15,6 +15,16 @@ namespace UnityExplorer.Helpers
         private static MethodInfo EncodeToPNGMethod => m_encodeToPNGMethod ?? GetEncodeToPNGMethod();
         private static MethodInfo m_encodeToPNGMethod;
 
+        public static byte[] EncodeToPNGSafe(this Texture2D tex)
+        {
+            var method = EncodeToPNGMethod;
+
+            if (method.IsStatic)
+                return (byte[])method.Invoke(null, new object[] { tex });
+            else
+                return (byte[])method.Invoke(tex, new object[0]);
+        }
+
         private static MethodInfo GetEncodeToPNGMethod()
         {
             if (ReflectionHelpers.GetTypeByName("UnityEngine.ImageConversion") is Type imageConversion)
