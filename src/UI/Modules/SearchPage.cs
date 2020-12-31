@@ -229,6 +229,7 @@ namespace UnityExplorer.UI.Modules
             }
 
             m_sceneDropdown.transform.Find("Label").GetComponent<Text>().text = "Any";
+            m_sceneFilter = SceneFilter.Any;
         }
 
         // ~~~~~ UI Callbacks ~~~~~
