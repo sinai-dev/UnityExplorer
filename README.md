@@ -49,7 +49,7 @@
 
 0. Install [BepInEx](https://github.com/BepInEx/BepInEx) for your game.
 1. Download the UnityExplorer release for BepInEx IL2CPP or Mono above.
-2. Take the `UnityExplorer.dll` file and put it in `[GameFolder]\BepInEx\plugins\`
+2. Take the `UnityExplorer.BIE.___.dll` file and put it in `[GameFolder]\BepInEx\plugins\`
 3. Take the `UnityExplorer\` folder (with `explorerui.bundle`) and put it in `[GameFolder]\Mods\`, so it looks like `[GameFolder]\Mods\UnityExplorer\explorerui.bundle`.
 4. In IL2CPP, it is highly recommended to get the base Unity libs for the game's Unity version and put them in the `BepInEx\unhollowed\base\` folder. 
 
@@ -57,7 +57,7 @@
 
 0. Install [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) for your game.
 1. Download the UnityExplorer release for MelonLoader IL2CPP or Mono above.
-2. Take the contents of the release and put it in the `[GameFolder]\Mods\` folder. It should look like `[GameFolder]\Mods\UnityExplorer.dll` and `[GameFolder]\Mods\UnityExplorer\explorerui.bundle`.
+2. Take the contents of the release and put it in the `[GameFolder]\Mods\` folder. It should look like `[GameFolder]\Mods\UnityExplorer.ML.___.dll` and `[GameFolder]\Mods\UnityExplorer\explorerui.bundle`.
 
 ## Mod Config
 
