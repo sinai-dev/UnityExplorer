@@ -11,7 +11,7 @@ namespace UnityExplorer.Config
         public static ModConfig Instance;
 
         internal static readonly IniDataParser _parser = new IniDataParser();
-        internal const string INI_PATH = ExplorerCore.EXPLORER_FOLDER + @"\config.ini";
+        internal static readonly string INI_PATH = Path.Combine(ExplorerCore.EXPLORER_FOLDER, "config.ini");
 
         static ModConfig()
         {

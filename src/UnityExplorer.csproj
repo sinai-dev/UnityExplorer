@@ -293,6 +293,7 @@
     <Compile Include="Unstrip\SceneUnstrip.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\UIFactory.cs" />
+    <EmbeddedResource Include="Resources\*" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ILRepack.targets" />
