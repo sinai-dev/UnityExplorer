@@ -88,18 +88,22 @@ namespace UnityExplorer.UI
             }
         }
 
+        private static AssetBundle LoadExplorerUi(string id)
+        {
+            return AssetBundle.LoadFromMemory(ReadFully(typeof(ExplorerCore).Assembly.GetManifestResourceStream($"UnityExplorer.Resources.explorerui.{id}.bundle")));
+        }
+
         private static byte[] ReadFully(this Stream input)
         {
             using (var ms = new MemoryStream())
             {
-                input.CopyTo(ms);
+                byte[] buffer = new byte[81920];
+                int read;
+                while ((read = input.Read(buffer, 0, buffer.Length)) != 0)
+                    ms.Write(buffer, 0, read);
+
                 return ms.ToArray();
             }
-        }
-
-        private static AssetBundle LoadExplorerUi(string id)
-        {
-            return AssetBundle.LoadFromMemory(ReadFully(typeof(ExplorerCore).Assembly.GetManifestResourceStream($"UnityExplorer.Resources.explorerui.{id}.bundle")));
         }
 
         private static void LoadBundle()

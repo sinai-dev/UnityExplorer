@@ -71,7 +71,11 @@ namespace UnityExplorer.Helpers
             pixels = orig.GetPixels((int)rect.x, (int)rect.y, (int)rect.width, (int)rect.height);
 
             // use full constructor for better compatibility
+#if CPP
             var _newTex = new Texture2D((int)rect.width, (int)rect.height, TextureFormat.RGBA32, Texture.GenerateAllMips, false, IntPtr.Zero);
+#else
+            var _newTex = new Texture2D((int)rect.width, (int)rect.height);
+#endif
             _newTex.SetPixels(pixels);
 
             return _newTex;
