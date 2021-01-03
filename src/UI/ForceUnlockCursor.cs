@@ -176,6 +176,7 @@ namespace UnityExplorer.UI
             // Set to our current system
             m_settingEventSystem = true;
             EventSystem.current = UIManager.EventSys;
+            UIManager.EventSys.enabled = true;
             InputManager.ActivateUIModule();
             m_settingEventSystem = false;
         }
