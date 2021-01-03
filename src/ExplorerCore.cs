@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using BepInEx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityExplorer.Config;
@@ -19,7 +20,12 @@ namespace UnityExplorer
         public const string VERSION = "3.1.4";
         public const string AUTHOR = "Sinai";
         public const string GUID = "com.sinai.unityexplorer";
+
+#if ML
         public const string EXPLORER_FOLDER = @"Mods\UnityExplorer";
+#elif BIE
+        public static string EXPLORER_FOLDER = Path.Combine(Paths.ConfigPath, "UnityExplorer");
+#endif
 
         public static ExplorerCore Instance { get; private set; }
 

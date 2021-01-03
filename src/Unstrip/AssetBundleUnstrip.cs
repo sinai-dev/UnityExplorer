@@ -24,6 +24,17 @@ namespace UnityExplorer.Unstrip
 
             return new AssetBundle(ptr);
         }
+        
+        private delegate IntPtr d_LoadFromMemory(IntPtr binary, uint crc);
+
+        public static AssetBundle LoadFromMemory(byte[] binary, uint crc = 0)
+        {
+            var iCall = ICallHelper.GetICall<d_LoadFromMemory>("UnityEngine.AssetBundle::LoadFromMemory_Internal");
+
+            var ptr = iCall(((Il2CppStructArray<byte>) binary).Pointer, crc);
+
+            return new AssetBundle(ptr);
+        }
 
         // ~~~~~~~~~~~~ Instance ~~~~~~~~~~~~
 

@@ -88,33 +88,62 @@ namespace UnityExplorer.UI
             }
         }
 
+        private static byte[] ReadFully(this Stream input)
+        {
+            using (var ms = new MemoryStream())
+            {
+                input.CopyTo(ms);
+                return ms.ToArray();
+            }
+        }
+
+        private static AssetBundle LoadExplorerUi(string id)
+        {
+            return AssetBundle.LoadFromMemory(ReadFully(typeof(ExplorerCore).Assembly.GetManifestResourceStream($"UnityExplorer.Resources.explorerui.{id}.bundle")));
+        }
+
         private static void LoadBundle()
         {
-            var bundlePath = ExplorerCore.EXPLORER_FOLDER + @"\explorerui.bundle";
-            if (File.Exists(bundlePath))
+            AssetBundle bundle = null;
+
+            try
             {
-                var bundle = AssetBundle.LoadFromFile(bundlePath);
-
-                BackupShader = bundle.LoadAsset<Shader>("DefaultUI");
-
-                // Fix for games which don't ship with 'UI/Default' shader.
-                if (Graphic.defaultGraphicMaterial.shader?.name != "UI/Default")
-                {
-                    ExplorerCore.Log("This game does not ship with the 'UI/Default' shader, using manual Default Shader...");
-                    Graphic.defaultGraphicMaterial.shader = BackupShader;
-                }
-
-                ResizeCursor = bundle.LoadAsset<Sprite>("cursor");
-
-                ConsoleFont = bundle.LoadAsset<Font>("CONSOLA");
-
-                ExplorerCore.Log("Loaded UI bundle");
+                bundle = LoadExplorerUi("modern");
             }
-            else
+            catch
             {
-                ExplorerCore.LogWarning("Could not find the ExplorerUI Bundle! It should exist at '" + bundlePath + "'");
+                ExplorerCore.Log("Failed to load modern ExplorerUI Bundle, falling back to legacy");
+
+                try
+                {
+                    bundle = LoadExplorerUi("legacy");
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
+
+            if (bundle == null)
+            {
+                ExplorerCore.LogWarning("Could not load the ExplorerUI Bundle!");
                 return;
             }
+
+            BackupShader = bundle.LoadAsset<Shader>("DefaultUI");
+
+            // Fix for games which don't ship with 'UI/Default' shader.
+            if (Graphic.defaultGraphicMaterial.shader?.name != "UI/Default")
+            {
+                ExplorerCore.Log("This game does not ship with the 'UI/Default' shader, using manual Default Shader...");
+                Graphic.defaultGraphicMaterial.shader = BackupShader;
+            }
+
+            ResizeCursor = bundle.LoadAsset<Sprite>("cursor");
+
+            ConsoleFont = bundle.LoadAsset<Font>("CONSOLA");
+
+            ExplorerCore.Log("Loaded UI bundle");
         }
 
         private static GameObject CreateRootCanvas()
