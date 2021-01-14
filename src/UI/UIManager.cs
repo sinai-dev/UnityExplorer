@@ -166,7 +166,7 @@ namespace UnityExplorer.UI
             canvas.renderMode = RenderMode.ScreenSpaceCamera;
             canvas.referencePixelsPerUnit = 100;
             canvas.sortingOrder = 999;
-            canvas.pixelPerfect = false;
+            //canvas.pixelPerfect = false;
 
             CanvasScaler scaler = rootObj.AddComponent<CanvasScaler>();
             scaler.referenceResolution = new Vector2(1920, 1080);

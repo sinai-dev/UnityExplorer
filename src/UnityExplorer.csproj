@@ -25,9 +25,9 @@
     <Prefer32Bit>false</Prefer32Bit>
     <RootNamespace>UnityExplorer</RootNamespace>
     <!-- Set this to the BepInEx Il2Cpp Game folder, without the ending '\' character. -->
-    <BIECppGameFolder>D:\source\Unity Projects\Test\_BUILD</BIECppGameFolder>
+    <BIECppGameFolder>E:\source\Unity Projects\Test\_BUILD</BIECppGameFolder>
     <!-- Set this to the MelonLoader Il2Cpp Game folder, without the ending '\' character. -->
-    <MLCppGameFolder>D:\source\Unity Projects\Test\_BUILD</MLCppGameFolder>
+    <MLCppGameFolder>E:\source\Unity Projects\Test\_BUILD</MLCppGameFolder>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>
