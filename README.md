@@ -63,7 +63,8 @@
 
 0. Load the DLL from your mod or inject it.
 1. Create an instance of Unity Explorer with `new ExplorerCore();`
-2. Subscribe to the `ExplorerCore.OnLog__` methods for logging.
+2. You will need to call ExplorerCore.Update() (static method) from your Update method.
+3. Subscribe to the `ExplorerCore.OnLog__` methods for logging.
 
 ## Mod Config
 
