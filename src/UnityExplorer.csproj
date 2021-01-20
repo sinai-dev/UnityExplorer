@@ -68,6 +68,24 @@
     <IsMelonLoader>false</IsMelonLoader>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_STANDALONE_Mono|AnyCPU'">
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <OutputPath>..\Release\UnityExplorer.Standalone.Mono\</OutputPath>
+    <DefineConstants>MONO,STANDALONE</DefineConstants>
+    <AssemblyName>UnityExplorer.STANDALONE.Mono</AssemblyName>
+    <IsCpp>false</IsCpp>
+    <IsMelonLoader>false</IsMelonLoader>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_STANDALONE_Cpp|AnyCPU'">
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <OutputPath>..\Release\UnityExplorer.Standalone.Il2Cpp\</OutputPath>
+    <DefineConstants>CPP,STANDALONE</DefineConstants>
+    <AssemblyName>UnityExplorer.STANDALONE.IL2CPP</AssemblyName>
+    <IsCpp>true</IsCpp>
+    <IsMelonLoader>false</IsMelonLoader>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="INIFileParser, Version=2.5.2.0, Culture=neutral, PublicKeyToken=79af7b307b65cf3c, processorArchitecture=MSIL">
       <HintPath>packages\ini-parser.2.5.2\lib\net20\INIFileParser.dll</HintPath>
@@ -217,6 +235,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExplorerStandalone.cs" />
     <Compile Include="Helpers\EventHelper.cs" />
     <Compile Include="Inspectors\MouseInspector.cs" />
     <Compile Include="Inspectors\Reflection\CacheObject\CacheEnumerated.cs" />

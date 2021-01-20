@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityExplorer.Config;
@@ -16,7 +17,7 @@ namespace UnityExplorer
     public class ExplorerCore
     {
         public const string NAME = "UnityExplorer";
-        public const string VERSION = "3.1.6";
+        public const string VERSION = "3.1.7";
         public const string AUTHOR = "Sinai";
         public const string GUID = "com.sinai.unityexplorer";
 
@@ -24,6 +25,22 @@ namespace UnityExplorer
         public const string EXPLORER_FOLDER = @"Mods\UnityExplorer";
 #elif BIE
         public static string EXPLORER_FOLDER = Path.Combine(BepInEx.Paths.ConfigPath, "UnityExplorer");
+#elif STANDALONE
+        public static string EXPLORER_FOLDER
+        {
+            get
+            {
+                if (s_explorerFolder == null)
+                {
+                    s_explorerFolder = (new Uri(Assembly.GetExecutingAssembly().CodeBase)).AbsolutePath;
+                    s_explorerFolder = Uri.UnescapeDataString(s_explorerFolder);
+                    s_explorerFolder = Path.GetDirectoryName(s_explorerFolder);                    
+                }
+                
+                return s_explorerFolder;
+            }
+        }
+        private static string s_explorerFolder;
 #endif
 
         public static ExplorerCore Instance { get; private set; }
@@ -166,6 +183,12 @@ namespace UnityExplorer
             }
         }
 
+#if STANDALONE
+        public static Action<string> OnLogMessage;
+        public static Action<string> OnLogWarning;
+        public static Action<string> OnLogError;
+#endif
+
         public static void Log(object message, bool unity = false)
         {
             DebugConsole.Log(message?.ToString());
@@ -175,8 +198,10 @@ namespace UnityExplorer
 
 #if ML
             MelonLoader.MelonLogger.Log(message?.ToString());
-#else
+#elif BIE
             ExplorerBepInPlugin.Logging?.LogMessage(message?.ToString());
+#elif STANDALONE
+            OnLogMessage?.Invoke(message?.ToString());
 #endif
         }
 
@@ -189,8 +214,10 @@ namespace UnityExplorer
 
 #if ML
             MelonLoader.MelonLogger.LogWarning(message?.ToString());
-#else
-                        ExplorerBepInPlugin.Logging?.LogWarning(message?.ToString());
+#elif BIE
+            ExplorerBepInPlugin.Logging?.LogWarning(message?.ToString());
+#elif STANDALONE
+            OnLogWarning?.Invoke(message?.ToString());
 #endif
         }
 
@@ -203,8 +230,10 @@ namespace UnityExplorer
 
 #if ML
             MelonLoader.MelonLogger.LogError(message?.ToString());
-#else
-                        ExplorerBepInPlugin.Logging?.LogError(message?.ToString());
+#elif BIE
+            ExplorerBepInPlugin.Logging?.LogError(message?.ToString());
+#elif STANDALONE
+            OnLogError?.Invoke(message?.ToString());
 #endif
         }
 

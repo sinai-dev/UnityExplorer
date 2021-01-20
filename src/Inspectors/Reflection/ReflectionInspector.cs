@@ -58,6 +58,8 @@ namespace UnityExplorer.Inspectors
 
         public override string TabLabel => m_targetTypeShortName;
 
+        internal CacheObjectBase ParentMember { get; set; }
+
         internal readonly Type m_targetType;
         internal readonly string m_targetTypeShortName;
 
@@ -202,6 +204,8 @@ namespace UnityExplorer.Inspectors
                             list.Add(new CacheProperty(pi, target, m_scrollContent));
                         else
                             list.Add(new CacheField(fi, target, m_scrollContent));
+
+                        list.Last().ParentInspector = this;
                     }
                     catch (Exception e)
                     {

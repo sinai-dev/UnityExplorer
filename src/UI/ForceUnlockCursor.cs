@@ -105,8 +105,10 @@ namespace UnityExplorer.UI
                 var harmony =
 #if ML
                     ExplorerMelonMod.Instance.harmonyInstance;
-#else
+#elif BIE
                     ExplorerBepInPlugin.HarmonyInstance;
+#elif STANDALONE
+                    ExplorerStandalone.HarmonyInstance;
 #endif
 
                 System.Reflection.PropertyInfo prop = type.GetProperty(property);

@@ -19,6 +19,7 @@ namespace UnityExplorer.Inspectors.Reflection
 
         public override Type FallbackType { get; }
 
+        public ReflectionInspector ParentInspector { get; set; }
         public MemberInfo MemInfo { get; set; }
         public Type DeclaringType { get; set; }
         public object DeclaringInstance { get; set; }

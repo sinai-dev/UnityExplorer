@@ -176,6 +176,10 @@ namespace UnityExplorer.Inspectors.Reflection
                 ConstructSubcontent();
         }
 
+        internal MethodInfo m_toStringMethod;
+        internal MethodInfo m_toStringFormatMethod;
+        internal bool m_gotToStringMethods;
+
         public string GetDefaultLabel(bool updateType = true)
         {
             var valueType = Value?.GetType() ?? this.FallbackType;
@@ -205,8 +209,33 @@ namespace UnityExplorer.Inspectors.Reflection
             }
             else
             {
-                var toString = (string)valueType.GetMethod("ToString", new Type[0])?.Invoke(Value, null) 
-                                ?? Value.ToString();
+                if (!m_gotToStringMethods)
+                {
+                    m_gotToStringMethods = true;
+
+                    m_toStringMethod = valueType.GetMethod("ToString", new Type[0]);
+                    m_toStringFormatMethod = valueType.GetMethod("ToString", new Type[] { typeof(string) });
+
+                    // test format method actually works
+                    try
+                    {
+                        m_toStringFormatMethod.Invoke(Value, new object[] { "F3" });
+                    }
+                    catch
+                    {
+                        m_toStringFormatMethod = null;
+                    }
+                }
+
+                string toString;
+                if (m_toStringFormatMethod != null)
+                {
+                    toString = (string)m_toStringFormatMethod.Invoke(Value, new object[] { "F3" });
+                }
+                else
+                {
+                    toString = (string)m_toStringMethod.Invoke(Value, new object[0]);
+                }
 
                 var fullnametemp = valueType.ToString();
                 if (fullnametemp.StartsWith("Il2CppSystem"))
@@ -303,7 +332,7 @@ namespace UnityExplorer.Inspectors.Reflection
             void OnInspectClicked()
             {
                 if (!Value.IsNullOrDestroyed(false))
-                    InspectorManager.Instance.Inspect(this.Value);
+                    InspectorManager.Instance.Inspect(this.Value, this.Owner);
             }
 
             m_inspectButton.SetActive(false);

@@ -38,7 +38,7 @@ namespace UnityExplorer.Inspectors
             }
         }
 
-        public void Inspect(object obj)
+        public void Inspect(object obj, CacheObjectBase parentMember = null)
         {
 #if CPP
             obj = obj.Il2CppCast(ReflectionHelpers.GetActualType(obj));
@@ -75,6 +75,9 @@ namespace UnityExplorer.Inspectors
                 inspector = new GameObjectInspector(go);
             else
                 inspector = new InstanceInspector(obj);
+
+            if (inspector is ReflectionInspector ri)
+                ri.ParentMember = parentMember;
 
             m_currentInspectors.Add(inspector);
             SetInspectorTab(inspector);

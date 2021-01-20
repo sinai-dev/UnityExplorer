@@ -33,6 +33,9 @@ namespace UnityExplorer.Inspectors.Reflection
         {
             var fi = MemInfo as FieldInfo;
             fi.SetValue(fi.IsStatic ? null : DeclaringInstance, IValue.Value);
+
+            if (this.ParentInspector?.ParentMember != null)
+                this.ParentInspector.ParentMember.SetValue();
         }
     }
 }

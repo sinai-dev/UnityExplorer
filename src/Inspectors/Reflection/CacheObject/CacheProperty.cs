@@ -63,6 +63,9 @@ namespace UnityExplorer.Inspectors.Reflection
             var target = pi.GetAccessors()[0].IsStatic ? null : DeclaringInstance;
 
             pi.SetValue(target, IValue.Value, ParseArguments());
+
+            if (this.ParentInspector?.ParentMember != null)
+                this.ParentInspector.ParentMember.SetValue();
         }
     }
 }
