@@ -153,7 +153,7 @@ namespace UnityExplorer.UI.Modules
                     {
                         var name = UISyntaxHighlight.ParseFullSyntax(obj.GetActualType(), true);
 
-                        if (unityObj && m_context != SearchContext.Singleton && m_context != SearchContext.StaticClass)
+                        if (unityObj && m_context != SearchContext.Singleton)
                         {
                             if (unityObj && !string.IsNullOrEmpty(unityObj.name))
                                 name += $": {unityObj.name}";
@@ -301,8 +301,8 @@ namespace UnityExplorer.UI.Modules
 
             foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
             {
-                // All non-static classes
-                foreach (var type in asm.TryGetTypes().Where(it => !it.IsSealed && !it.IsAbstract))
+                // Search all non-static, non-enum classes.
+                foreach (var type in asm.TryGetTypes().Where(it => !(it.IsSealed && it.IsAbstract) && !it.IsEnum))
                 {
                     try
                     {
@@ -336,7 +336,7 @@ namespace UnityExplorer.UI.Modules
                                 if (instance != null)
                                 {
                                     instances.Add(instance);
-                                    continue;
+                                    break;
                                 }
                             }
                         }

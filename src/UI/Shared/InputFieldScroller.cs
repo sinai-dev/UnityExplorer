@@ -33,6 +33,8 @@ namespace UnityExplorer.UI.Shared
             this.sliderScroller = sliderScroller;
             this.inputField = inputField;
 
+            sliderScroller.m_parentInputScroller = this;
+
             inputField.onValueChanged.AddListener(OnTextChanged);
 
             inputRect = inputField.GetComponent<RectTransform>();
@@ -66,6 +68,17 @@ namespace UnityExplorer.UI.Shared
                 m_updateWanted = false;
                 RefreshUI();
             }
+        }
+
+        internal bool CheckDestroyed()
+        {
+            if (sliderScroller == null || sliderScroller.CheckDestroyed())
+            {
+                Instances.Remove(this);
+                return true;
+            }
+
+            return false;
         }
 
         internal void OnTextChanged(string text)

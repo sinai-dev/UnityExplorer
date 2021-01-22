@@ -229,13 +229,9 @@ namespace UnityExplorer.Inspectors.Reflection
 
                 string toString;
                 if (m_toStringFormatMethod != null)
-                {
                     toString = (string)m_toStringFormatMethod.Invoke(Value, new object[] { "F3" });
-                }
                 else
-                {
                     toString = (string)m_toStringMethod.Invoke(Value, new object[0]);
-                }
 
                 var fullnametemp = valueType.ToString();
                 if (fullnametemp.StartsWith("Il2CppSystem"))

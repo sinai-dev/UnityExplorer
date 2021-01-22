@@ -81,7 +81,7 @@ namespace UnityExplorer.UI
             {
                 var input = InputFieldScroller.Instances[i];
 
-                if (input.sliderScroller.CheckDestroyed())
+                if (input.CheckDestroyed())
                     i--;
                 else
                     input.Update();
