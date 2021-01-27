@@ -51,7 +51,7 @@
 0. Install [BepInEx](https://github.com/BepInEx/BepInEx) for your game.
 1. Download the UnityExplorer release for BepInEx IL2CPP or Mono above.
 2. Take the `UnityExplorer.BIE.___.dll` file and put it in `[GameFolder]\BepInEx\plugins\`
-3. In IL2CPP, it is highly recommended to get the base Unity libs for the game's Unity version and put them in the `BepInEx\unhollowed\base\` folder. 
+3. In IL2CPP, it is highly recommended to get the base Unity libs for the game's Unity version and put them in the `BepInEx\unity-libs\` folder. 
 
 ### MelonLoader
 
