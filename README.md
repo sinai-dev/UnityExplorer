@@ -17,7 +17,6 @@
 - [Features](#features)
 - [How to install](#how-to-install)
 - [Mod Config](#mod-config)
-- [Mouse Control](#mouse-control)
 - [Building](#building)
 - [Credits](#credits)
 
