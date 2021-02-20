@@ -101,8 +101,24 @@ namespace UnityExplorer.Helpers
                 return Il2CppToMonoType[cppType];
 
             var getType = Type.GetType(cppType.AssemblyQualifiedName);
-            Il2CppToMonoType.Add(cppType, getType);
-            return getType;
+            
+            if (getType != null)
+            {
+                Il2CppToMonoType.Add(cppType, getType);
+                return getType;
+            }
+            else
+            {
+                string baseName = cppType.FullName;
+                string baseAssembly = cppType.Assembly.GetName().name;
+
+                Type unhollowedType = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == baseAssembly)?.GetTypes().FirstOrDefault(t =>
+                    t.CustomAttributes.Any(ca =>
+                        ca.AttributeType.Name == "ObfuscatedNameAttribute" && (string)ca.ConstructorArguments[0].Value == baseName));
+
+                Il2CppToMonoType.Add(cppType, unhollowedType);
+                return unhollowedType;
+            }
         }
 
         private static readonly Dictionary<Type, IntPtr> CppClassPointers = new Dictionary<Type, IntPtr>();
