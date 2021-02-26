@@ -32,7 +32,7 @@ namespace UnityExplorer.CSConsole
         private Text inputHighlightText;
 
         private readonly CSharpLexer highlightLexer;
-        private readonly StringBuilder sbHighlight;
+        //private readonly StringBuilder sbHighlight;
 
         internal int m_lastCaretPos;
         internal int m_fixCaretPos;
@@ -68,7 +68,6 @@ The following helper methods are available:
 
         public CodeEditor()
         {
-            sbHighlight = new StringBuilder();
             highlightLexer = new CSharpLexer();
 
             ConstructUI();
@@ -76,8 +75,24 @@ The following helper methods are available:
             InputField.onValueChanged.AddListener((string s) => { OnInputChanged(s); });
         }
 
+        internal static bool IsUserCopyPasting()
+        {
+            return (InputManager.GetKey(KeyCode.LeftControl) || InputManager.GetKey(KeyCode.RightControl))
+                && InputManager.GetKeyDown(KeyCode.V);
+        }
+
         public void Update()
         {
+            if (s_copyPasteBuffer != null)
+            {
+                if (!IsUserCopyPasting())
+                {
+                    OnInputChanged(s_copyPasteBuffer);
+
+                    s_copyPasteBuffer = null;
+                }
+            }
+
             if (EnableCtrlRShortcut)
             {
                 if ((InputManager.GetKey(KeyCode.LeftControl) || InputManager.GetKey(KeyCode.RightControl))
@@ -149,11 +164,18 @@ The following helper methods are available:
             AutoCompleter.ClearAutocompletes();
         }
 
-        public void OnInputChanged(string newInput, bool forceUpdate = false)
-        {
-            string newText = newInput;
+        internal static string s_copyPasteBuffer;
 
-            UpdateIndent(newInput);
+        public void OnInputChanged(string newText, bool forceUpdate = false)
+        {
+            if (IsUserCopyPasting())
+            {
+                //Console.WriteLine("Copy+Paste detected!");
+                s_copyPasteBuffer = newText;
+                return;
+            }
+
+            UpdateIndent(newText);
 
             if (!forceUpdate && string.IsNullOrEmpty(newText))
                 inputHighlightText.text = string.Empty;
@@ -203,35 +225,29 @@ The following helper methods are available:
         {
             int offset = 0;
 
-            sbHighlight.Length = 0;
+            //Console.WriteLine("Highlighting input text:\r\n" + inputText);
+
+            string ret = "";
 
             foreach (LexerMatchInfo match in highlightLexer.GetMatches(inputText))
             {
                 for (int i = offset; i < match.startIndex; i++)
-                {
-                    sbHighlight.Append(inputText[i]);
-                }
+                    ret += inputText[i];
 
-                sbHighlight.Append($"{match.htmlColor}");
+                ret += $"{match.htmlColor}";
 
                 for (int i = match.startIndex; i < match.endIndex; i++)
-                {
-                    sbHighlight.Append(inputText[i]);
-                }
+                    ret += inputText[i];
 
-                sbHighlight.Append(CLOSE_COLOR_TAG);
+                ret += CLOSE_COLOR_TAG;
 
                 offset = match.endIndex;
             }
 
             for (int i = offset; i < inputText.Length; i++)
-            {
-                sbHighlight.Append(inputText[i]);
-            }
+                ret += inputText[i];
 
-            inputText = sbHighlight.ToString();
-
-            return inputText;
+            return ret;
         }
 
         private void AutoIndentCaret()
