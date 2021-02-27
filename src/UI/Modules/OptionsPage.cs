@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-//using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Config;
@@ -19,6 +18,7 @@ namespace UnityExplorer.UI.Modules
         private Toggle m_unlockMouseToggle;
         private InputField m_pageLimitInput;
         private InputField m_defaultOutputInput;
+        private Toggle m_hideOnStartupToggle;
 
         public override void Init()
         {
@@ -27,26 +27,21 @@ namespace UnityExplorer.UI.Modules
 
         public override void Update()
         {
-            // not needed?
         }
 
         internal void OnApply()
         {
             if (!string.IsNullOrEmpty(m_keycodeInput.text) && Enum.Parse(typeof(KeyCode), m_keycodeInput.text) is KeyCode keyCode)
-            {
                 ModConfig.Instance.Main_Menu_Toggle = keyCode;
-            }
 
             ModConfig.Instance.Force_Unlock_Mouse = m_unlockMouseToggle.isOn;
 
             if (!string.IsNullOrEmpty(m_pageLimitInput.text) && int.TryParse(m_pageLimitInput.text, out int lim))
-            {
                 ModConfig.Instance.Default_Page_Limit = lim;
-            }
 
             ModConfig.Instance.Default_Output_Path = m_defaultOutputInput.text;
 
-            // todo default output path
+            ModConfig.Instance.Hide_On_Startup = m_hideOnStartupToggle.isOn;
 
             ModConfig.SaveSettings();
             ModConfig.InvokeConfigChanged();
@@ -98,6 +93,7 @@ namespace UnityExplorer.UI.Modules
             ConstructMouseUnlockOpt(optionsGroupObj);
             ConstructPageLimitOpt(optionsGroupObj);
             ConstructOutputPathOpt(optionsGroupObj);
+            ConstructHideOnStartupOpt(optionsGroupObj);
 
             var applyBtnObj = UIFactory.CreateButton(Content, new Color(0.2f, 0.2f, 0.2f));
             var applyText = applyBtnObj.GetComponentInChildren<Text>();
@@ -113,10 +109,34 @@ namespace UnityExplorer.UI.Modules
             applyBtn.onClick.AddListener(OnApply);
         }
 
+        private void ConstructHideOnStartupOpt(GameObject optionsGroupObj)
+        {
+            var rowObj = UIFactory.CreateHorizontalGroup(optionsGroupObj, new Color(1, 1, 1, 0));
+            var rowGroup = rowObj.GetComponent<HorizontalLayoutGroup>();
+            rowGroup.childControlWidth = true;
+            rowGroup.childForceExpandWidth = false;
+            rowGroup.childControlHeight = true;
+            rowGroup.childForceExpandHeight = true;
+            var groupLayout = rowObj.AddComponent<LayoutElement>();
+            groupLayout.minHeight = 25;
+            groupLayout.flexibleHeight = 0;
+            groupLayout.minWidth = 200;
+            groupLayout.flexibleWidth = 1000;
+
+            var labelObj = UIFactory.CreateLabel(rowObj, TextAnchor.MiddleLeft);
+            var labelText = labelObj.GetComponent<Text>();
+            labelText.text = "Hide UI on startup:";
+            var labelLayout = labelObj.AddComponent<LayoutElement>();
+            labelLayout.minWidth = 150;
+            labelLayout.minHeight = 25;
+
+            UIFactory.CreateToggle(rowObj, out m_hideOnStartupToggle, out Text toggleText);
+            m_hideOnStartupToggle.isOn = ModConfig.Instance.Hide_On_Startup;
+            toggleText.text = "";
+        }
+
         internal void ConstructKeycodeOpt(GameObject parent)
         {
-            //public KeyCode Main_Menu_Toggle = KeyCode.F7;
-
             var rowObj = UIFactory.CreateHorizontalGroup(parent, new Color(1, 1, 1, 0));
             var rowGroup = rowObj.GetComponent<HorizontalLayoutGroup>();
             rowGroup.childControlWidth = true;
@@ -146,8 +166,6 @@ namespace UnityExplorer.UI.Modules
 
         internal void ConstructMouseUnlockOpt(GameObject parent)
         {
-            //public bool Force_Unlock_Mouse = true;
-
             var rowObj = UIFactory.CreateHorizontalGroup(parent, new Color(1, 1, 1, 0));
             var rowGroup = rowObj.GetComponent<HorizontalLayoutGroup>();
             rowGroup.childControlWidth = true;

@@ -15,14 +15,14 @@ namespace UnityExplorer
     public class ExplorerCore
     {
         public const string NAME = "UnityExplorer";
-        public const string VERSION = "3.1.9";
+        public const string VERSION = "3.1.10";
         public const string AUTHOR = "Sinai";
         public const string GUID = "com.sinai.unityexplorer";
 
 #if ML
-        public const string EXPLORER_FOLDER = @"Mods\UnityExplorer";
+        public static string EXPLORER_FOLDER = Path.Combine("Mods", NAME);
 #elif BIE
-        public static string EXPLORER_FOLDER = Path.Combine(BepInEx.Paths.ConfigPath, "UnityExplorer");
+        public static string EXPLORER_FOLDER = Path.Combine(BepInEx.Paths.ConfigPath, NAME);
 #elif STANDALONE
         public static string EXPLORER_FOLDER
         {
@@ -110,6 +110,10 @@ namespace UnityExplorer
                 {
                     UIManager.Init();
                     Log("Initialized UnityExplorer UI.");
+
+                    if (ModConfig.Instance.Hide_On_Startup)
+                        ShowMenu = false;
+
                     // InspectorManager.Instance.Inspect(Tests.TestClass.Instance);
                 }
                 catch (Exception e)

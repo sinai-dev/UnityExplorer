@@ -16,7 +16,7 @@ namespace UnityExplorer.UI.Modules
         public static DebugConsole Instance { get; private set; }
 
         public static bool LogUnity { get; set; } = ModConfig.Instance.Log_Unity_Debug;
-        public static bool SaveToDisk { get; set; } = ModConfig.Instance.Save_Logs_To_Disk;
+        //public static bool SaveToDisk { get; set; } = ModConfig.Instance.Save_Logs_To_Disk;
 
         internal static StreamWriter s_streamWriter;
 
@@ -49,8 +49,8 @@ namespace UnityExplorer.UI.Modules
 
             // set up IO
 
-            if (!SaveToDisk)
-                return;
+            //if (!SaveToDisk)
+            //    return;
 
             var path = ExplorerCore.EXPLORER_FOLDER + @"\Logs";
 
