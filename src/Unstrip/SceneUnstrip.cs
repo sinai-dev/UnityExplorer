@@ -3,35 +3,24 @@ using UnityExplorer.Helpers;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityExplorer.Inspectors;
+using System.Reflection;
 
 namespace UnityExplorer.Unstrip
 {
-    public class SceneUnstrip
+    public static class SceneUnstrip
     {
 #if MONO
-        public static GameObject[] GetRootGameObjects(Scene scene) => scene.GetRootGameObjects();
-
-        //public static GameObject[] GetRootGameObjects(int handle)
-        //{
-        //    Scene scene = default;
-        //    if (handle == SceneExplorer.DontDestroyHandle)
-        //        scene = SceneExplorer.DontDestroyObject.scene;
-        //    else
-        //    {
-        //        for (int i = 0; i < SceneManager.sceneCount; i++)
-        //        {
-        //            var iscene = SceneManager.GetSceneAt(i);
-        //            if (iscene.handle == handle)
-        //                scene = iscene;
-        //        }
-        //    }
-
-        //    if (scene != default && scene.handle != -1)
-        //        return scene.GetRootGameObjects();
-
-        //    return new GameObject[0];
-        //}
+        private static readonly FieldInfo fi_Scene_handle = typeof(Scene).GetField("m_Handle", ReflectionHelpers.CommonFlags);
 #endif
+
+        public static int GetHandle(this Scene scene)
+        {
+#if CPP
+            return scene.handle;
+#else
+            return (int)fi_Scene_handle.GetValue(scene);
+#endif
+        }
 
 #if CPP
         //Scene.GetRootGameObjects();
@@ -43,13 +32,16 @@ namespace UnityExplorer.Unstrip
         public static GameObject[] GetRootGameObjects(int handle)
         {
             if (handle == -1)
-            {
                 return new GameObject[0];
-            }
 
-            Il2CppSystem.Collections.Generic.List<GameObject> list = new Il2CppSystem.Collections.Generic.List<GameObject>(GetRootCount(handle));
+            int count = GetRootCount(handle);
 
-            d_GetRootGameObjects iCall = ICallHelper.GetICall<d_GetRootGameObjects>("UnityEngine.SceneManagement.Scene::GetRootGameObjectsInternal");
+            if (count < 1)
+                return new GameObject[0];
+
+            var list = new Il2CppSystem.Collections.Generic.List<GameObject>(count);
+
+            var iCall = ICallHelper.GetICall<d_GetRootGameObjects>("UnityEngine.SceneManagement.Scene::GetRootGameObjectsInternal");
 
             iCall.Invoke(handle, list.Pointer);
 
@@ -58,14 +50,14 @@ namespace UnityExplorer.Unstrip
 
         //Scene.rootCount;
 
-        internal delegate int GetRootCountInternal_delegate(int handle);
+        internal delegate int d_GetRootCountInternal(int handle);
 
         public static int GetRootCount(Scene scene) => GetRootCount(scene.handle);
 
         public static int GetRootCount(int handle)
         {
-            GetRootCountInternal_delegate iCall = ICallHelper.GetICall<GetRootCountInternal_delegate>("UnityEngine.SceneManagement.Scene::GetRootCountInternal");
-            return iCall.Invoke(handle);
+            return ICallHelper.GetICall<d_GetRootCountInternal>("UnityEngine.SceneManagement.Scene::GetRootCountInternal")
+                   .Invoke(handle);
         }
 #endif
     }

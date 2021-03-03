@@ -55,16 +55,15 @@ namespace UnityExplorer.Inspectors
         {
             get
             {
-                if (!m_dontDestroyObject)
+                if (!s_dontDestroyObject)
                 {
-                    m_dontDestroyObject = new GameObject("DontDestroyMe");
-                    GameObject.DontDestroyOnLoad(m_dontDestroyObject);
+                    s_dontDestroyObject = new GameObject("DontDestroyMe");
+                    GameObject.DontDestroyOnLoad(s_dontDestroyObject);
                 }
-                return m_dontDestroyObject;
+                return s_dontDestroyObject;
             }
         }
-
-        internal static GameObject m_dontDestroyObject;
+        internal static GameObject s_dontDestroyObject;
 
         public void Init()
         {
@@ -97,22 +96,6 @@ namespace UnityExplorer.Inspectors
             }
         }
 
-//#if CPP
-//        public int GetSceneHandle(string sceneName)
-//        {
-//            if (sceneName == "DontDestroyOnLoad")
-//                return DontDestroyScene;
-
-//            for (int i = 0; i < SceneManager.sceneCount; i++)
-//            {
-//                var scene = SceneManager.GetSceneAt(i);
-//                if (scene.name == sceneName)
-//                    return scene.handle;
-//            }
-//            return -1;
-//        }
-//#endif
-
         internal void OnSceneChange()
         {
             m_sceneDropdown.OnCancel(null);
@@ -121,8 +104,13 @@ namespace UnityExplorer.Inspectors
 
         private void RefreshSceneSelector()
         {
-            var names = new List<string>();
-            var scenes = new List<Scene>();
+            var newNames = new List<string>();
+            var newScenes = new List<Scene>();
+
+            if (m_currentScenes == null)
+                m_currentScenes = new Scene[0];
+
+            bool anyChange = SceneManager.sceneCount != m_currentScenes.Length - 1;
 
             for (int i = 0; i < SceneManager.sceneCount; i++)
             {
@@ -131,32 +119,31 @@ namespace UnityExplorer.Inspectors
                 if (scene == default)
                     continue;
 
-                scenes.Add(scene);
-                names.Add(scene.name);
+                if (!anyChange && !m_currentScenes.Any(it => it.GetHandle() == scene.GetHandle()))
+                    anyChange = true;
+
+                newScenes.Add(scene);
+                newNames.Add(scene.name);
             }
 
-            names.Add("DontDestroyOnLoad");
-            scenes.Add(DontDestroyScene);
+            newNames.Add("DontDestroyOnLoad");
+            newScenes.Add(DontDestroyScene);
 
             m_sceneDropdown.options.Clear();
 
-            foreach (string scene in names)
+            foreach (string scene in newNames)
             {
                 m_sceneDropdown.options.Add(new Dropdown.OptionData { text = scene });
             }
 
-            if (!names.Contains(m_sceneDropdownText.text))
+            if (anyChange)
             {
-                m_sceneDropdownText.text = names[0];
-                SetTargetScene(scenes[0]);
+                m_sceneDropdownText.text = newNames[0];
+                SetTargetScene(newScenes[0]);
             }
 
-            m_currentScenes = scenes.ToArray();
+            m_currentScenes = newScenes.ToArray();
         }
-
-//#if CPP
-//        public void SetTargetScene(string name) => SetTargetScene(scene.handle);
-//#endif
 
         public void SetTargetScene(Scene scene)
         {
@@ -167,7 +154,7 @@ namespace UnityExplorer.Inspectors
 #if CPP
             GameObject[] rootObjs = SceneUnstrip.GetRootGameObjects(scene.handle);
 #else
-            GameObject[] rootObjs = SceneUnstrip.GetRootGameObjects(scene);
+            GameObject[] rootObjs = scene.GetRootGameObjects();
 #endif
             SetSceneObjectList(rootObjs);
 
