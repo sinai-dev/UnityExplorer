@@ -93,18 +93,18 @@ namespace UnityExplorer.Helpers
         }
 
 #if CPP
-        private static readonly Dictionary<CppType, Type> Il2CppToMonoType = new Dictionary<CppType, Type>();
+        private static readonly Dictionary<string, Type> Il2CppToMonoType = new Dictionary<string, Type>();
 
         public static Type GetMonoType(CppType cppType)
         {
-            if (Il2CppToMonoType.ContainsKey(cppType))
-                return Il2CppToMonoType[cppType];
+            if (Il2CppToMonoType.ContainsKey(cppType.AssemblyQualifiedName))
+                return Il2CppToMonoType[cppType.AssemblyQualifiedName];
 
             var getType = Type.GetType(cppType.AssemblyQualifiedName);
             
             if (getType != null)
             {
-                Il2CppToMonoType.Add(cppType, getType);
+                Il2CppToMonoType.Add(cppType.AssemblyQualifiedName, getType);
                 return getType;
             }
             else
@@ -112,11 +112,17 @@ namespace UnityExplorer.Helpers
                 string baseName = cppType.FullName;
                 string baseAssembly = cppType.Assembly.GetName().name;
 
-                Type unhollowedType = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == baseAssembly)?.GetTypes().FirstOrDefault(t =>
-                    t.CustomAttributes.Any(ca =>
-                        ca.AttributeType.Name == "ObfuscatedNameAttribute" && (string)ca.ConstructorArguments[0].Value == baseName));
+                Type unhollowedType = AppDomain.CurrentDomain
+                    .GetAssemblies()
+                    .FirstOrDefault(a => a.GetName().Name == baseAssembly)?
+                    .TryGetTypes()
+                    .FirstOrDefault(t =>
+                        t.CustomAttributes.Any(ca 
+                            => ca.AttributeType.Name == "ObfuscatedNameAttribute"
+                               && (string)ca.ConstructorArguments[0].Value == baseName));
 
-                Il2CppToMonoType.Add(cppType, unhollowedType);
+                Il2CppToMonoType.Add(cppType.AssemblyQualifiedName, unhollowedType);
+
                 return unhollowedType;
             }
         }
