@@ -20,7 +20,7 @@ namespace UnityExplorer
             ExplorerCore.Update();
         }
 
-        public override void OnLevelWasLoaded(int level)
+        public override void OnSceneWasLoaded(int buildIndex, string sceneName)
         {
             ExplorerCore.Instance.OnSceneLoaded();
         }

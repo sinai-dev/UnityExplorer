@@ -116,8 +116,8 @@
   </ItemGroup>
   <!-- MelonLoader Mono refs -->
   <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)'=='true|false'">
-    <Reference Include="MelonLoader.ModHandler">
-      <HintPath>..\lib\MelonLoader.ModHandler.dll</HintPath>
+    <Reference Include="MelonLoader">
+      <HintPath>..\lib\MelonLoader.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -134,8 +134,8 @@
   </ItemGroup>
   <!-- MelonLoader Il2Cpp refs -->
   <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)'=='true|true'">
-    <Reference Include="MelonLoader.ModHandler">
-      <HintPath>$(MLCppGameFolder)\MelonLoader\MelonLoader.ModHandler.dll</HintPath>
+    <Reference Include="MelonLoader">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\MelonLoader.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnhollowerBaseLib">

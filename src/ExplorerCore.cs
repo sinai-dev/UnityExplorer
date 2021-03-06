@@ -199,7 +199,7 @@ namespace UnityExplorer
                 return;
 
 #if ML
-            MelonLoader.MelonLogger.Log(message?.ToString());
+            MelonLoader.MelonLogger.Msg(message?.ToString());
 #elif BIE
             ExplorerBepInPlugin.Logging?.LogMessage(message?.ToString());
 #elif STANDALONE
@@ -215,7 +215,7 @@ namespace UnityExplorer
                 return;
 
 #if ML
-            MelonLoader.MelonLogger.LogWarning(message?.ToString());
+            MelonLoader.MelonLogger.Msg(message?.ToString());
 #elif BIE
             ExplorerBepInPlugin.Logging?.LogWarning(message?.ToString());
 #elif STANDALONE
@@ -231,7 +231,7 @@ namespace UnityExplorer
                 return;
 
 #if ML
-            MelonLoader.MelonLogger.LogError(message?.ToString());
+            MelonLoader.MelonLogger.Msg(message?.ToString());
 #elif BIE
             ExplorerBepInPlugin.Logging?.LogError(message?.ToString());
 #elif STANDALONE
