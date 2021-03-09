@@ -24,7 +24,7 @@
 
 | Mod Loader  | IL2CPP | Mono |
 | ----------- | ------ | ---- |
-| [BepInEx](https://github.com/BepInEx/BepInEx) 6.X | ✔️ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx.Il2Cpp.zip) | ❓ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx6.Mono.zip) |
+| [BepInEx](https://github.com/BepInEx/BepInEx) 6.X | ✔️ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx.Il2Cpp.zip) | ❔ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx6.Mono.zip) |
 | [BepInEx](https://github.com/BepInEx/BepInEx) 5.X | ❌ | ✔️ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx5.Mono.zip) |
 | [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) 0.3 | ✔️ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.MelonLoader.Il2Cpp.zip) | ✔️ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.MelonLoader.Mono.zip) | 
 | Standalone | ✔️ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.Standalone.Il2Cpp.zip) | ✔️ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.Standalone.Mono.zip) | 
