@@ -92,7 +92,6 @@ You can change the settings via the "Options" page of the main menu, or directly
 `Default Output Path` (string)
 * Default: `Mods\UnityExplorer`
 * Where output is generated to, by default (for Texture PNG saving, etc).
-* Currently this is not actually used for anything, but it will be soon.
 
 `Log Unity Debug` (bool)
 * Default: `false`
