@@ -67,7 +67,7 @@ Note: You must use version 0.3 of MelonLoader or greater. Version 0.3 is current
 
 ### Standalone
 
-0. Load the DLL from your mod or inject it.
+0. Load the DLL from your mod or inject it. You must also make sure that the required libraries (Harmony, Unhollower for Il2Cpp, etc) are loaded.
 1. Create an instance of Unity Explorer with `new ExplorerCore();`
 2. You will need to call `ExplorerCore.Update()` (static method) from your Update method.
 3. Subscribe to the `ExplorerCore.OnLog__` methods for logging.
