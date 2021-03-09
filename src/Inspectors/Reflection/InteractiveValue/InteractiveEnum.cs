@@ -47,13 +47,34 @@ namespace UnityExplorer.Inspectors.Reflection
 
                 var list = new List<KeyValuePair<int, string>>();
                 var set = new HashSet<string>();
+
                 foreach (var value in values)
                 {
                     var name = value.ToString();
+
                     if (set.Contains(name)) 
                         continue;
+
                     set.Add(name);
-                    list.Add(new KeyValuePair<int, string>((int)value, name));
+
+                    var backingType = Enum.GetUnderlyingType(type);
+                    int intValue;
+                    try
+                    {
+                        // this approach is necessary, a simple '(int)value' is not sufficient.
+
+                        var unbox = Convert.ChangeType(value, backingType);
+
+                        intValue = (int)Convert.ChangeType(unbox, typeof(int));
+                    }
+                    catch (Exception ex)
+                    {
+                        ExplorerCore.LogWarning("[InteractiveEnum] Could not Unbox underlying type " + backingType.Name + " from " + type.FullName);
+                        ExplorerCore.Log(ex.ToString());
+                        continue;
+                    }
+
+                    list.Add(new KeyValuePair<int, string>(intValue, name));
                 }
 
                 s_enumNamesCache.Add(type, list.ToArray());

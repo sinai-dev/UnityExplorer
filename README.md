@@ -24,8 +24,9 @@
 
 | Mod Loader  | IL2CPP | Mono |
 | ----------- | ------ | ---- |
-| [BepInEx](https://github.com/BepInEx/BepInEx) | ✔️ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx.Il2Cpp.zip) | ✔️ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx.Mono.zip) |
-| [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) | ✔️ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.MelonLoader.Il2Cpp.zip) | ✔️ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.MelonLoader.Mono.zip) | 
+| [BepInEx](https://github.com/BepInEx/BepInEx) 6.X | ✔️ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx.Il2Cpp.zip) | ❓ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx6.Mono.zip) |
+| [BepInEx](https://github.com/BepInEx/BepInEx) 5.X | ❌ | ✔️ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx5.Mono.zip) |
+| [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) 0.3 | ✔️ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.MelonLoader.Il2Cpp.zip) | ✔️ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.MelonLoader.Mono.zip) | 
 | Standalone | ✔️ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.Standalone.Il2Cpp.zip) | ✔️ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.Standalone.Mono.zip) | 
 
 ## Features
@@ -47,12 +48,16 @@
 
 ### BepInEx
 
+Note: For IL2CPP you should use [BepInEx 6 (Bleeding Edge)](https://builds.bepis.io/projects/bepinex_be), for Mono you should use [BepInEx 5](https://github.com/BepInEx/BepInEx/releases) (until Mono support stabilizes in BepInEx 6).
+
 0. Install [BepInEx](https://github.com/BepInEx/BepInEx) for your game.
 1. Download the UnityExplorer release for BepInEx IL2CPP or Mono above.
 2. Take the `UnityExplorer.BIE.___.dll` file and put it in `[GameFolder]\BepInEx\plugins\`
 3. In IL2CPP, it is highly recommended to get the base Unity libs for the game's Unity version and put them in the `BepInEx\unity-libs\` folder. 
 
 ### MelonLoader
+
+Note: You must use version 0.3 of MelonLoader or greater. Version 0.3 is currently in pre-release, so you must opt-in from your MelonLoader installer (enable alpha releases).
 
 0. Install [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) for your game.
 1. Download the UnityExplorer release for MelonLoader IL2CPP or Mono above.
@@ -62,12 +67,12 @@
 
 0. Load the DLL from your mod or inject it.
 1. Create an instance of Unity Explorer with `new ExplorerCore();`
-2. You will need to call ExplorerCore.Update() (static method) from your Update method.
+2. You will need to call `ExplorerCore.Update()` (static method) from your Update method.
 3. Subscribe to the `ExplorerCore.OnLog__` methods for logging.
 
-## Mod Config
+## Settings
 
-You can access the settings via the "Options" page of the main menu, or directly from the config at `Mods\UnityExplorer\config.ini` (generated after first launch).
+You can change the settings via the "Options" page of the main menu, or directly from the config file (generated after first launch). The config file will be found either inside a "UnityExplorer" folder in the same directory as where you put the DLL file, or for BepInEx it will be at `BepInEx\config\UnityExplorer\`.
 
 `Main Menu Toggle` (KeyCode)
 * Default: `F7`
@@ -91,17 +96,24 @@ You can access the settings via the "Options" page of the main menu, or directly
 * Default: `false`
 * Listens for Unity `Debug.Log` messages and prints them to UnityExplorer's log.
 
+`Hide on Startup` (bool)
+* Default: `false`
+* If true, UnityExplorer will be hidden when you start the game, you must open it via the keybind.
+
 ## Building
 
-If you'd like to build this yourself, you will need to have installed BepInEx and/or MelonLoader for at least one Unity game. If you want to build all 4 versions, you will need at least one IL2CPP and one Mono game, with BepInEx and MelonLoader installed for both.
+If you'd like to build this yourself, all you need to do is download this repository and build from Visual Studio. If you want to build for BepInEx or MelonLoader IL2CPP then you will need to install the mod loader for a game and set the directory in the `csproj` file.
 
-1. Install BepInEx or MelonLoader for your game, or use the standalone build.
+For IL2CPP:
+1. Install BepInEx or MelonLoader for your game.
 2. Open the `src\UnityExplorer.csproj` file in a text editor.
-3. For IL2CPP builds, make sure you set `BIECppGameFolder` (for BepInEx) and/or `MLCppGameFolder` (for MelonLoader) so the project can locate the necessary references.
-4. Open the `src\UnityExplorer.sln` project.
-5. Select `Solution 'UnityExplorer' (1 of 1 project)` in the Solution Explorer panel, and set the <b>Active config</b> property to the version you want to build, then build it.
-5. The DLLs are built to the `Release\` folder in the root of the repository.
-6. If ILRepack fails or is missing, use the NuGet package manager to re-install `ILRepack.Lib.MSBuild.Task`, then re-build.
+3. Set `BIECppGameFolder` (for BepInEx) and/or `MLCppGameFolder` (for MelonLoader) so the project can locate the necessary references.
+
+For all builds:
+1. Open the `src\UnityExplorer.sln` project.
+2. Select `Solution 'UnityExplorer' (1 of 1 project)` in the Solution Explorer panel, and set the <b>Active config</b> property to the version you want to build, then build it.
+3. The DLLs are built to the `Release\` folder in the root of the repository.
+4. If ILRepack fails or is missing, use the NuGet package manager to re-install `ILRepack.Lib.MSBuild.Task`, then re-build.
 
 ## Credits
 

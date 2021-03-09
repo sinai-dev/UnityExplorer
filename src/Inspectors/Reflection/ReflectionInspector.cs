@@ -43,6 +43,7 @@ namespace UnityExplorer.Inspectors
             "Collider2D.Cast",
             "Collider2D.Raycast",
             "Texture2D.SetPixelDataImpl",
+            "Camera.CalculateProjectionMatrixFromPhysicalProperties",
 #endif
         };
         private static readonly HashSet<string> bl_memberNameStartsWith = new HashSet<string>
@@ -172,10 +173,10 @@ namespace UnityExplorer.Inspectors
                 {
                     try
                     {
+                        var sig = GetSig(member);
+
                         //ExplorerCore.Log($"Trying to cache member {sig}...");
                         //ExplorerCore.Log(member.DeclaringType.FullName + "." + member.Name);
-
-                        var sig = GetSig(member);
 
                         var mi = member as MethodInfo;
                         var pi = member as PropertyInfo;

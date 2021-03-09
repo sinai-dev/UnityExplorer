@@ -13,6 +13,14 @@ using UnityExplorer.Helpers;
 
 namespace UnityExplorer.Tests
 {
+    internal enum TestByteEnum : byte
+    {
+        One,
+        Two,
+        Three,
+        TwoFiftyFive = 255,
+    }
+
     public static class StaticTestClass
     {
         public static int StaticProperty => 5;
@@ -28,6 +36,8 @@ namespace UnityExplorer.Tests
 
     public class TestClass
     {
+        internal static TestByteEnum testingByte = TestByteEnum.One;
+
         public string AAALongString = @"1
 2
 3

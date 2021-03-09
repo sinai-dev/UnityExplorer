@@ -104,7 +104,7 @@ namespace UnityExplorer.UI
             {
                 var harmony =
 #if ML
-                    ExplorerMelonMod.Instance.harmonyInstance;
+                    ExplorerMelonMod.Instance.Harmony;
 #elif BIE
                     ExplorerBepInPlugin.HarmonyInstance;
 #elif STANDALONE
