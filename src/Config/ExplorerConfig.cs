@@ -6,14 +6,14 @@ using IniParser.Parser;
 
 namespace UnityExplorer.Config
 {
-    public class ModConfig
+    public class ExplorerConfig
     {
-        public static ModConfig Instance;
+        public static ExplorerConfig Instance;
 
         internal static readonly IniDataParser _parser = new IniDataParser();
-        internal static readonly string INI_PATH = Path.Combine(ExplorerCore.EXPLORER_FOLDER, "config.ini");
+        internal static readonly string INI_PATH = Path.Combine(ExplorerCore.Loader.ConfigFolder, "config.ini");
 
-        static ModConfig()
+        static ExplorerConfig()
         {
             _parser.Configuration.CommentString = "#";
         }
@@ -22,7 +22,7 @@ namespace UnityExplorer.Config
         public KeyCode  Main_Menu_Toggle    = KeyCode.F7;
         public bool     Force_Unlock_Mouse  = true;
         public int      Default_Page_Limit  = 25;
-        public string   Default_Output_Path = ExplorerCore.EXPLORER_FOLDER + @"\Output";
+        public string   Default_Output_Path = ExplorerCore.ExplorerFolder + @"\Output";
         public bool     Log_Unity_Debug     = false;
         public bool     Hide_On_Startup     = false;
         //public bool     Save_Logs_To_Disk   = true;
@@ -36,7 +36,7 @@ namespace UnityExplorer.Config
 
         public static void OnLoad()
         {
-            Instance = new ModConfig();
+            Instance = new ExplorerConfig();
 
             if (LoadSettings())
                 return;
@@ -98,6 +98,9 @@ namespace UnityExplorer.Config
             sec.AddKey(nameof(Default_Output_Path), Instance.Default_Output_Path);
             sec.AddKey(nameof(Hide_On_Startup),     Instance.Hide_On_Startup.ToString());
             //sec.AddKey("Save_Logs_To_Disk",     Instance.Save_Logs_To_Disk.ToString());
+
+            if (!Directory.Exists(ExplorerCore.Loader.ConfigFolder))
+                Directory.CreateDirectory(ExplorerCore.Loader.ConfigFolder);
 
             File.WriteAllText(INI_PATH, data.ToString());
         }

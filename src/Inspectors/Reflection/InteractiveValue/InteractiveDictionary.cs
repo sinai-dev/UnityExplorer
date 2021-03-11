@@ -59,7 +59,7 @@ namespace UnityExplorer.Inspectors.Reflection
             = new List<KeyValuePair<CachePaired, CachePaired>>();
 
         internal readonly KeyValuePair<CachePaired, CachePaired>[] m_displayedEntries
-            = new KeyValuePair<CachePaired, CachePaired>[ModConfig.Instance.Default_Page_Limit];
+            = new KeyValuePair<CachePaired, CachePaired>[ExplorerConfig.Instance.Default_Page_Limit];
 
         internal bool m_recacheWanted = true;
 

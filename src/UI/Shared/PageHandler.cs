@@ -21,7 +21,7 @@ namespace UnityExplorer.UI.Shared
     {
         public PageHandler(SliderScrollbar scroll)
         {
-            ItemsPerPage = ModConfig.Instance?.Default_Page_Limit ?? 20;
+            ItemsPerPage = ExplorerConfig.Instance?.Default_Page_Limit ?? 20;
             m_scrollbar = scroll;
         }
 

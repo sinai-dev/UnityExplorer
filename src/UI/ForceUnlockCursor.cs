@@ -28,7 +28,7 @@ namespace UnityExplorer.UI
             UpdateCursorControl();
         }
 
-        public static bool ShouldForceMouse => ExplorerCore.ShowMenu && Unlock;
+        public static bool ShouldForceMouse => UIManager.ShowMenu && Unlock;
 
         private static CursorLockMode m_lastLockMode;
         private static bool m_lastVisibleState;
@@ -42,7 +42,7 @@ namespace UnityExplorer.UI
 
         public static void Init()
         {
-            ModConfig.OnConfigChanged += ModConfig_OnConfigChanged;
+            ExplorerConfig.OnConfigChanged += ModConfig_OnConfigChanged;
 
             SetupPatches();
 
@@ -51,7 +51,7 @@ namespace UnityExplorer.UI
 
         internal static void ModConfig_OnConfigChanged()
         {
-            Unlock = ModConfig.Instance.Force_Unlock_Mouse;
+            Unlock = ExplorerConfig.Instance.Force_Unlock_Mouse;
         }
 
         private static void SetupPatches()
@@ -102,14 +102,7 @@ namespace UnityExplorer.UI
         {
             try
             {
-                var harmony =
-#if ML
-                    ExplorerMelonMod.Instance.Harmony;
-#elif BIE
-                    ExplorerBepInPlugin.HarmonyInstance;
-#elif STANDALONE
-                    ExplorerStandalone.HarmonyInstance;
-#endif
+                var harmony = ExplorerCore.Loader.HarmonyInstance;
 
                 System.Reflection.PropertyInfo prop = type.GetProperty(property);
 
@@ -208,7 +201,7 @@ namespace UnityExplorer.UI
                 m_lastEventSystem = value;
                 m_lastInputModule = value?.currentInputModule;
 
-                if (ExplorerCore.ShowMenu)
+                if (UIManager.ShowMenu)
                 {
                     value = UIManager.EventSys;
                 }

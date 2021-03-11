@@ -8,6 +8,8 @@ using System.Reflection;
 using UnityExplorer.Helpers;
 using UnityExplorer.UI.Shared;
 using UnityExplorer.Input;
+using System;
+using UnityExplorer.Config;
 #if CPP
 using UnityExplorer.Unstrip;
 #endif
@@ -23,6 +25,43 @@ namespace UnityExplorer.UI
 
         internal static Sprite ResizeCursor { get; private set; }
         internal static Shader BackupShader { get; private set; }
+
+        public static bool ShowMenu
+        {
+            get => s_showMenu;
+            set => SetShowMenu(value);
+        }
+        public static bool s_showMenu;
+
+        private static bool s_doneUIInit;
+        private static float s_timeSinceStartup;
+
+        internal static void CheckUIInit()
+        {
+            if (s_doneUIInit)
+                return;
+
+            s_timeSinceStartup += Time.deltaTime;
+
+            if (s_timeSinceStartup > 0.1f)
+            {
+                s_doneUIInit = true;
+                try
+                {
+                    Init();
+                    ExplorerCore.Log("Initialized UnityExplorer UI.");
+
+                    if (ExplorerConfig.Instance.Hide_On_Startup)
+                        ShowMenu = false;
+
+                    // InspectorManager.Instance.Inspect(Tests.TestClass.Instance);
+                }
+                catch (Exception e)
+                {
+                    ExplorerCore.LogWarning($"Exception setting up UI: {e}");
+                }
+            }
+        }
 
         public static void Init()
         {
@@ -40,13 +79,40 @@ namespace UnityExplorer.UI
             Canvas.ForceUpdateCanvases();
         }
 
+        private static void SetShowMenu(bool show)
+        {
+            if (s_showMenu == show)
+                return;
+
+            s_showMenu = show;
+
+            if (CanvasRoot)
+            {
+                CanvasRoot.SetActive(show);
+
+                if (show)
+                    ForceUnlockCursor.SetEventSystem();
+                else
+                    ForceUnlockCursor.ReleaseEventSystem();
+            }
+
+            ForceUnlockCursor.UpdateCursorControl();
+        }
+
         public static void OnSceneChange()
         {
             SceneExplorer.Instance?.OnSceneChange();
             SearchPage.Instance?.OnSceneChange();
         }
+
         public static void Update()
         {
+            if (InputManager.GetKeyDown(ExplorerConfig.Instance.Main_Menu_Toggle))
+                ShowMenu = !ShowMenu;
+
+            if (!ShowMenu || !s_doneUIInit || !CanvasRoot)
+                return;
+
             MainMenu.Instance?.Update();
 
             if (EventSys)

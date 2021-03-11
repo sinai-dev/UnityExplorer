@@ -15,7 +15,7 @@ namespace UnityExplorer.UI.Modules
     {
         public static DebugConsole Instance { get; private set; }
 
-        public static bool LogUnity { get; set; } = ModConfig.Instance.Log_Unity_Debug;
+        public static bool LogUnity { get; set; } = ExplorerConfig.Instance.Log_Unity_Debug;
         //public static bool SaveToDisk { get; set; } = ModConfig.Instance.Save_Logs_To_Disk;
 
         internal static StreamWriter s_streamWriter;
@@ -52,7 +52,7 @@ namespace UnityExplorer.UI.Modules
             //if (!SaveToDisk)
             //    return;
 
-            var path = ExplorerCore.EXPLORER_FOLDER + @"\Logs";
+            var path = ExplorerCore.ExplorerFolder + @"\Logs";
 
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
@@ -69,7 +69,7 @@ namespace UnityExplorer.UI.Modules
             }
 
             var fileName = "UnityExplorer " + DateTime.Now.ToString("u") + ".txt";
-            fileName = ExplorerCore.RemoveInvalidFilenameChars(fileName);
+            fileName = RemoveInvalidFilenameChars(fileName);
 
             var stream = File.Create(path + @"\" + fileName);
             s_streamWriter = new StreamWriter(stream)
@@ -79,6 +79,16 @@ namespace UnityExplorer.UI.Modules
 
             foreach (var msg in AllMessages)
                 s_streamWriter.WriteLine(msg);
+        }
+
+        public static string RemoveInvalidFilenameChars(string s)
+        {
+            var invalid = Path.GetInvalidFileNameChars();
+            foreach (var c in invalid)
+            {
+                s = s.Replace(c.ToString(), "");
+            }
+            return s;
         }
 
         public static void Log(string message)
@@ -256,8 +266,8 @@ namespace UnityExplorer.UI.Modules
             void ToggleLogUnity(bool val)
             {
                 LogUnity = val;
-                ModConfig.Instance.Log_Unity_Debug = val;
-                ModConfig.SaveSettings();
+                ExplorerConfig.Instance.Log_Unity_Debug = val;
+                ExplorerConfig.SaveSettings();
             }
 
             var unityToggleLayout = unityToggleObj.AddComponent<LayoutElement>();

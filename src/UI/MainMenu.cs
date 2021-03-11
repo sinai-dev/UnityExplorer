@@ -208,7 +208,7 @@ namespace UnityExplorer.UI
             GameObject hideBtnObj = UIFactory.CreateButton(titleBar);
 
             Button hideBtn = hideBtnObj.GetComponent<Button>();
-            hideBtn.onClick.AddListener(() => { ExplorerCore.ShowMenu = false; });
+            hideBtn.onClick.AddListener(() => { UIManager.ShowMenu = false; });
             ColorBlock colorBlock = hideBtn.colors;
             colorBlock.normalColor = new Color(65f / 255f, 23f / 255f, 23f / 255f);
             colorBlock.pressedColor = new Color(35f / 255f, 10f / 255f, 10f / 255f);
@@ -224,13 +224,13 @@ namespace UnityExplorer.UI
             hideText.resizeTextForBestFit = true;
             hideText.resizeTextMinSize = 8;
             hideText.resizeTextMaxSize = 14;
-            hideText.text = $"Hide ({ModConfig.Instance.Main_Menu_Toggle})";
+            hideText.text = $"Hide ({ExplorerConfig.Instance.Main_Menu_Toggle})";
 
-            ModConfig.OnConfigChanged += ModConfig_OnConfigChanged; 
+            ExplorerConfig.OnConfigChanged += ModConfig_OnConfigChanged; 
             
             void ModConfig_OnConfigChanged()
             {
-                hideText.text = $"Hide ({ModConfig.Instance.Main_Menu_Toggle})";
+                hideText.text = $"Hide ({ExplorerConfig.Instance.Main_Menu_Toggle})";
             }
         }
 

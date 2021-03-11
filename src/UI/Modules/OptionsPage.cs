@@ -32,19 +32,19 @@ namespace UnityExplorer.UI.Modules
         internal void OnApply()
         {
             if (!string.IsNullOrEmpty(m_keycodeInput.text) && Enum.Parse(typeof(KeyCode), m_keycodeInput.text) is KeyCode keyCode)
-                ModConfig.Instance.Main_Menu_Toggle = keyCode;
+                ExplorerConfig.Instance.Main_Menu_Toggle = keyCode;
 
-            ModConfig.Instance.Force_Unlock_Mouse = m_unlockMouseToggle.isOn;
+            ExplorerConfig.Instance.Force_Unlock_Mouse = m_unlockMouseToggle.isOn;
 
             if (!string.IsNullOrEmpty(m_pageLimitInput.text) && int.TryParse(m_pageLimitInput.text, out int lim))
-                ModConfig.Instance.Default_Page_Limit = lim;
+                ExplorerConfig.Instance.Default_Page_Limit = lim;
 
-            ModConfig.Instance.Default_Output_Path = m_defaultOutputInput.text;
+            ExplorerConfig.Instance.Default_Output_Path = m_defaultOutputInput.text;
 
-            ModConfig.Instance.Hide_On_Startup = m_hideOnStartupToggle.isOn;
+            ExplorerConfig.Instance.Hide_On_Startup = m_hideOnStartupToggle.isOn;
 
-            ModConfig.SaveSettings();
-            ModConfig.InvokeConfigChanged();
+            ExplorerConfig.SaveSettings();
+            ExplorerConfig.InvokeConfigChanged();
         }
 
         #region UI CONSTRUCTION
@@ -131,7 +131,7 @@ namespace UnityExplorer.UI.Modules
             labelLayout.minHeight = 25;
 
             UIFactory.CreateToggle(rowObj, out m_hideOnStartupToggle, out Text toggleText);
-            m_hideOnStartupToggle.isOn = ModConfig.Instance.Hide_On_Startup;
+            m_hideOnStartupToggle.isOn = ExplorerConfig.Instance.Hide_On_Startup;
             toggleText.text = "";
         }
 
@@ -159,7 +159,7 @@ namespace UnityExplorer.UI.Modules
             var keycodeInputObj = UIFactory.CreateInputField(rowObj);
             
             m_keycodeInput = keycodeInputObj.GetComponent<InputField>();
-            m_keycodeInput.text = ModConfig.Instance.Main_Menu_Toggle.ToString();
+            m_keycodeInput.text = ExplorerConfig.Instance.Main_Menu_Toggle.ToString();
 
             m_keycodeInput.placeholder.gameObject.GetComponent<Text>().text = "KeyCode, eg. F7";
         }
@@ -186,7 +186,7 @@ namespace UnityExplorer.UI.Modules
             labelLayout.minHeight = 25;
 
             UIFactory.CreateToggle(rowObj, out m_unlockMouseToggle, out Text toggleText);
-            m_unlockMouseToggle.isOn = ModConfig.Instance.Force_Unlock_Mouse;
+            m_unlockMouseToggle.isOn = ExplorerConfig.Instance.Force_Unlock_Mouse;
             toggleText.text = "";
         }
 
@@ -216,7 +216,7 @@ namespace UnityExplorer.UI.Modules
             var inputObj = UIFactory.CreateInputField(rowObj);
 
             m_pageLimitInput = inputObj.GetComponent<InputField>();
-            m_pageLimitInput.text = ModConfig.Instance.Default_Page_Limit.ToString();
+            m_pageLimitInput.text = ExplorerConfig.Instance.Default_Page_Limit.ToString();
 
             m_pageLimitInput.placeholder.gameObject.GetComponent<Text>().text = "Integer, eg. 20";
         }
@@ -247,7 +247,7 @@ namespace UnityExplorer.UI.Modules
             var inputObj = UIFactory.CreateInputField(rowObj);
 
             m_defaultOutputInput = inputObj.GetComponent<InputField>();
-            m_defaultOutputInput.text = ModConfig.Instance.Default_Output_Path.ToString();
+            m_defaultOutputInput.text = ExplorerConfig.Instance.Default_Output_Path.ToString();
 
             m_defaultOutputInput.placeholder.gameObject.GetComponent<Text>().text = @"Directory, eg. Mods\UnityExplorer";
         }

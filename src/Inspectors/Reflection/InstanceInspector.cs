@@ -251,7 +251,7 @@ namespace UnityExplorer.Inspectors.Reflection
             if (string.IsNullOrEmpty(name))
                 name = "untitled";
 
-            var savePath = $@"{Config.ModConfig.Instance.Default_Output_Path}\{name}.png";
+            var savePath = $@"{Config.ExplorerConfig.Instance.Default_Output_Path}\{name}.png";
             inputField.text = savePath;
 
             saveBtn.onClick.AddListener(() => 

@@ -44,7 +44,7 @@
 * <b>Reflection Inspector</b>: Inspect Properties and Fields. Can also set primitive values and evaluate primitive methods.
 * <b>Search</b>: Search for UnityEngine.Objects with various filters, or use the helpers for static Instances and Classes.
 * <b>C# Console</b>: Interactive console for evaluating C# methods on the fly, with some basic helpers.
-* <b>Inspect-under-mouse</b>: Hover over an object with a collider and inspect it by clicking on it.
+* <b>Inspect-under-mouse</b>: Hover over an object with a collider and inspect it by clicking on it. There's also a UI mode to inspect UI objects.
 
 ## How to install
 
@@ -68,9 +68,15 @@ Note: You must use version 0.3 of MelonLoader or greater. Version 0.3 is current
 ### Standalone
 
 0. Load the DLL from your mod or inject it. You must also make sure that the required libraries (Harmony, Unhollower for Il2Cpp, etc) are loaded.
-1. Create an instance of Unity Explorer with `new ExplorerCore();`
-2. You will need to call `ExplorerCore.Update()` (static method) from your Update method.
-3. Subscribe to the `ExplorerCore.OnLog__` methods for logging.
+1. Create an instance of Unity Explorer with `ExplorerStandalone.CreateInstance();`
+2. You will need to call `ExplorerStandalone.Update()` from your Update method.
+3. Subscribe to the `ExplorerStandalone.OnLog` event to handle logging if you wish.
+
+## Logging
+
+Explorer saves all logs to disk (only keeps the most recent 10 logs). They can be found in a "UnityExplorer" folder in the same place as where you put the DLL file.
+
+These logs are also visible in the Debug Console part of the UI.
 
 ## Settings
 

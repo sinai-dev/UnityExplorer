@@ -69,7 +69,7 @@ namespace UnityExplorer.Inspectors
         // filtered members based on current filters
         internal readonly List<CacheMember> m_membersFiltered = new List<CacheMember>();
         // actual shortlist of displayed members
-        internal readonly CacheMember[] m_displayedMembers = new CacheMember[ModConfig.Instance.Default_Page_Limit];
+        internal readonly CacheMember[] m_displayedMembers = new CacheMember[ExplorerConfig.Instance.Default_Page_Limit];
 
         internal bool m_autoUpdate;
 

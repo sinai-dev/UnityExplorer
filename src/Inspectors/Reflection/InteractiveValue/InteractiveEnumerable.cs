@@ -46,7 +46,7 @@ namespace UnityExplorer.Inspectors.Reflection
         internal readonly Type m_baseEntryType;
 
         internal readonly List<CacheEnumerated> m_entries = new List<CacheEnumerated>();
-        internal readonly CacheEnumerated[] m_displayedEntries = new CacheEnumerated[ModConfig.Instance.Default_Page_Limit];
+        internal readonly CacheEnumerated[] m_displayedEntries = new CacheEnumerated[ExplorerConfig.Instance.Default_Page_Limit];
         internal bool m_recacheWanted = true;
 
         public override void OnValueUpdated()

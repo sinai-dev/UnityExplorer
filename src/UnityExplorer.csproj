@@ -1,364 +1,365 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release_ML_Cpp</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <!--<TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>-->
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+    <OutputPath>..\Release\UnityExplorer.MelonLoader.Il2Cpp\</OutputPath>
+    <DefineConstants>
+    </DefineConstants>
+    <IsCpp>false</IsCpp>
+    <IsMelonLoader>false</IsMelonLoader>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+    <RootNamespace>UnityExplorer</RootNamespace>
+    <!-- Set this to the BepInEx Il2Cpp Game folder, without the ending '\' character. -->
+    <BIECppGameFolder>E:\source\Unity Projects\Test\_BUILD</BIECppGameFolder>
+    <!-- Set this to the MelonLoader Il2Cpp Game folder, without the ending '\' character. -->
+    <MLCppGameFolder>E:\source\Unity Projects\Test\_BUILD</MLCppGameFolder>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_ML_Cpp|AnyCPU' ">
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <OutputPath>..\Release\UnityExplorer.MelonLoader.Il2Cpp\</OutputPath>
+    <DefineConstants>CPP,ML</DefineConstants>
+    <AssemblyName>UnityExplorer.ML.IL2CPP</AssemblyName>
+    <IsCpp>true</IsCpp>
+    <IsMelonLoader>true</IsMelonLoader>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_ML_Mono|AnyCPU' ">
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <OutputPath>..\Release\UnityExplorer.MelonLoader.Mono\</OutputPath>
+    <DefineConstants>MONO,ML</DefineConstants>
+    <AssemblyName>UnityExplorer.ML.Mono</AssemblyName>
+    <Prefer32Bit>false</Prefer32Bit>
+    <IsCpp>false</IsCpp>
+    <IsMelonLoader>true</IsMelonLoader>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_BIE_Cpp|AnyCPU' ">
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <OutputPath>..\Release\UnityExplorer.BepInEx.Il2Cpp\</OutputPath>
+    <DefineConstants>CPP,BIE,BIE6</DefineConstants>
+    <AssemblyName>UnityExplorer.BIE.IL2CPP</AssemblyName>
+    <IsCpp>true</IsCpp>
+    <IsMelonLoader>false</IsMelonLoader>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_BIE6_Mono|AnyCPU' ">
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <OutputPath>..\Release\UnityExplorer.BepInEx6.Mono\</OutputPath>
+    <DefineConstants>MONO,BIE,BIE6</DefineConstants>
+    <AssemblyName>UnityExplorer.BIE6.Mono</AssemblyName>
+    <IsCpp>false</IsCpp>
+    <IsMelonLoader>false</IsMelonLoader>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_BIE5_Mono|AnyCPU'">
+    <OutputPath>..\Release\UnityExplorer.BepInEx5.Mono\</OutputPath>
+    <DefineConstants>MONO,BIE,BIE5</DefineConstants>
+    <AssemblyName>UnityExplorer.BIE5.Mono</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_STANDALONE_Mono|AnyCPU'">
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <OutputPath>..\Release\UnityExplorer.Standalone.Mono\</OutputPath>
+    <DefineConstants>MONO,STANDALONE</DefineConstants>
+    <AssemblyName>UnityExplorer.STANDALONE.Mono</AssemblyName>
+    <IsCpp>false</IsCpp>
+    <IsMelonLoader>false</IsMelonLoader>
+    <IsStandalone>true</IsStandalone>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_STANDALONE_Cpp|AnyCPU'">
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <OutputPath>..\Release\UnityExplorer.Standalone.Il2Cpp\</OutputPath>
+    <DefineConstants>CPP,STANDALONE</DefineConstants>
+    <AssemblyName>UnityExplorer.STANDALONE.IL2CPP</AssemblyName>
+    <IsCpp>true</IsCpp>
+    <IsMelonLoader>false</IsMelonLoader>
+    <IsStandalone>true</IsStandalone>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="INIFileParser, Version=2.5.2.0, Culture=neutral, PublicKeyToken=79af7b307b65cf3c, processorArchitecture=MSIL">
+      <HintPath>packages\ini-parser.2.5.2\lib\net20\INIFileParser.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <!-- MCS ref -->
+    <Reference Include="mcs">
+      <HintPath>..\lib\mcs.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <!-- Universal Mono UnityEngine.dll ref (v5.3) -->
+  <ItemGroup Condition="'$(IsCpp)'=='false'">
+    <Reference Include="UnityEngine">
+      <HintPath>..\lib\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\lib\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <!-- MelonLoader Mono refs -->
+  <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)'=='true|false'">
+    <Reference Include="MelonLoader">
+      <HintPath>..\lib\MelonLoader.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <!-- BepInEx 5 Mono refs -->
+  <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)|$(Configuration)'=='false|false|Release_BIE5_Mono'">
+    <Reference Include="BepInEx">
+      <HintPath>..\lib\BepInEx.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>..\lib\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <!-- BepInEx 6 Mono refs -->
+  <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)|$(Configuration)'=='false|false|Release_BIE6_Mono'">
+    <Reference Include="BepInEx">
+      <HintPath>..\lib\BepInEx.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BepInEx.Unity">
+      <HintPath>..\lib\BepInEx.Unity.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>..\lib\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <!-- Standalone refs -->
+  <ItemGroup Condition="'$(IsStandalone)'=='true'">
+    <Reference Include="0Harmony">
+      <HintPath>..\lib\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <!-- MelonLoader Il2Cpp refs -->
+  <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)'=='true|true'">
+    <Reference Include="MelonLoader">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\MelonLoader.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnhollowerBaseLib">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnhollowerBaseLib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Il2Cppmscorlib">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\Il2Cppmscorlib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Il2CppSystem.Core">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\Il2CppSystem.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.UIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <!-- BepInEx Il2Cpp refs -->
+  <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)'=='false|true'">
+    <Reference Include="BepInEx">
+      <HintPath>$(BIECppGameFolder)\BepInEx\core\BepInEx.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(BIECppGameFolder)\BepInEx\core\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BepInEx.IL2CPP">
+      <HintPath>$(BIECppGameFolder)\BepInEx\core\BepInEx.IL2CPP.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnhollowerBaseLib">
+      <HintPath>$(BIECppGameFolder)\BepInEx\core\UnhollowerBaseLib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Il2Cppmscorlib">
+      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\Il2Cppmscorlib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Il2CppSystem.Core">
+      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\Il2CppSystem.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.UIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Loader\ExplorerBepIn6Plugin.cs" />
+    <Compile Include="Loader\ExplorerStandalone.cs" />
+    <Compile Include="Helpers\EventHelper.cs" />
+    <Compile Include="Inspectors\MouseInspector.cs" />
+    <Compile Include="Inspectors\Reflection\CacheObject\CacheEnumerated.cs" />
+    <Compile Include="Inspectors\Reflection\CacheObject\CacheField.cs" />
+    <Compile Include="Inspectors\Reflection\CacheObject\CachePaired.cs" />
+    <Compile Include="Inspectors\Reflection\CacheObject\CacheMember.cs" />
+    <Compile Include="Inspectors\Reflection\CacheObject\CacheMethod.cs" />
+    <Compile Include="Inspectors\Reflection\CacheObject\CacheProperty.cs" />
+    <Compile Include="Inspectors\Reflection\CacheObject\CacheObjectBase.cs" />
+    <Compile Include="Helpers\Texture2DHelpers.cs" />
+    <Compile Include="Config\ExplorerConfig.cs" />
+    <Compile Include="ExplorerCore.cs" />
+    <Compile Include="Loader\ExplorerBepIn5Plugin.cs" />
+    <Compile Include="Loader\ExplorerMelonMod.cs" />
+    <Compile Include="Helpers\ReflectionHelpers.cs" />
+    <Compile Include="Helpers\UnityHelpers.cs" />
+    <Compile Include="Inspectors\GameObjects\ChildList.cs" />
+    <Compile Include="Inspectors\GameObjects\ComponentList.cs" />
+    <Compile Include="Inspectors\GameObjects\GameObjectControls.cs" />
+    <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveBool.cs" />
+    <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveDictionary.cs" />
+    <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveEnum.cs" />
+    <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveEnumerable.cs" />
+    <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveFlags.cs" />
+    <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveNumber.cs" />
+    <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveString.cs" />
+    <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveUnityStruct.cs" />
+    <Compile Include="Loader\IExplorerLoader.cs" />
+    <Compile Include="UI\ForceUnlockCursor.cs" />
+    <Compile Include="Input\IHandleInput.cs" />
+    <Compile Include="Tests\Tests.cs" />
+    <Compile Include="Input\InputManager.cs" />
+    <Compile Include="Input\InputSystem.cs" />
+    <Compile Include="Input\LegacyInput.cs" />
+    <Compile Include="Input\NoInput.cs" />
+    <Compile Include="UI\Modules\DebugConsole.cs" />
+    <Compile Include="Inspectors\InspectorManager.cs" />
+    <Compile Include="Inspectors\Reflection\ReflectionInspector.cs" />
+    <Compile Include="UI\MainMenu.cs" />
+    <Compile Include="UI\Modules\CSConsolePage.cs" />
+    <Compile Include="CSConsole\AutoCompleter.cs" />
+    <Compile Include="CSConsole\CodeEditor.cs" />
+    <Compile Include="CSConsole\Lexer\CommentMatch.cs" />
+    <Compile Include="CSConsole\CSharpLexer.cs" />
+    <Compile Include="CSConsole\Lexer\KeywordMatch.cs" />
+    <Compile Include="CSConsole\Lexer\StringMatch.cs" />
+    <Compile Include="CSConsole\Lexer\Matcher.cs" />
+    <Compile Include="CSConsole\Lexer\NumberMatch.cs" />
+    <Compile Include="CSConsole\Lexer\SymbolMatch.cs" />
+    <Compile Include="CSConsole\Suggestion.cs" />
+    <Compile Include="CSConsole\ScriptEvaluator.cs" />
+    <Compile Include="CSConsole\ScriptInteraction.cs" />
+    <Compile Include="UI\Modules\HomePage.cs" />
+    <Compile Include="Inspectors\GameObjects\GameObjectInspector.cs" />
+    <Compile Include="Inspectors\InspectorBase.cs" />
+    <Compile Include="Inspectors\Reflection\InstanceInspector.cs" />
+    <Compile Include="Inspectors\Reflection\StaticInspector.cs" />
+    <Compile Include="UI\Modules\OptionsPage.cs" />
+    <Compile Include="Inspectors\SceneExplorer.cs" />
+    <Compile Include="UI\Modules\SearchPage.cs" />
+    <Compile Include="UI\PanelDragger.cs" />
+    <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveValue.cs" />
+    <Compile Include="UI\Shared\InputFieldScroller.cs" />
+    <Compile Include="UI\Shared\ScrollRectEx.cs" />
+    <Compile Include="UI\Shared\SliderScrollbar.cs" />
+    <Compile Include="UI\Shared\PageHandler.cs" />
+    <Compile Include="UI\UISyntaxHighlight.cs" />
+    <Compile Include="UI\UIManager.cs" />
+    <Compile Include="Unstrip\AssetBundleUnstrip.cs" />
+    <Compile Include="Unstrip\ColorUtilityUnstrip.cs" />
+    <Compile Include="Unstrip\ImageConversionUnstrip.cs" />
+    <Compile Include="Helpers\ICallHelper.cs" />
+    <Compile Include="Unstrip\LayerMaskUnstrip.cs" />
+    <Compile Include="Unstrip\ResourcesUnstrip.cs" />
+    <Compile Include="Unstrip\SceneUnstrip.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\UIFactory.cs" />
+    <EmbeddedResource Include="Resources\*" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ILRepack.targets" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="packages\ILRepack.Lib.MSBuild.Task.2.0.18.1\build\ILRepack.Lib.MSBuild.Task.targets" Condition="Exists('packages\ILRepack.Lib.MSBuild.Task.2.0.18.1\build\ILRepack.Lib.MSBuild.Task.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
-        <Configuration Condition=" '$(Configuration)' == '' ">Release_ML_Cpp</Configuration>
-        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-        <ProjectGuid>{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}</ProjectGuid>
-        <OutputType>Library</OutputType>
-        <!--<TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>-->
-        <AppDesignerFolder>Properties</AppDesignerFolder>
-        <FileAlignment>512</FileAlignment>
-        <Deterministic>true</Deterministic>
-        <TargetFrameworkProfile />
-        <OutputPath>..\Release\UnityExplorer.MelonLoader.Il2Cpp\</OutputPath>
-        <DefineConstants>
-        </DefineConstants>
-        <IsCpp>false</IsCpp>
-        <IsMelonLoader>false</IsMelonLoader>
-        <DebugSymbols>false</DebugSymbols>
-        <DebugType>none</DebugType>
-        <Optimize>false</Optimize>
-        <ErrorReport>prompt</ErrorReport>
-        <WarningLevel>4</WarningLevel>
-        <PlatformTarget>x64</PlatformTarget>
-        <Prefer32Bit>false</Prefer32Bit>
-        <RootNamespace>UnityExplorer</RootNamespace>
-        <!-- Set this to the BepInEx Il2Cpp Game folder, without the ending '\' character. -->
-        <BIECppGameFolder>E:\source\Unity Projects\Test\_BUILD</BIECppGameFolder>
-        <!-- Set this to the MelonLoader Il2Cpp Game folder, without the ending '\' character. -->
-        <MLCppGameFolder>E:\source\Unity Projects\Test\_BUILD</MLCppGameFolder>
-        <NuGetPackageImportStamp>
-        </NuGetPackageImportStamp>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_ML_Cpp|AnyCPU' ">
-        <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-        <OutputPath>..\Release\UnityExplorer.MelonLoader.Il2Cpp\</OutputPath>
-        <DefineConstants>CPP,ML</DefineConstants>
-        <AssemblyName>UnityExplorer.ML.IL2CPP</AssemblyName>
-        <IsCpp>true</IsCpp>
-        <IsMelonLoader>true</IsMelonLoader>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    </PropertyGroup>
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_ML_Mono|AnyCPU' ">
-        <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-        <OutputPath>..\Release\UnityExplorer.MelonLoader.Mono\</OutputPath>
-        <DefineConstants>MONO,ML</DefineConstants>
-        <AssemblyName>UnityExplorer.ML.Mono</AssemblyName>
-        <Prefer32Bit>false</Prefer32Bit>
-        <IsCpp>false</IsCpp>
-        <IsMelonLoader>true</IsMelonLoader>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    </PropertyGroup>
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_BIE_Cpp|AnyCPU' ">
-        <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-        <OutputPath>..\Release\UnityExplorer.BepInEx.Il2Cpp\</OutputPath>
-        <DefineConstants>CPP,BIE,BIE6</DefineConstants>
-        <AssemblyName>UnityExplorer.BIE.IL2CPP</AssemblyName>
-        <IsCpp>true</IsCpp>
-        <IsMelonLoader>false</IsMelonLoader>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    </PropertyGroup>
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_BIE6_Mono|AnyCPU' ">
-        <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-        <OutputPath>..\Release\UnityExplorer.BepInEx6.Mono\</OutputPath>
-        <DefineConstants>MONO,BIE,BIE6</DefineConstants>
-        <AssemblyName>UnityExplorer.BIE6.Mono</AssemblyName>
-        <IsCpp>false</IsCpp>
-        <IsMelonLoader>false</IsMelonLoader>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_BIE5_Mono|AnyCPU'">
-        <OutputPath>..\Release\UnityExplorer.BepInEx5.Mono\</OutputPath>
-        <DefineConstants>MONO,BIE,BIE5</DefineConstants>
-        <AssemblyName>UnityExplorer.BIE5.Mono</AssemblyName>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <PlatformTarget>x64</PlatformTarget>
-        <LangVersion>7.3</LangVersion>
-        <ErrorReport>prompt</ErrorReport>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_STANDALONE_Mono|AnyCPU'">
-        <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-        <OutputPath>..\Release\UnityExplorer.Standalone.Mono\</OutputPath>
-        <DefineConstants>MONO,STANDALONE</DefineConstants>
-        <AssemblyName>UnityExplorer.STANDALONE.Mono</AssemblyName>
-        <IsCpp>false</IsCpp>
-        <IsMelonLoader>false</IsMelonLoader>
-        <IsStandalone>true</IsStandalone>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_STANDALONE_Cpp|AnyCPU'">
-        <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-        <OutputPath>..\Release\UnityExplorer.Standalone.Il2Cpp\</OutputPath>
-        <DefineConstants>CPP,STANDALONE</DefineConstants>
-        <AssemblyName>UnityExplorer.STANDALONE.IL2CPP</AssemblyName>
-        <IsCpp>true</IsCpp>
-        <IsMelonLoader>false</IsMelonLoader>
-        <IsStandalone>true</IsStandalone>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    </PropertyGroup>
-    <ItemGroup>
-        <Reference Include="INIFileParser, Version=2.5.2.0, Culture=neutral, PublicKeyToken=79af7b307b65cf3c, processorArchitecture=MSIL">
-            <HintPath>packages\ini-parser.2.5.2\lib\net20\INIFileParser.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="System" />
-        <Reference Include="System.Core" />
-        <Reference Include="System.Xml.Linq" />
-        <Reference Include="System.Data.DataSetExtensions" />
-        <Reference Include="System.Data" />
-        <Reference Include="System.Xml" />
-        <!-- MCS ref -->
-        <Reference Include="mcs">
-            <HintPath>..\lib\mcs.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-    </ItemGroup>
-    <!-- Universal Mono UnityEngine.dll ref (v5.3) -->
-    <ItemGroup Condition="'$(IsCpp)'=='false'">
-        <Reference Include="UnityEngine">
-            <HintPath>..\lib\UnityEngine.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="UnityEngine.UI">
-            <HintPath>..\lib\UnityEngine.UI.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-    </ItemGroup>
-    <!-- MelonLoader Mono refs -->
-    <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)'=='true|false'">
-        <Reference Include="MelonLoader">
-            <HintPath>..\lib\MelonLoader.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-    </ItemGroup>
-    <!-- BepInEx 5 Mono refs -->
-    <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)|$(Configuration)'=='false|false|Release_BIE5_Mono'">
-        <Reference Include="BepInEx">
-            <HintPath>..\lib\BepInEx.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="0Harmony">
-            <HintPath>..\lib\0Harmony.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-    </ItemGroup>
-    <!-- BepInEx 6 Mono refs -->
-    <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)|$(Configuration)'=='false|false|Release_BIE6_Mono'">
-        <Reference Include="BepInEx">
-            <HintPath>..\lib\BepInEx.Core.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="BepInEx.Unity">
-            <HintPath>..\lib\BepInEx.Unity.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="0Harmony">
-            <HintPath>..\lib\0Harmony.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-    </ItemGroup>
-    <!-- Standalone refs -->
-    <ItemGroup Condition="'$(IsStandalone)'=='true'">
-        <Reference Include="0Harmony">
-            <HintPath>..\lib\0Harmony.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-    </ItemGroup>
-    <!-- MelonLoader Il2Cpp refs -->
-    <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)'=='true|true'">
-        <Reference Include="MelonLoader">
-            <HintPath>$(MLCppGameFolder)\MelonLoader\MelonLoader.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="UnhollowerBaseLib">
-            <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnhollowerBaseLib.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="Il2Cppmscorlib">
-            <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\Il2Cppmscorlib.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="Il2CppSystem.Core">
-            <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\Il2CppSystem.Core.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="UnityEngine">
-            <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="UnityEngine.CoreModule">
-            <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.CoreModule.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="UnityEngine.PhysicsModule">
-            <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.PhysicsModule.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="UnityEngine.TextRenderingModule">
-            <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="UnityEngine.UI">
-            <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.UI.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="UnityEngine.UIModule">
-            <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.UIModule.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="UnityEngine.IMGUIModule">
-            <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.IMGUIModule.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-    </ItemGroup>
-    <!-- BepInEx Il2Cpp refs -->
-    <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)'=='false|true'">
-        <Reference Include="BepInEx">
-            <HintPath>$(BIECppGameFolder)\BepInEx\core\BepInEx.Core.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="0Harmony">
-            <HintPath>$(BIECppGameFolder)\BepInEx\core\0Harmony.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="BepInEx.IL2CPP">
-            <HintPath>$(BIECppGameFolder)\BepInEx\core\BepInEx.IL2CPP.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="UnhollowerBaseLib">
-            <HintPath>$(BIECppGameFolder)\BepInEx\core\UnhollowerBaseLib.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="Il2Cppmscorlib">
-            <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\Il2Cppmscorlib.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="Il2CppSystem.Core">
-            <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\Il2CppSystem.Core.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="UnityEngine">
-            <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="UnityEngine.CoreModule">
-            <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.CoreModule.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="UnityEngine.PhysicsModule">
-            <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.PhysicsModule.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="UnityEngine.TextRenderingModule">
-            <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.TextRenderingModule.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="UnityEngine.UI">
-            <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.UI.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="UnityEngine.UIModule">
-            <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.UIModule.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="UnityEngine.IMGUIModule">
-            <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.IMGUIModule.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Include="ExplorerBepIn6Plugin.cs" />
-        <Compile Include="ExplorerStandalone.cs" />
-        <Compile Include="Helpers\EventHelper.cs" />
-        <Compile Include="Inspectors\MouseInspector.cs" />
-        <Compile Include="Inspectors\Reflection\CacheObject\CacheEnumerated.cs" />
-        <Compile Include="Inspectors\Reflection\CacheObject\CacheField.cs" />
-        <Compile Include="Inspectors\Reflection\CacheObject\CachePaired.cs" />
-        <Compile Include="Inspectors\Reflection\CacheObject\CacheMember.cs" />
-        <Compile Include="Inspectors\Reflection\CacheObject\CacheMethod.cs" />
-        <Compile Include="Inspectors\Reflection\CacheObject\CacheProperty.cs" />
-        <Compile Include="Inspectors\Reflection\CacheObject\CacheObjectBase.cs" />
-        <Compile Include="Helpers\Texture2DHelpers.cs" />
-        <Compile Include="Config\ModConfig.cs" />
-        <Compile Include="ExplorerCore.cs" />
-        <Compile Include="ExplorerBepIn5Plugin.cs" />
-        <Compile Include="ExplorerMelonMod.cs" />
-        <Compile Include="Helpers\ReflectionHelpers.cs" />
-        <Compile Include="Helpers\UnityHelpers.cs" />
-        <Compile Include="Inspectors\GameObjects\ChildList.cs" />
-        <Compile Include="Inspectors\GameObjects\ComponentList.cs" />
-        <Compile Include="Inspectors\GameObjects\GameObjectControls.cs" />
-        <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveBool.cs" />
-        <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveDictionary.cs" />
-        <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveEnum.cs" />
-        <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveEnumerable.cs" />
-        <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveFlags.cs" />
-        <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveNumber.cs" />
-        <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveString.cs" />
-        <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveUnityStruct.cs" />
-        <Compile Include="UI\ForceUnlockCursor.cs" />
-        <Compile Include="Input\IHandleInput.cs" />
-        <Compile Include="Tests\Tests.cs" />
-        <Compile Include="Input\InputManager.cs" />
-        <Compile Include="Input\InputSystem.cs" />
-        <Compile Include="Input\LegacyInput.cs" />
-        <Compile Include="Input\NoInput.cs" />
-        <Compile Include="UI\Modules\DebugConsole.cs" />
-        <Compile Include="Inspectors\InspectorManager.cs" />
-        <Compile Include="Inspectors\Reflection\ReflectionInspector.cs" />
-        <Compile Include="UI\MainMenu.cs" />
-        <Compile Include="UI\Modules\CSConsolePage.cs" />
-        <Compile Include="CSConsole\AutoCompleter.cs" />
-        <Compile Include="CSConsole\CodeEditor.cs" />
-        <Compile Include="CSConsole\Lexer\CommentMatch.cs" />
-        <Compile Include="CSConsole\CSharpLexer.cs" />
-        <Compile Include="CSConsole\Lexer\KeywordMatch.cs" />
-        <Compile Include="CSConsole\Lexer\StringMatch.cs" />
-        <Compile Include="CSConsole\Lexer\Matcher.cs" />
-        <Compile Include="CSConsole\Lexer\NumberMatch.cs" />
-        <Compile Include="CSConsole\Lexer\SymbolMatch.cs" />
-        <Compile Include="CSConsole\Suggestion.cs" />
-        <Compile Include="CSConsole\ScriptEvaluator.cs" />
-        <Compile Include="CSConsole\ScriptInteraction.cs" />
-        <Compile Include="UI\Modules\HomePage.cs" />
-        <Compile Include="Inspectors\GameObjects\GameObjectInspector.cs" />
-        <Compile Include="Inspectors\InspectorBase.cs" />
-        <Compile Include="Inspectors\Reflection\InstanceInspector.cs" />
-        <Compile Include="Inspectors\Reflection\StaticInspector.cs" />
-        <Compile Include="UI\Modules\OptionsPage.cs" />
-        <Compile Include="Inspectors\SceneExplorer.cs" />
-        <Compile Include="UI\Modules\SearchPage.cs" />
-        <Compile Include="UI\PanelDragger.cs" />
-        <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveValue.cs" />
-        <Compile Include="UI\Shared\InputFieldScroller.cs" />
-        <Compile Include="UI\Shared\ScrollRectEx.cs" />
-        <Compile Include="UI\Shared\SliderScrollbar.cs" />
-        <Compile Include="UI\Shared\PageHandler.cs" />
-        <Compile Include="UI\UISyntaxHighlight.cs" />
-        <Compile Include="UI\UIManager.cs" />
-        <Compile Include="Unstrip\AssetBundleUnstrip.cs" />
-        <Compile Include="Unstrip\ColorUtilityUnstrip.cs" />
-        <Compile Include="Unstrip\ImageConversionUnstrip.cs" />
-        <Compile Include="Helpers\ICallHelper.cs" />
-        <Compile Include="Unstrip\LayerMaskUnstrip.cs" />
-        <Compile Include="Unstrip\ResourcesUnstrip.cs" />
-        <Compile Include="Unstrip\SceneUnstrip.cs" />
-        <Compile Include="Properties\AssemblyInfo.cs" />
-        <Compile Include="UI\UIFactory.cs" />
-        <EmbeddedResource Include="Resources\*" />
-    </ItemGroup>
-    <ItemGroup>
-        <None Include="ILRepack.targets" />
-        <None Include="packages.config" />
-    </ItemGroup>
-    <ItemGroup />
-    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-    <Import Project="packages\ILRepack.Lib.MSBuild.Task.2.0.18.1\build\ILRepack.Lib.MSBuild.Task.targets" Condition="Exists('packages\ILRepack.Lib.MSBuild.Task.2.0.18.1\build\ILRepack.Lib.MSBuild.Task.targets')" />
-    <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-        <PropertyGroup>
-            <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-        </PropertyGroup>
-        <Error Condition="!Exists('packages\ILRepack.Lib.MSBuild.Task.2.0.18.1\build\ILRepack.Lib.MSBuild.Task.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\ILRepack.Lib.MSBuild.Task.2.0.18.1\build\ILRepack.Lib.MSBuild.Task.targets'))" />
-    </Target>
+    <Error Condition="!Exists('packages\ILRepack.Lib.MSBuild.Task.2.0.18.1\build\ILRepack.Lib.MSBuild.Task.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\ILRepack.Lib.MSBuild.Task.2.0.18.1\build\ILRepack.Lib.MSBuild.Task.targets'))" />
+  </Target>
 </Project>
