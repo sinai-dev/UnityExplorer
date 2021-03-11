@@ -67,6 +67,8 @@ Note: You must use version 0.3 of MelonLoader or greater. Version 0.3 is current
 
 ### Standalone
 
+The standalone release is based on the BepInEx build, so it requires Harmony 2.0 (or HarmonyX) to function properly.
+
 0. Load the DLL from your mod or inject it. You must also make sure that the required libraries (Harmony, Unhollower for Il2Cpp, etc) are loaded.
 1. Create an instance of Unity Explorer with `ExplorerStandalone.CreateInstance();`
 2. Optionally subscribe to the `ExplorerStandalone.OnLog` event to handle logging if you wish.
