@@ -39,8 +39,6 @@ namespace UnityExplorer
             Instance = this;
 
             new ExplorerCore();
-
-            // HarmonyInstance.PatchAll();
         }
 
         internal void Update()
@@ -83,8 +81,6 @@ namespace UnityExplorer
             GameObject.DontDestroyOnLoad(obj);
 
             new ExplorerCore();
-
-            // HarmonyInstance.PatchAll();
         }
 
         // BepInEx Il2Cpp mod class doesn't have monobehaviour methods yet, so wrap them in a dummy.

@@ -3,11 +3,19 @@ using HarmonyLib;
 using System;
 using System.IO;
 using System.Reflection;
+using UnityEngine;
+#if CPP
+using UnhollowerRuntimeLib;
+#endif
 
 namespace UnityExplorer
 {
 	public class ExplorerStandalone : IExplorerLoader
     {
+        /// <summary>
+        /// Call this to initialize UnityExplorer. Optionally, also subscribe to the 'OnLog' event to handle logging.
+        /// </summary>
+        /// <returns>The new (or active, if one exists) instance of ExplorerStandalone.</returns>
         public static ExplorerStandalone CreateInstance()
         {
             if (Instance != null)
@@ -18,8 +26,7 @@ namespace UnityExplorer
 
         private ExplorerStandalone()
         {
-            Instance = this;
-            new ExplorerCore();
+            Init();
         }
 
         public static ExplorerStandalone Instance { get; private set; }
@@ -27,7 +34,7 @@ namespace UnityExplorer
         /// <summary>
         /// Invoked whenever Explorer logs something. Subscribe to this to handle logging.
         /// </summary>
-        public static event Action<string, UnityEngine.LogType> OnLog;
+        public static event Action<string, LogType> OnLog;
 
         public Harmony HarmonyInstance => s_harmony;
         public static readonly Harmony s_harmony = new Harmony(ExplorerCore.GUID);
@@ -50,16 +57,42 @@ namespace UnityExplorer
         
         public string ConfigFolder => ExplorerFolder;
 
-        Action<object> IExplorerLoader.OnLogMessage => (object log) => { OnLog?.Invoke(log?.ToString() ?? "", UnityEngine.LogType.Log); };
-        Action<object> IExplorerLoader.OnLogWarning => (object log) => { OnLog?.Invoke(log?.ToString() ?? "", UnityEngine.LogType.Warning); };
-        Action<object> IExplorerLoader.OnLogError   => (object log) => { OnLog?.Invoke(log?.ToString() ?? "", UnityEngine.LogType.Error); };
+        Action<object> IExplorerLoader.OnLogMessage => (object log) => { OnLog?.Invoke(log?.ToString() ?? "", LogType.Log); };
+        Action<object> IExplorerLoader.OnLogWarning => (object log) => { OnLog?.Invoke(log?.ToString() ?? "", LogType.Warning); };
+        Action<object> IExplorerLoader.OnLogError   => (object log) => { OnLog?.Invoke(log?.ToString() ?? "", LogType.Error); };
 
-        /// <summary>
-        /// Call this once per frame for Explorer to update.
-        /// </summary>
-        public static void Update()
+        private void Init()
         {
-            ExplorerCore.Update();
+            Instance = this;
+#if CPP
+            ClassInjector.RegisterTypeInIl2Cpp<ExplorerBehaviour>();
+
+            var obj = new GameObject(
+                "ExplorerBehaviour",
+                new Il2CppSystem.Type[] { Il2CppType.Of<ExplorerBehaviour>() }
+            );
+#else
+            var obj = new GameObject(
+                "ExplorerBehaviour",
+                new Type[] { typeof(ExplorerBehaviour) }
+            );           
+#endif
+
+            obj.hideFlags = HideFlags.HideAndDontSave;
+            GameObject.DontDestroyOnLoad(obj);
+
+            new ExplorerCore();
+        }
+
+        public class ExplorerBehaviour : MonoBehaviour
+        {
+#if CPP
+            public ExplorerBehaviour(IntPtr ptr) : base(ptr) { }
+#endif
+            internal void Update()
+            {
+                ExplorerCore.Update();
+            }
         }
     }
 }

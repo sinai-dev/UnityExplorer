@@ -69,8 +69,7 @@ Note: You must use version 0.3 of MelonLoader or greater. Version 0.3 is current
 
 0. Load the DLL from your mod or inject it. You must also make sure that the required libraries (Harmony, Unhollower for Il2Cpp, etc) are loaded.
 1. Create an instance of Unity Explorer with `ExplorerStandalone.CreateInstance();`
-2. You will need to call `ExplorerStandalone.Update()` from your Update method.
-3. Subscribe to the `ExplorerStandalone.OnLog` event to handle logging if you wish.
+2. Optionally subscribe to the `ExplorerStandalone.OnLog` event to handle logging if you wish.
 
 ## Logging
 
@@ -115,6 +114,7 @@ For IL2CPP:
 1. Install BepInEx or MelonLoader for your game.
 2. Open the `src\UnityExplorer.csproj` file in a text editor.
 3. Set `BIECppGameFolder` (for BepInEx) and/or `MLCppGameFolder` (for MelonLoader) so the project can locate the necessary references.
+4. For Standalone builds, you can either install BepInEx for the game to build, or just change the .csproj file and set the Unhollower reference manually.
 
 For all builds:
 1. Open the `src\UnityExplorer.sln` project.
