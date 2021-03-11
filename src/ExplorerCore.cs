@@ -82,9 +82,9 @@ namespace UnityExplorer
                 SceneManager.add_sceneLoaded(new Action<Scene, LoadSceneMode>((Scene a, LoadSceneMode b) => { OnSceneLoaded(); }));
                 SceneManager.add_activeSceneChanged(new Action<Scene, Scene>((Scene a, Scene b) => { OnSceneLoaded(); }));
             }
-            catch (Exception ex)
+            catch
             {
-                LogWarning($"Exception setting up Unity event listeners!\r\n{ex}");
+               // exceptions here are non-fatal, just ignore. 
             }
 #else
             Application.logMessageReceived += OnUnityLog;

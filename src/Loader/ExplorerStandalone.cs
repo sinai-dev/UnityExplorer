@@ -45,9 +45,15 @@ namespace UnityExplorer
             {
                 if (s_explorerFolder == null)
                 {
-                    s_explorerFolder = new Uri(Assembly.GetExecutingAssembly().CodeBase).AbsolutePath;
-                    s_explorerFolder = Uri.UnescapeDataString(s_explorerFolder);
-                    s_explorerFolder = Path.GetDirectoryName(s_explorerFolder);
+                    s_explorerFolder = 
+                        Path.Combine(
+                            Path.GetDirectoryName(
+                                Uri.UnescapeDataString(new Uri(Assembly.GetExecutingAssembly().CodeBase)
+                                .AbsolutePath)), 
+                        "UnityExplorer");
+
+                    if (!Directory.Exists(s_explorerFolder))
+                        Directory.CreateDirectory(s_explorerFolder);
                 }
 
                 return s_explorerFolder;
