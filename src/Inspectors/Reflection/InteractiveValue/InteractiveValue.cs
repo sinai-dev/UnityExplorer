@@ -194,6 +194,7 @@ namespace UnityExplorer.Inspectors.Reflection
 
             string label;
 
+            // Two dirty fixes for TextAsset and EventSystem, which can have very long ToString results.
             if (Value is TextAsset textAsset)
             {
                 label = textAsset.text;
@@ -207,7 +208,7 @@ namespace UnityExplorer.Inspectors.Reflection
             {
                 label = m_richValueType;
             }
-            else
+            else // For everything else...
             {
                 if (!m_gotToStringMethods)
                 {
@@ -233,17 +234,24 @@ namespace UnityExplorer.Inspectors.Reflection
                 else
                     toString = (string)m_toStringMethod.Invoke(Value, new object[0]);
 
-                var fullnametemp = valueType.ToString();
-                if (fullnametemp.StartsWith("Il2CppSystem"))
-                    fullnametemp = fullnametemp.Substring(6, fullnametemp.Length - 6);
+                string typeName = valueType.FullName;
+                if (typeName.StartsWith("Il2CppSystem."))
+                    typeName = typeName.Substring(6, typeName.Length - 6);
+#if CPP
+                var cppType = UnhollowerRuntimeLib.Il2CppType.From(valueType);
+                if (cppType != null && ReflectionHelpers.UnobfuscatedTypeNames.ContainsKey(cppType.FullName))
+                {
+                    typeName = ReflectionHelpers.UnobfuscatedTypeNames[cppType.FullName];
+                    toString = toString.Replace(cppType.FullName, typeName);
+                }
+#endif
 
-                var temp = toString.Replace(fullnametemp, "").Trim();
-
-                if (string.IsNullOrEmpty(temp))
+                // If the ToString is just the type name, use our syntax highlighted type name instead.
+                if (toString == typeName)
                 {
                     label = m_richValueType;
                 }
-                else
+                else // Otherwise, parse the result and put our highlighted name in.
                 {
                     if (toString.Length > 200)
                         toString = toString.Substring(0, 200) + "...";
