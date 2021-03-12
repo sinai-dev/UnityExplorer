@@ -155,8 +155,11 @@ namespace UnityExplorer.UI
             MainPanel = UIFactory.CreatePanel(UIManager.CanvasRoot, "MainMenu", out GameObject content);
 
             RectTransform panelRect = MainPanel.GetComponent<RectTransform>();
-            panelRect.anchorMin = new Vector2(0.25f, 0.1f);
-            panelRect.anchorMax = new Vector2(0.78f, 0.95f);
+            //panelRect.anchorMin = new Vector2(0.25f, 0.1f);
+            //panelRect.anchorMax = new Vector2(0.78f, 0.95f);
+            var anchors = ExplorerConfig.Instance.GetWindowAnchorsVector();
+            panelRect.anchorMin = new Vector2(anchors.x, anchors.y);
+            panelRect.anchorMax = new Vector2(anchors.z, anchors.w);
 
             MainPanel.AddComponent<Mask>();
 
