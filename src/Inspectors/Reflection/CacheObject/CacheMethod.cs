@@ -168,7 +168,7 @@ namespace UnityExplorer.Inspectors.Reflection
             //var argLayout = argLabelObj.AddComponent<LayoutElement>();
             //argLayout.minWidth = 20;
             var argText = argLabelObj.GetComponent<Text>();
-            argText.text = $"{constrainTxt} <color={UISyntaxHighlight.Enum}>{arg.Name}</color>";
+            argText.text = $"{constrainTxt} <color={UISyntaxHighlight.CONST_VAR}>{arg.Name}</color>";
 
             var argInputObj = UIFactory.CreateInputField(rowObj, 14, (int)TextAnchor.MiddleLeft, 1);
             var argInputLayout = argInputObj.AddComponent<LayoutElement>();

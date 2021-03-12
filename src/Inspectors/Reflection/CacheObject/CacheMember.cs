@@ -381,7 +381,7 @@ namespace UnityExplorer.Inspectors.Reflection
             argLabelLayout.minHeight = 25;
             var argText = argLabelObj.GetComponent<Text>();
             var argTypeTxt = UISyntaxHighlight.ParseFullSyntax(arg.ParameterType, false);
-            argText.text = $"{argTypeTxt} <color={UISyntaxHighlight.Local}>{arg.Name}</color>";
+            argText.text = $"{argTypeTxt} <color={UISyntaxHighlight.LOCAL_ARG}>{arg.Name}</color>";
 
             var argInputObj = UIFactory.CreateInputField(rowObj, 14, (int)TextAnchor.MiddleLeft, 1);
             var argInputLayout = argInputObj.AddComponent<LayoutElement>();

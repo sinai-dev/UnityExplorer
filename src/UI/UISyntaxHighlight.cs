@@ -8,36 +8,36 @@ namespace UnityExplorer.UI
 {
     public class UISyntaxHighlight
     {
-        public const string Field_Static = "#8d8dc6";
-        public const string Field_Instance = "#c266ff";
+        public const string FIELD_STATIC = "#8d8dc6";
+        public const string FIELD_INSTANCE = "#c266ff";
 
-        public const string Method_Static = "#b55b02";
-        public const string Method_Instance = "#ff8000";
+        public const string METHOD_STATIC = "#b55b02";
+        public const string METHOD_INSTANCE = "#ff8000";
 
-        public const string Prop_Static = "#588075";
-        public const string Prop_Instance = "#55a38e";
+        public const string PROP_STATIC = "#588075";
+        public const string PROP_INSTANCE = "#55a38e";
 
-        public const string Class_Static = "#3a8d71";
-        public const string Class_Instance = "#2df7b2";
+        public const string CLASS_STATIC = "#3a8d71";
+        public const string CLASS_INSTANCE = "#2df7b2";
 
-        public const string Local = "#a6e9e9";
+        public const string CLASS_STRUCT = "#0fba3a";
 
-        public const string StructGreen = "#0fba3a";
+        public const string LOCAL_ARG = "#a6e9e9";
 
-        public static string Enum = "#92c470";
+        public static string CONST_VAR = "#92c470";
 
         internal static readonly Color s_silver = new Color(0.66f, 0.66f, 0.66f);
 
         internal static string GetClassColor(Type type)
         {
             if (type.IsAbstract && type.IsSealed)
-                return Class_Static;
+                return CLASS_STATIC;
             else if (type.IsEnum || type.IsGenericParameter)
-                return Enum;
+                return CONST_VAR;
             else if (type.IsValueType)
-                return StructGreen;
+                return CLASS_STRUCT;
             else
-                return Class_Instance;
+                return CLASS_INSTANCE;
         }
 
         public static string ParseFullSyntax(Type type, bool includeNamespace, MemberInfo memberInfo = null)
@@ -49,7 +49,7 @@ namespace UnityExplorer.UI
 
             if (type.IsGenericParameter || (type.HasElementType && type.GetElementType().IsGenericParameter))
             {
-                ret = $"<color={Enum}>{type.Name}</color>";
+                ret = $"<color={CONST_VAR}>{type.Name}</color>";
             }
             else
             {
@@ -134,7 +134,7 @@ namespace UnityExplorer.UI
 
                 if (allGeneric)
                 {
-                    args += $"<color={Enum}>{arg.Name}</color>";
+                    args += $"<color={CONST_VAR}>{arg.Name}</color>";
                     continue;
                 }
 
@@ -153,30 +153,30 @@ namespace UnityExplorer.UI
                 if (fi.IsStatic)
                 {
                     isStatic = true;
-                    memberColor = Field_Static;
+                    memberColor = FIELD_STATIC;
                 }
                 else
-                    memberColor = Field_Instance;
+                    memberColor = FIELD_INSTANCE;
             }
             else if (memberInfo is MethodInfo mi)
             {
                 if (mi.IsStatic)
                 {
                     isStatic = true;
-                    memberColor = Method_Static;
+                    memberColor = METHOD_STATIC;
                 }
                 else
-                    memberColor = Method_Instance;
+                    memberColor = METHOD_INSTANCE;
             }
             else if (memberInfo is PropertyInfo pi)
             {
                 if (pi.GetAccessors(true)[0].IsStatic)
                 {
                     isStatic = true;
-                    memberColor = Prop_Static;
+                    memberColor = PROP_STATIC;
                 }
                 else
-                    memberColor = Prop_Instance;
+                    memberColor = PROP_INSTANCE;
             }
             return memberColor;
         }
