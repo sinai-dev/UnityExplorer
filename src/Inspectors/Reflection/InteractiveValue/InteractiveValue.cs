@@ -12,29 +12,47 @@ namespace UnityExplorer.Inspectors.Reflection
 {
     public class InteractiveValue
     {
+        /// <summary>
+        /// Get the <see cref="InteractiveValue"/> subclass which supports the provided <paramref name="type"/>.
+        /// </summary>
+        /// <param name="type">The <see cref="Type"/> which you want the <see cref="InteractiveValue"/> Type for.</param>
+        /// <returns>The best subclass of <see cref="InteractiveValue"/> which supports the provided <paramref name="type"/>.</returns>
         public static Type GetIValueForType(Type type)
         {
+            // rather ugly but I couldn't think of a cleaner way that was worth it.
+            // switch-case doesn't really work here.
+
+            // arbitrarily check some types, fastest methods first.
             if (type == typeof(bool))
                 return typeof(InteractiveBool);
-            else if (type == typeof(string))
-                return typeof(InteractiveString);
+            // if type is primitive then it must be a number if its not a bool
             else if (type.IsPrimitive)
                 return typeof(InteractiveNumber);
+            // check for strings
+            else if (type == typeof(string))
+                return typeof(InteractiveString);
+            // check for enum/flags
             else if (typeof(Enum).IsAssignableFrom(type))
             {
-                if (type.GetCustomAttributes(typeof(FlagsAttribute), true) is object[] attributes && attributes.Length > 0)
+                // NET 3.5 doesn't have "GetCustomAttribute", gotta use the multiple version.
+                if (type.GetCustomAttributes(typeof(FlagsAttribute), true) is object[] fa && fa.Length > 0)
                     return typeof(InteractiveFlags);
                 else
                     return typeof(InteractiveEnum);
             }
+            // check for unity struct types
             else if (InteractiveUnityStruct.SupportsType(type))
                 return typeof(InteractiveUnityStruct);
+            // check Transform, force InteractiveValue so they dont become InteractiveEnumerables.
             else if (typeof(Transform).IsAssignableFrom(type))
                 return typeof(InteractiveValue);
+            // check Dictionaries before Enumerables
             else if (ReflectionHelpers.IsDictionary(type))
                 return typeof(InteractiveDictionary);
+            // finally check for Enumerables
             else if (ReflectionHelpers.IsEnumerable(type))
                 return typeof(InteractiveEnumerable);
+            // fallback to default
             else
                 return typeof(InteractiveValue);
         }
