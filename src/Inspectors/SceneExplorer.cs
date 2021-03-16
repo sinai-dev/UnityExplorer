@@ -96,11 +96,11 @@ namespace UnityExplorer.Inspectors
             }
         }
 
-        internal void OnSceneChange()
-        {
-            m_sceneDropdown.OnCancel(null);
-            RefreshSceneSelector();
-        }
+        //internal void OnSceneChange()
+        //{
+        //    m_sceneDropdown.OnCancel(null);
+        //    RefreshSceneSelector();
+        //}
 
         private void RefreshSceneSelector()
         {
@@ -138,8 +138,11 @@ namespace UnityExplorer.Inspectors
 
             if (anyChange)
             {
+                m_sceneDropdown.OnCancel(null);
                 m_sceneDropdownText.text = newNames[0];
                 SetTargetScene(newScenes[0]);
+
+                SearchPage.Instance.OnSceneChange();
             }
 
             m_currentScenes = newScenes.ToArray();

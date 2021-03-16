@@ -30,10 +30,10 @@ namespace UnityExplorer
             ExplorerCore.Update();
         }
 
-        public override void OnSceneWasLoaded(int buildIndex, string sceneName)
-        {
-            ExplorerCore.Instance.OnSceneLoaded();
-        }
+        //public override void OnSceneWasLoaded(int buildIndex, string sceneName)
+        //{
+        //    ExplorerCore.Instance.OnSceneLoaded();
+        //}
     }
 }
 #endif

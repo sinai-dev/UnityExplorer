@@ -198,12 +198,12 @@ namespace UnityExplorer.Tests
             }
         }
 
-        public static string TestRefInOutGeneric<T>(ref string arg0, in int arg1, out string arg2) where T : Component
-        {
-            arg2 = "this is arg2";
+        //public static string TestRefInOutGeneric<T>(ref string arg0, in int arg1, out string arg2) where T : Component
+        //{
+        //    arg2 = "this is arg2";
 
-            return $"T: '{typeof(T).FullName}', ref arg0: '{arg0}', in arg1: '{arg1}', out arg2: '{arg2}'";
-        }
+        //    return $"T: '{typeof(T).FullName}', ref arg0: '{arg0}', in arg1: '{arg1}', out arg2: '{arg2}'";
+        //}
 
         // test a non-generic dictionary
 

@@ -7,6 +7,7 @@ using UnityExplorer.Config;
 using UnityExplorer.Helpers;
 using UnityExplorer.Input;
 using UnityExplorer.Inspectors;
+using UnityExplorer.Runtime;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Modules;
 
@@ -21,17 +22,16 @@ namespace UnityExplorer
 
         public static ExplorerCore Instance { get; private set; }
 
-        private static IExplorerLoader s_loader;
-        public static IExplorerLoader Loader => s_loader
+        public static IExplorerLoader Loader =>
 #if ML
-                                             ?? (s_loader = ExplorerMelonMod.Instance);   
+            ExplorerMelonMod.Instance;
 #elif BIE
-                                             ?? (s_loader = ExplorerBepInPlugin.Instance);
+            ExplorerBepInPlugin.Instance;
 #elif STANDALONE
-                                             ?? (s_loader = ExplorerStandalone.Instance);
+            ExplorerStandalone.Instance;
 #endif
 
-        public static string ExplorerFolder => Loader.ExplorerFolder;
+        public static string EXPLORER_FOLDER => Loader.ExplorerFolder;
 
         public ExplorerCore()
         {
@@ -43,19 +43,16 @@ namespace UnityExplorer
 
             Instance = this;
 
-#if CPP
-            ReflectionHelpers.TryLoadGameModules();
-#endif
+            RuntimeProvider.Init();
 
-            if (!Directory.Exists(ExplorerFolder))
-                Directory.CreateDirectory(ExplorerFolder);
+            if (!Directory.Exists(EXPLORER_FOLDER))
+                Directory.CreateDirectory(EXPLORER_FOLDER);
 
             ExplorerConfig.OnLoad();
 
             InputManager.Init();
-            ForceUnlockCursor.Init();
 
-            SetupEvents();
+            ForceUnlockCursor.Init();
 
             UIManager.ShowMenu = true;
 
@@ -72,33 +69,7 @@ namespace UnityExplorer
                 UIManager.Update();
         }
 
-        private void SetupEvents()
-        {
-#if CPP
-            try
-            {
-                Application.add_logMessageReceived(new Action<string, string, LogType>(OnUnityLog));
-
-                SceneManager.add_sceneLoaded(new Action<Scene, LoadSceneMode>((Scene a, LoadSceneMode b) => { OnSceneLoaded(); }));
-                SceneManager.add_activeSceneChanged(new Action<Scene, Scene>((Scene a, Scene b) => { OnSceneLoaded(); }));
-            }
-            catch
-            {
-               // exceptions here are non-fatal, just ignore. 
-            }
-#else
-            Application.logMessageReceived += OnUnityLog;
-            SceneManager.sceneLoaded += (Scene a, LoadSceneMode b) => { OnSceneLoaded(); }; 
-            SceneManager.activeSceneChanged += (Scene a, Scene b) => { OnSceneLoaded(); };
-#endif
-        }
-
-        internal void OnSceneLoaded()
-        {
-            UIManager.OnSceneChange();
-        }
-
-        private void OnUnityLog(string message, string stackTrace, LogType type)
+        public void OnUnityLog(string message, string stackTrace, LogType type)
         {
             if (!DebugConsole.LogUnity)
                 return;

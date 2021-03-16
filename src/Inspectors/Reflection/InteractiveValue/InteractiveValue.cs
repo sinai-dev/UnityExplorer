@@ -35,7 +35,7 @@ namespace UnityExplorer.Inspectors.Reflection
             else if (typeof(Enum).IsAssignableFrom(type))
             {
                 // NET 3.5 doesn't have "GetCustomAttribute", gotta use the multiple version.
-                if (type.GetCustomAttributes(typeof(FlagsAttribute), true) is object[] fa && fa.Length > 0)
+                if (type.GetCustomAttributes(typeof(FlagsAttribute), true) is object[] fa && fa.Any())
                     return typeof(InteractiveFlags);
                 else
                     return typeof(InteractiveEnum);

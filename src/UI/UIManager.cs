@@ -99,11 +99,11 @@ namespace UnityExplorer.UI
             ForceUnlockCursor.UpdateCursorControl();
         }
 
-        public static void OnSceneChange()
-        {
-            SceneExplorer.Instance?.OnSceneChange();
-            SearchPage.Instance?.OnSceneChange();
-        }
+        //public static void OnSceneChange()
+        //{
+        //    SceneExplorer.Instance?.OnSceneChange();
+        //    SearchPage.Instance?.OnSceneChange();
+        //}
 
         public static void Update()
         {

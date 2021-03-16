@@ -25,7 +25,7 @@ namespace UnityExplorer.Config
         public KeyCode  Main_Menu_Toggle    = KeyCode.F7;
         public bool     Force_Unlock_Mouse  = true;
         public int      Default_Page_Limit  = 25;
-        public string   Default_Output_Path = Path.Combine(ExplorerCore.ExplorerFolder, "Output");
+        public string   Default_Output_Path = Path.Combine(ExplorerCore.EXPLORER_FOLDER, "Output");
         public bool     Log_Unity_Debug     = false;
         public bool     Hide_On_Startup     = false;
         public string   Window_Anchors      = DEFAULT_WINDOW_ANCHORS;

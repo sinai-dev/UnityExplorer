@@ -109,6 +109,9 @@ namespace UnityExplorer.UI.Modules
 
         private void RefreshResultList()
         {
+            if (m_resultListPageHandler == null || m_results == null)
+                return;
+
             m_resultListPageHandler.ListCount = m_results.Length;
 
             int newCount = 0;

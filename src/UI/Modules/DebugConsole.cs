@@ -52,7 +52,7 @@ namespace UnityExplorer.UI.Modules
             //if (!SaveToDisk)
             //    return;
 
-            var path = ExplorerCore.ExplorerFolder + @"\Logs";
+            var path = ExplorerCore.EXPLORER_FOLDER + @"\Logs";
 
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
