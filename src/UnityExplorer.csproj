@@ -38,7 +38,6 @@
     <AssemblyName>UnityExplorer.ML.IL2CPP</AssemblyName>
     <IsCpp>true</IsCpp>
     <IsMelonLoader>true</IsMelonLoader>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_ML_Mono|AnyCPU' ">
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
@@ -48,7 +47,6 @@
     <Prefer32Bit>false</Prefer32Bit>
     <IsCpp>false</IsCpp>
     <IsMelonLoader>true</IsMelonLoader>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_BIE_Cpp|AnyCPU' ">
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -57,7 +55,6 @@
     <AssemblyName>UnityExplorer.BIE.IL2CPP</AssemblyName>
     <IsCpp>true</IsCpp>
     <IsMelonLoader>false</IsMelonLoader>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_BIE6_Mono|AnyCPU' ">
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
@@ -66,16 +63,14 @@
     <AssemblyName>UnityExplorer.BIE6.Mono</AssemblyName>
     <IsCpp>false</IsCpp>
     <IsMelonLoader>false</IsMelonLoader>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_BIE5_Mono|AnyCPU'">
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <OutputPath>..\Release\UnityExplorer.BepInEx5.Mono\</OutputPath>
     <DefineConstants>MONO,BIE,BIE5</DefineConstants>
     <AssemblyName>UnityExplorer.BIE5.Mono</AssemblyName>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
+    <IsCpp>false</IsCpp>
+    <IsMelonLoader>false</IsMelonLoader>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_STANDALONE_Mono|AnyCPU'">
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
@@ -85,7 +80,6 @@
     <IsCpp>false</IsCpp>
     <IsMelonLoader>false</IsMelonLoader>
     <IsStandalone>true</IsStandalone>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_STANDALONE_Cpp|AnyCPU'">
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -95,7 +89,6 @@
     <IsCpp>true</IsCpp>
     <IsMelonLoader>false</IsMelonLoader>
     <IsStandalone>true</IsStandalone>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="INIFileParser, Version=2.5.2.0, Culture=neutral, PublicKeyToken=79af7b307b65cf3c, processorArchitecture=MSIL">
@@ -270,7 +263,6 @@
   <ItemGroup>
     <Compile Include="Loader\ExplorerBepIn6Plugin.cs" />
     <Compile Include="Loader\ExplorerStandalone.cs" />
-    <Compile Include="Helpers\EventHelper.cs" />
     <Compile Include="Inspectors\MouseInspector.cs" />
     <Compile Include="Inspectors\Reflection\CacheObject\CacheEnumerated.cs" />
     <Compile Include="Inspectors\Reflection\CacheObject\CacheField.cs" />
@@ -298,6 +290,9 @@
     <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveString.cs" />
     <Compile Include="Inspectors\Reflection\InteractiveValue\InteractiveUnityStruct.cs" />
     <Compile Include="Loader\IExplorerLoader.cs" />
+    <Compile Include="Runtime\Il2Cpp\Il2CppProvider.cs" />
+    <Compile Include="Runtime\RuntimeProvider.cs" />
+    <Compile Include="Runtime\Mono\MonoProvider.cs" />
     <Compile Include="UI\ForceUnlockCursor.cs" />
     <Compile Include="Input\IHandleInput.cs" />
     <Compile Include="Tests\Tests.cs" />
