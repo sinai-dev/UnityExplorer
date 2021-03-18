@@ -2,8 +2,8 @@
 //using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.Helpers;
-using UnityExplorer.UI.Shared;
+using UnityExplorer.Core.Unity;
+using UnityExplorer.UI.Reusable;
 
 namespace UnityExplorer.UI
 {

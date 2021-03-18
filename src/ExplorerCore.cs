@@ -3,13 +3,14 @@ using System.IO;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityExplorer.Config;
-using UnityExplorer.Helpers;
-using UnityExplorer.Input;
-using UnityExplorer.Inspectors;
-using UnityExplorer.Runtime;
+using UnityExplorer.Core.Config;
+using UnityExplorer.Core.Unity;
+using UnityExplorer.Core.Input;
+using UnityExplorer.Core.Inspectors;
+using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI;
-using UnityExplorer.UI.Modules;
+using UnityExplorer.UI.Main;
+using UnityExplorer.UI.Utility;
 
 namespace UnityExplorer
 {
@@ -52,7 +53,7 @@ namespace UnityExplorer
 
             InputManager.Init();
 
-            ForceUnlockCursor.Init();
+            CursorUnlocker.Init();
 
             UIManager.ShowMenu = true;
 
@@ -63,8 +64,8 @@ namespace UnityExplorer
         {
             UIManager.CheckUIInit();
 
-            if (MouseInspector.Enabled)
-                MouseInspector.UpdateInspect();
+            if (InspectUnderMouse.Enabled)
+                InspectUnderMouse.UpdateInspect();
             else
                 UIManager.Update();
         }

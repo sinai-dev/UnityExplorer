@@ -1,18 +1,15 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityExplorer.Inspectors;
-using UnityExplorer.UI.Modules;
+using UnityExplorer.Core.Inspectors;
+using UnityExplorer.UI.Main;
 using System.IO;
 using System.Reflection;
-using UnityExplorer.Helpers;
-using UnityExplorer.UI.Shared;
-using UnityExplorer.Input;
+using UnityExplorer.UI.Reusable;
+using UnityExplorer.Core.Input;
 using System;
-using UnityExplorer.Config;
-#if CPP
-using UnityExplorer.Unstrip;
-#endif
+using UnityExplorer.Core.Config;
+using UnityExplorer.UI.Utility;
 
 namespace UnityExplorer.UI
 {
@@ -72,7 +69,7 @@ namespace UnityExplorer.UI
 
             // Create submodules
             new MainMenu();
-            MouseInspector.ConstructUI();
+            InspectUnderMouse.UI.ConstructUI();
             PanelDragger.LoadCursorImage();
 
             // Force refresh of anchors
@@ -91,12 +88,12 @@ namespace UnityExplorer.UI
                 CanvasRoot.SetActive(show);
 
                 if (show)
-                    ForceUnlockCursor.SetEventSystem();
+                    CursorUnlocker.SetEventSystem();
                 else
-                    ForceUnlockCursor.ReleaseEventSystem();
+                    CursorUnlocker.ReleaseEventSystem();
             }
 
-            ForceUnlockCursor.UpdateCursorControl();
+            CursorUnlocker.UpdateCursorControl();
         }
 
         //public static void OnSceneChange()
@@ -118,7 +115,7 @@ namespace UnityExplorer.UI
             if (EventSys)
             {
                 if (EventSystem.current != EventSys)
-                    ForceUnlockCursor.SetEventSystem();
+                    CursorUnlocker.SetEventSystem();
 #if CPP
                 // Some IL2CPP games behave weird with multiple UI Input Systems, some fixes for them.
                 var evt = InputManager.InputPointerEvent;

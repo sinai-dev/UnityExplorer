@@ -8,7 +8,7 @@ using HarmonyLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using UnityExplorer.UI.Modules;
+using UnityExplorer.UI.Main;
 #if CPP
 using UnhollowerRuntimeLib;
 using BepInEx.IL2CPP;

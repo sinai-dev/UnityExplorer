@@ -1,0 +1,186 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using BF = System.Reflection.BindingFlags;
+using UnityExplorer.Core.Runtime;
+
+namespace UnityExplorer.Core
+{
+    public static class ReflectionUtility
+    {
+        public static BF CommonFlags = BF.Public | BF.Instance | BF.NonPublic | BF.Static;
+
+        /// <summary>
+        /// Helper for IL2CPP to get the underlying true Type (Unhollowed) of the object.
+        /// </summary>
+        /// <param name="obj">The object to get the true Type for.</param>
+        /// <returns>The most accurate Type of the object which could be identified.</returns>
+        public static Type GetType(this object obj)
+        {
+            if (obj == null)
+                return null;
+
+            return ReflectionProvider.Instance.GetActualType(obj);
+        }
+
+        /// <summary>
+        /// Cast an object to its underlying Type.
+        /// </summary>
+        /// <param name="obj">The object to cast</param>
+        /// <returns>The object, cast to the underlying Type if possible, otherwise the original object.</returns>
+        public static object Cast(this object obj)
+            => Cast(obj, GetType(obj));
+
+        /// <summary>
+        /// Cast an object to a Type, if possible.
+        /// </summary>
+        /// <param name="obj">The object to cast</param>
+        /// <param name="castTo">The Type to cast to </param>
+        /// <returns>The object, cast to the Type provided if possible, otherwise the original object.</returns>
+        public static object Cast(this object obj, Type castTo)
+            => ReflectionProvider.Instance.Cast(obj, castTo);
+
+        /// <summary>
+        /// Check if the provided Type is assignable to IEnumerable.
+        /// </summary>
+        /// <param name="t">The Type to check</param>
+        /// <returns>True if the Type is assignable to IEnumerable, otherwise false.</returns>
+        public static bool IsEnumerable(this Type t)
+            => ReflectionProvider.Instance.IsAssignableFrom(typeof(IEnumerable), t);
+
+        /// <summary>
+        /// Check if the provided Type is assignable to IDictionary.
+        /// </summary>
+        /// <param name="t">The Type to check</param>
+        /// <returns>True if the Type is assignable to IDictionary, otherwise false.</returns>
+        public static bool IsDictionary(this Type t)
+            => ReflectionProvider.Instance.IsAssignableFrom(typeof(IDictionary), t);
+
+        public static bool LoadModule(string module)
+            => ReflectionProvider.Instance.LoadModule(module);
+
+        // cache for GetTypeByName
+        internal static readonly Dictionary<string, Type> s_typesByName = new Dictionary<string, Type>();
+
+        /// <summary>
+        /// Find a <see cref="Type"/> in the current AppDomain whose <see cref="Type.FullName"/> matches the provided <paramref name="fullName"/>.
+        /// </summary>
+        /// <param name="fullName">The <see cref="Type.FullName"/> you want to search for - case sensitive and full matches only.</param>
+        /// <returns>The Type if found, otherwise null.</returns>
+        public static Type GetTypeByName(string fullName)
+        {
+            s_typesByName.TryGetValue(fullName, out Type ret);
+
+            if (ret != null)
+                return ret;
+
+            foreach (var type in from asm in AppDomain.CurrentDomain.GetAssemblies() 
+                                 from type in asm.TryGetTypes() 
+                                 select type)
+            {
+                if (type.FullName == fullName)
+                {
+                    ret = type;
+                    break;
+                }
+            }
+
+            if (s_typesByName.ContainsKey(fullName))
+                s_typesByName[fullName] = ret;
+            else
+                s_typesByName.Add(fullName, ret);
+
+            return ret;
+        }
+
+        // cache for GetBaseTypes
+        internal static readonly Dictionary<string, Type[]> s_cachedTypeInheritance = new Dictionary<string, Type[]>();
+
+        /// <summary>
+        /// Get all base types of the provided Type, including itself.
+        /// </summary>
+        public static Type[] GetAllBaseTypes(this object obj) => GetAllBaseTypes(GetType(obj));
+
+        /// <summary>
+        /// Get all base types of the provided Type, including itself.
+        /// </summary>
+        public static Type[] GetAllBaseTypes(this Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            var name = type.AssemblyQualifiedName;
+
+            if (s_cachedTypeInheritance.TryGetValue(name, out Type[] ret))
+                return ret;
+
+            List<Type> list = new List<Type>();
+
+            while (type != null)
+            {
+                list.Add(type);
+                type = type.BaseType;
+            }
+
+            ret = list.ToArray();
+
+            s_cachedTypeInheritance.Add(name, ret);
+
+            return ret;
+        }
+
+        /// <summary>
+        /// Safely get all valid Types inside an Assembly.
+        /// </summary>
+        /// <param name="asm">The Assembly to find Types in.</param>
+        /// <returns>All possible Types which could be retrieved from the Assembly, or an empty array.</returns>
+        public static IEnumerable<Type> TryGetTypes(this Assembly asm)
+        {
+            try
+            {
+                return asm.GetTypes();
+            }
+            catch (ReflectionTypeLoadException e)
+            {
+                try
+                {
+                    return asm.GetExportedTypes();
+                }
+                catch
+                {
+                    return e.Types.Where(t => t != null);
+                }
+            }
+            catch
+            {
+                return Enumerable.Empty<Type>();
+            }
+        }
+
+        /// <summary>
+        /// Helper to display a simple "{ExceptionType}: {Message}" of the exception, and optionally use the inner-most exception.
+        /// </summary>
+        /// <param name="e">The Exception to convert to string.</param>
+        /// <param name="innerMost">Should the inner-most Exception of the stack be used? If false, the Exception you provided will be used directly.</param>
+        /// <returns>The exception to string.</returns>
+        public static string ReflectionExToString(this Exception e, bool innerMost = false)
+        {
+            if (innerMost)
+            {
+                while (e.InnerException != null)
+                {
+#if CPP
+                    if (e.InnerException is System.Runtime.CompilerServices.RuntimeWrappedException)
+                        break;
+#endif
+                    e = e.InnerException;
+                }
+            }
+
+            return $"{e.GetType()}: {e.Message}";
+        }
+    }
+}
