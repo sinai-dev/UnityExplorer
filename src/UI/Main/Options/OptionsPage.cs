@@ -18,9 +18,11 @@ namespace UnityExplorer.UI.Main
         private InputField m_defaultOutputInput;
         private Toggle m_hideOnStartupToggle;
 
-        public override void Init()
+        public override bool Init()
         {
             ConstructUI();
+
+            return true;
         }
 
         public override void Update()

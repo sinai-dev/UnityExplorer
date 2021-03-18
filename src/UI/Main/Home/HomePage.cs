@@ -13,7 +13,7 @@ namespace UnityExplorer.UI.Main
 
         public static HomePage Instance { get; internal set; }
 
-        public override void Init()
+        public override bool Init()
         {
             Instance = this;
 
@@ -24,6 +24,8 @@ namespace UnityExplorer.UI.Main
             new InspectorManager();
 
             SceneExplorer.Instance.Init();
+
+            return true;
         }
 
         public override void Update()

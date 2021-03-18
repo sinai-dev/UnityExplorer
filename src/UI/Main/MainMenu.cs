@@ -49,10 +49,19 @@ namespace UnityExplorer.UI.Main
             for (int i = 0; i < Pages.Count; i++)
             {
                 var page = Pages[i];
-                page.Init();
-
-                if (!Pages.Contains(page))
+                
+                if (!page.Init())
+                {
+                    // page init failed.
+                    Pages.RemoveAt(i);
                     i--;
+
+                    if (page.RefNavbarButton)
+                        page.RefNavbarButton.interactable = false;
+                    
+                    if (page.Content)
+                        GameObject.Destroy(page.Content);
+                }
             }
 
             // hide menu until each page has init layout (bit of a hack)

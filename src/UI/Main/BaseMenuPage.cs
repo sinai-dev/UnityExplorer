@@ -21,7 +21,7 @@ namespace UnityExplorer.UI.Main
         }
 
 
-        public abstract void Init();
+        public abstract bool Init();
         public abstract void Update();
     }
 }

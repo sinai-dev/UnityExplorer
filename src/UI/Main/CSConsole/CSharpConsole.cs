@@ -12,6 +12,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityExplorer.UI.Reusable;
 using UnityExplorer.UI.Main.CSConsole;
+using UnityExplorer.Core;
 
 namespace UnityExplorer.UI.Main
 {
@@ -40,13 +41,12 @@ namespace UnityExplorer.UI.Main
 #endif
         };
 
-        public override void Init()
+        public override bool Init()
         {
             Instance = this;
 
             try
             {
-                //m_codeEditor = new UI.CSConsole.CSharpConsole();
                 InitConsole();
 
                 AutoCompleter.Init();
@@ -57,14 +57,21 @@ namespace UnityExplorer.UI.Main
                 m_evaluator.Compile("");
 
                 foreach (string use in DefaultUsing)
-                {
                     AddUsing(use);
-                }
+
+                return true;
             }
             catch (Exception e)
             {
-                ExplorerCore.LogWarning($"Error setting up console!\r\nMessage: {e.Message}");
-                MainMenu.Instance.Pages.RemoveAll(it => it is CSharpConsole);
+                string info = "The C# Console has been disabled because";
+                if (e is NotSupportedException && e.TargetSite?.Name == "DefineDynamicAssembly")
+                    info += " Reflection.Emit is not supported.";
+                else
+                    info += $" of an unknown error.\r\n({e.ReflectionExToString()})";
+
+                ExplorerCore.LogWarning(info);
+
+                return false;
             }
         }
 

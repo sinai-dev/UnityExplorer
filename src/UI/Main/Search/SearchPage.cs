@@ -55,9 +55,11 @@ namespace UnityExplorer.UI.Main
             Instance = this;
         }
 
-        public override void Init()
+        public override bool Init()
         {
             ConstructUI();
+
+            return true;
         }
 
         public void OnSceneChange()
