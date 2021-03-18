@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace UnityExplorer.UI.CSConsole.Lexer
+namespace UnityExplorer.UI.Main.CSConsole.Lexer
 {
     public class StringMatch : Matcher
     {

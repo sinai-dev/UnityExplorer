@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace UnityExplorer.UI.CSConsole.Lexer
+namespace UnityExplorer.UI.Main.CSConsole.Lexer
 {
     // I use two different KeywordMatch instances (valid and invalid).
     // This class just contains common implementations.

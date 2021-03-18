@@ -7,7 +7,6 @@ using UnityEngine.UI;
 using UnityExplorer.Core.CSharp;
 using UnityExplorer.Core.Unity;
 using UnityExplorer.UI;
-using UnityExplorer.UI.CSConsole;
 using UnityExplorer.UI.Main;
 
 namespace UnityExplorer.UI.Main.CSConsole

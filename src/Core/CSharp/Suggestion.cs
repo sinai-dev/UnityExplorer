@@ -5,7 +5,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityExplorer.Core;
 using UnityExplorer.Core.Unity;
-using UnityExplorer.UI.CSConsole;
+using UnityExplorer.UI.Main.CSConsole;
 
 namespace UnityExplorer.Core.CSharp
 {

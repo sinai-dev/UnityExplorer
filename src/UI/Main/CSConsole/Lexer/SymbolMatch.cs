@@ -2,7 +2,7 @@
 using System.Linq;
 using UnityEngine;
 
-namespace UnityExplorer.UI.CSConsole.Lexer
+namespace UnityExplorer.UI.Main.CSConsole.Lexer
 {
     public class SymbolMatch : Matcher
     {

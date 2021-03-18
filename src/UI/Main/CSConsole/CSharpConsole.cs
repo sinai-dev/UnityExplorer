@@ -4,7 +4,6 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using UnityExplorer.Core.CSharp;
-using UnityExplorer.UI.CSConsole;
 using System.Linq;
 using UnityExplorer.Core.Input;
 using UnityEngine;
@@ -14,7 +13,7 @@ using UnityExplorer.UI.Reusable;
 using UnityExplorer.UI.Main.CSConsole;
 using UnityExplorer.Core;
 
-namespace UnityExplorer.UI.Main
+namespace UnityExplorer.UI.Main.CSConsole
 {
     public class CSharpConsole : BaseMenuPage
     {

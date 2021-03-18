@@ -3,6 +3,7 @@ using Mono.CSharp;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Main;
 using UnityExplorer.Core.Inspectors;
+using UnityExplorer.UI.Main.CSConsole;
 
 namespace UnityExplorer.Core.CSharp
 {

@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Unity;
-using UnityExplorer.UI.CSConsole;
 using UnityExplorer.UI.Main;
 using UnityExplorer.UI.Main.CSConsole;
 
