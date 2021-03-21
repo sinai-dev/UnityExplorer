@@ -255,6 +255,8 @@ namespace UnityExplorer.Core.Inspectors.Reflection
                 else
                     toString = (string)m_toStringMethod.Invoke(Value, new object[0]);
 
+                toString = toString ?? "";
+
                 string typeName = valueType.FullName;
                 if (typeName.StartsWith("Il2CppSystem."))
                     typeName = typeName.Substring(6, typeName.Length - 6);
