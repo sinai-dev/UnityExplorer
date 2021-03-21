@@ -55,7 +55,7 @@ namespace UnityExplorer.Core.Runtime
         {
             Color[] pixels;
 
-            if (IsReadable(orig))
+            if (!IsReadable(orig))
                 orig = ForceReadTexture(orig);
 
             pixels = orig.GetPixels((int)rect.x, (int)rect.y, (int)rect.width, (int)rect.height);
