@@ -4,6 +4,7 @@ using UnityEngine;
 using IniParser;
 using IniParser.Parser;
 using UnityExplorer.UI;
+using System.Globalization;
 
 namespace UnityExplorer.Core.Config
 {
@@ -13,6 +14,8 @@ namespace UnityExplorer.Core.Config
 
         internal static readonly IniDataParser _parser = new IniDataParser();
         internal static readonly string INI_PATH = Path.Combine(ExplorerCore.Loader.ConfigFolder, "config.ini");
+
+        internal static CultureInfo _enCulture = new CultureInfo("en-US");
 
         static ExplorerConfig()
         {
@@ -30,7 +33,7 @@ namespace UnityExplorer.Core.Config
         public bool     Hide_On_Startup     = false;
         public string   Window_Anchors      = DEFAULT_WINDOW_ANCHORS;
 
-        private const string DEFAULT_WINDOW_ANCHORS = "0.25,0.1,0.78,0.95";
+        private const string DEFAULT_WINDOW_ANCHORS = "0.25,0.10,0.78,0.95";
 
         public static event Action OnConfigChanged;
 
@@ -123,17 +126,22 @@ namespace UnityExplorer.Core.Config
             try
             {
                 var split = Window_Anchors.Split(',');
+
+                if (split.Length != 4)
+                    throw new Exception();
+
                 Vector4 ret = Vector4.zero;
-                ret.x = float.Parse(split[0]);
-                ret.y = float.Parse(split[1]);
-                ret.z = float.Parse(split[2]);
-                ret.w = float.Parse(split[3]);
+                ret.x = float.Parse(split[0], _enCulture);
+                ret.y = float.Parse(split[1], _enCulture);
+                ret.z = float.Parse(split[2], _enCulture);
+                ret.w = float.Parse(split[3], _enCulture);
+
                 return ret;
             }
             catch
             {
                 Window_Anchors = DEFAULT_WINDOW_ANCHORS;
-                return GetWindowAnchorsVector();
+                return new Vector4(0.25f, 0.1f, 0.78f, 0.95f);
             }
         }
 
@@ -142,7 +150,13 @@ namespace UnityExplorer.Core.Config
             try
             {
                 var rect = PanelDragger.Instance.Panel;
-                return $"{rect.anchorMin.x},{rect.anchorMin.y},{rect.anchorMax.x},{rect.anchorMax.y}";
+                return string.Format(_enCulture, "{0},{1},{2},{3}", new object[]
+                {
+                    rect.anchorMin.x,
+                    rect.anchorMax.y,
+                    rect.anchorMax.x,
+                    rect.anchorMax.y
+                });
             }
             catch
             {
