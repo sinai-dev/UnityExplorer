@@ -151,11 +151,14 @@ namespace UnityExplorer.UI.Main
             MainPanel = UIFactory.CreatePanel(UIManager.CanvasRoot, "MainMenu", out GameObject content);
 
             RectTransform panelRect = MainPanel.GetComponent<RectTransform>();
-            //panelRect.anchorMin = new Vector2(0.25f, 0.1f);
-            //panelRect.anchorMax = new Vector2(0.78f, 0.95f);
             var anchors = ExplorerConfig.Instance.GetWindowAnchorsVector();
-            panelRect.anchorMin = new Vector2(anchors.x, anchors.y);
-            panelRect.anchorMax = new Vector2(anchors.z, anchors.w);
+            SetPanelAnchors(panelRect, anchors);
+
+            if (panelRect.rect.width < 400 || panelRect.rect.height < 400)
+            {
+                anchors = ExplorerConfig.DefaultWindowAnchors();
+                SetPanelAnchors(panelRect, anchors);
+            }
 
             MainPanel.AddComponent<Mask>();
 
@@ -166,6 +169,12 @@ namespace UnityExplorer.UI.Main
             ConstructMainViewport(content);
 
             new DebugConsole(content);
+        }
+
+        private void SetPanelAnchors(RectTransform panelRect, Vector4 anchors)
+        {
+            panelRect.anchorMin = new Vector2(anchors.x, anchors.y);
+            panelRect.anchorMax = new Vector2(anchors.z, anchors.w);
         }
 
         private void ConstructTitleBar(GameObject content)

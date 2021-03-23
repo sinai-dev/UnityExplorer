@@ -135,13 +135,11 @@ namespace UnityExplorer.Core.Config
                 ret.y = float.Parse(split[1], _enCulture);
                 ret.z = float.Parse(split[2], _enCulture);
                 ret.w = float.Parse(split[3], _enCulture);
-
                 return ret;
             }
             catch
             {
-                Window_Anchors = DEFAULT_WINDOW_ANCHORS;
-                return new Vector4(0.25f, 0.1f, 0.78f, 0.95f);
+                return DefaultWindowAnchors();
             }
         }
 
@@ -153,7 +151,7 @@ namespace UnityExplorer.Core.Config
                 return string.Format(_enCulture, "{0},{1},{2},{3}", new object[]
                 {
                     rect.anchorMin.x,
-                    rect.anchorMax.y,
+                    rect.anchorMin.y,
                     rect.anchorMax.x,
                     rect.anchorMax.y
                 });
@@ -162,6 +160,12 @@ namespace UnityExplorer.Core.Config
             {
                 return DEFAULT_WINDOW_ANCHORS;
             }
+        }
+
+        internal static Vector4 DefaultWindowAnchors()
+        {
+            Instance.Window_Anchors = DEFAULT_WINDOW_ANCHORS;
+            return new Vector4(0.25f, 0.1f, 0.78f, 0.95f);
         }
     }
 }
