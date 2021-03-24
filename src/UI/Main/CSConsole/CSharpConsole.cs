@@ -284,14 +284,16 @@ The following helper methods are available:
                 return;
             }
 
-            UpdateIndent(newText);
+            if (EnableAutoIndent)
+                UpdateIndent(newText);
 
             if (!forceUpdate && string.IsNullOrEmpty(newText))
                 inputHighlightText.text = string.Empty;
             else
                 inputHighlightText.text = SyntaxHighlightContent(newText);
 
-            UpdateAutocompletes();
+            if (EnableAutocompletes)
+                UpdateAutocompletes();
         }
 
         private void UpdateIndent(string newText)
