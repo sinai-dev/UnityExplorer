@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using BF = System.Reflection.BindingFlags;
 using System.Text;
 using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
@@ -21,14 +23,22 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
 
         public override void SetupEvents()
         {
-            Application.add_logMessageReceived(
-                new Action<string, string, LogType>(ExplorerCore.Instance.OnUnityLog));
+            try
+            {
+                //Application.add_logMessageReceived(new Action<string, string, LogType>(ExplorerCore.Instance.OnUnityLog));
 
-            //SceneManager.add_sceneLoaded(
-            //    new Action<Scene, LoadSceneMode>(ExplorerCore.Instance.OnSceneLoaded1));
-
-            //SceneManager.add_activeSceneChanged(
-            //    new Action<Scene, Scene>(ExplorerCore.Instance.OnSceneLoaded2));
+                var logType = ReflectionUtility.GetTypeByName("UnityEngine.Application+LogCallback");
+                var castMethod = logType.GetMethod("op_Implicit", new[] { typeof(Action<string, string, LogType>) });
+                var addMethod = typeof(Application).GetMethod("add_logMessageReceived", BF.Static | BF.Public, null, new[] { logType }, null);
+                addMethod.Invoke(null, new[]
+                {
+                    castMethod.Invoke(null, new[] { new Action<string, string, LogType>(ExplorerCore.Instance.OnUnityLog) })
+                });
+            }
+            catch 
+            {
+                ExplorerCore.LogWarning("Exception setting up Unity log listener, make sure Unity libraries have been unstripped!");
+            }
         }
 
         internal delegate IntPtr d_LayerToName(int layer);
