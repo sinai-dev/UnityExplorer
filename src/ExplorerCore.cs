@@ -17,7 +17,7 @@ namespace UnityExplorer
     public class ExplorerCore
     {
         public const string NAME = "UnityExplorer";
-        public const string VERSION = "3.2.7";
+        public const string VERSION = "3.2.8";
         public const string AUTHOR = "Sinai";
         public const string GUID = "com.sinai.unityexplorer";
 
@@ -44,12 +44,12 @@ namespace UnityExplorer
 
             Instance = this;
 
-            RuntimeProvider.Init();
-
             if (!Directory.Exists(EXPLORER_FOLDER))
                 Directory.CreateDirectory(EXPLORER_FOLDER);
 
             ExplorerConfig.OnLoad();
+
+            RuntimeProvider.Init();
 
             InputManager.Init();
 
