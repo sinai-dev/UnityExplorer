@@ -56,9 +56,9 @@ For example, you could run this code to define a temporary class (it will be vis
 public class MyClass
 {
     public static void Method()
-	{
-	    UnityExplorer.ExplorerCore.Log("hello");
-	}
+    {
+        UnityExplorer.ExplorerCore.Log("hello");
+    }
 }
 ```
 
