@@ -12,6 +12,7 @@ using UnityEngine.UI;
 using UnityExplorer.UI.Reusable;
 using UnityExplorer.UI.Main.CSConsole;
 using UnityExplorer.Core;
+using UnityExplorer.Core.Unity;
 #if CPP
 using UnityExplorer.Core.Runtime.Il2Cpp;
 #endif
@@ -56,12 +57,9 @@ namespace UnityExplorer.UI.Main.CSConsole
                 DummyBehaviour.Setup();
 #endif
 
-                ResetConsole();
+                ResetConsole(false);
                 // Make sure compiler is supported on this platform
                 Evaluator.Compile("");
-
-                foreach (string use in DefaultUsing)
-                    AddUsing(use);
 
                 return true;
             }
@@ -79,7 +77,7 @@ namespace UnityExplorer.UI.Main.CSConsole
             }
         }
 
-        public void ResetConsole()
+        public void ResetConsole(bool log = true)
         {
             if (Evaluator != null)
                 Evaluator.Dispose();
@@ -89,6 +87,12 @@ namespace UnityExplorer.UI.Main.CSConsole
             Evaluator = new ScriptEvaluator(new StringWriter(m_evalLogBuilder)) { InteractiveBaseClass = typeof(ScriptInteraction) };
 
             UsingDirectives = new List<string>();
+
+            foreach (string use in DefaultUsing)
+                AddUsing(use);
+
+            if (log)
+                ExplorerCore.Log($"C# Console reset. Using directives:\r\n{Evaluator.GetUsing()}");
         }
 
         public override void Update()
@@ -96,7 +100,6 @@ namespace UnityExplorer.UI.Main.CSConsole
             UpdateConsole();
 
             AutoCompleter.Update();
-
 #if CPP
             Il2CppCoroutine.Process();
 #endif
@@ -572,11 +575,40 @@ The following helper methods are available:
             highlightTextInput.supportRichText = true;
             highlightTextInput.fontSize = fontSize;
 
-#endregion
+            #endregion
 
-#region COMPILE BUTTON
+            #region COMPILE BUTTON BAR
 
-            var compileBtnObj = UIFactory.CreateButton(Content);
+            var horozGroupObj = UIFactory.CreateHorizontalGroup(Content, new Color(1, 1, 1, 0));
+            var horozGroup = horozGroupObj.GetComponent<HorizontalLayoutGroup>();
+            horozGroup.padding.left = 2;
+            horozGroup.padding.top = 2;
+            horozGroup.padding.right = 2;
+            horozGroup.padding.bottom = 2;
+
+            var resetBtnObj = UIFactory.CreateButton(horozGroupObj);
+            var resetBtnLayout = resetBtnObj.AddComponent<LayoutElement>();
+            resetBtnLayout.preferredWidth = 80;
+            resetBtnLayout.flexibleWidth = 0;
+            resetBtnLayout.minHeight = 45;
+            resetBtnLayout.flexibleHeight = 0;
+            var resetButton = resetBtnObj.GetComponent<Button>();
+            var resetBtnColors = resetButton.colors;
+            resetBtnColors.normalColor = "666666".ToColor();
+            resetButton.colors = resetBtnColors;
+            var resetBtnText = resetBtnObj.GetComponentInChildren<Text>();
+            resetBtnText.text = "Reset";
+            resetBtnText.fontSize = 18;
+            resetBtnText.color = Color.white;
+
+            // Set compile button callback now that we have the Input Field reference
+            resetButton.onClick.AddListener(ResetCallback);
+            void ResetCallback()
+            {
+                ResetConsole();
+            }
+
+            var compileBtnObj = UIFactory.CreateButton(horozGroupObj);
             var compileBtnLayout = compileBtnObj.AddComponent<LayoutElement>();
             compileBtnLayout.preferredWidth = 80;
             compileBtnLayout.flexibleWidth = 0;
@@ -601,7 +633,7 @@ The following helper methods are available:
                 }
             }
 
-#endregion
+            #endregion
 
             //mainTextInput.supportRichText = false;
 
