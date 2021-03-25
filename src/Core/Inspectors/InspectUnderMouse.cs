@@ -37,20 +37,29 @@ namespace UnityExplorer.Core.Inspectors
             UI = new MouseInspectorUI();
         }
 
-        public static void StartInspect()
+        private static readonly List<Graphic> _wasDisabledGraphics = new List<Graphic>();
+        private static readonly List<CanvasGroup> _wasDisabledCanvasGroups = new List<CanvasGroup>();
+        private static readonly List<GameObject> _objectsAddedCastersTo = new List<GameObject>();
+
+        public static void StartInspect(MouseInspectMode mode)
         {
+            Mode = mode;
             Enabled = true;
             MainMenu.Instance.MainPanel.SetActive(false);
             
             UI.s_UIContent.SetActive(true);
 
-            // recache Graphic Raycasters each time we start
-            var casters = RuntimeProvider.Instance.FindObjectsOfTypeAll(typeof(GraphicRaycaster));
-            m_gCasters = new GraphicRaycaster[casters.Length];
-            for (int i = 0; i < casters.Length; i++)
+            if (mode == MouseInspectMode.UI)
             {
-                m_gCasters[i] = casters[i].Cast(typeof(GraphicRaycaster)) as GraphicRaycaster;
+                SetupUIRaycast();
             }
+        }
+
+        internal static void ClearHitData()
+        {
+            s_lastHit = null;
+            UI.s_objNameLabel.text = "No hits...";
+            UI.s_objPathLabel.text = "";
         }
 
         public static void StopInspect()
@@ -58,6 +67,9 @@ namespace UnityExplorer.Core.Inspectors
             Enabled = false;
             MainMenu.Instance.MainPanel.SetActive(true);
             UI.s_UIContent.SetActive(false);
+
+            if (Mode == MouseInspectMode.UI)
+                StopUIInspect();
 
             ClearHitData();
         }
@@ -91,6 +103,18 @@ namespace UnityExplorer.Core.Inspectors
             }
         }
 
+        internal static void UpdatePosition(Vector2 mousePos)
+        {
+            s_lastMousePos = mousePos;
+
+            var inversePos = UIManager.CanvasRoot.transform.InverseTransformPoint(mousePos);
+
+            UI.s_mousePosLabel.text = $"<color=grey>Mouse Position:</color> {mousePos.ToString()}";
+
+            float yFix = mousePos.y < 120 ? 80 : -80;
+            UI.s_UIContent.transform.localPosition = new Vector3(inversePos.x, inversePos.y + yFix, 0);
+        }
+
         internal static void OnHitGameObject(GameObject obj)
         {
             if (obj != s_lastHit)
@@ -106,6 +130,8 @@ namespace UnityExplorer.Core.Inspectors
                 InspectorManager.Instance.Inspect(obj);
             }
         }
+
+        // Collider raycasting
 
         internal static void RaycastWorld(Vector2 mousePos)
         {
@@ -124,6 +150,54 @@ namespace UnityExplorer.Core.Inspectors
             }
         }
 
+        // UI Graphic raycasting
+
+        private static void SetupUIRaycast()
+        {
+            foreach (var obj in RuntimeProvider.Instance.FindObjectsOfTypeAll(typeof(Canvas)))
+            {
+                var canvas = obj.Cast(typeof(Canvas)) as Canvas;
+                if (!canvas || !canvas.enabled || !canvas.gameObject.activeInHierarchy)
+                    continue;
+                if (!canvas.GetComponent<GraphicRaycaster>())
+                {
+                    canvas.gameObject.AddComponent<GraphicRaycaster>();
+                    //ExplorerCore.Log("Added raycaster to " + canvas.name);
+                    _objectsAddedCastersTo.Add(canvas.gameObject);
+                }
+            }
+
+            // recache Graphic Raycasters each time we start
+            var casters = RuntimeProvider.Instance.FindObjectsOfTypeAll(typeof(GraphicRaycaster));
+            m_gCasters = new GraphicRaycaster[casters.Length];
+            for (int i = 0; i < casters.Length; i++)
+            {
+                m_gCasters[i] = casters[i].Cast(typeof(GraphicRaycaster)) as GraphicRaycaster;
+            }
+
+            // enable raycastTarget on Graphics
+            foreach (var obj in RuntimeProvider.Instance.FindObjectsOfTypeAll(typeof(Graphic)))
+            {
+                var graphic = obj.Cast(typeof(Graphic)) as Graphic;
+                if (!graphic || !graphic.enabled || graphic.raycastTarget || !graphic.gameObject.activeInHierarchy)
+                    continue;
+                graphic.raycastTarget = true;
+                //ExplorerCore.Log("Enabled raycastTarget on " + graphic.name);
+                _wasDisabledGraphics.Add(graphic);
+            }
+
+            // enable blocksRaycasts on CanvasGroups
+            foreach (var obj in RuntimeProvider.Instance.FindObjectsOfTypeAll(typeof(CanvasGroup)))
+            {
+                var canvas = obj.Cast(typeof(CanvasGroup)) as CanvasGroup;
+                if (!canvas || !canvas.gameObject.activeInHierarchy || canvas.blocksRaycasts)
+                    continue;
+                canvas.blocksRaycasts = true;
+                //ExplorerCore.Log("Enabled raycasts on " + canvas.name);
+                _wasDisabledCanvasGroups.Add(canvas);
+            }
+        }
+
         internal static void RaycastUI(Vector2 mousePos)
         {
             var ped = new PointerEventData(null)
@@ -136,6 +210,11 @@ namespace UnityExplorer.Core.Inspectors
 #else
             var list = new Il2CppSystem.Collections.Generic.List<RaycastResult>();
 #endif
+            //ExplorerCore.Log("~~~~~~~~~ begin raycast ~~~~~~~~");
+            GameObject hitObject = null;
+            int highestLayer = int.MinValue;
+            int highestOrder = int.MinValue;
+            int highestDepth = int.MinValue;
             foreach (var gr in m_gCasters)
             {
                 gr.Raycast(ped, list);
@@ -144,14 +223,40 @@ namespace UnityExplorer.Core.Inspectors
                 {
                     foreach (var hit in list)
                     {
-                        if (hit.gameObject)
+                        if (!hit.gameObject)
+                            continue;
+
+                        if (hit.gameObject.GetComponent<CanvasGroup>() is CanvasGroup group && group.alpha == 0)
+                            continue;
+
+                        if (hit.gameObject.GetComponent<Graphic>() is Graphic graphic && graphic.color.a == 0f)
+                            continue;
+
+                        //ExplorerCore.Log("Hit: " + hit.gameObject.name + ", depth: " + hit.depth + ", layer: " + hit.sortingLayer + ", order: " + hit.sortingOrder);
+
+                        if (hit.sortingLayer < highestLayer)
+                            continue;
+
+                        if (hit.sortingLayer > highestLayer)
                         {
-                            var obj = hit.gameObject;
-
-                            OnHitGameObject(obj);
-
-                            break;
+                            highestLayer = hit.sortingLayer;
+                            highestOrder = int.MinValue;
                         }
+
+                        if (hit.depth < highestDepth)
+                            continue;
+
+                        if (hit.depth > highestDepth)
+                        {
+                            highestDepth = hit.depth;
+                            highestOrder = int.MinValue;
+                        }
+
+                        if (hit.sortingOrder <= highestOrder)
+                            continue;
+
+                        highestOrder = hit.sortingOrder;
+                        hitObject = hit.gameObject;
                     }
                 }
                 else
@@ -160,25 +265,30 @@ namespace UnityExplorer.Core.Inspectors
                         ClearHitData();
                 }
             }
+
+            if (hitObject)
+                OnHitGameObject(hitObject);
+
+            //ExplorerCore.Log("~~~~~~~~~ end raycast ~~~~~~~~");
         }
 
-        internal static void UpdatePosition(Vector2 mousePos)
+        private static void StopUIInspect()
         {
-            s_lastMousePos = mousePos;
+            foreach (var obj in _objectsAddedCastersTo)
+            {
+                if (obj.GetComponent<GraphicRaycaster>() is GraphicRaycaster raycaster)
+                    GameObject.Destroy(raycaster);
+            }
 
-            var inversePos = UIManager.CanvasRoot.transform.InverseTransformPoint(mousePos);
+            foreach (var graphic in _wasDisabledGraphics)
+                graphic.raycastTarget = false;
 
-            UI.s_mousePosLabel.text = $"<color=grey>Mouse Position:</color> {mousePos.ToString()}";
+            foreach (var canvas in _wasDisabledCanvasGroups)
+                canvas.blocksRaycasts = false;
 
-            float yFix = mousePos.y < 120 ? 80 : -80;
-            UI.s_UIContent.transform.localPosition = new Vector3(inversePos.x, inversePos.y + yFix, 0);
-        }
-
-        internal static void ClearHitData()
-        {
-            s_lastHit = null;
-            UI.s_objNameLabel.text = "No hits...";
-            UI.s_objPathLabel.text = "";
+            _objectsAddedCastersTo.Clear();
+            _wasDisabledCanvasGroups.Clear();
+            _wasDisabledGraphics.Clear();
         }
     }
 }

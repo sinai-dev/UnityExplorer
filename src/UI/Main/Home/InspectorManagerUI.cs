@@ -150,8 +150,7 @@ namespace UnityExplorer.UI.Main.Home
 
             void OnInspectMouseClicked()
             {
-                InspectUnderMouse.Mode = mode;
-                InspectUnderMouse.StartInspect();
+                InspectUnderMouse.StartInspect(mode);
             }
         }
 
