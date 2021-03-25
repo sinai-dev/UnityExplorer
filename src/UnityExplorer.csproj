@@ -24,10 +24,6 @@
     <PlatformTarget>x64</PlatformTarget>
     <Prefer32Bit>false</Prefer32Bit>
     <RootNamespace>UnityExplorer</RootNamespace>
-    <!-- Set this to the BepInEx Il2Cpp Game folder, without the ending '\' character. -->
-    <BIECppGameFolder>E:\source\Unity Projects\Test\_BUILD</BIECppGameFolder>
-    <!-- Set this to the MelonLoader Il2Cpp Game folder, without the ending '\' character. -->
-    <MLCppGameFolder>E:\source\Unity Projects\Test\_BUILD</MLCppGameFolder>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>
@@ -161,102 +157,102 @@
   <!-- MelonLoader Il2Cpp refs -->
   <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)'=='true|true'">
     <Reference Include="MelonLoader">
-      <HintPath>$(MLCppGameFolder)\MelonLoader\MelonLoader.dll</HintPath>
+      <HintPath>..\lib\MelonLoader.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnhollowerBaseLib">
-      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnhollowerBaseLib.dll</HintPath>
+      <HintPath>..\lib\UnhollowerBaseLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Il2Cppmscorlib">
-      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\Il2Cppmscorlib.dll</HintPath>
+      <HintPath>..\lib\melonloader-il2cpp\Il2Cppmscorlib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Il2CppSystem.Core">
-      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\Il2CppSystem.Core.dll</HintPath>
+      <HintPath>..\lib\melonloader-il2cpp\Il2CppSystem.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\lib\melonloader-il2cpp\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>..\lib\melonloader-il2cpp\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+      <HintPath>..\lib\melonloader-il2cpp\UnityEngine.PhysicsModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>..\lib\melonloader-il2cpp\UnityEngine.TextRenderingModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.UI.dll</HintPath>
+      <HintPath>..\lib\melonloader-il2cpp\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UIModule">
-      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.UIModule.dll</HintPath>
+      <HintPath>..\lib\melonloader-il2cpp\UnityEngine.UIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>$(MLCppGameFolder)\MelonLoader\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>..\lib\melonloader-il2cpp\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <!-- BepInEx Il2Cpp refs -->
   <ItemGroup Condition="'$(IsMelonLoader)|$(IsCpp)'=='false|true'">
     <Reference Include="BepInEx">
-      <HintPath>$(BIECppGameFolder)\BepInEx\core\BepInEx.Core.dll</HintPath>
+      <HintPath>..\lib\BepInEx.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="0Harmony">
-      <HintPath>$(BIECppGameFolder)\BepInEx\core\0Harmony.dll</HintPath>
+      <HintPath>..\lib\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="BepInEx.IL2CPP">
-      <HintPath>$(BIECppGameFolder)\BepInEx\core\BepInEx.IL2CPP.dll</HintPath>
+      <HintPath>..\lib\BepInEx.IL2CPP.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnhollowerBaseLib">
-      <HintPath>$(BIECppGameFolder)\BepInEx\core\UnhollowerBaseLib.dll</HintPath>
+      <HintPath>..\lib\UnhollowerBaseLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Il2Cppmscorlib">
-      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\Il2Cppmscorlib.dll</HintPath>
+      <HintPath>..\lib\bepinex-il2cpp\Il2Cppmscorlib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Il2CppSystem.Core">
-      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\Il2CppSystem.Core.dll</HintPath>
+      <HintPath>..\lib\bepinex-il2cpp\Il2CppSystem.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.dll</HintPath>
+      <HintPath>..\lib\bepinex-il2cpp\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>..\lib\bepinex-il2cpp\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.PhysicsModule.dll</HintPath>
+      <HintPath>..\lib\bepinex-il2cpp\UnityEngine.PhysicsModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>..\lib\bepinex-il2cpp\UnityEngine.TextRenderingModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.UI.dll</HintPath>
+      <HintPath>..\lib\bepinex-il2cpp\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UIModule">
-      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.UIModule.dll</HintPath>
+      <HintPath>..\lib\bepinex-il2cpp\UnityEngine.UIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>$(BIECppGameFolder)\BepInEx\unhollowed\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>..\lib\bepinex-il2cpp\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

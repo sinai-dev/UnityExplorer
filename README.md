@@ -136,27 +136,17 @@ You can change the settings via the "Options" page of the main menu, or directly
 
 ## Building
 
-If you'd like to build this yourself, all you need to do is download this repository and build from Visual Studio. If you want to build for BepInEx or MelonLoader IL2CPP then you will need to install the mod loader for a game and set the directory in the `csproj` file.
+If you'd like to build this yourself, all you need to do is download this repository and build from Visual Studio. 
 
-For IL2CPP:
-1. Install BepInEx or MelonLoader for your game.
-2. Open the `src\UnityExplorer.csproj` file in a text editor.
-3. Set `BIECppGameFolder` (for BepInEx) and/or `MLCppGameFolder` (for MelonLoader) so the project can locate the necessary references.
-4. For Standalone builds, you can either install BepInEx for the game to build, or just change the .csproj file and set the Unhollower reference manually.
-
-For all builds:
 1. Open the `src\UnityExplorer.sln` project.
-2. Select `Solution 'UnityExplorer' (1 of 1 project)` in the Solution Explorer panel, and set the <b>Active config</b> property to the version you want to build, then build it.
+2. Select `Solution 'UnityExplorer' (1 of 1 project)` in the Solution Explorer panel, and set the <b>Active config</b> property to the version you want to build, then build it. Alternatively, use "Batch Build" and select all releases.
 3. The DLLs are built to the `Release\` folder in the root of the repository.
-4. If ILRepack fails or is missing, use the NuGet package manager to re-install `ILRepack.Lib.MSBuild.Task`, then re-build.
 
-## Credits
+The references are all inside the `lib\` folder, if you need to change them for some reason then you can replace them there.
 
-Written by Sinai.
+## Acknowledgments
 
-### Licensing
-
-This project uses code from:
 * (GPL) [ManlyMarco](https://github.com/ManlyMarco)'s [Runtime Unity Editor](https://github.com/ManlyMarco/RuntimeUnityEditor), which I used for some aspects of the C# Console and Auto-Complete features. The snippets I used are indicated with a comment.
 * (MIT) [denikson](https://github.com/denikson) (aka Horse)'s [mcs-unity](https://github.com/denikson/mcs-unity). I commented out the `SkipVisibilityExt` constructor since it was causing an exception with the Hook it attempted in IL2CPP.
+* (Apache) [HerpDerpenstine](https://github.com/HerpDerpinstine) for [MelonCoroutines](https://github.com/LavaGang/MelonLoader/blob/master/MelonLoader.Support.Il2Cpp/MelonCoroutines.cs), which were included for standalone Il2CPP coroutine support.
 * (Apache) [InGameCodeEditor](https://assetstore.unity.com/packages/tools/gui/ingame-code-editor-144254) was used as the base for the syntax highlighting for UnityExplorer's C# console, although it has been heavily rewritten and optimized. Used classes are in the `UnityExplorer.UI.Main.CSConsole.Lexer` namespace.
