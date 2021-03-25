@@ -46,6 +46,32 @@
 * <b>C# Console</b>: Interactive console for evaluating C# methods on the fly, with some basic helpers.
 * <b>Inspect-under-mouse</b>: Hover over an object with a collider and inspect it by clicking on it. There's also a UI mode to inspect UI objects.
 
+### C# Console Tips
+
+The C# Console can be used to define temporary classes and methods, or it can be used to evaluate an expression, but you cannot do both at the same time.
+
+For example, you could run this code to define a temporary class (it will be visible within the console until you run `Reset();`).
+
+```csharp
+public class MyClass
+{
+    public static void Method()
+	{
+	    UnityExplorer.ExplorerCore.Log("hello");
+	}
+}
+```
+
+You could then delete or comment out the class and run the following expression to run that method:
+
+```csharp
+MyClass.Method();
+```
+
+However, you cannot define a class and run it both at the same time. You must either define class(es) and run that, or define an expression and run that.
+
+You can also make use of the helper methods in the console to simplify some tasks, which you can see listed when the console has nothing entered for input. These methods are **not** accessible within any temporary classes you define, they can only be used in the expression context.
+
 ## How to install
 
 ### BepInEx
