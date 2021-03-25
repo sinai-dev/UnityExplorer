@@ -2,6 +2,10 @@
 using System;
 using System.IO;
 using MelonLoader;
+using UnityExplorer;
+
+[assembly: MelonInfo(typeof(ExplorerMelonMod), ExplorerCore.NAME, ExplorerCore.VERSION, ExplorerCore.AUTHOR)]
+[assembly: MelonGame(null, null)]
 
 namespace UnityExplorer
 {

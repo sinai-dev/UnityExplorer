@@ -2,13 +2,6 @@
 using System.Runtime.InteropServices;
 using UnityExplorer;
 
-#if ML
-using MelonLoader;
-
-[assembly: MelonInfo(typeof(ExplorerMelonMod), "UnityExplorer", ExplorerCore.VERSION, ExplorerCore.AUTHOR)]
-[assembly: MelonGame(null, null)]
-#endif
-
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
