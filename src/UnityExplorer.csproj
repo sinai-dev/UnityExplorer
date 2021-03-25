@@ -261,6 +261,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\CSharp\DummyBehaviour.cs" />
+    <Compile Include="Core\Runtime\Il2Cpp\Il2CppCoroutine.cs" />
     <Compile Include="Loader\ExplorerBepIn6Plugin.cs" />
     <Compile Include="Loader\ExplorerStandalone.cs" />
     <Compile Include="Core\Runtime\Il2Cpp\Il2CppReflection.cs" />

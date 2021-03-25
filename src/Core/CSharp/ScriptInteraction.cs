@@ -4,6 +4,11 @@ using UnityExplorer.UI;
 using UnityExplorer.UI.Main;
 using UnityExplorer.Core.Inspectors;
 using UnityExplorer.UI.Main.CSConsole;
+using System.Collections;
+using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
+using UnityExplorer.Core.Runtime;
 
 namespace UnityExplorer.Core.CSharp
 {
@@ -14,6 +19,11 @@ namespace UnityExplorer.Core.CSharp
             ExplorerCore.Log(message);
         }
 
+        public static void StartCoroutine(IEnumerator ienumerator)
+        {
+            RuntimeProvider.Instance.StartConsoleCoroutine(ienumerator);
+        }
+
         public static void AddUsing(string directive)
         {
             CSharpConsole.Instance.AddUsing(directive);
@@ -21,7 +31,7 @@ namespace UnityExplorer.Core.CSharp
 
         public static void GetUsing()
         {
-            ExplorerCore.Log(CSharpConsole.Instance.m_evaluator.GetUsing());
+            ExplorerCore.Log(CSharpConsole.Instance.Evaluator.GetUsing());
         }
 
         public static void Reset()

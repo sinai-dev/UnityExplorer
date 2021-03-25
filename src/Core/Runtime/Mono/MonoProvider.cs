@@ -1,5 +1,6 @@
 ﻿#if MONO
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -7,6 +8,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityExplorer.Core;
+using UnityExplorer.Core.CSharp;
 
 namespace UnityExplorer.Core.Runtime.Mono
 {
@@ -23,6 +25,11 @@ namespace UnityExplorer.Core.Runtime.Mono
             Application.logMessageReceived += ExplorerCore.Instance.OnUnityLog;
             //SceneManager.sceneLoaded += ExplorerCore.Instance.OnSceneLoaded1;
             //SceneManager.activeSceneChanged += ExplorerCore.Instance.OnSceneLoaded2;
+        }
+
+        public override void StartConsoleCoroutine(IEnumerator routine)
+        {
+            DummyBehaviour.Instance.StartCoroutine(routine);
         }
 
         public override string LayerToName(int layer)
@@ -47,6 +54,14 @@ namespace UnityExplorer.Core.Runtime.Mono
         {
             return scene.rootCount;
         }
+    }
+}
+
+public static class MonoExtensions
+{
+    public static void Clear(this StringBuilder sb)
+    {
+        sb.Remove(0, sb.Length);
     }
 }
 

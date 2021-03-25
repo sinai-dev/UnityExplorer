@@ -205,7 +205,7 @@ namespace UnityExplorer.UI.Main.CSConsole
             {
                 // Credit ManylMarco
                 CSharpConsole.AutoCompletes.Clear();
-                string[] completions = CSharpConsole.Instance.m_evaluator.GetCompletions(input, out string prefix);
+                string[] completions = CSharpConsole.Instance.Evaluator.GetCompletions(input, out string prefix);
                 if (completions != null)
                 {
                     if (prefix == null)

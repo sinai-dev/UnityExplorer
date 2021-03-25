@@ -12,6 +12,9 @@ using UnityEngine.UI;
 using UnityExplorer.UI.Reusable;
 using UnityExplorer.UI.Main.CSConsole;
 using UnityExplorer.Core;
+#if CPP
+using UnityExplorer.Core.Runtime.Il2Cpp;
+#endif
 
 namespace UnityExplorer.UI.Main.CSConsole
 {
@@ -21,8 +24,8 @@ namespace UnityExplorer.UI.Main.CSConsole
 
         public static CSharpConsole Instance { get; private set; }
 
-        //public UI.CSConsole.CSharpConsole m_codeEditor;
-        public ScriptEvaluator m_evaluator;
+        public ScriptEvaluator Evaluator;
+        internal StringBuilder m_evalLogBuilder;
 
         public static List<string> UsingDirectives;
 
@@ -49,11 +52,13 @@ namespace UnityExplorer.UI.Main.CSConsole
                 InitConsole();
 
                 AutoCompleter.Init();
+#if MONO
+                DummyBehaviour.Setup();
+#endif
 
                 ResetConsole();
-
                 // Make sure compiler is supported on this platform
-                m_evaluator.Compile("");
+                Evaluator.Compile("");
 
                 foreach (string use in DefaultUsing)
                     AddUsing(use);
@@ -74,10 +79,27 @@ namespace UnityExplorer.UI.Main.CSConsole
             }
         }
 
+        public void ResetConsole()
+        {
+            if (Evaluator != null)
+                Evaluator.Dispose();
+
+            m_evalLogBuilder = new StringBuilder();
+
+            Evaluator = new ScriptEvaluator(new StringWriter(m_evalLogBuilder)) { InteractiveBaseClass = typeof(ScriptInteraction) };
+
+            UsingDirectives = new List<string>();
+        }
+
         public override void Update()
         {
             UpdateConsole();
+
             AutoCompleter.Update();
+
+#if CPP
+            Il2CppCoroutine.Process();
+#endif
         }
 
         public void AddUsing(string asm)
@@ -89,40 +111,34 @@ namespace UnityExplorer.UI.Main.CSConsole
             }
         }
 
-        public void Evaluate(string code, bool suppressWarning = false)
+        public void Evaluate(string code, bool supressLog = false)
         {
-            m_evaluator.Compile(code, out Mono.CSharp.CompiledMethod compiled);
-
-            if (compiled == null)
+            try
             {
-                if (!suppressWarning)
-                    ExplorerCore.LogWarning("Unable to compile the code!");
+                Evaluator.Run(code);
+
+                string output = ScriptEvaluator._textWriter.ToString();
+                var outputSplit = output.Split('\n');
+                if (outputSplit.Length >= 2)
+                    output = outputSplit[outputSplit.Length - 2];
+                m_evalLogBuilder.Clear();
+
+                if (ScriptEvaluator._reportPrinter.ErrorsCount > 0)
+                    throw new FormatException($"Unable to compile the code. Evaluator's last output was:\r\n{output}");
+
+                if (!supressLog)
+                    ExplorerCore.Log("Code executed successfully.");
             }
-            else
+            catch (FormatException fex)
             {
-                try
-                {
-                    object ret = VoidType.Value;
-                    compiled.Invoke(ref ret);
-                }
-                catch (Exception e)
-                {
-                    if (!suppressWarning)
-                        ExplorerCore.LogWarning($"Exception executing code: {e.GetType()}, {e.Message}\r\n{e.StackTrace}");
-                }
+                if (!supressLog)
+                    ExplorerCore.LogWarning(fex.Message);
             }
-        }
-
-        public void ResetConsole()
-        {
-            if (m_evaluator != null)
+            catch (Exception ex)
             {
-                m_evaluator.Dispose();
+                if (!supressLog)
+                    ExplorerCore.LogWarning(ex);
             }
-
-            m_evaluator = new ScriptEvaluator(new StringWriter(new StringBuilder())) { InteractiveBaseClass = typeof(ScriptInteraction) };
-
-            UsingDirectives = new List<string>();
         }
 
         // =================================================================================================
@@ -159,6 +175,8 @@ namespace UnityExplorer.UI.Main.CSConsole
 The following helper methods are available:
 
 * <color=#add490>Log(""message"")</color> logs a message to the debug console
+
+* <color=#add490>StartCoroutine(IEnumerator routine)</color> start the IEnumerator as a UnityEngine.Coroutine
 
 * <color=#add490>CurrentTarget()</color> returns the currently inspected target on the Home page
 
@@ -447,7 +465,7 @@ The following helper methods are available:
             mainGroup.childForceExpandHeight = true;
             mainGroup.childForceExpandWidth = true;
 
-            #region TOP BAR 
+#region TOP BAR 
 
             // Main group object
 
@@ -523,9 +541,9 @@ The following helper methods are available:
             autoIndentLayout.flexibleWidth = 0;
             autoIndentLayout.minHeight = 25;
 
-            #endregion
+#endregion
 
-            #region CONSOLE INPUT
+#region CONSOLE INPUT
 
             int fontSize = 16;
 
@@ -554,9 +572,9 @@ The following helper methods are available:
             highlightTextInput.supportRichText = true;
             highlightTextInput.fontSize = fontSize;
 
-            #endregion
+#endregion
 
-            #region COMPILE BUTTON
+#region COMPILE BUTTON
 
             var compileBtnObj = UIFactory.CreateButton(Content);
             var compileBtnLayout = compileBtnObj.AddComponent<LayoutElement>();
@@ -583,7 +601,7 @@ The following helper methods are available:
                 }
             }
 
-            #endregion
+#endregion
 
             //mainTextInput.supportRichText = false;
 

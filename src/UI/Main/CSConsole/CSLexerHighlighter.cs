@@ -53,15 +53,10 @@ namespace UnityExplorer.UI.Main.CSConsole
 "else", "equals", "false", "finally", "float", "for", "foreach", "from", "global", "goto", "group", 
 "if", "in", "int", "into", "is", "join", "let", "lock", "long", "new", "null", "object", "on", "orderby", "out", 
 "ref", "remove", "return", "sbyte", "select", "short", "sizeof", "stackalloc", "string", 
-"switch", "throw", "true", "try", "typeof", "uint", "ulong", "ushort", "var", "where", "while", "yield" }
-        };
-
-        public static KeywordMatch invalidKeywordMatcher = new KeywordMatch()
-        {
-            highlightColor = new Color(0.95f, 0.10f, 0.10f, 1.0f),
-            Keywords = new[] { "abstract", "async", "base", "class", "delegate", "enum", "explicit", "extern", "fixed", "get", 
-"implicit", "interface", "internal", "namespace", "operator", "override", "params", "private", "protected", "public", 
-"using", "partial", "readonly", "sealed", "set", "static", "struct", "this", "unchecked", "unsafe", "value", "virtual", "volatile", "void" }
+"switch", "throw", "true", "try", "typeof", "uint", "ulong", "ushort", "var", "where", "while", "yield",
+"abstract", "async", "base", "class", "delegate", "enum", "explicit", "extern", "fixed", "get",
+"implicit", "interface", "internal", "namespace", "operator", "override", "params", "private", "protected", "public",
+"using", "partial", "readonly", "sealed", "set", "static", "struct", "this", "unchecked", "unsafe", "value", "virtual", "volatile", "void"}
         };
 
         // ~~~~~~~ ctor ~~~~~~~
@@ -78,7 +73,6 @@ namespace UnityExplorer.UI.Main.CSConsole
                 numberMatcher,
                 stringMatcher,
                 validKeywordMatcher,
-                invalidKeywordMatcher,
             };
 
             foreach (Matcher lexer in matchers)

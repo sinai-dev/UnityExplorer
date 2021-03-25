@@ -10,6 +10,7 @@ using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 namespace UnityExplorer.Core.Runtime.Il2Cpp
 {
@@ -39,6 +40,11 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             {
                 ExplorerCore.LogWarning("Exception setting up Unity log listener, make sure Unity libraries have been unstripped!");
             }
+        }
+
+        public override void StartConsoleCoroutine(IEnumerator routine)
+        {
+            Il2CppCoroutine.Start(routine);
         }
 
         internal delegate IntPtr d_LayerToName(int layer);

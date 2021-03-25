@@ -15,11 +15,12 @@ namespace UnityExplorer.Core.CSharp
             "mscorlib", "System.Core", "System", "System.Xml"
         };
 
-        private readonly TextWriter tw;
+        internal static TextWriter _textWriter;
+        internal static StreamReportPrinter _reportPrinter;
 
         public ScriptEvaluator(TextWriter tw) : base(BuildContext(tw))
         {
-            this.tw = tw;
+            _textWriter = tw;
 
             ImportAppdomainAssemblies(ReferenceAssembly);
             AppDomain.CurrentDomain.AssemblyLoad += OnAssemblyLoad;
@@ -28,23 +29,22 @@ namespace UnityExplorer.Core.CSharp
         public void Dispose()
         {
             AppDomain.CurrentDomain.AssemblyLoad -= OnAssemblyLoad;
-            tw.Dispose();
+            _textWriter.Dispose();
         }
 
         private void OnAssemblyLoad(object sender, AssemblyLoadEventArgs args)
         {
             string name = args.LoadedAssembly.GetName().Name;
+
             if (StdLib.Contains(name))
-            {
                 return;
-            }
 
             ReferenceAssembly(args.LoadedAssembly);
         }
 
         private static CompilerContext BuildContext(TextWriter tw)
         {
-            var reporter = new StreamReportPrinter(tw);
+            _reportPrinter = new StreamReportPrinter(tw);
 
             var settings = new CompilerSettings
             {
@@ -56,7 +56,7 @@ namespace UnityExplorer.Core.CSharp
                 EnhancedWarnings = false
             };
 
-            return new CompilerContext(settings, reporter);
+            return new CompilerContext(settings, _reportPrinter);
         }
 
         private static void ImportAppdomainAssemblies(Action<Assembly> import)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -35,6 +36,8 @@ namespace UnityExplorer.Core.Runtime
         public abstract void Initialize();
 
         public abstract void SetupEvents();
+
+        public abstract void StartConsoleCoroutine(IEnumerator routine);
 
         // Unity API handlers
 
