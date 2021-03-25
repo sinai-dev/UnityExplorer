@@ -18,7 +18,7 @@
 - [How to install](#how-to-install)
 - [Mod Config](#mod-config)
 - [Building](#building)
-- [Credits](#credits)
+- [Acknowledgments](#acknowledgments)
 
 ## Releases
 
@@ -146,7 +146,13 @@ The references are all inside the `lib\` folder, if you need to change them for 
 
 ## Acknowledgments
 
-* (GPL) [ManlyMarco](https://github.com/ManlyMarco)'s [Runtime Unity Editor](https://github.com/ManlyMarco/RuntimeUnityEditor), which I used for some aspects of the C# Console and Auto-Complete features. The snippets I used are indicated with a comment.
-* (MIT) [denikson](https://github.com/denikson) (aka Horse)'s [mcs-unity](https://github.com/denikson/mcs-unity). I commented out the `SkipVisibilityExt` constructor since it was causing an exception with the Hook it attempted in IL2CPP.
-* (Apache) [HerpDerpenstine](https://github.com/HerpDerpinstine) for [MelonCoroutines](https://github.com/LavaGang/MelonLoader/blob/master/MelonLoader.Support.Il2Cpp/MelonCoroutines.cs), which were included for standalone Il2CPP coroutine support.
+This project uses code from:
+
+* (GPL) [ManlyMarco](https://github.com/ManlyMarco)'s [Runtime Unity Editor](https://github.com/ManlyMarco/RuntimeUnityEditor) REPL Console was used as the base for the C# Console and autocomplete features, in the `UnityExplorer.Core.CSharp` namespace.
+* (MIT) [denikson](https://github.com/denikson) (aka Horse)'s [mcs-unity](https://github.com/denikson/mcs-unity) is used as a reference for the C# Console, but I commented out the `SkipVisibilityExt` constructor since it was causing an exception with the Hook it attempted in IL2CPP.
+* (Apache) [HerpDerpenstine](https://github.com/HerpDerpinstine)'s [MelonCoroutines](https://github.com/LavaGang/MelonLoader/blob/master/MelonLoader.Support.Il2Cpp/MelonCoroutines.cs) were included for standalone Il2CPP coroutine support, as `UnityExplorer.Core.Runtime.Il2Cpp.Il2CppCoroutine`.
 * (Apache) [InGameCodeEditor](https://assetstore.unity.com/packages/tools/gui/ingame-code-editor-144254) was used as the base for the syntax highlighting for UnityExplorer's C# console, although it has been heavily rewritten and optimized. Used classes are in the `UnityExplorer.UI.Main.CSConsole.Lexer` namespace.
+
+### Disclaimer
+
+UnityExplorer is in no way associated with Unity Technologies. "Unity", Unity logos, and other Unity trademarks are trademarks or registered trademarks of Unity Technologies or its affiliates in the U.S. and elsewhere.
