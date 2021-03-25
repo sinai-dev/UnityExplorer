@@ -146,12 +146,10 @@ The references are all inside the `lib\` folder, if you need to change them for 
 
 ## Acknowledgments
 
-This project uses code from:
-
-* (GPL) [ManlyMarco](https://github.com/ManlyMarco)'s [Runtime Unity Editor](https://github.com/ManlyMarco/RuntimeUnityEditor) REPL Console was used as the base for the C# Console and autocomplete features, in the `UnityExplorer.Core.CSharp` namespace.
-* (MIT) [denikson](https://github.com/denikson) (aka Horse)'s [mcs-unity](https://github.com/denikson/mcs-unity) is used as a reference for the C# Console, but I commented out the `SkipVisibilityExt` constructor since it was causing an exception with the Hook it attempted in IL2CPP.
-* (Apache) [HerpDerpenstine](https://github.com/HerpDerpinstine)'s [MelonCoroutines](https://github.com/LavaGang/MelonLoader/blob/master/MelonLoader.Support.Il2Cpp/MelonCoroutines.cs) were included for standalone Il2CPP coroutine support, as `UnityExplorer.Core.Runtime.Il2Cpp.Il2CppCoroutine`.
-* (Apache) [InGameCodeEditor](https://assetstore.unity.com/packages/tools/gui/ingame-code-editor-144254) was used as the base for the syntax highlighting for UnityExplorer's C# console, although it has been heavily rewritten and optimized. Used classes are in the `UnityExplorer.UI.Main.CSConsole.Lexer` namespace.
+* [ManlyMarco](https://github.com/ManlyMarco) for [Runtime Unity Editor](https://github.com/ManlyMarco/RuntimeUnityEditor) (GPL), snippets from the REPL Console were used for UnityExplorer's C# Console.
+* [denikson](https://github.com/denikson) (aka Horse) for [mcs-unity](https://github.com/denikson/mcs-unity) (MIT), used as the `Mono.CSharp` reference for the C# Console.
+* [HerpDerpenstine](https://github.com/HerpDerpinstine) for [MelonCoroutines](https://github.com/LavaGang/MelonLoader/blob/master/MelonLoader.Support.Il2Cpp/MelonCoroutines.cs) (Apache), they were included for standalone Il2CPP coroutine support.
+* [InGameCodeEditor](https://assetstore.unity.com/packages/tools/gui/ingame-code-editor-144254) (Apache) was used as the base for the syntax highlighting for UnityExplorer's C# console (`UnityExplorer.UI.Main.CSConsole.Lexer`).
 
 ### Disclaimer
 
