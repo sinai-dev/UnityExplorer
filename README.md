@@ -13,13 +13,6 @@
   <img src="https://img.shields.io/github/downloads/sinai-dev/Explorer/total.svg" />
 </p>
 
-- [Releases](#releases)
-- [Features](#features)
-- [How to install](#how-to-install)
-- [Mod Config](#mod-config)
-- [Building](#building)
-- [Acknowledgments](#acknowledgments)
-
 ## Releases
 
 | Mod Loader  | IL2CPP | Mono |
@@ -30,6 +23,29 @@
 | Standalone | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.Standalone.Il2Cpp.zip) | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.Standalone.Mono.zip) | 
 
 \* BepInEx 6.X Mono release may not work on all games yet.
+
+## How to install
+
+### BepInEx
+
+0. Install [BepInEx](https://github.com/BepInEx/BepInEx) for your game. For IL2CPP you should use [BepInEx 6 (Bleeding Edge)](https://builds.bepis.io/projects/bepinex_be), for Mono you should use [BepInEx 5](https://github.com/BepInEx/BepInEx/releases) (until Mono support stabilizes in BepInEx 6).
+1. Download the UnityExplorer release for BepInEx IL2CPP or Mono above.
+2. Take the `UnityExplorer.BIE.___.dll` file and put it in `[GameFolder]\BepInEx\plugins\`
+3. In IL2CPP, you will need to download the [Unity libs](https://github.com/LavaGang/Unity-Runtime-Libraries) for the game's Unity version and put them in the `BepInEx\unity-libs\` folder. 
+
+### MelonLoader
+
+0. Install [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) 0.3+ for your game. Version 0.3 is currently in pre-release, so you must "Enable ALPHA Releases" in your MelonLoader Installer settings to see the option for it.
+1. Download the UnityExplorer release for MelonLoader IL2CPP or Mono above.
+2. Take the `UnityExplorer.ML.___.dll` file and put it in the `[GameFolder]\Mods\` folder.
+
+### Standalone
+
+The standalone release is based on the BepInEx build, so it requires Harmony 2.0 (or HarmonyX) to function properly.
+
+0. Load the DLL from your mod or inject it. You must also make sure `0Harmony.dll` is loaded, and `UnhollowerBaseLib.dll` for IL2CPP as well.
+1. Create an instance of Unity Explorer with `UnityExplorer.ExplorerStandalone.CreateInstance();`
+2. Optionally subscribe to the `ExplorerStandalone.OnLog` event to handle logging if you wish.
 
 ## Features
 
@@ -72,40 +88,13 @@ However, you cannot define a class and run it both at the same time. You must ei
 
 You can also make use of the helper methods in the console to simplify some tasks, which you can see listed when the console has nothing entered for input. These methods are **not** accessible within any temporary classes you define, they can only be used in the expression context.
 
-## How to install
-
-### BepInEx
-
-Note: For IL2CPP you should use [BepInEx 6 (Bleeding Edge)](https://builds.bepis.io/projects/bepinex_be), for Mono you should use [BepInEx 5](https://github.com/BepInEx/BepInEx/releases) (until Mono support stabilizes in BepInEx 6).
-
-0. Install [BepInEx](https://github.com/BepInEx/BepInEx) for your game.
-1. Download the UnityExplorer release for BepInEx IL2CPP or Mono above.
-2. Take the `UnityExplorer.BIE.___.dll` file and put it in `[GameFolder]\BepInEx\plugins\`
-3. In IL2CPP, it is highly recommended to get the base Unity libs for the game's Unity version and put them in the `BepInEx\unity-libs\` folder. 
-
-### MelonLoader
-
-Note: You must use version 0.3 of MelonLoader or greater. Version 0.3 is currently in pre-release, so you must opt-in from your MelonLoader installer (enable alpha releases).
-
-0. Install [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) for your game.
-1. Download the UnityExplorer release for MelonLoader IL2CPP or Mono above.
-2. Take the contents of the release and put it in the `[GameFolder]\Mods\` folder. It should look like `[GameFolder]\Mods\UnityExplorer.ML.___.dll`
-
-### Standalone
-
-The standalone release is based on the BepInEx build, so it requires Harmony 2.0 (or HarmonyX) to function properly.
-
-0. Load the DLL from your mod or inject it. You must also make sure that the required libraries (Harmony, Unhollower for Il2Cpp, etc) are loaded.
-1. Create an instance of Unity Explorer with `ExplorerStandalone.CreateInstance();`
-2. Optionally subscribe to the `ExplorerStandalone.OnLog` event to handle logging if you wish.
-
-## Logging
+### Logging
 
 Explorer saves all logs to disk (only keeps the most recent 10 logs). They can be found in a "UnityExplorer" folder in the same place as where you put the DLL file.
 
 These logs are also visible in the Debug Console part of the UI.
 
-## Settings
+### Settings
 
 You can change the settings via the "Options" page of the main menu, or directly from the config file (generated after first launch). The config file will be found either inside a "UnityExplorer" folder in the same directory as where you put the DLL file, or for BepInEx it will be at `BepInEx\config\UnityExplorer\`.
 
