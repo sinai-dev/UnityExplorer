@@ -130,6 +130,7 @@ If you'd like to build this yourself, all you need to do is download this reposi
 1. Open the `src\UnityExplorer.sln` project.
 2. Select `Solution 'UnityExplorer' (1 of 1 project)` in the Solution Explorer panel, and set the <b>Active config</b> property to the version you want to build, then build it. Alternatively, use "Batch Build" and select all releases.
 3. The DLLs are built to the `Release\` folder in the root of the repository.
+4. If ILRepack complains about an error, just change the Active config to a different release and then back again. This sometimes happens for the first time you build the project.
 
 The references are all inside the `lib\` folder, if you need to change them for some reason then you can replace them there.
 
