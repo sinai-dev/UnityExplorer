@@ -270,7 +270,7 @@ namespace UnityExplorer.Core.Inspectors.Reflection
 
             var scrollGroup = m_listContent.GetComponent<VerticalLayoutGroup>();
             scrollGroup.childForceExpandHeight = true;
-            scrollGroup.childControlHeight = true;
+            scrollGroup.SetChildControlHeight(true);
             scrollGroup.spacing = 2;
             scrollGroup.padding.top = 5;
             scrollGroup.padding.left = 5;

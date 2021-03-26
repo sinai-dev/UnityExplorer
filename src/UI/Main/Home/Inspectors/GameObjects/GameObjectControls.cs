@@ -247,7 +247,7 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             var controlsObj = UIFactory.CreateVerticalGroup(parent, new Color(0.07f, 0.07f, 0.07f));
             var controlsGroup = controlsObj.GetComponent<VerticalLayoutGroup>();
             controlsGroup.childForceExpandWidth = false;
-            controlsGroup.childControlWidth = true;
+            controlsGroup.SetChildControlWidth(true);
             controlsGroup.childForceExpandHeight = false;
             controlsGroup.spacing = 5;
             controlsGroup.padding.top = 4;
@@ -260,9 +260,9 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             var topRow = UIFactory.CreateHorizontalGroup(controlsObj, new Color(1, 1, 1, 0));
             var topRowGroup = topRow.GetComponent<HorizontalLayoutGroup>();
             topRowGroup.childForceExpandWidth = false;
-            topRowGroup.childControlWidth = true;
+            topRowGroup.SetChildControlWidth(true);
             topRowGroup.childForceExpandHeight = false;
-            topRowGroup.childControlHeight = true;
+            topRowGroup.SetChildControlHeight(true);
             topRowGroup.spacing = 5;
 
             var hideButtonObj = UIFactory.CreateButton(topRow);
@@ -292,10 +292,10 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             var contentObj = UIFactory.CreateVerticalGroup(controlsObj, new Color(1, 1, 1, 0));
             var contentGroup = contentObj.GetComponent<VerticalLayoutGroup>();
             contentGroup.childForceExpandHeight = false;
-            contentGroup.childControlHeight = true;
+            contentGroup.SetChildControlHeight(true);
             contentGroup.spacing = 5;
             contentGroup.childForceExpandWidth = true;
-            contentGroup.childControlWidth = true;
+            contentGroup.SetChildControlWidth(true);
 
             // ~~ add hide button callback now that we have scroll reference ~~
             hideButton.onClick.AddListener(OnHideClicked);
@@ -334,9 +334,9 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             var setParentGroupObj = UIFactory.CreateHorizontalGroup(contentObj, new Color(1, 1, 1, 0));
             var setParentGroup = setParentGroupObj.GetComponent<HorizontalLayoutGroup>();
             setParentGroup.childForceExpandHeight = false;
-            setParentGroup.childControlHeight = true;
+            setParentGroup.SetChildControlHeight(true);
             setParentGroup.childForceExpandWidth = false;
-            setParentGroup.childControlWidth = true;
+            setParentGroup.SetChildControlWidth(true);
             setParentGroup.spacing = 5;
             var setParentLayout = setParentGroupObj.AddComponent<LayoutElement>();
             setParentLayout.minHeight = 25;
@@ -380,9 +380,9 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             var topBarObj = UIFactory.CreateHorizontalGroup(parent, new Color(1, 1, 1, 0));
             var topGroup = topBarObj.GetComponent<HorizontalLayoutGroup>();
             topGroup.childForceExpandWidth = false;
-            topGroup.childControlWidth = true;
+            topGroup.SetChildControlWidth(true);
             topGroup.childForceExpandHeight = false;
-            topGroup.childControlHeight = true;
+            topGroup.SetChildControlHeight(true);
             topGroup.spacing = 5;
             var topLayout = topBarObj.AddComponent<LayoutElement>();
             topLayout.minHeight = 25;
@@ -462,9 +462,9 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             var rowObject = UIFactory.CreateHorizontalGroup(parent, new Color(1, 1, 1, 0));
             var rowGroup = rowObject.GetComponent<HorizontalLayoutGroup>();
             rowGroup.childForceExpandWidth = false;
-            rowGroup.childControlWidth = true;
+            rowGroup.SetChildControlWidth(true);
             rowGroup.childForceExpandHeight = false;
-            rowGroup.childControlHeight = true;
+            rowGroup.SetChildControlHeight(true);
             rowGroup.spacing = 5;
             var rowLayout = rowObject.AddComponent<LayoutElement>();
             rowLayout.minHeight = 25;
@@ -500,9 +500,9 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             var inputHolder = UIFactory.CreateVerticalGroup(rowObject, new Color(1, 1, 1, 0));
             var inputHolderGroup = inputHolder.GetComponent<VerticalLayoutGroup>();
             inputHolderGroup.childForceExpandHeight = false;
-            inputHolderGroup.childControlHeight = true;
+            inputHolderGroup.SetChildControlHeight(true);
             inputHolderGroup.childForceExpandWidth = false;
-            inputHolderGroup.childControlWidth = true;
+            inputHolderGroup.SetChildControlWidth(true);
 
             var inputObj = UIFactory.CreateInputField(inputHolder);
             var input = inputObj.GetComponent<InputField>();
@@ -556,7 +556,7 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             var bottomRow = UIFactory.CreateHorizontalGroup(contentObj, new Color(1, 1, 1, 0));
             var bottomGroup = bottomRow.GetComponent<HorizontalLayoutGroup>();
             bottomGroup.childForceExpandWidth = true;
-            bottomGroup.childControlWidth = true;
+            bottomGroup.SetChildControlWidth(true);
             bottomGroup.spacing = 4;
             var bottomLayout = bottomRow.AddComponent<LayoutElement>();
             bottomLayout.minHeight = 25;

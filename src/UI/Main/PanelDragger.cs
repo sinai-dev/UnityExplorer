@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using UnityExplorer.Core.Input;
 using System.IO;
 using UnityExplorer.Core.Inspectors;
+using System.Diagnostics;
 
 namespace UnityExplorer.UI
 {
@@ -39,7 +40,7 @@ namespace UnityExplorer.UI
             Vector3 dragPos = DragableArea.InverseTransformPoint(rawMousePos);
             bool inDragPos = DragableArea.rect.Contains(dragPos);
 
-            if (WasHoveringResize && s_resizeCursorImage)
+            if (WasHoveringResize && s_resizeCursorObj)
             {
                 UpdateHoverImagePos();
             }
@@ -141,16 +142,16 @@ namespace UnityExplorer.UI
 
         private bool WasHoveringResize { get; set; }
         private ResizeTypes m_lastResizeHoverType;
-        public static GameObject s_resizeCursorImage;
+        public static GameObject s_resizeCursorObj;
 
         private Rect m_resizeRect;
 
         private readonly Dictionary<ResizeTypes, Rect> m_resizeMask = new Dictionary<ResizeTypes, Rect>
         {
-            { ResizeTypes.Top,      Rect.zero },
-            { ResizeTypes.Left,     Rect.zero },
-            { ResizeTypes.Right,    Rect.zero },
-            { ResizeTypes.Bottom,   Rect.zero },
+            { ResizeTypes.Top,      default },
+            { ResizeTypes.Left,     default },
+            { ResizeTypes.Right,    default },
+            { ResizeTypes.Bottom,   default },
         };
 
         [Flags]
@@ -167,15 +168,15 @@ namespace UnityExplorer.UI
             BottomRight = Bottom | Right,
         }
 
+        private const int HALF_THICKESS = RESIZE_THICKNESS / 2;
+        private const int DBL_THICKNESS = RESIZE_THICKNESS* 2;
+
         private void UpdateResizeCache()
         {
-            int halfThick = RESIZE_THICKNESS / 2;
-            int dblThick = RESIZE_THICKNESS * 2;
-
-            m_resizeRect = new Rect(Panel.rect.x - halfThick,
-                Panel.rect.y - halfThick,
-                Panel.rect.width + dblThick,
-                Panel.rect.height + dblThick);
+            m_resizeRect = new Rect(Panel.rect.x - HALF_THICKESS,
+                Panel.rect.y - HALF_THICKESS,
+                Panel.rect.width + DBL_THICKNESS,
+                Panel.rect.height + DBL_THICKNESS);
 
             // calculate the four cross sections to use as flags
 
@@ -196,20 +197,25 @@ namespace UnityExplorer.UI
         private ResizeTypes GetResizeType(Vector2 mousePos)
         {
             // Calculate which part of the resize area we're in, if any.
+            // More readable method commented out below.
 
-            ResizeTypes mask = 0;
+            int mask = 0;
+            mask |= (int)ResizeTypes.Top * (m_resizeMask[ResizeTypes.Top].Contains(mousePos) ? 1 : 0);
+            mask |= (int)ResizeTypes.Bottom * (m_resizeMask[ResizeTypes.Bottom].Contains(mousePos) ? 1 : 0);
+            mask |= (int)ResizeTypes.Left * (m_resizeMask[ResizeTypes.Left].Contains(mousePos) ? 1 : 0);
+            mask |= (int)ResizeTypes.Right * (m_resizeMask[ResizeTypes.Right].Contains(mousePos) ? 1 : 0);
 
-            if (m_resizeMask[ResizeTypes.Top].Contains(mousePos))
-                mask |= ResizeTypes.Top;
-            else if (m_resizeMask[ResizeTypes.Bottom].Contains(mousePos))
-                mask |= ResizeTypes.Bottom;
+            //if (m_resizeMask[ResizeTypes.Top].Contains(mousePos))
+            //    mask |= ResizeTypes.Top;
+            //else if (m_resizeMask[ResizeTypes.Bottom].Contains(mousePos))
+            //    mask |= ResizeTypes.Bottom;
 
-            if (m_resizeMask[ResizeTypes.Left].Contains(mousePos))
-                mask |= ResizeTypes.Left;
-            else if (m_resizeMask[ResizeTypes.Right].Contains(mousePos))
-                mask |= ResizeTypes.Right;
+            //if (m_resizeMask[ResizeTypes.Left].Contains(mousePos))
+            //    mask |= ResizeTypes.Left;
+            //else if (m_resizeMask[ResizeTypes.Right].Contains(mousePos))
+            //    mask |= ResizeTypes.Right;
 
-            return mask;
+            return (ResizeTypes)mask;
         }
 
         public void OnHoverResize(ResizeTypes resizeType)
@@ -222,7 +228,7 @@ namespace UnityExplorer.UI
             WasHoveringResize = true;
             m_lastResizeHoverType = resizeType;
 
-            s_resizeCursorImage.SetActive(true);
+            s_resizeCursorObj.SetActive(true);
 
             // set the rotation for the resize icon
             float iconRotation = 0f;
@@ -239,9 +245,9 @@ namespace UnityExplorer.UI
                     iconRotation = 135f; break;
             }
 
-            Quaternion rot = s_resizeCursorImage.transform.rotation;
+            Quaternion rot = s_resizeCursorObj.transform.rotation;
             rot.eulerAngles = new Vector3(0, 0, iconRotation);
-            s_resizeCursorImage.transform.rotation = rot;
+            s_resizeCursorObj.transform.rotation = rot;
 
             UpdateHoverImagePos();
         }
@@ -250,13 +256,13 @@ namespace UnityExplorer.UI
         private void UpdateHoverImagePos()
         {
             RectTransform t = UIManager.CanvasRoot.GetComponent<RectTransform>();
-            s_resizeCursorImage.transform.localPosition = t.InverseTransformPoint(InputManager.MousePosition);
+            s_resizeCursorObj.transform.localPosition = t.InverseTransformPoint(InputManager.MousePosition);
         }
 
         public void OnHoverResizeEnd()
         {
             WasHoveringResize = false;
-            s_resizeCursorImage.SetActive(false);
+            s_resizeCursorObj.SetActive(false);
         }
 
         public void OnBeginResize(ResizeTypes resizeType)
@@ -321,19 +327,18 @@ namespace UnityExplorer.UI
         {
             try
             {
-                var sprite = UIManager.ResizeCursor;
+                s_resizeCursorObj = UIFactory.CreateLabel(UIManager.CanvasRoot.gameObject, TextAnchor.MiddleCenter);
 
-                s_resizeCursorImage = new GameObject("ResizeCursorImage");
-                s_resizeCursorImage.transform.SetParent(UIManager.CanvasRoot.transform);
+                var text = s_resizeCursorObj.GetComponent<Text>();
+                text.text = "↔";
+                text.fontSize = 35;
+                text.color = Color.white;
 
-                Image image = s_resizeCursorImage.AddComponent<Image>();
-                image.sprite = sprite;
-                image.material = Graphic.defaultGraphicMaterial;
-                RectTransform rect = image.transform.GetComponent<RectTransform>();
-                rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 32);
-                rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 32);
+                RectTransform rect = s_resizeCursorObj.transform.GetComponent<RectTransform>();
+                rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 64);
+                rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 64);
 
-                s_resizeCursorImage.SetActive(false);
+                s_resizeCursorObj.SetActive(false);
             }
             catch (Exception e)
             {

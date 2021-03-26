@@ -143,7 +143,7 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             var vertGroup = vertGroupObj.GetComponent<VerticalLayoutGroup>();
             vertGroup.childForceExpandHeight = true;
             vertGroup.childForceExpandWidth = false;
-            vertGroup.childControlWidth = true;
+            vertGroup.SetChildControlWidth(true);
             vertGroup.spacing = 5;
             var vertLayout = vertGroupObj.AddComponent<LayoutElement>();
             vertLayout.minWidth = 120;
@@ -175,9 +175,9 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             GameObject btnGroupObj = UIFactory.CreateHorizontalGroup(s_childListContent, new Color(0.07f, 0.07f, 0.07f));
             HorizontalLayoutGroup btnGroup = btnGroupObj.GetComponent<HorizontalLayoutGroup>();
             btnGroup.childForceExpandWidth = true;
-            btnGroup.childControlWidth = true;
+            btnGroup.SetChildControlWidth(true);
             btnGroup.childForceExpandHeight = false;
-            btnGroup.childControlHeight = true;
+            btnGroup.SetChildControlHeight(true);
             LayoutElement btnLayout = btnGroupObj.AddComponent<LayoutElement>();
             btnLayout.flexibleWidth = 320;
             btnLayout.minHeight = 25;

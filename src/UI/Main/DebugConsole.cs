@@ -14,7 +14,7 @@ namespace UnityExplorer.UI.Main
     {
         public static DebugConsole Instance { get; private set; }
 
-        public static bool LogUnity { get; set; } = ExplorerConfig.Instance.Log_Unity_Debug;
+        public static bool LogUnity { get; set; }
         //public static bool SaveToDisk { get; set; } = ModConfig.Instance.Save_Logs_To_Disk;
 
         internal static StreamWriter s_streamWriter;
@@ -32,8 +32,12 @@ namespace UnityExplorer.UI.Main
         public DebugConsole(GameObject parent)
         {
             Instance = this;
+            LogUnity = ExplorerConfig.Instance.Log_Unity_Debug;
 
             ConstructUI(parent);
+
+            if (ExplorerConfig.Instance.DebugConsole_Hidden)
+                ToggleShow();
 
             // append messages that logged before we were set up
             string preAppend = "";
@@ -47,9 +51,6 @@ namespace UnityExplorer.UI.Main
             m_textInput.text = preAppend;
 
             // set up IO
-
-            //if (!SaveToDisk)
-            //    return;
 
             var path = ExplorerCore.EXPLORER_FOLDER + @"\Logs";
 
@@ -78,6 +79,34 @@ namespace UnityExplorer.UI.Main
 
             foreach (var msg in AllMessages)
                 s_streamWriter.WriteLine(msg);
+        }
+
+        public static bool Hiding;
+
+        private GameObject m_logAreaObj;
+        private Text m_hideBtnText;
+        private LayoutElement m_mainLayout;
+
+        public static Action OnToggleShow;
+
+        public void ToggleShow()
+        {
+            if (m_logAreaObj.activeSelf)
+            {
+                Hiding = true;
+                m_logAreaObj.SetActive(false);
+                m_hideBtnText.text = "Show";
+                m_mainLayout.minHeight = 30;
+            }
+            else
+            {
+                Hiding = false;
+                m_logAreaObj.SetActive(true);
+                m_hideBtnText.text = "Hide";
+                m_mainLayout.minHeight = 190;
+            }
+
+            OnToggleShow?.Invoke();
         }
 
         public static string RemoveInvalidFilenameChars(string s)
@@ -129,8 +158,8 @@ namespace UnityExplorer.UI.Main
             var mainObj = UIFactory.CreateVerticalGroup(parent, new Color(0.1f, 0.1f, 0.1f, 1.0f));
 
             var mainGroup = mainObj.GetComponent<VerticalLayoutGroup>();
-            mainGroup.childControlHeight = true;
-            mainGroup.childControlWidth = true;
+            mainGroup.SetChildControlHeight(true);
+            mainGroup.SetChildControlWidth(true);
             mainGroup.childForceExpandHeight = true;
             mainGroup.childForceExpandWidth = true;
 
@@ -140,23 +169,23 @@ namespace UnityExplorer.UI.Main
             var mask = mainObj.AddComponent<Mask>();
             mask.showMaskGraphic = true;
 
-            var mainLayout = mainObj.AddComponent<LayoutElement>();
-            mainLayout.minHeight = 190;
-            mainLayout.flexibleHeight = 0;
+            m_mainLayout = mainObj.AddComponent<LayoutElement>();
+            m_mainLayout.minHeight = 190;
+            m_mainLayout.flexibleHeight = 0;
 
             #region LOG AREA
-            var logAreaObj = UIFactory.CreateHorizontalGroup(mainObj);
-            var logAreaGroup = logAreaObj.GetComponent<HorizontalLayoutGroup>();
-            logAreaGroup.childControlHeight = true;
-            logAreaGroup.childControlWidth = true;
+            m_logAreaObj = UIFactory.CreateHorizontalGroup(mainObj);
+            var logAreaGroup = m_logAreaObj.GetComponent<HorizontalLayoutGroup>();
+            logAreaGroup.SetChildControlHeight(true);
+            logAreaGroup.SetChildControlWidth(true);
             logAreaGroup.childForceExpandHeight = true;
             logAreaGroup.childForceExpandWidth = true;
 
-            var logAreaLayout = logAreaObj.AddComponent<LayoutElement>();
+            var logAreaLayout = m_logAreaObj.AddComponent<LayoutElement>();
             logAreaLayout.preferredHeight = 190;
             logAreaLayout.flexibleHeight = 0;
 
-            var inputScrollerObj = UIFactory.CreateSrollInputField(logAreaObj, out InputFieldScroller inputScroll, 14, new Color(0.05f, 0.05f, 0.05f));
+            var inputScrollerObj = UIFactory.CreateSrollInputField(m_logAreaObj, out InputFieldScroller inputScroll, 14, new Color(0.05f, 0.05f, 0.05f));
 
             inputScroll.inputField.textComponent.font = UIManager.ConsoleFont;
             inputScroll.inputField.readOnly = true;
@@ -179,8 +208,8 @@ namespace UnityExplorer.UI.Main
             bottomGroup.spacing = 10;
             bottomGroup.childForceExpandHeight = true;
             bottomGroup.childForceExpandWidth = false;
-            bottomGroup.childControlWidth = true;
-            bottomGroup.childControlHeight = true;
+            bottomGroup.SetChildControlWidth(true);
+            bottomGroup.SetChildControlHeight(true);
             bottomGroup.childAlignment = TextAnchor.MiddleLeft;
 
             // Debug Console label
@@ -198,26 +227,15 @@ namespace UnityExplorer.UI.Main
 
             var hideButtonObj = UIFactory.CreateButton(bottomBarObj);
 
-            var hideBtnText = hideButtonObj.GetComponentInChildren<Text>();
-            hideBtnText.text = "Hide";
+            m_hideBtnText = hideButtonObj.GetComponentInChildren<Text>();
+            m_hideBtnText.text = "Hide";
 
             var hideButton = hideButtonObj.GetComponent<Button>();
 
             hideButton.onClick.AddListener(HideCallback);
             void HideCallback()
             {
-                if (logAreaObj.activeSelf)
-                {
-                    logAreaObj.SetActive(false);
-                    hideBtnText.text = "Show";
-                    mainLayout.minHeight = 30;
-                }
-                else
-                {
-                    logAreaObj.SetActive(true);
-                    hideBtnText.text = "Hide";
-                    mainLayout.minHeight = 190;
-                }
+                ToggleShow();
             }
 
             var hideBtnColors = hideButton.colors;

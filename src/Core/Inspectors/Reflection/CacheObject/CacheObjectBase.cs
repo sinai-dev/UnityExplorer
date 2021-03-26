@@ -92,9 +92,9 @@ namespace UnityExplorer.Core.Inspectors.Reflection
             m_mainRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 25);
             var mainGroup = m_mainContent.GetComponent<VerticalLayoutGroup>();
             mainGroup.childForceExpandWidth = true;
-            mainGroup.childControlWidth = true;
+            mainGroup.SetChildControlWidth(true);
             mainGroup.childForceExpandHeight = true;
-            mainGroup.childControlHeight = true;
+            mainGroup.SetChildControlHeight(true);
             var mainLayout = m_mainContent.AddComponent<LayoutElement>();
             mainLayout.minHeight = 25;
             mainLayout.flexibleHeight = 9999;

@@ -5,6 +5,8 @@ using IniParser;
 using IniParser.Parser;
 using UnityExplorer.UI;
 using System.Globalization;
+using UnityExplorer.Core.Inspectors;
+using UnityExplorer.UI.Main;
 
 namespace UnityExplorer.Core.Config
 {
@@ -17,21 +19,17 @@ namespace UnityExplorer.Core.Config
 
         internal static CultureInfo _enCulture = new CultureInfo("en-US");
 
-        static ExplorerConfig()
-        {
-            _parser.Configuration.CommentString = "#";
-
-            PanelDragger.OnFinishResize += PanelDragger_OnFinishResize;
-        }
-
         // Actual configs
-        public KeyCode  Main_Menu_Toggle    = KeyCode.F7;
-        public bool     Force_Unlock_Mouse  = true;
-        public int      Default_Page_Limit  = 25;
-        public string   Default_Output_Path = Path.Combine(ExplorerCore.EXPLORER_FOLDER, "Output");
-        public bool     Log_Unity_Debug     = false;
-        public bool     Hide_On_Startup     = false;
-        public string   Window_Anchors      = DEFAULT_WINDOW_ANCHORS;
+        public KeyCode  Main_Menu_Toggle     = KeyCode.F7;
+        public bool     Force_Unlock_Mouse   = true;
+        public int      Default_Page_Limit   = 25;
+        public string   Default_Output_Path  = Path.Combine(ExplorerCore.EXPLORER_FOLDER, "Output");
+        public bool     Log_Unity_Debug      = false;
+        public bool     Hide_On_Startup      = false;
+        public string   Window_Anchors       = DEFAULT_WINDOW_ANCHORS;
+        public int      Active_Tab           = 0;
+        public bool     DebugConsole_Hidden  = false;
+        public bool     SceneExplorer_Hidden = false;
 
         private const string DEFAULT_WINDOW_ANCHORS = "0.25,0.10,0.78,0.95";
 
@@ -45,6 +43,12 @@ namespace UnityExplorer.Core.Config
         public static void OnLoad()
         {
             Instance = new ExplorerConfig();
+            _parser.Configuration.CommentString = "#";
+
+            PanelDragger.OnFinishResize += PanelDragger_OnFinishResize;
+            SceneExplorer.OnToggleShow += SceneExplorer_OnToggleShow;
+            DebugConsole.OnToggleShow += DebugConsole_OnToggleShow;
+            MainMenu.OnActiveTabChanged += MainMenu_OnActiveTabChanged;
 
             if (LoadSettings())
                 return;
@@ -86,6 +90,15 @@ namespace UnityExplorer.Core.Config
                     case nameof(Window_Anchors):
                         Instance.Window_Anchors = config.Value;
                         break;
+                    case nameof(Active_Tab):
+                        Instance.Active_Tab = int.Parse(config.Value);
+                        break;
+                    case nameof(DebugConsole_Hidden):
+                        Instance.DebugConsole_Hidden = bool.Parse(config.Value);
+                        break;
+                    case nameof(SceneExplorer_Hidden):
+                        Instance.SceneExplorer_Hidden = bool.Parse(config.Value);
+                        break;
                 }
             }
 
@@ -99,18 +112,39 @@ namespace UnityExplorer.Core.Config
             data.Sections.AddSection("Config");
 
             var sec = data.Sections["Config"];
-            sec.AddKey(nameof(Main_Menu_Toggle),    Instance.Main_Menu_Toggle.ToString());
-            sec.AddKey(nameof(Force_Unlock_Mouse),  Instance.Force_Unlock_Mouse.ToString());
-            sec.AddKey(nameof(Default_Page_Limit),  Instance.Default_Page_Limit.ToString());
-            sec.AddKey(nameof(Log_Unity_Debug),     Instance.Log_Unity_Debug.ToString());
-            sec.AddKey(nameof(Default_Output_Path), Instance.Default_Output_Path);
-            sec.AddKey(nameof(Hide_On_Startup),     Instance.Hide_On_Startup.ToString());
-            sec.AddKey(nameof(Window_Anchors),      GetWindowAnchorsString());
+            sec.AddKey(nameof(Main_Menu_Toggle),     Instance.Main_Menu_Toggle.ToString());
+            sec.AddKey(nameof(Force_Unlock_Mouse),   Instance.Force_Unlock_Mouse.ToString());
+            sec.AddKey(nameof(Default_Page_Limit),   Instance.Default_Page_Limit.ToString());
+            sec.AddKey(nameof(Log_Unity_Debug),      Instance.Log_Unity_Debug.ToString());
+            sec.AddKey(nameof(Default_Output_Path),  Instance.Default_Output_Path);
+            sec.AddKey(nameof(Hide_On_Startup),      Instance.Hide_On_Startup.ToString());
+            sec.AddKey(nameof(Window_Anchors),       GetWindowAnchorsString());
+            sec.AddKey(nameof(Active_Tab),           Instance.Active_Tab.ToString());
+            sec.AddKey(nameof(DebugConsole_Hidden),  Instance.DebugConsole_Hidden.ToString());
+            sec.AddKey(nameof(SceneExplorer_Hidden), Instance.SceneExplorer_Hidden.ToString());
 
             if (!Directory.Exists(ExplorerCore.Loader.ConfigFolder))
                 Directory.CreateDirectory(ExplorerCore.Loader.ConfigFolder);
 
             File.WriteAllText(INI_PATH, data.ToString());
+        }
+
+        private static void SceneExplorer_OnToggleShow()
+        {
+            Instance.SceneExplorer_Hidden = SceneExplorer.UI.Hiding;
+            SaveSettings();
+        }
+
+        private static void DebugConsole_OnToggleShow()
+        {
+            Instance.DebugConsole_Hidden = DebugConsole.Hiding;
+            SaveSettings();
+        }
+
+        private static void MainMenu_OnActiveTabChanged(int page)
+        {
+            Instance.Active_Tab = page;
+            SaveSettings();
         }
 
         // ============ Window Anchors specific stuff ============== //

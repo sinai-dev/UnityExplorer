@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using UnityExplorer.Core;
 using UnityExplorer.Core.CSharp;
 
@@ -62,6 +63,26 @@ public static class MonoExtensions
     public static void Clear(this StringBuilder sb)
     {
         sb.Remove(0, sb.Length);
+    }
+
+    private static PropertyInfo pi_childControlHeight;
+
+    public static void SetChildControlHeight(this HorizontalOrVerticalLayoutGroup group, bool value)
+    {
+        if (pi_childControlHeight == null)
+            pi_childControlHeight = group.GetType().GetProperty("childControlHeight");
+        
+        pi_childControlHeight?.SetValue(group, value, null);
+    }
+
+    private static PropertyInfo pi_childControlWidth;
+
+    public static void SetChildControlWidth(this HorizontalOrVerticalLayoutGroup group, bool value)
+    {
+        if (pi_childControlWidth == null)
+            pi_childControlWidth = group.GetType().GetProperty("childControlWidth");
+
+        pi_childControlWidth?.SetValue(group, value, null);
     }
 }
 

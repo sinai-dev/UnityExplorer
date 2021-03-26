@@ -295,8 +295,8 @@ namespace UnityExplorer.UI.Main
             mainGroup.spacing = 5;
             mainGroup.childForceExpandHeight = true;
             mainGroup.childForceExpandWidth = true;
-            mainGroup.childControlHeight = true;
-            mainGroup.childControlWidth = true;
+            mainGroup.SetChildControlHeight(true);
+            mainGroup.SetChildControlWidth(true);
 
             ConstructTopArea();
 
@@ -308,9 +308,9 @@ namespace UnityExplorer.UI.Main
             var topAreaObj = UIFactory.CreateVerticalGroup(Content, new Color(0.15f, 0.15f, 0.15f));
             var topGroup = topAreaObj.GetComponent<VerticalLayoutGroup>();
             topGroup.childForceExpandHeight = false;
-            topGroup.childControlHeight = true;
+            topGroup.SetChildControlHeight(true);
             topGroup.childForceExpandWidth = true;
-            topGroup.childControlWidth = true;
+            topGroup.SetChildControlWidth(true);
             topGroup.padding.top = 5;
             topGroup.padding.left = 5;
             topGroup.padding.right = 5;
@@ -330,9 +330,9 @@ namespace UnityExplorer.UI.Main
             var optionsGroupObj = UIFactory.CreateVerticalGroup(topAreaObj, new Color(0.1f, 0.1f, 0.1f));
             var optionsGroup = optionsGroupObj.GetComponent<VerticalLayoutGroup>();
             optionsGroup.childForceExpandHeight = false;
-            optionsGroup.childControlHeight = true;
+            optionsGroup.SetChildControlHeight(true);
             optionsGroup.childForceExpandWidth = true;
-            optionsGroup.childControlWidth = true;
+            optionsGroup.SetChildControlWidth(true);
             optionsGroup.spacing = 10;
             optionsGroup.padding.top = 4;
             optionsGroup.padding.right = 4;
@@ -348,9 +348,9 @@ namespace UnityExplorer.UI.Main
             var contextRowObj = UIFactory.CreateHorizontalGroup(optionsGroupObj, new Color(1, 1, 1, 0));
             var contextGroup = contextRowObj.GetComponent<HorizontalLayoutGroup>();
             contextGroup.childForceExpandWidth = false;
-            contextGroup.childControlWidth = true;
+            contextGroup.SetChildControlWidth(true);
             contextGroup.childForceExpandHeight = false;
-            contextGroup.childControlHeight = true;
+            contextGroup.SetChildControlHeight(true);
             contextGroup.spacing = 3;
             var contextLayout = contextRowObj.AddComponent<LayoutElement>();
             contextLayout.minHeight = 25;
@@ -402,9 +402,9 @@ namespace UnityExplorer.UI.Main
             var nameRowObj = UIFactory.CreateHorizontalGroup(optionsGroupObj, new Color(1, 1, 1, 0));
             var nameRowGroup = nameRowObj.GetComponent<HorizontalLayoutGroup>();
             nameRowGroup.childForceExpandWidth = true;
-            nameRowGroup.childControlWidth = true;
+            nameRowGroup.SetChildControlWidth(true);
             nameRowGroup.childForceExpandHeight = false;
-            nameRowGroup.childControlHeight = true;
+            nameRowGroup.SetChildControlHeight(true);
             var nameRowLayout = nameRowObj.AddComponent<LayoutElement>();
             nameRowLayout.minHeight = 25;
             nameRowLayout.flexibleHeight = 0;
@@ -431,9 +431,9 @@ namespace UnityExplorer.UI.Main
             m_extraFilterRow.SetActive(false);
             var extraGroup = m_extraFilterRow.GetComponent<HorizontalLayoutGroup>();
             extraGroup.childForceExpandHeight = true;
-            extraGroup.childControlHeight = true;
+            extraGroup.SetChildControlHeight(true);
             extraGroup.childForceExpandWidth = false;
-            extraGroup.childControlWidth = true;
+            extraGroup.SetChildControlWidth(true);
             var filterRowLayout = m_extraFilterRow.AddComponent<LayoutElement>();
             filterRowLayout.minHeight = 25;
             filterRowLayout.flexibleHeight = 0;
@@ -543,8 +543,8 @@ namespace UnityExplorer.UI.Main
             var resultGroup = resultGroupObj.GetComponent<VerticalLayoutGroup>();
             resultGroup.childForceExpandHeight = false;
             resultGroup.childForceExpandWidth = true;
-            resultGroup.childControlHeight = true;
-            resultGroup.childControlWidth = true;
+            resultGroup.SetChildControlHeight(true);
+            resultGroup.SetChildControlWidth(true);
             resultGroup.spacing = 5;
             resultGroup.padding.top = 5;
             resultGroup.padding.right = 5;
@@ -568,7 +568,7 @@ namespace UnityExplorer.UI.Main
             var contentGroup = m_resultListContent.GetComponent<VerticalLayoutGroup>();
             contentGroup.spacing = 2;
             contentGroup.childForceExpandHeight = false;
-            contentGroup.childControlHeight = true;
+            contentGroup.SetChildControlHeight(true);
         }
 
         internal void AddResultButton()
@@ -578,9 +578,9 @@ namespace UnityExplorer.UI.Main
             GameObject btnGroupObj = UIFactory.CreateHorizontalGroup(m_resultListContent, new Color(0.1f, 0.1f, 0.1f));
             HorizontalLayoutGroup btnGroup = btnGroupObj.GetComponent<HorizontalLayoutGroup>();
             btnGroup.childForceExpandWidth = true;
-            btnGroup.childControlWidth = true;
+            btnGroup.SetChildControlWidth(true);
             btnGroup.childForceExpandHeight = false;
-            btnGroup.childControlHeight = true;
+            btnGroup.SetChildControlHeight(true);
             btnGroup.padding.top = 1;
             btnGroup.padding.left = 1;
             btnGroup.padding.right = 1;

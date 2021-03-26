@@ -97,8 +97,8 @@ namespace UnityExplorer.UI
             img.color = Color.white;
 
             VerticalLayoutGroup group = panelObj.AddComponent<VerticalLayoutGroup>();
-            group.childControlHeight = true;
-            group.childControlWidth = true;
+            group.SetChildControlHeight(true);
+            group.SetChildControlWidth(true);
             group.childForceExpandHeight = true;
             group.childForceExpandWidth = true;
 
@@ -115,8 +115,8 @@ namespace UnityExplorer.UI
             group2.padding.bottom = 3;
             group2.padding.top = 3;
             group2.spacing = 3;
-            group2.childControlHeight = true;
-            group2.childControlWidth = true;
+            group2.SetChildControlHeight(true);
+            group2.SetChildControlWidth(true);
             group2.childForceExpandHeight = false;
             group2.childForceExpandWidth = true;
 
@@ -151,8 +151,8 @@ namespace UnityExplorer.UI
 
             VerticalLayoutGroup horiGroup = groupObj.AddComponent<VerticalLayoutGroup>();
             horiGroup.childAlignment = TextAnchor.UpperLeft;
-            horiGroup.childControlWidth = true;
-            horiGroup.childControlHeight = true;
+            horiGroup.SetChildControlWidth(true);
+            horiGroup.SetChildControlHeight(true);
 
             Image image = groupObj.AddComponent<Image>();
             if (color != default)
@@ -173,8 +173,8 @@ namespace UnityExplorer.UI
 
             HorizontalLayoutGroup horiGroup = groupObj.AddComponent<HorizontalLayoutGroup>();
             horiGroup.childAlignment = TextAnchor.UpperLeft;
-            horiGroup.childControlWidth = true;
-            horiGroup.childControlHeight = true;
+            horiGroup.SetChildControlWidth(true);
+            horiGroup.SetChildControlHeight(true);
 
             Image image = groupObj.AddComponent<Image>();
             if (color != default)
@@ -423,8 +423,8 @@ namespace UnityExplorer.UI
             mainInput.colors = mainColors;
 
             VerticalLayoutGroup mainGroup = mainObj.AddComponent<VerticalLayoutGroup>();
-            mainGroup.childControlHeight = true;
-            mainGroup.childControlWidth = true;
+            mainGroup.SetChildControlHeight(true);
+            mainGroup.SetChildControlWidth(true);
             mainGroup.childForceExpandWidth = true;
             mainGroup.childForceExpandHeight = true;
 
@@ -655,9 +655,9 @@ namespace UnityExplorer.UI
 
             var contentGroup = content.AddComponent<VerticalLayoutGroup>();
             contentGroup.childForceExpandHeight = true;
-            contentGroup.childControlHeight = true;
+            contentGroup.SetChildControlHeight(true);
             contentGroup.childForceExpandWidth = true;
-            contentGroup.childControlWidth = true;
+            contentGroup.SetChildControlWidth(true);
             contentGroup.padding.left = 5;
             contentGroup.padding.right = 5;
             contentGroup.padding.top = 5;
@@ -668,7 +668,7 @@ namespace UnityExplorer.UI
 
             var scrollbarLayout = scrollBarObj.AddComponent<VerticalLayoutGroup>();
             scrollbarLayout.childForceExpandHeight = true;
-            scrollbarLayout.childControlHeight = true;
+            scrollbarLayout.SetChildControlHeight(true);
 
             RectTransform scrollBarRect = scrollBarObj.GetComponent<RectTransform>();
             scrollBarRect.anchorMin = new Vector2(1.0f, 0.0f);

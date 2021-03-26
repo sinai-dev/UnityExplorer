@@ -9,6 +9,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI.Main.Home;
+using UnityExplorer.Core.Config;
 
 namespace UnityExplorer.Core.Inspectors
 {
@@ -58,14 +59,15 @@ namespace UnityExplorer.Core.Inspectors
         public void Init()
         {
             RefreshSceneSelector();
+
+            if (ExplorerConfig.Instance.SceneExplorer_Hidden)
+                UI.ToggleShow();
         }
 
         public void Update()
         {
-            if (SceneExplorerUI.Hiding || Time.realtimeSinceStartup - m_timeOfLastSceneUpdate < UPDATE_INTERVAL)
-            {
+            if (UI.Hiding || Time.realtimeSinceStartup - m_timeOfLastSceneUpdate < UPDATE_INTERVAL)
                 return;
-            }
 
             RefreshSceneSelector();
 

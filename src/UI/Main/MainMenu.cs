@@ -22,6 +22,8 @@ namespace UnityExplorer.UI.Main
         public readonly List<BaseMenuPage> Pages = new List<BaseMenuPage>();
         private BaseMenuPage m_activePage;
 
+        public static Action<int> OnActiveTabChanged;
+
         // Navbar buttons
         private Button m_lastNavButtonPressed;
         private readonly Color m_navButtonNormal = new Color(0.3f, 0.3f, 0.3f, 1);
@@ -72,10 +74,15 @@ namespace UnityExplorer.UI.Main
         internal bool pageLayoutInit;
         internal int layoutInitIndex;
 
+        private int origDesiredPage = -1;
+
         public void Update()
         {
             if (!pageLayoutInit)
             {
+                if (origDesiredPage == -1)
+                    origDesiredPage = ExplorerConfig.Instance?.Active_Tab ?? 0;
+
                 if (layoutInitIndex < Pages.Count)
                 {
                     SetPage(Pages[layoutInitIndex]);
@@ -85,7 +92,7 @@ namespace UnityExplorer.UI.Main
                 {
                     pageLayoutInit = true;
                     MainPanel.transform.position = initPos;
-                    SetPage(Pages[0]);
+                    SetPage(Pages[origDesiredPage]);
                 }
                 return;
             }
@@ -97,19 +104,6 @@ namespace UnityExplorer.UI.Main
         {
             if (page == null || m_activePage == page)
                 return;
-
-            // WIP, was going to hide current page if you press current page's button,
-            // but the main panel does not resize so its just a big empty gap there.
-            // Could be good if I resize that gap, not bothering for now. 
-            // Would need a fix in PanelDragger as well.
-
-            //if (m_activePage == page)
-            //{
-            //    SetButtonInactiveColors(page.RefNavbarButton);
-            //    m_activePage.Content.SetActive(false);
-            //    m_activePage = null;
-            //    return;
-            //}
 
             m_activePage?.Content?.SetActive(false);
 
@@ -128,6 +122,8 @@ namespace UnityExplorer.UI.Main
                 SetButtonInactiveColors(m_lastNavButtonPressed);
 
             m_lastNavButtonPressed = button;
+
+            OnActiveTabChanged?.Invoke(Pages.IndexOf(m_activePage));
         }
 
         internal void SetButtonActiveColors(Button button)
@@ -184,8 +180,8 @@ namespace UnityExplorer.UI.Main
             GameObject titleBar = UIFactory.CreateHorizontalGroup(content);
 
             HorizontalLayoutGroup titleGroup = titleBar.GetComponent<HorizontalLayoutGroup>();
-            titleGroup.childControlHeight = true;
-            titleGroup.childControlWidth = true;
+            titleGroup.SetChildControlHeight(true);
+            titleGroup.SetChildControlWidth(true);
             titleGroup.childForceExpandHeight = true;
             titleGroup.childForceExpandWidth = true;
             titleGroup.padding.left = 15;
@@ -248,8 +244,8 @@ namespace UnityExplorer.UI.Main
 
             HorizontalLayoutGroup navGroup = navbarObj.GetComponent<HorizontalLayoutGroup>();
             navGroup.spacing = 5;
-            navGroup.childControlHeight = true;
-            navGroup.childControlWidth = true;
+            navGroup.SetChildControlHeight(true);
+            navGroup.SetChildControlWidth(true);
             navGroup.childForceExpandHeight = true;
             navGroup.childForceExpandWidth = true;
 
@@ -283,8 +279,8 @@ namespace UnityExplorer.UI.Main
         {
             GameObject mainObj = UIFactory.CreateHorizontalGroup(content);
             HorizontalLayoutGroup mainGroup = mainObj.GetComponent<HorizontalLayoutGroup>();
-            mainGroup.childControlHeight = true;
-            mainGroup.childControlWidth = true;
+            mainGroup.SetChildControlHeight(true);
+            mainGroup.SetChildControlWidth(true);
             mainGroup.childForceExpandHeight = true;
             mainGroup.childForceExpandWidth = true;
 

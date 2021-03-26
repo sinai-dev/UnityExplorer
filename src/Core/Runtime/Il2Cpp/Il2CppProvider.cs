@@ -11,6 +11,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using UnityEngine.UI;
 
 namespace UnityExplorer.Core.Runtime.Il2Cpp
 {
@@ -107,7 +108,7 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
     }
 }
 
-public static class UnityEventExtensions
+public static class Il2CppExtensions
 {
     public static void AddListener(this UnityEvent action, Action listener)
     {
@@ -118,6 +119,9 @@ public static class UnityEventExtensions
     {
         action.AddListener(listener);
     }
+
+    public static void SetChildControlHeight(this HorizontalOrVerticalLayoutGroup group, bool value) => group.childControlHeight = value;
+    public static void SetChildControlWidth(this HorizontalOrVerticalLayoutGroup group, bool value) => group.childControlWidth = value;
 }
 
 #endif

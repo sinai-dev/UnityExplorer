@@ -47,8 +47,8 @@ namespace UnityExplorer.UI.Main
             mainGroup.spacing = 3;
             mainGroup.childForceExpandHeight = true;
             mainGroup.childForceExpandWidth = true;
-            mainGroup.childControlHeight = true;
-            mainGroup.childControlWidth = true;
+            mainGroup.SetChildControlHeight(true);
+            mainGroup.SetChildControlWidth(true);
         }
     }
 }

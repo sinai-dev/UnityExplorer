@@ -28,7 +28,7 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             var rowObj = UIFactory.CreateHorizontalGroup(Parent.ReflectionUI.Content, new Color(0.1f, 0.1f, 0.1f));
             var rowGroup = rowObj.GetComponent<HorizontalLayoutGroup>();
             rowGroup.childForceExpandWidth = true;
-            rowGroup.childControlWidth = true;
+            rowGroup.SetChildControlWidth(true);
             rowGroup.spacing = 5;
             rowGroup.padding.top = 2;
             rowGroup.padding.bottom = 2;
@@ -137,8 +137,8 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             var viewerGroup = scrollContent.GetComponent<VerticalLayoutGroup>();
             viewerGroup.childForceExpandHeight = false;
             viewerGroup.childForceExpandWidth = false;
-            viewerGroup.childControlHeight = true;
-            viewerGroup.childControlWidth = true;
+            viewerGroup.SetChildControlHeight(true);
+            viewerGroup.SetChildControlWidth(true);
             var mainLayout = textureViewerObj.GetComponent<LayoutElement>();
             mainLayout.flexibleHeight = 9999;
             mainLayout.flexibleWidth = 9999;
@@ -275,8 +275,8 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             var memFilterGroup = memberFilterRowObj.GetComponent<HorizontalLayoutGroup>();
             memFilterGroup.childForceExpandHeight = false;
             memFilterGroup.childForceExpandWidth = false;
-            memFilterGroup.childControlWidth = true;
-            memFilterGroup.childControlHeight = true;
+            memFilterGroup.SetChildControlWidth(true);
+            memFilterGroup.SetChildControlHeight(true);
             memFilterGroup.spacing = 5;
             var memFilterLayout = memberFilterRowObj.AddComponent<LayoutElement>();
             memFilterLayout.minHeight = 25;

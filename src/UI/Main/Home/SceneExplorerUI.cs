@@ -12,7 +12,14 @@ namespace UnityExplorer.UI.Main.Home
 {
     public class SceneExplorerUI
     {
-        internal static bool Hiding;
+        public static SceneExplorerUI Instance;
+
+        public SceneExplorerUI()
+        {
+            Instance = this;
+        }
+
+        internal bool Hiding;
 
         private Dropdown m_sceneDropdown;
         private Text m_sceneDropdownText;
@@ -26,6 +33,46 @@ namespace UnityExplorer.UI.Main.Home
         private readonly List<Toggle> m_shortListToggles = new List<Toggle>();
 
         internal readonly List<GameObject> m_shortList = new List<GameObject>();
+
+        private Text hideText;
+        private GameObject m_titleObj;
+        private GameObject m_sceneDropdownObj;
+        private GameObject m_scenePathGroupObj;
+        private GameObject m_scrollObj;
+        private LayoutElement m_leftLayout;
+
+        public void ToggleShow()
+        {
+            if (!Hiding)
+            {
+                Hiding = true;
+
+                hideText.text = "►";
+                m_titleObj.SetActive(false);
+                m_sceneDropdownObj.SetActive(false);
+                m_scenePathGroupObj.SetActive(false);
+                m_scrollObj.SetActive(false);
+                m_pageHandler.Hide();
+
+                m_leftLayout.minWidth = 15;
+            }
+            else
+            {
+                Hiding = false;
+
+                hideText.text = "Hide Scene Explorer";
+                m_titleObj.SetActive(true);
+                m_sceneDropdownObj.SetActive(true);
+                m_scenePathGroupObj.SetActive(true);
+                m_scrollObj.SetActive(true);
+
+                m_leftLayout.minWidth = 350;
+
+                SceneExplorer.Instance.Update();
+            }
+
+            SceneExplorer.InvokeOnToggleShow();
+        }
 
         public void OnActiveScenesChanged(List<string> newNames)
         {
@@ -160,9 +207,9 @@ namespace UnityExplorer.UI.Main.Home
         public void ConstructScenePane()
         {
             GameObject leftPane = UIFactory.CreateVerticalGroup(HomePage.Instance.Content, new Color(72f / 255f, 72f / 255f, 72f / 255f));
-            LayoutElement leftLayout = leftPane.AddComponent<LayoutElement>();
-            leftLayout.minWidth = 350;
-            leftLayout.flexibleWidth = 0;
+            m_leftLayout = leftPane.AddComponent<LayoutElement>();
+            m_leftLayout.minWidth = 350;
+            m_leftLayout.flexibleWidth = 0;
 
             VerticalLayoutGroup leftGroup = leftPane.GetComponent<VerticalLayoutGroup>();
             leftGroup.padding.left = 4;
@@ -170,21 +217,21 @@ namespace UnityExplorer.UI.Main.Home
             leftGroup.padding.top = 8;
             leftGroup.padding.bottom = 4;
             leftGroup.spacing = 4;
-            leftGroup.childControlWidth = true;
-            leftGroup.childControlHeight = true;
+            leftGroup.SetChildControlWidth(true);
+            leftGroup.SetChildControlHeight(true);
             leftGroup.childForceExpandWidth = true;
             leftGroup.childForceExpandHeight = true;
 
-            GameObject titleObj = UIFactory.CreateLabel(leftPane, TextAnchor.UpperLeft);
-            Text titleLabel = titleObj.GetComponent<Text>();
+            m_titleObj = UIFactory.CreateLabel(leftPane, TextAnchor.UpperLeft);
+            Text titleLabel = m_titleObj.GetComponent<Text>();
             titleLabel.text = "Scene Explorer";
             titleLabel.fontSize = 20;
-            LayoutElement titleLayout = titleObj.AddComponent<LayoutElement>();
+            LayoutElement titleLayout = m_titleObj.AddComponent<LayoutElement>();
             titleLayout.minHeight = 30;
             titleLayout.flexibleHeight = 0;
 
-            GameObject sceneDropdownObj = UIFactory.CreateDropdown(leftPane, out m_sceneDropdown);
-            LayoutElement dropdownLayout = sceneDropdownObj.AddComponent<LayoutElement>();
+            m_sceneDropdownObj = UIFactory.CreateDropdown(leftPane, out m_sceneDropdown);
+            LayoutElement dropdownLayout = m_sceneDropdownObj.AddComponent<LayoutElement>();
             dropdownLayout.minHeight = 40;
             dropdownLayout.flexibleHeight = 0;
             dropdownLayout.minWidth = 320;
@@ -199,19 +246,19 @@ namespace UnityExplorer.UI.Main.Home
                 SceneExplorer.Instance.SetTargetScene(val);
             }
 
-            GameObject scenePathGroupObj = UIFactory.CreateHorizontalGroup(leftPane, new Color(1, 1, 1, 0f));
-            HorizontalLayoutGroup scenePathGroup = scenePathGroupObj.GetComponent<HorizontalLayoutGroup>();
-            scenePathGroup.childControlHeight = true;
-            scenePathGroup.childControlWidth = true;
+            m_scenePathGroupObj = UIFactory.CreateHorizontalGroup(leftPane, new Color(1, 1, 1, 0f));
+            HorizontalLayoutGroup scenePathGroup = m_scenePathGroupObj.GetComponent<HorizontalLayoutGroup>();
+            scenePathGroup.SetChildControlHeight(true);
+            scenePathGroup.SetChildControlWidth(true);
             scenePathGroup.childForceExpandHeight = true;
             scenePathGroup.childForceExpandWidth = true;
             scenePathGroup.spacing = 5;
-            LayoutElement scenePathLayout = scenePathGroupObj.AddComponent<LayoutElement>();
+            LayoutElement scenePathLayout = m_scenePathGroupObj.AddComponent<LayoutElement>();
             scenePathLayout.minHeight = 20;
             scenePathLayout.minWidth = 335;
             scenePathLayout.flexibleWidth = 0;
 
-            m_backButtonObj = UIFactory.CreateButton(scenePathGroupObj);
+            m_backButtonObj = UIFactory.CreateButton(m_scenePathGroupObj);
             Text backButtonText = m_backButtonObj.GetComponentInChildren<Text>();
             backButtonText.text = "◄";
             LayoutElement backButtonLayout = m_backButtonObj.AddComponent<LayoutElement>();
@@ -224,7 +271,7 @@ namespace UnityExplorer.UI.Main.Home
 
             backButton.onClick.AddListener(() => { SceneExplorer.Instance.SetSceneObjectParent(); });
 
-            GameObject scenePathLabel = UIFactory.CreateHorizontalGroup(scenePathGroupObj);
+            GameObject scenePathLabel = UIFactory.CreateHorizontalGroup(m_scenePathGroupObj);
             Image image = scenePathLabel.GetComponent<Image>();
             image.color = Color.white;
 
@@ -248,7 +295,7 @@ namespace UnityExplorer.UI.Main.Home
             textLayout.minHeight = 20;
             textLayout.flexibleHeight = 0;
 
-            m_mainInspectBtn = UIFactory.CreateButton(scenePathGroupObj);
+            m_mainInspectBtn = UIFactory.CreateButton(m_scenePathGroupObj);
             Text inspectButtonText = m_mainInspectBtn.GetComponentInChildren<Text>();
             inspectButtonText.text = "Inspect";
             LayoutElement inspectButtonLayout = m_mainInspectBtn.AddComponent<LayoutElement>();
@@ -261,7 +308,7 @@ namespace UnityExplorer.UI.Main.Home
 
             inspectButton.onClick.AddListener(() => { SceneExplorer.InspectSelectedGameObject(); });
 
-            GameObject scrollObj = UIFactory.CreateScrollView(leftPane, out m_pageContent, out SliderScrollbar scroller, new Color(0.1f, 0.1f, 0.1f));
+            m_scrollObj = UIFactory.CreateScrollView(leftPane, out m_pageContent, out SliderScrollbar scroller, new Color(0.1f, 0.1f, 0.1f));
 
             m_pageHandler = new PageHandler(scroller);
             m_pageHandler.ConstructUI(leftPane);
@@ -275,47 +322,14 @@ namespace UnityExplorer.UI.Main.Home
             var hideColors = hideBtn.colors;
             hideColors.normalColor = new Color(0.15f, 0.15f, 0.15f);
             hideBtn.colors = hideColors;
-            var hideText = hideButtonObj.GetComponentInChildren<Text>();
+            hideText = hideButtonObj.GetComponentInChildren<Text>();
             hideText.text = "Hide Scene Explorer";
             hideText.fontSize = 13;
             var hideLayout = hideButtonObj.AddComponent<LayoutElement>();
             hideLayout.minWidth = 20;
             hideLayout.minHeight = 20;
 
-            hideBtn.onClick.AddListener(OnHide);
-
-            void OnHide()
-            {
-                if (!Hiding)
-                {
-                    Hiding = true;
-
-                    hideText.text = "►";
-                    titleObj.SetActive(false);
-                    sceneDropdownObj.SetActive(false);
-                    scenePathGroupObj.SetActive(false);
-                    scrollObj.SetActive(false);
-                    m_pageHandler.Hide();
-
-                    leftLayout.minWidth = 15;
-                }
-                else
-                {
-                    Hiding = false;
-
-                    hideText.text = "Hide Scene Explorer";
-                    titleObj.SetActive(true);
-                    sceneDropdownObj.SetActive(true);
-                    scenePathGroupObj.SetActive(true);
-                    scrollObj.SetActive(true);
-
-                    leftLayout.minWidth = 350;
-
-                    SceneExplorer.Instance.Update();
-                }
-
-                SceneExplorer.InvokeOnToggleShow();
-            }
+            hideBtn.onClick.AddListener(ToggleShow);
         }
 
         private void AddObjectListButton()
@@ -325,9 +339,9 @@ namespace UnityExplorer.UI.Main.Home
             GameObject btnGroupObj = UIFactory.CreateHorizontalGroup(m_pageContent, new Color(0.1f, 0.1f, 0.1f));
             HorizontalLayoutGroup btnGroup = btnGroupObj.GetComponent<HorizontalLayoutGroup>();
             btnGroup.childForceExpandWidth = true;
-            btnGroup.childControlWidth = true;
+            btnGroup.SetChildControlWidth(true);
             btnGroup.childForceExpandHeight = false;
-            btnGroup.childControlHeight = true;
+            btnGroup.SetChildControlHeight(true);
             LayoutElement btnLayout = btnGroupObj.AddComponent<LayoutElement>();
             btnLayout.flexibleWidth = 320;
             btnLayout.minHeight = 25;

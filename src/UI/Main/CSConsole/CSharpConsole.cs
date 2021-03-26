@@ -463,8 +463,8 @@ The following helper methods are available:
             mainLayout.flexibleHeight = 9000;
 
             var mainGroup = Content.AddComponent<VerticalLayoutGroup>();
-            mainGroup.childControlHeight = true;
-            mainGroup.childControlWidth = true;
+            mainGroup.SetChildControlHeight(true);
+            mainGroup.SetChildControlWidth(true);
             mainGroup.childForceExpandHeight = true;
             mainGroup.childForceExpandWidth = true;
 
@@ -485,8 +485,8 @@ The following helper methods are available:
             topBarGroup.spacing = 10;
             topBarGroup.childForceExpandHeight = true;
             topBarGroup.childForceExpandWidth = true;
-            topBarGroup.childControlWidth = true;
-            topBarGroup.childControlHeight = true;
+            topBarGroup.SetChildControlWidth(true);
+            topBarGroup.SetChildControlHeight(true);
             topBarGroup.childAlignment = TextAnchor.LowerCenter;
 
             var topBarLabel = UIFactory.CreateLabel(topBarObj, TextAnchor.MiddleLeft);

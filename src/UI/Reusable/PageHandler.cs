@@ -176,8 +176,8 @@ namespace UnityExplorer.UI.Reusable
             HorizontalLayoutGroup mainGroup = m_pageUIHolder.GetComponent<HorizontalLayoutGroup>();
             mainGroup.childForceExpandHeight = true;
             mainGroup.childForceExpandWidth = false;
-            mainGroup.childControlWidth = true;
-            mainGroup.childControlHeight = true;
+            mainGroup.SetChildControlWidth(true);
+            mainGroup.SetChildControlHeight(true);
 
             LayoutElement mainLayout = m_pageUIHolder.AddComponent<LayoutElement>();
             mainLayout.minHeight = 25;

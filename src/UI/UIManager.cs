@@ -20,7 +20,7 @@ namespace UnityExplorer.UI
 
         internal static Font ConsoleFont { get; private set; }
 
-        internal static Sprite ResizeCursor { get; private set; }
+        //internal static Sprite ResizeCursor { get; private set; }
         internal static Shader BackupShader { get; private set; }
 
         public static bool ShowMenu
@@ -76,6 +76,33 @@ namespace UnityExplorer.UI
             Canvas.ForceUpdateCanvases();
         }
 
+        private static GameObject CreateRootCanvas()
+        {
+            GameObject rootObj = new GameObject("ExplorerCanvas");
+            UnityEngine.Object.DontDestroyOnLoad(rootObj);
+            rootObj.layer = 5;
+
+            CanvasRoot = rootObj;
+            CanvasRoot.transform.position = new Vector3(0f, 0f, 1f);
+
+            EventSys = rootObj.AddComponent<EventSystem>();
+            InputManager.AddUIModule();
+
+            Canvas canvas = rootObj.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceCamera;
+            canvas.referencePixelsPerUnit = 100;
+            canvas.sortingOrder = 999;
+            //canvas.pixelPerfect = false;
+
+            CanvasScaler scaler = rootObj.AddComponent<CanvasScaler>();
+            scaler.referenceResolution = new Vector2(1920, 1080);
+            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
+
+            rootObj.AddComponent<GraphicRaycaster>();
+
+            return rootObj;
+        }
+
         private static void SetShowMenu(bool show)
         {
             if (s_showMenu == show)
@@ -95,12 +122,6 @@ namespace UnityExplorer.UI
 
             CursorUnlocker.UpdateCursorControl();
         }
-
-        //public static void OnSceneChange()
-        //{
-        //    SceneExplorer.Instance?.OnSceneChange();
-        //    SearchPage.Instance?.OnSceneChange();
-        //}
 
         public static void Update()
         {
@@ -151,24 +172,6 @@ namespace UnityExplorer.UI
             }
         }
 
-        private static AssetBundle LoadExplorerUi(string id)
-        {
-            return AssetBundle.LoadFromMemory(ReadFully(typeof(ExplorerCore).Assembly.GetManifestResourceStream($"UnityExplorer.Resources.explorerui.{id}.bundle")));
-        }
-
-        private static byte[] ReadFully(this Stream input)
-        {
-            using (var ms = new MemoryStream())
-            {
-                byte[] buffer = new byte[81920];
-                int read;
-                while ((read = input.Read(buffer, 0, buffer.Length)) != 0)
-                    ms.Write(buffer, 0, read);
-
-                return ms.ToArray();
-            }
-        }
-
         private static void LoadBundle()
         {
             AssetBundle bundle = null;
@@ -176,10 +179,12 @@ namespace UnityExplorer.UI
             try
             {
                 bundle = LoadExplorerUi("modern");
+                if (bundle == null)
+                    throw new Exception();
             }
             catch
             {
-                ExplorerCore.Log("Failed to load modern ExplorerUI Bundle, falling back to legacy");
+                ExplorerCore.Log("Failed to load Unity 2017 ExplorerUI Bundle, falling back to legacy");
 
                 try
                 {
@@ -194,6 +199,7 @@ namespace UnityExplorer.UI
             if (bundle == null)
             {
                 ExplorerCore.LogWarning("Could not load the ExplorerUI Bundle!");
+                ConsoleFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
                 return;
             }
 
@@ -206,38 +212,29 @@ namespace UnityExplorer.UI
                 Graphic.defaultGraphicMaterial.shader = BackupShader;
             }
 
-            ResizeCursor = bundle.LoadAsset<Sprite>("cursor");
+            //ResizeCursor = bundle.LoadAsset<Sprite>("cursor");
 
             ConsoleFont = bundle.LoadAsset<Font>("CONSOLA");
 
             ExplorerCore.Log("Loaded UI bundle");
         }
 
-        private static GameObject CreateRootCanvas()
+        private static AssetBundle LoadExplorerUi(string id)
         {
-            GameObject rootObj = new GameObject("ExplorerCanvas");
-            UnityEngine.Object.DontDestroyOnLoad(rootObj);
-            rootObj.layer = 5;
+            var data = ReadFully(typeof(ExplorerCore).Assembly.GetManifestResourceStream($"UnityExplorer.Resources.explorerui.{id}.bundle"));
+            return AssetBundle.LoadFromMemory(data);
+        }
 
-            CanvasRoot = rootObj;
-            CanvasRoot.transform.position = new Vector3(0f, 0f, 1f);
-
-            EventSys = rootObj.AddComponent<EventSystem>();
-            InputManager.AddUIModule();
-
-            Canvas canvas = rootObj.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceCamera;
-            canvas.referencePixelsPerUnit = 100;
-            canvas.sortingOrder = 999;
-            //canvas.pixelPerfect = false;
-
-            CanvasScaler scaler = rootObj.AddComponent<CanvasScaler>();
-            scaler.referenceResolution = new Vector2(1920, 1080);
-            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
-
-            rootObj.AddComponent<GraphicRaycaster>();
-
-            return rootObj;
+        private static byte[] ReadFully(this Stream input)
+        {
+            using (var ms = new MemoryStream())
+            {
+                byte[] buffer = new byte[81920];
+                int read;
+                while ((read = input.Read(buffer, 0, buffer.Length)) != 0)
+                    ms.Write(buffer, 0, read);
+                return ms.ToArray();
+            }
         }
     }
 }

@@ -224,8 +224,8 @@ namespace UnityExplorer.Core.Inspectors.Reflection
             var topGroup = topGroupObj.GetComponent<HorizontalLayoutGroup>();
             topGroup.childForceExpandHeight = false;
             topGroup.childForceExpandWidth = false;
-            topGroup.childControlHeight = true;
-            topGroup.childControlWidth = true;
+            topGroup.SetChildControlHeight(true);
+            topGroup.SetChildControlWidth(true);
             topGroup.spacing = 10;
             topGroup.padding.left = 3;
             topGroup.padding.right = 3;
@@ -243,8 +243,8 @@ namespace UnityExplorer.Core.Inspectors.Reflection
             var leftGroup = m_leftGroup.GetComponent<HorizontalLayoutGroup>();
             leftGroup.childForceExpandHeight = true;
             leftGroup.childForceExpandWidth = false;
-            leftGroup.childControlHeight = true;
-            leftGroup.childControlWidth = true;
+            leftGroup.SetChildControlHeight(true);
+            leftGroup.SetChildControlWidth(true);
             leftGroup.spacing = 4;
 
             // member label
@@ -278,8 +278,8 @@ namespace UnityExplorer.Core.Inspectors.Reflection
             var rightGroup = m_rightGroup.GetComponent<VerticalLayoutGroup>();
             rightGroup.childForceExpandHeight = true;
             rightGroup.childForceExpandWidth = false;
-            rightGroup.childControlHeight = true;
-            rightGroup.childControlWidth = true;
+            rightGroup.SetChildControlHeight(true);
+            rightGroup.SetChildControlWidth(true);
             rightGroup.spacing = 2;
             rightGroup.padding.top = 4;
             rightGroup.padding.bottom = 2;

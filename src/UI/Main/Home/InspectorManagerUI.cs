@@ -43,8 +43,8 @@ namespace UnityExplorer.UI.Main.Home
             var mainGroup = mainObj.GetComponent<VerticalLayoutGroup>();
             mainGroup.childForceExpandHeight = true;
             mainGroup.childForceExpandWidth = true;
-            mainGroup.childControlHeight = true;
-            mainGroup.childControlWidth = true;
+            mainGroup.SetChildControlHeight(true);
+            mainGroup.SetChildControlWidth(true);
             mainGroup.spacing = 4;
             mainGroup.padding.left = 4;
             mainGroup.padding.right = 4;
@@ -54,9 +54,9 @@ namespace UnityExplorer.UI.Main.Home
             var topRowObj = UIFactory.CreateHorizontalGroup(mainObj, new Color(1, 1, 1, 0));
             var topRowGroup = topRowObj.GetComponent<HorizontalLayoutGroup>();
             topRowGroup.childForceExpandWidth = false;
-            topRowGroup.childControlWidth = true;
+            topRowGroup.SetChildControlWidth(true);
             topRowGroup.childForceExpandHeight = true;
-            topRowGroup.childControlHeight = true;
+            topRowGroup.SetChildControlHeight(true);
             topRowGroup.spacing = 15;
 
             var inspectorTitle = UIFactory.CreateLabel(topRowObj, TextAnchor.MiddleLeft);
@@ -87,15 +87,15 @@ namespace UnityExplorer.UI.Main.Home
             var inspectorGroup = m_inspectorContent.GetComponent<VerticalLayoutGroup>();
             inspectorGroup.childForceExpandHeight = true;
             inspectorGroup.childForceExpandWidth = true;
-            inspectorGroup.childControlHeight = true;
-            inspectorGroup.childControlWidth = true;
+            inspectorGroup.SetChildControlHeight(true);
+            inspectorGroup.SetChildControlWidth(true);
 
             m_inspectorContent = UIFactory.CreateVerticalGroup(mainObj, new Color(0.1f, 0.1f, 0.1f));
             var contentGroup = m_inspectorContent.GetComponent<VerticalLayoutGroup>();
             contentGroup.childForceExpandHeight = true;
             contentGroup.childForceExpandWidth = true;
-            contentGroup.childControlHeight = true;
-            contentGroup.childControlWidth = true;
+            contentGroup.SetChildControlHeight(true);
+            contentGroup.SetChildControlWidth(true);
             contentGroup.padding.top = 2;
             contentGroup.padding.left = 2;
             contentGroup.padding.right = 2;
@@ -114,8 +114,8 @@ namespace UnityExplorer.UI.Main.Home
             var invisGroup = invisObj.GetComponent<HorizontalLayoutGroup>();
             invisGroup.childForceExpandWidth = false;
             invisGroup.childForceExpandHeight = false;
-            invisGroup.childControlWidth = true;
-            invisGroup.childControlHeight = true;
+            invisGroup.SetChildControlWidth(true);
+            invisGroup.SetChildControlHeight(true);
             invisGroup.padding.top = 2;
             invisGroup.padding.bottom = 2;
             invisGroup.padding.left = 2;

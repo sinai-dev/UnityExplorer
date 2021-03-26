@@ -21,7 +21,7 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             var tabGroupObj = UIFactory.CreateHorizontalGroup(tabContent);
             var tabGroup = tabGroupObj.GetComponent<HorizontalLayoutGroup>();
             tabGroup.childForceExpandWidth = true;
-            tabGroup.childControlWidth = true;
+            tabGroup.SetChildControlWidth(true);
             var tabLayout = tabGroupObj.AddComponent<LayoutElement>();
             tabLayout.minWidth = 185;
             tabLayout.flexibleWidth = 0;

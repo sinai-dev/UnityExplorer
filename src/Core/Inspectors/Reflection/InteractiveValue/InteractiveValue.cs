@@ -308,9 +308,9 @@ namespace UnityExplorer.Core.Inspectors.Reflection
             mainRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 25);
             var mainGroup = m_valueContent.GetComponent<HorizontalLayoutGroup>();
             mainGroup.childForceExpandWidth = false;
-            mainGroup.childControlWidth = true;
+            mainGroup.SetChildControlWidth(true);
             mainGroup.childForceExpandHeight = false;
-            mainGroup.childControlHeight = true;
+            mainGroup.SetChildControlHeight(true);
             mainGroup.spacing = 4;
             mainGroup.childAlignment = TextAnchor.UpperLeft;
             var mainLayout = m_valueContent.AddComponent<LayoutElement>();

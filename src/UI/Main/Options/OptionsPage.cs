@@ -62,8 +62,8 @@ namespace UnityExplorer.UI.Main
             mainGroup.spacing = 5;
             mainGroup.childForceExpandHeight = false;
             mainGroup.childForceExpandWidth = true;
-            mainGroup.childControlHeight = true;
-            mainGroup.childControlWidth = true;
+            mainGroup.SetChildControlHeight(true);
+            mainGroup.SetChildControlWidth(true);
 
             // ~~~~~ Title ~~~~~
 
@@ -81,8 +81,8 @@ namespace UnityExplorer.UI.Main
             var optionsGroup = optionsGroupObj.GetComponent<VerticalLayoutGroup>();
             optionsGroup.childForceExpandHeight = false;
             optionsGroup.childForceExpandWidth = true;
-            optionsGroup.childControlWidth = true;
-            optionsGroup.childControlHeight = true;
+            optionsGroup.SetChildControlWidth(true);
+            optionsGroup.SetChildControlHeight(true);
             optionsGroup.spacing = 5;
             optionsGroup.padding.top = 5;
             optionsGroup.padding.left = 5;
@@ -113,9 +113,9 @@ namespace UnityExplorer.UI.Main
         {
             var rowObj = UIFactory.CreateHorizontalGroup(optionsGroupObj, new Color(1, 1, 1, 0));
             var rowGroup = rowObj.GetComponent<HorizontalLayoutGroup>();
-            rowGroup.childControlWidth = true;
+            rowGroup.SetChildControlWidth(true);
             rowGroup.childForceExpandWidth = false;
-            rowGroup.childControlHeight = true;
+            rowGroup.SetChildControlHeight(true);
             rowGroup.childForceExpandHeight = true;
             var groupLayout = rowObj.AddComponent<LayoutElement>();
             groupLayout.minHeight = 25;
@@ -139,9 +139,9 @@ namespace UnityExplorer.UI.Main
         {
             var rowObj = UIFactory.CreateHorizontalGroup(parent, new Color(1, 1, 1, 0));
             var rowGroup = rowObj.GetComponent<HorizontalLayoutGroup>();
-            rowGroup.childControlWidth = true;
+            rowGroup.SetChildControlWidth(true);
             rowGroup.childForceExpandWidth = false;
-            rowGroup.childControlHeight = true;
+            rowGroup.SetChildControlHeight(true);
             rowGroup.childForceExpandHeight = true;
             var groupLayout = rowObj.AddComponent<LayoutElement>();
             groupLayout.minHeight = 25;
@@ -168,9 +168,9 @@ namespace UnityExplorer.UI.Main
         {
             var rowObj = UIFactory.CreateHorizontalGroup(parent, new Color(1, 1, 1, 0));
             var rowGroup = rowObj.GetComponent<HorizontalLayoutGroup>();
-            rowGroup.childControlWidth = true;
+            rowGroup.SetChildControlWidth(true);
             rowGroup.childForceExpandWidth = false;
-            rowGroup.childControlHeight = true;
+            rowGroup.SetChildControlHeight(true);
             rowGroup.childForceExpandHeight = true;
             var groupLayout = rowObj.AddComponent<LayoutElement>();
             groupLayout.minHeight = 25;
@@ -196,9 +196,9 @@ namespace UnityExplorer.UI.Main
 
             var rowObj = UIFactory.CreateHorizontalGroup(parent, new Color(1, 1, 1, 0));
             var rowGroup = rowObj.GetComponent<HorizontalLayoutGroup>();
-            rowGroup.childControlWidth = true;
+            rowGroup.SetChildControlWidth(true);
             rowGroup.childForceExpandWidth = false;
-            rowGroup.childControlHeight = true;
+            rowGroup.SetChildControlHeight(true);
             rowGroup.childForceExpandHeight = true;
             var groupLayout = rowObj.AddComponent<LayoutElement>();
             groupLayout.minHeight = 25;
@@ -227,9 +227,9 @@ namespace UnityExplorer.UI.Main
 
             var rowObj = UIFactory.CreateHorizontalGroup(parent, new Color(1, 1, 1, 0));
             var rowGroup = rowObj.GetComponent<HorizontalLayoutGroup>();
-            rowGroup.childControlWidth = true;
+            rowGroup.SetChildControlWidth(true);
             rowGroup.childForceExpandWidth = false;
-            rowGroup.childControlHeight = true;
+            rowGroup.SetChildControlHeight(true);
             rowGroup.childForceExpandHeight = true;
             var groupLayout = rowObj.AddComponent<LayoutElement>();
             groupLayout.minHeight = 25;

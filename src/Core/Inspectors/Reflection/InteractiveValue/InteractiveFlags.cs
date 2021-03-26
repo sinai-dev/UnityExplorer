@@ -98,8 +98,8 @@ namespace UnityExplorer.Core.Inspectors.Reflection
                 var group = groupObj.GetComponent<VerticalLayoutGroup>();
                 group.childForceExpandHeight = true;
                 group.childForceExpandWidth = false;
-                group.childControlHeight = true;
-                group.childControlWidth = true;
+                group.SetChildControlHeight(true);
+                group.SetChildControlWidth(true);
                 group.padding.top = 3;
                 group.padding.left = 3;
                 group.padding.right = 3;

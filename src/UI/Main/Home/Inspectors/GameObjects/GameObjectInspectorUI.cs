@@ -141,15 +141,15 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
 
             var parentLayout = scrollContent.transform.parent.gameObject.AddComponent<VerticalLayoutGroup>();
             parentLayout.childForceExpandWidth = true;
-            parentLayout.childControlWidth = true;
+            parentLayout.SetChildControlWidth(true);
             parentLayout.childForceExpandHeight = true;
-            parentLayout.childControlHeight = true;
+            parentLayout.SetChildControlHeight(true);
 
             var scrollGroup = scrollContent.GetComponent<VerticalLayoutGroup>();
             scrollGroup.childForceExpandHeight = true;
-            scrollGroup.childControlHeight = true;
+            scrollGroup.SetChildControlHeight(true);
             scrollGroup.childForceExpandWidth = true;
-            scrollGroup.childControlWidth = true;
+            scrollGroup.SetChildControlWidth(true);
             scrollGroup.spacing = 5;
             var contentFitter = scrollContent.GetComponent<ContentSizeFitter>();
             contentFitter.verticalFit = ContentSizeFitter.FitMode.Unconstrained;
@@ -175,8 +175,8 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             var pathGroup = m_pathGroupObj.GetComponent<HorizontalLayoutGroup>();
             pathGroup.childForceExpandHeight = false;
             pathGroup.childForceExpandWidth = false;
-            pathGroup.childControlHeight = false;
-            pathGroup.childControlWidth = true;
+            pathGroup.SetChildControlHeight(false);
+            pathGroup.SetChildControlWidth(true);
             pathGroup.spacing = 5;
             var pathRect = m_pathGroupObj.GetComponent<RectTransform>();
             pathRect.sizeDelta = new Vector2(pathRect.sizeDelta.x, 20);
@@ -215,9 +215,9 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             hiddenLayout.flexibleWidth = 9000;
             var hiddenGroup = pathHiddenTextObj.AddComponent<HorizontalLayoutGroup>();
             hiddenGroup.childForceExpandWidth = true;
-            hiddenGroup.childControlWidth = true;
+            hiddenGroup.SetChildControlWidth(true);
             hiddenGroup.childForceExpandHeight = true;
-            hiddenGroup.childControlHeight = true;
+            hiddenGroup.SetChildControlHeight(true);
 
             var pathInputObj = UIFactory.CreateInputField(pathHiddenTextObj);
             var pathInputRect = pathInputObj.GetComponent<RectTransform>();
@@ -246,8 +246,8 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             var nameGroup = nameRowObj.GetComponent<HorizontalLayoutGroup>();
             nameGroup.childForceExpandHeight = false;
             nameGroup.childForceExpandWidth = false;
-            nameGroup.childControlHeight = true;
-            nameGroup.childControlWidth = true;
+            nameGroup.SetChildControlHeight(true);
+            nameGroup.SetChildControlWidth(true);
             nameGroup.spacing = 5;
             var nameRect = nameRowObj.GetComponent<RectTransform>();
             nameRect.sizeDelta = new Vector2(nameRect.sizeDelta.x, 25);
@@ -311,7 +311,7 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             var sceneLayerRow = UIFactory.CreateHorizontalGroup(scrollContent, new Color(0.1f, 0.1f, 0.1f));
             var sceneLayerGroup = sceneLayerRow.GetComponent<HorizontalLayoutGroup>();
             sceneLayerGroup.childForceExpandWidth = false;
-            sceneLayerGroup.childControlWidth = true;
+            sceneLayerGroup.SetChildControlWidth(true);
             sceneLayerGroup.spacing = 5;
 
             var layerLabel = UIFactory.CreateLabel(sceneLayerRow, TextAnchor.MiddleCenter);
@@ -363,9 +363,9 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             var midGroup = midGroupObj.GetComponent<HorizontalLayoutGroup>();
             midGroup.spacing = 5;
             midGroup.childForceExpandWidth = true;
-            midGroup.childControlWidth = true;
+            midGroup.SetChildControlWidth(true);
             midGroup.childForceExpandHeight = true;
-            midGroup.childControlHeight = true;
+            midGroup.SetChildControlHeight(true);
 
             var midLayout = midGroupObj.AddComponent<LayoutElement>();
             midLayout.minHeight = 300;

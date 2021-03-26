@@ -269,8 +269,8 @@ namespace UnityExplorer.UI.Main.CSConsole
             mainRect.offsetMax = Vector2.zero;
 
             var mainGroup = content.GetComponent<VerticalLayoutGroup>();
-            mainGroup.childControlHeight = false;
-            mainGroup.childControlWidth = true;
+            mainGroup.SetChildControlHeight(false);
+            mainGroup.SetChildControlWidth(true);
             mainGroup.childForceExpandHeight = false;
             mainGroup.childForceExpandWidth = true;
 

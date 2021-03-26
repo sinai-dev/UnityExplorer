@@ -155,9 +155,9 @@ namespace UnityExplorer.Core.Inspectors.Reflection
             hiddenLayout.flexibleWidth = 9000;
             var hiddenGroup = m_hiddenObj.AddComponent<HorizontalLayoutGroup>();
             hiddenGroup.childForceExpandWidth = true;
-            hiddenGroup.childControlWidth = true;
+            hiddenGroup.SetChildControlWidth(true);
             hiddenGroup.childForceExpandHeight = true;
-            hiddenGroup.childControlHeight = true;
+            hiddenGroup.SetChildControlHeight(true);
 
             var inputObj = UIFactory.CreateInputField(m_hiddenObj, 14, 3);
             var inputLayout = inputObj.AddComponent<LayoutElement>();

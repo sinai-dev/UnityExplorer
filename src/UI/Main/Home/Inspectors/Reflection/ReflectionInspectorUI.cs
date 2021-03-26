@@ -53,8 +53,8 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             var mainGroup = Content.GetComponent<VerticalLayoutGroup>();
             mainGroup.childForceExpandHeight = false;
             mainGroup.childForceExpandWidth = true;
-            mainGroup.childControlHeight = true;
-            mainGroup.childControlWidth = true;
+            mainGroup.SetChildControlHeight(true);
+            mainGroup.SetChildControlWidth(true);
             mainGroup.spacing = 5;
             mainGroup.padding.top = 4;
             mainGroup.padding.left = 4;
@@ -72,8 +72,8 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             var nameRow = nameRowObj.GetComponent<HorizontalLayoutGroup>();
             nameRow.childForceExpandWidth = true;
             nameRow.childForceExpandHeight = true;
-            nameRow.childControlHeight = true;
-            nameRow.childControlWidth = true;
+            nameRow.SetChildControlHeight(true);
+            nameRow.SetChildControlWidth(true);
             nameRow.padding.top = 2;
             var nameRowLayout = nameRowObj.AddComponent<LayoutElement>();
             nameRowLayout.minHeight = 25;
@@ -120,8 +120,8 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             var filterGroup = filterAreaObj.GetComponent<VerticalLayoutGroup>();
             filterGroup.childForceExpandWidth = true;
             filterGroup.childForceExpandHeight = true;
-            filterGroup.childControlWidth = true;
-            filterGroup.childControlHeight = true;
+            filterGroup.SetChildControlWidth(true);
+            filterGroup.SetChildControlHeight(true);
             filterGroup.spacing = 4;
             filterGroup.padding.left = 4;
             filterGroup.padding.right = 4;
@@ -136,8 +136,8 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             var nameFilterGroup = nameFilterRowObj.GetComponent<HorizontalLayoutGroup>();
             nameFilterGroup.childForceExpandHeight = false;
             nameFilterGroup.childForceExpandWidth = false;
-            nameFilterGroup.childControlWidth = true;
-            nameFilterGroup.childControlHeight = true;
+            nameFilterGroup.SetChildControlWidth(true);
+            nameFilterGroup.SetChildControlHeight(true);
             nameFilterGroup.spacing = 5;
             var nameFilterLayout = nameFilterRowObj.AddComponent<LayoutElement>();
             nameFilterLayout.minHeight = 25;
@@ -168,8 +168,8 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             var memFilterGroup = memberFilterRowObj.GetComponent<HorizontalLayoutGroup>();
             memFilterGroup.childForceExpandHeight = false;
             memFilterGroup.childForceExpandWidth = false;
-            memFilterGroup.childControlWidth = true;
-            memFilterGroup.childControlHeight = true;
+            memFilterGroup.SetChildControlWidth(true);
+            memFilterGroup.SetChildControlHeight(true);
             memFilterGroup.spacing = 5;
             var memFilterLayout = memberFilterRowObj.AddComponent<LayoutElement>();
             memFilterLayout.minHeight = 25;
