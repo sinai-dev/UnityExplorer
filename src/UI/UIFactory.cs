@@ -120,7 +120,7 @@ namespace UnityExplorer.UI
             if (!group)
                 group = gameObject.AddComponent<T>();
 
-            return SetLayoutGroup(group, forceWidth, forceHeight, childControlWidth, childControlHeight, spacing, padTop, padBottom, padLeft, padRight);
+            return SetLayoutGroup(group, forceWidth, forceHeight, childControlWidth, childControlHeight, spacing, padTop, padBottom, padLeft, padRight, childAlignment);
         }
 
         /// <summary>
@@ -312,51 +312,6 @@ namespace UnityExplorer.UI
 
             return button;
         }
-
-        ///// <summary>
-        ///// Create a Button and specify only the Normal color.
-        ///// </summary>
-        //public static Button CreateButton(GameObject parent, string name, string text, Action onClick = null, Color? normalColor = null)
-        //{
-        //    var colors = new ColorBlock
-        //    {
-        //        normalColor = normalColor ?? new Color(0.25f, 0.25f, 0.25f),
-        //        highlightedColor = new Color(0.3f, 0.3f, 0.3f),
-        //        pressedColor = new Color(0.15f, 0.15f, 0.15f)
-        //    };
-
-        //    return CreateButton(parent, name, text, onClick, colors);
-        //}
-
-        ///// <summary>
-        ///// Create a Button and specify the entire ColorBlock for the transition values.
-        ///// </summary>
-        //public static Button CreateButton(GameObject parent, string name, string text, Action onClick, ColorBlock? colors)
-        //{
-        //    var buttonObj = CreateUIObject(name, parent);
-
-        //    Image bgImage = buttonObj.AddComponent<Image>();
-        //    bgImage.type = Image.Type.Sliced;
-        //    bgImage.color = new Color(1, 1, 1, 0.75f);
-
-        //    Button button = buttonObj.AddComponent<Button>();
-        //    SetDefaultSelectableColors(button);
-
-        //    if (onClick != null)
-        //        button.onClick.AddListener(onClick);
-
-        //    if (colors != null)
-        //        button.colors = (ColorBlock)colors;
-
-        //    var textObj = CreateLabel(buttonObj, "Text", text, TextAnchor.MiddleCenter);
-
-        //    RectTransform rect = textObj.GetComponent<RectTransform>();
-        //    rect.anchorMin = Vector2.zero;
-        //    rect.anchorMax = Vector2.one;
-        //    rect.sizeDelta = Vector2.zero;
-
-        //    return button;
-        //}
 
         /// <summary>
         /// Create a Slider control.
