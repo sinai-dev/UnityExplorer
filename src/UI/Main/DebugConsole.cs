@@ -220,8 +220,10 @@ namespace UnityExplorer.UI.Main
                 ConfigManager.Handler.SaveConfig();
             });
 
+            ConfigManager.Log_Unity_Debug.OnValueChanged += (bool val) => { unityToggle.isOn = val; };
+
             unityToggle.isOn = LogUnity;
-            unityToggleText.text = "Print Unity Debug?";
+            unityToggleText.text = "Log Unity Debug?";
             unityToggleText.alignment = TextAnchor.MiddleLeft;
 
             UIFactory.SetLayoutElement(unityToggleObj, minWidth: 170, flexibleWidth: 0);
