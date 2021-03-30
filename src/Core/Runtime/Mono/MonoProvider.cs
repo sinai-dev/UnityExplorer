@@ -60,18 +60,6 @@ namespace UnityExplorer.Core.Runtime.Mono
             return scene.rootCount;
         }
 
-        public override void SetColorBlockColors(ref ColorBlock block, Color? normal, Color? highlighted, Color? pressed)
-        {
-            if (normal != null)
-                block.normalColor = (Color)normal;
-
-            if (highlighted != null)
-                block.highlightedColor = (Color)highlighted;
-
-            if (pressed != null)
-                block.pressedColor = (Color)pressed;
-        }
-
         public override void CheckInputPointerEvent()
         {
             // Not necessary afaik

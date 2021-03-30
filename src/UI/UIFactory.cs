@@ -64,7 +64,14 @@ namespace UnityExplorer.UI
         public static void SetColorBlockValues(ref this ColorBlock colorBlock, Color? normal = null, Color? highlighted = null, 
             Color? pressed = null)
         {
-            RuntimeProvider.Instance.SetColorBlockColors(ref colorBlock, normal, highlighted, pressed);
+            if (normal != null)
+                colorBlock.normalColor = (Color)normal;
+
+            if (highlighted != null)
+                colorBlock.highlightedColor = (Color)highlighted;
+
+            if (pressed != null)
+                colorBlock.pressedColor = (Color)pressed;
         }
 
         /// <summary>

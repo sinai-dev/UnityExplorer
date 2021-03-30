@@ -121,23 +121,6 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
                    .Invoke(handle);
         }
 
-        // ColorBlock set
-
-        public override void SetColorBlockColors(ref ColorBlock colorBlock, Color? normal, Color? highlighted, Color? pressed)
-        {
-            if (normal != null)
-            {
-                colorBlock.m_NormalColor = (Color)normal;
-                colorBlock.m_SelectedColor = (Color)normal;
-            }
-
-            if (highlighted != null)
-                colorBlock.m_HighlightedColor = (Color)highlighted;
-
-            if (pressed != null)
-                colorBlock.m_PressedColor = (Color)pressed;
-        }
-
         // Custom check for il2cpp input pointer event
 
         public override void CheckInputPointerEvent()

@@ -108,6 +108,7 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
 
             Type ret = Type.GetType(name);
 
+            // Thanks to Slaynash for this deobfuscation snippet!
             if (ret == null)
             {
                 string baseName = cppType.FullName;
