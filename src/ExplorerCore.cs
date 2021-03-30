@@ -1,126 +1,93 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityExplorer.Core.Config;
-using UnityExplorer.Core.Unity;
 using UnityExplorer.Core.Input;
-using UnityExplorer.Core.Inspectors;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Main;
-using UnityExplorer.UI.Utility;
 
 namespace UnityExplorer
 {
     public class ExplorerCore
     {
         public const string NAME = "UnityExplorer";
-        public const string VERSION = "3.2.10";
+        public const string VERSION = "3.3.0";
         public const string AUTHOR = "Sinai";
         public const string GUID = "com.sinai.unityexplorer";
 
         public static ExplorerCore Instance { get; private set; }
 
-        public static IExplorerLoader Loader =>
-#if ML
-            ExplorerMelonMod.Instance;
-#elif BIE
-            ExplorerBepInPlugin.Instance;
-#elif STANDALONE
-            ExplorerStandalone.Instance;
-#endif
+        public static IExplorerLoader Loader { get; private set; }
 
-        public static string EXPLORER_FOLDER => Loader.ExplorerFolder;
+        // Prevent using ctor, must use Init method.
+        private ExplorerCore() { }
 
-        public ExplorerCore()
+        public static void Init(IExplorerLoader loader)
         {
             if (Instance != null)
             {
-                Log("An instance of Explorer is already active!");
+                Log("An instance of UnityExplorer is already active!");
                 return;
             }
 
-            Instance = this;
+            Loader = loader;
+            Instance = new ExplorerCore();
 
-            if (!Directory.Exists(EXPLORER_FOLDER))
-                Directory.CreateDirectory(EXPLORER_FOLDER);
+            if (!Directory.Exists(Loader.ExplorerFolder))
+                Directory.CreateDirectory(Loader.ExplorerFolder);
 
-            ExplorerConfig.OnLoad();
+            ConfigManager.Init(Loader.ConfigHandler);
 
             RuntimeProvider.Init();
 
             InputManager.Init();
 
-            CursorUnlocker.Init();
-
-            UIManager.ShowMenu = true;
+            UIManager.Init();
 
             Log($"{NAME} {VERSION} initialized.");
         }
 
         public static void Update()
         {
-            UIManager.CheckUIInit();
-
-            if (InspectUnderMouse.Enabled)
-                InspectUnderMouse.UpdateInspect();
-            else
-                UIManager.Update();
+            UIManager.Update();
         }
 
-        public void OnUnityLog(string message, string stackTrace, LogType type)
+        public static void Log(object message) 
+            => Log(message, LogType.Log, false);
+
+        public static void LogWarning(object message) 
+            => Log(message, LogType.Warning, false);
+
+        public static void LogError(object message) 
+            => Log(message, LogType.Error, false);
+
+        internal static void Log(object message, LogType logType, bool isFromUnity = false)
         {
-            if (!DebugConsole.LogUnity)
+            if (isFromUnity && !ConfigManager.Log_Unity_Debug.Value)
                 return;
 
-            message = $"[UNITY] {message}";
+            string log = message?.ToString() ?? "";
 
-            switch (type)
+            switch (logType)
             {
                 case LogType.Assert:
                 case LogType.Log:
-                    Log(message, true);
+                    Loader.OnLogMessage(log);
+                    DebugConsole.Log(log, Color.white);
                     break;
+
                 case LogType.Warning:
-                    LogWarning(message, true);
+                    Loader.OnLogWarning(log);
+                    DebugConsole.Log(log, Color.yellow);
                     break;
-                case LogType.Exception:
+
                 case LogType.Error:
-                    LogError(message, true);
+                case LogType.Exception:
+                    Loader.OnLogError(log);
+                    DebugConsole.Log(log, Color.red);
                     break;
             }
-        }
-
-        public static void Log(object message, bool unity = false)
-        {
-            DebugConsole.Log(message?.ToString());
-
-            if (unity)
-                return;
-
-            Loader.OnLogMessage(message);
-        }
-
-        public static void LogWarning(object message, bool unity = false)
-        {
-            DebugConsole.Log(message?.ToString(), "FFFF00");
-
-            if (unity)
-                return;
-
-            Loader.OnLogWarning(message);
-        }
-
-        public static void LogError(object message, bool unity = false)
-        {
-            DebugConsole.Log(message?.ToString(), "FF0000");
-
-            if (unity)
-                return;
-
-            Loader.OnLogError(message);
         }
     }
 }

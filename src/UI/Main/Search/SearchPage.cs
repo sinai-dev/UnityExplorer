@@ -4,15 +4,14 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using UnityExplorer.Core.Inspectors;
-using UnityExplorer.UI.Reusable;
 using System.Reflection;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.Core;
-using UnityExplorer.Search;
 using UnityExplorer.UI.Utility;
+using UnityExplorer.Core.Search;
+using UnityExplorer.UI.Main.Home;
 
-namespace UnityExplorer.UI.Main
+namespace UnityExplorer.UI.Main.Search
 {
     public class SearchPage : BaseMenuPage
     {
@@ -207,7 +206,7 @@ namespace UnityExplorer.UI.Main
                 });
             }
 
-            m_sceneDropdown.transform.Find("Label").GetComponent<Text>().text = "Any";
+            m_sceneDropdown.itemText.text = "Any";
             m_sceneFilter = SceneFilter.Any;
         }
 
@@ -254,7 +253,7 @@ namespace UnityExplorer.UI.Main
                 return;
 
             if (m_selectedContextButton)
-                UIFactory.SetDefaultColorTransitionValues(m_selectedContextButton);
+                UIFactory.SetDefaultSelectableColors(m_selectedContextButton);
 
             var button = m_contextButtons[context];
 
@@ -268,8 +267,8 @@ namespace UnityExplorer.UI.Main
             m_context = context;
 
             // if extra filters are valid
-            if (context == SearchContext.Component 
-                || context == SearchContext.GameObject 
+            if (context == SearchContext.Component
+                || context == SearchContext.GameObject
                 || context == SearchContext.Custom)
             {
                 m_extraFilterRow?.SetActive(true);
@@ -280,23 +279,13 @@ namespace UnityExplorer.UI.Main
             }
         }
 
-#region UI CONSTRUCTION
+        #region UI CONSTRUCTION
 
         internal void ConstructUI()
         {
             GameObject parent = MainMenu.Instance.PageViewport;
 
-            Content = UIFactory.CreateVerticalGroup(parent);
-            var mainGroup = Content.GetComponent<VerticalLayoutGroup>();
-            mainGroup.padding.left = 4;
-            mainGroup.padding.right = 4;
-            mainGroup.padding.top = 4;
-            mainGroup.padding.bottom = 4;
-            mainGroup.spacing = 5;
-            mainGroup.childForceExpandHeight = true;
-            mainGroup.childForceExpandWidth = true;
-            mainGroup.SetChildControlHeight(true);
-            mainGroup.SetChildControlWidth(true);
+            Content = UIFactory.CreateVerticalGroup(parent, "SearchPage", true, true, true, true, 5, new Vector4(4,4,4,4));
 
             ConstructTopArea();
 
@@ -305,312 +294,172 @@ namespace UnityExplorer.UI.Main
 
         internal void ConstructTopArea()
         {
-            var topAreaObj = UIFactory.CreateVerticalGroup(Content, new Color(0.15f, 0.15f, 0.15f));
-            var topGroup = topAreaObj.GetComponent<VerticalLayoutGroup>();
-            topGroup.childForceExpandHeight = false;
-            topGroup.SetChildControlHeight(true);
-            topGroup.childForceExpandWidth = true;
-            topGroup.SetChildControlWidth(true);
-            topGroup.padding.top = 5;
-            topGroup.padding.left = 5;
-            topGroup.padding.right = 5;
-            topGroup.padding.bottom = 5;
-            topGroup.spacing = 5;
+            var topAreaObj = UIFactory.CreateVerticalGroup(Content, "TitleArea", true, false, true, true, 5, new Vector4(5,5,5,5),
+                new Color(0.15f, 0.15f, 0.15f));
 
-            GameObject titleObj = UIFactory.CreateLabel(topAreaObj, TextAnchor.UpperLeft);
-            Text titleLabel = titleObj.GetComponent<Text>();
-            titleLabel.text = "Search";
-            titleLabel.fontSize = 20;
-            LayoutElement titleLayout = titleObj.AddComponent<LayoutElement>();
-            titleLayout.minHeight = 30;
-            titleLayout.flexibleHeight = 0;
+            var titleLabel = UIFactory.CreateLabel(topAreaObj, "SearchTitle", "Search", TextAnchor.UpperLeft, Color.white, true, 25);
+            UIFactory.SetLayoutElement(titleLabel.gameObject, minHeight: 30, flexibleHeight: 0);
 
             // top area options
 
-            var optionsGroupObj = UIFactory.CreateVerticalGroup(topAreaObj, new Color(0.1f, 0.1f, 0.1f));
-            var optionsGroup = optionsGroupObj.GetComponent<VerticalLayoutGroup>();
-            optionsGroup.childForceExpandHeight = false;
-            optionsGroup.SetChildControlHeight(true);
-            optionsGroup.childForceExpandWidth = true;
-            optionsGroup.SetChildControlWidth(true);
-            optionsGroup.spacing = 10;
-            optionsGroup.padding.top = 4;
-            optionsGroup.padding.right = 4;
-            optionsGroup.padding.left = 4;
-            optionsGroup.padding.bottom = 4;
-            var optionsLayout = optionsGroupObj.AddComponent<LayoutElement>();
-            optionsLayout.minWidth = 500;
-            optionsLayout.minHeight = 70;
-            optionsLayout.flexibleHeight = 100;
+            var optionsGroupObj = UIFactory.CreateVerticalGroup(topAreaObj, "OptionsArea", true, false, true, true, 10, new Vector4(4,4,4,4),
+                new Color(0.1f, 0.1f, 0.1f));
+            UIFactory.SetLayoutElement(optionsGroupObj, minWidth: 500, minHeight: 70, flexibleHeight: 100);
 
             // search context row
 
-            var contextRowObj = UIFactory.CreateHorizontalGroup(optionsGroupObj, new Color(1, 1, 1, 0));
-            var contextGroup = contextRowObj.GetComponent<HorizontalLayoutGroup>();
-            contextGroup.childForceExpandWidth = false;
-            contextGroup.SetChildControlWidth(true);
-            contextGroup.childForceExpandHeight = false;
-            contextGroup.SetChildControlHeight(true);
-            contextGroup.spacing = 3;
-            var contextLayout = contextRowObj.AddComponent<LayoutElement>();
-            contextLayout.minHeight = 25;
+            var contextRowObj = UIFactory.CreateHorizontalGroup(optionsGroupObj, "ContextFilters", false, false, true, true, 3, default,
+                new Color(1, 1, 1, 0));
+            UIFactory.SetLayoutElement(contextRowObj, minHeight: 25);
 
-            var contextLabelObj = UIFactory.CreateLabel(contextRowObj, TextAnchor.MiddleLeft);
-            var contextText = contextLabelObj.GetComponent<Text>();
-            contextText.text = "Searching for:";
-            var contextLabelLayout = contextLabelObj.AddComponent<LayoutElement>();
-            contextLabelLayout.minWidth = 125;
-            contextLabelLayout.minHeight = 25;
+            var contextLabelObj = UIFactory.CreateLabel(contextRowObj, "ContextLabel", "Searching for:", TextAnchor.MiddleLeft);
+            UIFactory.SetLayoutElement(contextLabelObj.gameObject, minWidth: 125, minHeight: 25);
 
             // context buttons
 
-            AddContextButton(contextRowObj, "UnityEngine.Object",   SearchContext.UnityObject, 140);
-            AddContextButton(contextRowObj, "GameObject",           SearchContext.GameObject);
-            AddContextButton(contextRowObj, "Component",            SearchContext.Component);
-            AddContextButton(contextRowObj, "Custom...",            SearchContext.Custom);
+            AddContextButton(contextRowObj, "UnityEngine.Object", SearchContext.UnityObject, 140);
+            AddContextButton(contextRowObj, "GameObject", SearchContext.GameObject);
+            AddContextButton(contextRowObj, "Component", SearchContext.Component);
+            AddContextButton(contextRowObj, "Custom...", SearchContext.Custom);
 
             // custom type input
 
-            var customTypeObj = UIFactory.CreateInputField(contextRowObj);
-            var customTypeLayout = customTypeObj.AddComponent<LayoutElement>();
-            customTypeLayout.minWidth = 250;
-            customTypeLayout.flexibleWidth = 2000;
-            customTypeLayout.minHeight = 25;
-            customTypeLayout.flexibleHeight = 0;
+            var customTypeObj = UIFactory.CreateInputField(contextRowObj, "CustomTypeInput", "eg. UnityEngine.Texture2D, etc...");
+            UIFactory.SetLayoutElement(customTypeObj, minWidth: 250, flexibleWidth: 2000, minHeight: 25, flexibleHeight: 0);
             m_customTypeInput = customTypeObj.GetComponent<InputField>();
-            m_customTypeInput.placeholder.gameObject.GetComponent<Text>().text = "eg. UnityEngine.Texture2D, etc...";
 
             // static class and singleton buttons
 
-            var secondRow = UIFactory.CreateHorizontalGroup(optionsGroupObj, new Color(1, 1, 1, 0));
-            var secondGroup = secondRow.GetComponent<HorizontalLayoutGroup>();
-            secondGroup.childForceExpandWidth = false;
-            secondGroup.childForceExpandHeight = false;
-            secondGroup.spacing = 3;
-            var secondLayout = secondRow.AddComponent<LayoutElement>();
-            secondLayout.minHeight = 25;
+            var secondRow = UIFactory.CreateHorizontalGroup(optionsGroupObj, "SecondRow", false, false, true, true, 3, default, new Color(1, 1, 1, 0));
+            UIFactory.SetLayoutElement(secondRow, minHeight: 25);
+
             var spacer = UIFactory.CreateUIObject("spacer", secondRow);
-            var spaceLayout = spacer.AddComponent<LayoutElement>();
-            spaceLayout.minWidth = 125;
-            spaceLayout.minHeight = 25;
+            UIFactory.SetLayoutElement(spacer, minWidth: 25, minHeight: 25);
 
             AddContextButton(secondRow, "Static Class", SearchContext.StaticClass);
             AddContextButton(secondRow, "Singleton", SearchContext.Singleton);
 
             // search input
 
-            var nameRowObj = UIFactory.CreateHorizontalGroup(optionsGroupObj, new Color(1, 1, 1, 0));
-            var nameRowGroup = nameRowObj.GetComponent<HorizontalLayoutGroup>();
-            nameRowGroup.childForceExpandWidth = true;
-            nameRowGroup.SetChildControlWidth(true);
-            nameRowGroup.childForceExpandHeight = false;
-            nameRowGroup.SetChildControlHeight(true);
-            var nameRowLayout = nameRowObj.AddComponent<LayoutElement>();
-            nameRowLayout.minHeight = 25;
-            nameRowLayout.flexibleHeight = 0;
-            nameRowLayout.flexibleWidth = 5000;
+            var nameRowObj = UIFactory.CreateHorizontalGroup(optionsGroupObj, "SearchInput", true, false, true, true, 0, default, new Color(1, 1, 1, 0));
+            UIFactory.SetLayoutElement(nameRowObj, minHeight: 25, flexibleHeight: 0, flexibleWidth: 5000);
 
-            var nameLabelObj = UIFactory.CreateLabel(nameRowObj, TextAnchor.MiddleLeft);
-            var nameLabelText = nameLabelObj.GetComponent<Text>();
-            nameLabelText.text = "Name contains:";
-            var nameLabelLayout = nameLabelObj.AddComponent<LayoutElement>();
-            nameLabelLayout.minWidth = 125;
-            nameLabelLayout.minHeight = 25;
+            var nameLabel = UIFactory.CreateLabel(nameRowObj, "NameLabel", "Name contains:", TextAnchor.MiddleLeft);
+            UIFactory.SetLayoutElement(nameLabel.gameObject, minWidth: 125, minHeight: 25);
 
-            var nameInputObj = UIFactory.CreateInputField(nameRowObj);
+            var nameInputObj = UIFactory.CreateInputField(nameRowObj, "NameInputField", "...");
             m_nameInput = nameInputObj.GetComponent<InputField>();
-            //m_nameInput.placeholder.gameObject.GetComponent<TextMeshProUGUI>().text = "";
-            var nameInputLayout = nameInputObj.AddComponent<LayoutElement>();
-            nameInputLayout.minWidth = 150;
-            nameInputLayout.flexibleWidth = 5000;
-            nameInputLayout.minHeight = 25;
+            UIFactory.SetLayoutElement(nameInputObj, minWidth: 150, flexibleWidth: 5000, minHeight: 25);
 
             // extra filter row
 
-            m_extraFilterRow = UIFactory.CreateHorizontalGroup(optionsGroupObj, new Color(1, 1, 1, 0));
+            m_extraFilterRow = UIFactory.CreateHorizontalGroup(optionsGroupObj, "ExtraFilterRow", false, true, true, true, 0, default, new Color(1, 1, 1, 0));
             m_extraFilterRow.SetActive(false);
-            var extraGroup = m_extraFilterRow.GetComponent<HorizontalLayoutGroup>();
-            extraGroup.childForceExpandHeight = true;
-            extraGroup.SetChildControlHeight(true);
-            extraGroup.childForceExpandWidth = false;
-            extraGroup.SetChildControlWidth(true);
-            var filterRowLayout = m_extraFilterRow.AddComponent<LayoutElement>();
-            filterRowLayout.minHeight = 25;
-            filterRowLayout.flexibleHeight = 0;
-            filterRowLayout.minWidth = 125;
-            filterRowLayout.flexibleWidth = 150;
+            UIFactory.SetLayoutElement(m_extraFilterRow, minHeight: 25, minWidth: 125, flexibleHeight: 0, flexibleWidth: 150);
 
             // scene filter
 
-            var sceneLabelObj = UIFactory.CreateLabel(m_extraFilterRow, TextAnchor.MiddleLeft);
-            var sceneLabel = sceneLabelObj.GetComponent<Text>();
-            sceneLabel.text = "Scene Filter:";
-            var sceneLayout = sceneLabelObj.AddComponent<LayoutElement>();
-            sceneLayout.minWidth = 125;
-            sceneLayout.minHeight = 25;
+            var sceneLabelObj = UIFactory.CreateLabel(m_extraFilterRow, "SceneFilterLabel", "Scene filter:", TextAnchor.MiddleLeft);
+            UIFactory.SetLayoutElement(sceneLabelObj.gameObject, minWidth: 125, minHeight: 25);
 
-            var sceneDropObj = UIFactory.CreateDropdown(m_extraFilterRow, out m_sceneDropdown);
-            m_sceneDropdown.itemText.text = "Any";
-            m_sceneDropdown.itemText.fontSize = 12;
-            var sceneDropLayout = sceneDropObj.AddComponent<LayoutElement>();
-            sceneDropLayout.minWidth = 220;
-            sceneDropLayout.minHeight = 25;
+            var sceneDropObj = UIFactory.CreateDropdown(m_extraFilterRow, 
+                out m_sceneDropdown,
+                "Any", 
+                12, 
+                (int value) => { m_sceneFilter = (SceneFilter)value; }
+            );
 
-            m_sceneDropdown.onValueChanged.AddListener(OnSceneDropdownChanged);
-            void OnSceneDropdownChanged(int value)
-            {
-                if (value < 4)
-                    m_sceneFilter = (SceneFilter)value;
-                else
-                    m_sceneFilter = SceneFilter.Explicit;
-            }
+            UIFactory.SetLayoutElement(sceneDropObj, minWidth: 220, minHeight: 25);
 
             // invisible space
 
             var invis = UIFactory.CreateUIObject("spacer", m_extraFilterRow);
-            var invisLayout = invis.AddComponent<LayoutElement>();
-            invisLayout.minWidth = 25;
-            invisLayout.flexibleWidth = 0;
+            UIFactory.SetLayoutElement(invis, minWidth: 25, flexibleWidth: 0);
 
             // children filter
 
-            var childLabelObj = UIFactory.CreateLabel(m_extraFilterRow, TextAnchor.MiddleLeft);
-            var childLabel = childLabelObj.GetComponent<Text>();
-            childLabel.text = "Child Filter:";
-            var childLayout = childLabelObj.AddComponent<LayoutElement>();
-            childLayout.minWidth = 100;
-            childLayout.minHeight = 25;
+            var childLabelObj = UIFactory.CreateLabel(m_extraFilterRow, "ChildFilterLabel", "Child filter:", TextAnchor.MiddleLeft);
+            UIFactory.SetLayoutElement(childLabelObj.gameObject, minWidth: 100, minHeight: 25);
 
-            var childDropObj = UIFactory.CreateDropdown(m_extraFilterRow, out Dropdown childDrop);
-            childDrop.itemText.text = "Any";
-            childDrop.itemText.fontSize = 12;
-            var childDropLayout = childDropObj.AddComponent<LayoutElement>();
-            childDropLayout.minWidth = 180;
-            childDropLayout.minHeight = 25;
+            var childDropObj = UIFactory.CreateDropdown(m_extraFilterRow, 
+                out Dropdown childDrop, 
+                "Any", 
+                12,
+                (int value) => { m_childFilter = (ChildFilter)value; },
+                new[] { "Any", "Root Objects Only", "Children Only" });
 
-            childDrop.options.Add(new Dropdown.OptionData { text = "Any" });
-            childDrop.options.Add(new Dropdown.OptionData { text = "Root Objects Only" });
-            childDrop.options.Add(new Dropdown.OptionData { text = "Children Only" });
-
-            childDrop.onValueChanged.AddListener(OnChildDropdownChanged);
-            void OnChildDropdownChanged(int value)
-            {
-                m_childFilter = (ChildFilter)value;
-            }
+            UIFactory.SetLayoutElement(childDropObj, minWidth: 180, minHeight: 25);
 
             // search button
 
-            var searchBtnObj = UIFactory.CreateButton(topAreaObj);
-            var searchText = searchBtnObj.GetComponentInChildren<Text>();
-            searchText.text = "Search";
-            LayoutElement searchBtnLayout = searchBtnObj.AddComponent<LayoutElement>();
-            searchBtnLayout.minHeight = 30;
-            searchBtnLayout.flexibleHeight = 0;
-            var searchBtn = searchBtnObj.GetComponent<Button>();
-
-            searchBtn.onClick.AddListener(OnSearchClicked);
+            var searchBtnObj = UIFactory.CreateButton(topAreaObj, "SearchButton", "Search", OnSearchClicked);
+            UIFactory.SetLayoutElement(searchBtnObj.gameObject, minHeight: 30, flexibleHeight: 0);
         }
 
         internal void AddContextButton(GameObject parent, string label, SearchContext context, float width = 110)
         {
-            var btnObj = UIFactory.CreateButton(parent);
-
-            var btn = btnObj.GetComponent<Button>();
+            var btn = UIFactory.CreateButton(parent, $"Context_{context}", label, () => { OnContextButtonClicked(context); });
+            UIFactory.SetLayoutElement(btn.gameObject, minHeight: 25, minWidth: (int)width);
 
             m_contextButtons.Add(context, btn);
 
-            btn.onClick.AddListener(() => { OnContextButtonClicked(context); });
-
-            var btnLayout = btnObj.AddComponent<LayoutElement>();
-            btnLayout.minHeight = 25;
-            btnLayout.minWidth = width;
-
-            var btnText = btnObj.GetComponentInChildren<Text>();
-            btnText.text = label;
-
             // if first button
             if (!m_selectedContextButton)
-            {
                 OnContextButtonClicked(context);
-            }
         }
 
         internal void ConstructResultsArea()
         {
             // Result group holder (NOT actual result list content)
 
-            var resultGroupObj = UIFactory.CreateVerticalGroup(Content, new Color(1,1,1,0));
-            var resultGroup = resultGroupObj.GetComponent<VerticalLayoutGroup>();
-            resultGroup.childForceExpandHeight = false;
-            resultGroup.childForceExpandWidth = true;
-            resultGroup.SetChildControlHeight(true);
-            resultGroup.SetChildControlWidth(true);
-            resultGroup.spacing = 5;
-            resultGroup.padding.top = 5;
-            resultGroup.padding.right = 5;
-            resultGroup.padding.left = 5;
-            resultGroup.padding.bottom = 5;
+            var resultGroupObj = UIFactory.CreateVerticalGroup(Content, "SearchResults", true, false, true, true, 5, new Vector4(5,5,5,5), 
+                new Color(1, 1, 1, 0));
 
-            var resultCountObj = UIFactory.CreateLabel(resultGroupObj, TextAnchor.MiddleCenter);
-            m_resultCountText = resultCountObj.GetComponent<Text>();
-            m_resultCountText.text = "No results...";
+            m_resultCountText = UIFactory.CreateLabel(resultGroupObj, "ResultsLabel", "No results...", TextAnchor.MiddleCenter);
 
-            GameObject scrollObj = UIFactory.CreateScrollView(resultGroupObj, 
-                out m_resultListContent, 
-                out SliderScrollbar scroller, 
+            GameObject scrollObj = UIFactory.CreateScrollView(resultGroupObj,
+                "ResultsScrollView",
+                out m_resultListContent,
+                out SliderScrollbar scroller,
                 new Color(0.07f, 0.07f, 0.07f, 1));
 
             m_resultListPageHandler = new PageHandler(scroller);
             m_resultListPageHandler.ConstructUI(resultGroupObj);
             m_resultListPageHandler.OnPageChanged += OnResultPageTurn;
 
-            // actual result list content
-            var contentGroup = m_resultListContent.GetComponent<VerticalLayoutGroup>();
-            contentGroup.spacing = 2;
-            contentGroup.childForceExpandHeight = false;
-            contentGroup.SetChildControlHeight(true);
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(m_resultListContent, forceHeight: false, childControlHeight: true, spacing: 2);
         }
 
         internal void AddResultButton()
         {
             int thisIndex = m_resultListTexts.Count();
 
-            GameObject btnGroupObj = UIFactory.CreateHorizontalGroup(m_resultListContent, new Color(0.1f, 0.1f, 0.1f));
-            HorizontalLayoutGroup btnGroup = btnGroupObj.GetComponent<HorizontalLayoutGroup>();
-            btnGroup.childForceExpandWidth = true;
-            btnGroup.SetChildControlWidth(true);
-            btnGroup.childForceExpandHeight = false;
-            btnGroup.SetChildControlHeight(true);
-            btnGroup.padding.top = 1;
-            btnGroup.padding.left = 1;
-            btnGroup.padding.right = 1;
-            btnGroup.padding.bottom = 1;
-            LayoutElement btnLayout = btnGroupObj.AddComponent<LayoutElement>();
-            btnLayout.flexibleWidth = 320;
-            btnLayout.minHeight = 25;
-            btnLayout.flexibleHeight = 0;
+            GameObject btnGroupObj = UIFactory.CreateHorizontalGroup(m_resultListContent, "ResultButtonGroup", 
+                true, false, true, true, 0, new Vector4(1,1,1,1), new Color(0.1f, 0.1f, 0.1f));
+            UIFactory.SetLayoutElement(btnGroupObj, flexibleWidth: 320, minHeight: 25, flexibleHeight: 0);
             btnGroupObj.AddComponent<Mask>();
 
-            GameObject mainButtonObj = UIFactory.CreateButton(btnGroupObj);
-            LayoutElement mainBtnLayout = mainButtonObj.AddComponent<LayoutElement>();
-            mainBtnLayout.minHeight = 25;
-            mainBtnLayout.flexibleHeight = 0;
-            mainBtnLayout.minWidth = 230;
-            mainBtnLayout.flexibleWidth = 0;
-            Button mainBtn = mainButtonObj.GetComponent<Button>();
-            ColorBlock mainColors = mainBtn.colors;
-            mainColors.normalColor = new Color(0.1f, 0.1f, 0.1f);
-            mainColors.highlightedColor = new Color(0.2f, 0.2f, 0.2f, 1);
-            mainBtn.colors = mainColors;
+            var mainColors = new ColorBlock
+            {
+                normalColor = new Color(0.1f, 0.1f, 0.1f),
+                highlightedColor = new Color(0.2f, 0.2f, 0.2f, 1),
+                pressedColor = new Color(0.05f, 0.05f, 0.05f)
+            };
 
-            mainBtn.onClick.AddListener(() => { OnResultClicked(thisIndex); });
+            var mainButton = UIFactory.CreateButton(btnGroupObj, 
+                "ResultButton",
+                "<not set>", 
+                () => { OnResultClicked(thisIndex); },
+                mainColors);
 
-            Text mainText = mainButtonObj.GetComponentInChildren<Text>();
-            mainText.alignment = TextAnchor.MiddleLeft;
-            mainText.horizontalOverflow = HorizontalWrapMode.Overflow;
-            m_resultListTexts.Add(mainText);
+            UIFactory.SetLayoutElement(mainButton.gameObject, minHeight: 25, flexibleHeight: 0, minWidth: 320, flexibleWidth: 0);
+
+            Text text = mainButton.GetComponentInChildren<Text>();
+            text.alignment = TextAnchor.MiddleLeft;
+            text.horizontalOverflow = HorizontalWrapMode.Overflow;
+            m_resultListTexts.Add(text);
         }
 
-#endregion
+        #endregion
     }
 }

@@ -4,10 +4,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Core.Input;
 using System.IO;
-using UnityExplorer.Core.Inspectors;
 using System.Diagnostics;
+using UnityExplorer.UI.Main.Home;
 
-namespace UnityExplorer.UI
+namespace UnityExplorer.UI.Main
 {
     // Handles dragging and resizing for the main explorer window.
 
@@ -17,7 +17,7 @@ namespace UnityExplorer.UI
 
         public RectTransform Panel { get; set; }
 
-        public static event Action OnFinishResize;
+        public static event Action<RectTransform> OnFinishResize;
 
         public PanelDragger(RectTransform dragArea, RectTransform panelToDrag)
         {
@@ -169,14 +169,13 @@ namespace UnityExplorer.UI
         }
 
         private const int HALF_THICKESS = RESIZE_THICKNESS / 2;
-        private const int DBL_THICKNESS = RESIZE_THICKNESS* 2;
 
         private void UpdateResizeCache()
         {
             m_resizeRect = new Rect(Panel.rect.x - HALF_THICKESS,
                 Panel.rect.y - HALF_THICKESS,
-                Panel.rect.width + DBL_THICKNESS,
-                Panel.rect.height + DBL_THICKNESS);
+                Panel.rect.width + RESIZE_THICKNESS,
+                Panel.rect.height + RESIZE_THICKNESS);
 
             // calculate the four cross sections to use as flags
 
@@ -316,25 +315,21 @@ namespace UnityExplorer.UI
             }
         }
 
-        public void OnEndResize()
+        public void OnEndResize(bool showing = false)
         {
             WasResizing = false;
             UpdateResizeCache();
-            OnFinishResize?.Invoke();
+            OnFinishResize?.Invoke(Panel);
         }
 
-        internal static void LoadCursorImage()
+        internal static void CreateCursorUI()
         {
             try
             {
-                s_resizeCursorObj = UIFactory.CreateLabel(UIManager.CanvasRoot.gameObject, TextAnchor.MiddleCenter);
+                var text = UIFactory.CreateLabel(UIManager.CanvasRoot.gameObject, "ResizeCursor", "↔", TextAnchor.MiddleCenter, Color.white, true, 35);
+                s_resizeCursorObj = text.gameObject;
 
-                var text = s_resizeCursorObj.GetComponent<Text>();
-                text.text = "↔";
-                text.fontSize = 35;
-                text.color = Color.white;
-
-                RectTransform rect = s_resizeCursorObj.transform.GetComponent<RectTransform>();
+                RectTransform rect = s_resizeCursorObj.GetComponent<RectTransform>();
                 rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 64);
                 rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 64);
 
@@ -342,7 +337,7 @@ namespace UnityExplorer.UI
             }
             catch (Exception e)
             {
-                ExplorerCore.LogWarning("Exception loading cursor image!\r\n" + e.ToString());
+                ExplorerCore.LogWarning("Exception creating Resize Cursor UI!\r\n" + e.ToString());
             }
         }
 

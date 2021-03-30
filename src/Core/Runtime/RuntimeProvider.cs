@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace UnityExplorer.Core.Runtime
 {
@@ -50,5 +51,9 @@ namespace UnityExplorer.Core.Runtime
         public abstract GameObject[] GetRootGameObjects(Scene scene);
 
         public abstract int GetRootCount(Scene scene);
+
+        public abstract void SetColorBlockColors(ref ColorBlock block, Color? normal, Color? highlight, Color? pressed);
+
+        public abstract void CheckInputPointerEvent();
     }
 }

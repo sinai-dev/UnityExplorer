@@ -130,7 +130,7 @@ namespace UnityExplorer.UI.Utility
             var args = "<";
             for (int i = 0; i < gArgs.Length; i++)
             {
-                if (i > 0) 
+                if (i > 0)
                     args += ", ";
 
                 var arg = gArgs[i];

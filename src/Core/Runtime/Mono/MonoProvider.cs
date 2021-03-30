@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityExplorer.Core;
@@ -23,9 +24,12 @@ namespace UnityExplorer.Core.Runtime.Mono
 
         public override void SetupEvents()
         {
-            Application.logMessageReceived += ExplorerCore.Instance.OnUnityLog;
-            //SceneManager.sceneLoaded += ExplorerCore.Instance.OnSceneLoaded1;
-            //SceneManager.activeSceneChanged += ExplorerCore.Instance.OnSceneLoaded2;
+            Application.logMessageReceived += Application_logMessageReceived;
+        }
+
+        private void Application_logMessageReceived(string condition, string stackTrace, LogType type)
+        {
+            ExplorerCore.Log(condition, type, true);
         }
 
         public override void StartConsoleCoroutine(IEnumerator routine)
@@ -55,11 +59,38 @@ namespace UnityExplorer.Core.Runtime.Mono
         {
             return scene.rootCount;
         }
+
+        public override void SetColorBlockColors(ref ColorBlock block, Color? normal, Color? highlighted, Color? pressed)
+        {
+            if (normal != null)
+                block.normalColor = (Color)normal;
+
+            if (highlighted != null)
+                block.highlightedColor = (Color)highlighted;
+
+            if (pressed != null)
+                block.pressedColor = (Color)pressed;
+        }
+
+        public override void CheckInputPointerEvent()
+        {
+            // Not necessary afaik
+        }
     }
 }
 
 public static class MonoExtensions
 {
+    public static void AddListener(this UnityEvent _event, Action listener)
+    {
+        _event.AddListener(new UnityAction(listener));
+    }
+
+    public static void AddListener<T>(this UnityEvent<T> _event, Action<T> listener)
+    {
+        _event.AddListener(new UnityAction<T>(listener));
+    }
+
     public static void Clear(this StringBuilder sb)
     {
         sb.Remove(0, sb.Length);

@@ -1,131 +1,230 @@
 ﻿using System;
-//using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
-using UnityExplorer.Core.Unity;
-using UnityExplorer.UI.Reusable;
+using UnityExplorer.Core.Config;
+using UnityExplorer.Core.Runtime;
+using UnityExplorer.UI.Utility;
 
 namespace UnityExplorer.UI
 {
     public static class UIFactory
     {
-        internal static Vector2 thickSize = new Vector2(160f, 30f);
-        internal static Vector2 thinSize = new Vector2(160f, 20f);
-        internal static Color defaultTextColor = new Color(0.95f, 0.95f, 0.95f, 1f);
-        internal static Font s_defaultFont;
+        internal static Vector2 _largeElementSize = new Vector2(160f, 30f);
+        internal static Vector2 _smallElementSize = new Vector2(160f, 20f);
+        internal static Color _defaultTextColor = Color.white;
+        internal static Font _defaultFont;
 
-        public static GameObject CreateUIObject(string name, GameObject parent, Vector2 size = default)
+        public static void Init()
         {
-            GameObject obj = new GameObject(name);
+            _defaultFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        }
 
-            RectTransform rect = obj.AddComponent<RectTransform>();
-            if (size != default)
+        public static GameObject CreateUIObject(string name, GameObject parent = null, Vector2 size = default)
+        {
+            if (!parent)
             {
-                rect.sizeDelta = size;
+                ExplorerCore.LogWarning("Cannot create UI object as the parent is null or destroyed! (" + name + ")");
+                return null;
             }
 
-            SetParentAndAlign(obj, parent);
+            var obj = new GameObject(name)
+            {
+                layer = 5,
+                hideFlags = HideFlags.HideAndDontSave
+            };
 
+            obj.transform.SetParent(parent.transform, false);
+
+            RectTransform rect = obj.AddComponent<RectTransform>();
+            rect.sizeDelta = size == default
+                                ? _smallElementSize
+                                : size;
             return obj;
         }
 
-        private static void SetParentAndAlign(GameObject child, GameObject parent)
+        internal static void SetDefaultTextValues(Text text)
         {
-            if (parent == null)
-            {
-                return;
-            }
-            child.transform.SetParent(parent.transform, false);
-            SetLayerRecursively(child);
+            text.color = _defaultTextColor;
+            text.font = _defaultFont;
+            text.fontSize = 14;
         }
 
-        public static void SetLayerRecursively(GameObject go)
-        {
-            go.layer = 5;
-            Transform transform = go.transform;
-            for (int i = 0; i < transform.childCount; i++)
-            {
-                SetLayerRecursively(transform.GetChild(i).gameObject);
-            }
-        }
-
-        private static void SetDefaultTextValues(Text lbl)
-        {
-            lbl.color = defaultTextColor;
-
-            if (!s_defaultFont)
-                s_defaultFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
-
-            if (s_defaultFont)
-                lbl.font = s_defaultFont;
-        }
-
-        public static void SetDefaultColorTransitionValues(Selectable selectable)
+        internal static void SetDefaultSelectableColors(Selectable selectable)
         {
             ColorBlock colors = selectable.colors;
-            colors.normalColor = new Color(0.35f, 0.35f, 0.35f);
-            colors.highlightedColor = new Color(0.45f, 0.45f, 0.45f);
-            colors.pressedColor = new Color(0.25f, 0.25f, 0.25f);
-            //colors.disabledColor = new Color(0.6f, 0.6f, 0.6f);
-
-            // fix to make all buttons become de-selected after being clicked.
-            // this is because i'm not setting any ColorBlock.selectedColor, because it is commonly stripped.
-            if (selectable is Button button)
-            {
-                button.onClick.AddListener(Deselect);
-                void Deselect()
-                {
-					button.OnDeselect(null);
-                }
-
-            }
-
+            SetColorBlockValues(ref colors, new Color(0.2f, 0.2f, 0.2f), new Color(0.3f, 0.3f, 0.3f), new Color(0.15f, 0.15f, 0.15f));
             selectable.colors = colors;
+
+            // Deselect all Buttons after they are clicked.
+            if (selectable is Button button)
+                button.onClick.AddListener(() => { button.OnDeselect(null); });
         }
 
-        public static GameObject CreatePanel(GameObject parent, string name, out GameObject content)
+        public static void SetColorBlockValues(ref this ColorBlock colorBlock, Color? normal = null, Color? highlighted = null, 
+            Color? pressed = null)
         {
-            GameObject panelObj = CreateUIObject($"Panel_{name}", parent, thickSize);
+            RuntimeProvider.Instance.SetColorBlockColors(ref colorBlock, normal, highlighted, pressed);
+        }
 
-            RectTransform rect = panelObj.GetComponent<RectTransform>();
+        /// <summary>
+        /// Get and/or Add a LayoutElement component to the GameObject, and set any of the values on it.
+        /// </summary>
+        public static LayoutElement SetLayoutElement(GameObject gameObject, int? minWidth = null, int? minHeight = null,
+            int? flexibleWidth = null, int? flexibleHeight = null, int? preferredWidth = null, int? preferredHeight = null, 
+            bool? ignoreLayout = null)
+        {
+            var layout = gameObject.GetComponent<LayoutElement>();
+            if (!layout)
+                layout = gameObject.AddComponent<LayoutElement>();
+
+            if (minWidth != null)
+                layout.minWidth = (int)minWidth;
+
+            if (minHeight != null)
+                layout.minHeight = (int)minHeight;
+
+            if (flexibleWidth != null)
+                layout.flexibleWidth = (int)flexibleWidth;
+
+            if (flexibleHeight != null)
+                layout.flexibleHeight = (int)flexibleHeight;
+
+            if (preferredWidth != null)
+                layout.preferredWidth = (int)preferredWidth;
+
+            if (preferredHeight != null)
+                layout.preferredHeight = (int)preferredHeight;
+
+            if (ignoreLayout != null)
+                layout.ignoreLayout = (bool)ignoreLayout;
+
+            return layout;
+        }
+
+        /// <summary>
+        /// Get and/or Add a HorizontalOrVerticalLayoutGroup (must pick one) to the GameObject, and set the values on it.
+        /// </summary>
+        public static T SetLayoutGroup<T>(GameObject gameObject, bool? forceWidth = null, bool? forceHeight = null,
+            bool? childControlWidth = null, bool? childControlHeight = null, int? spacing = null, int? padTop = null, 
+            int? padBottom = null, int? padLeft = null, int? padRight = null, TextAnchor? childAlignment = null) where T : HorizontalOrVerticalLayoutGroup
+        {
+            var group = gameObject.GetComponent<T>();
+            if (!group)
+                group = gameObject.AddComponent<T>();
+
+            return SetLayoutGroup(group, forceWidth, forceHeight, childControlWidth, childControlHeight, spacing, padTop, padBottom, padLeft, padRight);
+        }
+
+        /// <summary>
+        /// Set the values on a HorizontalOrVerticalLayoutGroup.
+        /// </summary>
+        public static T SetLayoutGroup<T>(T group, bool? forceWidth = null, bool? forceHeight = null,
+            bool? childControlWidth = null, bool? childControlHeight = null, int? spacing = null, int? padTop = null,
+            int? padBottom = null, int? padLeft = null, int? padRight = null, TextAnchor? childAlignment = null) where T : HorizontalOrVerticalLayoutGroup
+        {
+            if (forceWidth != null)
+                group.childForceExpandWidth = (bool)forceWidth;
+            if (forceHeight != null)
+                group.childForceExpandHeight = (bool)forceHeight;
+            if (childControlWidth != null)
+                group.SetChildControlWidth((bool)childControlWidth);
+            if (childControlHeight != null)
+                group.SetChildControlHeight((bool)childControlHeight);
+            if (spacing != null)
+                group.spacing = (int)spacing;
+            if (padTop != null)
+                group.padding.top = (int)padTop;
+            if (padBottom != null)
+                group.padding.bottom = (int)padBottom;
+            if (padLeft != null)
+                group.padding.left = (int)padLeft;
+            if (padRight != null)
+                group.padding.right = (int)padRight;
+            if (childAlignment != null)
+                group.childAlignment = (TextAnchor)childAlignment;
+
+            return group;
+        }
+
+        /// <summary>
+        /// Create a Panel on the UI Canvas.
+        /// </summary>
+        public static GameObject CreatePanel(string name, out GameObject contentHolder, string anchors = null)
+        {
+            var panelObj = CreateUIObject(name, UIManager.CanvasRoot);
+            var rect = panelObj.GetComponent<RectTransform>();
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.one;
             rect.anchoredPosition = Vector2.zero;
             rect.sizeDelta = Vector2.zero;
 
-            var img = panelObj.AddComponent<Image>();
-            img.color = Color.white;
+            if (anchors != null)
+                rect.SetAnchorsFromString(anchors);
 
-            VerticalLayoutGroup group = panelObj.AddComponent<VerticalLayoutGroup>();
-            group.SetChildControlHeight(true);
-            group.SetChildControlWidth(true);
-            group.childForceExpandHeight = true;
-            group.childForceExpandWidth = true;
+            var maskImg = panelObj.AddComponent<Image>();
+            maskImg.color = Color.white;
+            panelObj.AddComponent<Mask>().showMaskGraphic = false;
 
-            content = new GameObject("Content");
-            content.transform.parent = panelObj.transform;
+            SetLayoutGroup<VerticalLayoutGroup>(panelObj, true, true, true, true);
 
-            Image image2 = content.AddComponent<Image>();
-            image2.type = Image.Type.Filled;
-            image2.color = new Color(0.1f, 0.1f, 0.1f);
+            contentHolder = CreateUIObject("Content", panelObj);
 
-            VerticalLayoutGroup group2 = content.AddComponent<VerticalLayoutGroup>();
-            group2.padding.left = 3;
-            group2.padding.right = 3;
-            group2.padding.bottom = 3;
-            group2.padding.top = 3;
-            group2.spacing = 3;
-            group2.SetChildControlHeight(true);
-            group2.SetChildControlWidth(true);
-            group2.childForceExpandHeight = false;
-            group2.childForceExpandWidth = true;
+            Image bgImage = contentHolder.AddComponent<Image>();
+            bgImage.type = Image.Type.Filled;
+            bgImage.color = new Color(0.1f, 0.1f, 0.1f);
+
+            SetLayoutGroup<VerticalLayoutGroup>(contentHolder, true, true, true, true, 3, 3, 3, 3, 3);
 
             return panelObj;
         }
 
-        public static GameObject CreateGridGroup(GameObject parent, Vector2 cellSize, Vector2 spacing, Color color = default)
+        /// <summary>
+        /// Create a VerticalLayoutGroup object.
+        /// </summary>
+        public static GameObject CreateVerticalGroup(GameObject parent, string name, bool forceWidth, bool forceHeight,
+            bool childControlWidth, bool childControlHeight, int spacing = 0, Vector4 padding = default, Color bgColor = default,
+            TextAnchor? childAlignment = null)
         {
-            GameObject groupObj = CreateUIObject("GridLayout", parent);
+            GameObject groupObj = CreateUIObject(name, parent);
+
+            SetLayoutGroup<VerticalLayoutGroup>(groupObj, forceWidth, forceHeight, childControlWidth, childControlHeight,
+                spacing, (int)padding.x, (int)padding.y, (int)padding.z, (int)padding.w, childAlignment);
+
+            Image image = groupObj.AddComponent<Image>();
+            image.color = bgColor == default
+                            ? new Color(0.17f, 0.17f, 0.17f)
+                            : bgColor;
+
+            return groupObj;
+        }
+
+        /// <summary>
+        /// Create a HorizontalLayoutGroup object.
+        /// </summary>
+        public static GameObject CreateHorizontalGroup(GameObject parent, string name, bool forceExpandWidth, bool forceExpandHeight,
+            bool childControlWidth, bool childControlHeight, int spacing = 0, Vector4 padding = default, Color bgColor = default,
+            TextAnchor? childAlignment = null)
+        {
+            GameObject groupObj = CreateUIObject(name, parent);
+
+            SetLayoutGroup<HorizontalLayoutGroup>(groupObj, forceExpandWidth, forceExpandHeight, childControlWidth, childControlHeight,
+                spacing, (int)padding.x, (int)padding.y, (int)padding.z, (int)padding.w, childAlignment);
+
+            Image image = groupObj.AddComponent<Image>();
+            image.color = bgColor == default
+                            ? new Color(0.17f, 0.17f, 0.17f)
+                            : bgColor;
+
+            return groupObj;
+        }
+
+        /// <summary>
+        /// Create a GridLayoutGroup object.
+        /// </summary>
+        public static GameObject CreateGridGroup(GameObject parent, string name, Vector2 cellSize, Vector2 spacing, Color bgColor = default)
+        {
+            var groupObj = CreateUIObject(name, parent);
 
             GridLayoutGroup gridGroup = groupObj.AddComponent<GridLayoutGroup>();
             gridGroup.childAlignment = TextAnchor.UpperLeft;
@@ -133,120 +232,131 @@ namespace UnityExplorer.UI
             gridGroup.spacing = spacing;
 
             Image image = groupObj.AddComponent<Image>();
-            if (color != default)
-            {
-                image.color = color;
-            }
-            else
-            {
-                image.color = new Color(44f / 255f, 44f / 255f, 44f / 255f);
-            }
+
+            image.color = bgColor == default
+                ? new Color(0.17f, 0.17f, 0.17f)
+                : bgColor;
 
             return groupObj;
         }
 
-        public static GameObject CreateVerticalGroup(GameObject parent, Color color = default)
+        /// <summary>
+        /// Create a Label object.
+        /// </summary>
+        public static Text CreateLabel(GameObject parent, string name, string text, TextAnchor alignment,
+            Color color = default, bool supportRichText = true, int fontSize = 14)
         {
-            GameObject groupObj = CreateUIObject("VerticalLayout", parent);
+            var obj = CreateUIObject(name, parent);
+            var textComp = obj.AddComponent<Text>();
 
-            VerticalLayoutGroup horiGroup = groupObj.AddComponent<VerticalLayoutGroup>();
-            horiGroup.childAlignment = TextAnchor.UpperLeft;
-            horiGroup.SetChildControlWidth(true);
-            horiGroup.SetChildControlHeight(true);
+            SetDefaultTextValues(textComp);
 
-            Image image = groupObj.AddComponent<Image>();
-            if (color != default)
-            {
-                image.color = color;
-            }
+            textComp.text = text;
+            textComp.color = color == default ? _defaultTextColor : color;
+            textComp.supportRichText = supportRichText;
+            textComp.alignment = alignment;
+            textComp.fontSize = fontSize;
+
+            return textComp;
+        }
+
+        public static Button CreateButton(GameObject parent, string name, string text, Action onClick = null, Color? normalColor = null)
+        {
+            var colors = new ColorBlock();
+            if (normalColor != null)
+                colors.normalColor = (Color)normalColor;
             else
-            {
-                image.color = new Color(44f / 255f, 44f / 255f, 44f / 255f);
-            }
+                colors.normalColor = new Color(0.25f, 0.25f, 0.25f);
 
-            return groupObj;
+            colors.pressedColor = new Color(0.15f, 0.15f, 0.15f);
+            colors.highlightedColor = new Color(0.4f, 0.4f, 0.4f);
+
+            return CreateButton(parent, name, text, onClick, colors);
         }
 
-        public static GameObject CreateHorizontalGroup(GameObject parent, Color color = default)
+        public static Button CreateButton(GameObject parent, string name, string text, Action onClick, ColorBlock colors)
         {
-            GameObject groupObj = CreateUIObject("HorizontalLayout", parent);
+            GameObject buttonObj = CreateUIObject(name, parent, _smallElementSize);
 
-            HorizontalLayoutGroup horiGroup = groupObj.AddComponent<HorizontalLayoutGroup>();
-            horiGroup.childAlignment = TextAnchor.UpperLeft;
-            horiGroup.SetChildControlWidth(true);
-            horiGroup.SetChildControlHeight(true);
-
-            Image image = groupObj.AddComponent<Image>();
-            if (color != default)
-                image.color = color;
-            else
-                image.color = new Color(44f / 255f, 44f / 255f, 44f / 255f);
-
-            return groupObj;
-        }
-
-        //public static GameObject CreateTMPLabel(GameObject parent, TextAlignmentOptions alignment)
-        //{
-        //    GameObject labelObj = CreateUIObject("Label", parent, thinSize);
-
-        //    TextMeshProUGUI text = labelObj.AddComponent<TextMeshProUGUI>();
-
-        //    text.alignment = alignment;
-        //    text.richText = true;
-
-        //    return labelObj;
-        //}
-
-        public static GameObject CreateLabel(GameObject parent, TextAnchor alignment)
-        {
-            GameObject labelObj = CreateUIObject("Label", parent, thinSize);
-
-            Text text = labelObj.AddComponent<Text>();
-            SetDefaultTextValues(text);
-            text.alignment = alignment;
-            text.supportRichText = true;
-
-            return labelObj;
-        }
-
-        public static GameObject CreateButton(GameObject parent, Color normalColor = default)
-        {
-            GameObject buttonObj = CreateUIObject("Button", parent, thinSize);
-
-            GameObject textObj = new GameObject("Text");
-            textObj.AddComponent<RectTransform>();
-            SetParentAndAlign(textObj, buttonObj);
+            var textObj = CreateUIObject("Text", buttonObj);
 
             Image image = buttonObj.AddComponent<Image>();
             image.type = Image.Type.Sliced;
             image.color = new Color(1, 1, 1, 0.75f);
 
-            SetDefaultColorTransitionValues(buttonObj.AddComponent<Button>());
+            var button = buttonObj.AddComponent<Button>();
+            SetDefaultSelectableColors(button);
 
-            if (normalColor != default)
-            {
-                var btn = buttonObj.GetComponent<Button>();
-                var colors = btn.colors;
-                colors.normalColor = normalColor;
-                btn.colors = colors;
-            }
+            colors.colorMultiplier = 1;
+            button.colors = colors;
 
-            Text text = textObj.AddComponent<Text>();
-            text.text = "Button";
-            SetDefaultTextValues(text);
-            text.alignment = TextAnchor.MiddleCenter;
+            Text textComp = textObj.AddComponent<Text>();
+            textComp.text = text;
+            SetDefaultTextValues(textComp);
+            textComp.alignment = TextAnchor.MiddleCenter;
 
             RectTransform rect = textObj.GetComponent<RectTransform>();
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.one;
             rect.sizeDelta = Vector2.zero;
 
-            return buttonObj;
+            if (onClick != null)
+                button.onClick.AddListener(onClick);
+
+            return button;
         }
 
-        public static GameObject CreateSlider(GameObject parent)
+        ///// <summary>
+        ///// Create a Button and specify only the Normal color.
+        ///// </summary>
+        //public static Button CreateButton(GameObject parent, string name, string text, Action onClick = null, Color? normalColor = null)
+        //{
+        //    var colors = new ColorBlock
+        //    {
+        //        normalColor = normalColor ?? new Color(0.25f, 0.25f, 0.25f),
+        //        highlightedColor = new Color(0.3f, 0.3f, 0.3f),
+        //        pressedColor = new Color(0.15f, 0.15f, 0.15f)
+        //    };
+
+        //    return CreateButton(parent, name, text, onClick, colors);
+        //}
+
+        ///// <summary>
+        ///// Create a Button and specify the entire ColorBlock for the transition values.
+        ///// </summary>
+        //public static Button CreateButton(GameObject parent, string name, string text, Action onClick, ColorBlock? colors)
+        //{
+        //    var buttonObj = CreateUIObject(name, parent);
+
+        //    Image bgImage = buttonObj.AddComponent<Image>();
+        //    bgImage.type = Image.Type.Sliced;
+        //    bgImage.color = new Color(1, 1, 1, 0.75f);
+
+        //    Button button = buttonObj.AddComponent<Button>();
+        //    SetDefaultSelectableColors(button);
+
+        //    if (onClick != null)
+        //        button.onClick.AddListener(onClick);
+
+        //    if (colors != null)
+        //        button.colors = (ColorBlock)colors;
+
+        //    var textObj = CreateLabel(buttonObj, "Text", text, TextAnchor.MiddleCenter);
+
+        //    RectTransform rect = textObj.GetComponent<RectTransform>();
+        //    rect.anchorMin = Vector2.zero;
+        //    rect.anchorMax = Vector2.one;
+        //    rect.sizeDelta = Vector2.zero;
+
+        //    return button;
+        //}
+
+        /// <summary>
+        /// Create a Slider control.
+        /// </summary>
+        public static GameObject CreateSlider(GameObject parent, string name, out Slider slider)
         {
-            GameObject sliderObj = CreateUIObject("Slider", parent, thinSize);
+            GameObject sliderObj = CreateUIObject(name, parent, _smallElementSize);
 
             GameObject bgObj = CreateUIObject("Background", sliderObj);
             GameObject fillAreaObj = CreateUIObject("Fill Area", sliderObj);
@@ -285,19 +395,23 @@ namespace UnityExplorer.UI
 
             handleObj.GetComponent<RectTransform>().sizeDelta = new Vector2(20f, 0f);
 
-            Slider slider = sliderObj.AddComponent<Slider>();
+            slider = sliderObj.AddComponent<Slider>();
             slider.fillRect = fillObj.GetComponent<RectTransform>();
             slider.handleRect = handleObj.GetComponent<RectTransform>();
             slider.targetGraphic = handleImage;
             slider.direction = Slider.Direction.LeftToRight;
-            SetDefaultColorTransitionValues(slider);
+
+            SetDefaultSelectableColors(slider);
 
             return sliderObj;
         }
 
-        public static GameObject CreateScrollbar(GameObject parent)
+        /// <summary>
+        /// Create a Scrollbar control.
+        /// </summary>
+        public static GameObject CreateScrollbar(GameObject parent, string name, out Scrollbar scrollbar)
         {
-            GameObject scrollObj = CreateUIObject("Scrollbar", parent, thinSize);
+            GameObject scrollObj = CreateUIObject(name, parent, _smallElementSize);
 
             GameObject slideAreaObj = CreateUIObject("Sliding Area", scrollObj);
             GameObject handleObj = CreateUIObject("Handle", slideAreaObj);
@@ -318,17 +432,21 @@ namespace UnityExplorer.UI
             RectTransform handleRect = handleObj.GetComponent<RectTransform>();
             handleRect.sizeDelta = new Vector2(20f, 20f);
 
-            Scrollbar scrollbar = scrollObj.AddComponent<Scrollbar>();
+            scrollbar = scrollObj.AddComponent<Scrollbar>();
             scrollbar.handleRect = handleRect;
             scrollbar.targetGraphic = handleImage;
-            SetDefaultColorTransitionValues(scrollbar);
+
+            SetDefaultSelectableColors(scrollbar);
 
             return scrollObj;
         }
 
-        public static GameObject CreateToggle(GameObject parent, out Toggle toggle, out Text text, Color bgColor = default)
+        /// <summary>
+        /// Create a Toggle control.
+        /// </summary>
+        public static GameObject CreateToggle(GameObject parent, string name, out Toggle toggle, out Text text, Color bgColor = default)
         {
-            GameObject toggleObj = CreateUIObject("Toggle", parent, thinSize);
+            GameObject toggleObj = CreateUIObject(name, parent, _smallElementSize);
 
             GameObject bgObj = CreateUIObject("Background", toggleObj);
             GameObject checkObj = CreateUIObject("Checkmark", bgObj);
@@ -345,8 +463,8 @@ namespace UnityExplorer.UI
             }
 
             Image bgImage = bgObj.AddComponent<Image>();
-            bgImage.color = bgColor == default 
-                ? new Color(0.2f, 0.2f, 0.2f, 1.0f) 
+            bgImage.color = bgColor == default
+                ? new Color(0.2f, 0.2f, 0.2f, 1.0f)
                 : bgColor;
 
             Image checkImage = checkObj.AddComponent<Image>();
@@ -358,7 +476,7 @@ namespace UnityExplorer.UI
 
             toggle.graphic = checkImage;
             toggle.targetGraphic = bgImage;
-            SetDefaultColorTransitionValues(toggle);
+            SetDefaultSelectableColors(toggle);
 
             RectTransform bgRect = bgObj.GetComponent<RectTransform>();
             bgRect.anchorMin = new Vector2(0f, 1f);
@@ -380,14 +498,18 @@ namespace UnityExplorer.UI
             return toggleObj;
         }
 
-        public static GameObject CreateSrollInputField(GameObject parent, out InputFieldScroller inputScroll, int fontSize = 14, Color color = default)
+        /// <summary>
+        /// Create a Scrollable Input Field control (custom InputFieldScroller).
+        /// </summary>
+        public static GameObject CreateSrollInputField(GameObject parent, string name, string placeHolderText,
+            out InputFieldScroller inputScroll, int fontSize = 14, Color color = default)
         {
             if (color == default)
                 color = new Color(0.15f, 0.15f, 0.15f);
 
-            var mainObj = CreateScrollView(parent, out GameObject scrollContent, out SliderScrollbar scroller, color);
+            var mainObj = CreateScrollView(parent, "InputFieldScrollView", out GameObject scrollContent, out SliderScrollbar scroller, color);
 
-            var inputObj = CreateInputField(scrollContent, fontSize, 0);
+            var inputObj = CreateInputField(scrollContent, name, placeHolderText ?? "...", fontSize, 0);
 
             var inputField = inputObj.GetComponent<InputField>();
             inputField.lineType = InputField.LineType.MultiLineNewline;
@@ -398,9 +520,12 @@ namespace UnityExplorer.UI
             return mainObj;
         }
 
-        public static GameObject CreateInputField(GameObject parent, int fontSize = 14, int alignment = 3, int wrap = 0)
+        /// <summary>
+        /// Create a standard InputField control.
+        /// </summary>
+        public static GameObject CreateInputField(GameObject parent, string name, string placeHolderText, int fontSize = 14, int alignment = 3, int wrap = 0)
         {
-            GameObject mainObj = CreateUIObject("InputField", parent);
+            GameObject mainObj = CreateUIObject(name, parent);
 
             Image mainImage = mainObj.AddComponent<Image>();
             mainImage.type = Image.Type.Sliced;
@@ -417,16 +542,12 @@ namespace UnityExplorer.UI
 
             ColorBlock mainColors = mainInput.colors;
             mainColors.normalColor = new Color(1, 1, 1, 1);
-            mainColors.highlightedColor = new Color(245f / 255f, 245f / 255f, 245f / 255f, 1.0f);
-            mainColors.pressedColor = new Color(200f / 255f, 200f / 255f, 200f / 255f, 1.0f);
-            mainColors.highlightedColor = new Color(245f / 255f, 245f / 255f, 245f / 255f, 1.0f);
+            mainColors.highlightedColor = new Color(0.95f, 0.95f, 0.95f, 1.0f);
+            mainColors.pressedColor = new Color(0.78f, 0.78f, 0.78f, 1.0f);
+            mainColors.highlightedColor = new Color(0.95f, 0.95f, 0.95f, 1.0f);
             mainInput.colors = mainColors;
 
-            VerticalLayoutGroup mainGroup = mainObj.AddComponent<VerticalLayoutGroup>();
-            mainGroup.SetChildControlHeight(true);
-            mainGroup.SetChildControlWidth(true);
-            mainGroup.childForceExpandWidth = true;
-            mainGroup.childForceExpandHeight = true;
+            SetLayoutGroup<VerticalLayoutGroup>(mainObj, true, true, true, true);
 
             GameObject textArea = CreateUIObject("TextArea", mainObj);
             textArea.AddComponent<RectMask2D>();
@@ -442,7 +563,7 @@ namespace UnityExplorer.UI
             GameObject placeHolderObj = CreateUIObject("Placeholder", textArea);
             Text placeholderText = placeHolderObj.AddComponent<Text>();
             SetDefaultTextValues(placeholderText);
-            placeholderText.text = "...";
+            placeholderText.text = placeHolderText ?? "...";
             placeholderText.color = new Color(0.5f, 0.5f, 0.5f, 1.0f);
             placeholderText.horizontalOverflow = (HorizontalWrapMode)wrap;
             placeholderText.alignment = (TextAnchor)alignment;
@@ -454,9 +575,7 @@ namespace UnityExplorer.UI
             placeHolderRect.offsetMin = Vector2.zero;
             placeHolderRect.offsetMax = Vector2.zero;
 
-            LayoutElement placeholderLayout = placeHolderObj.AddComponent<LayoutElement>();
-            placeholderLayout.minWidth = 500;
-            placeholderLayout.flexibleWidth = 5000;
+            SetLayoutElement(placeHolderObj, minWidth: 500, flexibleWidth: 5000);
 
             mainInput.placeholder = placeholderText;
 
@@ -475,18 +594,20 @@ namespace UnityExplorer.UI
             inputTextRect.offsetMin = Vector2.zero;
             inputTextRect.offsetMax = Vector2.zero;
 
-            LayoutElement inputTextLayout = inputTextObj.AddComponent<LayoutElement>();
-            inputTextLayout.minWidth = 500;
-            inputTextLayout.flexibleWidth = 5000;
+            SetLayoutElement(inputTextObj, minWidth: 500, flexibleWidth: 5000);
 
             mainInput.textComponent = inputText;
 
             return mainObj;
         }
 
-        public static GameObject CreateDropdown(GameObject parent, out Dropdown dropdown)
+        /// <summary>
+        /// Create a DropDown control.
+        /// </summary>
+        public static GameObject CreateDropdown(GameObject parent, out Dropdown dropdown, string defaultItemText, int itemFontSize, 
+            Action<int> onValueChanged, string[] defaultOptions = null)
         {
-            GameObject dropdownObj = CreateUIObject("Dropdown", parent, thickSize);
+            GameObject dropdownObj = CreateUIObject("Dropdown", parent, _largeElementSize);
 
             GameObject labelObj = CreateUIObject("Label", dropdownObj);
             GameObject arrowObj = CreateUIObject("Arrow", dropdownObj);
@@ -498,9 +619,7 @@ namespace UnityExplorer.UI
             GameObject itemCheckObj = CreateUIObject("Item Checkmark", itemObj);
             GameObject itemLabelObj = CreateUIObject("Item Label", itemObj);
 
-            GameObject scrollbarObj = CreateScrollbar(templateObj);
-            scrollbarObj.name = "Scrollbar";
-            Scrollbar scrollbar = scrollbarObj.GetComponent<Scrollbar>();
+            GameObject scrollbarObj = CreateScrollbar(templateObj, "DropdownScroll", out Scrollbar scrollbar);
             scrollbar.SetDirection(Scrollbar.Direction.BottomToTop, true);
 
             RectTransform scrollRectTransform = scrollbarObj.GetComponent<RectTransform>();
@@ -512,6 +631,8 @@ namespace UnityExplorer.UI
             Text itemLabelText = itemLabelObj.AddComponent<Text>();
             SetDefaultTextValues(itemLabelText);
             itemLabelText.alignment = TextAnchor.MiddleLeft;
+            itemLabelText.text = defaultItemText;
+            itemLabelText.fontSize = itemFontSize;
 
             var arrowText = arrowObj.AddComponent<Text>();
             SetDefaultTextValues(arrowText);
@@ -566,7 +687,7 @@ namespace UnityExplorer.UI
             dropdown.template = templateObj.GetComponent<RectTransform>();
             dropdown.captionText = labelText;
             dropdown.itemText = itemLabelText;
-            itemLabelText.text = "DEFAULT";
+            //itemLabelText.text = "DEFAULT";
 
             dropdown.RefreshShownValue();
 
@@ -613,18 +734,27 @@ namespace UnityExplorer.UI
             itemLabelRect.offsetMax = new Vector2(-10f, -2f);
             templateObj.SetActive(false);
 
+            if (onValueChanged != null)
+                dropdown.onValueChanged.AddListener(onValueChanged);
+
+            if (defaultOptions != null)
+            {
+                foreach (var option in defaultOptions)
+                    dropdown.options.Add(new Dropdown.OptionData(option));
+            }
+
             return dropdownObj;
         }
 
-        public static GameObject CreateScrollView(GameObject parent, out GameObject content, out SliderScrollbar scroller, Color color = default)
+        /// <summary>
+        /// Create a ScrollView element.
+        /// </summary>
+        public static GameObject CreateScrollView(GameObject parent, string name, out GameObject content, out SliderScrollbar scroller, 
+            Color color = default)
         {
             GameObject mainObj = CreateUIObject("DynamicScrollView", parent);
 
-            var mainLayout = mainObj.AddComponent<LayoutElement>();
-            mainLayout.minWidth = 100;
-            mainLayout.minHeight = 30;
-            mainLayout.flexibleWidth = 5000;
-            mainLayout.flexibleHeight = 5000;
+            SetLayoutElement(mainObj, minWidth: 100, minHeight: 30, flexibleWidth: 5000, flexibleHeight: 5000);
 
             Image mainImage = mainObj.AddComponent<Image>();
             mainImage.type = Image.Type.Filled;
@@ -637,7 +767,7 @@ namespace UnityExplorer.UI
             viewportRect.anchorMax = Vector2.one;
             viewportRect.pivot = new Vector2(0.0f, 1.0f);
             viewportRect.sizeDelta = new Vector2(-15.0f, 0.0f);
-            viewportRect.offsetMax = new Vector2(-20.0f, 0.0f); 
+            viewportRect.offsetMax = new Vector2(-20.0f, 0.0f);
 
             viewportObj.AddComponent<Image>().color = Color.white;
             viewportObj.AddComponent<Mask>().showMaskGraphic = false;
@@ -653,16 +783,7 @@ namespace UnityExplorer.UI
             contentFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
             contentFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-            var contentGroup = content.AddComponent<VerticalLayoutGroup>();
-            contentGroup.childForceExpandHeight = true;
-            contentGroup.SetChildControlHeight(true);
-            contentGroup.childForceExpandWidth = true;
-            contentGroup.SetChildControlWidth(true);
-            contentGroup.padding.left = 5;
-            contentGroup.padding.right = 5;
-            contentGroup.padding.top = 5;
-            contentGroup.padding.bottom = 5;
-            contentGroup.spacing = 5;
+            SetLayoutGroup<VerticalLayoutGroup>(content, true, true, true, true, 5, 5, 5, 5, 5);
 
             GameObject scrollBarObj = CreateUIObject("DynamicScrollbar", mainObj);
 
@@ -676,8 +797,7 @@ namespace UnityExplorer.UI
             scrollBarRect.sizeDelta = new Vector2(15.0f, 0.0f);
             scrollBarRect.offsetMin = new Vector2(-15.0f, 0.0f);
 
-            GameObject hiddenBar = CreateScrollbar(scrollBarObj);
-            var hiddenScroll = hiddenBar.GetComponent<Scrollbar>();
+            GameObject hiddenBar = CreateScrollbar(scrollBarObj, "HiddenScrollviewScroller", out Scrollbar hiddenScroll);
             hiddenScroll.SetDirection(Scrollbar.Direction.BottomToTop, true);
 
             for (int i = 0; i < hiddenBar.transform.childCount; i++)
@@ -704,8 +824,6 @@ namespace UnityExplorer.UI
 
             // Create a custom DynamicScrollbar module
             scroller = new SliderScrollbar(hiddenScroll, scrollSlider);
-
-            //scrollRect.sliderScrollbar = scroller;
 
             return mainObj;
         }

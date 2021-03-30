@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityExplorer.Core.Config;
 
 namespace UnityExplorer
 {
@@ -10,6 +11,7 @@ namespace UnityExplorer
         string ExplorerFolder { get; }
 
         string ConfigFolder { get; }
+        IConfigHandler ConfigHandler { get; }
 
         Action<object> OnLogMessage { get; }
         Action<object> OnLogWarning { get; }

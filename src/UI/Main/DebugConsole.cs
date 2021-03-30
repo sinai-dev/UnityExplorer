@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Core.Config;
-using UnityExplorer.UI.Reusable;
 using System.IO;
 using System.Linq;
 using UnityExplorer.Core.Unity;
+using UnityExplorer.UI.Utility;
 
 namespace UnityExplorer.UI.Main
 {
@@ -32,11 +32,11 @@ namespace UnityExplorer.UI.Main
         public DebugConsole(GameObject parent)
         {
             Instance = this;
-            LogUnity = ExplorerConfig.Instance.Log_Unity_Debug;
+            LogUnity = ConfigManager.Log_Unity_Debug.Value;
 
             ConstructUI(parent);
 
-            if (ExplorerConfig.Instance.DebugConsole_Hidden)
+            if (!ConfigManager.Last_DebugConsole_State.Value)
                 ToggleShow();
 
             // append messages that logged before we were set up
@@ -52,7 +52,7 @@ namespace UnityExplorer.UI.Main
 
             // set up IO
 
-            var path = ExplorerCore.EXPLORER_FOLDER + @"\Logs";
+            var path = Path.Combine(ExplorerCore.Loader.ExplorerFolder, "Logs");
 
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
@@ -87,7 +87,7 @@ namespace UnityExplorer.UI.Main
         private Text m_hideBtnText;
         private LayoutElement m_mainLayout;
 
-        public static Action OnToggleShow;
+        public static Action<bool> OnToggleShow;
 
         public void ToggleShow()
         {
@@ -106,7 +106,7 @@ namespace UnityExplorer.UI.Main
                 m_mainLayout.minHeight = 190;
             }
 
-            OnToggleShow?.Invoke();
+            OnToggleShow?.Invoke(!Hiding);
         }
 
         public static string RemoveInvalidFilenameChars(string s)
@@ -138,7 +138,7 @@ namespace UnityExplorer.UI.Main
 
             if (hexColor != null)
                 message = $"<color=#{hexColor}>{message}</color>";
-            
+
             if (Instance?.m_textInput)
             {
                 var input = Instance.m_textInput;
@@ -155,17 +155,9 @@ namespace UnityExplorer.UI.Main
 
         public void ConstructUI(GameObject parent)
         {
-            var mainObj = UIFactory.CreateVerticalGroup(parent, new Color(0.1f, 0.1f, 0.1f, 1.0f));
-
-            var mainGroup = mainObj.GetComponent<VerticalLayoutGroup>();
-            mainGroup.SetChildControlHeight(true);
-            mainGroup.SetChildControlWidth(true);
-            mainGroup.childForceExpandHeight = true;
-            mainGroup.childForceExpandWidth = true;
-
+            var mainObj = UIFactory.CreateVerticalGroup(parent, "DebugConsole", true, true, true, true, 0, default, new Color(0.1f, 0.1f, 0.1f, 1.0f));
             var mainImage = mainObj.GetComponent<Image>();
             mainImage.maskable = true;
-
             var mask = mainObj.AddComponent<Mask>();
             mask.showMaskGraphic = true;
 
@@ -174,153 +166,70 @@ namespace UnityExplorer.UI.Main
             m_mainLayout.flexibleHeight = 0;
 
             #region LOG AREA
-            m_logAreaObj = UIFactory.CreateHorizontalGroup(mainObj);
-            var logAreaGroup = m_logAreaObj.GetComponent<HorizontalLayoutGroup>();
-            logAreaGroup.SetChildControlHeight(true);
-            logAreaGroup.SetChildControlWidth(true);
-            logAreaGroup.childForceExpandHeight = true;
-            logAreaGroup.childForceExpandWidth = true;
+            m_logAreaObj = UIFactory.CreateHorizontalGroup(mainObj, "LogArea", true, true, true, true);
+            UIFactory.SetLayoutElement(m_logAreaObj, preferredHeight: 190, flexibleHeight: 0);
 
-            var logAreaLayout = m_logAreaObj.AddComponent<LayoutElement>();
-            logAreaLayout.preferredHeight = 190;
-            logAreaLayout.flexibleHeight = 0;
-
-            var inputScrollerObj = UIFactory.CreateSrollInputField(m_logAreaObj, out InputFieldScroller inputScroll, 14, new Color(0.05f, 0.05f, 0.05f));
+            var inputScrollerObj = UIFactory.CreateSrollInputField(m_logAreaObj, 
+                "DebugConsoleOutput",
+                "<no output>",
+                out InputFieldScroller inputScroll,
+                14, 
+                new Color(0.05f, 0.05f, 0.05f));
 
             inputScroll.inputField.textComponent.font = UIManager.ConsoleFont;
             inputScroll.inputField.readOnly = true;
 
             m_textInput = inputScroll.inputField;
-#endregion
+            #endregion
 
             #region BOTTOM BAR
 
-            var bottomBarObj = UIFactory.CreateHorizontalGroup(mainObj);
-            LayoutElement topBarLayout = bottomBarObj.AddComponent<LayoutElement>();
-            topBarLayout.minHeight = 30;
-            topBarLayout.flexibleHeight = 0;
-
-            var bottomGroup = bottomBarObj.GetComponent<HorizontalLayoutGroup>();
-            bottomGroup.padding.left = 10;
-            bottomGroup.padding.right = 10;
-            bottomGroup.padding.top = 2;
-            bottomGroup.padding.bottom = 2;
-            bottomGroup.spacing = 10;
-            bottomGroup.childForceExpandHeight = true;
-            bottomGroup.childForceExpandWidth = false;
-            bottomGroup.SetChildControlWidth(true);
-            bottomGroup.SetChildControlHeight(true);
-            bottomGroup.childAlignment = TextAnchor.MiddleLeft;
+            var bottomBarObj = UIFactory.CreateHorizontalGroup(mainObj, "BottomBar", false, true, true, true, 10, new Vector4(2,2,10,10),
+                default, TextAnchor.MiddleLeft);
+            UIFactory.SetLayoutElement(bottomBarObj, minHeight: 30, flexibleHeight: 0);
 
             // Debug Console label
 
-            var bottomLabel = UIFactory.CreateLabel(bottomBarObj, TextAnchor.MiddleLeft);
-            var topBarLabelLayout = bottomLabel.AddComponent<LayoutElement>();
-            topBarLabelLayout.minWidth = 100;
-            topBarLabelLayout.flexibleWidth = 0;
-            var topBarText = bottomLabel.GetComponent<Text>();
-            topBarText.fontStyle = FontStyle.Bold;
-            topBarText.text = "Debug Console";
-            topBarText.fontSize = 14;
+            var bottomLabel = UIFactory.CreateLabel(bottomBarObj, "DebugConsoleLabel", "Debug Console", TextAnchor.MiddleLeft);
+            bottomLabel.fontStyle = FontStyle.Bold;
+            UIFactory.SetLayoutElement(bottomLabel.gameObject, minWidth: 100, flexibleWidth: 0);
 
             // Hide button
 
-            var hideButtonObj = UIFactory.CreateButton(bottomBarObj);
-
-            m_hideBtnText = hideButtonObj.GetComponentInChildren<Text>();
-            m_hideBtnText.text = "Hide";
-
-            var hideButton = hideButtonObj.GetComponent<Button>();
-
-            hideButton.onClick.AddListener(HideCallback);
-            void HideCallback()
-            {
-                ToggleShow();
-            }
-
-            var hideBtnColors = hideButton.colors;
-            //hideBtnColors.normalColor = new Color(160f / 255f, 140f / 255f, 40f / 255f);
-            hideButton.colors = hideBtnColors;
-
-            var hideBtnLayout = hideButtonObj.AddComponent<LayoutElement>();
-            hideBtnLayout.minWidth = 80;
-            hideBtnLayout.flexibleWidth = 0;
+            var hideButton = UIFactory.CreateButton(bottomBarObj, "HideButton", "Hide", ToggleShow);
+            UIFactory.SetLayoutElement(hideButton.gameObject, minWidth: 80, flexibleWidth: 0);
+            m_hideBtnText = hideButton.GetComponentInChildren<Text>();
 
             // Clear button
 
-            var clearButtonObj = UIFactory.CreateButton(bottomBarObj);
-
-            var clearBtnText = clearButtonObj.GetComponentInChildren<Text>();
-            clearBtnText.text = "Clear";
-
-            var clearButton = clearButtonObj.GetComponent<Button>();
-
-            clearButton.onClick.AddListener(ClearCallback);
-            void ClearCallback()
+            var clearButton = UIFactory.CreateButton(bottomBarObj, "ClearButton", "Clear", () =>
             {
                 m_textInput.text = "";
                 AllMessages.Clear();
-            }
-
-            var clearBtnColors = clearButton.colors;
-            //clearBtnColors.normalColor = new Color(160f/255f, 140f/255f, 40f/255f);
-            clearButton.colors = clearBtnColors;
-
-            var clearBtnLayout = clearButtonObj.AddComponent<LayoutElement>();
-            clearBtnLayout.minWidth = 80;
-            clearBtnLayout.flexibleWidth = 0;
+            });
+            UIFactory.SetLayoutElement(clearButton.gameObject, minWidth: 80, flexibleWidth: 0);
 
             // Unity log toggle
 
-            var unityToggleObj = UIFactory.CreateToggle(bottomBarObj, out Toggle unityToggle, out Text unityToggleText);
+            var unityToggleObj = UIFactory.CreateToggle(bottomBarObj, "UnityLogToggle", out Toggle unityToggle, out Text unityToggleText);
 
-            unityToggle.onValueChanged.AddListener(ToggleLogUnity);
+            unityToggle.onValueChanged.AddListener((bool val) =>
+            {
+                LogUnity = val;
+                ConfigManager.Log_Unity_Debug.Value = val;
+                ConfigManager.Handler.SaveConfig();
+            });
 
             unityToggle.isOn = LogUnity;
             unityToggleText.text = "Print Unity Debug?";
             unityToggleText.alignment = TextAnchor.MiddleLeft;
 
-            void ToggleLogUnity(bool val)
-            {
-                LogUnity = val;
-                ExplorerConfig.Instance.Log_Unity_Debug = val;
-                ExplorerConfig.SaveSettings();
-            }
-
-            var unityToggleLayout = unityToggleObj.AddComponent<LayoutElement>();
-            unityToggleLayout.minWidth = 170;
-            unityToggleLayout.flexibleWidth = 0;
+            UIFactory.SetLayoutElement(unityToggleObj, minWidth: 170, flexibleWidth: 0);
 
             var unityToggleRect = unityToggleObj.transform.Find("Background").GetComponent<RectTransform>();
             var pos = unityToggleRect.localPosition;
             pos.y = -4;
             unityToggleRect.localPosition = pos;
-
-            //            // Save to disk button
-
-            //            var saveToDiskObj = UIFactory.CreateToggle(bottomBarObj, out Toggle diskToggle, out Text diskToggleText);
-
-            //            diskToggle.onValueChanged.AddListener(ToggleDisk);
-
-            //            diskToggle.isOn = SaveToDisk;
-            //            diskToggleText.text = "Save logs to 'Mods\\UnityExplorer\\Logs'?";
-            //            diskToggleText.alignment = TextAnchor.MiddleLeft;
-
-            //            void ToggleDisk(bool val)
-            //            {
-            //                SaveToDisk = val;
-            //                ModConfig.Instance.Save_Logs_To_Disk = val;
-            //                ModConfig.SaveSettings();
-            //            }
-
-            //            var diskToggleLayout = saveToDiskObj.AddComponent<LayoutElement>();
-            //            diskToggleLayout.minWidth = 340;
-            //            diskToggleLayout.flexibleWidth = 0;
-
-            //            var saveToDiskRect = saveToDiskObj.transform.Find("Background").GetComponent<RectTransform>();
-            //            pos = unityToggleRect.localPosition;
-            //            pos.y = -8;
-            //            saveToDiskRect.localPosition = pos;
 
             #endregion
         }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace UnityExplorer.Search
+namespace UnityExplorer.Core.Search
 {
     internal enum SceneFilter
     {

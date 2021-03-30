@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityExplorer.UI;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Core.Input;
 using UnityExplorer.Core.Unity;
-using UnityExplorer.Core.Inspectors;
 
-namespace UnityExplorer.UI.Main.Home.Inspectors
+namespace UnityExplorer.UI.Main.Home.Inspectors.GameObjects
 {
     public class GameObjectControls
     {
@@ -18,6 +17,24 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
         {
             Instance = this;
         }
+
+        internal static bool Showing;
+
+        internal static void ToggleVisibility() => SetVisibility(!Showing);
+
+        internal static void SetVisibility(bool show)
+        {
+            if (show == Showing)
+                return;
+
+            Showing = show;
+
+            m_hideShowLabel.text = show ? "Hide" : "Show";
+            m_contentObj.SetActive(show);
+        }
+
+        internal static GameObject m_contentObj;
+        internal static Text m_hideShowLabel;
 
         private static InputField s_setParentInput;
 
@@ -59,22 +76,22 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
         {
             var go = GameObjectInspector.ActiveInstance.TargetGO;
 
-            s_positionControl.fullValue.text = go.transform.position.ToStringLong();
+            s_positionControl.fullValue.text = go.transform.position.ToStringPretty();
             s_positionControl.values[0].text = go.transform.position.x.ToString("F3");
             s_positionControl.values[1].text = go.transform.position.y.ToString("F3");
             s_positionControl.values[2].text = go.transform.position.z.ToString("F3");
 
-            s_localPosControl.fullValue.text = go.transform.localPosition.ToStringLong();
+            s_localPosControl.fullValue.text = go.transform.localPosition.ToStringPretty();
             s_localPosControl.values[0].text = go.transform.localPosition.x.ToString("F3");
             s_localPosControl.values[1].text = go.transform.localPosition.y.ToString("F3");
             s_localPosControl.values[2].text = go.transform.localPosition.z.ToString("F3");
 
-            s_rotationControl.fullValue.text = go.transform.eulerAngles.ToStringLong();
+            s_rotationControl.fullValue.text = go.transform.eulerAngles.ToStringPretty();
             s_rotationControl.values[0].text = go.transform.eulerAngles.x.ToString("F3");
             s_rotationControl.values[1].text = go.transform.eulerAngles.y.ToString("F3");
             s_rotationControl.values[2].text = go.transform.eulerAngles.z.ToString("F3");
 
-            s_scaleControl.fullValue.text = go.transform.localScale.ToStringLong();
+            s_scaleControl.fullValue.text = go.transform.localScale.ToStringPretty();
             s_scaleControl.values[0].text = go.transform.localScale.x.ToString("F3");
             s_scaleControl.values[1].text = go.transform.localScale.y.ToString("F3");
             s_scaleControl.values[2].text = go.transform.localScale.z.ToString("F3");
@@ -244,184 +261,79 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
 
         internal void ConstructControls(GameObject parent)
         {
-            var controlsObj = UIFactory.CreateVerticalGroup(parent, new Color(0.07f, 0.07f, 0.07f));
-            var controlsGroup = controlsObj.GetComponent<VerticalLayoutGroup>();
-            controlsGroup.childForceExpandWidth = false;
-            controlsGroup.SetChildControlWidth(true);
-            controlsGroup.childForceExpandHeight = false;
-            controlsGroup.spacing = 5;
-            controlsGroup.padding.top = 4;
-            controlsGroup.padding.left = 4;
-            controlsGroup.padding.right = 4;
-            controlsGroup.padding.bottom = 4;
+            var mainGroup = UIFactory.CreateVerticalGroup(parent, "ControlsGroup", false, false, true, true, 5, new Vector4(4,4,4,4),
+                new Color(0.07f, 0.07f, 0.07f));
 
             // ~~~~~~ Top row ~~~~~~
 
-            var topRow = UIFactory.CreateHorizontalGroup(controlsObj, new Color(1, 1, 1, 0));
-            var topRowGroup = topRow.GetComponent<HorizontalLayoutGroup>();
-            topRowGroup.childForceExpandWidth = false;
-            topRowGroup.SetChildControlWidth(true);
-            topRowGroup.childForceExpandHeight = false;
-            topRowGroup.SetChildControlHeight(true);
-            topRowGroup.spacing = 5;
+            var topRow = UIFactory.CreateHorizontalGroup(mainGroup, "TopRow", false, false, true, true, 5, default, new Color(1, 1, 1, 0));
 
-            var hideButtonObj = UIFactory.CreateButton(topRow);
-            var hideButton = hideButtonObj.GetComponent<Button>();
-            var hideColors = hideButton.colors;
-            hideColors.normalColor = new Color(0.16f, 0.16f, 0.16f);
-            hideButton.colors = hideColors;
-            var hideText = hideButtonObj.GetComponentInChildren<Text>();
-            hideText.text = "Show";
-            hideText.fontSize = 14;
-            var hideButtonLayout = hideButtonObj.AddComponent<LayoutElement>();
-            hideButtonLayout.minWidth = 40;
-            hideButtonLayout.flexibleWidth = 0;
-            hideButtonLayout.minHeight = 25;
-            hideButtonLayout.flexibleHeight = 0;
+            var hideButton = UIFactory.CreateButton(topRow, "ToggleShowButton", "Show", ToggleVisibility, new Color(0.16f, 0.16f, 0.16f));
+            UIFactory.SetLayoutElement(hideButton.gameObject, minWidth: 40, flexibleWidth: 0, minHeight: 25, flexibleHeight: 0);
+            m_hideShowLabel = hideButton.GetComponentInChildren<Text>();
 
-            var topTitle = UIFactory.CreateLabel(topRow, TextAnchor.MiddleLeft);
-            var topText = topTitle.GetComponent<Text>();
-            topText.text = "Controls";
-            var titleLayout = topTitle.AddComponent<LayoutElement>();
-            titleLayout.minWidth = 100;
-            titleLayout.flexibleWidth = 9500;
-            titleLayout.minHeight = 25;
+            var topTitle = UIFactory.CreateLabel(topRow, "ControlsLabel", "Controls", TextAnchor.MiddleLeft);
+            UIFactory.SetLayoutElement(topTitle.gameObject, minWidth: 100, flexibleWidth: 9500, minHeight: 25);
 
             //// ~~~~~~~~ Content ~~~~~~~~ //
 
-            var contentObj = UIFactory.CreateVerticalGroup(controlsObj, new Color(1, 1, 1, 0));
-            var contentGroup = contentObj.GetComponent<VerticalLayoutGroup>();
-            contentGroup.childForceExpandHeight = false;
-            contentGroup.SetChildControlHeight(true);
-            contentGroup.spacing = 5;
-            contentGroup.childForceExpandWidth = true;
-            contentGroup.SetChildControlWidth(true);
-
-            // ~~ add hide button callback now that we have scroll reference ~~
-            hideButton.onClick.AddListener(OnHideClicked);
-            void OnHideClicked()
-            {
-                if (hideText.text == "Show")
-                {
-                    hideText.text = "Hide";
-                    contentObj.SetActive(true);
-                }
-                else
-                {
-                    hideText.text = "Show";
-                    contentObj.SetActive(false);
-                }
-            }
+            m_contentObj = UIFactory.CreateVerticalGroup(mainGroup, "ContentGroup", true, false, true, true, 5, default, new Color(1, 1, 1, 0));
 
             // transform controls
-            ConstructVector3Editor(contentObj, "Position", ControlType.position, out s_positionControl);
-            ConstructVector3Editor(contentObj, "Local Position", ControlType.localPosition, out s_localPosControl);
-            ConstructVector3Editor(contentObj, "Rotation", ControlType.eulerAngles, out s_rotationControl);
-            ConstructVector3Editor(contentObj, "Scale", ControlType.localScale, out s_scaleControl);
+            ConstructVector3Editor(m_contentObj, "Position", ControlType.position, out s_positionControl);
+            ConstructVector3Editor(m_contentObj, "Local Position", ControlType.localPosition, out s_localPosControl);
+            ConstructVector3Editor(m_contentObj, "Rotation", ControlType.eulerAngles, out s_rotationControl);
+            ConstructVector3Editor(m_contentObj, "Scale", ControlType.localScale, out s_scaleControl);
 
             // set parent 
-            ConstructSetParent(contentObj);
+            ConstructSetParent(m_contentObj);
 
             // bottom row buttons
-            ConstructBottomButtons(contentObj);
+            ConstructBottomButtons(m_contentObj);
 
             // set controls content inactive now that content is made (otherwise TMP font size goes way too big?)
-            contentObj.SetActive(false);
+            m_contentObj.SetActive(false);
         }
 
         internal void ConstructSetParent(GameObject contentObj)
         {
-            var setParentGroupObj = UIFactory.CreateHorizontalGroup(contentObj, new Color(1, 1, 1, 0));
-            var setParentGroup = setParentGroupObj.GetComponent<HorizontalLayoutGroup>();
-            setParentGroup.childForceExpandHeight = false;
-            setParentGroup.SetChildControlHeight(true);
-            setParentGroup.childForceExpandWidth = false;
-            setParentGroup.SetChildControlWidth(true);
-            setParentGroup.spacing = 5;
-            var setParentLayout = setParentGroupObj.AddComponent<LayoutElement>();
-            setParentLayout.minHeight = 25;
-            setParentLayout.flexibleHeight = 0;
+            var setParentGroupObj = UIFactory.CreateHorizontalGroup(contentObj, "SetParentRow", false, false, true, true, 5, default, 
+                new Color(1, 1, 1, 0));
+            UIFactory.SetLayoutElement(setParentGroupObj, minHeight: 25, flexibleHeight: 0);
 
-            var setParentLabelObj = UIFactory.CreateLabel(setParentGroupObj, TextAnchor.MiddleLeft);
-            var setParentLabel = setParentLabelObj.GetComponent<Text>();
-            setParentLabel.text = "Set Parent:";
-            setParentLabel.color = Color.grey;
-            setParentLabel.fontSize = 14;
-            var setParentLabelLayout = setParentLabelObj.AddComponent<LayoutElement>();
-            setParentLabelLayout.minWidth = 110;
-            setParentLabelLayout.minHeight = 25;
-            setParentLabelLayout.flexibleWidth = 0;
+            var title = UIFactory.CreateLabel(setParentGroupObj, "SetParentLabel", "Set Parent:", TextAnchor.MiddleLeft, Color.grey);
+            UIFactory.SetLayoutElement(title.gameObject, minWidth: 110, minHeight: 25, flexibleHeight: 0);
 
-            var setParentInputObj = UIFactory.CreateInputField(setParentGroupObj);
-            s_setParentInput = setParentInputObj.GetComponent<InputField>();
-            var placeholderInput = s_setParentInput.placeholder.GetComponent<Text>();
-            placeholderInput.text = "Enter a GameObject name or path...";
-            var setParentInputLayout = setParentInputObj.AddComponent<LayoutElement>();
-            setParentInputLayout.minHeight = 25;
-            setParentInputLayout.preferredWidth = 400;
-            setParentInputLayout.flexibleWidth = 9999;
+            var inputFieldObj = UIFactory.CreateInputField(setParentGroupObj, "SetParentInputField", "Enter a GameObject name or path...");
+            s_setParentInput = inputFieldObj.GetComponent<InputField>();
+            UIFactory.SetLayoutElement(inputFieldObj, minHeight: 25, preferredWidth: 400, flexibleWidth: 9999);
 
-            var applyButtonObj = UIFactory.CreateButton(setParentGroupObj);
-            var applyButton = applyButtonObj.GetComponent<Button>();
-            applyButton.onClick.AddListener(OnSetParentClicked);
-            var applyText = applyButtonObj.GetComponentInChildren<Text>();
-            applyText.text = "Apply";
-            var applyLayout = applyButtonObj.AddComponent<LayoutElement>();
-            applyLayout.minWidth = 55;
-            applyLayout.flexibleWidth = 0;
-            applyLayout.minHeight = 25;
-            applyLayout.flexibleHeight = 0;
+            var applyButton = UIFactory.CreateButton(setParentGroupObj, "SetParentButton", "Apply", OnSetParentClicked);
+            UIFactory.SetLayoutElement(applyButton.gameObject, minWidth: 55, flexibleWidth: 0, minHeight: 25, flexibleHeight: 0);
         }
 
-        internal void ConstructVector3Editor(GameObject parent, string title, ControlType type, out ControlEditor editor)
+        internal void ConstructVector3Editor(GameObject parent, string titleText, ControlType type, out ControlEditor editor)
         {
             editor = new ControlEditor();
 
-            var topBarObj = UIFactory.CreateHorizontalGroup(parent, new Color(1, 1, 1, 0));
-            var topGroup = topBarObj.GetComponent<HorizontalLayoutGroup>();
-            topGroup.childForceExpandWidth = false;
-            topGroup.SetChildControlWidth(true);
-            topGroup.childForceExpandHeight = false;
-            topGroup.SetChildControlHeight(true);
-            topGroup.spacing = 5;
-            var topLayout = topBarObj.AddComponent<LayoutElement>();
-            topLayout.minHeight = 25;
-            topLayout.flexibleHeight = 0;
+            var topBarObj = UIFactory.CreateHorizontalGroup(parent, "Vector3Editor", false, false, true, true, 5, default, new Color(1, 1, 1, 0));
+            UIFactory.SetLayoutElement(topBarObj, minHeight: 25, flexibleHeight: 0);
 
-            var titleObj = UIFactory.CreateLabel(topBarObj, TextAnchor.MiddleLeft);
-            var titleText = titleObj.GetComponent<Text>();
-            titleText.text = title;
-            titleText.color = Color.grey;
-            titleText.fontSize = 14;
-            var titleLayout = titleObj.AddComponent<LayoutElement>();
-            titleLayout.minWidth = 110;
-            titleLayout.flexibleWidth = 0;
-            titleLayout.minHeight = 25;
+            var title = UIFactory.CreateLabel(topBarObj, "Title", titleText, TextAnchor.MiddleLeft, Color.grey);
+            UIFactory.SetLayoutElement(title.gameObject, minWidth: 110, flexibleWidth: 0, minHeight: 25);
 
             // expand button
-            var expandButtonObj = UIFactory.CreateButton(topBarObj);
-            var expandButton = expandButtonObj.GetComponent<Button>();
-            var expandText = expandButtonObj.GetComponentInChildren<Text>();
-            expandText.text = "▼";
+            var expandButton = UIFactory.CreateButton(topBarObj, "ExpandArrow", "▼");
+            var expandText = expandButton.GetComponentInChildren<Text>();
             expandText.fontSize = 12;
-            var btnLayout = expandButtonObj.AddComponent<LayoutElement>();
-            btnLayout.minWidth = 35;
-            btnLayout.flexibleWidth = 0;
-            btnLayout.minHeight = 25;
-            btnLayout.flexibleHeight = 0;
+            UIFactory.SetLayoutElement(expandButton.gameObject, minWidth: 35, flexibleWidth: 0, minHeight: 25, flexibleHeight: 0);
 
             // readonly value input
 
-            var valueInputObj = UIFactory.CreateInputField(topBarObj);
+            var valueInputObj = UIFactory.CreateInputField(topBarObj, "ValueInput", "...");
             var valueInput = valueInputObj.GetComponent<InputField>();
             valueInput.readOnly = true;
-            //valueInput.richText = true;
-            //valueInput.isRichTextEditingAllowed = true;
-            var valueInputLayout = valueInputObj.AddComponent<LayoutElement>();
-            valueInputLayout.minHeight = 25;
-            valueInputLayout.flexibleHeight = 0;
-            valueInputLayout.preferredWidth = 400;
-            valueInputLayout.flexibleWidth = 9999;
+            UIFactory.SetLayoutElement(valueInputObj, minHeight: 25, flexibleHeight: 0, preferredWidth: 400, flexibleWidth: 9999);
 
             editor.fullValue = valueInput;
 
@@ -459,86 +371,42 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
 
         internal GameObject ConstructEditorRow(GameObject parent, ControlEditor editor, ControlType type, VectorValue vectorValue)
         {
-            var rowObject = UIFactory.CreateHorizontalGroup(parent, new Color(1, 1, 1, 0));
-            var rowGroup = rowObject.GetComponent<HorizontalLayoutGroup>();
-            rowGroup.childForceExpandWidth = false;
-            rowGroup.SetChildControlWidth(true);
-            rowGroup.childForceExpandHeight = false;
-            rowGroup.SetChildControlHeight(true);
-            rowGroup.spacing = 5;
-            var rowLayout = rowObject.AddComponent<LayoutElement>();
-            rowLayout.minHeight = 25;
-            rowLayout.flexibleHeight = 0;
-            rowLayout.minWidth = 100;
+            var rowObject = UIFactory.CreateHorizontalGroup(parent, "EditorRow", false, false, true, true, 5, default, new Color(1, 1, 1, 0));
+            UIFactory.SetLayoutElement(rowObject, minHeight: 25, flexibleHeight: 0, minWidth: 100);
 
             // Value labels
 
-            var labelObj = UIFactory.CreateLabel(rowObject, TextAnchor.MiddleLeft);
-            var labelText = labelObj.GetComponent<Text>();
-            labelText.color = Color.cyan;
-            labelText.text = $"{vectorValue.ToString().ToUpper()}:";
-            labelText.fontSize = 14;
-            labelText.resizeTextMaxSize = 14;
-            labelText.resizeTextForBestFit = true;
-            var labelLayout = labelObj.AddComponent<LayoutElement>();
-            labelLayout.minHeight = 25;
-            labelLayout.flexibleHeight = 0;
-            labelLayout.minWidth = 25;
-            labelLayout.flexibleWidth = 0;
+            var valueTitle = UIFactory.CreateLabel(rowObject, "ValueTitle", $"{vectorValue.ToString().ToUpper()}:", TextAnchor.MiddleLeft, Color.cyan);
+            UIFactory.SetLayoutElement(valueTitle.gameObject, minHeight: 25, flexibleHeight: 0, minWidth: 25, flexibleWidth: 0);
 
             // actual value label
-            var valueLabelObj = UIFactory.CreateLabel(rowObject, TextAnchor.MiddleLeft);
-            var valueLabel = valueLabelObj.GetComponent<Text>();
+            var valueLabel = UIFactory.CreateLabel(rowObject, "ValueLabel", "<notset>", TextAnchor.MiddleLeft);
             editor.values[(int)vectorValue] = valueLabel;
-            var valueLabelLayout = valueLabelObj.AddComponent<LayoutElement>();
-            valueLabelLayout.minWidth = 85;
-            valueLabelLayout.flexibleWidth = 0;
-            valueLabelLayout.minHeight = 25;
+            UIFactory.SetLayoutElement(valueLabel.gameObject, minWidth: 85, flexibleWidth: 0, minHeight: 25);
 
             // input field
 
-            var inputHolder = UIFactory.CreateVerticalGroup(rowObject, new Color(1, 1, 1, 0));
-            var inputHolderGroup = inputHolder.GetComponent<VerticalLayoutGroup>();
-            inputHolderGroup.childForceExpandHeight = false;
-            inputHolderGroup.SetChildControlHeight(true);
-            inputHolderGroup.childForceExpandWidth = false;
-            inputHolderGroup.SetChildControlWidth(true);
+            var inputHolder = UIFactory.CreateVerticalGroup(rowObject, "InputFieldGroup", false, false, true, true, 0, default, new Color(1, 1, 1, 0));
 
-            var inputObj = UIFactory.CreateInputField(inputHolder);
+            var inputObj = UIFactory.CreateInputField(inputHolder, "InputField", "...");
             var input = inputObj.GetComponent<InputField>();
-            input.characterValidation = InputField.CharacterValidation.Decimal;
+            //input.characterValidation = InputField.CharacterValidation.Decimal;
 
-            var inputLayout = inputObj.AddComponent<LayoutElement>();
-            inputLayout.minHeight = 25;
-            inputLayout.flexibleHeight = 0;
-            inputLayout.minWidth = 90;
-            inputLayout.flexibleWidth = 50;
+            UIFactory.SetLayoutElement(inputObj, minHeight: 25, flexibleHeight: 0, minWidth: 90, flexibleWidth: 50);
 
             editor.inputs[(int)vectorValue] = input;
 
             // apply button
 
-            var applyBtnObj = UIFactory.CreateButton(rowObject);
-            var applyBtn = applyBtnObj.GetComponent<Button>();
-            var applyText = applyBtnObj.GetComponentInChildren<Text>();
-            applyText.text = "Apply";
-            applyText.fontSize = 14;
-            var applyLayout = applyBtnObj.AddComponent<LayoutElement>();
-            applyLayout.minWidth = 60;
-            applyLayout.minHeight = 25;
+            var applyBtn = UIFactory.CreateButton(rowObject, "ApplyButton", "Apply", () => { OnVectorControlInputApplied(type, vectorValue); });
+            UIFactory.SetLayoutElement(applyBtn.gameObject, minWidth: 60, minHeight: 25);
 
-            applyBtn.onClick.AddListener(() => { OnVectorControlInputApplied(type, vectorValue); });
 
             // Slider
 
-            var sliderObj = UIFactory.CreateSlider(rowObject);
+            var sliderObj = UIFactory.CreateSlider(rowObject, "VectorSlider", out Slider slider);
+            UIFactory.SetLayoutElement(sliderObj, minHeight: 20, flexibleHeight: 0, minWidth: 200, flexibleWidth: 9000);
             sliderObj.transform.Find("Fill Area").gameObject.SetActive(false);
-            var sliderLayout = sliderObj.AddComponent<LayoutElement>();
-            sliderLayout.minHeight = 20;
-            sliderLayout.flexibleHeight = 0;
-            sliderLayout.minWidth = 200;
-            sliderLayout.flexibleWidth = 9000;
-            var slider = sliderObj.GetComponent<Slider>();
             var sliderColors = slider.colors;
             sliderColors.normalColor = new Color(0.65f, 0.65f, 0.65f);
             slider.colors = sliderColors;
@@ -553,24 +421,10 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
 
         internal void ConstructBottomButtons(GameObject contentObj)
         {
-            var bottomRow = UIFactory.CreateHorizontalGroup(contentObj, new Color(1, 1, 1, 0));
-            var bottomGroup = bottomRow.GetComponent<HorizontalLayoutGroup>();
-            bottomGroup.childForceExpandWidth = true;
-            bottomGroup.SetChildControlWidth(true);
-            bottomGroup.spacing = 4;
-            var bottomLayout = bottomRow.AddComponent<LayoutElement>();
-            bottomLayout.minHeight = 25;
+            var bottomRow = UIFactory.CreateHorizontalGroup(contentObj, "BottomButtons", true, true, false, false, 4, default, new Color(1, 1, 1, 0));
 
-            var instantiateBtnObj = UIFactory.CreateButton(bottomRow, new Color(0.2f, 0.2f, 0.2f));
-            var instantiateBtn = instantiateBtnObj.GetComponent<Button>();
-
-            instantiateBtn.onClick.AddListener(InstantiateBtn);
-
-            var instantiateText = instantiateBtnObj.GetComponentInChildren<Text>();
-            instantiateText.text = "Instantiate";
-            instantiateText.fontSize = 14;
-            var instantiateLayout = instantiateBtnObj.AddComponent<LayoutElement>();
-            instantiateLayout.minWidth = 150;
+            var instantiateBtn = UIFactory.CreateButton(bottomRow, "InstantiateBtn", "Instantiate", InstantiateBtn, new Color(0.2f, 0.2f, 0.2f));
+            UIFactory.SetLayoutElement(instantiateBtn.gameObject, minWidth: 150);
 
             void InstantiateBtn()
             {
@@ -582,16 +436,9 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
                 InspectorManager.Instance.Inspect(clone);
             }
 
-            var dontDestroyBtnObj = UIFactory.CreateButton(bottomRow, new Color(0.2f, 0.2f, 0.2f));
-            var dontDestroyBtn = dontDestroyBtnObj.GetComponent<Button>();
-
-            dontDestroyBtn.onClick.AddListener(DontDestroyOnLoadBtn);
-
-            var dontDestroyText = dontDestroyBtnObj.GetComponentInChildren<Text>();
-            dontDestroyText.text = "Set DontDestroyOnLoad";
-            dontDestroyText.fontSize = 14;
-            var dontDestroyLayout = dontDestroyBtnObj.AddComponent<LayoutElement>();
-            dontDestroyLayout.flexibleWidth = 5000;
+            var dontDestroyBtn = UIFactory.CreateButton(bottomRow, "DontDestroyButton", "Set DontDestroyOnLoad", DontDestroyOnLoadBtn,
+                new Color(0.2f, 0.2f, 0.2f));
+            UIFactory.SetLayoutElement(dontDestroyBtn.gameObject, flexibleWidth: 5000);
 
             void DontDestroyOnLoadBtn()
             {
@@ -602,17 +449,10 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
                 GameObject.DontDestroyOnLoad(go);
             }
 
-            var destroyBtnObj = UIFactory.CreateButton(bottomRow, new Color(0.2f, 0.2f, 0.2f));
-            var destroyBtn = destroyBtnObj.GetComponent<Button>();
-
-            destroyBtn.onClick.AddListener(DestroyBtn);
-
-            var destroyText = destroyBtnObj.GetComponentInChildren<Text>();
-            destroyText.text = "Destroy";
-            destroyText.fontSize = 14;
+            var destroyBtn = UIFactory.CreateButton(bottomRow, "DestroyButton", "Destroy", DestroyBtn, new Color(0.2f, 0.2f, 0.2f));
+            UIFactory.SetLayoutElement(destroyBtn.gameObject, minWidth: 150);
+            var destroyText = destroyBtn.GetComponentInChildren<Text>();
             destroyText.color = Color.red;
-            var destroyLayout = destroyBtnObj.AddComponent<LayoutElement>();
-            destroyLayout.minWidth = 150;
 
             void DestroyBtn()
             {
@@ -624,6 +464,6 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
             }
         }
 
-#endregion
+        #endregion
     }
 }

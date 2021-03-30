@@ -1,14 +1,16 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityExplorer.Core.Inspectors;
-using UnityExplorer.UI.Main;
-using System.IO;
-using System.Reflection;
-using UnityExplorer.UI.Reusable;
-using UnityExplorer.Core.Input;
-using System;
 using UnityExplorer.Core.Config;
+using UnityExplorer.Core.Input;
+using UnityExplorer.Core.Runtime;
+using UnityExplorer.UI.Main;
+using UnityExplorer.UI.Main.Home;
 using UnityExplorer.UI.Utility;
 
 namespace UnityExplorer.UI
@@ -19,157 +21,95 @@ namespace UnityExplorer.UI
         public static EventSystem EventSys { get; private set; }
 
         internal static Font ConsoleFont { get; private set; }
-
-        //internal static Sprite ResizeCursor { get; private set; }
         internal static Shader BackupShader { get; private set; }
 
         public static bool ShowMenu
         {
             get => s_showMenu;
-            set => SetShowMenu(value);
-        }
-        public static bool s_showMenu;
-
-        private static bool s_doneUIInit;
-        private static float s_timeSinceStartup;
-
-        internal static void CheckUIInit()
-        {
-            if (s_doneUIInit)
-                return;
-
-            s_timeSinceStartup += Time.deltaTime;
-
-            if (s_timeSinceStartup > 0.1f)
+            set 
             {
-                s_doneUIInit = true;
-                try
-                {
-                    Init();
-                    ExplorerCore.Log("Initialized UnityExplorer UI.");
+                if (s_showMenu == value || !CanvasRoot)
+                    return;
 
-                    if (ExplorerConfig.Instance.Hide_On_Startup)
-                        ShowMenu = false;
-
-                    // InspectorManager.Instance.Inspect(Tests.TestClass.Instance);
-                }
-                catch (Exception e)
-                {
-                    ExplorerCore.LogWarning($"Exception setting up UI: {e}");
-                }
+                s_showMenu = value;
+                CanvasRoot.SetActive(value);
+                CursorUnlocker.UpdateCursorControl();
             }
         }
+        public static bool s_showMenu = true;
 
-        public static void Init()
+        internal static void Init()
         {
-            LoadBundle();
-
-            // Create core UI Canvas and Event System handler
             CreateRootCanvas();
 
-            // Create submodules
-            new MainMenu();
-            InspectUnderMouse.UI.ConstructUI();
-            PanelDragger.LoadCursorImage();
+            LoadBundle();
 
-            // Force refresh of anchors
+            UIFactory.Init();
+
+            MainMenu.Create();
+            InspectUnderMouse.ConstructUI();
+            PanelDragger.CreateCursorUI();
+
+            // Force refresh of anchors etc
             Canvas.ForceUpdateCanvases();
+
+            if (!ConfigManager.Hide_On_Startup.Value)
+                ShowMenu = true;
+
+            ExplorerCore.Log("UI initialized.");
         }
 
-        private static GameObject CreateRootCanvas()
+        internal static void Update()
         {
-            GameObject rootObj = new GameObject("ExplorerCanvas");
-            UnityEngine.Object.DontDestroyOnLoad(rootObj);
-            rootObj.layer = 5;
+            if (!CanvasRoot)
+                return;
 
-            CanvasRoot = rootObj;
+            if (InspectUnderMouse.Inspecting)
+            {
+                InspectUnderMouse.UpdateInspect();
+                return;
+            }
+
+            if (InputManager.GetKeyDown(ConfigManager.Main_Menu_Toggle.Value))
+                ShowMenu = !ShowMenu;
+
+            if (!ShowMenu)
+                return;
+
+            MainMenu.Instance.Update();
+
+            if (EventSystem.current != EventSys)
+                CursorUnlocker.SetEventSystem();
+
+            RuntimeProvider.Instance.CheckInputPointerEvent();
+
+            PanelDragger.Instance.Update();
+
+            SliderScrollbar.UpdateInstances();
+            InputFieldScroller.UpdateInstances();
+        }
+
+        private static void CreateRootCanvas()
+        {
+            CanvasRoot = new GameObject("ExplorerCanvas");
+            UnityEngine.Object.DontDestroyOnLoad(CanvasRoot);
+            CanvasRoot.hideFlags |= HideFlags.HideAndDontSave;
+            CanvasRoot.layer = 5;
             CanvasRoot.transform.position = new Vector3(0f, 0f, 1f);
 
-            EventSys = rootObj.AddComponent<EventSystem>();
+            EventSys = CanvasRoot.AddComponent<EventSystem>();
             InputManager.AddUIModule();
 
-            Canvas canvas = rootObj.AddComponent<Canvas>();
+            Canvas canvas = CanvasRoot.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceCamera;
             canvas.referencePixelsPerUnit = 100;
             canvas.sortingOrder = 999;
-            //canvas.pixelPerfect = false;
 
-            CanvasScaler scaler = rootObj.AddComponent<CanvasScaler>();
+            CanvasScaler scaler = CanvasRoot.AddComponent<CanvasScaler>();
             scaler.referenceResolution = new Vector2(1920, 1080);
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
 
-            rootObj.AddComponent<GraphicRaycaster>();
-
-            return rootObj;
-        }
-
-        private static void SetShowMenu(bool show)
-        {
-            if (s_showMenu == show)
-                return;
-
-            s_showMenu = show;
-
-            if (CanvasRoot)
-            {
-                CanvasRoot.SetActive(show);
-
-                if (show)
-                    CursorUnlocker.SetEventSystem();
-                else
-                    CursorUnlocker.ReleaseEventSystem();
-            }
-
-            CursorUnlocker.UpdateCursorControl();
-        }
-
-        public static void Update()
-        {
-            if (InputManager.GetKeyDown(ExplorerConfig.Instance.Main_Menu_Toggle))
-                ShowMenu = !ShowMenu;
-
-            if (!ShowMenu || !s_doneUIInit || !CanvasRoot)
-                return;
-
-            MainMenu.Instance?.Update();
-
-            if (EventSys)
-            {
-                if (EventSystem.current != EventSys)
-                    CursorUnlocker.SetEventSystem();
-#if CPP
-                // Some IL2CPP games behave weird with multiple UI Input Systems, some fixes for them.
-                var evt = InputManager.InputPointerEvent;
-                if (evt != null)
-                {
-                    if (!evt.eligibleForClick && evt.selectedObject)
-                        evt.eligibleForClick = true;
-                }
-#endif
-            }
-
-            if (PanelDragger.Instance != null)
-                PanelDragger.Instance.Update();
-
-            for (int i = 0; i < SliderScrollbar.Instances.Count; i++)
-            {
-                var slider = SliderScrollbar.Instances[i];
-
-                if (slider.CheckDestroyed())
-                    i--;
-                else
-                    slider.Update();
-            }
-
-            for (int i = 0; i < InputFieldScroller.Instances.Count; i++)
-            {
-                var input = InputFieldScroller.Instances[i];
-
-                if (input.CheckDestroyed())
-                    i--;
-                else
-                    input.Update();
-            }
+            CanvasRoot.AddComponent<GraphicRaycaster>();
         }
 
         private static void LoadBundle()
@@ -179,21 +119,13 @@ namespace UnityExplorer.UI
             try
             {
                 bundle = LoadExplorerUi("modern");
+
                 if (bundle == null)
-                    throw new Exception();
+                    bundle = LoadExplorerUi("legacy");
             }
             catch
             {
-                ExplorerCore.Log("Failed to load Unity 2017 ExplorerUI Bundle, falling back to legacy");
-
-                try
-                {
-                    bundle = LoadExplorerUi("legacy");
-                }
-                catch
-                {
-                    // ignored
-                }
+                // ignored
             }
 
             if (bundle == null)
@@ -212,20 +144,21 @@ namespace UnityExplorer.UI
                 Graphic.defaultGraphicMaterial.shader = BackupShader;
             }
 
-            //ResizeCursor = bundle.LoadAsset<Sprite>("cursor");
-
             ConsoleFont = bundle.LoadAsset<Font>("CONSOLA");
 
-            ExplorerCore.Log("Loaded UI bundle");
+            ExplorerCore.Log("Loaded UI AssetBundle");
         }
 
         private static AssetBundle LoadExplorerUi(string id)
         {
-            var data = ReadFully(typeof(ExplorerCore).Assembly.GetManifestResourceStream($"UnityExplorer.Resources.explorerui.{id}.bundle"));
+            var data = ReadFully(typeof(ExplorerCore)
+                .Assembly
+                .GetManifestResourceStream($"UnityExplorer.Resources.explorerui.{id}.bundle"));
+
             return AssetBundle.LoadFromMemory(data);
         }
 
-        private static byte[] ReadFully(this Stream input)
+        private static byte[] ReadFully(Stream input)
         {
             using (var ms = new MemoryStream())
             {

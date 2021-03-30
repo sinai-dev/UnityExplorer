@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityExplorer.Core.Unity;
-using UnityExplorer.UI;
-using UnityExplorer.UI.Reusable;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.Core.Input;
-using UnityExplorer.Core.Inspectors;
+using UnityExplorer.UI.Utility;
 
-namespace UnityExplorer.UI.Main.Home.Inspectors
+namespace UnityExplorer.UI.Main.Home.Inspectors.GameObjects
 {
     public class ChildList
     {
@@ -139,29 +136,15 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
 
         internal void ConstructChildList(GameObject parent)
         {
-            var vertGroupObj = UIFactory.CreateVerticalGroup(parent, new Color(1, 1, 1, 0));
-            var vertGroup = vertGroupObj.GetComponent<VerticalLayoutGroup>();
-            vertGroup.childForceExpandHeight = true;
-            vertGroup.childForceExpandWidth = false;
-            vertGroup.SetChildControlWidth(true);
-            vertGroup.spacing = 5;
-            var vertLayout = vertGroupObj.AddComponent<LayoutElement>();
-            vertLayout.minWidth = 120;
-            vertLayout.flexibleWidth = 25000;
-            vertLayout.minHeight = 200;
-            vertLayout.flexibleHeight = 5000;
+            var vertGroupObj = UIFactory.CreateVerticalGroup(parent, "ChildListGroup", false, true, true, true, 5, default, new Color(1, 1, 1, 0));
+            UIFactory.SetLayoutElement(vertGroupObj, minWidth: 120, flexibleWidth: 25000, minHeight: 200, flexibleHeight: 5000);
 
-            var childTitleObj = UIFactory.CreateLabel(vertGroupObj, TextAnchor.MiddleLeft);
-            var childTitleText = childTitleObj.GetComponent<Text>();
-            childTitleText.text = "Children";
-            childTitleText.color = Color.grey;
-            childTitleText.fontSize = 14;
-            var childTitleLayout = childTitleObj.AddComponent<LayoutElement>();
-            childTitleLayout.minHeight = 30;
+            var childTitle = UIFactory.CreateLabel(vertGroupObj, "ChildListTitle", "Children:", TextAnchor.MiddleLeft, Color.grey, true, 14);
+            UIFactory.SetLayoutElement(childTitle.gameObject, minHeight: 30);
 
-            var childrenScrollObj = UIFactory.CreateScrollView(vertGroupObj, out s_childListContent, out SliderScrollbar scroller, new Color(0.07f, 0.07f, 0.07f));
-            var contentLayout = childrenScrollObj.GetComponent<LayoutElement>();
-            contentLayout.minHeight = 50;
+            var childrenScrollObj = UIFactory.CreateScrollView(vertGroupObj, "ChildListScrollView", out s_childListContent, 
+                out SliderScrollbar scroller, new Color(0.07f, 0.07f, 0.07f));
+            UIFactory.SetLayoutElement(childrenScrollObj, minHeight: 50);
 
             s_childListPageHandler = new PageHandler(scroller);
             s_childListPageHandler.ConstructUI(vertGroupObj);
@@ -172,46 +155,38 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
         {
             int thisIndex = s_childListTexts.Count;
 
-            GameObject btnGroupObj = UIFactory.CreateHorizontalGroup(s_childListContent, new Color(0.07f, 0.07f, 0.07f));
-            HorizontalLayoutGroup btnGroup = btnGroupObj.GetComponent<HorizontalLayoutGroup>();
-            btnGroup.childForceExpandWidth = true;
-            btnGroup.SetChildControlWidth(true);
-            btnGroup.childForceExpandHeight = false;
-            btnGroup.SetChildControlHeight(true);
-            LayoutElement btnLayout = btnGroupObj.AddComponent<LayoutElement>();
-            btnLayout.flexibleWidth = 320;
-            btnLayout.minHeight = 25;
-            btnLayout.flexibleHeight = 0;
+            var btnGroupObj = UIFactory.CreateHorizontalGroup(s_childListContent, "ChildButtonGroup", true, false, true, true, 
+                0, default, new Color(0.07f, 0.07f, 0.07f));
+            UIFactory.SetLayoutElement(btnGroupObj, flexibleWidth: 320, minHeight: 25, flexibleHeight: 0);
             btnGroupObj.AddComponent<Mask>();
 
-            var toggleObj = UIFactory.CreateToggle(btnGroupObj, out Toggle toggle, out Text toggleText, new Color(0.3f, 0.3f, 0.3f));
-            var toggleLayout = toggleObj.AddComponent<LayoutElement>();
-            toggleLayout.minHeight = 25;
-            toggleLayout.minWidth = 25;
+            var toggleObj = UIFactory.CreateToggle(btnGroupObj, "Toggle", out Toggle toggle, out Text toggleText, new Color(0.3f, 0.3f, 0.3f));
+            UIFactory.SetLayoutElement(toggleObj, minHeight: 25, minWidth: 25);
             toggleText.text = "";
             toggle.isOn = false;
             s_childListToggles.Add(toggle);
             toggle.onValueChanged.AddListener((bool val) => { OnToggleClicked(thisIndex, val); });
 
-            GameObject mainButtonObj = UIFactory.CreateButton(btnGroupObj);
-            LayoutElement mainBtnLayout = mainButtonObj.AddComponent<LayoutElement>();
-            mainBtnLayout.minHeight = 25;
-            mainBtnLayout.flexibleHeight = 0;
-            mainBtnLayout.minWidth = 25;
-            mainBtnLayout.flexibleWidth = 999;
-            Button mainBtn = mainButtonObj.GetComponent<Button>();
-            ColorBlock mainColors = mainBtn.colors;
+            ColorBlock mainColors = new ColorBlock();
             mainColors.normalColor = new Color(0.07f, 0.07f, 0.07f);
             mainColors.highlightedColor = new Color(0.2f, 0.2f, 0.2f, 1);
-            mainBtn.colors = mainColors;
-            mainBtn.onClick.AddListener(() => { OnChildListObjectClicked(thisIndex); });
+            mainColors.pressedColor = new Color(0.05f, 0.05f, 0.05f);
 
-            Text mainText = mainButtonObj.GetComponentInChildren<Text>();
+            var mainBtn = UIFactory.CreateButton(btnGroupObj, 
+                "MainButton",
+                "<notset>", 
+                () => { OnChildListObjectClicked(thisIndex); },
+                mainColors);
+
+            UIFactory.SetLayoutElement(mainBtn.gameObject, minHeight: 25, flexibleHeight: 0, minWidth: 25, flexibleWidth: 9999);
+
+            Text mainText = mainBtn.GetComponentInChildren<Text>();
             mainText.alignment = TextAnchor.MiddleLeft;
             mainText.horizontalOverflow = HorizontalWrapMode.Overflow;
             mainText.resizeTextForBestFit = true;
             mainText.resizeTextMaxSize = 14;
             mainText.resizeTextMinSize = 10;
+
             s_childListTexts.Add(mainText);
         }
 

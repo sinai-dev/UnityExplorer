@@ -19,7 +19,6 @@ namespace UnityExplorer.UI.Main.CSConsole
         private const int UPDATES_PER_BATCH = 100;
 
         public static GameObject m_mainObj;
-        //private static RectTransform m_thisRect;
 
         private static readonly List<GameObject> m_suggestionButtons = new List<GameObject>();
         private static readonly List<Text> m_suggestionTexts = new List<Text>();
@@ -137,7 +136,7 @@ namespace UnityExplorer.UI.Main.CSConsole
 
                 if (!editor.InputField.isFocused)
                     return;
-                
+
                 var textGen = editor.InputText.cachedTextGenerator;
                 int caretPos = editor.m_lastCaretPos;
 
@@ -256,7 +255,7 @@ namespace UnityExplorer.UI.Main.CSConsole
         {
             var parent = UIManager.CanvasRoot;
 
-            var obj = UIFactory.CreateScrollView(parent, out GameObject content, out _, new Color(0.1f, 0.1f, 0.1f, 0.95f));
+            var obj = UIFactory.CreateScrollView(parent, "AutoCompleterScrollView", out GameObject content, out _, new Color(0.1f, 0.1f, 0.1f, 0.95f));
 
             m_mainObj = obj;
 
@@ -274,38 +273,31 @@ namespace UnityExplorer.UI.Main.CSConsole
             mainGroup.childForceExpandHeight = false;
             mainGroup.childForceExpandWidth = true;
 
+            ColorBlock btnColors = new ColorBlock();
+            btnColors.normalColor = new Color(0f, 0f, 0f, 0f);
+            btnColors.highlightedColor = new Color(0.2f, 0.2f, 0.2f, 1.0f);
+
             for (int i = 0; i < MAX_LABELS; i++)
             {
-                var buttonObj = UIFactory.CreateButton(content);
-                Button btn = buttonObj.GetComponent<Button>();
-                ColorBlock btnColors = btn.colors;
-                btnColors.normalColor = new Color(0f, 0f, 0f, 0f);
-                btnColors.highlightedColor = new Color(0.2f, 0.2f, 0.2f, 1.0f);
-                btn.colors = btnColors;
+                var btn = UIFactory.CreateButton(content, "AutoCompleteButton", "", null, btnColors);
 
                 var nav = btn.navigation;
                 nav.mode = Navigation.Mode.Vertical;
                 btn.navigation = nav;
 
-                var btnLayout = buttonObj.AddComponent<LayoutElement>();
-                btnLayout.minHeight = 20;
+                UIFactory.SetLayoutElement(btn.gameObject, minHeight: 20);
 
                 var text = btn.GetComponentInChildren<Text>();
                 text.alignment = TextAnchor.MiddleLeft;
                 text.color = Color.white;
 
-                var hiddenChild = UIFactory.CreateUIObject("HiddenText", buttonObj);
+                var hiddenChild = UIFactory.CreateUIObject("HiddenText", btn.gameObject);
                 hiddenChild.SetActive(false);
                 var hiddenText = hiddenChild.AddComponent<Text>();
                 m_hiddenSuggestionTexts.Add(hiddenText);
-                btn.onClick.AddListener(UseAutocompleteButton);
+                btn.onClick.AddListener(() => { CSharpConsole.Instance.UseAutocomplete(hiddenText.text); });
 
-                void UseAutocompleteButton()
-                {
-                    CSharpConsole.Instance.UseAutocomplete(hiddenText.text);
-                }
-
-                m_suggestionButtons.Add(buttonObj);
+                m_suggestionButtons.Add(btn.gameObject);
                 m_suggestionTexts.Add(text);
             }
         }

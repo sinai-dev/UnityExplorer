@@ -7,10 +7,18 @@ namespace UnityExplorer.UI.Main.CSConsole.Lexer
     // This class just contains common implementations.
     public class KeywordMatch : Matcher
     {
-        public string[] Keywords;
+        public string[] Keywords = new[] {"add", "as", "ascending", "await", "bool", "break", "by", "byte",
+"case", "catch", "char", "checked", "const", "continue", "decimal", "default", "descending", "do", "dynamic",
+"else", "equals", "false", "finally", "float", "for", "foreach", "from", "global", "goto", "group",
+"if", "in", "int", "into", "is", "join", "let", "lock", "long", "new", "null", "object", "on", "orderby", "out",
+"ref", "remove", "return", "sbyte", "select", "short", "sizeof", "stackalloc", "string",
+"switch", "throw", "true", "try", "typeof", "uint", "ulong", "ushort", "var", "where", "while", "yield",
+"abstract", "async", "base", "class", "delegate", "enum", "explicit", "extern", "fixed", "get",
+"implicit", "interface", "internal", "namespace", "operator", "override", "params", "private", "protected", "public",
+"using", "partial", "readonly", "sealed", "set", "static", "struct", "this", "unchecked", "unsafe", "value", "virtual", "volatile", "void" };
 
         public override Color HighlightColor => highlightColor;
-        public Color highlightColor;
+        public Color highlightColor = new Color(0.33f, 0.61f, 0.83f, 1.0f);
 
         private readonly HashSet<string> shortlist = new HashSet<string>();
         private readonly Stack<string> removeList = new Stack<string>();

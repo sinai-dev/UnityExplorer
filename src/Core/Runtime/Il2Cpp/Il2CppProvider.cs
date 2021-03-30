@@ -12,6 +12,7 @@ using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using UnityEngine.UI;
+using UnityExplorer.Core.Input;
 
 namespace UnityExplorer.Core.Runtime.Il2Cpp
 {
@@ -34,7 +35,7 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
                 var addMethod = typeof(Application).GetMethod("add_logMessageReceived", BF.Static | BF.Public, null, new[] { logType }, null);
                 addMethod.Invoke(null, new[]
                 {
-                    castMethod.Invoke(null, new[] { new Action<string, string, LogType>(ExplorerCore.Instance.OnUnityLog) })
+                    castMethod.Invoke(null, new[] { new Action<string, string, LogType>(Application_logMessageReceived) })
                 });
             }
             catch 
@@ -43,10 +44,19 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             }
         }
 
+        private void Application_logMessageReceived(string condition, string stackTrace, LogType type)
+        {
+            ExplorerCore.Log(condition, type, true);
+        }
+
         public override void StartConsoleCoroutine(IEnumerator routine)
         {
             Il2CppCoroutine.Start(routine);
         }
+
+        // Unity API Handlers
+
+        // LayerMask.LayerToName
 
         internal delegate IntPtr d_LayerToName(int layer);
 
@@ -56,20 +66,25 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             return IL2CPP.Il2CppStringToManaged(iCall.Invoke(layer));
         }
 
+        // Resources.FindObjectsOfTypeAll
+
         internal delegate IntPtr d_FindObjectsOfTypeAll(IntPtr type);
 
         public override UnityEngine.Object[] FindObjectsOfTypeAll(Type type)
         {
-            var iCall = ICallManager.GetICall<d_FindObjectsOfTypeAll>("UnityEngine.Resources::FindObjectsOfTypeAll");
-            var cppType = Il2CppType.From(type);
+            var iCall = ICallManager.GetICallUnreliable<d_FindObjectsOfTypeAll>(new[]
+            {
+                "UnityEngine.Resources::FindObjectsOfTypeAll",
+                "UnityEngine.ResourcesAPIInternal::FindObjectsOfTypeAll" // Unity 2020+ updated to this
+            });
 
-            return new Il2CppReferenceArray<UnityEngine.Object>(iCall.Invoke(cppType.Pointer));
+            return new Il2CppReferenceArray<UnityEngine.Object>(iCall.Invoke(Il2CppType.From(type).Pointer));
         }
 
         public override int GetSceneHandle(Scene scene)
             => scene.handle;
 
-        //Scene.GetRootGameObjects();
+        // Scene.GetRootGameObjects();
 
         internal delegate void d_GetRootGameObjects(int handle, IntPtr list);
 
@@ -94,7 +109,7 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             return list.ToArray();
         }
 
-        //Scene.rootCount;
+        // Scene.rootCount
 
         internal delegate int d_GetRootCountInternal(int handle);
 
@@ -104,6 +119,36 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
         {
             return ICallManager.GetICall<d_GetRootCountInternal>("UnityEngine.SceneManagement.Scene::GetRootCountInternal")
                    .Invoke(handle);
+        }
+
+        // ColorBlock set
+
+        public override void SetColorBlockColors(ref ColorBlock colorBlock, Color? normal, Color? highlighted, Color? pressed)
+        {
+            if (normal != null)
+            {
+                colorBlock.m_NormalColor = (Color)normal;
+                colorBlock.m_SelectedColor = (Color)normal;
+            }
+
+            if (highlighted != null)
+                colorBlock.m_HighlightedColor = (Color)highlighted;
+
+            if (pressed != null)
+                colorBlock.m_PressedColor = (Color)pressed;
+        }
+
+        // Custom check for il2cpp input pointer event
+
+        public override void CheckInputPointerEvent()
+        {
+            // Some IL2CPP games behave weird with multiple UI Input Systems, some fixes for them.
+            var evt = InputManager.InputPointerEvent;
+            if (evt != null)
+            {
+                if (!evt.eligibleForClick && evt.selectedObject)
+                    evt.eligibleForClick = true;
+            }
         }
     }
 }

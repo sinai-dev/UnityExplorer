@@ -11,7 +11,7 @@ namespace UnityExplorer.Core
 {
     public static class ReflectionUtility
     {
-        public static BF CommonFlags = BF.Public | BF.Instance | BF.NonPublic | BF.Static;
+        public const BF CommonFlags = BF.Public | BF.Instance | BF.NonPublic | BF.Static;
 
         /// <summary>
         /// Helper for IL2CPP to get the underlying true Type (Unhollowed) of the object.
@@ -32,7 +32,7 @@ namespace UnityExplorer.Core
         /// <param name="obj">The object to cast</param>
         /// <returns>The object, cast to the underlying Type if possible, otherwise the original object.</returns>
         public static object Cast(this object obj)
-            => Cast(obj, GetType(obj));
+            => ReflectionProvider.Instance.Cast(obj, GetType(obj));
 
         /// <summary>
         /// Cast an object to a Type, if possible.
@@ -59,7 +59,10 @@ namespace UnityExplorer.Core
         public static bool IsDictionary(this Type t)
             => ReflectionProvider.Instance.IsAssignableFrom(typeof(IDictionary), t);
 
-        public static bool LoadModule(string module)
+        /// <summary>
+        /// [INTERNAL] Used to load Unhollowed DLLs in IL2CPP.
+        /// </summary>
+        internal static bool LoadModule(string module)
             => ReflectionProvider.Instance.LoadModule(module);
 
         // cache for GetTypeByName

@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityExplorer.UI;
-using UnityExplorer.UI.Reusable;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.Core.Input;
 using UnityExplorer.Core;
 using UnityExplorer.UI.Utility;
-using UnityExplorer.Core.Inspectors;
 
-namespace UnityExplorer.UI.Main.Home.Inspectors
+namespace UnityExplorer.UI.Main.Home.Inspectors.GameObjects
 {
     public class ComponentList
     {
@@ -137,34 +134,20 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
         }
 
 
-#region UI CONSTRUCTION
+        #region UI CONSTRUCTION
 
         internal void ConstructCompList(GameObject parent)
         {
-            var vertGroupObj = UIFactory.CreateVerticalGroup(parent, new Color(1, 1, 1, 0));
-            var vertGroup = vertGroupObj.GetComponent<VerticalLayoutGroup>();
-            vertGroup.childForceExpandHeight = true;
-            vertGroup.childForceExpandWidth = false;
-            vertGroup.SetChildControlWidth(true);
-            vertGroup.spacing = 5;
-            var vertLayout = vertGroupObj.AddComponent<LayoutElement>();
-            vertLayout.minWidth = 120;
-            vertLayout.flexibleWidth = 25000;
-            vertLayout.minHeight = 200;
-            vertLayout.flexibleHeight = 5000;
+            var vertGroupObj = UIFactory.CreateVerticalGroup(parent, "ComponentList", false, true, true, true, 5, default, new Color(1, 1, 1, 0));
+            UIFactory.SetLayoutElement(vertGroupObj, minWidth: 120, flexibleWidth: 25000, minHeight: 200, flexibleHeight: 5000);
 
-            var compTitleObj = UIFactory.CreateLabel(vertGroupObj, TextAnchor.MiddleLeft);
-            var compTitleText = compTitleObj.GetComponent<Text>();
-            compTitleText.text = "Components";
-            compTitleText.color = Color.grey;
-            compTitleText.fontSize = 14;
-            var childTitleLayout = compTitleObj.AddComponent<LayoutElement>();
-            childTitleLayout.minHeight = 30;
+            var compTitle = UIFactory.CreateLabel(vertGroupObj, "ComponentsTitle", "Components:", TextAnchor.MiddleLeft, Color.grey);
+            UIFactory.SetLayoutElement(compTitle.gameObject, minHeight: 30);
 
-            var compScrollObj = UIFactory.CreateScrollView(vertGroupObj, out s_compListContent, out SliderScrollbar scroller, new Color(0.07f, 0.07f, 0.07f));
-            var contentLayout = compScrollObj.AddComponent<LayoutElement>();
-            contentLayout.minHeight = 50;
-            contentLayout.flexibleHeight = 5000;
+            var compScrollObj = UIFactory.CreateScrollView(vertGroupObj, "ComponentListScrollView", out s_compListContent,
+                out SliderScrollbar scroller, new Color(0.07f, 0.07f, 0.07f));
+
+            UIFactory.SetLayoutElement(compScrollObj, minHeight: 50, flexibleHeight: 5000);
 
             s_compListPageHandler = new PageHandler(scroller);
             s_compListPageHandler.ConstructUI(vertGroupObj);
@@ -175,26 +158,15 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
         {
             int thisIndex = s_compListTexts.Count;
 
-            GameObject groupObj = UIFactory.CreateHorizontalGroup(s_compListContent, new Color(0.07f, 0.07f, 0.07f));
-            HorizontalLayoutGroup group = groupObj.GetComponent<HorizontalLayoutGroup>();
-            group.childForceExpandWidth = true;
-            group.SetChildControlWidth(true);
-            group.childForceExpandHeight = false;
-            group.SetChildControlHeight(true);
-            group.childAlignment = TextAnchor.MiddleLeft;
-            LayoutElement groupLayout = groupObj.AddComponent<LayoutElement>();
-            groupLayout.minWidth = 25;
-            groupLayout.flexibleWidth = 999;
-            groupLayout.minHeight = 25;
-            groupLayout.flexibleHeight = 0;
+            GameObject groupObj = UIFactory.CreateHorizontalGroup(s_compListContent, "CompListButton", true, false, true, true, 0, default,
+                new Color(0.07f, 0.07f, 0.07f), TextAnchor.MiddleLeft);
+            UIFactory.SetLayoutElement(groupObj, minWidth: 25, flexibleWidth: 999, minHeight: 25, flexibleHeight: 0);
             groupObj.AddComponent<Mask>();
 
             // Behaviour enabled toggle
 
-            var toggleObj = UIFactory.CreateToggle(groupObj, out Toggle toggle, out Text toggleText, new Color(0.3f, 0.3f, 0.3f));
-            var toggleLayout = toggleObj.AddComponent<LayoutElement>();
-            toggleLayout.minHeight = 25;
-            toggleLayout.minWidth = 25;
+            var toggleObj = UIFactory.CreateToggle(groupObj, "EnabledToggle", out Toggle toggle, out Text toggleText, new Color(0.3f, 0.3f, 0.3f));
+            UIFactory.SetLayoutElement(toggleObj, minWidth: 25, minHeight: 25);
             toggleText.text = "";
             toggle.isOn = true;
             s_compToggles.Add(toggle);
@@ -202,35 +174,31 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
 
             // Main component button
 
-            GameObject mainButtonObj = UIFactory.CreateButton(groupObj);
-            LayoutElement mainBtnLayout = mainButtonObj.AddComponent<LayoutElement>();
-            mainBtnLayout.minHeight = 25;
-            mainBtnLayout.flexibleHeight = 0;
-            mainBtnLayout.minWidth = 25;
-            mainBtnLayout.flexibleWidth = 999;
-            Button mainBtn = mainButtonObj.GetComponent<Button>();
-            ColorBlock mainColors = mainBtn.colors;
+            ColorBlock mainColors = new ColorBlock();
             mainColors.normalColor = new Color(0.07f, 0.07f, 0.07f);
             mainColors.highlightedColor = new Color(0.2f, 0.2f, 0.2f, 1);
-            mainBtn.colors = mainColors;
-            mainBtn.onClick.AddListener(() => { OnCompListObjectClicked(thisIndex); });
+            mainColors.pressedColor = new Color(0.05f, 0.05f, 0.05f);
+
+            var mainBtn = UIFactory.CreateButton(groupObj, 
+                "MainButton", 
+                "<notset>",
+                () => { OnCompListObjectClicked(thisIndex); },
+                mainColors);
+
+            UIFactory.SetLayoutElement(mainBtn.gameObject, minHeight: 25, flexibleHeight: 0, minWidth: 25, flexibleWidth: 999);
 
             // Component button text
 
-            Text mainText = mainButtonObj.GetComponentInChildren<Text>();
+            Text mainText = mainBtn.GetComponentInChildren<Text>();
             mainText.alignment = TextAnchor.MiddleLeft;
             mainText.horizontalOverflow = HorizontalWrapMode.Overflow;
-            //mainText.color = SyntaxColors.Class_Instance.ToColor();
             mainText.resizeTextForBestFit = true;
             mainText.resizeTextMaxSize = 14;
             mainText.resizeTextMinSize = 8;
 
             s_compListTexts.Add(mainText);
-
-            // TODO remove component button
         }
 
-
-#endregion
+        #endregion
     }
 }

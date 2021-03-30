@@ -4,11 +4,11 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
-using UnityExplorer.Core;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI.Main;
+using UnityExplorer.UI.Main.Search;
 
-namespace UnityExplorer.Search
+namespace UnityExplorer.Core.Search
 {
     public static class SearchProvider
     {

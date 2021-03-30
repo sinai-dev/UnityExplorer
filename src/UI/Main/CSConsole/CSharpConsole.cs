@@ -9,10 +9,10 @@ using UnityExplorer.Core.Input;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityExplorer.UI.Reusable;
 using UnityExplorer.UI.Main.CSConsole;
 using UnityExplorer.Core;
 using UnityExplorer.Core.Unity;
+using UnityExplorer.UI.Utility;
 #if CPP
 using UnityExplorer.Core.Runtime.Il2Cpp;
 #endif
@@ -361,7 +361,7 @@ The following helper methods are available:
 
             string ret = "";
 
-            foreach (LexerMatchInfo match in highlightLexer.GetMatches(inputText))
+            foreach (var match in highlightLexer.GetMatches(inputText))
             {
                 for (int i = offset; i < match.startIndex; i++)
                     ret += inputText[i];
@@ -456,101 +456,62 @@ The following helper methods are available:
 
         public void ConstructUI()
         {
-            Content = UIFactory.CreateUIObject("C# Console", MainMenu.Instance.PageViewport);
+            Content = UIFactory.CreateVerticalGroup(MainMenu.Instance.PageViewport, "CSharpConsole", true, true, true, true);
+            UIFactory.SetLayoutElement(Content, preferredHeight: 500, flexibleHeight: 9000);
 
-            var mainLayout = Content.AddComponent<LayoutElement>();
-            mainLayout.preferredHeight = 500;
-            mainLayout.flexibleHeight = 9000;
-
-            var mainGroup = Content.AddComponent<VerticalLayoutGroup>();
-            mainGroup.SetChildControlHeight(true);
-            mainGroup.SetChildControlWidth(true);
-            mainGroup.childForceExpandHeight = true;
-            mainGroup.childForceExpandWidth = true;
-
-#region TOP BAR 
+            #region TOP BAR 
 
             // Main group object
 
-            var topBarObj = UIFactory.CreateHorizontalGroup(Content);
-            LayoutElement topBarLayout = topBarObj.AddComponent<LayoutElement>();
-            topBarLayout.minHeight = 50;
-            topBarLayout.flexibleHeight = 0;
+            var topBarObj = UIFactory.CreateHorizontalGroup(Content, "TopBar", true, true, true, true, 10, new Vector4(8, 8, 30, 30), 
+                default, TextAnchor.LowerCenter);
+            UIFactory.SetLayoutElement(topBarObj, minHeight: 50, flexibleHeight: 0);
 
-            var topBarGroup = topBarObj.GetComponent<HorizontalLayoutGroup>();
-            topBarGroup.padding.left = 30;
-            topBarGroup.padding.right = 30;
-            topBarGroup.padding.top = 8;
-            topBarGroup.padding.bottom = 8;
-            topBarGroup.spacing = 10;
-            topBarGroup.childForceExpandHeight = true;
-            topBarGroup.childForceExpandWidth = true;
-            topBarGroup.SetChildControlWidth(true);
-            topBarGroup.SetChildControlHeight(true);
-            topBarGroup.childAlignment = TextAnchor.LowerCenter;
+            // Top label
 
-            var topBarLabel = UIFactory.CreateLabel(topBarObj, TextAnchor.MiddleLeft);
-            var topBarLabelLayout = topBarLabel.AddComponent<LayoutElement>();
-            topBarLabelLayout.preferredWidth = 150;
-            topBarLabelLayout.flexibleWidth = 5000;
-            var topBarText = topBarLabel.GetComponent<Text>();
-            topBarText.text = "C# Console";
-            topBarText.fontSize = 20;
+            var topBarLabel = UIFactory.CreateLabel(topBarObj, "TopLabel", "C# Console", TextAnchor.MiddleLeft, default, true, 25);
+            UIFactory.SetLayoutElement(topBarLabel.gameObject, preferredWidth: 150, flexibleWidth: 5000);
 
             // Enable Ctrl+R toggle
 
-            var ctrlRToggleObj = UIFactory.CreateToggle(topBarObj, out Toggle ctrlRToggle, out Text ctrlRToggleText);
-            ctrlRToggle.onValueChanged.AddListener(CtrlRToggleCallback);
-            void CtrlRToggleCallback(bool val)
-            {
-                EnableCtrlRShortcut = val;
-            }
+            var ctrlRToggleObj = UIFactory.CreateToggle(topBarObj, "CtrlRToggle", out Toggle ctrlRToggle, out Text ctrlRToggleText);
+            ctrlRToggle.onValueChanged.AddListener((bool val) => { EnableCtrlRShortcut = val; });
 
             ctrlRToggleText.text = "Run on Ctrl+R";
             ctrlRToggleText.alignment = TextAnchor.UpperLeft;
-            var ctrlRLayout = ctrlRToggleObj.AddComponent<LayoutElement>();
-            ctrlRLayout.minWidth = 140;
-            ctrlRLayout.flexibleWidth = 0;
-            ctrlRLayout.minHeight = 25;
+            UIFactory.SetLayoutElement(ctrlRToggleObj, minWidth: 140, flexibleWidth: 0, minHeight: 25);
 
             // Enable Suggestions toggle
 
-            var suggestToggleObj = UIFactory.CreateToggle(topBarObj, out Toggle suggestToggle, out Text suggestToggleText);
-            suggestToggle.onValueChanged.AddListener(SuggestToggleCallback);
-            void SuggestToggleCallback(bool val)
+            var suggestToggleObj = UIFactory.CreateToggle(topBarObj, "SuggestionToggle", out Toggle suggestToggle, out Text suggestToggleText);
+            suggestToggle.onValueChanged.AddListener((bool val) =>
             {
                 EnableAutocompletes = val;
                 AutoCompleter.Update();
-            }
+            });
 
             suggestToggleText.text = "Suggestions";
             suggestToggleText.alignment = TextAnchor.UpperLeft;
-            var suggestLayout = suggestToggleObj.AddComponent<LayoutElement>();
-            suggestLayout.minWidth = 120;
-            suggestLayout.flexibleWidth = 0;
-            suggestLayout.minHeight = 25;
+
+            UIFactory.SetLayoutElement(suggestToggleObj, minWidth: 120, flexibleWidth: 0, minHeight: 25);
 
             // Enable Auto-indent toggle
 
-            var autoIndentToggleObj = UIFactory.CreateToggle(topBarObj, out Toggle autoIndentToggle, out Text autoIndentToggleText);
-            autoIndentToggle.onValueChanged.AddListener(OnIndentChanged);
-            void OnIndentChanged(bool val) => EnableAutoIndent = val;
+            var autoIndentToggleObj = UIFactory.CreateToggle(topBarObj, "IndentToggle", out Toggle autoIndentToggle, out Text autoIndentToggleText);
+            autoIndentToggle.onValueChanged.AddListener((bool val) => EnableAutoIndent = val);
 
             autoIndentToggleText.text = "Auto-indent on Enter";
             autoIndentToggleText.alignment = TextAnchor.UpperLeft;
 
-            var autoIndentLayout = autoIndentToggleObj.AddComponent<LayoutElement>();
-            autoIndentLayout.minWidth = 180;
-            autoIndentLayout.flexibleWidth = 0;
-            autoIndentLayout.minHeight = 25;
+            UIFactory.SetLayoutElement(autoIndentToggleObj, minWidth: 180, flexibleWidth: 0, minHeight: 25);
 
-#endregion
+            #endregion
 
-#region CONSOLE INPUT
+            #region CONSOLE INPUT
 
             int fontSize = 16;
 
-            var inputObj = UIFactory.CreateSrollInputField(Content, out InputFieldScroller consoleScroll, fontSize);
+            var inputObj = UIFactory.CreateSrollInputField(Content, "ConsoleInput", STARTUP_TEXT, out InputFieldScroller consoleScroll, fontSize);
 
             var inputField = consoleScroll.inputField;
 
@@ -560,7 +521,6 @@ The following helper methods are available:
             mainTextInput.color = new Color(1, 1, 1, 0.5f);
 
             var placeHolderText = inputField.placeholder.GetComponent<Text>();
-            placeHolderText.text = STARTUP_TEXT;
             placeHolderText.fontSize = fontSize;
 
             var highlightTextObj = UIFactory.CreateUIObject("HighlightText", mainTextObj.gameObject);
@@ -579,58 +539,26 @@ The following helper methods are available:
 
             #region COMPILE BUTTON BAR
 
-            var horozGroupObj = UIFactory.CreateHorizontalGroup(Content, new Color(1, 1, 1, 0));
-            var horozGroup = horozGroupObj.GetComponent<HorizontalLayoutGroup>();
-            horozGroup.padding.left = 2;
-            horozGroup.padding.top = 2;
-            horozGroup.padding.right = 2;
-            horozGroup.padding.bottom = 2;
+            var horozGroupObj = UIFactory.CreateHorizontalGroup(Content, "BigButtons", true, true, true, true, 0, new Vector4(2,2,2,2),
+                new Color(1, 1, 1, 0));
 
-            var resetBtnObj = UIFactory.CreateButton(horozGroupObj);
-            var resetBtnLayout = resetBtnObj.AddComponent<LayoutElement>();
-            resetBtnLayout.preferredWidth = 80;
-            resetBtnLayout.flexibleWidth = 0;
-            resetBtnLayout.minHeight = 45;
-            resetBtnLayout.flexibleHeight = 0;
-            var resetButton = resetBtnObj.GetComponent<Button>();
-            var resetBtnColors = resetButton.colors;
-            resetBtnColors.normalColor = "666666".ToColor();
-            resetButton.colors = resetBtnColors;
-            var resetBtnText = resetBtnObj.GetComponentInChildren<Text>();
-            resetBtnText.text = "Reset";
+            var resetButton = UIFactory.CreateButton(horozGroupObj, "ResetButton", "Reset", () => ResetConsole(), "666666".ToColor());
+            var resetBtnText = resetButton.GetComponentInChildren<Text>();
             resetBtnText.fontSize = 18;
-            resetBtnText.color = Color.white;
+            UIFactory.SetLayoutElement(resetButton.gameObject, preferredWidth: 80, flexibleWidth: 0, minHeight: 45, flexibleHeight: 0);
 
-            // Set compile button callback now that we have the Input Field reference
-            resetButton.onClick.AddListener(ResetCallback);
-            void ResetCallback()
-            {
-                ResetConsole();
-            }
-
-            var compileBtnObj = UIFactory.CreateButton(horozGroupObj);
-            var compileBtnLayout = compileBtnObj.AddComponent<LayoutElement>();
-            compileBtnLayout.preferredWidth = 80;
-            compileBtnLayout.flexibleWidth = 0;
-            compileBtnLayout.minHeight = 45;
-            compileBtnLayout.flexibleHeight = 0;
-            var compileButton = compileBtnObj.GetComponent<Button>();
-            var compileBtnColors = compileButton.colors;
-            compileBtnColors.normalColor = new Color(14f / 255f, 80f / 255f, 14f / 255f);
-            compileButton.colors = compileBtnColors;
-            var btnText = compileBtnObj.GetComponentInChildren<Text>();
-            btnText.text = "Run";
+            var compileButton = UIFactory.CreateButton(horozGroupObj, "CompileButton", "Compile", CompileCallback, 
+                new Color(14f / 255f, 80f / 255f, 14f / 255f));
+            var btnText = compileButton.GetComponentInChildren<Text>();
             btnText.fontSize = 18;
-            btnText.color = Color.white;
+            UIFactory.SetLayoutElement(compileButton.gameObject, preferredWidth: 80, flexibleWidth: 0, minHeight: 45, flexibleHeight: 0);
 
-            // Set compile button callback now that we have the Input Field reference
-            compileButton.onClick.AddListener(CompileCallback);
             void CompileCallback()
             {
                 if (!string.IsNullOrEmpty(inputField.text))
-                {
                     Evaluate(inputField.text.Trim());
-                }
+                else
+                    ExplorerCore.Log("Cannot evaluate empty input!");
             }
 
             #endregion

@@ -1,14 +1,12 @@
 ﻿using System;
 using Mono.CSharp;
-using UnityExplorer.UI;
-using UnityExplorer.UI.Main;
-using UnityExplorer.Core.Inspectors;
-using UnityExplorer.UI.Main.CSConsole;
 using System.Collections;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using UnityExplorer.Core.Runtime;
+using UnityExplorer.UI.Main.CSConsole;
+using UnityExplorer.UI.Main.Home;
 
 namespace UnityExplorer.Core.CSharp
 {

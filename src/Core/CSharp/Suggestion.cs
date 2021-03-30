@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityExplorer.Core;
-using UnityExplorer.Core.Unity;
 using UnityExplorer.UI.Main.CSConsole;
 
 namespace UnityExplorer.Core.CSharp
@@ -47,8 +46,8 @@ namespace UnityExplorer.Core.CSharp
 
         // ~~~~ Static ~~~~
 
-        public static HashSet<string> Namespaces => m_namspaces ?? GetNamespaces();
-        private static HashSet<string> m_namspaces;
+        public static HashSet<string> Namespaces => m_namespaces ?? GetNamespaces();
+        private static HashSet<string> m_namespaces;
 
         public static HashSet<string> Keywords => m_keywords ?? (m_keywords = new HashSet<string>(CSLexerHighlighter.validKeywordMatcher.Keywords));
         private static HashSet<string> m_keywords;
@@ -63,7 +62,7 @@ namespace UnityExplorer.Core.CSharp
                             .Where(x => x.IsPublic && !string.IsNullOrEmpty(x.Namespace))
                             .Select(x => x.Namespace));
 
-            return m_namspaces = set;
+            return m_namespaces = set;
 
             IEnumerable<Type> GetTypes(Assembly asm) => asm.TryGetTypes();
         }

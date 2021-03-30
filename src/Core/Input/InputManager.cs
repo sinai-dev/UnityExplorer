@@ -56,6 +56,8 @@ namespace UnityExplorer.Core.Input
                 m_inputModule = new NoInput();
                 CurrentType = InputType.None;
             }
+
+            CursorUnlocker.Init();
         }
     }
 }
