@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using MelonLoader;
+using UnityEngine;
 using UnityExplorer;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Loader.ML;
@@ -18,7 +19,7 @@ namespace UnityExplorer
         public string ExplorerFolder => Path.Combine("Mods", ExplorerCore.NAME);
         public string ConfigFolder => ExplorerFolder;
 
-        public IConfigHandler ConfigHandler => _configHandler;
+        public ConfigHandler ConfigHandler => _configHandler;
         public MelonLoaderConfigHandler _configHandler;
 
         public Action<object> OnLogMessage => MelonLogger.Msg;

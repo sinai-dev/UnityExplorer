@@ -36,7 +36,7 @@ namespace UnityExplorer
             => Log;
 #endif
 
-        public IConfigHandler ConfigHandler => _configHandler;
+        public ConfigHandler ConfigHandler => _configHandler;
         private BepInExConfigHandler _configHandler;
 
         public Harmony HarmonyInstance => s_harmony;

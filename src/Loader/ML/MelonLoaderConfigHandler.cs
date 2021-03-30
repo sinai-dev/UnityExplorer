@@ -10,20 +10,20 @@ using UnityExplorer.Core.Config;
 
 namespace UnityExplorer.Loader.ML
 {
-    public class MelonLoaderConfigHandler : IConfigHandler
+    public class MelonLoaderConfigHandler : ConfigHandler
     {
         internal const string CTG_NAME = "UnityExplorer";
 
         internal MelonPreferences_Category prefCategory;
 
-        public void Init()
+        public override void Init()
         {
             prefCategory = MelonPreferences.CreateCategory(CTG_NAME, $"{CTG_NAME} Settings");
 
             MelonPreferences.Mapper.RegisterMapper(KeycodeReader, KeycodeWriter);
         }
 
-        public void LoadConfig()
+        public override void LoadConfig()
         {
             foreach (var entry in ConfigManager.ConfigElements)
             {
@@ -36,7 +36,7 @@ namespace UnityExplorer.Loader.ML
             }
         }
 
-        public void RegisterConfigElement<T>(ConfigElement<T> config)
+        public override void RegisterConfigElement<T>(ConfigElement<T> config)
         {
             var entry = prefCategory.CreateEntry(config.Name, config.Value, null, config.IsInternal) as MelonPreferences_Entry<T>;
             
@@ -49,17 +49,16 @@ namespace UnityExplorer.Loader.ML
             };
         }
 
-        public void SetConfigValue<T>(ConfigElement<T> config, T value)
+        public override void SetConfigValue<T>(ConfigElement<T> config, T value)
         {
             if (prefCategory.GetEntry<T>(config.Name) is MelonPreferences_Entry<T> entry)
             { 
                 entry.Value = value;
                 entry.Save();
-                MelonPreferences.Save();
             }
         }
 
-        public T GetConfigValue<T>(ConfigElement<T> config)
+        public override T GetConfigValue<T>(ConfigElement<T> config)
         {
             if (prefCategory.GetEntry<T>(config.Name) is MelonPreferences_Entry<T> entry)
                 return entry.Value;
@@ -67,9 +66,9 @@ namespace UnityExplorer.Loader.ML
             return default;
         }
 
-        public void SaveConfig()
+        public override void SaveConfig()
         {
-            // Not necessary
+            MelonPreferences.Save();
         }
 
         public static KeyCode KeycodeReader(TomlObject value)

@@ -12,15 +12,17 @@ namespace UnityExplorer.Core.Config
 {
     public static class ConfigManager
     {
-        // Each Loader has its own ConfigHandler.
+        // Each Mod Loader has its own ConfigHandler.
         // See the UnityExplorer.Loader namespace for the implementations.
-        public static IConfigHandler Handler { get; private set; }
+        public static ConfigHandler Handler { get; private set; }
 
         public static ConfigElement<KeyCode> Main_Menu_Toggle;
+        public static ConfigElement<bool>    Force_Unlock_Mouse;
         public static ConfigElement<int>     Default_Page_Limit;
         public static ConfigElement<string>  Default_Output_Path;
         public static ConfigElement<bool>    Log_Unity_Debug;
         public static ConfigElement<bool>    Hide_On_Startup;
+
         public static ConfigElement<string>  Last_Window_Anchors;
         public static ConfigElement<int>     Last_Active_Tab;
         public static ConfigElement<bool>    Last_DebugConsole_State;
@@ -28,7 +30,7 @@ namespace UnityExplorer.Core.Config
 
         internal static readonly Dictionary<string, IConfigElement> ConfigElements = new Dictionary<string, IConfigElement>();
 
-        public static void Init(IConfigHandler configHandler)
+        public static void Init(ConfigHandler configHandler)
         {
             Handler = configHandler;
             Handler.Init();
@@ -54,6 +56,11 @@ namespace UnityExplorer.Core.Config
             Main_Menu_Toggle = new ConfigElement<KeyCode>("Main Menu Toggle",
                 "The UnityEngine.KeyCode to toggle the UnityExplorer Menu.",
                 KeyCode.F7,
+                false);
+
+            Force_Unlock_Mouse = new ConfigElement<bool>("Force Unlock Mouse",
+                "Force the Cursor to be unlocked (visible) when the UnityExplorer menu is open.",
+                true,
                 false);
 
             Default_Page_Limit = new ConfigElement<int>("Default Page Limit",
@@ -102,25 +109,25 @@ namespace UnityExplorer.Core.Config
         private static void PanelDragger_OnFinishResize(RectTransform rect)
         {
             Last_Window_Anchors.Value = RectAnchorsToString(rect);
-            Handler.SaveConfig();
+            Handler.OnAnyConfigChanged();
         }
 
         private static void MainMenu_OnActiveTabChanged(int page)
         {
             Last_Active_Tab.Value = page;
-            Handler.SaveConfig();
+            Handler.OnAnyConfigChanged();
         }
 
         private static void DebugConsole_OnToggleShow(bool showing)
         {
             Last_DebugConsole_State.Value = showing;
-            Handler.SaveConfig();
+            Handler.OnAnyConfigChanged();
         }
 
         private static void SceneExplorer_OnToggleShow(bool showing)
         {
             Last_SceneExplorer_State.Value = showing;
-            Handler.SaveConfig();
+            Handler.OnAnyConfigChanged();
         }
 
         // Window Anchors helpers

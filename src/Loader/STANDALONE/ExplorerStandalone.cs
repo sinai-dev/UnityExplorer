@@ -48,8 +48,8 @@ namespace UnityExplorer
         public Harmony HarmonyInstance => s_harmony;
         public static readonly Harmony s_harmony = new Harmony(ExplorerCore.GUID);
 
-        public IConfigHandler ConfigHandler => _configHandler;
-        private IConfigHandler _configHandler;
+        public ConfigHandler ConfigHandler => _configHandler;
+        private StandaloneConfigHandler _configHandler;
 
         public string ExplorerFolder
         {

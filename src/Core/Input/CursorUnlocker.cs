@@ -17,20 +17,18 @@ namespace UnityExplorer.Core.Input
 {
     public class CursorUnlocker
     {
-        //public static bool Unlock
-        //{
-        //    get => m_forceUnlock;
-        //    set => SetForceUnlock(value);
-        //}
-        //private static bool m_forceUnlock;
+        public static bool Unlock
+        {
+            get => m_forceUnlock;
+            set
+            {
+                m_forceUnlock = value;
+                UpdateCursorControl();
+            }
+        }
+        private static bool m_forceUnlock;
 
-        //private static void SetForceUnlock(bool unlock)
-        //{
-        //    m_forceUnlock = unlock;
-        //    UpdateCursorControl();
-        //}
-
-        //public static bool ShouldForceMouse => UIManager.ShowMenu && Unlock;
+        public static bool ShouldActuallyUnlock => UIManager.ShowMenu && Unlock;
 
         private static CursorLockMode m_lastLockMode;
         private static bool m_lastVisibleState;
@@ -48,7 +46,8 @@ namespace UnityExplorer.Core.Input
 
             UpdateCursorControl();
 
-            //Unlock = true;
+            Unlock = true;
+            ConfigManager.Force_Unlock_Mouse.OnValueChanged += (bool val) => { Unlock = val; };
         }
 
         private static void SetupPatches()
@@ -122,7 +121,7 @@ namespace UnityExplorer.Core.Input
             try
             {
                 m_currentlySettingCursor = true;
-                if (UIManager.ShowMenu)
+                if (ShouldActuallyUnlock)
                 {
                     Cursor.lockState = CursorLockMode.None;
                     Cursor.visible = true;
@@ -196,10 +195,8 @@ namespace UnityExplorer.Core.Input
                 m_lastEventSystem = value;
                 m_lastInputModule = value?.currentInputModule;
 
-                if (UIManager.ShowMenu)
-                {
+                if (ShouldActuallyUnlock)
                     value = UIManager.EventSys;
-                }
             }
         }
 
@@ -214,10 +211,8 @@ namespace UnityExplorer.Core.Input
             {
                 m_lastLockMode = value;
 
-                if (UIManager.ShowMenu)
-                {
+                if (ShouldActuallyUnlock)
                     value = CursorLockMode.None;
-                }
             }
         }
 
@@ -228,10 +223,8 @@ namespace UnityExplorer.Core.Input
             {
                 m_lastVisibleState = value;
 
-                if (UIManager.ShowMenu)
-                {
+                if (ShouldActuallyUnlock)
                     value = true;
-                }
             }
         }
     }

@@ -11,7 +11,7 @@ namespace UnityExplorer
         string ExplorerFolder { get; }
 
         string ConfigFolder { get; }
-        IConfigHandler ConfigHandler { get; }
+        ConfigHandler ConfigHandler { get; }
 
         Action<object> OnLogMessage { get; }
         Action<object> OnLogWarning { get; }

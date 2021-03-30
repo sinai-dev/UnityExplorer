@@ -49,7 +49,7 @@ namespace UnityExplorer.UI.CacheObject
         public override void SetValue()
         {
             RefConfig.BoxedValue = IValue.Value;
-            ConfigManager.Handler.SaveConfig();
+            ConfigManager.Handler.OnAnyConfigChanged();
         }
 
         internal GameObject m_leftGroup;
@@ -59,7 +59,9 @@ namespace UnityExplorer.UI.CacheObject
         {
             base.ConstructUI();
 
-            var horiGroup = UIFactory.CreateHorizontalGroup(m_mainContent, "ConfigEntryHolder", true, false, true, true, 5, new Vector4(2,2,2,2));
+            var vertGroup = UIFactory.CreateVerticalGroup(m_mainContent, "ConfigHolder", true, false, true, true, 5, new Vector4(2, 2, 2, 2));
+
+            var horiGroup = UIFactory.CreateHorizontalGroup(vertGroup, "ConfigEntryHolder", true, false, true, true);
             UIFactory.SetLayoutElement(horiGroup, minHeight: 30, flexibleHeight: 0);
 
             // left group
@@ -89,6 +91,12 @@ namespace UnityExplorer.UI.CacheObject
                 IValue.m_mainContentParent = m_rightGroup;
                 IValue.m_subContentParent = this.m_subContent;
             }
+
+            // Config description label
+
+            UIFactory.CreateLabel(vertGroup, "Description", $"<i>{RefConfig.Description}</i>", TextAnchor.MiddleLeft, Color.grey);
+
+            m_subContent.transform.SetAsLastSibling();
         }
     }
 }

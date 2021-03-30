@@ -10,36 +10,36 @@ using UnityEngine;
 
 namespace UnityExplorer.Loader.STANDALONE
 {
-    public class StandaloneConfigHandler : IConfigHandler
+    public class StandaloneConfigHandler : ConfigHandler
     {
         internal static IniDataParser _parser;
         internal static string INI_PATH;
 
-        public void Init()
+        public override void Init()
         {
             INI_PATH = Path.Combine(ExplorerCore.Loader.ConfigFolder, "config.ini");
             _parser = new IniDataParser();
             _parser.Configuration.CommentString = "#";
         }
 
-        public void LoadConfig()
+        public override void LoadConfig()
         {
             if (!TryLoadConfig())
                 SaveConfig();
         }
 
-        public void RegisterConfigElement<T>(ConfigElement<T> element)
+        public override void RegisterConfigElement<T>(ConfigElement<T> element)
         {
             // Not necessary
         }
 
-        public void SetConfigValue<T>(ConfigElement<T> element, T value)
+        public override void SetConfigValue<T>(ConfigElement<T> element, T value)
         {
             // Not necessary, just save.
             SaveConfig();
         }
 
-        public T GetConfigValue<T>(ConfigElement<T> element)
+        public override T GetConfigValue<T>(ConfigElement<T> element)
         {
             // Not necessary, just return the value.
             return element.Value;
@@ -82,7 +82,12 @@ namespace UnityExplorer.Loader.STANDALONE
                 return value;
         }
 
-        public void SaveConfig()
+        public override void OnAnyConfigChanged()
+        {
+            SaveConfig();
+        }
+
+        public override void SaveConfig()
         {
             var data = new IniParser.Model.IniData();
 

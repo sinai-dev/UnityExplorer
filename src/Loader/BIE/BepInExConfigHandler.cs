@@ -8,18 +8,18 @@ using UnityExplorer.Core.Config;
 
 namespace UnityExplorer.Loader.BIE
 {
-    public class BepInExConfigHandler : IConfigHandler
+    public class BepInExConfigHandler : ConfigHandler
     {
         private ConfigFile Config => ExplorerBepInPlugin.Instance.Config;
 
         private const string CTG_NAME = "UnityExplorer";
 
-        public void Init()
+        public override void Init()
         {
             // Not necessary
         }
 
-        public void RegisterConfigElement<T>(ConfigElement<T> config)
+        public override void RegisterConfigElement<T>(ConfigElement<T> config)
         {
             var entry = Config.Bind(CTG_NAME, config.Name, config.Value, config.Description);
 
@@ -29,7 +29,7 @@ namespace UnityExplorer.Loader.BIE
             };
         }
 
-        public T GetConfigValue<T>(ConfigElement<T> element)
+        public override T GetConfigValue<T>(ConfigElement<T> element)
         {
             if (Config.TryGetEntry(CTG_NAME, element.Name, out ConfigEntry<T> configEntry))
                 return configEntry.Value;
@@ -37,7 +37,7 @@ namespace UnityExplorer.Loader.BIE
                 throw new Exception("Could not get config entry '" + element.Name + "'");
         }
 
-        public void SetConfigValue<T>(ConfigElement<T> element, T value)
+        public override void SetConfigValue<T>(ConfigElement<T> element, T value)
         {
             if (Config.TryGetEntry(CTG_NAME, element.Name, out ConfigEntry<T> configEntry))
                 configEntry.Value = value;
@@ -45,7 +45,7 @@ namespace UnityExplorer.Loader.BIE
                 ExplorerCore.Log("Could not get config entry '" + element.Name + "'");
         }
 
-        public void LoadConfig()
+        public override void LoadConfig()
         {
             foreach (var entry in ConfigManager.ConfigElements)
             {
@@ -59,7 +59,7 @@ namespace UnityExplorer.Loader.BIE
             }
         }
 
-        public void SaveConfig()
+        public override void SaveConfig()
         {
             // not required
         }
