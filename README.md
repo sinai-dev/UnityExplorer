@@ -96,7 +96,12 @@ These logs are also visible in the Debug Console part of the UI.
 
 ### Settings
 
-You can change the settings via the "Options" page of the main menu, or directly from the config file (generated after first launch). The config file will be found either inside a "UnityExplorer" folder in the same directory as where you put the DLL file, or for BepInEx it will be at `BepInEx\config\UnityExplorer\`.
+You can change the settings via the "Options" page of the main menu, or directly from the config file.
+
+Depending on the release you are using, the config file will be found at:
+* BepInEx: `BepInEx\config\com.sinai.unityexplorer.cfg`
+* MelonLoader: `UserData\MelonPreferences.cfg`
+* Standalone `{DLL_location}\UnityExplorer\config.ini`
 
 `Main Menu Toggle` (KeyCode)
 * Default: `F7`
@@ -125,14 +130,12 @@ You can change the settings via the "Options" page of the main menu, or directly
 
 ## Building
 
-If you'd like to build this yourself, all you need to do is download this repository and build from Visual Studio. 
+Building the project should be straight-forward, the references are all inside the `lib\` folder.
 
-1. Open the `src\UnityExplorer.sln` project.
+1. Open the `src\UnityExplorer.sln` project in Visual Studio.
 2. Select `Solution 'UnityExplorer' (1 of 1 project)` in the Solution Explorer panel, and set the <b>Active config</b> property to the version you want to build, then build it. Alternatively, use "Batch Build" and select all releases.
 3. The DLLs are built to the `Release\` folder in the root of the repository.
 4. If ILRepack complains about an error, just change the Active config to a different release and then back again. This sometimes happens for the first time you build the project.
-
-The references are all inside the `lib\` folder, if you need to change them for some reason then you can replace them there.
 
 ## Acknowledgments
 
