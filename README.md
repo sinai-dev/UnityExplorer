@@ -5,24 +5,15 @@
 <p align="center">
   An in-game explorer and a suite of debugging tools for <a href="https://docs.unity3d.com/Manual/IL2CPP.html">IL2CPP</a> and <b>Mono</b> Unity games, to aid with modding development.
 </p>
-<p align="center">
-  <a href="../../releases/latest">
-    <img src="https://img.shields.io/github/release/sinai-dev/Explorer.svg" />
-  </a>
- 
-  <img src="https://img.shields.io/github/downloads/sinai-dev/Explorer/total.svg" />
-</p>
 
-## Releases
+## Releases [![](https://img.shields.io/github/release/sinai-dev/Explorer.svg)](../../releases/latest) [![](https://img.shields.io/github/downloads/sinai-dev/Explorer/total.svg)]() [![](https://img.shields.io/github/downloads/sinai-dev/Explorer/latest/total.svg)]()
 
 | Mod Loader  | IL2CPP | Mono |
 | ----------- | ------ | ---- |
-| [BepInEx](https://github.com/BepInEx/BepInEx) 6.X | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx.Il2Cpp.zip) | ❔* [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx6.Mono.zip) |
-| [BepInEx](https://github.com/BepInEx/BepInEx) 5.X | ❌ n/a | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx5.Mono.zip) |
+| [BepInEx](https://github.com/BepInEx/BepInEx) 6.X | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx.Il2Cpp.zip) | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx6.Mono.zip) |
+| [BepInEx](https://github.com/BepInEx/BepInEx) 5.X | ✖️ n/a | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx5.Mono.zip) |
 | [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) 0.3 | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.MelonLoader.Il2Cpp.zip) | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.MelonLoader.Mono.zip) | 
 | Standalone | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.Standalone.Il2Cpp.zip) | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.Standalone.Mono.zip) | 
-
-\* BepInEx 6.X Mono release may not work on all games yet.
 
 ## How to install
 
@@ -139,10 +130,10 @@ Building the project should be straight-forward, the references are all inside t
 
 ## Acknowledgments
 
-* [ManlyMarco](https://github.com/ManlyMarco) for [Runtime Unity Editor](https://github.com/ManlyMarco/RuntimeUnityEditor) (GPL), snippets from the REPL Console were used for UnityExplorer's C# Console.
-* [denikson](https://github.com/denikson) (aka Horse) for [mcs-unity](https://github.com/denikson/mcs-unity) (MIT), used as the `Mono.CSharp` reference for the C# Console.
-* [HerpDerpenstine](https://github.com/HerpDerpinstine) for [MelonCoroutines](https://github.com/LavaGang/MelonLoader/blob/master/MelonLoader.Support.Il2Cpp/MelonCoroutines.cs) (Apache), they were included for standalone Il2CPP coroutine support.
-* [InGameCodeEditor](https://assetstore.unity.com/packages/tools/gui/ingame-code-editor-144254) (Apache) was used as the base for the syntax highlighting for UnityExplorer's C# console (`UnityExplorer.UI.Main.CSConsole.Lexer`).
+* [ManlyMarco](https://github.com/ManlyMarco) for [Runtime Unity Editor](https://github.com/ManlyMarco/RuntimeUnityEditor), snippets from the REPL Console were used for UnityExplorer's C# Console.
+* [denikson](https://github.com/denikson) (aka Horse) for [mcs-unity](https://github.com/denikson/mcs-unity), used as the `Mono.CSharp` reference for the C# Console.
+* [HerpDerpenstine](https://github.com/HerpDerpinstine) for [MelonCoroutines](https://github.com/LavaGang/MelonLoader/blob/master/MelonLoader.Support.Il2Cpp/MelonCoroutines.cs), they were included for standalone IL2CPP coroutine support.
+* [InGameCodeEditor](https://assetstore.unity.com/packages/tools/gui/ingame-code-editor-144254) was used as the base for the syntax highlighting for UnityExplorer's C# console (`UnityExplorer.UI.Main.CSConsole.Lexer`).
 
 ### Disclaimer
 
