@@ -321,7 +321,7 @@ namespace UnityExplorer.UI.Main.Home.Inspectors.GameObjects
             var layerLabel = UIFactory.CreateLabel(sceneLayerRow, "LayerLabel", "Layer:", TextAnchor.MiddleCenter, Color.grey, true, 14);
             UIFactory.SetLayoutElement(layerLabel.gameObject, minWidth: 55, flexibleWidth: 0);
 
-            var layerDropdownObj = UIFactory.CreateDropdown(sceneLayerRow, out m_layerDropdown, "<notset>", 14, OnLayerSelected);
+            var layerDropdownObj = UIFactory.CreateDropdown(sceneLayerRow, out m_layerDropdown, "", 14, OnLayerSelected);
             m_layerDropdown.options.Clear();
             for (int i = 0; i < 32; i++)
             {
@@ -335,7 +335,7 @@ namespace UnityExplorer.UI.Main.Home.Inspectors.GameObjects
             var sceneLabel = UIFactory.CreateLabel(sceneLayerRow, "SceneLabel", "Scene:", TextAnchor.MiddleCenter, Color.grey, true, 14);
             UIFactory.SetLayoutElement(sceneLabel.gameObject, minWidth: 55, flexibleWidth: 0);
 
-            m_sceneText = UIFactory.CreateLabel(sceneLayerRow, "SceneText", "<notset>", TextAnchor.MiddleLeft);
+            m_sceneText = UIFactory.CreateLabel(sceneLayerRow, "SceneText", "", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(m_sceneText.gameObject, minWidth: 120, flexibleWidth: 2000);
         }
 

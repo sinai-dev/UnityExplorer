@@ -35,14 +35,14 @@ namespace UnityExplorer.UI.Main.Options
         {
             GameObject parent = MainMenu.Instance.PageViewport;
 
-            Content = UIFactory.CreateVerticalGroup(parent, "OptionsPage", true, true, true, true, 5, new Vector4(4,4,4,4),
+            Content = UIFactory.CreateVerticalGroup(parent, "OptionsPage", false, true, true, true, 5, new Vector4(4,4,4,4),
                 new Color(0.15f, 0.15f, 0.15f));
             UIFactory.SetLayoutElement(Content, minHeight: 340, flexibleHeight: 9999);
 
             // ~~~~~ Title ~~~~~
 
             var titleLabel = UIFactory.CreateLabel(Content, "Title", "Options", TextAnchor.UpperLeft, default, true, 25);
-            UIFactory.SetLayoutElement(titleLabel.gameObject, minHeight: 30, flexibleHeight: 0);
+            UIFactory.SetLayoutElement(titleLabel.gameObject, minHeight: 30, flexibleHeight: 0, flexibleWidth: 9999);
 
             // Save button
 
@@ -51,7 +51,7 @@ namespace UnityExplorer.UI.Main.Options
                 "Save Config File", 
                 () => { ConfigManager.Handler.SaveConfig(); },
                 new Color(0.25f, 0.6f, 0.25f));
-            UIFactory.SetLayoutElement(btn.gameObject, flexibleWidth: 9999, minHeight: 30, flexibleHeight: 0);
+            UIFactory.SetLayoutElement(btn.gameObject, minWidth: 200, flexibleWidth: 0, minHeight: 30, flexibleHeight: 0);
 
             // ~~~~~ Actual options ~~~~~
 

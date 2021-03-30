@@ -380,7 +380,7 @@ namespace UnityExplorer.UI.Main.Home.Inspectors.GameObjects
             UIFactory.SetLayoutElement(valueTitle.gameObject, minHeight: 25, flexibleHeight: 0, minWidth: 25, flexibleWidth: 0);
 
             // actual value label
-            var valueLabel = UIFactory.CreateLabel(rowObject, "ValueLabel", "<notset>", TextAnchor.MiddleLeft);
+            var valueLabel = UIFactory.CreateLabel(rowObject, "ValueLabel", "", TextAnchor.MiddleLeft);
             editor.values[(int)vectorValue] = valueLabel;
             UIFactory.SetLayoutElement(valueLabel.gameObject, minWidth: 85, flexibleWidth: 0, minHeight: 25);
 

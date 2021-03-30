@@ -18,6 +18,7 @@ namespace UnityExplorer.UI.Main
         public RectTransform Panel { get; set; }
 
         public static event Action<RectTransform> OnFinishResize;
+        public static event Action<RectTransform> OnFinishDrag;
 
         public PanelDragger(RectTransform dragArea, RectTransform panelToDrag)
         {
@@ -115,6 +116,7 @@ namespace UnityExplorer.UI.Main
             Vector3 diff = InputManager.MousePosition - m_lastDragPosition;
             m_lastDragPosition = InputManager.MousePosition;
 
+            // update position while preserving the z value
             Vector3 pos = Panel.localPosition;
             float z = pos.z;
             pos += diff;
@@ -125,7 +127,8 @@ namespace UnityExplorer.UI.Main
         public void OnEndDrag()
         {
             WasDragging = false;
-            //UpdateResizeCache();
+
+            OnFinishDrag?.Invoke(Panel);
         }
 
         #endregion

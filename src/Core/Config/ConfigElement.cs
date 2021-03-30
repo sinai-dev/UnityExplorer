@@ -16,6 +16,8 @@ namespace UnityExplorer.Core.Config
         public Action<T> OnValueChanged;
         public Action OnValueChangedNotify { get; set; }
 
+        public object DefaultValue { get; }
+
         public T Value
         {
             get => m_value;
@@ -29,12 +31,13 @@ namespace UnityExplorer.Core.Config
             set => SetValue((T)value);
         }
 
-        public ConfigElement(string name, string description, T defaultValue, bool isInternal)
+        public ConfigElement(string name, string description, T defaultValue, bool isInternal = false)
         {
             Name = name;
             Description = description;
 
             m_value = defaultValue;
+            DefaultValue = defaultValue;
 
             IsInternal = isInternal;
 
@@ -52,6 +55,8 @@ namespace UnityExplorer.Core.Config
 
             OnValueChanged?.Invoke(value);
             OnValueChangedNotify?.Invoke();
+
+            ConfigManager.Handler.OnAnyConfigChanged();
         }
 
         object IConfigElement.GetLoaderConfigValue() => GetLoaderConfigValue();
@@ -59,6 +64,11 @@ namespace UnityExplorer.Core.Config
         public T GetLoaderConfigValue()
         {
             return ConfigManager.Handler.GetConfigValue(this);
+        }
+
+        public void RevertToDefaultValue()
+        {
+            Value = (T)DefaultValue;
         }
     }
 }

@@ -24,6 +24,7 @@ namespace UnityExplorer.Core.Config
         public static ConfigElement<bool>    Hide_On_Startup;
 
         public static ConfigElement<string>  Last_Window_Anchors;
+        public static ConfigElement<string>  Last_Window_Position;
         public static ConfigElement<int>     Last_Active_Tab;
         public static ConfigElement<bool>    Last_DebugConsole_State;
         public static ConfigElement<bool>    Last_SceneExplorer_State;
@@ -41,6 +42,7 @@ namespace UnityExplorer.Core.Config
 
             SceneExplorer.OnToggleShow += SceneExplorer_OnToggleShow;
             PanelDragger.OnFinishResize += PanelDragger_OnFinishResize;
+            PanelDragger.OnFinishDrag += PanelDragger_OnFinishDrag;
             MainMenu.OnActiveTabChanged += MainMenu_OnActiveTabChanged;
             DebugConsole.OnToggleShow += DebugConsole_OnToggleShow;
         }
@@ -55,37 +57,38 @@ namespace UnityExplorer.Core.Config
         {
             Main_Menu_Toggle = new ConfigElement<KeyCode>("Main Menu Toggle",
                 "The UnityEngine.KeyCode to toggle the UnityExplorer Menu.",
-                KeyCode.F7,
-                false);
+                KeyCode.F7);
 
-            Force_Unlock_Mouse = new ConfigElement<bool>("Force Unlock Mouse",
-                "Force the Cursor to be unlocked (visible) when the UnityExplorer menu is open.",
-                true,
-                false);
-
-            Default_Page_Limit = new ConfigElement<int>("Default Page Limit",
-                "The default maximum number of elements per 'page' in UnityExplorer.",
-                25,
-                false);
-
-            Default_Output_Path = new ConfigElement<string>("Default Output Path",
-                "The default output path when exporting things from UnityExplorer.",
-                Path.Combine(ExplorerCore.Loader.ExplorerFolder, "Output"),
+            Hide_On_Startup = new ConfigElement<bool>("Hide On Startup",
+                "Should UnityExplorer be hidden on startup?",
                 false);
 
             Log_Unity_Debug = new ConfigElement<bool>("Log Unity Debug",
                 "Should UnityEngine.Debug.Log messages be printed to UnityExplorer's log?",
-                false,
                 false);
 
-            Hide_On_Startup = new ConfigElement<bool>("Hide On Startup",
-                "Should UnityExplorer be hidden on startup?",
-                false,
-                false);
+            Force_Unlock_Mouse = new ConfigElement<bool>("Force Unlock Mouse",
+                "Force the Cursor to be unlocked (visible) when the UnityExplorer menu is open.",
+                true);
+
+            Default_Page_Limit = new ConfigElement<int>("Default Page Limit",
+                "The default maximum number of elements per 'page' in UnityExplorer.",
+                25);
+
+            Default_Output_Path = new ConfigElement<string>("Default Output Path",
+                "The default output path when exporting things from UnityExplorer.",
+                Path.Combine(ExplorerCore.Loader.ExplorerFolder, "Output"));
+
+            // Internal configs
 
             Last_Window_Anchors = new ConfigElement<string>("Last_Window_Anchors",
                 "For internal use, the last anchors of the UnityExplorer window.",
                 DEFAULT_WINDOW_ANCHORS,
+                true);
+
+            Last_Window_Position = new ConfigElement<string>("Last_Window_Position",
+                "For internal use, the last position of the UnityExplorer window.",
+                DEFAULT_WINDOW_POSITION,
                 true);
 
             Last_Active_Tab = new ConfigElement<int>("Last_Active_Tab",
@@ -108,31 +111,33 @@ namespace UnityExplorer.Core.Config
 
         private static void PanelDragger_OnFinishResize(RectTransform rect)
         {
-            Last_Window_Anchors.Value = RectAnchorsToString(rect);
-            Handler.OnAnyConfigChanged();
+            Last_Window_Anchors.Value = rect.RectAnchorsToString();
+        }
+
+        private static void PanelDragger_OnFinishDrag(RectTransform rect)
+        {
+            Last_Window_Position.Value = rect.RectPositionToString();
         }
 
         private static void MainMenu_OnActiveTabChanged(int page)
         {
             Last_Active_Tab.Value = page;
-            Handler.OnAnyConfigChanged();
         }
 
         private static void DebugConsole_OnToggleShow(bool showing)
         {
             Last_DebugConsole_State.Value = showing;
-            Handler.OnAnyConfigChanged();
         }
 
         private static void SceneExplorer_OnToggleShow(bool showing)
         {
             Last_SceneExplorer_State.Value = showing;
-            Handler.OnAnyConfigChanged();
         }
 
         // Window Anchors helpers
 
         private const string DEFAULT_WINDOW_ANCHORS = "0.25,0.10,0.78,0.95";
+        private const string DEFAULT_WINDOW_POSITION = "0,0";
 
         internal static CultureInfo _enCulture = new CultureInfo("en-US");
 
@@ -176,6 +181,34 @@ namespace UnityExplorer.Core.Config
 
             panel.anchorMin = new Vector2(anchors.x, anchors.y);
             panel.anchorMax = new Vector2(anchors.z, anchors.w);
+        }
+
+        internal static string RectPositionToString(this RectTransform rect)
+        {
+            return string.Format(_enCulture, "{0},{1}", new object[]
+            {
+                rect.localPosition.x, rect.localPosition.y
+            });
+        }
+
+        internal static void SetPositionFromString(this RectTransform rect, string stringPosition)
+        {
+            try
+            {
+                var split = stringPosition.Split(',');
+
+                if (split.Length != 2)
+                    throw new Exception();
+
+                Vector3 vector = rect.localPosition;
+                vector.x = float.Parse(split[0], _enCulture);
+                vector.y = float.Parse(split[1], _enCulture);
+                rect.localPosition = vector;
+            }
+            catch //(Exception ex)
+            {
+                //ExplorerCore.LogWarning("Exception setting window position: " + ex);
+            }
         }
     }
 }

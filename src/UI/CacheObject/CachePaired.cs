@@ -50,8 +50,12 @@ namespace UnityExplorer.UI.CacheObject
         {
             base.ConstructUI();
 
+            Color bgColor = this.PairType == PairTypes.Key
+                            ? new Color(0.07f, 0.07f, 0.07f)
+                            : new Color(0.1f, 0.1f, 0.1f);
+
             var rowObj = UIFactory.CreateHorizontalGroup(m_mainContent, "PairedGroup", false, false, true, true, 0, new Vector4(0,0,5,2),
-                new Color(1, 1, 1, 0));
+                bgColor);
             
             var indexLabel = UIFactory.CreateLabel(rowObj, "IndexLabel", $"{this.PairType} {this.Index}:", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(indexLabel.gameObject, minWidth: 80, flexibleWidth: 30, minHeight: 25);

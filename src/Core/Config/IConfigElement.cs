@@ -11,8 +11,11 @@ namespace UnityExplorer.Core.Config
         Type ElementType { get; }
 
         object BoxedValue { get; set; }
+        object DefaultValue { get; }
 
         object GetLoaderConfigValue();
+
+        void RevertToDefaultValue();
 
         Action OnValueChangedNotify { get; set; }
     }

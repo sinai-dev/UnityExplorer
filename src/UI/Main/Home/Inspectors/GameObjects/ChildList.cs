@@ -174,7 +174,7 @@ namespace UnityExplorer.UI.Main.Home.Inspectors.GameObjects
 
             var mainBtn = UIFactory.CreateButton(btnGroupObj, 
                 "MainButton",
-                "<notset>", 
+                "", 
                 () => { OnChildListObjectClicked(thisIndex); },
                 mainColors);
 

@@ -448,7 +448,7 @@ namespace UnityExplorer.UI.Main.Search
 
             var mainButton = UIFactory.CreateButton(btnGroupObj, 
                 "ResultButton",
-                "<not set>", 
+                "", 
                 () => { OnResultClicked(thisIndex); },
                 mainColors);
 

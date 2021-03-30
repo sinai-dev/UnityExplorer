@@ -115,7 +115,7 @@ namespace UnityExplorer.UI.InteractiveValues
 
             m_labelLayout = m_baseLabel.gameObject.GetComponent<LayoutElement>();
 
-            m_readonlyInput = UIFactory.CreateLabel(m_valueContent, "ReadonlyLabel", "<notset>", TextAnchor.MiddleLeft);
+            m_readonlyInput = UIFactory.CreateLabel(m_valueContent, "ReadonlyLabel", "", TextAnchor.MiddleLeft);
             m_readonlyInput.horizontalOverflow = HorizontalWrapMode.Overflow;
 
             var testFitter = m_readonlyInput.gameObject.AddComponent<ContentSizeFitter>();
@@ -128,7 +128,7 @@ namespace UnityExplorer.UI.InteractiveValues
         {
             base.ConstructSubcontent();
 
-            var groupObj = UIFactory.CreateVerticalGroup(m_subContentParent, "SubContent", true, false, true, true, 4, new Vector4(3,3,3,3),
+            var groupObj = UIFactory.CreateVerticalGroup(m_subContentParent, "SubContent", false, false, true, true, 4, new Vector4(3,3,3,3),
                 new Color(1, 1, 1, 0));
 
             m_hiddenObj = UIFactory.CreateLabel(groupObj, "HiddenLabel", "", TextAnchor.MiddleLeft).gameObject;

@@ -338,7 +338,7 @@ namespace UnityExplorer.UI.InteractiveValues
 
             // value label
 
-            m_baseLabel = UIFactory.CreateLabel(m_valueContent, "ValueLabel", "<not set>", TextAnchor.MiddleLeft);
+            m_baseLabel = UIFactory.CreateLabel(m_valueContent, "ValueLabel", "", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(m_baseLabel.gameObject, flexibleWidth: 9000, minHeight: 25);
 
             m_subContentParent = subGroup;

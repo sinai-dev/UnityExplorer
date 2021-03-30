@@ -157,7 +157,7 @@ namespace UnityExplorer.UI
         /// <summary>
         /// Create a Panel on the UI Canvas.
         /// </summary>
-        public static GameObject CreatePanel(string name, out GameObject contentHolder, string anchors = null)
+        public static GameObject CreatePanel(string name, out GameObject contentHolder, string anchors = null, string position = null)
         {
             var panelObj = CreateUIObject(name, UIManager.CanvasRoot);
             var rect = panelObj.GetComponent<RectTransform>();
@@ -168,6 +168,9 @@ namespace UnityExplorer.UI
 
             if (anchors != null)
                 rect.SetAnchorsFromString(anchors);
+
+            if (position != null)
+                rect.SetPositionFromString(position);
 
             var maskImg = panelObj.AddComponent<Image>();
             maskImg.color = Color.white;

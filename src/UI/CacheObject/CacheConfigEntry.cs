@@ -35,7 +35,7 @@ namespace UnityExplorer.UI.CacheObject
         {
             IValue = InteractiveValue.Create(value, fallbackType);
             IValue.Owner = this;
-            IValue.m_mainContentParent = m_rightGroup;
+            IValue.m_mainContentParent = m_mainGroup;
             IValue.m_subContentParent = this.m_subContent;
         }
 
@@ -52,26 +52,28 @@ namespace UnityExplorer.UI.CacheObject
             ConfigManager.Handler.OnAnyConfigChanged();
         }
 
-        internal GameObject m_leftGroup;
-        internal GameObject m_rightGroup;
+        internal GameObject m_mainGroup;
+        //internal GameObject m_leftGroup;
+        //internal GameObject m_rightGroup;
+        //internal GameObject m_secondRow;
 
         internal override void ConstructUI()
         {
             base.ConstructUI();
 
-            var vertGroup = UIFactory.CreateVerticalGroup(m_mainContent, "ConfigHolder", true, false, true, true, 5, new Vector4(2, 2, 2, 2));
+            m_mainGroup = UIFactory.CreateVerticalGroup(m_mainContent, "ConfigHolder", true, false, true, true, 5, new Vector4(2, 2, 2, 2));
 
-            var horiGroup = UIFactory.CreateHorizontalGroup(vertGroup, "ConfigEntryHolder", true, false, true, true);
+            var horiGroup = UIFactory.CreateHorizontalGroup(m_mainGroup, "ConfigEntryHolder", false, false, true, true, childAlignment: TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(horiGroup, minHeight: 30, flexibleHeight: 0);
 
-            // left group
+            //// left group
 
-            m_leftGroup = UIFactory.CreateHorizontalGroup(horiGroup, "ConfigTitleGroup", false, false, true, true, 4, default, new Color(1, 1, 1, 0));
-            UIFactory.SetLayoutElement(m_leftGroup, minHeight: 25, flexibleHeight: 0, minWidth: 125, flexibleWidth: 200);
+            //m_leftGroup = UIFactory.CreateHorizontalGroup(horiGroup, "ConfigTitleGroup", false, false, true, true, 4, default, new Color(1, 1, 1, 0));
+            //UIFactory.SetLayoutElement(m_leftGroup, minHeight: 25, flexibleHeight: 0, minWidth: 200, flexibleWidth: 0);
 
             // config entry label
 
-            var configLabel = UIFactory.CreateLabel(m_leftGroup, "ConfigLabel", this.RefConfig.Name, TextAnchor.MiddleLeft);
+            var configLabel = UIFactory.CreateLabel(horiGroup, "ConfigLabel", this.RefConfig.Name, TextAnchor.MiddleLeft);
             var leftRect = configLabel.GetComponent<RectTransform>();
             leftRect.anchorMin = Vector2.zero;
             leftRect.anchorMax = Vector2.one;
@@ -80,23 +82,39 @@ namespace UnityExplorer.UI.CacheObject
             leftRect.sizeDelta = Vector2.zero;
             UIFactory.SetLayoutElement(configLabel.gameObject, minWidth: 250, minHeight: 25, flexibleWidth: 0, flexibleHeight: 0);
 
-            // right group
+            // Default button
 
-            m_rightGroup = UIFactory.CreateVerticalGroup(horiGroup, "ConfigValueGroup", false, false, true, true, 2, new Vector4(4,2,0,0),
-                new Color(1, 1, 1, 0));
-            UIFactory.SetLayoutElement(m_rightGroup, minHeight: 25, minWidth: 150, flexibleHeight: 0, flexibleWidth: 5000);
+            var defaultButton = UIFactory.CreateButton(horiGroup,
+                "RevertDefaultButton",
+                "Default",
+                () => { RefConfig.RevertToDefaultValue(); },
+                new Color(0.3f, 0.3f, 0.3f));
+            UIFactory.SetLayoutElement(defaultButton.gameObject, minWidth: 80, minHeight: 22, flexibleWidth: 0);
+
+            //// right group
+
+            //m_rightGroup = UIFactory.CreateVerticalGroup(horiGroup, "ConfigValueGroup", false, false, true, true, 4, default, new Color(1, 1, 1, 0));
+            //UIFactory.SetLayoutElement(m_rightGroup, minHeight: 25, minWidth: 150, flexibleHeight: 0, flexibleWidth: 5000);
+
+            // Description label
+
+            var desc = UIFactory.CreateLabel(m_mainGroup, "Description", $"<i>{RefConfig.Description}</i>", TextAnchor.MiddleLeft, Color.grey);
+            UIFactory.SetLayoutElement(desc.gameObject, minWidth: 250, minHeight: 20, flexibleWidth: 9999, flexibleHeight: 0);
+
+            //// Second row (IValue)
+
+            //m_secondRow = UIFactory.CreateHorizontalGroup(m_mainGroup, "DescriptionRow", false, false, true, true, 4, new Color(0.08f, 0.08f, 0.08f));
+
+            // IValue
 
             if (IValue != null)
             {
-                IValue.m_mainContentParent = m_rightGroup;
+                IValue.m_mainContentParent = m_mainGroup;
                 IValue.m_subContentParent = this.m_subContent;
             }
 
-            // Config description label
-
-            UIFactory.CreateLabel(vertGroup, "Description", $"<i>{RefConfig.Description}</i>", TextAnchor.MiddleLeft, Color.grey);
-
-            m_subContent.transform.SetAsLastSibling();
+            // makes the subcontent look nicer
+            m_subContent.transform.SetParent(m_mainGroup.transform, false);
         }
     }
 }

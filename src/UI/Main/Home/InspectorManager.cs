@@ -200,15 +200,13 @@ namespace UnityExplorer.UI.Main.Home
             UIFactory.CreateHorizontalGroup(topRowObj, "Toolbar", false, false, true, true, 10, new Vector4(2, 2, 2, 2), new Color(1,1,1,0));
 
             // inspect under mouse button
-            AddMouseInspectButton(topRowObj, InspectUnderMouse.MouseInspectMode.UI);
-            AddMouseInspectButton(topRowObj, InspectUnderMouse.MouseInspectMode.World);
+            AddMouseInspectButton(topRowObj, "UI", InspectUnderMouse.MouseInspectMode.UI);
+            AddMouseInspectButton(topRowObj, "3D", InspectUnderMouse.MouseInspectMode.World);
         }
 
-        private static void AddMouseInspectButton(GameObject topRowObj, InspectUnderMouse.MouseInspectMode mode)
+        private static void AddMouseInspectButton(GameObject topRowObj, string suffix, InspectUnderMouse.MouseInspectMode mode)
         {
-            string lbl = "Mouse Inspect";
-            if (mode == InspectUnderMouse.MouseInspectMode.UI)
-                lbl += " (UI)";
+            string lbl = $"Mouse Inspect ({suffix})";
 
             var inspectObj = UIFactory.CreateButton(topRowObj, 
                 lbl, 
@@ -216,7 +214,7 @@ namespace UnityExplorer.UI.Main.Home
                 () => { InspectUnderMouse.StartInspect(mode); }, 
                 new Color(0.2f, 0.2f, 0.2f));
 
-            UIFactory.SetLayoutElement(inspectObj.gameObject, minWidth: 120, flexibleWidth: 0);
+            UIFactory.SetLayoutElement(inspectObj.gameObject, minWidth: 150, flexibleWidth: 0);
         }
     }
 }

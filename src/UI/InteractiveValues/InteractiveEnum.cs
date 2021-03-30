@@ -146,7 +146,7 @@ namespace UnityExplorer.UI.InteractiveValues
 
                 // dropdown
 
-                var dropdownObj = UIFactory.CreateDropdown(groupObj, out m_dropdown, "<notset>", 14, null);
+                var dropdownObj = UIFactory.CreateDropdown(groupObj, out m_dropdown, "", 14, null);
                 UIFactory.SetLayoutElement(dropdownObj, minWidth: 150, minHeight: 25, flexibleWidth: 120);
 
                 foreach (var kvp in m_values)

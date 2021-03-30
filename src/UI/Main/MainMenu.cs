@@ -151,7 +151,8 @@ namespace UnityExplorer.UI.Main
 
         private void ConstructMenu()
         {
-            MainPanel = UIFactory.CreatePanel("MainMenu", out GameObject content, ConfigManager.Last_Window_Anchors.Value);
+            MainPanel = UIFactory.CreatePanel("MainMenu", out GameObject content,
+                ConfigManager.Last_Window_Anchors.Value, ConfigManager.Last_Window_Position.Value);
 
             ConstructTitleBar(content);
 

@@ -399,7 +399,7 @@ namespace UnityExplorer.UI.Main.Home
             m_titleObj = UIFactory.CreateLabel(leftPane, "SceneExplorerTitle", "Scene Explorer", TextAnchor.UpperLeft, default, true, 20).gameObject;
             UIFactory.SetLayoutElement(m_titleObj, minHeight: 30, flexibleHeight: 0);
 
-            m_sceneDropdownObj = UIFactory.CreateDropdown(leftPane, out m_sceneDropdown, "<notset>", 14, null);
+            m_sceneDropdownObj = UIFactory.CreateDropdown(leftPane, out m_sceneDropdown, "", 14, null);
             UIFactory.SetLayoutElement(m_sceneDropdownObj, minHeight: 40, minWidth: 320, flexibleWidth: 0, flexibleHeight: 0);
 
             m_sceneDropdownText = m_sceneDropdown.transform.Find("Label").GetComponent<Text>();

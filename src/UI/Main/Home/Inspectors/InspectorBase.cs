@@ -94,7 +94,7 @@ namespace UnityExplorer.UI.Main.Home.Inspectors
 
             m_tabButton = UIFactory.CreateButton(tabGroupObj, 
                 "TabButton", 
-                "<notset>",
+                "",
                 () => { InspectorManager.Instance.SetInspectorTab(parent); });
 
             UIFactory.SetLayoutElement(m_tabButton.gameObject, minWidth: 165, flexibleWidth: 0);
