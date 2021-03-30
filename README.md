@@ -6,7 +6,7 @@
   An in-game explorer and a suite of debugging tools for <a href="https://docs.unity3d.com/Manual/IL2CPP.html">IL2CPP</a> and <b>Mono</b> Unity games, to aid with modding development.
 </p>
 
-## Releases [![](https://img.shields.io/github/release/sinai-dev/Explorer.svg)](../../releases/latest) [![](https://img.shields.io/github/downloads/sinai-dev/Explorer/total.svg)]() [![](https://img.shields.io/github/downloads/sinai-dev/Explorer/latest/total.svg)]()
+## Releases [![](https://img.shields.io/github/release/sinai-dev/Explorer.svg?label=release%20notes)](../../releases/latest) [![](https://img.shields.io/github/downloads/sinai-dev/Explorer/total.svg)]() [![](https://img.shields.io/github/downloads/sinai-dev/Explorer/latest/total.svg)]()
 
 | Mod Loader  | IL2CPP | Mono |
 | ----------- | ------ | ---- |
