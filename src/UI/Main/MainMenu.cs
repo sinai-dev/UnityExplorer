@@ -10,6 +10,7 @@ using UnityExplorer.UI.Main.Home;
 using UnityExplorer.UI.Main.Search;
 using UnityExplorer.UI.Main.CSConsole;
 using UnityExplorer.UI.Main.Options;
+using UnityExplorer.Core.Runtime;
 
 namespace UnityExplorer.UI.Main
 {
@@ -135,16 +136,12 @@ namespace UnityExplorer.UI.Main
 
         internal void SetButtonActiveColors(Button button)
         {
-            ColorBlock colors = button.colors;
-            colors.normalColor = m_navButtonSelected;
-            button.colors = colors;
+            button.colors = RuntimeProvider.Instance.SetColorBlock(button.colors, m_navButtonSelected);
         }
 
         internal void SetButtonInactiveColors(Button button)
         {
-            ColorBlock colors = button.colors;
-            colors.normalColor = m_navButtonNormal;
-            button.colors = colors;
+            button.colors = RuntimeProvider.Instance.SetColorBlock(button.colors, m_navButtonNormal);
         }
 
         #region UI Construction
@@ -183,9 +180,8 @@ namespace UnityExplorer.UI.Main
             // Hide button
 
             ColorBlock colorBlock = new ColorBlock();
-            colorBlock.normalColor = new Color(65f / 255f, 23f / 255f, 23f / 255f);
-            colorBlock.pressedColor = new Color(35f / 255f, 10f / 255f, 10f / 255f);
-            colorBlock.highlightedColor = new Color(156f / 255f, 0f, 0f);
+            RuntimeProvider.Instance.SetColorBlock(colorBlock, new Color(65f / 255f, 23f / 255f, 23f / 255f),
+                new Color(35f / 255f, 10f / 255f, 10f / 255f), new Color(156f / 255f, 0f, 0f));
 
             var hideButton = UIFactory.CreateButton(titleBar, 
                 "HideButton", 
@@ -213,9 +209,7 @@ namespace UnityExplorer.UI.Main
             UIFactory.SetLayoutElement(navbarObj, minHeight: 25, flexibleHeight: 0);
 
             ColorBlock colorBlock = new ColorBlock();
-            colorBlock.normalColor = m_navButtonNormal;
-            colorBlock.highlightedColor = m_navButtonHighlight;
-            colorBlock.pressedColor = m_navButtonSelected;
+            colorBlock = RuntimeProvider.Instance.SetColorBlock(colorBlock, m_navButtonNormal, m_navButtonHighlight, m_navButtonSelected);
 
             foreach (var page in Pages)
             {

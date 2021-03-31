@@ -11,7 +11,7 @@ namespace UnityExplorer.Core
 {
     public static class ReflectionUtility
     {
-        public const BF CommonFlags = BF.Public | BF.Instance | BF.NonPublic | BF.Static;
+        public const BF AllFlags = BF.Public | BF.Instance | BF.NonPublic | BF.Static;
 
         /// <summary>
         /// Helper for IL2CPP to get the underlying true Type (Unhollowed) of the object.
@@ -161,6 +161,32 @@ namespace UnityExplorer.Core
             {
                 return Enumerable.Empty<Type>();
             }
+        }
+
+        internal static Dictionary<Type, Dictionary<string, FieldInfo>> s_cachedFieldInfos = new Dictionary<Type, Dictionary<string, FieldInfo>>();
+
+        public static FieldInfo GetFieldInfo(Type type, string fieldName)
+        {
+            if (!s_cachedFieldInfos.ContainsKey(type))
+                s_cachedFieldInfos.Add(type, new Dictionary<string, FieldInfo>());
+
+            if (!s_cachedFieldInfos[type].ContainsKey(fieldName))
+                s_cachedFieldInfos[type].Add(fieldName, type.GetField(fieldName, AllFlags));
+
+            return s_cachedFieldInfos[type][fieldName];
+        }
+
+        internal static Dictionary<Type, Dictionary<string, PropertyInfo>> s_cachedPropInfos = new Dictionary<Type, Dictionary<string, PropertyInfo>>();
+
+        public static PropertyInfo GetPropertyInfo(Type type, string propertyName)
+        {
+            if (!s_cachedPropInfos.ContainsKey(type))
+                s_cachedPropInfos.Add(type, new Dictionary<string, PropertyInfo>());
+
+            if (!s_cachedPropInfos[type].ContainsKey(propertyName))
+                s_cachedPropInfos[type].Add(propertyName, type.GetProperty(propertyName, AllFlags));
+
+            return s_cachedPropInfos[type][propertyName];
         }
 
         /// <summary>

@@ -46,6 +46,8 @@ namespace UnityExplorer.UI.InteractiveValues
                     return typeof(InteractiveEnum);
             }
             // check for unity struct types
+            else if (typeof(Color).IsAssignableFrom(type))
+                return typeof(InteractiveColor);
             else if (InteractiveUnityStruct.SupportsType(type))
                 return typeof(InteractiveUnityStruct);
             // check Transform, force InteractiveValue so they dont become InteractiveEnumerables.
@@ -95,11 +97,11 @@ namespace UnityExplorer.UI.InteractiveValues
 
         public virtual void OnDestroy()
         {
-            if (this.m_valueContent)
+            if (this.m_mainContent)
             {
-                m_valueContent.transform.SetParent(null, false);
-                m_valueContent.SetActive(false); 
-                GameObject.Destroy(this.m_valueContent.gameObject);
+                m_mainContent.transform.SetParent(null, false);
+                m_mainContent.SetActive(false); 
+                GameObject.Destroy(this.m_mainContent.gameObject);
             }
 
             DestroySubContent();
@@ -293,7 +295,7 @@ namespace UnityExplorer.UI.InteractiveValues
         internal GameObject m_mainContentParent;
         internal GameObject m_subContentParent;
 
-        internal GameObject m_valueContent;
+        internal GameObject m_mainContent;
         internal GameObject m_inspectButton;
         internal Text m_baseLabel;
 
@@ -304,24 +306,24 @@ namespace UnityExplorer.UI.InteractiveValues
         {
             m_UIConstructed = true;
 
-            m_valueContent = UIFactory.CreateHorizontalGroup(parent, $"InteractiveValue_{this.GetType().Name}", false, false, true, true, 4, default, 
+            m_mainContent = UIFactory.CreateHorizontalGroup(parent, $"InteractiveValue_{this.GetType().Name}", false, false, true, true, 4, default, 
                 new Color(1, 1, 1, 0), TextAnchor.UpperLeft);
 
-            var mainRect = m_valueContent.GetComponent<RectTransform>();
+            var mainRect = m_mainContent.GetComponent<RectTransform>();
             mainRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 25);
 
-            UIFactory.SetLayoutElement(m_valueContent, flexibleWidth: 9000, minWidth: 175, minHeight: 25, flexibleHeight: 0);
+            UIFactory.SetLayoutElement(m_mainContent, flexibleWidth: 9000, minWidth: 175, minHeight: 25, flexibleHeight: 0);
 
             // subcontent expand button
             if (HasSubContent)
             {
-                m_subExpandBtn = UIFactory.CreateButton(m_valueContent, "ExpandSubcontentButton", "▲", ToggleSubcontent, new Color(0.3f, 0.3f, 0.3f));
+                m_subExpandBtn = UIFactory.CreateButton(m_mainContent, "ExpandSubcontentButton", "▲", ToggleSubcontent, new Color(0.3f, 0.3f, 0.3f));
                 UIFactory.SetLayoutElement(m_subExpandBtn.gameObject, minHeight: 25, minWidth: 25, flexibleWidth: 0, flexibleHeight: 0);
             }
 
             // inspect button
 
-            var inspectBtn = UIFactory.CreateButton(m_valueContent, 
+            var inspectBtn = UIFactory.CreateButton(m_mainContent, 
                 "InspectButton", 
                 "Inspect", 
                 () => 
@@ -338,7 +340,7 @@ namespace UnityExplorer.UI.InteractiveValues
 
             // value label
 
-            m_baseLabel = UIFactory.CreateLabel(m_valueContent, "ValueLabel", "", TextAnchor.MiddleLeft);
+            m_baseLabel = UIFactory.CreateLabel(m_mainContent, "ValueLabel", "", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(m_baseLabel.gameObject, flexibleWidth: 9000, minHeight: 25);
 
             m_subContentParent = subGroup;

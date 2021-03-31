@@ -52,6 +52,6 @@ namespace UnityExplorer.Core.Runtime
 
         public abstract int GetRootCount(Scene scene);
 
-        public abstract void CheckInputPointerEvent();
+        public abstract ColorBlock SetColorBlock(ColorBlock colors, Color? normal = null, Color? highlighted = null, Color? pressed = null);
     }
 }

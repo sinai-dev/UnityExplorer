@@ -5,6 +5,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Core;
+using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI.Utility;
 
 namespace UnityExplorer.UI.Main.Home.Inspectors.GameObjects
@@ -175,9 +176,8 @@ namespace UnityExplorer.UI.Main.Home.Inspectors.GameObjects
             // Main component button
 
             ColorBlock mainColors = new ColorBlock();
-            mainColors.normalColor = new Color(0.07f, 0.07f, 0.07f);
-            mainColors.highlightedColor = new Color(0.2f, 0.2f, 0.2f, 1);
-            mainColors.pressedColor = new Color(0.05f, 0.05f, 0.05f);
+            RuntimeProvider.Instance.SetColorBlock(mainColors, new Color(0.07f, 0.07f, 0.07f), 
+                new Color(0.2f, 0.2f, 0.2f, 1), new Color(0.05f, 0.05f, 0.05f));
 
             var mainBtn = UIFactory.CreateButton(groupObj, 
                 "MainButton", 

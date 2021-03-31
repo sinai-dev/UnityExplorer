@@ -49,13 +49,9 @@ namespace UnityExplorer.UI.CacheObject
         public override void SetValue()
         {
             RefConfig.BoxedValue = IValue.Value;
-            ConfigManager.Handler.OnAnyConfigChanged();
         }
 
         internal GameObject m_mainGroup;
-        //internal GameObject m_leftGroup;
-        //internal GameObject m_rightGroup;
-        //internal GameObject m_secondRow;
 
         internal override void ConstructUI()
         {
@@ -65,11 +61,6 @@ namespace UnityExplorer.UI.CacheObject
 
             var horiGroup = UIFactory.CreateHorizontalGroup(m_mainGroup, "ConfigEntryHolder", false, false, true, true, childAlignment: TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(horiGroup, minHeight: 30, flexibleHeight: 0);
-
-            //// left group
-
-            //m_leftGroup = UIFactory.CreateHorizontalGroup(horiGroup, "ConfigTitleGroup", false, false, true, true, 4, default, new Color(1, 1, 1, 0));
-            //UIFactory.SetLayoutElement(m_leftGroup, minHeight: 25, flexibleHeight: 0, minWidth: 200, flexibleWidth: 0);
 
             // config entry label
 
@@ -91,19 +82,10 @@ namespace UnityExplorer.UI.CacheObject
                 new Color(0.3f, 0.3f, 0.3f));
             UIFactory.SetLayoutElement(defaultButton.gameObject, minWidth: 80, minHeight: 22, flexibleWidth: 0);
 
-            //// right group
-
-            //m_rightGroup = UIFactory.CreateVerticalGroup(horiGroup, "ConfigValueGroup", false, false, true, true, 4, default, new Color(1, 1, 1, 0));
-            //UIFactory.SetLayoutElement(m_rightGroup, minHeight: 25, minWidth: 150, flexibleHeight: 0, flexibleWidth: 5000);
-
             // Description label
 
             var desc = UIFactory.CreateLabel(m_mainGroup, "Description", $"<i>{RefConfig.Description}</i>", TextAnchor.MiddleLeft, Color.grey);
             UIFactory.SetLayoutElement(desc.gameObject, minWidth: 250, minHeight: 20, flexibleWidth: 9999, flexibleHeight: 0);
-
-            //// Second row (IValue)
-
-            //m_secondRow = UIFactory.CreateHorizontalGroup(m_mainGroup, "DescriptionRow", false, false, true, true, 4, new Color(0.08f, 0.08f, 0.08f));
 
             // IValue
 

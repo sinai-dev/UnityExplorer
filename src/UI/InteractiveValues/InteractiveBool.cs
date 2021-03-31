@@ -88,13 +88,13 @@ namespace UnityExplorer.UI.InteractiveValues
 
             if (Owner.CanWrite)
             {
-                var toggleObj = UIFactory.CreateToggle(m_valueContent, "InteractiveBoolToggle", out m_toggle, out _, new Color(0.1f, 0.1f, 0.1f));
+                var toggleObj = UIFactory.CreateToggle(m_mainContent, "InteractiveBoolToggle", out m_toggle, out _, new Color(0.1f, 0.1f, 0.1f));
                 UIFactory.SetLayoutElement(toggleObj, minWidth: 24);
                 m_toggle.onValueChanged.AddListener(OnToggleValueChanged);
 
                 m_baseLabel.transform.SetAsLastSibling();
 
-                m_applyBtn = UIFactory.CreateButton(m_valueContent, 
+                m_applyBtn = UIFactory.CreateButton(m_mainContent, 
                     "ApplyButton",
                     "Apply", 
                     () => { Owner.SetValue(); }, 

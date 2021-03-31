@@ -102,7 +102,7 @@ namespace UnityExplorer.UI.InteractiveValues
             labelLayout.minWidth = 50;
             labelLayout.flexibleWidth = 0;
 
-            var inputObj = UIFactory.CreateInputField(m_valueContent, "InteractiveNumberInput", "...");
+            var inputObj = UIFactory.CreateInputField(m_mainContent, "InteractiveNumberInput", "...");
             UIFactory.SetLayoutElement(inputObj, minWidth: 120, minHeight: 25, flexibleWidth: 0);
 
             m_valueInput = inputObj.GetComponent<InputField>();
@@ -110,7 +110,7 @@ namespace UnityExplorer.UI.InteractiveValues
 
             if (Owner.CanWrite)
             {
-                m_applyBtn = UIFactory.CreateButton(m_valueContent, "ApplyButton", "Apply", OnApplyClicked, new Color(0.2f, 0.2f, 0.2f));
+                m_applyBtn = UIFactory.CreateButton(m_mainContent, "ApplyButton", "Apply", OnApplyClicked, new Color(0.2f, 0.2f, 0.2f));
                 UIFactory.SetLayoutElement(m_applyBtn.gameObject, minWidth: 50, minHeight: 25, flexibleWidth: 0);
             }
         }

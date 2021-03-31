@@ -43,7 +43,7 @@ namespace UnityExplorer.Core.Runtime.Mono
         public override UnityEngine.Object[] FindObjectsOfTypeAll(Type type)
             => Resources.FindObjectsOfTypeAll(type);
 
-        private static readonly FieldInfo fi_Scene_handle = typeof(Scene).GetField("m_Handle", ReflectionUtility.CommonFlags);
+        private static readonly FieldInfo fi_Scene_handle = typeof(Scene).GetField("m_Handle", ReflectionUtility.AllFlags);
 
         public override int GetSceneHandle(Scene scene)
         {
@@ -60,9 +60,18 @@ namespace UnityExplorer.Core.Runtime.Mono
             return scene.rootCount;
         }
 
-        public override void CheckInputPointerEvent()
+        public override ColorBlock SetColorBlock(ColorBlock colors, Color? normal = null, Color? highlighted = null, Color? pressed = null)
         {
-            // Not necessary afaik
+            if (normal != null)
+                colors.normalColor = (Color)normal;
+
+            if (highlighted != null)
+                colors.highlightedColor = (Color)highlighted;
+
+            if (pressed != null)
+                colors.pressedColor = (Color)pressed;
+
+            return colors;
         }
     }
 }

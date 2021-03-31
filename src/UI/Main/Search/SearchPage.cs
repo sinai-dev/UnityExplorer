@@ -259,10 +259,8 @@ namespace UnityExplorer.UI.Main.Search
 
             m_selectedContextButton = button;
 
-            var colors = m_selectedContextButton.colors;
-            colors.normalColor = new Color(0.35f, 0.7f, 0.35f);
-            colors.highlightedColor = colors.normalColor;
-            m_selectedContextButton.colors = colors;
+            m_selectedContextButton.colors = RuntimeProvider.Instance.SetColorBlock(m_selectedContextButton.colors, 
+                new Color(0.35f, 0.7f, 0.35f), new Color(0.35f, 0.7f, 0.35f));
 
             m_context = context;
 
@@ -439,12 +437,9 @@ namespace UnityExplorer.UI.Main.Search
             UIFactory.SetLayoutElement(btnGroupObj, flexibleWidth: 320, minHeight: 25, flexibleHeight: 0);
             btnGroupObj.AddComponent<Mask>();
 
-            var mainColors = new ColorBlock
-            {
-                normalColor = new Color(0.1f, 0.1f, 0.1f),
-                highlightedColor = new Color(0.2f, 0.2f, 0.2f, 1),
-                pressedColor = new Color(0.05f, 0.05f, 0.05f)
-            };
+            var mainColors = new ColorBlock();
+            RuntimeProvider.Instance.SetColorBlock(mainColors, new Color(0.1f, 0.1f, 0.1f),
+                new Color(0.2f, 0.2f, 0.2f), new Color(0.05f, 0.05f, 0.05f));
 
             var mainButton = UIFactory.CreateButton(btnGroupObj, 
                 "ResultButton",

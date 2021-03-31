@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityExplorer.Core;
 using UnityExplorer.Core.Config;
 
 namespace UnityExplorer.Loader.ML
@@ -64,6 +65,11 @@ namespace UnityExplorer.Loader.ML
                 return entry.Value;
 
             return default;
+        }
+
+        public override void OnAnyConfigChanged()
+        {
+            MelonPreferences.Save();
         }
 
         public override void SaveConfig()

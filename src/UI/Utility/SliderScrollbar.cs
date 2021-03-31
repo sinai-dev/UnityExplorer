@@ -186,7 +186,7 @@ public static class SliderExtensions
         {
 			if (m_setMethod == null)
             {
-				m_setMethod = typeof(Slider).GetMethod("Set", ReflectionUtility.CommonFlags, null, new[] { typeof(float), typeof(bool) }, null);
+				m_setMethod = typeof(Slider).GetMethod("Set", ReflectionUtility.AllFlags, null, new[] { typeof(float), typeof(bool) }, null);
             }
 			return m_setMethod;
         }

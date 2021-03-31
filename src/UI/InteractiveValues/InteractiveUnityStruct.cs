@@ -183,7 +183,7 @@ namespace UnityExplorer.UI.InteractiveValues
             typeof(Vector3), 
             typeof(Vector4),
             typeof(Rect),
-            typeof(Color) // todo might make a special editor for colors
+            //typeof(Color) // todo might make a special editor for colors
         };
 
         //~~~~~~~~~ Instance ~~~~~~~~~~

@@ -81,8 +81,6 @@ namespace UnityExplorer.UI
             if (EventSystem.current != EventSys)
                 CursorUnlocker.SetEventSystem();
 
-            RuntimeProvider.Instance.CheckInputPointerEvent();
-
             PanelDragger.Instance.Update();
 
             SliderScrollbar.UpdateInstances();

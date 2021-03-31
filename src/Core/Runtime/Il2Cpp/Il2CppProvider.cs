@@ -13,6 +13,7 @@ using UnityEngine.SceneManagement;
 using System.Collections;
 using UnityEngine.UI;
 using UnityExplorer.Core.Input;
+using UnityEngine.EventSystems;
 
 namespace UnityExplorer.Core.Runtime.Il2Cpp
 {
@@ -121,17 +122,42 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
                    .Invoke(handle);
         }
 
-        // Custom check for il2cpp input pointer event
+        internal static bool? s_doPropertiesExist;
 
-        public override void CheckInputPointerEvent()
+        public override ColorBlock SetColorBlock(ColorBlock colors, Color? normal = null, Color? highlighted = null, Color? pressed = null)
         {
-            // Some IL2CPP games behave weird with multiple UI Input Systems, some fixes for them.
-            var evt = InputManager.InputPointerEvent;
-            if (evt != null)
+            if (s_doPropertiesExist == null)
             {
-                if (!evt.eligibleForClick && evt.selectedObject)
-                    evt.eligibleForClick = true;
+                var prop = ReflectionUtility.GetPropertyInfo(typeof(ColorBlock), "normalColor") as PropertyInfo;
+                s_doPropertiesExist = prop != null && prop.CanWrite;
             }
+
+            colors.colorMultiplier = 1;
+
+            object boxed = (object)colors;
+
+            if (s_doPropertiesExist == true)
+            {
+                if (normal != null)
+                    ReflectionUtility.GetPropertyInfo(typeof(ColorBlock), "normalColor").SetValue(boxed, (Color)normal);
+                if (pressed != null)
+                    ReflectionUtility.GetPropertyInfo(typeof(ColorBlock), "pressedColor").SetValue(boxed, (Color)pressed);
+                if (highlighted != null)
+                    ReflectionUtility.GetPropertyInfo(typeof(ColorBlock), "highlightedColor").SetValue(boxed, (Color)highlighted);
+            }
+            else if (s_doPropertiesExist == false)
+            {
+                if (normal != null)
+                    ReflectionUtility.GetFieldInfo(typeof(ColorBlock), "m_NormalColor").SetValue(boxed, (Color)normal);
+                if (pressed != null)
+                    ReflectionUtility.GetFieldInfo(typeof(ColorBlock), "m_PressedColor").SetValue(boxed, (Color)pressed);
+                if (highlighted != null)
+                    ReflectionUtility.GetFieldInfo(typeof(ColorBlock), "m_HighlightedColor").SetValue(boxed, (Color)highlighted);
+            }
+
+            colors = (ColorBlock)boxed;
+
+            return colors;
         }
     }
 }

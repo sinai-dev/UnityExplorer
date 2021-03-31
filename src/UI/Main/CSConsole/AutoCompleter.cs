@@ -5,6 +5,8 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityExplorer.Core.CSharp;
+using UnityExplorer.Core.Input;
+using UnityExplorer.Core.Runtime;
 using UnityExplorer.Core.Unity;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Main;
@@ -41,16 +43,12 @@ namespace UnityExplorer.UI.Main.CSConsole
         public static void Update()
         {
             if (!m_mainObj)
-            {
                 return;
-            }
 
             if (!CSharpConsole.EnableAutocompletes)
             {
                 if (m_mainObj.activeSelf)
-                {
                     m_mainObj.SetActive(false);
-                }
 
                 return;
             }
@@ -274,8 +272,7 @@ namespace UnityExplorer.UI.Main.CSConsole
             mainGroup.childForceExpandWidth = true;
 
             ColorBlock btnColors = new ColorBlock();
-            btnColors.normalColor = new Color(0f, 0f, 0f, 0f);
-            btnColors.highlightedColor = new Color(0.2f, 0.2f, 0.2f, 1.0f);
+            RuntimeProvider.Instance.SetColorBlock(btnColors, new Color(0, 0, 0, 0), highlighted: new Color(0.2f, 0.2f, 0.2f, 1.0f));
 
             for (int i = 0; i < MAX_LABELS; i++)
             {

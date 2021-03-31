@@ -115,7 +115,7 @@ namespace UnityExplorer.UI.InteractiveValues
 
             m_labelLayout = m_baseLabel.gameObject.GetComponent<LayoutElement>();
 
-            m_readonlyInput = UIFactory.CreateLabel(m_valueContent, "ReadonlyLabel", "", TextAnchor.MiddleLeft);
+            m_readonlyInput = UIFactory.CreateLabel(m_mainContent, "ReadonlyLabel", "", TextAnchor.MiddleLeft);
             m_readonlyInput.horizontalOverflow = HorizontalWrapMode.Overflow;
 
             var testFitter = m_readonlyInput.gameObject.AddComponent<ContentSizeFitter>();

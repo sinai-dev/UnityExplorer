@@ -5,6 +5,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Core.Input;
+using UnityExplorer.Core.Runtime;
 using UnityExplorer.Core.Unity;
 
 namespace UnityExplorer.UI.Main.Home.Inspectors.GameObjects
@@ -407,9 +408,7 @@ namespace UnityExplorer.UI.Main.Home.Inspectors.GameObjects
             var sliderObj = UIFactory.CreateSlider(rowObject, "VectorSlider", out Slider slider);
             UIFactory.SetLayoutElement(sliderObj, minHeight: 20, flexibleHeight: 0, minWidth: 200, flexibleWidth: 9000);
             sliderObj.transform.Find("Fill Area").gameObject.SetActive(false);
-            var sliderColors = slider.colors;
-            sliderColors.normalColor = new Color(0.65f, 0.65f, 0.65f);
-            slider.colors = sliderColors;
+            slider.colors = RuntimeProvider.Instance.SetColorBlock(slider.colors, new Color(0.65f, 0.65f, 0.65f));
             slider.minValue = -2;
             slider.maxValue = 2;
             slider.value = 0;

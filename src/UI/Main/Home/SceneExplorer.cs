@@ -11,6 +11,8 @@ using UnityExplorer.UI.Main.Home;
 using UnityExplorer.Core.Config;
 using UnityExplorer.UI.Utility;
 using UnityExplorer.UI.Main.Search;
+using System.IO;
+using UnityExplorer.Core;
 
 namespace UnityExplorer.UI.Main.Home
 {
@@ -56,11 +58,9 @@ namespace UnityExplorer.UI.Main.Home
         internal readonly List<GameObject> m_shortList = new List<GameObject>();
 
         private Text m_hideText;
-        private GameObject m_titleObj;
         private GameObject m_sceneDropdownObj;
         private GameObject m_scenePathGroupObj;
-        private GameObject m_scrollObj;
-        private LayoutElement m_leftLayout;
+        private GameObject m_mainContent;
 
         internal static GameObject DontDestroyObject
         {
@@ -82,6 +82,30 @@ namespace UnityExplorer.UI.Main.Home
 
             if (!ConfigManager.Last_SceneExplorer_State.Value)
                 ToggleShow();
+        }
+
+        public void ToggleShow()
+        {
+            if (!Hiding)
+            {
+                Hiding = true;
+
+                m_hideText.text = "►";
+                m_mainContent.SetActive(false);
+                m_pageHandler.Hide();
+            }
+            else
+            {
+                Hiding = false;
+
+                m_hideText.text = "◄";
+                m_mainContent.SetActive(true);
+                m_pageHandler.Show();
+
+                Update();
+            }
+
+            InvokeOnToggleShow();
         }
 
         public void Update()
@@ -223,39 +247,6 @@ namespace UnityExplorer.UI.Main.Home
             OnToggleShow?.Invoke(!Instance.Hiding);
         }
 
-        public void ToggleShow()
-        {
-            if (!Hiding)
-            {
-                Hiding = true;
-
-                m_hideText.text = "►";
-                m_titleObj.SetActive(false);
-                m_sceneDropdownObj.SetActive(false);
-                m_scenePathGroupObj.SetActive(false);
-                m_scrollObj.SetActive(false);
-                m_pageHandler.Hide();
-
-                m_leftLayout.minWidth = 15;
-            }
-            else
-            {
-                Hiding = false;
-
-                m_hideText.text = "Hide Scene Explorer";
-                m_titleObj.SetActive(true);
-                m_sceneDropdownObj.SetActive(true);
-                m_scenePathGroupObj.SetActive(true);
-                m_scrollObj.SetActive(true);
-
-                m_leftLayout.minWidth = 350;
-
-                Update();
-            }
-
-            InvokeOnToggleShow();
-        }
-
         public void OnActiveScenesChanged(List<string> newNames)
         {
             m_sceneDropdown.options.Clear();
@@ -387,25 +378,32 @@ namespace UnityExplorer.UI.Main.Home
 
         public void ConstructScenePane()
         {
-            GameObject leftPane = UIFactory.CreateVerticalGroup(HomePage.Instance.Content, "SceneGroup", true, false, true, true, 0, default,
+            var coreGroup = UIFactory.CreateHorizontalGroup(HomePage.Instance.Content, "SceneExplorer", true, true, true, true, 4, new Vector4(2, 2, 2, 2),
+                new Color(0.05f, 0.05f, 0.05f));
+
+            // hide button
+
+            var hideButton = UIFactory.CreateButton(coreGroup, "HideButton", "◄", ToggleShow, new Color(0.15f, 0.15f, 0.15f));
+            hideButton.GetComponentInChildren<Text>().fontSize = 13;
+            m_hideText = hideButton.GetComponentInChildren<Text>();
+            UIFactory.SetLayoutElement(hideButton.gameObject, minWidth: 20, minHeight: 20, flexibleWidth: 0, flexibleHeight: 9999);
+
+            m_mainContent = UIFactory.CreateVerticalGroup(coreGroup, "SceneGroup", true, false, true, true, 0, default,
                 new Color(72f / 255f, 72f / 255f, 72f / 255f));
+            UIFactory.SetLayoutElement(m_mainContent, minWidth: 350, flexibleWidth: 0);
 
-            m_leftLayout = leftPane.AddComponent<LayoutElement>();
-            m_leftLayout.minWidth = 350;
-            m_leftLayout.flexibleWidth = 0;
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(m_mainContent, true, true, true, true, spacing: 4, padTop: 8, 4, 4, 4);
 
-            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(leftPane, true, true, true, true, spacing: 4, padTop: 8, 4, 4, 4);
+            var titleObj = UIFactory.CreateLabel(m_mainContent, "SceneExplorerTitle", "Scene Explorer", TextAnchor.UpperLeft, default, true, 20).gameObject;
+            UIFactory.SetLayoutElement(titleObj, minHeight: 30, flexibleHeight: 0);
 
-            m_titleObj = UIFactory.CreateLabel(leftPane, "SceneExplorerTitle", "Scene Explorer", TextAnchor.UpperLeft, default, true, 20).gameObject;
-            UIFactory.SetLayoutElement(m_titleObj, minHeight: 30, flexibleHeight: 0);
-
-            m_sceneDropdownObj = UIFactory.CreateDropdown(leftPane, out m_sceneDropdown, "", 14, null);
+            m_sceneDropdownObj = UIFactory.CreateDropdown(m_mainContent, out m_sceneDropdown, "", 14, null);
             UIFactory.SetLayoutElement(m_sceneDropdownObj, minHeight: 40, minWidth: 320, flexibleWidth: 0, flexibleHeight: 0);
 
             m_sceneDropdownText = m_sceneDropdown.transform.Find("Label").GetComponent<Text>();
             m_sceneDropdown.onValueChanged.AddListener((int val) => { SetTargetScene(val); });
 
-            m_scenePathGroupObj = UIFactory.CreateHorizontalGroup(leftPane, "ScenePathGroup", true, true, true, true, 5, default, new Color(1, 1, 1, 0f));
+            m_scenePathGroupObj = UIFactory.CreateHorizontalGroup(m_mainContent, "ScenePathGroup", true, true, true, true, 5, default, new Color(1, 1, 1, 0f));
             UIFactory.SetLayoutElement(m_scenePathGroupObj, minHeight: 20, minWidth: 335);
 
             var backBtnObj = UIFactory.CreateButton(m_scenePathGroupObj, 
@@ -439,20 +437,68 @@ namespace UnityExplorer.UI.Main.Home
             m_mainInspectBtn = mainInspectButton.gameObject;
             UIFactory.SetLayoutElement(m_mainInspectBtn, minWidth: 65);
 
-            m_scrollObj = UIFactory.CreateScrollView(leftPane, "SceneExplorerScrollView",
+            var scrollObj = UIFactory.CreateScrollView(m_mainContent, "SceneExplorerScrollView",
                 out m_pageContent, out SliderScrollbar scroller, new Color(0.1f, 0.1f, 0.1f));
 
             m_pageHandler = new PageHandler(scroller);
-            m_pageHandler.ConstructUI(leftPane);
+            m_pageHandler.ConstructUI(m_mainContent);
             m_pageHandler.OnPageChanged += OnSceneListPageTurn;
 
-            // hide button
+            // Scene Loader
+            try
+            {
+                Type sceneUtil = ReflectionUtility.GetTypeByName("UnityEngine.SceneManagement.SceneUtility");
+                if (sceneUtil == null)
+                    throw new Exception("This version of Unity does not ship with the 'SceneUtility' class, or it was not unstripped.");
+                var method = sceneUtil.GetMethod("GetScenePathByBuildIndex", ReflectionUtility.AllFlags);
 
-            var hideButton = UIFactory.CreateButton(leftPane, "HideButton", "Hide Scene Explorer", ToggleShow, new Color(0.15f, 0.15f, 0.15f));
-            hideButton.GetComponentInChildren<Text>().fontSize = 13;
-            m_hideText = hideButton.GetComponentInChildren<Text>();
+                var title2 = UIFactory.CreateLabel(m_mainContent, "SceneLoaderLabel", "Scene Loader", TextAnchor.MiddleLeft, Color.white, true, 20);
+                UIFactory.SetLayoutElement(title2.gameObject, minHeight: 30, flexibleHeight: 0);
 
-            UIFactory.SetLayoutElement(hideButton.gameObject, minWidth: 20, minHeight: 20);
+                var allSceneDropObj = UIFactory.CreateDropdown(m_mainContent, out Dropdown allSceneDrop, "", 14, null);
+                UIFactory.SetLayoutElement(allSceneDropObj, minHeight: 40, minWidth: 320, flexibleWidth: 0, flexibleHeight: 0);
+
+                int sceneCount = SceneManager.sceneCountInBuildSettings;
+                for (int i = 0; i < sceneCount; i++)
+                {
+                    var scenePath = (string)method.Invoke(null, new object[] { i });
+                    allSceneDrop.options.Add(new Dropdown.OptionData(Path.GetFileNameWithoutExtension(scenePath)));
+                }
+                allSceneDrop.value = 1;
+                allSceneDrop.value = 0;
+
+                var buttonRow = UIFactory.CreateHorizontalGroup(m_mainContent, "LoadButtons", true, true, true, true, 4);
+
+                var loadButton = UIFactory.CreateButton(buttonRow, "LoadSceneButton", "Load (Single)", () =>
+                {
+                    try
+                    {
+                        SceneManager.LoadScene(allSceneDrop.options[allSceneDrop.value].text);
+                    }
+                    catch (Exception ex)
+                    {
+                        ExplorerCore.LogWarning($"Unable to load the Scene! {ex.ReflectionExToString()}");
+                    }
+                }, new Color(0.1f, 0.3f, 0.3f));
+                UIFactory.SetLayoutElement(loadButton.gameObject, minHeight: 40, minWidth: 150);
+
+                var loadAdditiveButton = UIFactory.CreateButton(buttonRow, "LoadSceneButton", "Load (Additive)", () =>
+                {
+                    try
+                    {
+                        SceneManager.LoadScene(allSceneDrop.options[allSceneDrop.value].text, LoadSceneMode.Additive);
+                    }
+                    catch (Exception ex)
+                    {
+                        ExplorerCore.LogWarning($"Unable to load the Scene! {ex.ReflectionExToString()}");
+                    }
+                }, new Color(0.1f, 0.3f, 0.3f));
+                UIFactory.SetLayoutElement(loadAdditiveButton.gameObject, minHeight: 40, minWidth: 150);
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.LogWarning($"Could not create the Scene Loader helper! {ex.ReflectionExToString()}");
+            }
         }
 
         private void AddObjectListButton()
@@ -476,9 +522,8 @@ namespace UnityExplorer.UI.Main.Home
             toggle.onValueChanged.AddListener((bool val) => { OnToggleClicked(thisIndex, val); });
 
             ColorBlock mainColors = new ColorBlock();
-            mainColors.normalColor = new Color(0.1f, 0.1f, 0.1f);
-            mainColors.highlightedColor = new Color(0.2f, 0.2f, 0.2f);
-            mainColors.pressedColor = new Color(0.05f, 0.05f, 0.05f);
+            mainColors = RuntimeProvider.Instance.SetColorBlock(mainColors, new Color(0.1f, 0.1f, 0.1f), 
+                new Color(0.2f, 0.2f, 0.2f), new Color(0.05f, 0.05f, 0.05f));
 
             var mainButton = UIFactory.CreateButton(btnGroupObj, 
                 "MainButton", 
@@ -494,9 +539,8 @@ namespace UnityExplorer.UI.Main.Home
             m_shortListTexts.Add(mainText);
 
             ColorBlock inspectColors = new ColorBlock();
-            inspectColors.normalColor = new Color(0.15f, 0.15f, 0.15f);
-            inspectColors.highlightedColor = new Color(0.2f, 0.2f, 0.2f);
-            inspectColors.pressedColor = new Color(0.1f, 0.1f, 0.1f);
+            inspectColors = RuntimeProvider.Instance.SetColorBlock(inspectColors, new Color(0.15f, 0.15f, 0.15f),
+                new Color(0.2f, 0.2f, 0.2f), new Color(0.1f, 0.1f, 0.1f));
 
             var inspectButton = UIFactory.CreateButton(btnGroupObj, 
                 "InspectButton", 

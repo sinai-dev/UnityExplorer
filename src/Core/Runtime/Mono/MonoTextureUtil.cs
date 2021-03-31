@@ -52,9 +52,9 @@ namespace UnityExplorer.Core.Runtime.Mono
         private static MethodInfo GetEncodeToPNGMethod()
         {
             if (ReflectionUtility.GetTypeByName("UnityEngine.ImageConversion") is Type imageConversion)
-                return m_encodeToPNGMethod = imageConversion.GetMethod("EncodeToPNG", ReflectionUtility.CommonFlags);
+                return m_encodeToPNGMethod = imageConversion.GetMethod("EncodeToPNG", ReflectionUtility.AllFlags);
 
-            var method = typeof(Texture2D).GetMethod("EncodeToPNG", ReflectionUtility.CommonFlags);
+            var method = typeof(Texture2D).GetMethod("EncodeToPNG", ReflectionUtility.AllFlags);
             if (method != null)
                 return m_encodeToPNGMethod = method;
 

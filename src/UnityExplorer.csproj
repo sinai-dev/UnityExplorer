@@ -265,6 +265,7 @@
     <Compile Include="UI\CacheObject\CachePaired.cs" />
     <Compile Include="UI\CacheObject\CacheProperty.cs" />
     <Compile Include="UI\InteractiveValues\InteractiveBool.cs" />
+    <Compile Include="UI\InteractiveValues\InteractiveColor.cs" />
     <Compile Include="UI\InteractiveValues\InteractiveDictionary.cs" />
     <Compile Include="UI\InteractiveValues\InteractiveEnum.cs" />
     <Compile Include="UI\InteractiveValues\InteractiveEnumerable.cs" />

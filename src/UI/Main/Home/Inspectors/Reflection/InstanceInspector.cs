@@ -30,18 +30,12 @@ namespace UnityExplorer.UI.Main.Home.Inspectors.Reflection
         internal void OnScopeFilterClicked(MemberScopes type, Button button)
         {
             if (m_lastActiveScopeButton)
-            {
-                var lastColors = m_lastActiveScopeButton.colors;
-                lastColors.normalColor = new Color(0.2f, 0.2f, 0.2f);
-                m_lastActiveScopeButton.colors = lastColors;
-            }
+                m_lastActiveScopeButton.colors = RuntimeProvider.Instance.SetColorBlock(m_lastActiveScopeButton.colors, new Color(0.2f, 0.2f, 0.2f));
 
             m_scopeFilter = type;
             m_lastActiveScopeButton = button;
 
-            var colors = m_lastActiveScopeButton.colors;
-            colors.normalColor = new Color(0.2f, 0.6f, 0.2f);
-            m_lastActiveScopeButton.colors = colors;
+            m_lastActiveScopeButton.colors = RuntimeProvider.Instance.SetColorBlock(m_lastActiveScopeButton.colors, new Color(0.2f, 0.6f, 0.2f));
 
             FilterMembers(null, true);
             m_sliderScroller.m_slider.value = 1f;
@@ -246,17 +240,14 @@ namespace UnityExplorer.UI.Main.Home.Inspectors.Reflection
 
             btn.onClick.AddListener(() => { OnScopeFilterClicked(type, btn); });
 
-            var colors = btn.colors;
-            colors.highlightedColor = new Color(0.3f, 0.7f, 0.3f);
+            btn.colors = RuntimeProvider.Instance.SetColorBlock(btn.colors, highlighted: new Color(0.3f, 0.7f, 0.3f));
 
             if (setEnabled)
             {
-                colors.normalColor = new Color(0.2f, 0.6f, 0.2f);
+                btn.colors = RuntimeProvider.Instance.SetColorBlock(btn.colors, new Color(0.2f, 0.6f, 0.2f));
                 m_scopeFilter = type;
                 m_lastActiveScopeButton = btn;
             }
-
-            btn.colors = colors;
         }
     }
 }
