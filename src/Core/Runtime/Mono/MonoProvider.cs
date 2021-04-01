@@ -52,6 +52,9 @@ namespace UnityExplorer.Core.Runtime.Mono
 
         public override GameObject[] GetRootGameObjects(Scene scene)
         {
+            if (!scene.isLoaded)
+                return new GameObject[0];
+
             return scene.GetRootGameObjects();
         }
 

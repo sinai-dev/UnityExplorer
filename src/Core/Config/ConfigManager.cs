@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using UnityEngine;
 using UnityExplorer.UI.Main;
@@ -45,6 +46,8 @@ namespace UnityExplorer.Core.Config
             PanelDragger.OnFinishDrag += PanelDragger_OnFinishDrag;
             MainMenu.OnActiveTabChanged += MainMenu_OnActiveTabChanged;
             DebugConsole.OnToggleShow += DebugConsole_OnToggleShow;
+
+            InitConsoleCallback();
         }
 
         internal static void RegisterConfigElement<T>(ConfigElement<T> configElement)
@@ -134,6 +137,33 @@ namespace UnityExplorer.Core.Config
             Last_SceneExplorer_State.Value = showing;
         }
 
+        #region CONSOLE ONEXIT CALLBACK
+
+        internal static void InitConsoleCallback()
+        {
+            handler = new ConsoleEventDelegate(ConsoleEventCallback);
+            SetConsoleCtrlHandler(handler, true);
+        }
+
+        static bool ConsoleEventCallback(int eventType)
+        {
+            // 2 is Console Quit
+            if (eventType == 2)
+                Handler.SaveConfig();
+
+            return false;
+        }
+
+        static ConsoleEventDelegate handler;
+        private delegate bool ConsoleEventDelegate(int eventType);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool SetConsoleCtrlHandler(ConsoleEventDelegate callback, bool add);
+
+        #endregion
+
+        #region WINDOW ANCHORS / POSITION HELPERS
+
         // Window Anchors helpers
 
         private const string DEFAULT_WINDOW_ANCHORS = "0.25,0.10,0.78,0.95";
@@ -210,5 +240,7 @@ namespace UnityExplorer.Core.Config
                 //ExplorerCore.LogWarning("Exception setting window position: " + ex);
             }
         }
+
+        #endregion
     }
 }

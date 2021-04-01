@@ -38,6 +38,34 @@ The standalone release is based on the BepInEx build, so it requires Harmony 2.0
 1. Create an instance of Unity Explorer with `UnityExplorer.ExplorerStandalone.CreateInstance();`
 2. Optionally subscribe to the `ExplorerStandalone.OnLog` event to handle logging if you wish.
 
+## Issues and contributions
+
+Both issue reports and PR contributions are welcome in this repository.
+
+### Issue reporting
+
+To report an issue with UnityExplorer, please use the following template (as well as any other information / images you can provide).
+
+Please upload the required log files on [Pastebin](https://pastebin.com/) and include a link to your paste:
+
+* All reports: Unity's `output_log.txt` or `Player.log`, should be found at `%userprofile%\AppData\LocalLow\[Company]\[Game]\` unless redirected.
+* BepInEx: `BepInEx\LogOutput.log`
+* MelonLoader: `MelonLoader\Latest.log`
+
+Template:
+
+```
+* OS Platform:
+* Display resolution:
+* Game(s) tested on: 
+* UnityExplorer version(s) tested:
+
+* Description of issue:
+
+* Unity log pastebin link:
+* Mod Loader log pastebin link: 
+```
+
 ## Features
 
 <p align="center">

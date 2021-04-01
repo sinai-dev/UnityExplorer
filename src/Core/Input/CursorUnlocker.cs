@@ -125,11 +125,17 @@ namespace UnityExplorer.Core.Input
                 {
                     Cursor.lockState = CursorLockMode.None;
                     Cursor.visible = true;
+                    
+                    if (UIManager.EventSys)
+                        SetEventSystem();
                 }
                 else
                 {
                     Cursor.lockState = m_lastLockMode;
                     Cursor.visible = m_lastVisibleState;
+
+                    if (UIManager.EventSys)
+                        ReleaseEventSystem();
                 }
                 m_currentlySettingCursor = false;
             }

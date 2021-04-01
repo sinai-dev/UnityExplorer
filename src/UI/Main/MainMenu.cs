@@ -180,7 +180,7 @@ namespace UnityExplorer.UI.Main
             // Hide button
 
             ColorBlock colorBlock = new ColorBlock();
-            RuntimeProvider.Instance.SetColorBlock(colorBlock, new Color(65f / 255f, 23f / 255f, 23f / 255f),
+            colorBlock = RuntimeProvider.Instance.SetColorBlock(colorBlock, new Color(65f / 255f, 23f / 255f, 23f / 255f),
                 new Color(35f / 255f, 10f / 255f, 10f / 255f), new Color(156f / 255f, 0f, 0f));
 
             var hideButton = UIFactory.CreateButton(titleBar, 

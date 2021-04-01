@@ -53,8 +53,7 @@ namespace UnityExplorer.UI
             // Force refresh of anchors etc
             Canvas.ForceUpdateCanvases();
 
-            if (!ConfigManager.Hide_On_Startup.Value)
-                ShowMenu = true;
+            ShowMenu = !ConfigManager.Hide_On_Startup.Value;
 
             ExplorerCore.Log("UI initialized.");
         }

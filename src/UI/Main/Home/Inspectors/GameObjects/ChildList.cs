@@ -169,7 +169,7 @@ namespace UnityExplorer.UI.Main.Home.Inspectors.GameObjects
             toggle.onValueChanged.AddListener((bool val) => { OnToggleClicked(thisIndex, val); });
 
             ColorBlock mainColors = new ColorBlock();
-            RuntimeProvider.Instance.SetColorBlock(mainColors, new Color(0.07f, 0.07f, 0.07f), 
+            mainColors = RuntimeProvider.Instance.SetColorBlock(mainColors, new Color(0.07f, 0.07f, 0.07f), 
                 new Color(0.2f, 0.2f, 0.2f, 1), new Color(0.05f, 0.05f, 0.05f));
 
             var mainBtn = UIFactory.CreateButton(btnGroupObj, 

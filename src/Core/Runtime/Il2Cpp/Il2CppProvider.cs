@@ -89,10 +89,13 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
 
         internal delegate void d_GetRootGameObjects(int handle, IntPtr list);
 
-        public override GameObject[] GetRootGameObjects(Scene scene) => GetRootGameObjects(scene.handle);
-
-        public static GameObject[] GetRootGameObjects(int handle)
+        public override GameObject[] GetRootGameObjects(Scene scene)
         {
+            if (!scene.isLoaded)
+                return new GameObject[0];
+
+            int handle = scene.handle;
+
             if (handle == -1)
                 return new GameObject[0];
 

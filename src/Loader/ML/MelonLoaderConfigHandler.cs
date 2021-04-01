@@ -69,7 +69,6 @@ namespace UnityExplorer.Loader.ML
 
         public override void OnAnyConfigChanged()
         {
-            MelonPreferences.Save();
         }
 
         public override void SaveConfig()
