@@ -46,9 +46,13 @@ Both issue reports and PR contributions are welcome in this repository.
 
 To report an issue with UnityExplorer, please use the following template (as well as any other information / images you can provide).
 
-Please upload the required log files on [Pastebin](https://pastebin.com/) and include a link to your paste:
+Please upload your Unity log file to [Pastebin](https://pastebin.com/) and provide a link to the paste.
 
-* All reports: Unity's `output_log.txt` or `Player.log`, should be found at `%userprofile%\AppData\LocalLow\[Company]\[Game]\` unless redirected.
+* The log should be found at `%userprofile%\AppData\LocalLow\[Company]\[Game]\` unless redirected by your Mod Loader.
+* The file will be called either `output_log.txt` or `Player.log`
+
+As well as the Unity log, please upload your Mod Loader's log:
+
 * BepInEx: `BepInEx\LogOutput.log`
 * MelonLoader: `MelonLoader\Latest.log`
 
