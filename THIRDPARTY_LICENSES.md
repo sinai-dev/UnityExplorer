@@ -1,6 +1,6 @@
-* [RuntimeUnityEditor License](#unityexplorer-license)
-* [MelonLoader License](#unityexplorer-license)
-* [InGameCodeEditor License](#unityexplorer-license)
+* [RuntimeUnityEditor License](#runtimeunityeditor-license)
+* [MelonLoader License](#melonloader-license)
+* [InGameCodeEditor License](#ingamecodeeditor-license)
 
 ## RuntimeUnityEditor License
 
