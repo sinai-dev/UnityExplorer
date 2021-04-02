@@ -46,74 +46,8 @@ namespace UnityExplorer.Core.Input
 
             UpdateCursorControl();
 
-            Unlock = true;
+            Unlock = ConfigManager.Force_Unlock_Mouse.Value;
             ConfigManager.Force_Unlock_Mouse.OnValueChanged += (bool val) => { Unlock = val; };
-        }
-
-        private static void SetupPatches()
-        {
-            try
-            {
-                if (CursorType == null)
-                {
-                    throw new Exception("Could not find Type 'UnityEngine.Cursor'!");
-                }
-
-                // Get current cursor state and enable cursor
-                try
-                {
-                    m_lastLockMode = (CursorLockMode?)typeof(Cursor).GetProperty("lockState", BF.Public | BF.Static)?.GetValue(null, null)
-                                     ?? CursorLockMode.None;
-
-                    m_lastVisibleState = (bool?)typeof(Cursor).GetProperty("visible", BF.Public | BF.Static)?.GetValue(null, null)
-                                         ?? false;
-                }
-                catch { }
-
-                // Setup Harmony Patches
-                TryPatch(typeof(Cursor),
-                    "lockState",
-                    new HarmonyMethod(typeof(CursorUnlocker).GetMethod(nameof(Prefix_set_lockState))),
-                    true);
-
-                TryPatch(typeof(Cursor),
-                    "visible",
-                    new HarmonyMethod(typeof(CursorUnlocker).GetMethod(nameof(Prefix_set_visible))),
-                    true);
-
-                TryPatch(typeof(EventSystem),
-                    "current",
-                    new HarmonyMethod(typeof(CursorUnlocker).GetMethod(nameof(Prefix_EventSystem_set_current))),
-                    true);
-            }
-            catch (Exception e)
-            {
-                ExplorerCore.Log($"Exception on ForceUnlockCursor.Init! {e.GetType()}, {e.Message}");
-            }
-        }
-
-        private static void TryPatch(Type type, string property, HarmonyMethod patch, bool setter)
-        {
-            try
-            {
-                var harmony = ExplorerCore.Loader.HarmonyInstance;
-
-                var prop = type.GetProperty(property);
-
-                if (setter) // setter is prefix
-                {
-                    harmony.Patch(prop.GetSetMethod(), prefix: patch);
-                }
-                else // getter is postfix
-                {
-                    harmony.Patch(prop.GetGetMethod(), postfix: patch);
-                }
-            }
-            catch (Exception e)
-            {
-                string suf = setter ? "set_" : "get_";
-                ExplorerCore.Log($"Unable to patch {type.Name}.{suf}{property}: {e.Message}");
-            }
         }
 
         public static void UpdateCursorControl()
@@ -121,11 +55,12 @@ namespace UnityExplorer.Core.Input
             try
             {
                 m_currentlySettingCursor = true;
+
                 if (ShouldActuallyUnlock)
                 {
                     Cursor.lockState = CursorLockMode.None;
                     Cursor.visible = true;
-                    
+
                     if (UIManager.EventSys)
                         SetEventSystem();
                 }
@@ -137,6 +72,7 @@ namespace UnityExplorer.Core.Input
                     if (UIManager.EventSys)
                         ReleaseEventSystem();
                 }
+
                 m_currentlySettingCursor = false;
             }
             catch (Exception e)
@@ -163,9 +99,7 @@ namespace UnityExplorer.Core.Input
                 if (!m_lastEventSystem)
                     m_lastEventSystem = EventSystem.current;
 
-                //ExplorerCore.Log("Disabling current event system...");
                 m_lastEventSystem.enabled = false;
-                //m_lastEventSystem.gameObject.SetActive(false);
             }
 
             // Set to our current system
@@ -184,7 +118,6 @@ namespace UnityExplorer.Core.Input
             if (m_lastEventSystem)
             {
                 m_lastEventSystem.enabled = true;
-                //m_lastEventSystem.gameObject.SetActive(true);
 
                 m_settingEventSystem = true;
                 EventSystem.current = m_lastEventSystem;
@@ -193,7 +126,30 @@ namespace UnityExplorer.Core.Input
             }
         }
 
-        [HarmonyPrefix]
+        // Patches
+
+        private static void SetupPatches()
+        {
+            try
+            {
+                if (CursorType == null)
+                    throw new Exception("Could not load Type 'UnityEngine.Cursor'!");
+
+                // Get current cursor state and enable cursor
+                m_lastLockMode = (CursorLockMode?)CursorType.GetProperty("lockState", BF.Public | BF.Static)?.GetValue(null, null)
+                                 ?? CursorLockMode.None;
+
+                m_lastVisibleState = (bool?)CursorType.GetProperty("visible", BF.Public | BF.Static)?.GetValue(null, null)
+                                     ?? false;
+
+                ExplorerCore.Loader.SetupPatches();
+            }
+            catch (Exception e)
+            {
+                ExplorerCore.Log($"Error on CursorUnlocker.Init! {e.GetType()}, {e.Message}");
+            }
+        }
+
         public static void Prefix_EventSystem_set_current(ref EventSystem value)
         {
             if (!m_settingEventSystem)
@@ -210,7 +166,6 @@ namespace UnityExplorer.Core.Input
         // Also keep track of when anything else tries to set Cursor state, this will be the
         // value that we set back to when we close the menu or disable force-unlock.
 
-        [HarmonyPrefix]
         public static void Prefix_set_lockState(ref CursorLockMode value)
         {
             if (!m_currentlySettingCursor)
@@ -222,7 +177,6 @@ namespace UnityExplorer.Core.Input
             }
         }
 
-        [HarmonyPrefix]
         public static void Prefix_set_visible(ref bool value)
         {
             if (!m_currentlySettingCursor)

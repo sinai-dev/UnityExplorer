@@ -10,6 +10,9 @@ using System.Text;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Loader.BIE;
 using UnityEngine;
+using UnityExplorer.Core;
+using UnityEngine.EventSystems;
+using UnityExplorer.Core.Input;
 #if CPP
 using BepInEx.IL2CPP;
 using UnhollowerRuntimeLib;
@@ -75,10 +78,8 @@ namespace UnityExplorer
 
             ClassInjector.RegisterTypeInIl2Cpp<ExplorerBehaviour>();
 
-            var obj = new GameObject(
-                "ExplorerBehaviour",
-                new Il2CppSystem.Type[] { Il2CppType.Of<ExplorerBehaviour>() }
-            );
+            var obj = new GameObject("ExplorerBehaviour");
+            obj.AddComponent<ExplorerBehaviour>();
             obj.hideFlags = HideFlags.HideAndDontSave;
             GameObject.DontDestroyOnLoad(obj);
 
@@ -101,6 +102,48 @@ namespace UnityExplorer
             }
         }
 #endif
+
+        public void SetupPatches()
+        {
+            try
+            {
+                this.HarmonyInstance.PatchAll();
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.Log($"Exception setting up Harmony patches:\r\n{ex.ReflectionExToString()}");
+            }
+        }
+
+        [HarmonyPatch(typeof(EventSystem), "current", MethodType.Setter)]
+        public class PATCH_EventSystem_current
+        {
+            [HarmonyPrefix]
+            public static void Prefix_EventSystem_set_current(ref EventSystem value)
+            {
+                CursorUnlocker.Prefix_EventSystem_set_current(ref value);
+            }
+        }
+
+        [HarmonyPatch(typeof(Cursor), "lockState", MethodType.Setter)]
+        public class PATCH_Cursor_lockState
+        {
+            [HarmonyPrefix]
+            public static void Prefix_set_lockState(ref CursorLockMode value)
+            {
+                CursorUnlocker.Prefix_set_lockState(ref value);
+            }
+        }
+
+        [HarmonyPatch(typeof(Cursor), "visible", MethodType.Setter)]
+        public class PATCH_Cursor_visible
+        {
+            [HarmonyPrefix]
+            public static void Prefix_set_visible(ref bool value)
+            {
+                CursorUnlocker.Prefix_set_visible(ref value);
+            }
+        }
     }
 }
 #endif

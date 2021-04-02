@@ -46,7 +46,7 @@ namespace UnityExplorer.Core.Config
 
         private void SetValue(T value)
         {
-            if ((m_value == null && value == null) || m_value.Equals(value))
+            if ((m_value == null && value == null) || (m_value != null && m_value.Equals(value)))
                 return;
 
             m_value = value;

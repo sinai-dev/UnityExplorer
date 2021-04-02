@@ -17,10 +17,6 @@ namespace UnityExplorer
         Action<object> OnLogWarning { get; }
         Action<object> OnLogError { get; }
 
-#if ML
-        Harmony.HarmonyInstance HarmonyInstance { get; }
-#else
-        HarmonyLib.Harmony HarmonyInstance { get; }
-#endif
+        void SetupPatches();
     }
 }

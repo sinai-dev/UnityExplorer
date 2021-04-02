@@ -19,24 +19,24 @@
 
 ### BepInEx
 
-0. Install [BepInEx](https://github.com/BepInEx/BepInEx) for your game. For IL2CPP you should use [BepInEx 6 (Bleeding Edge)](https://builds.bepis.io/projects/bepinex_be), for Mono you should use [BepInEx 5](https://github.com/BepInEx/BepInEx/releases) (until Mono support stabilizes in BepInEx 6).
-1. Download the UnityExplorer release for BepInEx IL2CPP or Mono above.
-2. Take the `UnityExplorer.BIE.___.dll` file and put it in `[GameFolder]\BepInEx\plugins\`
-3. In IL2CPP, you will need to download the [Unity libs](https://github.com/LavaGang/Unity-Runtime-Libraries) for the game's Unity version and put them in the `BepInEx\unity-libs\` folder. 
+1. Install [BepInEx](https://github.com/BepInEx/BepInEx) for your game. For IL2CPP you should use [BepInEx 6 (Bleeding Edge)](https://builds.bepis.io/projects/bepinex_be), for Mono you should use [BepInEx 5](https://github.com/BepInEx/BepInEx/releases) (until Mono support stabilizes in BepInEx 6).
+2. Download the UnityExplorer release for BepInEx IL2CPP or Mono above.
+3. Take the `UnityExplorer.BIE.___.dll` file and put it in `[GameFolder]\BepInEx\plugins\`
+4. In IL2CPP, you will need to download the [Unity libs](https://github.com/LavaGang/Unity-Runtime-Libraries) for the game's Unity version and put them in the `BepInEx\unity-libs\` folder. 
 
 ### MelonLoader
 
-0. Install [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) 0.3+ for your game. Version 0.3 is currently in pre-release, so you must "Enable ALPHA Releases" in your MelonLoader Installer settings to see the option for it.
-1. Download the UnityExplorer release for MelonLoader IL2CPP or Mono above.
-2. Take the `UnityExplorer.ML.___.dll` file and put it in the `[GameFolder]\Mods\` folder.
+1. Install [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) 0.3+ for your game. Version 0.3 is currently in pre-release, so you must "Enable ALPHA Releases" in your MelonLoader Installer settings to see the option for it.
+2. Download the UnityExplorer release for MelonLoader IL2CPP or Mono above.
+3. Take the `UnityExplorer.ML.___.dll` file and put it in the `[GameFolder]\Mods\` folder.
 
 ### Standalone
 
-The standalone release is based on the BepInEx build, so it requires Harmony 2.0 (or HarmonyX) to function properly.
+The standalone release requires you to also load `0Harmony.dll` (HarmonyX, from the `lib\` folder) to function properly, and the IL2CPP also requires `UnhollowerBaseLib.dll` as well. The Mono release should be fairly easy to use with any loader, but the IL2CPP one may be tricky, I'd recommend just using BepInEx or MelonLoader for IL2CPP.
 
-0. Load the DLL from your mod or inject it. You must also make sure `0Harmony.dll` is loaded, and `UnhollowerBaseLib.dll` for IL2CPP as well.
-1. Create an instance of Unity Explorer with `UnityExplorer.ExplorerStandalone.CreateInstance();`
-2. Optionally subscribe to the `ExplorerStandalone.OnLog` event to handle logging if you wish.
+1. Load the UnityExplorer DLL from your mod or inject it, as well as `0Harmony.dll` and `UnhollowerBaseLib.dll` as required.
+2. Create an instance of Unity Explorer with `UnityExplorer.ExplorerStandalone.CreateInstance();`
+3. Optionally subscribe to the `ExplorerStandalone.OnLog` event to handle logging if you wish.
 
 ## Issues and contributions
 
@@ -123,31 +123,6 @@ Depending on the release you are using, the config file will be found at:
 * BepInEx: `BepInEx\config\com.sinai.unityexplorer.cfg`
 * MelonLoader: `UserData\MelonPreferences.cfg`
 * Standalone `{DLL_location}\UnityExplorer\config.ini`
-
-`Main Menu Toggle` (KeyCode)
-* Default: `F7`
-* See [this article](https://docs.unity3d.com/ScriptReference/KeyCode.html) for a full list of all accepted KeyCodes.
-
-`Force Unlock Mouse` (bool)
-* Default: `true`
-* Forces the cursor to be unlocked and visible while the UnityExplorer menu is open, and prevents anything else taking control.
-
-`Default Page Limit` (int)
-* Default: `25`
-* Sets the default items per page when viewing lists or search results.
-* <b>Requires a restart to take effect</b>, apart from Reflection Inspector tabs.
-
-`Default Output Path` (string)
-* Default: `Mods\UnityExplorer`
-* Where output is generated to, by default (for Texture PNG saving, etc).
-
-`Log Unity Debug` (bool)
-* Default: `false`
-* Listens for Unity `Debug.Log` messages and prints them to UnityExplorer's log.
-
-`Hide on Startup` (bool)
-* Default: `false`
-* If true, UnityExplorer will be hidden when you start the game, you must open it via the keybind.
 
 ## Building
 
