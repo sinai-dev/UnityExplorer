@@ -7,6 +7,7 @@ using System.Linq;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI.Main.CSConsole;
 using UnityExplorer.UI.Main.Home;
+using UnityExplorer.UI.Inspectors;
 
 namespace UnityExplorer.Core.CSharp
 {

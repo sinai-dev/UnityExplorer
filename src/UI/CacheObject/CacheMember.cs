@@ -10,7 +10,7 @@ using UnityExplorer.Core.Runtime;
 using UnityExplorer.Core;
 using UnityExplorer.UI.Utility;
 using UnityExplorer.UI.InteractiveValues;
-using UnityExplorer.UI.Main.Home.Inspectors.Reflection;
+using UnityExplorer.UI.Inspectors.Reflection;
 
 namespace UnityExplorer.UI.CacheObject
 {
@@ -86,7 +86,7 @@ namespace UnityExplorer.UI.CacheObject
             {
                 try
                 {
-                    Type baseType = ReflectionUtility.GetType(IValue.Value) ?? FallbackType;
+                    Type baseType = ReflectionUtility.GetActualType(IValue.Value) ?? FallbackType;
 
                     if (!ReflectionProvider.Instance.IsReflectionSupported(baseType))
                         throw new Exception("Type not supported with reflection");
@@ -94,7 +94,7 @@ namespace UnityExplorer.UI.CacheObject
                     UpdateReflection();
 
                     if (IValue.Value != null)
-                        IValue.Value = IValue.Value.Cast(ReflectionUtility.GetType(IValue.Value));
+                        IValue.Value = IValue.Value.Cast(ReflectionUtility.GetActualType(IValue.Value));
                 }
                 catch (Exception e)
                 {

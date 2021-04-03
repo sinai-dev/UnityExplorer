@@ -13,6 +13,7 @@ using UnityExplorer.UI.Utility;
 using UnityExplorer.UI.Main.Search;
 using System.IO;
 using UnityExplorer.Core;
+using UnityExplorer.UI.Inspectors;
 
 namespace UnityExplorer.UI.Main.Home
 {

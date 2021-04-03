@@ -55,7 +55,7 @@ namespace UnityExplorer.UI.CacheObject
             // if the type has changed fundamentally, make a new interactivevalue for it
             var type = value == null 
                 ? FallbackType
-                : ReflectionUtility.GetType(value);
+                : ReflectionUtility.GetActualType(value);
 
             var ivalueType = InteractiveValue.GetIValueForType(type);
 

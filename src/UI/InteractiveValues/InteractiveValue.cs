@@ -12,6 +12,7 @@ using UnityExplorer.UI;
 using UnityExplorer.UI.Utility;
 using UnityExplorer.UI.CacheObject;
 using UnityExplorer.UI.Main.Home;
+using UnityExplorer.UI.Inspectors;
 
 namespace UnityExplorer.UI.InteractiveValues
 {
@@ -66,7 +67,7 @@ namespace UnityExplorer.UI.InteractiveValues
 
         public static InteractiveValue Create(object value, Type fallbackType)
         {
-            var type = ReflectionUtility.GetType(value) ?? fallbackType;
+            var type = ReflectionUtility.GetActualType(value) ?? fallbackType;
             var iType = GetIValueForType(type);
 
             return (InteractiveValue)Activator.CreateInstance(iType, new object[] { value, type });

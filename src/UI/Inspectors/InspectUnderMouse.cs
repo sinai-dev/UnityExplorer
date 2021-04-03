@@ -11,6 +11,7 @@ using UnityExplorer.Core.Input;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Main;
+using UnityExplorer.UI.Inspectors;
 
 namespace UnityExplorer.UI.Main.Home
 {

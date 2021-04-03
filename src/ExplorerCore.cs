@@ -12,7 +12,7 @@ namespace UnityExplorer
     public class ExplorerCore
     {
         public const string NAME = "UnityExplorer";
-        public const string VERSION = "3.3.4";
+        public const string VERSION = "3.3.5";
         public const string AUTHOR = "Sinai";
         public const string GUID = "com.sinai.unityexplorer";
 
@@ -46,6 +46,8 @@ namespace UnityExplorer
             UIManager.Init();
 
             Log($"{NAME} {VERSION} initialized.");
+
+            // InspectorManager.Instance.Inspect(typeof(TestClass));
         }
 
         public static void Update()

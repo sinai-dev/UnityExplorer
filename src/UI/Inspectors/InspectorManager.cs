@@ -9,12 +9,11 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI.Main.Home;
-using UnityExplorer.UI.Main.Home.Inspectors;
 using UnityExplorer.UI.CacheObject;
-using UnityExplorer.UI.Main.Home.Inspectors.GameObjects;
-using UnityExplorer.UI.Main.Home.Inspectors.Reflection;
+using UnityExplorer.UI.Inspectors.GameObjects;
+using UnityExplorer.UI.Inspectors.Reflection;
 
-namespace UnityExplorer.UI.Main.Home
+namespace UnityExplorer.UI.Inspectors
 {
     public class InspectorManager
     {

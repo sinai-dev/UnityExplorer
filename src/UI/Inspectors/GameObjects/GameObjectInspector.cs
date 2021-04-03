@@ -7,7 +7,7 @@ using UnityEngine.UI;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.Core.Unity;
 
-namespace UnityExplorer.UI.Main.Home.Inspectors.GameObjects
+namespace UnityExplorer.UI.Inspectors.GameObjects
 {
     public class GameObjectInspector : InspectorBase
     {

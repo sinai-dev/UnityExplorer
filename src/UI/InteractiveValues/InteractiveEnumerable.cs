@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityExplorer.Core;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Unity;
 using UnityExplorer.UI;
@@ -38,11 +39,11 @@ namespace UnityExplorer.UI.InteractiveValues
 
         internal IEnumerable RefIEnumerable;
         internal IList RefIList;
-#if CPP
-        internal Il2CppSystem.Collections.ICollection CppICollection;
-#else
-        internal ICollection CppICollection = null;
-#endif
+//#if CPP
+//        internal object CppICollection;
+//#else
+//        internal object CppICollection = null;
+//#endif
 
         internal readonly Type m_baseEntryType;
 
@@ -55,13 +56,17 @@ namespace UnityExplorer.UI.InteractiveValues
             RefIEnumerable = Value as IEnumerable;
             RefIList = Value as IList;
 
-#if CPP
-            if (Value != null && RefIList == null)
-            {
-                try { CppICollection = (Value as Il2CppSystem.Object).TryCast<Il2CppSystem.Collections.ICollection>(); }
-                catch { }
-            }
-#endif
+//#if CPP
+//            if (Value != null && RefIList == null)
+//            {
+//                try 
+//                {
+//                    var type = typeof(Il2CppSystem.Collections.ICollection).MakeGenericType(this.m_baseEntryType);
+//                    CppICollection = (Value as Il2CppSystem.Object).Cast(type);
+//                }
+//                catch { }
+//            }
+//#endif
 
             if (m_subContentParent.activeSelf)
             {
@@ -91,8 +96,8 @@ namespace UnityExplorer.UI.InteractiveValues
             if (Value != null)
             {
                 string count = "?";
-                if (m_recacheWanted && (RefIList != null || CppICollection != null))
-                    count = RefIList?.Count.ToString() ?? CppICollection.Count.ToString();
+                if (m_recacheWanted && RefIList != null)// || CppICollection != null))
+                    count = RefIList.Count.ToString();// ?? CppICollection.Count.ToString();
                 else if (!m_recacheWanted)
                     count = m_entries.Count.ToString();
 

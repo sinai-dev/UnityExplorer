@@ -9,7 +9,7 @@ using UnityExplorer.Core;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Runtime;
 
-namespace UnityExplorer.UI.Main.Home.Inspectors.Reflection
+namespace UnityExplorer.UI.Inspectors.Reflection
 {
     public enum MemberScopes
     {

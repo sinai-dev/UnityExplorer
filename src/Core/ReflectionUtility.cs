@@ -7,7 +7,7 @@ using System.Reflection;
 using BF = System.Reflection.BindingFlags;
 using UnityExplorer.Core.Runtime;
 
-namespace UnityExplorer.Core
+namespace UnityExplorer
 {
     public static class ReflectionUtility
     {
@@ -18,7 +18,7 @@ namespace UnityExplorer.Core
         /// </summary>
         /// <param name="obj">The object to get the true Type for.</param>
         /// <returns>The most accurate Type of the object which could be identified.</returns>
-        public static Type GetType(this object obj)
+        public static Type GetActualType(this object obj)
         {
             if (obj == null)
                 return null;
@@ -32,7 +32,7 @@ namespace UnityExplorer.Core
         /// <param name="obj">The object to cast</param>
         /// <returns>The object, cast to the underlying Type if possible, otherwise the original object.</returns>
         public static object Cast(this object obj)
-            => ReflectionProvider.Instance.Cast(obj, GetType(obj));
+            => ReflectionProvider.Instance.Cast(obj, GetActualType(obj));
 
         /// <summary>
         /// Cast an object to a Type, if possible.
@@ -105,7 +105,7 @@ namespace UnityExplorer.Core
         /// <summary>
         /// Get all base types of the provided Type, including itself.
         /// </summary>
-        public static Type[] GetAllBaseTypes(this object obj) => GetAllBaseTypes(GetType(obj));
+        public static Type[] GetAllBaseTypes(this object obj) => GetAllBaseTypes(GetActualType(obj));
 
         /// <summary>
         /// Get all base types of the provided Type, including itself.

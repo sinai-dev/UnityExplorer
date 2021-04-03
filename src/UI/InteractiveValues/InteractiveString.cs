@@ -23,6 +23,14 @@ namespace UnityExplorer.UI.InteractiveValues
 
         public override void OnValueUpdated()
         {
+#if CPP
+            // strings boxed as Il2CppSystem.Objects can behave weirdly.
+            // GetActualType will find they are a string, but if its boxed
+            // then we need to unbox it like this...
+            if (!(Value is string))
+                Value = ((Il2CppSystem.Object)Value).ToString();
+#endif
+
             base.OnValueUpdated();
         }
 

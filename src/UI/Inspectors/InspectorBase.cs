@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Core.Unity;
 
-namespace UnityExplorer.UI.Main.Home.Inspectors
+namespace UnityExplorer.UI.Inspectors
 {
     public abstract class InspectorBase
     {

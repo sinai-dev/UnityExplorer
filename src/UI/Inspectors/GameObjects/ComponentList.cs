@@ -8,7 +8,7 @@ using UnityExplorer.Core;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI.Utility;
 
-namespace UnityExplorer.UI.Main.Home.Inspectors.GameObjects
+namespace UnityExplorer.UI.Inspectors.GameObjects
 {
     public class ComponentList
     {
@@ -75,7 +75,7 @@ namespace UnityExplorer.UI.Main.Home.Inspectors.GameObjects
 
                     var text = s_compListTexts[i];
 
-                    text.text = SignatureHighlighter.ParseFullSyntax(ReflectionUtility.GetType(comp), true);
+                    text.text = SignatureHighlighter.ParseFullSyntax(ReflectionUtility.GetActualType(comp), true);
 
                     var toggle = s_compToggles[i];
 #if CPP

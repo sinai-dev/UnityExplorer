@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace UnityExplorer.UI.Main.Home.Inspectors.Reflection
+namespace UnityExplorer.UI.Inspectors.Reflection
 {
     public class StaticInspector : ReflectionInspector
     {

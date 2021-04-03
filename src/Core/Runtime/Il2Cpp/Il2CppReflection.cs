@@ -163,7 +163,7 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             IntPtr castFromPtr = il2cpp_object_get_class(ilObj.Pointer);
 
             if (!il2cpp_class_is_assignable_from(castToPtr, castFromPtr))
-                return obj;
+                return null;
 
             if (RuntimeSpecificsStore.IsInjected(castToPtr))
                 return UnhollowerBaseLib.Runtime.ClassInjectorBase.GetMonoObjectFromIl2CppPointer(ilObj.Pointer);

@@ -217,7 +217,6 @@ namespace UnityExplorer.UI.Main
             {
                 LogUnity = val;
                 ConfigManager.Log_Unity_Debug.Value = val;
-                ConfigManager.Handler.SaveConfig();
             });
 
             ConfigManager.Log_Unity_Debug.OnValueChanged += (bool val) => { unityToggle.isOn = val; };

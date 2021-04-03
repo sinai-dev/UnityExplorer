@@ -10,6 +10,7 @@ using UnityExplorer.Core;
 using UnityExplorer.UI.Utility;
 using UnityExplorer.Core.Search;
 using UnityExplorer.UI.Main.Home;
+using UnityExplorer.UI.Inspectors;
 
 namespace UnityExplorer.UI.Main.Search
 {
@@ -129,7 +130,7 @@ namespace UnityExplorer.UI.Main.Search
 
                     if (m_context != SearchContext.StaticClass)
                     {
-                        var name = SignatureHighlighter.ParseFullSyntax(ReflectionUtility.GetType(obj), true);
+                        var name = SignatureHighlighter.ParseFullSyntax(ReflectionUtility.GetActualType(obj), true);
 
                         if (unityObj && m_context != SearchContext.Singleton)
                         {

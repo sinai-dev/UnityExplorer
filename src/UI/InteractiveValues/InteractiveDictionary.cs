@@ -218,32 +218,37 @@ namespace UnityExplorer.UI.InteractiveValues
 
         private IDictionary EnumerateWithReflection()
         {
-            var valueType = ReflectionUtility.GetType(Value);
+            var valueType = ReflectionUtility.GetActualType(Value);
 
-            // get keys and values
-            var keys = valueType.GetProperty("Keys").GetValue(Value, null);
-            var values = valueType.GetProperty("Values").GetValue(Value, null);
-
-            // create lists to hold them
             var keyList = new List<object>();
             var valueList = new List<object>();
 
-            // store entries with reflection
-            EnumerateCollection(keys, keyList);
-            EnumerateCollection(values, valueList);
+            var hashtable = Value.Cast(typeof(Il2CppSystem.Collections.Hashtable)) as Il2CppSystem.Collections.Hashtable;
 
-            // make actual mono dictionary
-            var dict = (IDictionary)Activator.CreateInstance(typeof(Dictionary<,>)
-                                             .MakeGenericType(m_typeOfKeys, m_typeofValues));
+            if (hashtable != null)
+            {
+                EnumerateCppHashtable(hashtable, keyList, valueList);
+            }
+            else
+            {
+                var keys = valueType.GetProperty("Keys").GetValue(Value, null);
+                var values = valueType.GetProperty("Values").GetValue(Value, null);
 
-            // finally iterate into mono dictionary
+                EnumerateCppIDictionary(keys, keyList);
+                EnumerateCppIDictionary(values, valueList);
+            }
+
+            var dict = Activator.CreateInstance(typeof(Dictionary<,>)
+                                .MakeGenericType(m_typeOfKeys, m_typeofValues))
+                                as IDictionary;
+
             for (int i = 0; i < keyList.Count; i++)
                 dict.Add(keyList[i], valueList[i]);
 
             return dict;
         }
 
-        private void EnumerateCollection(object collection, List<object> list)
+        private void EnumerateCppIDictionary(object collection, List<object> list)
         {
             // invoke GetEnumerator
             var enumerator = collection.GetType().GetMethod("GetEnumerator").Invoke(collection, null);
@@ -258,11 +263,23 @@ namespace UnityExplorer.UI.InteractiveValues
                 list.Add(current.GetValue(enumerator, null));
             }
         }
+
+        private void EnumerateCppHashtable(Il2CppSystem.Collections.Hashtable hashtable, List<object> keys, List<object> values)
+        {
+            for (int i = 0; i < hashtable.buckets.Count; i++)
+            {
+                var bucket = hashtable.buckets[i];
+                if (bucket == null || bucket.key == null)
+                    continue;
+                keys.Add(bucket.key);
+                values.Add(bucket.val);
+            }
+        }
 #endif
 
-#endregion
+        #endregion
 
-#region UI CONSTRUCTION
+        #region UI CONSTRUCTION
 
         internal GameObject m_listContent;
         internal LayoutElement m_listLayout;

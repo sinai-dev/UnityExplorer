@@ -9,9 +9,11 @@ using UnityExplorer.Core;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI.CacheObject;
+using UnityExplorer.UI.Main;
+using UnityExplorer.UI.Main.Home;
 using UnityExplorer.UI.Utility;
 
-namespace UnityExplorer.UI.Main.Home.Inspectors.Reflection
+namespace UnityExplorer.UI.Inspectors.Reflection
 {
     public class ReflectionInspector : InspectorBase
     {
@@ -78,7 +80,7 @@ namespace UnityExplorer.UI.Main.Home.Inspectors.Reflection
             if (this is StaticInspector)
                 m_targetType = target as Type;
             else
-                m_targetType = ReflectionUtility.GetType(target);
+                m_targetType = ReflectionUtility.GetActualType(target);
 
             m_targetTypeShortName = SignatureHighlighter.ParseFullSyntax(m_targetType, false);
 
