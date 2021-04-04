@@ -9,6 +9,7 @@ using UnityExplorer.Core.Unity;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Utility;
 using UnityExplorer.UI.CacheObject;
+using UnityExplorer.Core.Runtime;
 
 namespace UnityExplorer.UI.InteractiveValues
 {
@@ -27,8 +28,8 @@ namespace UnityExplorer.UI.InteractiveValues
             // strings boxed as Il2CppSystem.Objects can behave weirdly.
             // GetActualType will find they are a string, but if its boxed
             // then we need to unbox it like this...
-            if (!(Value is string))
-                Value = ((Il2CppSystem.Object)Value).ToString();
+            if (!(Value is string) && Value is Il2CppSystem.Object cppobj)
+                Value = cppobj.ToString();
 #endif
 
             base.OnValueUpdated();
@@ -96,10 +97,18 @@ namespace UnityExplorer.UI.InteractiveValues
             m_labelLayout.flexibleWidth = 0;
         }
 
-        internal void OnApplyClicked()
+        internal void SetValueFromInput()
         {
             Value = m_valueInput.text;
+
+            if (!typeof(string).IsAssignableFrom(Owner.FallbackType))
+                ReflectionProvider.Instance.BoxStringToType(ref Value, Owner.FallbackType);
+            
             Owner.SetValue();
+
+            // revert back to string now
+            OnValueUpdated();
+
             RefreshUIForValue();
         }
 
@@ -170,7 +179,7 @@ namespace UnityExplorer.UI.InteractiveValues
 
             if (Owner.CanWrite)
             {
-                var apply = UIFactory.CreateButton(groupObj, "ApplyButton", "Apply", OnApplyClicked, new Color(0.2f, 0.2f, 0.2f));
+                var apply = UIFactory.CreateButton(groupObj, "ApplyButton", "Apply", SetValueFromInput, new Color(0.2f, 0.2f, 0.2f));
                 UIFactory.SetLayoutElement(apply.gameObject, minWidth: 50, minHeight: 25, flexibleWidth: 0);
             }
             else

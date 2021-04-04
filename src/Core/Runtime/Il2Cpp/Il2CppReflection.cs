@@ -154,21 +154,24 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
         /// <returns>The object, as the type (or a normal C# object) if successful or the input value if not.</returns>
         public static object Il2CppCast(object obj, Type castTo)
         {
-            if (!(obj is Il2CppSystem.Object ilObj))
+            if (!(obj is Il2CppSystem.Object cppObj))
                 return obj;
 
             if (!Il2CppTypeNotNull(castTo, out IntPtr castToPtr))
                 return obj;
 
-            IntPtr castFromPtr = il2cpp_object_get_class(ilObj.Pointer);
+            IntPtr castFromPtr = il2cpp_object_get_class(cppObj.Pointer);
 
             if (!il2cpp_class_is_assignable_from(castToPtr, castFromPtr))
                 return null;
 
             if (RuntimeSpecificsStore.IsInjected(castToPtr))
-                return UnhollowerBaseLib.Runtime.ClassInjectorBase.GetMonoObjectFromIl2CppPointer(ilObj.Pointer);
+                return UnhollowerBaseLib.Runtime.ClassInjectorBase.GetMonoObjectFromIl2CppPointer(cppObj.Pointer);
 
-            return Activator.CreateInstance(castTo, ilObj.Pointer);
+            if (castTo == typeof(string))
+                return cppObj.ToString();
+
+            return Activator.CreateInstance(castTo, cppObj.Pointer);
         }
 
         /// <summary>
@@ -317,6 +320,14 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             }
 
             return false;
+        }
+
+        public override void BoxStringToType(ref object value, Type castTo)
+        {
+            if (castTo == typeof(Il2CppSystem.String))
+                value = (Il2CppSystem.String)(value as string);
+            else
+                value = (Il2CppSystem.Object)(value as string);
         }
 
         // ~~~~~~~~~~ not used ~~~~~~~~~~~~

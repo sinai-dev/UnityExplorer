@@ -25,5 +25,7 @@ namespace UnityExplorer.Core.Runtime
         public abstract string ProcessTypeNameInString(Type type, string theString, ref string typeName);
 
         public abstract bool LoadModule(string module);
+
+        public abstract void BoxStringToType(ref object _string, Type castTo);
     }
 }

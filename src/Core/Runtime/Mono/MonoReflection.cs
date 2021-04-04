@@ -27,6 +27,9 @@ namespace UnityExplorer.Core.Runtime.Mono
 
         public override string ProcessTypeNameInString(Type type, string theString, ref string typeName)
             => theString;
+
+        // not necessary
+        public override void BoxStringToType(ref object _string, Type castTo) { }
     }
 }
 
