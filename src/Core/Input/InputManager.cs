@@ -27,7 +27,6 @@ namespace UnityExplorer.Core.Input
         public static bool GetMouseButton(int btn) => m_inputModule.GetMouseButton(btn);
 
         public static BaseInputModule UIInput => m_inputModule.UIModule;
-        public static PointerEventData InputPointerEvent => m_inputModule.InputPointerEvent;
 
         public static void ActivateUIModule() => m_inputModule.ActivateModule();
 
@@ -52,7 +51,7 @@ namespace UnityExplorer.Core.Input
 
             if (m_inputModule == null)
             {
-                ExplorerCore.LogWarning("Could not find any Input module!");
+                ExplorerCore.LogWarning("Could not find any Input Module Type!");
                 m_inputModule = new NoInput();
                 CurrentType = InputType.None;
             }

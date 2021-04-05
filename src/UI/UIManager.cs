@@ -140,6 +140,8 @@ namespace UnityExplorer.UI
                 ExplorerCore.Log("This game does not ship with the 'UI/Default' shader, using manual Default Shader...");
                 Graphic.defaultGraphicMaterial.shader = BackupShader;
             }
+            else
+                BackupShader = Graphic.defaultGraphicMaterial.shader;
 
             ConsoleFont = bundle.LoadAsset<Font>("CONSOLA");
 
@@ -148,9 +150,11 @@ namespace UnityExplorer.UI
 
         private static AssetBundle LoadExplorerUi(string id)
         {
-            var data = ReadFully(typeof(ExplorerCore)
+            var stream = typeof(ExplorerCore)
                 .Assembly
-                .GetManifestResourceStream($"UnityExplorer.Resources.explorerui.{id}.bundle"));
+                .GetManifestResourceStream($"UnityExplorer.Resources.explorerui.{id}.bundle");
+
+            var data = ReadFully(stream);
 
             return AssetBundle.LoadFromMemory(data);
         }

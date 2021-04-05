@@ -15,8 +15,6 @@ namespace UnityExplorer.Core.Input
 
         BaseInputModule UIModule { get; }
 
-        PointerEventData InputPointerEvent { get; }
-
         void AddUIInputModule();
         void ActivateModule();
     }

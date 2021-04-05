@@ -5,6 +5,10 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityExplorer.UI;
 using System.Collections.Generic;
+using UnityExplorer.UI.Inspectors;
+#if CPP
+using UnhollowerRuntimeLib;
+#endif
 
 namespace UnityExplorer.Core.Input
 {
@@ -131,41 +135,74 @@ namespace UnityExplorer.Core.Input
 
         // UI Input
 
-        //public Type TInputSystemUIInputModule 
-        //    => m_tUIInputModule 
-        //    ?? (m_tUIInputModule = ReflectionHelpers.GetTypeByName("UnityEngine.InputSystem.UI.InputSystemUIInputModule"));
-        //internal Type m_tUIInputModule;
+        public Type TInputSystemUIInputModule
+            => m_tUIInputModule
+            ?? (m_tUIInputModule = ReflectionUtility.GetTypeByName("UnityEngine.InputSystem.UI.InputSystemUIInputModule"));
+        internal Type m_tUIInputModule;
 
-        public BaseInputModule UIModule => null; // m_newInputModule;
-        //internal BaseInputModule m_newInputModule;
-
-        public PointerEventData InputPointerEvent => null;
+        public BaseInputModule UIModule => m_newInputModule;
+        internal BaseInputModule m_newInputModule;
 
         public void AddUIInputModule()
         {
-//            if (TInputSystemUIInputModule != null)
-//            {
-//#if CPP
-//                // m_newInputModule = UIManager.CanvasRoot.AddComponent(Il2CppType.From(TInputSystemUIInputModule)).TryCast<BaseInputModule>();
-//#else
-//                m_newInputModule = (BaseInputModule)UIManager.CanvasRoot.AddComponent(TInputSystemUIInputModule);
-//#endif
-//            }
-//            else
-//            {
-//                ExplorerCore.LogWarning("New input system: Could not find type by name 'UnityEngine.InputSystem.UI.InputSystemUIInputModule'");
-//            }
+            if (TInputSystemUIInputModule == null)
+            {
+                ExplorerCore.LogWarning("Unable to find UI Input Module Type, Input will not work!");
+                return;
+            }
+
+            var assetType = ReflectionUtility.GetTypeByName("UnityEngine.InputSystem.InputActionAsset");
+#if CPP
+                m_newInputModule = UIManager.CanvasRoot.AddComponent(Il2CppType.From(TInputSystemUIInputModule)).TryCast<BaseInputModule>();
+                var asset = ScriptableObject.CreateInstance(Il2CppType.From(assetType));
+#else
+            m_newInputModule = (BaseInputModule)UIManager.CanvasRoot.AddComponent(TInputSystemUIInputModule);
+            var asset = ScriptableObject.CreateInstance(assetType);
+#endif
+            inputExtensions = ReflectionUtility.GetTypeByName("UnityEngine.InputSystem.InputActionSetupExtensions");
+
+            var addMap = inputExtensions.GetMethod("AddActionMap", new Type[] { assetType, typeof(string) });
+            var map = addMap.Invoke(null, new object[] { asset, "UI" });
+
+            CreateAction(map, "point", new[] { "<Mouse>/position" }, "point");
+            CreateAction(map, "click", new[] { "<Mouse>/leftButton" }, "leftClick");
+            CreateAction(map, "rightClick", new[] { "<Mouse>/rightButton" }, "rightClick");
+            CreateAction(map, "scrollWheel", new[] { "<Mouse>/scroll" }, "scrollWheel");
+
+            UI_Enable = map.GetType().GetMethod("Enable");
+            UI_Enable.Invoke(map, new object[0]);
+            UI_ActionMap = map;
+        }
+
+        private Type inputExtensions;
+        private object UI_ActionMap;
+        private MethodInfo UI_Enable;
+
+        private void CreateAction(object map, string actionName, string[] bindings, string propertyName)
+        {
+            var addAction = inputExtensions.GetMethod("AddAction");
+            var pointAction = addAction.Invoke(null, new object[] { map, actionName, default, null, null, null, null, null });
+
+            var inputActionType = pointAction.GetType();
+            var addBinding = inputExtensions.GetMethod("AddBinding",
+                new Type[] { inputActionType, typeof(string), typeof(string), typeof(string), typeof(string) });
+
+            foreach (string binding in bindings)
+                addBinding.Invoke(null, new object[] { pointAction, binding, null, null, null });
+
+            var inputRef = ReflectionUtility.GetTypeByName("UnityEngine.InputSystem.InputActionReference")
+                            .GetMethod("Create")
+                            .Invoke(null, new object[] { pointAction });
+
+            TInputSystemUIInputModule
+                .GetProperty(propertyName)
+                .SetValue(m_newInputModule, inputRef, null);
         }
 
         public void ActivateModule()
         {
-//#if CPP
-//            // m_newInputModule.ActivateModule();
-//#else
-//            m_newInputModule.ActivateModule();
-//#endif
-
-
+            m_newInputModule.ActivateModule();
+            UI_Enable.Invoke(UI_ActionMap, new object[0]);
         }
     }
 }

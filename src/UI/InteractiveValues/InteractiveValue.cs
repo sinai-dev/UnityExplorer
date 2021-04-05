@@ -31,8 +31,8 @@ namespace UnityExplorer.UI.InteractiveValues
             // arbitrarily check some types, fastest methods first.
             if (type == typeof(bool))
                 return typeof(InteractiveBool);
-            // if type is primitive then it must be a number if its not a bool
-            else if (type.IsPrimitive)
+            // if type is primitive then it must be a number if its not a bool. Also check for decimal.
+            else if (type.IsPrimitive || type == typeof(decimal))
                 return typeof(InteractiveNumber);
             // check for strings
             else if (type == typeof(string))
