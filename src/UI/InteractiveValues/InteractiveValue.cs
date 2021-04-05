@@ -49,8 +49,8 @@ namespace UnityExplorer.UI.InteractiveValues
             // check for unity struct types
             else if (typeof(Color).IsAssignableFrom(type))
                 return typeof(InteractiveColor);
-            else if (InteractiveUnityStruct.SupportsType(type))
-                return typeof(InteractiveUnityStruct);
+            else if (InteractiveFloatStruct.IsTypeSupported(type))
+                return typeof(InteractiveFloatStruct);
             // check Transform, force InteractiveValue so they dont become InteractiveEnumerables.
             else if (typeof(Transform).IsAssignableFrom(type))
                 return typeof(InteractiveValue);

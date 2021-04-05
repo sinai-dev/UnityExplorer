@@ -273,7 +273,7 @@
     <Compile Include="UI\InteractiveValues\InteractiveFlags.cs" />
     <Compile Include="UI\InteractiveValues\InteractiveNumber.cs" />
     <Compile Include="UI\InteractiveValues\InteractiveString.cs" />
-    <Compile Include="UI\InteractiveValues\InteractiveUnityStruct.cs" />
+    <Compile Include="UI\InteractiveValues\InteractiveFloatStruct.cs" />
     <Compile Include="UI\InteractiveValues\InteractiveValue.cs" />
     <Compile Include="UI\Main\BaseMenuPage.cs" />
     <Compile Include="UI\Main\CSConsole\AutoCompleter.cs" />

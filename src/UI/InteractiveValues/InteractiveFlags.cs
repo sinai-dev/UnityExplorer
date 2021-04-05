@@ -48,6 +48,8 @@ namespace UnityExplorer.UI.InteractiveValues
             GetDefaultLabel();
             m_baseLabel.text = DefaultLabel;
 
+            base.RefreshUIForValue();
+
             if (m_subContentConstructed)
             {
                 for (int i = 0; i < m_values.Length; i++)
