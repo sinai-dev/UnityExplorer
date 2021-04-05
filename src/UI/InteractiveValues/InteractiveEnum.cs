@@ -94,7 +94,7 @@ namespace UnityExplorer.UI.InteractiveValues
         {
             base.RefreshUIForValue();
 
-            if (m_subContentConstructed)
+            if (m_subContentConstructed && !(this is InteractiveFlags))
             {
                 m_dropdownText.text = Value?.ToString() ?? "<no value set>";
             }

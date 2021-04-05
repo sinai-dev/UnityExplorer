@@ -7,6 +7,8 @@ namespace UnityExplorer
 {
     public static class TestClass
     {
+        public static UI.Main.PanelDragger.ResizeTypes flags = UI.Main.PanelDragger.ResizeTypes.NONE;
+
 #if CPP
         public static string testStringOne = "Test";
         public static Il2CppSystem.Object testStringTwo = "string boxed as cpp object";

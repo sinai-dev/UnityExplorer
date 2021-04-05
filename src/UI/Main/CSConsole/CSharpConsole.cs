@@ -59,7 +59,7 @@ namespace UnityExplorer.UI.Main.CSConsole
 
                 ResetConsole(false);
                 // Make sure compiler is supported on this platform
-                Evaluator.Compile("");
+                Evaluator.Compile("new object();");
 
                 return true;
             }
@@ -72,6 +72,8 @@ namespace UnityExplorer.UI.Main.CSConsole
                     info += $" of an unknown error.\r\n({e.ReflectionExToString()})";
 
                 ExplorerCore.LogWarning(info);
+
+                this.RefNavbarButton.GetComponentInChildren<Text>().text += " (disabled)";
 
                 return false;
             }

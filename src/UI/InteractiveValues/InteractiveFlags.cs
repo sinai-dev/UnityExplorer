@@ -26,8 +26,6 @@ namespace UnityExplorer.UI.InteractiveValues
 
         public override void OnValueUpdated()
         {
-            base.OnValueUpdated();
-
             if (Owner.CanWrite)
             {
                 var enabledNames = new List<string>();
@@ -37,10 +35,10 @@ namespace UnityExplorer.UI.InteractiveValues
                     enabledNames.AddRange(enabled);
 
                 for (int i = 0; i < m_values.Length; i++)
-                {
                     m_enabledFlags[i] = enabledNames.Contains(m_values[i].Value);
-                }
             }
+
+            base.OnValueUpdated();
         }
 
         public override void RefreshUIForValue()

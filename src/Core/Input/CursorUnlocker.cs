@@ -89,7 +89,7 @@ namespace UnityExplorer.Core.Input
 
         public static void SetEventSystem()
         {
-            // temp disabled for new InputSystem
+            // not overriding EventSystem for new InputSystem, dont seem to need to.
             if (InputManager.CurrentType == InputType.InputSystem)
                 return;
 
@@ -112,6 +112,7 @@ namespace UnityExplorer.Core.Input
 
         public static void ReleaseEventSystem()
         {
+            // not overriding EventSystem for new InputSystem, dont seem to need to.
             if (InputManager.CurrentType == InputType.InputSystem)
                 return;
 
