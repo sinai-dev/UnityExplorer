@@ -61,6 +61,9 @@ namespace UnityExplorer.UI.InteractiveValues
             if (!type.IsValueType)
                 return false;
 
+            if (string.IsNullOrEmpty(type.AssemblyQualifiedName))
+                return false;
+
             if (_typeSupportCache.TryGetValue(type.AssemblyQualifiedName, out bool ret))
                 return ret;
 
