@@ -44,6 +44,31 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             }
         }
 
+        public override void BoxStringToType(ref object value, Type castTo)
+        {
+            if (castTo == typeof(Il2CppSystem.String))
+                value = (Il2CppSystem.String)(value as string);
+            else
+                value = (Il2CppSystem.Object)(value as string);
+        }
+
+        public override string UnboxString(object value)
+        {
+            if (value is string s)
+                return s;
+
+            s = null;
+            // strings boxed as Il2CppSystem.Objects can behave weirdly.
+            // GetActualType will find they are a string, but if its boxed
+            // then we need to unbox it like this...
+            if (value is Il2CppSystem.Object cppObject)
+                s = cppObject.ToString();
+            else if (value is Il2CppSystem.String cppString)
+                s = cppString;
+
+            return s;
+        }
+
         public override string ProcessTypeNameInString(Type type, string theString, ref string typeName)
         {
             if (!Il2CppTypeNotNull(type))
@@ -334,64 +359,6 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             return false;
         }
 
-        public override void BoxStringToType(ref object value, Type castTo)
-        {
-            if (castTo == typeof(Il2CppSystem.String))
-                value = (Il2CppSystem.String)(value as string);
-            else
-                value = (Il2CppSystem.Object)(value as string);
-        }
-
-        // ~~~~~~~~~~ not used ~~~~~~~~~~~~
-
-        // cached il2cpp unbox methods
-        internal static readonly Dictionary<string, MethodInfo> s_unboxMethods = new Dictionary<string, MethodInfo>();
-
-        /// <summary>
-        /// Attempt to unbox the object to the underlying struct type.
-        /// </summary>
-        /// <param name="obj">The object which is a struct underneath.</param>
-        /// <returns>The struct if successful, otherwise null.</returns>
-        public static object Unbox(object obj) => Unbox(obj, Instance.GetActualType(obj));
-
-        /// <summary>
-        /// Attempt to unbox the object to the struct type.
-        /// </summary>
-        /// <param name="obj">The object which is a struct underneath.</param>
-        /// <param name="type">The type of the struct you want to unbox to.</param>
-        /// <returns>The struct if successful, otherwise null.</returns>
-        public static object Unbox(object obj, Type type)
-        {
-            if (!type.IsValueType)
-                return null;
-
-            if (!(obj is Il2CppSystem.Object))
-                return obj;
-
-            var name = type.AssemblyQualifiedName;
-
-            if (!s_unboxMethods.ContainsKey(name))
-            {
-                s_unboxMethods.Add(name, typeof(Il2CppObjectBase)
-                                            .GetMethod("Unbox")
-                                            .MakeGenericMethod(type));
-            }
-
-            return s_unboxMethods[name].Invoke(obj, new object[0]);
-        }
-
-        public override string UnboxString(object value)
-        {
-            string s = null;
-            // strings boxed as Il2CppSystem.Objects can behave weirdly.
-            // GetActualType will find they are a string, but if its boxed
-            // then we need to unbox it like this...
-            if (!(value is string) && value is Il2CppSystem.Object cppobj)
-                s = cppobj.ToString();
-
-            return s;
-        }
-
         internal static readonly Dictionary<Type, MethodInfo> s_getEnumeratorMethods = new Dictionary<Type, MethodInfo>();
 
         internal static readonly Dictionary<Type, EnumeratorInfo> s_enumeratorInfos = new Dictionary<Type, EnumeratorInfo>();
@@ -496,6 +463,44 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
                 keys.Add(bucket.key);
                 values.Add(bucket.val);
             }
+        }
+
+        // ~~~~~~~~~~ not used ~~~~~~~~~~~~
+
+        // cached il2cpp unbox methods
+        internal static readonly Dictionary<string, MethodInfo> s_unboxMethods = new Dictionary<string, MethodInfo>();
+
+        /// <summary>
+        /// Attempt to unbox the object to the underlying struct type.
+        /// </summary>
+        /// <param name="obj">The object which is a struct underneath.</param>
+        /// <returns>The struct if successful, otherwise null.</returns>
+        public static object Unbox(object obj) => Unbox(obj, Instance.GetActualType(obj));
+
+        /// <summary>
+        /// Attempt to unbox the object to the struct type.
+        /// </summary>
+        /// <param name="obj">The object which is a struct underneath.</param>
+        /// <param name="type">The type of the struct you want to unbox to.</param>
+        /// <returns>The struct if successful, otherwise null.</returns>
+        public static object Unbox(object obj, Type type)
+        {
+            if (!type.IsValueType)
+                return null;
+
+            if (!(obj is Il2CppSystem.Object))
+                return obj;
+
+            var name = type.AssemblyQualifiedName;
+
+            if (!s_unboxMethods.ContainsKey(name))
+            {
+                s_unboxMethods.Add(name, typeof(Il2CppObjectBase)
+                                            .GetMethod("Unbox")
+                                            .MakeGenericMethod(type));
+            }
+
+            return s_unboxMethods[name].Invoke(obj, new object[0]);
         }
     }
 }

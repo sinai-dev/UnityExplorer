@@ -24,7 +24,8 @@ namespace UnityExplorer.UI.InteractiveValues
 
         public override void OnValueUpdated()
         {
-            Value = RuntimeProvider.Instance.Reflection.UnboxString(Value);
+            if (!(Value is string) && Value != null)
+                Value = RuntimeProvider.Instance.Reflection.UnboxString(Value);
 
             base.OnValueUpdated();
         }
