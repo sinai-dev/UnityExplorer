@@ -17,6 +17,7 @@ namespace UnityExplorer.UI.Main.Search
     public class SearchPage : BaseMenuPage
     {
         public override string Name => "Search";
+        public override MenuPages Type => MenuPages.Search;
 
         public static SearchPage Instance;
 

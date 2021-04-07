@@ -13,6 +13,8 @@ namespace UnityExplorer.UI.Main.Home
 
         public static HomePage Instance { get; internal set; }
 
+        public override MenuPages Type => MenuPages.Home;
+
         public override bool Init()
         {
             Instance = this;

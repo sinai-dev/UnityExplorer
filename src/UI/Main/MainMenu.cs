@@ -26,7 +26,7 @@ namespace UnityExplorer.UI.Main
         public readonly List<BaseMenuPage> Pages = new List<BaseMenuPage>();
         private BaseMenuPage m_activePage;
 
-        public static Action<int> OnActiveTabChanged;
+        public static Action<MenuPages> OnActiveTabChanged;
 
         // Navbar buttons
         private Button m_lastNavButtonPressed;
@@ -37,8 +37,6 @@ namespace UnityExplorer.UI.Main
         internal Vector3 initPos;
         internal bool pageLayoutInit;
         internal int layoutInitIndex;
-
-        private int origDesiredPage = -1;
 
         public static void Create()
         {
@@ -67,6 +65,7 @@ namespace UnityExplorer.UI.Main
 
                 if (!page.Init())
                 {
+                    page.WasDisabled = true;
                     // page init failed.
                     Pages.RemoveAt(i);
                     i--;
@@ -88,9 +87,6 @@ namespace UnityExplorer.UI.Main
         {
             if (!pageLayoutInit)
             {
-                if (origDesiredPage == -1)
-                    origDesiredPage = ConfigManager.Last_Active_Tab?.Value ?? 0;
-
                 if (layoutInitIndex < Pages.Count)
                 {
                     SetPage(Pages[layoutInitIndex]);
@@ -100,7 +96,8 @@ namespace UnityExplorer.UI.Main
                 {
                     pageLayoutInit = true;
                     MainPanel.transform.position = initPos;
-                    SetPage(Pages[origDesiredPage]);
+
+                    SetPage(ConfigManager.Default_Tab.Value);
                 }
                 return;
             }
@@ -108,9 +105,17 @@ namespace UnityExplorer.UI.Main
             m_activePage?.Update();
         }
 
+        public void SetPage(MenuPages page)
+        {
+            var pageObj = Pages.Find(it => it.Type == page);
+            if (pageObj == null || pageObj.WasDisabled)
+                return;
+            SetPage(pageObj);
+        }
+
         public void SetPage(BaseMenuPage page)
         {
-            if (page == null || m_activePage == page)
+            if (page == null || m_activePage == page || page.WasDisabled)
                 return;
 
             m_activePage?.Content?.SetActive(false);
@@ -131,7 +136,7 @@ namespace UnityExplorer.UI.Main
 
             m_lastNavButtonPressed = button;
 
-            OnActiveTabChanged?.Invoke(Pages.IndexOf(m_activePage));
+            OnActiveTabChanged?.Invoke(m_activePage.Type);
         }
 
         internal void SetButtonActiveColors(Button button)

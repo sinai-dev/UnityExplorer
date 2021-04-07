@@ -12,6 +12,7 @@ namespace UnityExplorer.UI.Main.Options
     public class OptionsPage : BaseMenuPage
     {
         public override string Name => "Options";
+        public override MenuPages Type => MenuPages.Options;
 
         internal static readonly List<CacheConfigEntry> _cachedConfigEntries = new List<CacheConfigEntry>();
 

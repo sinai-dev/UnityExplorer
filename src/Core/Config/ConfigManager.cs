@@ -17,18 +17,18 @@ namespace UnityExplorer.Core.Config
         // See the UnityExplorer.Loader namespace for the implementations.
         public static ConfigHandler Handler { get; private set; }
 
-        public static ConfigElement<KeyCode> Main_Menu_Toggle;
-        public static ConfigElement<bool>    Force_Unlock_Mouse;
-        public static ConfigElement<int>     Default_Page_Limit;
-        public static ConfigElement<string>  Default_Output_Path;
-        public static ConfigElement<bool>    Log_Unity_Debug;
-        public static ConfigElement<bool>    Hide_On_Startup;
+        public static ConfigElement<KeyCode>    Main_Menu_Toggle;
+        public static ConfigElement<bool>       Force_Unlock_Mouse;
+        public static ConfigElement<MenuPages>  Default_Tab;
+        public static ConfigElement<int>        Default_Page_Limit;
+        public static ConfigElement<string>     Default_Output_Path;
+        public static ConfigElement<bool>       Log_Unity_Debug;
+        public static ConfigElement<bool>       Hide_On_Startup;
 
-        public static ConfigElement<string>  Last_Window_Anchors;
-        public static ConfigElement<string>  Last_Window_Position;
-        public static ConfigElement<int>     Last_Active_Tab;
-        public static ConfigElement<bool>    Last_DebugConsole_State;
-        public static ConfigElement<bool>    Last_SceneExplorer_State;
+        public static ConfigElement<string>     Last_Window_Anchors;
+        public static ConfigElement<string>     Last_Window_Position;
+        public static ConfigElement<bool>       Last_DebugConsole_State;
+        public static ConfigElement<bool>       Last_SceneExplorer_State;
 
         internal static readonly Dictionary<string, IConfigElement> ConfigElements = new Dictionary<string, IConfigElement>();
 
@@ -44,7 +44,6 @@ namespace UnityExplorer.Core.Config
             SceneExplorer.OnToggleShow += SceneExplorer_OnToggleShow;
             PanelDragger.OnFinishResize += PanelDragger_OnFinishResize;
             PanelDragger.OnFinishDrag += PanelDragger_OnFinishDrag;
-            MainMenu.OnActiveTabChanged += MainMenu_OnActiveTabChanged;
             DebugConsole.OnToggleShow += DebugConsole_OnToggleShow;
 
             InitConsoleCallback();
@@ -65,6 +64,10 @@ namespace UnityExplorer.Core.Config
             Hide_On_Startup = new ConfigElement<bool>("Hide On Startup",
                 "Should UnityExplorer be hidden on startup?",
                 false);
+
+            Default_Tab = new ConfigElement<MenuPages>("Default Tab",
+                "The default menu page when starting the game.",
+                MenuPages.Home);
 
             Log_Unity_Debug = new ConfigElement<bool>("Log Unity Debug",
                 "Should UnityEngine.Debug.Log messages be printed to UnityExplorer's log?",
@@ -94,11 +97,6 @@ namespace UnityExplorer.Core.Config
                 DEFAULT_WINDOW_POSITION,
                 true);
 
-            Last_Active_Tab = new ConfigElement<int>("Last_Active_Tab",
-                "For internal use, the last active tab index.",
-                0,
-                true);
-
             Last_DebugConsole_State = new ConfigElement<bool>("Last_DebugConsole_State",
                 "For internal use, the collapsed state of the Debug Console.",
                 true,
@@ -115,16 +113,12 @@ namespace UnityExplorer.Core.Config
         private static void PanelDragger_OnFinishResize(RectTransform rect)
         {
             Last_Window_Anchors.Value = rect.RectAnchorsToString();
+            PanelDragger_OnFinishDrag(rect);
         }
 
         private static void PanelDragger_OnFinishDrag(RectTransform rect)
         {
             Last_Window_Position.Value = rect.RectPositionToString();
-        }
-
-        private static void MainMenu_OnActiveTabChanged(int page)
-        {
-            Last_Active_Tab.Value = page;
         }
 
         private static void DebugConsole_OnToggleShow(bool showing)
