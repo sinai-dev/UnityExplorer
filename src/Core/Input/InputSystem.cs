@@ -6,9 +6,6 @@ using UnityEngine.EventSystems;
 using UnityExplorer.UI;
 using System.Collections.Generic;
 using UnityExplorer.UI.Inspectors;
-#if CPP
-using UnhollowerRuntimeLib;
-#endif
 
 namespace UnityExplorer.Core.Input
 {
@@ -152,13 +149,9 @@ namespace UnityExplorer.Core.Input
             }
 
             var assetType = ReflectionUtility.GetTypeByName("UnityEngine.InputSystem.InputActionAsset");
-#if CPP
-                m_newInputModule = UIManager.CanvasRoot.AddComponent(Il2CppType.From(TInputSystemUIInputModule)).TryCast<BaseInputModule>();
-                var asset = ScriptableObject.CreateInstance(Il2CppType.From(assetType));
-#else
-            m_newInputModule = (BaseInputModule)UIManager.CanvasRoot.AddComponent(TInputSystemUIInputModule);
-            var asset = ScriptableObject.CreateInstance(assetType);
-#endif
+            m_newInputModule = RuntimeProvider.Instance.AddComponent<BaseInputModule>(UIManager.CanvasRoot, TInputSystemUIInputModule);
+            var asset = RuntimeProvider.Instance.CreateScriptable(assetType);
+
             inputExtensions = ReflectionUtility.GetTypeByName("UnityEngine.InputSystem.InputActionSetupExtensions");
 
             var addMap = inputExtensions.GetMethod("AddActionMap", new Type[] { assetType, typeof(string) });

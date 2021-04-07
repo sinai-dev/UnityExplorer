@@ -56,8 +56,12 @@ namespace UnityExplorer.UI.CacheObject
 
             var rowObj = UIFactory.CreateHorizontalGroup(m_mainContent, "PairedGroup", false, false, true, true, 0, new Vector4(0,0,5,2),
                 bgColor);
-            
-            var indexLabel = UIFactory.CreateLabel(rowObj, "IndexLabel", $"{this.PairType} {this.Index}:", TextAnchor.MiddleLeft);
+
+            string lbl = $"{this.PairType}";
+            if (this.PairType == PairTypes.Key)
+                lbl = $"[{Index}] {lbl}";
+
+            var indexLabel = UIFactory.CreateLabel(rowObj, "IndexLabel", lbl, TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(indexLabel.gameObject, minWidth: 80, flexibleWidth: 30, minHeight: 25);
 
             IValue.m_mainContentParent = rowObj;

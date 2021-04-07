@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityExplorer.Core;
@@ -20,6 +21,8 @@ namespace UnityExplorer.Core.Runtime.Mono
         {
             Reflection = new MonoReflection();
             TextureUtil = new MonoTextureUtil();
+
+            DummyBehaviour.Setup();
         }
 
         public override void SetupEvents()
@@ -32,9 +35,29 @@ namespace UnityExplorer.Core.Runtime.Mono
             ExplorerCore.Log(condition, type, true);
         }
 
-        public override void StartConsoleCoroutine(IEnumerator routine)
+        public override void StartCoroutine(IEnumerator routine)
         {
             DummyBehaviour.Instance.StartCoroutine(routine);
+        }
+
+        public override void Update()
+        {
+
+        }
+
+        public override T AddComponent<T>(GameObject obj, Type type)
+        {
+            return (T)obj.AddComponent(type);
+        }
+
+        public override ScriptableObject CreateScriptable(Type type)
+        {
+            return ScriptableObject.CreateInstance(type);
+        }
+
+        public override void GraphicRaycast(GraphicRaycaster raycaster, PointerEventData data, List<RaycastResult> list)
+        {
+            raycaster.Raycast(data, list);
         }
 
         public override string LayerToName(int layer)

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace UnityExplorer.Core.CSharp
+namespace UnityExplorer.Core.Runtime.Mono
 {
     public class DummyBehaviour : MonoBehaviour
     {

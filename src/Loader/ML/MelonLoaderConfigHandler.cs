@@ -23,7 +23,9 @@ namespace UnityExplorer.Loader.ML
 
             try
             {
+                // TEMPORARY - JUST REQUIRED UNTIL ML 0.3.1 RELEASED
                 MelonPreferences.Mapper.RegisterMapper(KeycodeReader, KeycodeWriter);
+                MelonPreferences.Mapper.RegisterMapper(MenuPagesReader, MenuPagesWriter);
             }
             catch { }
         }
@@ -80,6 +82,8 @@ namespace UnityExplorer.Loader.ML
             MelonPreferences.Save();
         }
 
+        // TEMPORARY - JUST REQUIRED UNTIL ML 0.3.1 RELEASED
+
         public static KeyCode KeycodeReader(TomlObject value)
         {
             try
@@ -98,6 +102,28 @@ namespace UnityExplorer.Loader.ML
         }
 
         public static TomlObject KeycodeWriter(KeyCode value)
+        {
+            return MelonPreferences.Mapper.ToToml(value.ToString());
+        }
+
+        public static UI.Main.MenuPages MenuPagesReader(TomlObject value)
+        {
+            try
+            {
+                var kc = (UI.Main.MenuPages)Enum.Parse(typeof(UI.Main.MenuPages), (value as TomlString).Value);
+
+                if (kc == default)
+                    throw new Exception();
+
+                return kc;
+            }
+            catch
+            {
+                return UI.Main.MenuPages.Home;
+            }
+        }
+
+        public static TomlObject MenuPagesWriter(UI.Main.MenuPages value)
         {
             return MelonPreferences.Mapper.ToToml(value.ToString());
         }

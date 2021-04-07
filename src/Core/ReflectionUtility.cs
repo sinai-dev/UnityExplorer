@@ -43,6 +43,9 @@ namespace UnityExplorer
         public static object Cast(this object obj, Type castTo)
             => ReflectionProvider.Instance.Cast(obj, castTo);
 
+        public static T TryCast<T>(this object obj)
+            => ReflectionProvider.Instance.TryCast<T>(obj);
+
         /// <summary>
         /// Check if the provided Type is assignable to IEnumerable.
         /// </summary>
@@ -201,10 +204,9 @@ namespace UnityExplorer
             {
                 while (e.InnerException != null)
                 {
-#if CPP
                     if (e.InnerException is System.Runtime.CompilerServices.RuntimeWrappedException)
                         break;
-#endif
+
                     e = e.InnerException;
                 }
             }

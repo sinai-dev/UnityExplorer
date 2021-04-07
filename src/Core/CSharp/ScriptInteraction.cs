@@ -20,7 +20,7 @@ namespace UnityExplorer.Core.CSharp
 
         public static void StartCoroutine(IEnumerator ienumerator)
         {
-            RuntimeProvider.Instance.StartConsoleCoroutine(ienumerator);
+            RuntimeProvider.Instance.StartCoroutine(ienumerator);
         }
 
         public static void AddUsing(string directive)

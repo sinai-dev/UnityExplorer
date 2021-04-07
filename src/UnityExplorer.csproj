@@ -219,7 +219,7 @@
     <Compile Include="Core\Config\ConfigManager.cs" />
     <Compile Include="Core\Config\IConfigElement.cs" />
     <Compile Include="Core\Config\ConfigHandler.cs" />
-    <Compile Include="Core\CSharp\DummyBehaviour.cs" />
+    <Compile Include="Core\Runtime\Mono\DummyBehaviour.cs" />
     <Compile Include="Core\CSharp\ScriptEvaluator.cs" />
     <Compile Include="Core\CSharp\ScriptInteraction.cs" />
     <Compile Include="Core\CSharp\Suggestion.cs" />

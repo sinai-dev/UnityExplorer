@@ -50,12 +50,47 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             ExplorerCore.Log(condition, type, true);
         }
 
-        public override void StartConsoleCoroutine(IEnumerator routine)
+        public override void StartCoroutine(IEnumerator routine)
         {
             Il2CppCoroutine.Start(routine);
         }
 
-        // Unity API Handlers
+        public override void Update()
+        {
+            Il2CppCoroutine.Process();
+        }
+
+        public override T AddComponent<T>(GameObject obj, Type type)
+        {
+            return obj.AddComponent(Il2CppType.From(type)).TryCast<T>();
+        }
+
+        public override ScriptableObject CreateScriptable(Type type)
+        {
+            return ScriptableObject.CreateInstance(Il2CppType.From(type));
+        }
+
+        public override void GraphicRaycast(GraphicRaycaster raycaster, PointerEventData data, List<RaycastResult> list)
+        {
+            var il2cppList = new Il2CppSystem.Collections.Generic.List<RaycastResult>();
+
+            raycaster.Raycast(data, il2cppList);
+
+            if (il2cppList.Count > 0)
+                list.AddRange(il2cppList.ToArray());
+        }
+
+        public override bool IsReferenceEqual(object a, object b)
+        {
+            if (a.TryCast<UnityEngine.Object>() is UnityEngine.Object ua)
+            {
+                var ub = b.TryCast<UnityEngine.Object>();
+                if (ub && ua.m_CachedPtr == ub.m_CachedPtr)
+                    return true;
+            }
+
+            return base.IsReferenceEqual(a, b);
+        }
 
         // LayerMask.LayerToName
 
@@ -161,6 +196,26 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             colors = (ColorBlock)boxed;
 
             return colors;
+        }
+
+        public override void FindSingleton(string[] possibleNames, Type type, BF flags, List<object> instances)
+        {
+            PropertyInfo pi;
+            foreach (var name in possibleNames)
+            {
+                pi = type.GetProperty(name, flags);
+                if (pi != null)
+                {
+                    var instance = pi.GetValue(null, null);
+                    if (instance != null)
+                    {
+                        instances.Add(instance);
+                        return;
+                    }
+                }
+            }
+
+            base.FindSingleton(possibleNames, type, flags, instances);
         }
     }
 }

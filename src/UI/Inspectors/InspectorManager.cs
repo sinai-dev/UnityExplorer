@@ -54,21 +54,11 @@ namespace UnityExplorer.UI.Inspectors
             // check if currently inspecting this object
             foreach (InspectorBase tab in m_currentInspectors)
             {
-                if (ReferenceEquals(obj, tab.Target))
+                if (RuntimeProvider.Instance.IsReferenceEqual(obj, tab.Target))
                 {
                     SetInspectorTab(tab);
                     return;
                 }
-#if CPP
-                else if (unityObj && tab.Target is UnityEngine.Object uTabObj)
-                {
-                    if (unityObj.m_CachedPtr == uTabObj.m_CachedPtr)
-                    {
-                        SetInspectorTab(tab);
-                        return;
-                    }
-                }
-#endif
             }
 
             InspectorBase inspector;

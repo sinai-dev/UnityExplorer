@@ -67,38 +67,8 @@ namespace UnityExplorer.Core.Search
                     {
                         if (!string.IsNullOrEmpty(nameFilter) && !type.FullName.ToLower().Contains(nameFilter))
                             continue;
-#if CPP
-                        // Only look for Properties in IL2CPP, not for Mono.
-                        PropertyInfo pi;
-                        foreach (var name in s_instanceNames)
-                        {
-                            pi = type.GetProperty(name, flags);
-                            if (pi != null)
-                            {
-                                var instance = pi.GetValue(null, null);
-                                if (instance != null)
-                                {
-                                    instances.Add(instance);
-                                    continue;
-                                }
-                            }
-                        }
-#endif
-                        // Look for a typical Instance backing field.
-                        FieldInfo fi;
-                        foreach (var name in s_instanceNames)
-                        {
-                            fi = type.GetField(name, flags);
-                            if (fi != null)
-                            {
-                                var instance = fi.GetValue(null);
-                                if (instance != null)
-                                {
-                                    instances.Add(instance);
-                                    break;
-                                }
-                            }
-                        }
+
+                        RuntimeProvider.Instance.FindSingleton(s_instanceNames, type, flags, instances);
                     }
                     catch { }
                 }
@@ -175,15 +145,9 @@ namespace UnityExplorer.Core.Search
 
                 if (canGetGameObject)
                 {
-#if MONO
-                    var go = context == SearchContext.GameObject
-                            ? obj as GameObject
-                            : (obj as Component).gameObject;
-#else
                     var go = context == SearchContext.GameObject
                             ? obj.TryCast<GameObject>()
                             : obj.TryCast<Component>().gameObject;
-#endif
 
                     // scene check
                     if (sceneFilter != SceneFilter.Any)

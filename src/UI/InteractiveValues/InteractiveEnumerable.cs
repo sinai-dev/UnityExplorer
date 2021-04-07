@@ -39,11 +39,6 @@ namespace UnityExplorer.UI.InteractiveValues
 
         internal IEnumerable RefIEnumerable;
         internal IList RefIList;
-//#if CPP
-//        internal object CppICollection;
-//#else
-//        internal object CppICollection = null;
-//#endif
 
         internal readonly Type m_baseEntryType;
 
@@ -55,18 +50,6 @@ namespace UnityExplorer.UI.InteractiveValues
         {
             RefIEnumerable = Value as IEnumerable;
             RefIList = Value as IList;
-
-//#if CPP
-//            if (Value != null && RefIList == null)
-//            {
-//                try 
-//                {
-//                    var type = typeof(Il2CppSystem.Collections.ICollection).MakeGenericType(this.m_baseEntryType);
-//                    CppICollection = (Value as Il2CppSystem.Object).Cast(type);
-//                }
-//                catch { }
-//            }
-//#endif
 
             if (m_subContentParent.activeSelf)
             {
@@ -96,8 +79,8 @@ namespace UnityExplorer.UI.InteractiveValues
             if (Value != null)
             {
                 string count = "?";
-                if (m_recacheWanted && RefIList != null)// || CppICollection != null))
-                    count = RefIList.Count.ToString();// ?? CppICollection.Count.ToString();
+                if (m_recacheWanted && RefIList != null)
+                    count = RefIList.Count.ToString();
                 else if (!m_recacheWanted)
                     count = m_entries.Count.ToString();
 
@@ -121,10 +104,8 @@ namespace UnityExplorer.UI.InteractiveValues
                 m_entries.Clear();
             }
 
-#if CPP
             if (RefIEnumerable == null && Value != null)
-                RefIEnumerable = EnumerateWithReflection();
-#endif
+                RefIEnumerable = RuntimeProvider.Instance.Reflection.EnumerateEnumerable(Value);
 
             if (RefIEnumerable != null)
             {
@@ -188,62 +169,6 @@ namespace UnityExplorer.UI.InteractiveValues
             RefreshDisplay();
         }
 
-#region CPP Helpers
-
-#if CPP
-        // some temp fixes for Il2Cpp IEnumerables until interfaces are fixed
-
-        internal static readonly Dictionary<Type, MethodInfo> s_getEnumeratorMethods = new Dictionary<Type, MethodInfo>();
-
-        internal static readonly Dictionary<Type, EnumeratorInfo> s_enumeratorInfos = new Dictionary<Type, EnumeratorInfo>();
-        
-        internal class EnumeratorInfo
-        {
-            internal MethodInfo moveNext;
-            internal PropertyInfo current;
-        }
-
-        private IEnumerable EnumerateWithReflection()
-        {
-            if (Value == null) 
-                return null;
-
-            // new test
-            var CppEnumerable = (Value as Il2CppSystem.Object)?.TryCast<Il2CppSystem.Collections.IEnumerable>();
-            if (CppEnumerable != null)
-            {
-                var type = Value.GetType();
-                if (!s_getEnumeratorMethods.ContainsKey(type))
-                    s_getEnumeratorMethods.Add(type, type.GetMethod("GetEnumerator"));
-                
-                var enumerator = s_getEnumeratorMethods[type].Invoke(Value, null);
-                var enumeratorType = enumerator.GetType();
-
-                if (!s_enumeratorInfos.ContainsKey(enumeratorType))
-                {
-                    s_enumeratorInfos.Add(enumeratorType, new EnumeratorInfo
-                    {
-                        current = enumeratorType.GetProperty("Current"),
-                        moveNext = enumeratorType.GetMethod("MoveNext"),
-                    });
-                }
-                var info = s_enumeratorInfos[enumeratorType];
-
-                // iterate
-                var list = new List<object>();
-                while ((bool)info.moveNext.Invoke(enumerator, null))
-                    list.Add(info.current.GetValue(enumerator));
-
-                return list;
-            }
-
-            return null;
-        }
-#endif
-
-#endregion
-
-#region UI CONSTRUCTION
 
         internal GameObject m_listContent;
         internal LayoutElement m_listLayout;
@@ -278,7 +203,5 @@ namespace UnityExplorer.UI.InteractiveValues
             contentFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
             contentFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
         }
-
-#endregion
     }
 }

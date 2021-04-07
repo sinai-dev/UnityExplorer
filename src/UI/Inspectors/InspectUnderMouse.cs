@@ -203,11 +203,6 @@ namespace UnityExplorer.UI.Main.Home
                 position = mousePos
             };
 
-#if MONO
-            var list = new List<RaycastResult>();
-#else
-            var list = new Il2CppSystem.Collections.Generic.List<RaycastResult>();
-#endif
             //ExplorerCore.Log("~~~~~~~~~ begin raycast ~~~~~~~~");
             GameObject hitObject = null;
             int highestLayer = int.MinValue;
@@ -215,7 +210,10 @@ namespace UnityExplorer.UI.Main.Home
             int highestDepth = int.MinValue;
             foreach (var gr in graphicRaycasters)
             {
-                gr.Raycast(ped, list);
+                var list = new List<RaycastResult>();
+                RuntimeProvider.Instance.GraphicRaycast(gr, ped, list);
+
+                //gr.Raycast(ped, list);
 
                 if (list.Count > 0)
                 {
@@ -290,8 +288,6 @@ namespace UnityExplorer.UI.Main.Home
             _wasDisabledGraphics.Clear();
         }
 
-        #region UI
-
         internal static Text s_objNameLabel;
         internal static Text s_objPathLabel;
         internal static Text s_mousePosLabel;
@@ -328,7 +324,5 @@ namespace UnityExplorer.UI.Main.Home
 
             s_UIContent.SetActive(false);
         }
-
-        #endregion
     }
 }

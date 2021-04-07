@@ -78,11 +78,7 @@ namespace UnityExplorer.UI.Inspectors.GameObjects
                     text.text = SignatureHighlighter.ParseFullSyntax(ReflectionUtility.GetActualType(comp), true);
 
                     var toggle = s_compToggles[i];
-#if CPP
                     if (comp.TryCast<Behaviour>() is Behaviour behaviour)
-#else
-                    if (comp is Behaviour behaviour)
-#endif
                     {
                         if (!toggle.gameObject.activeSelf)
                             toggle.gameObject.SetActive(true);
@@ -109,19 +105,13 @@ namespace UnityExplorer.UI.Inspectors.GameObjects
         internal static void OnCompToggleClicked(int index, bool value)
         {
             var comp = s_compShortlist[index];
-#if CPP
             comp.TryCast<Behaviour>().enabled = value;
-#else
-            (comp as Behaviour).enabled = value;
-#endif
         }
 
         internal static void OnCompListObjectClicked(int index)
         {
             if (index >= s_compShortlist.Count || !s_compShortlist[index])
-            {
                 return;
-            }
 
             InspectorManager.Instance.Inspect(s_compShortlist[index]);
         }

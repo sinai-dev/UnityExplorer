@@ -13,15 +13,13 @@ using UnityExplorer.UI.Main.CSConsole;
 using UnityExplorer.Core;
 using UnityExplorer.Core.Unity;
 using UnityExplorer.UI.Utility;
-#if CPP
-using UnityExplorer.Core.Runtime.Il2Cpp;
-#endif
 
 namespace UnityExplorer.UI.Main.CSConsole
 {
     public class CSharpConsole : BaseMenuPage
     {
         public override string Name => "C# Console";
+        public override MenuPages Type => MenuPages.CSConsole;
 
         public static CSharpConsole Instance { get; private set; }
 
@@ -53,9 +51,6 @@ namespace UnityExplorer.UI.Main.CSConsole
                 InitConsole();
 
                 AutoCompleter.Init();
-#if MONO
-                DummyBehaviour.Setup();
-#endif
 
                 ResetConsole(false);
                 // Make sure compiler is supported on this platform
@@ -102,9 +97,6 @@ namespace UnityExplorer.UI.Main.CSConsole
             UpdateConsole();
 
             AutoCompleter.Update();
-#if CPP
-            Il2CppCoroutine.Process();
-#endif
         }
 
         public void AddUsing(string asm)

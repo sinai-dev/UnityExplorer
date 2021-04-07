@@ -12,6 +12,18 @@ namespace UnityExplorer.Core.Runtime.Mono
         public override object Cast(object obj, Type castTo)
             => obj;
 
+        public override T TryCast<T>(object obj)
+        {
+            try
+            {
+                return (T)obj;
+            }
+            catch
+            {
+                return default;
+            }
+        }
+
         // Vanilla GetType is fine for mono
         public override Type GetActualType(object obj)
             => obj.GetType();

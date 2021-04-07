@@ -13,7 +13,9 @@ using UnityExplorer.UI.CacheObject;
 using UnityExplorer.Core;
 using UnityExplorer.UI.Utility;
 #if CPP
-using CppDictionary = Il2CppSystem.Collections.IDictionary;
+using AltIDictionary = Il2CppSystem.Collections.IDictionary;
+#else
+using AltIDictionary = System.Collections.IDictionary;
 #endif
 
 namespace UnityExplorer.UI.InteractiveValues
@@ -48,11 +50,7 @@ namespace UnityExplorer.UI.InteractiveValues
         }
 
         internal IDictionary RefIDictionary;
-#if CPP
-        internal CppDictionary RefCppDictionary;
-#else
-        internal IDictionary RefCppDictionary = null;
-#endif
+        internal AltIDictionary RefAltIDictionary;
         internal Type m_typeOfKeys;
         internal Type m_typeofValues;
 
@@ -73,10 +71,11 @@ namespace UnityExplorer.UI.InteractiveValues
         {
             RefIDictionary = Value as IDictionary;
 
-#if CPP
-            try { RefCppDictionary = (Value as Il2CppSystem.Object).TryCast<CppDictionary>(); }
-            catch { }
-#endif
+            if (RefIDictionary == null)
+            {
+                try { RefAltIDictionary = Value.TryCast<AltIDictionary>(); }
+                catch { }
+            }
 
             if (m_subContentParent.activeSelf)
             {
@@ -129,10 +128,8 @@ namespace UnityExplorer.UI.InteractiveValues
                 m_entries.Clear();
             }
 
-#if CPP
             if (RefIDictionary == null && Value != null)
-                RefIDictionary = EnumerateWithReflection();
-#endif
+                RefIDictionary = RuntimeProvider.Instance.Reflection.EnumerateDictionary(Value, m_typeOfKeys, m_typeofValues);
 
             if (RefIDictionary != null)
             {
@@ -212,81 +209,10 @@ namespace UnityExplorer.UI.InteractiveValues
             RefreshDisplay();
         }
 
-#region CPP fixes
-#if CPP
-        // temp fix for Il2Cpp IDictionary until interfaces are fixed
-
-        private IDictionary EnumerateWithReflection()
-        {
-            var valueType = ReflectionUtility.GetActualType(Value);
-
-            var keyList = new List<object>();
-            var valueList = new List<object>();
-
-            var hashtable = Value.Cast(typeof(Il2CppSystem.Collections.Hashtable)) as Il2CppSystem.Collections.Hashtable;
-
-            if (hashtable != null)
-            {
-                EnumerateCppHashtable(hashtable, keyList, valueList);
-            }
-            else
-            {
-                var keys = valueType.GetProperty("Keys").GetValue(Value, null);
-                var values = valueType.GetProperty("Values").GetValue(Value, null);
-
-                EnumerateCppIDictionary(keys, keyList);
-                EnumerateCppIDictionary(values, valueList);
-            }
-
-            var dict = Activator.CreateInstance(typeof(Dictionary<,>)
-                                .MakeGenericType(m_typeOfKeys, m_typeofValues))
-                                as IDictionary;
-
-            for (int i = 0; i < keyList.Count; i++)
-                dict.Add(keyList[i], valueList[i]);
-
-            return dict;
-        }
-
-        private void EnumerateCppIDictionary(object collection, List<object> list)
-        {
-            // invoke GetEnumerator
-            var enumerator = collection.GetType().GetMethod("GetEnumerator").Invoke(collection, null);
-            // get the type of it
-            var enumeratorType = enumerator.GetType();
-            // reflect MoveNext and Current
-            var moveNext = enumeratorType.GetMethod("MoveNext");
-            var current = enumeratorType.GetProperty("Current");
-            // iterate
-            while ((bool)moveNext.Invoke(enumerator, null))
-            {
-                list.Add(current.GetValue(enumerator, null));
-            }
-        }
-
-        private void EnumerateCppHashtable(Il2CppSystem.Collections.Hashtable hashtable, List<object> keys, List<object> values)
-        {
-            for (int i = 0; i < hashtable.buckets.Count; i++)
-            {
-                var bucket = hashtable.buckets[i];
-                if (bucket == null || bucket.key == null)
-                    continue;
-                keys.Add(bucket.key);
-                values.Add(bucket.val);
-            }
-        }
-#endif
-
-        #endregion
-
-        #region UI CONSTRUCTION
-
         internal GameObject m_listContent;
         internal LayoutElement m_listLayout;
 
         internal PageHandler m_pageHandler;
-
-        //internal List<GameObject> m_rowHolders = new List<GameObject>();
 
         public override void ConstructUI(GameObject parent, GameObject subGroup)
         {
@@ -317,7 +243,5 @@ namespace UnityExplorer.UI.InteractiveValues
             contentFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
             contentFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
         }
-
-#endregion
     }
 }
