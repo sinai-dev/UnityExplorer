@@ -48,7 +48,7 @@ namespace UnityExplorer
 
             Log($"{NAME} {VERSION} initialized.");
 
-            InspectorManager.Instance.Inspect(typeof(TestClass));
+            //InspectorManager.Instance.Inspect(typeof(TestClass));
         }
 
         public static void Update()

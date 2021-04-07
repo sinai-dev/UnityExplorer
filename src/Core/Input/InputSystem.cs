@@ -6,6 +6,7 @@ using UnityEngine.EventSystems;
 using UnityExplorer.UI;
 using System.Collections.Generic;
 using UnityExplorer.UI.Inspectors;
+using System.Linq;
 
 namespace UnityExplorer.Core.Input
 {
@@ -84,16 +85,28 @@ namespace UnityExplorer.Core.Input
         }
 
         internal static Dictionary<KeyCode, object> ActualKeyDict = new Dictionary<KeyCode, object>();
+        internal static Dictionary<string, string> enumNameFixes = new Dictionary<string, string>
+        {
+            { "Control", "Ctrl" },
+            { "Return", "Enter" },
+            { "Alpha", "Digit" },
+            { "Keypad", "Numpad" },
+            { "Numlock", "NumLock" },
+            { "Print", "PrintScreen" },
+            { "BackQuote", "Backquote" }
+        };
 
         internal object GetActualKey(KeyCode key)
         {
             if (!ActualKeyDict.ContainsKey(key))
             {
                 var s = key.ToString();
-                if (s.Contains("Control"))
-                    s = s.Replace("Control", "Ctrl");
-                else if (s.Contains("Return"))
-                    s = "Enter";
+                try
+                {
+                    if (enumNameFixes.First(it => s.Contains(it.Key)) is KeyValuePair<string, string> entry)
+                        s = s.Replace(entry.Key, entry.Value);
+                }
+                catch { }
 
                 var parsed = Enum.Parse(TKey, s);
                 var actualKey = m_kbIndexer.GetValue(CurrentKeyboard, new object[] { parsed });
