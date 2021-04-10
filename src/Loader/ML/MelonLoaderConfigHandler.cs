@@ -21,13 +21,9 @@ namespace UnityExplorer.Loader.ML
         {
             prefCategory = MelonPreferences.CreateCategory(CTG_NAME, $"{CTG_NAME} Settings");
 
-            try
-            {
-                // TEMPORARY - JUST REQUIRED UNTIL ML 0.3.1 RELEASED
-                MelonPreferences.Mapper.RegisterMapper(KeycodeReader, KeycodeWriter);
-                MelonPreferences.Mapper.RegisterMapper(MenuPagesReader, MenuPagesWriter);
-            }
-            catch { }
+            // temporary until melonloader 0.3.1 released
+            try { MelonPreferences.Mapper.RegisterMapper(KeycodeReader, KeycodeWriter); } catch { }
+            try { MelonPreferences.Mapper.RegisterMapper(MenuPagesReader, MenuPagesWriter); } catch { }
         }
 
         public override void LoadConfig()
