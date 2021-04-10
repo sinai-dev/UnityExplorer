@@ -160,38 +160,56 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
                    .Invoke(handle);
         }
 
-        internal static bool? s_doPropertiesExist;
+        internal static bool triedToGetProperties;
+        internal static PropertyInfo _normalColorProp;
+        internal static PropertyInfo _highlightColorProp;
+        internal static PropertyInfo _pressedColorProp;
 
         public override ColorBlock SetColorBlock(ColorBlock colors, Color? normal = null, Color? highlighted = null, Color? pressed = null)
         {
-            if (s_doPropertiesExist == null)
-            {
-                var prop = ReflectionUtility.GetPropertyInfo(typeof(ColorBlock), "normalColor") as PropertyInfo;
-                s_doPropertiesExist = prop != null && prop.CanWrite;
-            }
-
             colors.colorMultiplier = 1;
 
             object boxed = (object)colors;
 
-            if (s_doPropertiesExist == true)
+            if (!triedToGetProperties)
+            {
+                triedToGetProperties = true;
+
+                if (ReflectionUtility.GetPropertyInfo(typeof(ColorBlock), "normalColor") is PropertyInfo norm && norm.CanWrite)
+                    _normalColorProp = norm;
+                if (ReflectionUtility.GetPropertyInfo(typeof(ColorBlock), "highlightedColor") is PropertyInfo high && high.CanWrite)
+                    _highlightColorProp = high;
+                if (ReflectionUtility.GetPropertyInfo(typeof(ColorBlock), "pressedColor") is PropertyInfo pres && pres.CanWrite)
+                    _pressedColorProp = pres;
+            }
+
+            try
             {
                 if (normal != null)
-                    ReflectionUtility.GetPropertyInfo(typeof(ColorBlock), "normalColor").SetValue(boxed, (Color)normal);
-                if (pressed != null)
-                    ReflectionUtility.GetPropertyInfo(typeof(ColorBlock), "pressedColor").SetValue(boxed, (Color)pressed);
+                {
+                    if (_normalColorProp != null)
+                        _normalColorProp.SetValue(boxed, (Color)normal);
+                    else if (ReflectionUtility.GetFieldInfo(typeof(ColorBlock), "m_NormalColor") is FieldInfo fi)
+                        fi.SetValue(boxed, (Color)normal);
+                }
+
                 if (highlighted != null)
-                    ReflectionUtility.GetPropertyInfo(typeof(ColorBlock), "highlightedColor").SetValue(boxed, (Color)highlighted);
-            }
-            else if (s_doPropertiesExist == false)
-            {
-                if (normal != null)
-                    ReflectionUtility.GetFieldInfo(typeof(ColorBlock), "m_NormalColor").SetValue(boxed, (Color)normal);
+                {
+                    if (_highlightColorProp != null)
+                        _highlightColorProp.SetValue(boxed, (Color)highlighted);
+                    else if (ReflectionUtility.GetFieldInfo(typeof(ColorBlock), "m_HighlightedColor") is FieldInfo fi)
+                        fi.SetValue(boxed, (Color)highlighted);
+                }
+
                 if (pressed != null)
-                    ReflectionUtility.GetFieldInfo(typeof(ColorBlock), "m_PressedColor").SetValue(boxed, (Color)pressed);
-                if (highlighted != null)
-                    ReflectionUtility.GetFieldInfo(typeof(ColorBlock), "m_HighlightedColor").SetValue(boxed, (Color)highlighted);
+                {
+                    if (_pressedColorProp != null)
+                        _pressedColorProp.SetValue(boxed, (Color)pressed);
+                    else if (ReflectionUtility.GetFieldInfo(typeof(ColorBlock), "m_PressedColor") is FieldInfo fi)
+                        fi.SetValue(boxed, (Color)pressed);
+                }
             }
+            catch { }
 
             colors = (ColorBlock)boxed;
 
