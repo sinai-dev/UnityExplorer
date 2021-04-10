@@ -164,8 +164,10 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
         internal static PropertyInfo _normalColorProp;
         internal static PropertyInfo _highlightColorProp;
         internal static PropertyInfo _pressedColorProp;
+        internal static PropertyInfo _disabledColorProp;
 
-        public override void SetColorBlock(Selectable selectable, Color? normal = null, Color? highlighted = null, Color? pressed = null)
+        public override void SetColorBlock(Selectable selectable, Color? normal = null, Color? highlighted = null, Color? pressed = null, 
+            Color? disabled = null)
         {
             var colors = selectable.colors;
 
@@ -183,6 +185,8 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
                     _highlightColorProp = high;
                 if (ReflectionUtility.GetPropertyInfo(typeof(ColorBlock), "pressedColor") is PropertyInfo pres && pres.CanWrite)
                     _pressedColorProp = pres;
+                if (ReflectionUtility.GetPropertyInfo(typeof(ColorBlock), "disabledColor") is PropertyInfo disa && disa.CanWrite)
+                    _disabledColorProp = disa;
             }
 
             try
@@ -209,6 +213,14 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
                         _pressedColorProp.SetValue(boxed, (Color)pressed);
                     else if (ReflectionUtility.GetFieldInfo(typeof(ColorBlock), "m_PressedColor") is FieldInfo fi)
                         fi.SetValue(boxed, (Color)pressed);
+                }
+
+                if (disabled != null)
+                {
+                    if (_disabledColorProp != null)
+                        _disabledColorProp.SetValue(boxed, (Color)disabled);
+                    else if (ReflectionUtility.GetFieldInfo(typeof(ColorBlock), "m_DisabledColor") is FieldInfo fi)
+                        fi.SetValue(boxed, (Color)disabled);
                 }
             }
             catch (Exception ex)

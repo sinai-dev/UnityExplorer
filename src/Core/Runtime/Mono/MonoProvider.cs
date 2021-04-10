@@ -86,7 +86,8 @@ namespace UnityExplorer.Core.Runtime.Mono
             return scene.rootCount;
         }
 
-        public override void SetColorBlock(Selectable selectable, Color? normal = null, Color? highlighted = null, Color? pressed = null)
+        public override void SetColorBlock(Selectable selectable, Color? normal = null, Color? highlighted = null, Color? pressed = null,
+            Color? disabled = null)
         {
             var colors = selectable.colors;
 
@@ -98,6 +99,9 @@ namespace UnityExplorer.Core.Runtime.Mono
 
             if (pressed != null)
                 colors.pressedColor = (Color)pressed;
+
+            if (disabled != null)
+                colors.disabledColor = (Color)disabled;
 
             SetColorBlock(selectable, colors);
         }
