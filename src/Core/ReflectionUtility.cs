@@ -192,6 +192,51 @@ namespace UnityExplorer
             return s_cachedPropInfos[type][propertyName];
         }
 
+        internal static Dictionary<Type, Dictionary<string, MethodInfo>> s_cachedMethodInfos = new Dictionary<Type, Dictionary<string, MethodInfo>>();
+
+        public static MethodInfo GetMethodInfo(Type type, string methodName, Type[] argumentTypes)
+        {
+            if (!s_cachedMethodInfos.ContainsKey(type))
+                s_cachedMethodInfos.Add(type, new Dictionary<string, MethodInfo>());
+
+            var sig = methodName;
+
+            if (argumentTypes != null)
+            {
+                sig += "(";
+                for (int i = 0; i < argumentTypes.Length; i++)
+                {
+                    if (i > 0)
+                        sig += ",";
+                    sig += argumentTypes[i].FullName;
+                }
+                sig += ")";
+            }
+
+            try
+            {
+                if (!s_cachedMethodInfos[type].ContainsKey(sig))
+                {
+                    if (argumentTypes != null)
+                        s_cachedMethodInfos[type].Add(sig, type.GetMethod(methodName, AllFlags, null, argumentTypes, null));
+                    else
+                        s_cachedMethodInfos[type].Add(sig, type.GetMethod(methodName, AllFlags));
+                }
+
+                return s_cachedMethodInfos[type][sig];
+            }
+            catch (AmbiguousMatchException)
+            {
+                ExplorerCore.LogWarning($"AmbiguousMatchException trying to get method '{sig}'");
+                return null;
+            }
+            catch (Exception e)
+            {
+                ExplorerCore.LogWarning($"{e.GetType()} trying to get method '{sig}': {e.Message}\r\n{e.StackTrace}");
+                return null;
+            }
+        }
+
         /// <summary>
         /// Helper to display a simple "{ExceptionType}: {Message}" of the exception, and optionally use the inner-most exception.
         /// </summary>
