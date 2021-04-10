@@ -62,7 +62,9 @@ namespace UnityExplorer
 
         public abstract int GetRootCount(Scene scene);
 
-        public abstract ColorBlock SetColorBlock(ColorBlock colors, Color? normal = null, Color? highlighted = null, Color? pressed = null);
+        public abstract void SetColorBlock(Selectable selectable, ColorBlock colors);
+
+        public abstract void SetColorBlock(Selectable selectable, Color? normal = null, Color? highlighted = null, Color? pressed = null);
 
         public virtual void FindSingleton(string[] s_instanceNames, Type type, BindingFlags flags, List<object> instances)
         {

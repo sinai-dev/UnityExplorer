@@ -271,12 +271,10 @@ namespace UnityExplorer.UI.Main.CSConsole
             mainGroup.childForceExpandHeight = false;
             mainGroup.childForceExpandWidth = true;
 
-            ColorBlock btnColors = new ColorBlock();
-            RuntimeProvider.Instance.SetColorBlock(btnColors, new Color(0, 0, 0, 0), highlighted: new Color(0.2f, 0.2f, 0.2f, 1.0f));
-
             for (int i = 0; i < MAX_LABELS; i++)
             {
-                var btn = UIFactory.CreateButton(content, "AutoCompleteButton", "", null, btnColors);
+                var btn = UIFactory.CreateButton(content, "AutoCompleteButton", "", null);
+                RuntimeProvider.Instance.SetColorBlock(btn, new Color(0, 0, 0, 0), highlighted: new Color(0.2f, 0.2f, 0.2f, 1.0f));
 
                 var nav = btn.navigation;
                 nav.mode = Navigation.Mode.Vertical;

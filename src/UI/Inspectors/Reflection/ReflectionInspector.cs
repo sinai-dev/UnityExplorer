@@ -241,12 +241,12 @@ namespace UnityExplorer.UI.Inspectors.Reflection
         internal void OnMemberFilterClicked(MemberTypes type, Button button)
         {
             if (m_lastActiveMemButton)
-                m_lastActiveMemButton.colors = RuntimeProvider.Instance.SetColorBlock(m_lastActiveMemButton.colors, new Color(0.2f, 0.2f, 0.2f));
+                RuntimeProvider.Instance.SetColorBlock(m_lastActiveMemButton, new Color(0.2f, 0.2f, 0.2f));
 
             m_memberFilter = type;
             m_lastActiveMemButton = button;
 
-            m_lastActiveMemButton.colors = RuntimeProvider.Instance.SetColorBlock(m_lastActiveMemButton.colors, new Color(0.2f, 0.6f, 0.2f));
+            RuntimeProvider.Instance.SetColorBlock(m_lastActiveMemButton, new Color(0.2f, 0.6f, 0.2f));
 
             FilterMembers(null, true);
             m_sliderScroller.m_slider.value = 1f;
@@ -461,11 +461,11 @@ namespace UnityExplorer.UI.Inspectors.Reflection
             UIFactory.SetLayoutElement(btn.gameObject, minHeight: 25, minWidth: 70);
             btn.onClick.AddListener(() => { OnMemberFilterClicked(type, btn); });
 
-            btn.colors = RuntimeProvider.Instance.SetColorBlock(btn.colors, highlighted: new Color(0.3f, 0.7f, 0.3f));
+            RuntimeProvider.Instance.SetColorBlock(btn, highlighted: new Color(0.3f, 0.7f, 0.3f));
 
             if (setEnabled)
             {
-                btn.colors = RuntimeProvider.Instance.SetColorBlock(btn.colors, new Color(0.2f, 0.6f, 0.2f));
+                RuntimeProvider.Instance.SetColorBlock(btn, new Color(0.2f, 0.6f, 0.2f));
                 m_memberFilter = type;
                 m_lastActiveMemButton = btn;
             }

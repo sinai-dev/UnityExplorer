@@ -408,7 +408,7 @@ namespace UnityExplorer.UI.Inspectors.GameObjects
             var sliderObj = UIFactory.CreateSlider(rowObject, "VectorSlider", out Slider slider);
             UIFactory.SetLayoutElement(sliderObj, minHeight: 20, flexibleHeight: 0, minWidth: 200, flexibleWidth: 9000);
             sliderObj.transform.Find("Fill Area").gameObject.SetActive(false);
-            slider.colors = RuntimeProvider.Instance.SetColorBlock(slider.colors, new Color(0.65f, 0.65f, 0.65f));
+            RuntimeProvider.Instance.SetColorBlock(slider, new Color(0.65f, 0.65f, 0.65f));
             slider.minValue = -2;
             slider.maxValue = 2;
             slider.value = 0;

@@ -130,12 +130,12 @@ namespace UnityExplorer.UI.Inspectors
         public void OnSetInspectorTab(InspectorBase inspector)
         {
             Color activeColor = new Color(0, 0.25f, 0, 1);
-            inspector.m_tabButton.colors = RuntimeProvider.Instance.SetColorBlock(inspector.m_tabButton.colors, activeColor, activeColor);
+            RuntimeProvider.Instance.SetColorBlock(inspector.m_tabButton, activeColor, activeColor);
         }
 
         public void OnUnsetInspectorTab()
         {
-            m_activeInspector.m_tabButton.colors = RuntimeProvider.Instance.SetColorBlock(m_activeInspector.m_tabButton.colors, 
+            RuntimeProvider.Instance.SetColorBlock(m_activeInspector.m_tabButton, 
                 new Color(0.2f, 0.2f, 0.2f, 1), new Color(0.1f, 0.3f, 0.1f, 1));
         }
 

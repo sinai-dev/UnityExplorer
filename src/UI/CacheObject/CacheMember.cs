@@ -319,15 +319,13 @@ namespace UnityExplorer.UI.CacheObject
                     default, new Color(1, 1, 1, 0));
                 UIFactory.SetLayoutElement(evalGroupObj, minHeight: 25, flexibleHeight: 0, flexibleWidth: 5000);
 
-                var colors = new ColorBlock();
-                colors = RuntimeProvider.Instance.SetColorBlock(colors, new Color(0.4f, 0.4f, 0.4f),
-                    new Color(0.4f, 0.7f, 0.4f), new Color(0.3f, 0.3f, 0.3f));
-
                 var evalButton = UIFactory.CreateButton(evalGroupObj, 
                     "EvalButton", 
                     $"Evaluate ({ParamCount})",
-                    null,
-                    colors);
+                    null);
+
+                RuntimeProvider.Instance.SetColorBlock(evalButton, new Color(0.4f, 0.4f, 0.4f),
+                    new Color(0.4f, 0.7f, 0.4f), new Color(0.3f, 0.3f, 0.3f));
 
                 UIFactory.SetLayoutElement(evalButton.gameObject, minWidth: 100, minHeight: 22, flexibleWidth: 0);
 
@@ -345,7 +343,7 @@ namespace UnityExplorer.UI.CacheObject
                         argsHolder.SetActive(true);
                         m_isEvaluating = true;
                         evalText.text = "Evaluate";
-                        evalButton.colors = RuntimeProvider.Instance.SetColorBlock(evalButton.colors, new Color(0.3f, 0.6f, 0.3f));
+                        RuntimeProvider.Instance.SetColorBlock(evalButton, new Color(0.3f, 0.6f, 0.3f));
 
                         cancelButton.gameObject.SetActive(true);
                     }
@@ -365,18 +363,17 @@ namespace UnityExplorer.UI.CacheObject
                     m_isEvaluating = false;
 
                     evalText.text = $"Evaluate ({ParamCount})";
-                    evalButton.colors = RuntimeProvider.Instance.SetColorBlock(evalButton.colors, new Color(0.4f, 0.4f, 0.4f));
+                    RuntimeProvider.Instance.SetColorBlock(evalButton, new Color(0.4f, 0.4f, 0.4f));
                 });
             }
             else if (this is CacheMethod)
             {
                 // simple method evaluate button
 
-                var colors = new ColorBlock();
-                colors = RuntimeProvider.Instance.SetColorBlock(colors, new Color(0.4f, 0.4f, 0.4f),
+                var evalButton = UIFactory.CreateButton(m_rightGroup, "EvalButton", "Evaluate", () => { (this as CacheMethod).Evaluate(); });
+                RuntimeProvider.Instance.SetColorBlock(evalButton, new Color(0.4f, 0.4f, 0.4f),
                     new Color(0.4f, 0.7f, 0.4f), new Color(0.3f, 0.3f, 0.3f));
 
-                var evalButton = UIFactory.CreateButton(m_rightGroup, "EvalButton", "Evaluate", () => { (this as CacheMethod).Evaluate(); }, colors);
                 UIFactory.SetLayoutElement(evalButton.gameObject, minWidth: 100, minHeight: 22, flexibleWidth: 0);
             }
         }

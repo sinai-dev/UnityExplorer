@@ -168,15 +168,13 @@ namespace UnityExplorer.UI.Inspectors.GameObjects
             s_childListToggles.Add(toggle);
             toggle.onValueChanged.AddListener((bool val) => { OnToggleClicked(thisIndex, val); });
 
-            ColorBlock mainColors = new ColorBlock();
-            mainColors = RuntimeProvider.Instance.SetColorBlock(mainColors, new Color(0.07f, 0.07f, 0.07f), 
-                new Color(0.2f, 0.2f, 0.2f, 1), new Color(0.05f, 0.05f, 0.05f));
-
             var mainBtn = UIFactory.CreateButton(btnGroupObj, 
                 "MainButton",
                 "", 
-                () => { OnChildListObjectClicked(thisIndex); },
-                mainColors);
+                () => { OnChildListObjectClicked(thisIndex); });
+
+            RuntimeProvider.Instance.SetColorBlock(mainBtn, new Color(0.07f, 0.07f, 0.07f),
+                new Color(0.2f, 0.2f, 0.2f, 1), new Color(0.05f, 0.05f, 0.05f));
 
             UIFactory.SetLayoutElement(mainBtn.gameObject, minHeight: 25, flexibleHeight: 0, minWidth: 25, flexibleWidth: 9999);
 

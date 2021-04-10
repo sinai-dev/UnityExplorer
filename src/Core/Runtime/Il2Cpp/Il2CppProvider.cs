@@ -160,20 +160,22 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
                    .Invoke(handle);
         }
 
-        internal static bool triedToGetProperties;
+        internal static bool triedToGetColorBlockProps;
         internal static PropertyInfo _normalColorProp;
         internal static PropertyInfo _highlightColorProp;
         internal static PropertyInfo _pressedColorProp;
 
-        public override ColorBlock SetColorBlock(ColorBlock colors, Color? normal = null, Color? highlighted = null, Color? pressed = null)
+        public override void SetColorBlock(Selectable selectable, Color? normal = null, Color? highlighted = null, Color? pressed = null)
         {
+            var colors = selectable.colors;
+
             colors.colorMultiplier = 1;
 
             object boxed = (object)colors;
 
-            if (!triedToGetProperties)
+            if (!triedToGetColorBlockProps)
             {
-                triedToGetProperties = true;
+                triedToGetColorBlockProps = true;
 
                 if (ReflectionUtility.GetPropertyInfo(typeof(ColorBlock), "normalColor") is PropertyInfo norm && norm.CanWrite)
                     _normalColorProp = norm;
@@ -209,11 +211,32 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
                         fi.SetValue(boxed, (Color)pressed);
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                ExplorerCore.Log(ex);
+            }
 
             colors = (ColorBlock)boxed;
 
-            return colors;
+            SetColorBlock(selectable, colors);
+        }
+
+        public override void SetColorBlock(Selectable selectable, ColorBlock _colorBlock)
+        {
+            try
+            {
+                selectable = selectable.TryCast<Selectable>();
+
+                ReflectionUtility.GetPropertyInfo(typeof(Selectable), "m_Colors")
+                    .SetValue(selectable, _colorBlock, null);
+
+                ReflectionUtility.GetMethodInfo(typeof(Selectable), "OnSetProperty", new Type[0])
+                    .Invoke(selectable, new object[0]);
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.Log(ex);
+            }
         }
 
         public override void FindSingleton(string[] possibleNames, Type type, BF flags, List<object> instances)

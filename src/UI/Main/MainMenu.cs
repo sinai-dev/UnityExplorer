@@ -141,12 +141,12 @@ namespace UnityExplorer.UI.Main
 
         internal void SetButtonActiveColors(Button button)
         {
-            button.colors = RuntimeProvider.Instance.SetColorBlock(button.colors, m_navButtonSelected);
+            RuntimeProvider.Instance.SetColorBlock(button, m_navButtonSelected);
         }
 
         internal void SetButtonInactiveColors(Button button)
         {
-            button.colors = RuntimeProvider.Instance.SetColorBlock(button.colors, m_navButtonNormal);
+            RuntimeProvider.Instance.SetColorBlock(button, m_navButtonNormal);
         }
 
         #region UI Construction
@@ -184,15 +184,13 @@ namespace UnityExplorer.UI.Main
 
             // Hide button
 
-            ColorBlock colorBlock = new ColorBlock();
-            colorBlock = RuntimeProvider.Instance.SetColorBlock(colorBlock, new Color(65f / 255f, 23f / 255f, 23f / 255f),
-                new Color(35f / 255f, 10f / 255f, 10f / 255f), new Color(156f / 255f, 0f, 0f));
-
             var hideButton = UIFactory.CreateButton(titleBar, 
                 "HideButton", 
                 $"Hide ({ConfigManager.Main_Menu_Toggle.Value})", 
-                () => { UIManager.ShowMenu = false; },
-                colorBlock);
+                () => { UIManager.ShowMenu = false; }); 
+            
+            RuntimeProvider.Instance.SetColorBlock(hideButton, new Color(65f / 255f, 23f / 255f, 23f / 255f),
+                 new Color(35f / 255f, 10f / 255f, 10f / 255f), new Color(156f / 255f, 0f, 0f));
 
             UIFactory.SetLayoutElement(hideButton.gameObject, minWidth: 90, flexibleWidth: 0);
 
@@ -213,16 +211,14 @@ namespace UnityExplorer.UI.Main
             GameObject navbarObj = UIFactory.CreateHorizontalGroup(content, "MainNavBar", true, true, true, true, 5);
             UIFactory.SetLayoutElement(navbarObj, minHeight: 25, flexibleHeight: 0);
 
-            ColorBlock colorBlock = new ColorBlock();
-            colorBlock = RuntimeProvider.Instance.SetColorBlock(colorBlock, m_navButtonNormal, m_navButtonHighlight, m_navButtonSelected);
-
             foreach (var page in Pages)
             {
                 Button btn = UIFactory.CreateButton(navbarObj, 
                     $"Button_{page.Name}",
                     page.Name,
-                    () => { SetPage(page); },
-                    colorBlock);
+                    () => { SetPage(page); });
+
+                RuntimeProvider.Instance.SetColorBlock(btn, m_navButtonNormal, m_navButtonHighlight, m_navButtonSelected);
 
                 page.RefNavbarButton = btn;
             }

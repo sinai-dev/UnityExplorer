@@ -522,15 +522,13 @@ namespace UnityExplorer.UI.Main.Home
             m_shortListToggles.Add(toggle);
             toggle.onValueChanged.AddListener((bool val) => { OnToggleClicked(thisIndex, val); });
 
-            ColorBlock mainColors = new ColorBlock();
-            mainColors = RuntimeProvider.Instance.SetColorBlock(mainColors, new Color(0.1f, 0.1f, 0.1f), 
-                new Color(0.2f, 0.2f, 0.2f), new Color(0.05f, 0.05f, 0.05f));
-
             var mainButton = UIFactory.CreateButton(btnGroupObj, 
                 "MainButton", 
                 "",
-                () => { SceneListObjectClicked(thisIndex); },
-                mainColors);
+                () => { SceneListObjectClicked(thisIndex); });
+
+            RuntimeProvider.Instance.SetColorBlock(mainButton, new Color(0.1f, 0.1f, 0.1f),
+                new Color(0.2f, 0.2f, 0.2f), new Color(0.05f, 0.05f, 0.05f));
 
             UIFactory.SetLayoutElement(mainButton.gameObject, minHeight: 25, minWidth: 230);
 
@@ -539,15 +537,13 @@ namespace UnityExplorer.UI.Main.Home
             mainText.horizontalOverflow = HorizontalWrapMode.Overflow;
             m_shortListTexts.Add(mainText);
 
-            ColorBlock inspectColors = new ColorBlock();
-            inspectColors = RuntimeProvider.Instance.SetColorBlock(inspectColors, new Color(0.15f, 0.15f, 0.15f),
-                new Color(0.2f, 0.2f, 0.2f), new Color(0.1f, 0.1f, 0.1f));
-
             var inspectButton = UIFactory.CreateButton(btnGroupObj, 
                 "InspectButton", 
                 "Inspect",
-                () => { InspectorManager.Instance.Inspect(m_shortList[thisIndex]); },
-                inspectColors);
+                () => { InspectorManager.Instance.Inspect(m_shortList[thisIndex]); });
+
+            RuntimeProvider.Instance.SetColorBlock(inspectButton, new Color(0.15f, 0.15f, 0.15f),
+                new Color(0.2f, 0.2f, 0.2f), new Color(0.1f, 0.1f, 0.1f));
 
             UIFactory.SetLayoutElement(inspectButton.gameObject, minWidth: 60, minHeight: 25);
         }

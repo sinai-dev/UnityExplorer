@@ -52,26 +52,13 @@ namespace UnityExplorer.UI
 
         internal static void SetDefaultSelectableColors(Selectable selectable)
         {
-            selectable.colors = RuntimeProvider.Instance.SetColorBlock(selectable.colors, new Color(0.2f, 0.2f, 0.2f), 
+            RuntimeProvider.Instance.SetColorBlock(selectable, new Color(0.2f, 0.2f, 0.2f),
                 new Color(0.3f, 0.3f, 0.3f), new Color(0.15f, 0.15f, 0.15f));
 
             // Deselect all Buttons after they are clicked.
             if (selectable is Button button)
                 button.onClick.AddListener(() => { button.OnDeselect(null); });
         }
-
-        //public static void SetColorBlockValues(ref this ColorBlock colorBlock, Color? normal = null, Color? highlighted = null, 
-        //    Color? pressed = null)
-        //{
-        //    if (normal != null)
-        //        colorBlock.normalColor = (Color)normal;
-
-        //    if (highlighted != null)
-        //        colorBlock.highlightedColor = (Color)highlighted;
-
-        //    if (pressed != null)
-        //        colorBlock.pressedColor = (Color)pressed;
-        //}
 
         /// <summary>
         /// Get and/or Add a LayoutElement component to the GameObject, and set any of the values on it.
@@ -276,10 +263,12 @@ namespace UnityExplorer.UI
         {
             var colors = new ColorBlock();
             normalColor = normalColor ?? new Color(0.25f, 0.25f, 0.25f);
-            colors = RuntimeProvider.Instance.SetColorBlock(colors, normalColor, new Color(0.4f, 0.4f, 0.4f),
-                new Color(0.15f, 0.15f, 0.15f));
 
-            return CreateButton(parent, name, text, onClick, colors);
+            var btn = CreateButton(parent, name, text, onClick, colors);
+
+            RuntimeProvider.Instance.SetColorBlock(btn, normalColor, new Color(0.4f, 0.4f, 0.4f), new Color(0.15f, 0.15f, 0.15f));
+
+            return btn;
         }
 
         public static Button CreateButton(GameObject parent, string name, string text, Action onClick, ColorBlock colors)
@@ -296,7 +285,7 @@ namespace UnityExplorer.UI
             SetDefaultSelectableColors(button);
 
             colors.colorMultiplier = 1;
-            button.colors = colors;
+            RuntimeProvider.Instance.SetColorBlock(button, colors);
 
             Text textComp = textObj.AddComponent<Text>();
             textComp.text = text;
@@ -364,7 +353,7 @@ namespace UnityExplorer.UI
             slider.targetGraphic = handleImage;
             slider.direction = Slider.Direction.LeftToRight;
 
-            slider.colors = RuntimeProvider.Instance.SetColorBlock(slider.colors, new Color(0.4f, 0.4f, 0.4f), 
+            RuntimeProvider.Instance.SetColorBlock(slider, new Color(0.4f, 0.4f, 0.4f),
                 new Color(0.55f, 0.55f, 0.55f), new Color(0.3f, 0.3f, 0.3f));
 
             return sliderObj;
@@ -504,7 +493,7 @@ namespace UnityExplorer.UI
             mainInput.transition = Selectable.Transition.ColorTint;
             mainInput.targetGraphic = mainImage;
 
-            mainInput.colors = RuntimeProvider.Instance.SetColorBlock(mainInput.colors, new Color(1, 1, 1, 1),
+            RuntimeProvider.Instance.SetColorBlock(mainInput, new Color(1, 1, 1, 1),
                 new Color(0.95f, 0.95f, 0.95f, 1.0f), new Color(0.78f, 0.78f, 0.78f, 1.0f));
 
             SetLayoutGroup<VerticalLayoutGroup>(mainObj, true, true, true, true);
@@ -609,7 +598,7 @@ namespace UnityExplorer.UI
             Toggle itemToggle = itemObj.AddComponent<Toggle>();
             itemToggle.targetGraphic = itemBgImage;
             itemToggle.isOn = true;
-            itemToggle.colors = RuntimeProvider.Instance.SetColorBlock(itemToggle.colors, 
+            RuntimeProvider.Instance.SetColorBlock(itemToggle, 
                 new Color(0.35f, 0.35f, 0.35f, 1.0f), new Color(0.25f, 0.45f, 0.25f, 1.0f));
 
             itemToggle.onValueChanged.AddListener((bool val) => { itemToggle.OnDeselect(null); });
