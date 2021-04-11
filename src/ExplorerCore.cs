@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.IO;
 using UnityEngine;
 using UnityExplorer.Core.Config;
@@ -13,7 +14,7 @@ namespace UnityExplorer
     public class ExplorerCore
     {
         public const string NAME = "UnityExplorer";
-        public const string VERSION = "3.3.11";
+        public const string VERSION = "3.3.12";
         public const string AUTHOR = "Sinai";
         public const string GUID = "com.sinai.unityexplorer";
 
@@ -44,9 +45,23 @@ namespace UnityExplorer
 
             InputManager.Init();
 
-            UIManager.Init();
-
             Log($"{NAME} {VERSION} initialized.");
+
+            RuntimeProvider.Instance.StartCoroutine(SetupCoroutine());
+        }
+
+        // Do a delayed setup so that objects aren't destroyed instantly.
+        // This can happen for a multitude of reasons.
+        // Default delay is 1 second which is usually enough.
+        private static IEnumerator SetupCoroutine()
+        {
+            float f = Time.realtimeSinceStartup;
+            float delay = ConfigManager.Startup_Delay_Time.Value;
+            while (Time.realtimeSinceStartup - f < delay)
+                yield return null;
+
+            Log($"Creating UI, after delay of {delay} second(s).");
+            UIManager.Init();
 
             //InspectorManager.Instance.Inspect(typeof(TestClass));
         }

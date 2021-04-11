@@ -24,6 +24,7 @@ namespace UnityExplorer.Core.Config
         public static ConfigElement<string>     Default_Output_Path;
         public static ConfigElement<bool>       Log_Unity_Debug;
         public static ConfigElement<bool>       Hide_On_Startup;
+        public static ConfigElement<float>      Startup_Delay_Time;
 
         public static ConfigElement<string>     Last_Window_Anchors;
         public static ConfigElement<string>     Last_Window_Position;
@@ -84,6 +85,10 @@ namespace UnityExplorer.Core.Config
             Default_Output_Path = new ConfigElement<string>("Default Output Path",
                 "The default output path when exporting things from UnityExplorer.",
                 Path.Combine(ExplorerCore.Loader.ExplorerFolder, "Output"));
+
+            Startup_Delay_Time = new ConfigElement<float>("Startup Delay Time",
+                "The delay on startup before the UI is created.",
+                1f);
 
             // Internal configs
 
