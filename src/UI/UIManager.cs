@@ -12,6 +12,7 @@ using UnityExplorer.UI.Models;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Utility;
 using UnityExplorer.UI.Widgets;
+using UnityExplorer.UI.Widgets.InfiniteScroll;
 
 namespace UnityExplorer.UI
 {
@@ -44,14 +45,6 @@ namespace UnityExplorer.UI
 
         internal static void InitUI()
         {
-            // inject custom types for il2cpp (not actually necessary for these to be MBs, but w/e)
-            // TODO MAKE THESE UIBEHAVIOURMODELS
-#if CPP
-            UnhollowerRuntimeLib.ClassInjector.RegisterTypeInIl2Cpp<InfiniteScrollRect>();
-            UnhollowerRuntimeLib.ClassInjector.RegisterTypeInIl2Cpp<TransformTree>();
-            UnhollowerRuntimeLib.ClassInjector.RegisterTypeInIl2Cpp<TransformCell>();
-#endif
-
             LoadBundle();
 
             UIFactory.Init();
@@ -95,7 +88,7 @@ namespace UnityExplorer.UI
             if (EventSystem.current != EventSys)
                 CursorUnlocker.SetEventSystem();
 
-            // TODO MAKE THESE UIBEHAVIOURMODELS
+            // TODO could make these UIBehaviourModels
             PanelDragger.UpdateInstances();
             SliderScrollbar.UpdateInstances();
             InputFieldScroller.UpdateInstances();

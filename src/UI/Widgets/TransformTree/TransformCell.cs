@@ -8,14 +8,17 @@ using UnityExplorer.UI.Widgets.InfiniteScroll;
 
 namespace UnityExplorer.UI.Widgets
 {
-    public class TransformCell : MonoBehaviour, ICell
+    public class TransformCell : ICell
     {
         public bool Enabled => m_enabled;
         private bool m_enabled;
 
         public TransformTree tree;
-        internal CachedTransform cachedTransform;
-        internal int _cellIndex;
+
+        public CachedTransform cachedTransform;
+        public int _cellIndex;
+
+        public GameObject uiRoot;
 
         public Text nameLabel;
         public Button nameButton;
@@ -25,8 +28,16 @@ namespace UnityExplorer.UI.Widgets
 
         public LayoutElement spacer;
 
-        internal void Start()
+        public TransformCell(TransformTree tree, GameObject cellUI, Button nameButton, Button expandButton, LayoutElement spacer)
         {
+            this.tree = tree;
+            this.uiRoot = cellUI;
+            this.nameButton = nameButton;
+            this.nameLabel = nameButton.GetComponentInChildren<Text>();
+            this.expandButton = expandButton;
+            this.expandLabel = expandButton.GetComponentInChildren<Text>();
+            this.spacer = spacer;
+
             nameButton.onClick.AddListener(OnMainButtonClicked);
             expandButton.onClick.AddListener(OnExpandClicked);
         }
@@ -42,12 +53,13 @@ namespace UnityExplorer.UI.Widgets
 
             spacer.minWidth = cached.Depth * 15;
 
-            nameLabel.text = cached.Name;
-            nameLabel.color = cached.RefTransform.gameObject.activeSelf ? Color.white : Color.grey;
+            nameLabel.text = cached.Value.name;
+            nameLabel.color = cached.Value.gameObject.activeSelf ? Color.white : Color.grey;
 
-            if (cached.ChildCount > 0)
+            int childCount = cached.Value.childCount;
+            if (childCount > 0)
             {
-                nameLabel.text = $"<color=grey>[{cached.ChildCount}]</color> {nameLabel.text}";
+                nameLabel.text = $"<color=grey>[{childCount}]</color> {nameLabel.text}";
 
                 expandButton.interactable = true;
                 expandLabel.enabled = true;
@@ -64,13 +76,13 @@ namespace UnityExplorer.UI.Widgets
         public void Disable()
         {
             m_enabled = false;
-            this.gameObject.SetActive(false);
+            uiRoot.SetActive(false);
         }
 
         public void Enable()
         {
             m_enabled = true;
-            this.gameObject.SetActive(true);
+            uiRoot.SetActive(true);
         }
 
         public void OnExpandClicked()
@@ -80,7 +92,46 @@ namespace UnityExplorer.UI.Widgets
 
         public void OnMainButtonClicked()
         {
-            Debug.Log($"TODO Inspect {cachedTransform.RefTransform.name}");
+            if (cachedTransform.Value)
+                ExplorerCore.Log($"TODO Inspect {cachedTransform.Value.name}");
+            else
+                ExplorerCore.LogWarning("The object was destroyed!");
+        }
+
+        public static GameObject CreatePrototypeCell(GameObject parent)
+        {
+            var prototype = UIFactory.CreateHorizontalGroup(parent, "PrototypeCell", true, true, true, true, 2, default,
+                new Color(0.15f, 0.15f, 0.15f), TextAnchor.MiddleCenter);
+            //var cell = prototype.AddComponent<TransformCell>();
+            var rect = prototype.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0, 1);
+            rect.anchorMax = new Vector2(0, 1);
+            rect.pivot = new Vector2(0.5f, 1);
+            rect.sizeDelta = new Vector2(25, 25);
+            UIFactory.SetLayoutElement(prototype, minWidth: 100, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
+
+            var spacer = UIFactory.CreateUIObject("Spacer", prototype, new Vector2(0, 0));
+            UIFactory.SetLayoutElement(spacer, minWidth: 0, flexibleWidth: 0, minHeight: 0, flexibleHeight: 0);
+
+            var expandButton = UIFactory.CreateButton(prototype, "ExpandButton", "►", null);
+            UIFactory.SetLayoutElement(expandButton.gameObject, minWidth: 15, flexibleWidth: 0, minHeight: 25, flexibleHeight: 0);
+
+            var nameButton = UIFactory.CreateButton(prototype, "NameButton", "Name", null);
+            UIFactory.SetLayoutElement(nameButton.gameObject, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
+            var nameLabel = nameButton.GetComponentInChildren<Text>();
+            nameLabel.horizontalOverflow = HorizontalWrapMode.Overflow;
+            nameLabel.alignment = TextAnchor.MiddleLeft;
+
+            Color normal = new Color(0.15f, 0.15f, 0.15f);
+            Color highlight = new Color(0.25f, 0.25f, 0.25f);
+            Color pressed = new Color(0.05f, 0.05f, 0.05f);
+            Color disabled = new Color(1, 1, 1, 0);
+            RuntimeProvider.Instance.SetColorBlock(expandButton, normal, highlight, pressed, disabled);
+            RuntimeProvider.Instance.SetColorBlock(nameButton, normal, highlight, pressed, disabled);
+
+            prototype.SetActive(false);
+
+            return prototype;
         }
     }
 }
