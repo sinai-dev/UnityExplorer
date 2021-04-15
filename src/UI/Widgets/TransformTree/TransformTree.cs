@@ -39,20 +39,6 @@ namespace UnityExplorer.UI.Widgets
         {
             yield return null;
 
-            // stress test
-
-            //for (int i = 0; i < 10000; i++)
-            //    new GameObject(i.ToString());
-
-            var root = new GameObject().transform;
-            for (int i = 0; i < 100; i++)
-            {
-                var obj = new GameObject(i.ToString());
-                obj.transform.parent = root;
-                for (int j = 0; j < 100; j++)
-                    new GameObject(j.ToString()).transform.parent = obj.transform;
-            }
-
             RefreshData();
             infiniteScroll.DataSource = this;
             infiniteScroll.Initialize(this);
