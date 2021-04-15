@@ -23,7 +23,7 @@ namespace UnityExplorer.Loader.ML
 
             // temporary until melonloader 0.3.1 released
             try { MelonPreferences.Mapper.RegisterMapper(KeycodeReader, KeycodeWriter); } catch { }
-            try { MelonPreferences.Mapper.RegisterMapper(MenuPagesReader, MenuPagesWriter); } catch { }
+            //try { MelonPreferences.Mapper.RegisterMapper(MenuPagesReader, MenuPagesWriter); } catch { }
         }
 
         public override void LoadConfig()
@@ -102,27 +102,27 @@ namespace UnityExplorer.Loader.ML
             return MelonPreferences.Mapper.ToToml(value.ToString());
         }
 
-        public static UI.Main.MenuPages MenuPagesReader(TomlObject value)
-        {
-            try
-            {
-                var kc = (UI.Main.MenuPages)Enum.Parse(typeof(UI.Main.MenuPages), (value as TomlString).Value);
+        //public static UI.Main.MenuPages MenuPagesReader(TomlObject value)
+        //{
+        //    try
+        //    {
+        //        var kc = (UI.Main.MenuPages)Enum.Parse(typeof(UI.Main.MenuPages), (value as TomlString).Value);
 
-                if (kc == default)
-                    throw new Exception();
+        //        if (kc == default)
+        //            throw new Exception();
 
-                return kc;
-            }
-            catch
-            {
-                return UI.Main.MenuPages.Home;
-            }
-        }
+        //        return kc;
+        //    }
+        //    catch
+        //    {
+        //        return UI.Main.MenuPages.Home;
+        //    }
+        //}
 
-        public static TomlObject MenuPagesWriter(UI.Main.MenuPages value)
-        {
-            return MelonPreferences.Mapper.ToToml(value.ToString());
-        }
+        //public static TomlObject MenuPagesWriter(UI.Main.MenuPages value)
+        //{
+        //    return MelonPreferences.Mapper.ToToml(value.ToString());
+        //}
     }
 }
 
