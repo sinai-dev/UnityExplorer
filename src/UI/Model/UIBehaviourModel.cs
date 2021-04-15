@@ -15,24 +15,35 @@ namespace UnityExplorer.UI.Models
             if (!Instances.Any())
                 return;
 
-            for (int i = Instances.Count - 1; i >= 0; i--)
+            try
             {
-                var instance = Instances[i];
-                if (!instance.UIRoot)
-                    Instances.RemoveAt(i);
-                else if (instance.NeedsUpdate && instance.Visible)
-                    instance.Update();
+                for (int i = Instances.Count - 1; i >= 0; i--)
+                {
+                    var instance = Instances[i];
+                    if (instance == null || !instance.UIRoot)
+                    {
+                        ExplorerCore.Log($"Instance {instance?.GetType().Name ?? "<null>"} has no UIRoot or it was destroyed!");
+                        Instances.RemoveAt(i);
+                        continue;
+                    }
+                    if (instance.Visible)
+                        instance.Update();
+                }
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.Log(ex);
             }
         }
-
-        /// <summary>
-        /// Default false, if true then Update should be implemented.
-        /// </summary>
-        public virtual bool NeedsUpdate => false;
 
         public UIBehaviourModel()
         {
             Instances.Add(this);
+        }
+
+        public virtual void Init()
+        {
+
         }
 
         /// <summary>
