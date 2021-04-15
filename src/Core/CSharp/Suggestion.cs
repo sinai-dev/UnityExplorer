@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityExplorer.Core;
-using UnityExplorer.UI.Main.CSConsole;
 
 namespace UnityExplorer.Core.CSharp
 {
@@ -49,8 +48,8 @@ namespace UnityExplorer.Core.CSharp
         public static HashSet<string> Namespaces => m_namespaces ?? GetNamespaces();
         private static HashSet<string> m_namespaces;
 
-        public static HashSet<string> Keywords => m_keywords ?? (m_keywords = new HashSet<string>(CSLexerHighlighter.validKeywordMatcher.Keywords));
-        private static HashSet<string> m_keywords;
+        public static HashSet<string> Keywords => throw new NotImplementedException("TODO!"); // m_keywords ?? (m_keywords = new HashSet<string>(CSLexerHighlighter.validKeywordMatcher.Keywords));
+        //private static HashSet<string> m_keywords;
 
         private static readonly Color keywordColor = new Color(80f / 255f, 150f / 255f, 215f / 255f);
 

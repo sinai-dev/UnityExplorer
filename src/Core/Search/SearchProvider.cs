@@ -5,8 +5,6 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityExplorer.Core.Runtime;
-using UnityExplorer.UI.Main;
-using UnityExplorer.UI.Main.Search;
 
 namespace UnityExplorer.Core.Search
 {
@@ -68,7 +66,7 @@ namespace UnityExplorer.Core.Search
                         if (!string.IsNullOrEmpty(nameFilter) && !type.FullName.ToLower().Contains(nameFilter))
                             continue;
 
-                        RuntimeProvider.Instance.FindSingleton(s_instanceNames, type, flags, instances);
+                        ReflectionProvider.Instance.FindSingleton(s_instanceNames, type, flags, instances);
                     }
                     catch { }
                 }
@@ -78,7 +76,7 @@ namespace UnityExplorer.Core.Search
         }
 
         internal static object[] UnityObjectSearch(string input, string customTypeInput, SearchContext context, 
-            ChildFilter childFilter, SceneFilter sceneFilter)
+            ChildFilter childFilter, SceneFilter sceneFilter, string sceneName = null)
         {
             Type searchType = null;
             switch (context)
@@ -134,7 +132,8 @@ namespace UnityExplorer.Core.Search
                 if (sceneFilter == SceneFilter.DontDestroyOnLoad)
                     sceneFilterString = "DontDestroyOnLoad";
                 else if (sceneFilter == SceneFilter.Explicit)
-                    sceneFilterString = SearchPage.Instance.m_sceneDropdown.options[SearchPage.Instance.m_sceneDropdown.value].text;
+                    //sceneFilterString = SearchPage.Instance.m_sceneDropdown.options[SearchPage.Instance.m_sceneDropdown.value].text;
+                    sceneFilterString = sceneName;
             }
 
             foreach (var obj in allObjects)

@@ -27,6 +27,7 @@
     <RootNamespace>UnityExplorer</RootNamespace>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <!-- CONFIGURATIONS -->
   <!-- ML IL2CPP -->
@@ -163,11 +164,11 @@
   <!-- Mono refs -->
   <ItemGroup Condition="'$(IsCpp)'=='false'">
     <Reference Include="UnityEngine">
-      <HintPath>..\lib\UnityEngine.dll</HintPath>
+      <HintPath>..\lib\publicized_assemblies\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\lib\UnityEngine.UI.dll</HintPath>
+      <HintPath>..\lib\publicized_assemblies\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -215,14 +216,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\Config\ConfigElement.cs" />
-    <Compile Include="Core\Config\ConfigManager.cs" />
-    <Compile Include="Core\Config\IConfigElement.cs" />
-    <Compile Include="Core\Config\ConfigHandler.cs" />
-    <Compile Include="Core\Runtime\Mono\DummyBehaviour.cs" />
     <Compile Include="Core\CSharp\ScriptEvaluator.cs" />
     <Compile Include="Core\CSharp\ScriptInteraction.cs" />
     <Compile Include="Core\CSharp\Suggestion.cs" />
+    <Compile Include="Core\Config\ConfigElement.cs" />
+    <Compile Include="Core\Config\ConfigHandler.cs" />
+    <Compile Include="Core\Config\ConfigManager.cs" />
+    <Compile Include="Core\Config\IConfigElement.cs" />
     <Compile Include="Core\Input\CursorUnlocker.cs" />
     <Compile Include="Core\Input\IHandleInput.cs" />
     <Compile Include="Core\Input\InputManager.cs" />
@@ -236,78 +236,48 @@
     <Compile Include="Core\Runtime\Il2Cpp\Il2CppProvider.cs" />
     <Compile Include="Core\Runtime\Il2Cpp\Il2CppReflection.cs" />
     <Compile Include="Core\Runtime\Il2Cpp\Il2CppTextureUtil.cs" />
+    <Compile Include="Core\Runtime\Mono\DummyBehaviour.cs" />
     <Compile Include="Core\Runtime\Mono\MonoProvider.cs" />
     <Compile Include="Core\Runtime\Mono\MonoReflection.cs" />
     <Compile Include="Core\Runtime\Mono\MonoTextureUtil.cs" />
     <Compile Include="Core\Runtime\ReflectionProvider.cs" />
+    <Compile Include="Core\Runtime\RuntimeContext.cs" />
     <Compile Include="Core\Runtime\RuntimeProvider.cs" />
     <Compile Include="Core\Runtime\TextureUtilProvider.cs" />
+    <Compile Include="Core\SceneHandler.cs" />
     <Compile Include="Core\Search\ChildFilter.cs" />
     <Compile Include="Core\Search\SceneFilter.cs" />
     <Compile Include="Core\Search\SearchContext.cs" />
     <Compile Include="Core\Search\SearchProvider.cs" />
-    <Compile Include="Core\TestClass.cs" />
+    <Compile Include="Core\Tests\TestClass.cs" />
     <Compile Include="Core\Unity\UnityHelpers.cs" />
+    <Compile Include="ExplorerCore.cs" />
     <Compile Include="Loader\BIE\BepInExConfigHandler.cs" />
     <Compile Include="Loader\BIE\ExplorerBepInPlugin.cs" />
+    <Compile Include="Loader\IExplorerLoader.cs" />
+    <Compile Include="Loader\ML\ExplorerMelonMod.cs" />
     <Compile Include="Loader\ML\MelonLoaderConfigHandler.cs" />
     <Compile Include="Loader\STANDALONE\ExplorerStandalone.cs" />
-    <Compile Include="ExplorerCore.cs" />
-    <Compile Include="Loader\ML\ExplorerMelonMod.cs" />
-    <Compile Include="Loader\IExplorerLoader.cs" />
     <Compile Include="Loader\STANDALONE\StandaloneConfigHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\CacheObject\CacheConfigEntry.cs" />
-    <Compile Include="UI\CacheObject\CacheEnumerated.cs" />
-    <Compile Include="UI\CacheObject\CacheField.cs" />
-    <Compile Include="UI\CacheObject\CacheMember.cs" />
-    <Compile Include="UI\CacheObject\CacheMethod.cs" />
-    <Compile Include="UI\CacheObject\CacheObjectBase.cs" />
-    <Compile Include="UI\CacheObject\CachePaired.cs" />
-    <Compile Include="UI\CacheObject\CacheProperty.cs" />
-    <Compile Include="UI\InteractiveValues\InteractiveBool.cs" />
-    <Compile Include="UI\InteractiveValues\InteractiveColor.cs" />
-    <Compile Include="UI\InteractiveValues\InteractiveDictionary.cs" />
-    <Compile Include="UI\InteractiveValues\InteractiveEnum.cs" />
-    <Compile Include="UI\InteractiveValues\InteractiveEnumerable.cs" />
-    <Compile Include="UI\InteractiveValues\InteractiveFlags.cs" />
-    <Compile Include="UI\InteractiveValues\InteractiveNumber.cs" />
-    <Compile Include="UI\InteractiveValues\InteractiveString.cs" />
-    <Compile Include="UI\InteractiveValues\InteractiveFloatStruct.cs" />
-    <Compile Include="UI\InteractiveValues\InteractiveValue.cs" />
-    <Compile Include="UI\Main\BaseMenuPage.cs" />
-    <Compile Include="UI\Main\CSConsole\AutoCompleter.cs" />
-    <Compile Include="UI\Main\CSConsole\CSharpConsole.cs" />
-    <Compile Include="UI\Main\CSConsole\CSLexerHighlighter.cs" />
-    <Compile Include="UI\Main\CSConsole\Lexer\CommentMatch.cs" />
-    <Compile Include="UI\Main\CSConsole\Lexer\KeywordMatch.cs" />
-    <Compile Include="UI\Main\CSConsole\Lexer\Matcher.cs" />
-    <Compile Include="UI\Main\CSConsole\Lexer\NumberMatch.cs" />
-    <Compile Include="UI\Main\CSConsole\Lexer\StringMatch.cs" />
-    <Compile Include="UI\Main\CSConsole\Lexer\SymbolMatch.cs" />
-    <Compile Include="UI\Main\DebugConsole.cs" />
-    <Compile Include="UI\Main\Home\HomePage.cs" />
-    <Compile Include="UI\Inspectors\InspectorManager.cs" />
-    <Compile Include="UI\Inspectors\GameObjects\ChildList.cs" />
-    <Compile Include="UI\Inspectors\GameObjects\ComponentList.cs" />
-    <Compile Include="UI\Inspectors\GameObjects\GameObjectControls.cs" />
-    <Compile Include="UI\Inspectors\GameObjects\GameObjectInspector.cs" />
-    <Compile Include="UI\Inspectors\InspectorBase.cs" />
-    <Compile Include="UI\Inspectors\Reflection\InstanceInspector.cs" />
-    <Compile Include="UI\Inspectors\Reflection\ReflectionInspector.cs" />
-    <Compile Include="UI\Inspectors\Reflection\StaticInspector.cs" />
-    <Compile Include="UI\Inspectors\InspectUnderMouse.cs" />
-    <Compile Include="UI\Main\Home\SceneExplorer.cs" />
-    <Compile Include="UI\Main\MainMenu.cs" />
-    <Compile Include="UI\Main\Options\OptionsPage.cs" />
-    <Compile Include="UI\Main\PanelDragger.cs" />
-    <Compile Include="UI\Main\Search\SearchPage.cs" />
+    <Compile Include="UI\InspectorManager.cs" />
+    <Compile Include="UI\Model\UIBehaviourModel.cs" />
+    <Compile Include="UI\Model\UIModel.cs" />
+    <Compile Include="UI\Panels\SceneExplorer.cs" />
     <Compile Include="UI\UIFactory.cs" />
     <Compile Include="UI\UIManager.cs" />
-    <Compile Include="UI\Utility\InputFieldScroller.cs" />
-    <Compile Include="UI\Utility\PageHandler.cs" />
+    <Compile Include="UI\Utility\PanelDragger.cs" />
     <Compile Include="UI\Utility\SignatureHighlighter.cs" />
-    <Compile Include="UI\Utility\SliderScrollbar.cs" />
+    <Compile Include="UI\Widgets\InfiniteScroll\ICell.cs" />
+    <Compile Include="UI\Widgets\InfiniteScroll\IListDataSource.cs" />
+    <Compile Include="UI\Widgets\InfiniteScroll\InfiniteScrollRect.cs" />
+    <Compile Include="UI\Widgets\InfiniteScroll\UIExtensions.cs" />
+    <Compile Include="UI\Widgets\InputFieldScroller.cs" />
+    <Compile Include="UI\Widgets\PageHandler.cs" />
+    <Compile Include="UI\Widgets\SliderScrollbar.cs" />
+    <Compile Include="UI\Widgets\TransformTree\CachedTransform.cs" />
+    <Compile Include="UI\Widgets\TransformTree\TransformCell.cs" />
+    <Compile Include="UI\Widgets\TransformTree\TransformTree.cs" />
     <EmbeddedResource Include="Resources\*" />
   </ItemGroup>
   <ItemGroup>

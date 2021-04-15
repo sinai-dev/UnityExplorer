@@ -4,9 +4,11 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Events;
 using Object = UnityEngine.Object;
 
-namespace UnityExplorer.Core.Unity
+// Project-wide namespace for accessibility
+namespace UnityExplorer
 {
     public static class UnityHelpers
     {

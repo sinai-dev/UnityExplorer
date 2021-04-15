@@ -5,6 +5,8 @@ using UnityEngine.UI;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI.Utility;
+using UnityExplorer.UI.Widgets;
+using UnityExplorer.UI.Widgets.InfiniteScroll;
 
 namespace UnityExplorer.UI
 {
@@ -64,7 +66,7 @@ namespace UnityExplorer.UI
         /// Get and/or Add a LayoutElement component to the GameObject, and set any of the values on it.
         /// </summary>
         public static LayoutElement SetLayoutElement(GameObject gameObject, int? minWidth = null, int? minHeight = null,
-            int? flexibleWidth = null, int? flexibleHeight = null, int? preferredWidth = null, int? preferredHeight = null, 
+            int? flexibleWidth = null, int? flexibleHeight = null, int? preferredWidth = null, int? preferredHeight = null,
             bool? ignoreLayout = null)
         {
             var layout = gameObject.GetComponent<LayoutElement>();
@@ -99,15 +101,15 @@ namespace UnityExplorer.UI
         /// Get and/or Add a HorizontalOrVerticalLayoutGroup (must pick one) to the GameObject, and set the values on it.
         /// </summary>
         public static T SetLayoutGroup<T>(GameObject gameObject, bool? forceWidth = null, bool? forceHeight = null,
-            bool? childControlWidth = null, bool? childControlHeight = null, int? spacing = null, int? padTop = null, 
-            int? padBottom = null, int? padLeft = null, int? padRight = null, TextAnchor? childAlignment = null) 
+            bool? childControlWidth = null, bool? childControlHeight = null, int? spacing = null, int? padTop = null,
+            int? padBottom = null, int? padLeft = null, int? padRight = null, TextAnchor? childAlignment = null)
             where T : HorizontalOrVerticalLayoutGroup
         {
             var group = gameObject.GetComponent<T>();
             if (!group)
                 group = gameObject.AddComponent<T>();
 
-            return SetLayoutGroup(group, forceWidth, forceHeight, childControlWidth, childControlHeight, spacing, padTop, 
+            return SetLayoutGroup(group, forceWidth, forceHeight, childControlWidth, childControlHeight, spacing, padTop,
                 padBottom, padLeft, padRight, childAlignment);
         }
 
@@ -116,7 +118,7 @@ namespace UnityExplorer.UI
         /// </summary>
         public static T SetLayoutGroup<T>(T group, bool? forceWidth = null, bool? forceHeight = null,
             bool? childControlWidth = null, bool? childControlHeight = null, int? spacing = null, int? padTop = null,
-            int? padBottom = null, int? padLeft = null, int? padRight = null, TextAnchor? childAlignment = null) 
+            int? padBottom = null, int? padLeft = null, int? padRight = null, TextAnchor? childAlignment = null)
             where T : HorizontalOrVerticalLayoutGroup
         {
             if (forceWidth != null)
@@ -146,7 +148,8 @@ namespace UnityExplorer.UI
         /// <summary>
         /// Create a Panel on the UI Canvas.
         /// </summary>
-        public static GameObject CreatePanel(string name, out GameObject contentHolder, string anchors = null, string position = null)
+        public static GameObject CreatePanel(string name, out GameObject contentHolder, Color? bgColor = null,
+            string anchors = null, string position = null)
         {
             var panelObj = CreateUIObject(name, UIManager.CanvasRoot);
             var rect = panelObj.GetComponent<RectTransform>();
@@ -171,7 +174,10 @@ namespace UnityExplorer.UI
 
             Image bgImage = contentHolder.AddComponent<Image>();
             bgImage.type = Image.Type.Filled;
-            bgImage.color = new Color(0.1f, 0.1f, 0.1f);
+            if (bgColor == null)
+                bgImage.color = new Color(0.1f, 0.1f, 0.1f);
+            else
+                bgImage.color = (Color)bgColor;
 
             SetLayoutGroup<VerticalLayoutGroup>(contentHolder, true, true, true, true, 3, 3, 3, 3, 3);
 
@@ -279,7 +285,7 @@ namespace UnityExplorer.UI
 
             Image image = buttonObj.AddComponent<Image>();
             image.type = Image.Type.Sliced;
-            image.color = new Color(1, 1, 1, 0.75f);
+            image.color = new Color(1, 1, 1, 1);
 
             var button = buttonObj.AddComponent<Button>();
             SetDefaultSelectableColors(button);
@@ -462,9 +468,8 @@ namespace UnityExplorer.UI
 
             var mainObj = CreateScrollView(parent, "InputFieldScrollView", out GameObject scrollContent, out SliderScrollbar scroller, color);
 
-            var inputObj = CreateInputField(scrollContent, name, placeHolderText ?? "...", fontSize, 0);
+            var inputObj = CreateInputField(scrollContent, name, placeHolderText ?? "...", out InputField inputField, fontSize, 0);
 
-            var inputField = inputObj.GetComponent<InputField>();
             inputField.lineType = InputField.LineType.MultiLineNewline;
             inputField.targetGraphic.color = color;
 
@@ -476,7 +481,8 @@ namespace UnityExplorer.UI
         /// <summary>
         /// Create a standard InputField control.
         /// </summary>
-        public static GameObject CreateInputField(GameObject parent, string name, string placeHolderText, int fontSize = 14, int alignment = 3, int wrap = 0)
+        public static GameObject CreateInputField(GameObject parent, string name, string placeHolderText, out InputField inputField,
+            int fontSize = 14, int alignment = 3, int wrap = 0)
         {
             GameObject mainObj = CreateUIObject(name, parent);
 
@@ -484,16 +490,16 @@ namespace UnityExplorer.UI
             mainImage.type = Image.Type.Sliced;
             mainImage.color = new Color(0.15f, 0.15f, 0.15f);
 
-            InputField mainInput = mainObj.AddComponent<InputField>();
-            Navigation nav = mainInput.navigation;
+            inputField = mainObj.AddComponent<InputField>();
+            Navigation nav = inputField.navigation;
             nav.mode = Navigation.Mode.None;
-            mainInput.navigation = nav;
-            mainInput.lineType = InputField.LineType.SingleLine;
-            mainInput.interactable = true;
-            mainInput.transition = Selectable.Transition.ColorTint;
-            mainInput.targetGraphic = mainImage;
+            inputField.navigation = nav;
+            inputField.lineType = InputField.LineType.SingleLine;
+            inputField.interactable = true;
+            inputField.transition = Selectable.Transition.ColorTint;
+            inputField.targetGraphic = mainImage;
 
-            RuntimeProvider.Instance.SetColorBlock(mainInput, new Color(1, 1, 1, 1),
+            RuntimeProvider.Instance.SetColorBlock(inputField, new Color(1, 1, 1, 1),
                 new Color(0.95f, 0.95f, 0.95f, 1.0f), new Color(0.78f, 0.78f, 0.78f, 1.0f));
 
             SetLayoutGroup<VerticalLayoutGroup>(mainObj, true, true, true, true);
@@ -526,7 +532,7 @@ namespace UnityExplorer.UI
 
             SetLayoutElement(placeHolderObj, minWidth: 500, flexibleWidth: 5000);
 
-            mainInput.placeholder = placeholderText;
+            inputField.placeholder = placeholderText;
 
             GameObject inputTextObj = CreateUIObject("Text", textArea);
             Text inputText = inputTextObj.AddComponent<Text>();
@@ -545,7 +551,7 @@ namespace UnityExplorer.UI
 
             SetLayoutElement(inputTextObj, minWidth: 500, flexibleWidth: 5000);
 
-            mainInput.textComponent = inputText;
+            inputField.textComponent = inputText;
 
             return mainObj;
         }
@@ -553,7 +559,7 @@ namespace UnityExplorer.UI
         /// <summary>
         /// Create a DropDown control.
         /// </summary>
-        public static GameObject CreateDropdown(GameObject parent, out Dropdown dropdown, string defaultItemText, int itemFontSize, 
+        public static GameObject CreateDropdown(GameObject parent, out Dropdown dropdown, string defaultItemText, int itemFontSize,
             Action<int> onValueChanged, string[] defaultOptions = null)
         {
             GameObject dropdownObj = CreateUIObject("Dropdown", parent, _largeElementSize);
@@ -598,7 +604,7 @@ namespace UnityExplorer.UI
             Toggle itemToggle = itemObj.AddComponent<Toggle>();
             itemToggle.targetGraphic = itemBgImage;
             itemToggle.isOn = true;
-            RuntimeProvider.Instance.SetColorBlock(itemToggle, 
+            RuntimeProvider.Instance.SetColorBlock(itemToggle,
                 new Color(0.35f, 0.35f, 0.35f, 1.0f), new Color(0.25f, 0.45f, 0.25f, 1.0f));
 
             itemToggle.onValueChanged.AddListener((bool val) => { itemToggle.OnDeselect(null); });
@@ -693,10 +699,55 @@ namespace UnityExplorer.UI
             return dropdownObj;
         }
 
+        public static InfiniteScrollRect CreateInfiniteScroll(GameObject parent, string name, out GameObject content, Color? bgColor = null)
+        {
+            var mainObj = CreateUIObject(name, parent, new Vector2(1, 1));
+            mainObj.AddComponent<Image>().color = bgColor ?? new Color(0.12f, 0.12f, 0.12f);
+            SetLayoutGroup<HorizontalLayoutGroup>(mainObj, false, true, true, true);
+
+            GameObject viewportObj = CreateUIObject("Viewport", mainObj);
+            SetLayoutElement(viewportObj, flexibleWidth: 9999);
+            var viewportRect = viewportObj.GetComponent<RectTransform>();
+            viewportRect.anchorMin = Vector2.zero;
+            viewportRect.anchorMax = Vector2.one;
+            viewportRect.pivot = new Vector2(0.0f, 1.0f);
+            viewportRect.sizeDelta = new Vector2(0f, 0.0f);
+            viewportRect.offsetMax = new Vector2(-10.0f, 0.0f);
+            viewportObj.AddComponent<Image>().color = Color.white;
+            viewportObj.AddComponent<Mask>().showMaskGraphic = false;
+            //SetLayoutGroup<VerticalLayoutGroup>(viewportObj, true, true, true, true);
+
+            content = CreateUIObject("Content", viewportObj);
+            var contentRect = content.GetComponent<RectTransform>();
+            contentRect.anchorMin = Vector2.zero;
+            contentRect.anchorMax = Vector2.one;
+            contentRect.pivot = new Vector2(0.0f, 1.0f);
+            contentRect.sizeDelta = new Vector2(0f, 0f);
+            contentRect.offsetMax = new Vector2(0f, 0f);
+            //SetLayoutGroup<VerticalLayoutGroup>(content, true, false, true, false, 0, 2, 2, 2, 2);
+
+            var infiniteScroll = mainObj.AddComponent<InfiniteScrollRect>();
+            infiniteScroll.movementType = ScrollRect.MovementType.Clamped;
+            infiniteScroll.inertia = true;
+            infiniteScroll.decelerationRate = 0.135f;
+            infiniteScroll.scrollSensitivity = 15;
+            infiniteScroll.horizontal = false;
+            infiniteScroll.vertical = true;
+
+            infiniteScroll.viewport = viewportRect;
+            infiniteScroll.content = contentRect;
+
+            var sliderObj = SliderScrollbar.CreateSliderScrollbar(mainObj, out Slider slider);
+            slider.direction = Slider.Direction.TopToBottom;
+            SetLayoutElement(sliderObj, minWidth: 25, flexibleHeight: 9999);
+
+            return infiniteScroll;
+        }
+
         /// <summary>
         /// Create a ScrollView element.
         /// </summary>
-        public static GameObject CreateScrollView(GameObject parent, string name, out GameObject content, out SliderScrollbar scroller, 
+        public static GameObject CreateScrollView(GameObject parent, string name, out GameObject content, out SliderScrollbar scroller,
             Color color = default)
         {
             GameObject mainObj = CreateUIObject("DynamicScrollView", parent);
@@ -732,6 +783,27 @@ namespace UnityExplorer.UI
 
             SetLayoutGroup<VerticalLayoutGroup>(content, true, true, true, true, 5, 5, 5, 5, 5);
 
+            CreateSliderScrollbar(mainObj, out scroller, out Scrollbar hiddenScrollbar);
+
+            // Back to the main scrollview ScrollRect, setting it up now that we have all references.
+
+            var scrollRect = mainObj.AddComponent<ScrollRect>();
+            scrollRect.horizontal = false;
+            scrollRect.vertical = true;
+            scrollRect.verticalScrollbar = hiddenScrollbar;
+            scrollRect.movementType = ScrollRect.MovementType.Clamped;
+            scrollRect.scrollSensitivity = 35;
+            scrollRect.horizontalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
+            scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
+
+            scrollRect.viewport = viewportRect;
+            scrollRect.content = contentRect;
+
+            return mainObj;
+        }
+
+        public static GameObject CreateSliderScrollbar(GameObject mainObj, out SliderScrollbar scroller, out Scrollbar hiddenScrollbar)
+        {
             GameObject scrollBarObj = CreateUIObject("DynamicScrollbar", mainObj);
 
             var scrollbarLayout = scrollBarObj.AddComponent<VerticalLayoutGroup>();
@@ -744,8 +816,8 @@ namespace UnityExplorer.UI
             scrollBarRect.sizeDelta = new Vector2(15.0f, 0.0f);
             scrollBarRect.offsetMin = new Vector2(-15.0f, 0.0f);
 
-            GameObject hiddenBar = CreateScrollbar(scrollBarObj, "HiddenScrollviewScroller", out Scrollbar hiddenScroll);
-            hiddenScroll.SetDirection(Scrollbar.Direction.BottomToTop, true);
+            GameObject hiddenBar = CreateScrollbar(scrollBarObj, "HiddenScrollviewScroller", out hiddenScrollbar);
+            hiddenScrollbar.SetDirection(Scrollbar.Direction.BottomToTop, true);
 
             for (int i = 0; i < hiddenBar.transform.childCount; i++)
             {
@@ -755,24 +827,9 @@ namespace UnityExplorer.UI
 
             SliderScrollbar.CreateSliderScrollbar(scrollBarObj, out Slider scrollSlider);
 
-            // Back to the main scrollview ScrollRect, setting it up now that we have all references.
+            scroller = new SliderScrollbar(hiddenScrollbar, scrollSlider);
 
-            var scrollRect = mainObj.AddComponent<ScrollRect>();
-            scrollRect.horizontal = false;
-            scrollRect.vertical = true;
-            scrollRect.verticalScrollbar = hiddenScroll;
-            scrollRect.movementType = ScrollRect.MovementType.Clamped;
-            scrollRect.scrollSensitivity = 35;
-            scrollRect.horizontalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
-            scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
-
-            scrollRect.viewport = viewportRect;
-            scrollRect.content = contentRect;
-
-            // Create a custom DynamicScrollbar module
-            scroller = new SliderScrollbar(hiddenScroll, scrollSlider);
-
-            return mainObj;
+            return scrollBarObj;
         }
     }
 }

@@ -6,8 +6,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using UnityEngine;
-using UnityExplorer.UI.Main;
-using UnityExplorer.UI.Main.Home;
 
 namespace UnityExplorer.Core.Config
 {
@@ -19,7 +17,7 @@ namespace UnityExplorer.Core.Config
 
         public static ConfigElement<KeyCode>    Main_Menu_Toggle;
         public static ConfigElement<bool>       Force_Unlock_Mouse;
-        public static ConfigElement<MenuPages>  Default_Tab;
+        //public static ConfigElement<MenuPages>  Default_Tab;
         public static ConfigElement<int>        Default_Page_Limit;
         public static ConfigElement<string>     Default_Output_Path;
         public static ConfigElement<bool>       Log_Unity_Debug;
@@ -42,10 +40,10 @@ namespace UnityExplorer.Core.Config
 
             Handler.LoadConfig();
 
-            SceneExplorer.OnToggleShow += SceneExplorer_OnToggleShow;
-            PanelDragger.OnFinishResize += PanelDragger_OnFinishResize;
-            PanelDragger.OnFinishDrag += PanelDragger_OnFinishDrag;
-            DebugConsole.OnToggleShow += DebugConsole_OnToggleShow;
+            //SceneExplorer.OnToggleShow += SceneExplorer_OnToggleShow;
+            //PanelDragger.OnFinishResize += PanelDragger_OnFinishResize;
+            //PanelDragger.OnFinishDrag += PanelDragger_OnFinishDrag;
+            //DebugConsole.OnToggleShow += DebugConsole_OnToggleShow;
 
             InitConsoleCallback();
         }
@@ -66,9 +64,9 @@ namespace UnityExplorer.Core.Config
                 "Should UnityExplorer be hidden on startup?",
                 false);
 
-            Default_Tab = new ConfigElement<MenuPages>("Default Tab",
-                "The default menu page when starting the game.",
-                MenuPages.Home);
+            //Default_Tab = new ConfigElement<MenuPages>("Default Tab",
+            //    "The default menu page when starting the game.",
+            //    MenuPages.Home);
 
             Log_Unity_Debug = new ConfigElement<bool>("Log Unity Debug",
                 "Should UnityEngine.Debug.Log messages be printed to UnityExplorer's log?",

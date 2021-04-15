@@ -13,6 +13,36 @@ namespace UnityExplorer
     {
         public const BF AllFlags = BF.Public | BF.Instance | BF.NonPublic | BF.Static;
 
+        public static void Test()
+        {
+            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(AssemblyResolver);
+        }
+
+        private static Assembly AssemblyResolver(object sender, ResolveEventArgs args)
+        {
+            if (args.Name.StartsWith("UnityExplorer"))
+                return typeof(ExplorerCore).Assembly;
+
+            return null;
+        }
+
+        public static bool ValueEqual<T>(this T objA, T objB)
+        {
+            return (objA == null && objB == null) || (objA != null && objA.Equals(objB));
+        }
+
+        public static bool ReferenceEqual(this object objA, object objB)
+        {
+            if (objA.TryCast<UnityEngine.Object>() is UnityEngine.Object unityA)
+            {
+                var unityB = objB.TryCast<UnityEngine.Object>();
+                if (unityB && unityA.m_CachedPtr == unityB.m_CachedPtr)
+                    return true;
+            }
+
+            return object.ReferenceEquals(objA, objB);
+        }
+
         /// <summary>
         /// Helper for IL2CPP to get the underlying true Type (Unhollowed) of the object.
         /// </summary>
@@ -31,7 +61,7 @@ namespace UnityExplorer
         /// </summary>
         /// <param name="obj">The object to cast</param>
         /// <returns>The object, cast to the underlying Type if possible, otherwise the original object.</returns>
-        public static object Cast(this object obj)
+        public static object TryCast(this object obj)
             => ReflectionProvider.Instance.Cast(obj, GetActualType(obj));
 
         /// <summary>
@@ -40,7 +70,7 @@ namespace UnityExplorer
         /// <param name="obj">The object to cast</param>
         /// <param name="castTo">The Type to cast to </param>
         /// <returns>The object, cast to the Type provided if possible, otherwise the original object.</returns>
-        public static object Cast(this object obj, Type castTo)
+        public static object TryCast(this object obj, Type castTo)
             => ReflectionProvider.Instance.Cast(obj, castTo);
 
         public static T TryCast<T>(this object obj)

@@ -2,12 +2,11 @@
 using System.Collections;
 using System.IO;
 using UnityEngine;
+using UnityExplorer.Core;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Input;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI;
-using UnityExplorer.UI.Inspectors;
-using UnityExplorer.UI.Main;
 
 namespace UnityExplorer
 {
@@ -21,10 +20,14 @@ namespace UnityExplorer
         public static ExplorerCore Instance { get; private set; }
 
         public static IExplorerLoader Loader { get; private set; }
+        public static RuntimeContext Context { get; internal set; }
 
         // Prevent using ctor, must use Init method.
         private ExplorerCore() { }
 
+        /// <summary>
+        /// Initialize UnityExplorer with the provided Loader implementation.
+        /// </summary>
         public static void Init(IExplorerLoader loader)
         {
             if (Instance != null)
@@ -42,7 +45,7 @@ namespace UnityExplorer
             ConfigManager.Init(Loader.ConfigHandler);
 
             RuntimeProvider.Init();
-
+            SceneHandler.Init();
             InputManager.Init();
 
             Log($"{NAME} {VERSION} initialized.");
@@ -61,17 +64,23 @@ namespace UnityExplorer
                 yield return null;
 
             Log($"Creating UI, after delay of {delay} second(s).");
-            UIManager.Init();
+
+            UIManager.InitUI();
 
             //InspectorManager.Instance.Inspect(typeof(TestClass));
         }
 
+        /// <summary>
+        /// Should be called once per frame.
+        /// </summary>
         public static void Update()
         {
             RuntimeProvider.Instance.Update();
 
             UIManager.Update();
         }
+
+        #region LOGGING
 
         public static void Log(object message) 
             => Log(message, LogType.Log, false);
@@ -94,20 +103,22 @@ namespace UnityExplorer
                 case LogType.Assert:
                 case LogType.Log:
                     Loader.OnLogMessage(log);
-                    DebugConsole.Log(log, Color.white);
+                    //DebugConsole.Log(log, Color.white);
                     break;
 
                 case LogType.Warning:
                     Loader.OnLogWarning(log);
-                    DebugConsole.Log(log, Color.yellow);
+                    //DebugConsole.Log(log, Color.yellow);
                     break;
 
                 case LogType.Error:
                 case LogType.Exception:
                     Loader.OnLogError(log);
-                    DebugConsole.Log(log, Color.red);
+                    //DebugConsole.Log(log, Color.red);
                     break;
             }
         }
+
+        #endregion
     }
 }

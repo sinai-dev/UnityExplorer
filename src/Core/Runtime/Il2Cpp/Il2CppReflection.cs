@@ -412,7 +412,7 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             var keyList = new List<object>();
             var valueList = new List<object>();
 
-            var hashtable = value.Cast(typeof(Il2CppSystem.Collections.Hashtable)) as Il2CppSystem.Collections.Hashtable;
+            var hashtable = value.TryCast(typeof(Il2CppSystem.Collections.Hashtable)) as Il2CppSystem.Collections.Hashtable;
 
             if (hashtable != null)
             {
@@ -463,6 +463,26 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
                 keys.Add(bucket.key);
                 values.Add(bucket.val);
             }
+        }
+
+        public override void FindSingleton(string[] possibleNames, Type type, BF flags, List<object> instances)
+        {
+            PropertyInfo pi;
+            foreach (var name in possibleNames)
+            {
+                pi = type.GetProperty(name, flags);
+                if (pi != null)
+                {
+                    var instance = pi.GetValue(null, null);
+                    if (instance != null)
+                    {
+                        instances.Add(instance);
+                        return;
+                    }
+                }
+            }
+
+            base.FindSingleton(possibleNames, type, flags, instances);
         }
 
         // ~~~~~~~~~~ not used ~~~~~~~~~~~~

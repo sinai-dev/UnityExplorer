@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using UnityExplorer.Core.Unity;
 
 namespace UnityExplorer.UI.Utility
 {

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace UnityExplorer.Core.Runtime
@@ -38,5 +39,24 @@ namespace UnityExplorer.Core.Runtime
 
         public virtual IEnumerable EnumerateEnumerable(object value)
             => null;
+
+        public virtual void FindSingleton(string[] s_instanceNames, Type type, BindingFlags flags, List<object> instances)
+        {
+            // Look for a typical Instance backing field.
+            FieldInfo fi;
+            foreach (var name in s_instanceNames)
+            {
+                fi = type.GetField(name, flags);
+                if (fi != null)
+                {
+                    var instance = fi.GetValue(null);
+                    if (instance != null)
+                    {
+                        instances.Add(instance);
+                        return;
+                    }
+                }
+            }
+        }
     }
 }

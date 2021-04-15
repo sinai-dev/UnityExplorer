@@ -8,10 +8,10 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Input;
-using UnityExplorer.Core.Runtime;
-using UnityExplorer.UI.Main;
-using UnityExplorer.UI.Main.Home;
+using UnityExplorer.UI.Models;
+using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Utility;
+using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI
 {
@@ -20,13 +20,17 @@ namespace UnityExplorer.UI
         public static GameObject CanvasRoot { get; private set; }
         public static EventSystem EventSys { get; private set; }
 
+        // panels
+        public static SceneExplorer SceneExplorer { get; private set; }
+
+        // bundle assets
         internal static Font ConsoleFont { get; private set; }
         internal static Shader BackupShader { get; private set; }
 
         public static bool ShowMenu
         {
             get => s_showMenu;
-            set 
+            set
             {
                 if (s_showMenu == value || !CanvasRoot)
                     return;
@@ -38,17 +42,28 @@ namespace UnityExplorer.UI
         }
         public static bool s_showMenu = true;
 
-        internal static void Init()
+        internal static void InitUI()
         {
-            CreateRootCanvas();
+            // inject custom types for il2cpp (not actually necessary for these to be MBs, but w/e)
+            // TODO MAKE THESE UIBEHAVIOURMODELS
+#if CPP
+            UnhollowerRuntimeLib.ClassInjector.RegisterTypeInIl2Cpp<InfiniteScrollRect>();
+            UnhollowerRuntimeLib.ClassInjector.RegisterTypeInIl2Cpp<TransformTree>();
+            UnhollowerRuntimeLib.ClassInjector.RegisterTypeInIl2Cpp<TransformCell>();
+#endif
 
             LoadBundle();
 
             UIFactory.Init();
 
-            MainMenu.Create();
-            InspectUnderMouse.ConstructUI();
-            PanelDragger.CreateCursorUI();
+            CreateRootCanvas();
+
+            SceneExplorer = new SceneExplorer();
+            SceneExplorer.ConstructUI(CanvasRoot);
+
+            //MainMenu.Create();
+            //InspectUnderMouse.ConstructUI();
+            //PanelDragger.CreateCursorUI();
 
             // Force refresh of anchors etc
             Canvas.ForceUpdateCanvases();
@@ -58,16 +73,16 @@ namespace UnityExplorer.UI
             ExplorerCore.Log("UI initialized.");
         }
 
-        internal static void Update()
+        public static void Update()
         {
             if (!CanvasRoot)
                 return;
 
-            if (InspectUnderMouse.Inspecting)
-            {
-                InspectUnderMouse.UpdateInspect();
-                return;
-            }
+            //if (InspectUnderMouse.Inspecting)
+            //{
+            //    InspectUnderMouse.UpdateInspect();
+            //    return;
+            //}
 
             if (InputManager.GetKeyDown(ConfigManager.Main_Menu_Toggle.Value))
                 ShowMenu = !ShowMenu;
@@ -75,13 +90,13 @@ namespace UnityExplorer.UI
             if (!ShowMenu)
                 return;
 
-            MainMenu.Instance.Update();
+            UIBehaviourModel.UpdateInstances();
 
             if (EventSystem.current != EventSys)
                 CursorUnlocker.SetEventSystem();
 
-            PanelDragger.Instance.Update();
-
+            // TODO MAKE THESE UIBEHAVIOURMODELS
+            PanelDragger.UpdateInstances();
             SliderScrollbar.UpdateInstances();
             InputFieldScroller.UpdateInstances();
         }
@@ -112,18 +127,13 @@ namespace UnityExplorer.UI
         private static void LoadBundle()
         {
             AssetBundle bundle = null;
-
             try
             {
-                bundle = LoadExplorerUi("modern");
-
+                bundle = LoadBundle("modern");
                 if (bundle == null)
-                    bundle = LoadExplorerUi("legacy");
+                    bundle = LoadBundle("legacy");
             }
-            catch
-            {
-                // ignored
-            }
+            catch { }
 
             if (bundle == null)
             {
@@ -148,15 +158,12 @@ namespace UnityExplorer.UI
             ExplorerCore.Log("Loaded UI AssetBundle");
         }
 
-        private static AssetBundle LoadExplorerUi(string id)
+        private static AssetBundle LoadBundle(string id)
         {
-            var stream = typeof(ExplorerCore)
-                .Assembly
+            var stream = typeof(ExplorerCore).Assembly
                 .GetManifestResourceStream($"UnityExplorer.Resources.explorerui.{id}.bundle");
 
-            var data = ReadFully(stream);
-
-            return AssetBundle.LoadFromMemory(data);
+            return AssetBundle.LoadFromMemory(ReadFully(stream));
         }
 
         private static byte[] ReadFully(Stream input)
