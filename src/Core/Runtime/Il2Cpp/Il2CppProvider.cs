@@ -241,12 +241,12 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
 
 public static class Il2CppExtensions
 {
-    public static void AddListenerEx(this UnityEvent action, Action listener)
+    public static void AddListener(this UnityEvent action, Action listener)
     {
         action.AddListener(listener);
     }
 
-    public static void AddListenerEx<T>(this UnityEvent<T> action, Action<T> listener)
+    public static void AddListener<T>(this UnityEvent<T> action, Action<T> listener)
     {
         action.AddListener(listener);
     }
