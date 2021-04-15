@@ -699,7 +699,8 @@ namespace UnityExplorer.UI
             return dropdownObj;
         }
 
-        public static InfiniteScrollRect CreateInfiniteScroll(GameObject parent, string name, out GameObject content, Color? bgColor = null)
+        public static InfiniteScrollRect CreateInfiniteScroll(GameObject parent, string name, out GameObject uiRoot,
+            out GameObject content, Color? bgColor = null)
         {
             var mainObj = CreateUIObject(name, parent, new Vector2(1, 1));
             mainObj.AddComponent<Image>().color = bgColor ?? new Color(0.12f, 0.12f, 0.12f);
@@ -726,20 +727,24 @@ namespace UnityExplorer.UI
             contentRect.offsetMax = new Vector2(0f, 0f);
             //SetLayoutGroup<VerticalLayoutGroup>(content, true, false, true, false, 0, 2, 2, 2, 2);
 
-            var infiniteScroll = mainObj.AddComponent<InfiniteScrollRect>();
-            infiniteScroll.movementType = ScrollRect.MovementType.Clamped;
-            infiniteScroll.inertia = true;
-            infiniteScroll.decelerationRate = 0.135f;
-            infiniteScroll.scrollSensitivity = 15;
-            infiniteScroll.horizontal = false;
-            infiniteScroll.vertical = true;
+            var scrollRect = mainObj.AddComponent<ScrollRect>();
+            scrollRect.movementType = ScrollRect.MovementType.Clamped;
+            scrollRect.inertia = false;
+            //scrollRect.decelerationRate = 0.135f;
+            scrollRect.scrollSensitivity = 15;
+            scrollRect.horizontal = false;
+            scrollRect.vertical = true;
 
-            infiniteScroll.viewport = viewportRect;
-            infiniteScroll.content = contentRect;
+            scrollRect.viewport = viewportRect;
+            scrollRect.content = contentRect;
 
             var sliderObj = SliderScrollbar.CreateSliderScrollbar(mainObj, out Slider slider);
             slider.direction = Slider.Direction.TopToBottom;
             SetLayoutElement(sliderObj, minWidth: 25, flexibleHeight: 9999);
+
+            uiRoot = mainObj;
+
+            var infiniteScroll = new InfiniteScrollRect(scrollRect);
 
             return infiniteScroll;
         }
