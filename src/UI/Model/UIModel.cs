@@ -12,8 +12,8 @@ namespace UnityExplorer.UI.Models
 
         public bool Visible
         {
-            get => UIRoot?.activeInHierarchy ?? false;
-            set => UIRoot?.SetActive(value);
+            get => UIRoot && UIRoot.activeInHierarchy;
+            set { if (UIRoot) UIRoot.SetActive(value); }
         }
 
         public abstract void ConstructUI(GameObject parent);
