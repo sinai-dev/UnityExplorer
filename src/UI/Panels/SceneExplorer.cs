@@ -19,8 +19,6 @@ namespace UnityExplorer.UI.Panels
         public override GameObject UIRoot => uiRoot;
         private GameObject uiRoot;
 
-        public override bool NeedsUpdate => true;
-
         public TransformTree Tree;
         private float timeOfLastUpdate = -1f;
 
@@ -41,7 +39,7 @@ namespace UnityExplorer.UI.Panels
                 return;
             timeOfLastUpdate = Time.realtimeSinceStartup;
 
-            Tree.infiniteScroll.ExternallySetting = true;
+            Tree.Scroller.ExternallySetting = true;
             SceneHandler.Update();
             Tree.RefreshData(true);
         }
@@ -63,9 +61,12 @@ namespace UnityExplorer.UI.Panels
 
             if (sceneToDropdownOption.ContainsKey(scene.handle))
             {
-                int idx = sceneDropdown.value = sceneDropdown.options.IndexOf(sceneToDropdownOption[scene.handle]);
+                var opt = sceneToDropdownOption[scene.handle];
+                int idx = sceneDropdown.options.IndexOf(opt);
                 if (sceneDropdown.value != idx)
                     sceneDropdown.value = idx;
+                else
+                    sceneDropdown.captionText.text = opt.text;
             }
         }
 
@@ -88,8 +89,9 @@ namespace UnityExplorer.UI.Panels
                 else if (string.IsNullOrEmpty(name))
                     name = "<untitled>";
 
-                sceneDropdown.options.Add(new Dropdown.OptionData(name));
-                sceneToDropdownOption.Add(scene.handle, sceneDropdown.options.Last());
+                var option = new Dropdown.OptionData(name);
+                sceneDropdown.options.Add(option);
+                sceneToDropdownOption.Add(scene.handle, option);
             }
         }
 
@@ -99,23 +101,20 @@ namespace UnityExplorer.UI.Panels
             Tree.RefreshData(true);
         }
 
+        private float previousRectHeight;
+
         private void SceneExplorer_OnFinishResize(RectTransform obj)
         {
-            int curIdx = Tree.infiniteScroll.currentItemCount;
-            // Set it to 0 (its going to jump to top anyway)
-            Tree.infiniteScroll.currentItemCount = 0;
-            // Need to do complete rebuild so that anchors and offsets can recalculated.
-            Tree.infiniteScroll.ReloadData();
-            // Try jump back to previous idx
-            RuntimeProvider.Instance.StartCoroutine(DelayedJump(curIdx));
-        }
+            if (obj.rect.height == previousRectHeight)
+            {
+                // horizontal resize, soft refresh.
+                Tree.Scroller.Refresh();
+                return;
+            }
 
-        private IEnumerator DelayedJump(int idx)
-        {
-            yield return null;
-            Tree.infiniteScroll.JumpToIndex(0);
-            yield return null;
-            Tree.infiniteScroll.JumpToIndex(idx);
+            // height changed, hard refresh required.
+            previousRectHeight = obj.rect.height;
+            Tree.Scroller.ReloadData();
         }
 
         public override void ConstructUI(GameObject parent)
@@ -132,9 +131,6 @@ namespace UnityExplorer.UI.Panels
             panelRect.pivot = new Vector2(0.5f, 0.5f);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(panel, true, true, true, true, 0,0,0,0,0, TextAnchor.UpperLeft);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(panelContent, true, true, true, true, 2, 2, 2, 2, 2, TextAnchor.UpperLeft);
-
-            Tree = panel.AddComponent<TransformTree>();
-            Tree.GetRootEntriesMethod = GetRootEntries;
 
             // Title bar
 
@@ -156,7 +152,7 @@ namespace UnityExplorer.UI.Panels
 
             SceneHandler.Update();
             PopulateSceneDropdown();
-            sceneDropdown.itemText.text = sceneToDropdownOption.First().Value.text;
+            sceneDropdown.captionText.text = sceneToDropdownOption.First().Value.text;
 
             //Filter input field
             var inputFieldObj = UIFactory.CreateInputField(toolbar, "FilterInput", "Search...", out InputField inputField, 13);
@@ -165,17 +161,23 @@ namespace UnityExplorer.UI.Panels
 
             // Transform Tree
 
-            var infiniteScroll = UIFactory.CreateInfiniteScroll(panelContent, "TransformTree", out GameObject scrollContent,
-               new Color(0.15f, 0.15f, 0.15f));
-            UIFactory.SetLayoutElement(infiniteScroll.gameObject, flexibleHeight: 9999);
+            var infiniteScroll = UIFactory.CreateInfiniteScroll(panelContent, "TransformTree", out GameObject scrollObj,
+                out GameObject scrollContent, new Color(0.15f, 0.15f, 0.15f));
+            UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
             UIFactory.SetLayoutElement(scrollContent, flexibleHeight: 9999);
 
+            Tree = new TransformTree(infiniteScroll);
+            Tree.GetRootEntriesMethod = GetRootEntries;
+            Tree.Init();
+
             // Prototype tree cell
-            var prototype = Tree.CreatePrototypeCell(scrollContent, Tree);
+            var prototype = TransformCell.CreatePrototypeCell(scrollContent);
             infiniteScroll.PrototypeCell = prototype.GetComponent<RectTransform>();
 
             // Setup references
-            Tree.infiniteScroll = infiniteScroll;
+            Tree.Scroller = infiniteScroll;
+
+            previousRectHeight = panelRect.rect.height;
         }
     }
 }
