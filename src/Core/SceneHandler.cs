@@ -61,9 +61,9 @@ namespace UnityExplorer.Core
         public static event Action<ReadOnlyCollection<Scene>> OnLoadedScenesChanged;
 
         /// <summary>
-        /// Equivalent to <see cref="SceneManager.sceneCount"/> + 1, to include 'DontDestroyOnLoad'.
+        /// Equivalent to <see cref="SceneManager.sceneCount"/> + 2, to include 'DontDestroyOnLoad'.
         /// </summary>
-        public static int LoadedSceneCount => SceneManager.sceneCount + 1;
+        public static int LoadedSceneCount => SceneManager.sceneCount + 2;
 
         // Cached on startup, will never change during runtime (and generally doesn't change between Unity versions either)
 
