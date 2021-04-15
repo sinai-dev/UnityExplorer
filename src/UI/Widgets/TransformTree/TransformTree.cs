@@ -5,34 +5,65 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.Core;
 using UnityExplorer.UI.Widgets.InfiniteScroll;
 
 namespace UnityExplorer.UI.Widgets
 {
-    public class TransformTree : MonoBehaviour, IListDataSource
+    public class TransformTree : IListDataSource
     {
         public Func<IEnumerable<GameObject>> GetRootEntriesMethod;
+
+        public bool Filtering => !string.IsNullOrEmpty(currentFilter);
+        private bool wasFiltering;
 
         public string CurrentFilter
         {
             get => currentFilter;
-            set => currentFilter = value?.ToLower() ?? "";
+            set
+            {
+                currentFilter = value?.ToLower() ?? "";
+                if (!wasFiltering && Filtering)
+                    wasFiltering = true;
+                else if (wasFiltering && !Filtering)
+                {
+                    wasFiltering = false;
+                    autoExpandedIDs.Clear();
+                }
+            }
         }
         private string currentFilter;
 
-        internal InfiniteScrollRect infiniteScroll;
+        internal InfiniteScrollRect Scroller;
 
-        //internal readonly List<CachedTransform> objectTree = new List<CachedTransform>();
+        internal readonly List<CachedTransform> displayedObjects = new List<CachedTransform>();
 
-        internal readonly Dictionary<IntPtr, CachedTransform> objectCache = new Dictionary<IntPtr, CachedTransform>();
-        internal Dictionary<IntPtr, CachedTransform> tempObjectCache;
+        private readonly Dictionary<int, CachedTransform> objectCache = new Dictionary<int, CachedTransform>();
 
-        public int ItemCount => objectCache.Count;
+        private readonly HashSet<int> expandedInstanceIDs = new HashSet<int>();
+        private readonly HashSet<int> autoExpandedIDs = new HashSet<int>();
 
-        internal void Awake()
+        public int ItemCount => displayedObjects.Count;
+
+        public TransformTree(InfiniteScrollRect infiniteScroller)
+        {
+            Scroller = infiniteScroller;
+        }
+
+        public void Init()
         {
             RuntimeProvider.Instance.StartCoroutine(InitCoroutine());
+
+            //test
+            var root = new GameObject("StressTest");
+            for (int i = 0; i < 100; i++)
+            {
+                var obj = new GameObject("GameObject " + i);
+                obj.transform.parent = root.transform;
+                for (int j = 0; j < 100; j++)
+                {
+                    new GameObject("Child " + j).transform.parent = obj.transform;
+                }
+            }
         }
 
         private IEnumerator InitCoroutine()
@@ -40,51 +71,72 @@ namespace UnityExplorer.UI.Widgets
             yield return null;
 
             RefreshData();
-            infiniteScroll.DataSource = this;
-            infiniteScroll.Initialize(this);
+            Scroller.DataSource = this;
+            Scroller.Initialize(this);
+        }
+
+        public ICell CreateCell(RectTransform cellTransform)
+        {
+            var nameButton = cellTransform.Find("NameButton").GetComponent<Button>();
+            var expandButton = cellTransform.Find("ExpandButton").GetComponent<Button>();
+            var spacer = cellTransform.Find("Spacer").GetComponent<LayoutElement>();
+
+            return new TransformCell(this, cellTransform.gameObject, nameButton, expandButton, spacer);
+        }
+
+        public bool IsCellExpanded(int instanceID)
+        {
+            return Filtering ? autoExpandedIDs.Contains(instanceID)
+                             : expandedInstanceIDs.Contains(instanceID);
         }
 
         public void RefreshData(bool andReload = false)
         {
-            tempObjectCache = objectCache.ToDictionary(it => it.Key, it => it.Value);
-            objectCache.Clear();
+            //tempObjectCache = objectCache.ToDictionary(it => it.Key, it => it.Value);
+            displayedObjects.Clear();
+            // objectCache.Clear();
 
-            var objects = GetRootEntriesMethod.Invoke();
+            var rootObjects = GetRootEntriesMethod.Invoke();
 
-            foreach (var obj in objects)
+            foreach (var obj in rootObjects)
                 Traverse(obj.transform);
 
             if (andReload)
-                infiniteScroll.Refresh();
+                Scroller.Refresh();
         }
 
         private void Traverse(Transform transform, CachedTransform parent = null)
         {
-            CachedTransform cached;
-            if (tempObjectCache.ContainsKey(transform.m_CachedPtr))
+            int instanceID = transform.GetInstanceID();
+
+            if (Filtering)
             {
-                cached = tempObjectCache[transform.m_CachedPtr];
-                cached.Update();
+                //auto - expand to show results: works, but then we need to collapse after the search ends.
+
+                if (FilterHierarchy(transform))
+                {
+                    if (!autoExpandedIDs.Contains(instanceID))
+                        autoExpandedIDs.Add(instanceID);
+                }
+                else
+                    return;
+            }
+
+            CachedTransform cached;
+            if (objectCache.ContainsKey(instanceID))
+            {
+                cached = objectCache[instanceID];
+                cached.Update(transform);
             }
             else
-                cached = new CachedTransform(transform, parent);
-
-            if (!string.IsNullOrEmpty(CurrentFilter))
             {
-                if (!FilterHierarchy(transform))
-                    return;
-
-                // auto-expand to show results: works, but then we need to collapse after the search ends.
-
-                //if (FilterHierarchy(transform))
-                //    cached.Expanded = true;
-                //else
-                //    return;
+                cached = new CachedTransform(this, transform, parent);
+                objectCache.Add(instanceID, cached);
             }
 
-            objectCache.Add(transform.m_CachedPtr, cached);
+            displayedObjects.Add(cached);
 
-            if (cached.Expanded && cached.ChildCount > 0)
+            if (IsCellExpanded(instanceID) && cached.Value.childCount > 0)
             {
                 for (int i = 0; i < transform.childCount; i++)
                     Traverse(transform.GetChild(i), cached);
@@ -110,58 +162,21 @@ namespace UnityExplorer.UI.Widgets
         {
             var cell = iCell as TransformCell;
 
-            if (index < objectCache.Count)
-                cell.ConfigureCell(objectCache.ElementAt(index).Value, index);
+            if (index < displayedObjects.Count)
+                cell.ConfigureCell(displayedObjects[index], index);
             else
                 cell.Disable();
         }
 
         public void ToggleExpandCell(TransformCell cell)
         {
-            cell.cachedTransform.Expanded = !cell.cachedTransform.Expanded;
+            var instanceID = cell.cachedTransform.InstanceID;
+            if (expandedInstanceIDs.Contains(instanceID))
+                expandedInstanceIDs.Remove(instanceID);
+            else
+                expandedInstanceIDs.Add(instanceID);
+
             RefreshData(true);
-        }
-
-        public GameObject CreatePrototypeCell(GameObject parent, TransformTree tree)
-        {
-            var prototype = UIFactory.CreateHorizontalGroup(parent, "PrototypeCell", true, true, true, true, 2, default,
-                new Color(0.15f, 0.15f, 0.15f), TextAnchor.MiddleCenter);
-            var cell = prototype.AddComponent<TransformCell>();
-            var rect = prototype.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0, 1);
-            rect.anchorMax = new Vector2(0, 1);
-            rect.pivot = new Vector2(0.5f, 1);
-            rect.sizeDelta = new Vector2(25, 25);
-            UIFactory.SetLayoutElement(prototype, minWidth: 100, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
-
-            var spacer = UIFactory.CreateUIObject("Spacer", prototype, new Vector2(0,0));
-            UIFactory.SetLayoutElement(spacer, minWidth: 0, flexibleWidth: 0, minHeight: 0, flexibleHeight: 0);
-
-            var expandButton = UIFactory.CreateButton(prototype, "ExpandButton", "►", null);
-            UIFactory.SetLayoutElement(expandButton.gameObject, minWidth: 15, flexibleWidth: 0, minHeight: 25, flexibleHeight: 0);
-
-            var nameButton = UIFactory.CreateButton(prototype, "NameButton", "Name", null);
-            UIFactory.SetLayoutElement(nameButton.gameObject, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
-            nameButton.GetComponentInChildren<Text>().horizontalOverflow = HorizontalWrapMode.Overflow;
-
-            Color normal = new Color(0.15f, 0.15f, 0.15f);
-            Color highlight = new Color(0.25f, 0.25f, 0.25f);
-            Color pressed = new Color(0.05f, 0.05f, 0.05f);
-            Color disabled = new Color(1, 1, 1, 0);
-            RuntimeProvider.Instance.SetColorBlock(expandButton, normal, highlight, pressed, disabled);
-            RuntimeProvider.Instance.SetColorBlock(nameButton, normal, highlight, pressed, disabled);
-
-            cell.tree = tree;
-            cell.nameButton = nameButton;
-            cell.nameLabel = nameButton.GetComponentInChildren<Text>();
-            cell.nameLabel.alignment = TextAnchor.MiddleLeft;
-            cell.expandButton = expandButton;
-            cell.expandLabel = expandButton.GetComponentInChildren<Text>();
-            cell.spacer = spacer.GetComponent<LayoutElement>();
-
-            prototype.SetActive(false);
-
-            return prototype;
         }
     }
 }
