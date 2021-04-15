@@ -19,6 +19,11 @@ namespace UnityExplorer.UI.Panels
         public override GameObject UIRoot => uiRoot;
         private GameObject uiRoot;
 
+        /// <summary>
+        /// Whether to automatically update per auto-update interval or not.
+        /// </summary>
+        public bool AutoUpdate = false;
+
         public TransformTree Tree;
         private float timeOfLastUpdate = -1f;
 
@@ -33,15 +38,26 @@ namespace UnityExplorer.UI.Panels
 
         private IEnumerable<GameObject> GetRootEntries() => SceneHandler.CurrentRootObjects;
 
+        public void ForceUpdate()
+        {
+            ExpensiveUpdate();
+        }
+
         public override void Update()
         {
-            if (Time.realtimeSinceStartup - timeOfLastUpdate < 1f)
-                return;
-            timeOfLastUpdate = Time.realtimeSinceStartup;
+            if (AutoUpdate && Time.realtimeSinceStartup - timeOfLastUpdate >= 1f)
+            {
+                timeOfLastUpdate = Time.realtimeSinceStartup;
+                ExpensiveUpdate();
+            }
+        }
 
+        public void ExpensiveUpdate()
+        {
             Tree.Scroller.ExternallySetting = true;
             SceneHandler.Update();
             Tree.RefreshData(true);
+            // Tree.Scroller.ExternallySetting = false;
         }
 
         private void OnDropdownChanged(int value)
@@ -105,16 +121,21 @@ namespace UnityExplorer.UI.Panels
 
         private void SceneExplorer_OnFinishResize(RectTransform obj)
         {
-            if (obj.rect.height == previousRectHeight)
-            {
-                // horizontal resize, soft refresh.
-                Tree.Scroller.Refresh();
-                return;
-            }
+            RuntimeProvider.Instance.StartCoroutine(DelayedRefresh(obj));
+        }
 
-            // height changed, hard refresh required.
-            previousRectHeight = obj.rect.height;
-            Tree.Scroller.ReloadData();
+        private IEnumerator DelayedRefresh(RectTransform obj)
+        {
+            yield return null;
+
+            if (obj.rect.height != previousRectHeight)
+            {
+                // height changed, hard refresh required.
+                previousRectHeight = obj.rect.height;
+                Tree.Scroller.ReloadData();
+            }
+            Tree.Scroller.Refresh();
+
         }
 
         public override void ConstructUI(GameObject parent)
@@ -129,7 +150,7 @@ namespace UnityExplorer.UI.Panels
             panelRect.offsetMin = new Vector2(panelRect.offsetMin.x, 10);  // bottom
             panelRect.offsetMax = new Vector2(panelRect.offsetMax.x, -10); // top
             panelRect.pivot = new Vector2(0.5f, 0.5f);
-            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(panel, true, true, true, true, 0,0,0,0,0, TextAnchor.UpperLeft);
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(panel, true, true, true, true, 0, 0, 0, 0, 0, TextAnchor.UpperLeft);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(panelContent, true, true, true, true, 2, 2, 2, 2, 2, TextAnchor.UpperLeft);
 
             // Title bar
@@ -146,7 +167,24 @@ namespace UnityExplorer.UI.Panels
                new Color(0.15f, 0.15f, 0.15f));
             //UIFactory.SetLayoutElement(toolbar, minHeight: 25, flexibleHeight: 0);
 
-            //Scene selector dropdown
+            // refresh row
+
+            var refreshRow = UIFactory.CreateHorizontalGroup(toolbar, "RefreshGroup", true, true, true, true, 2, new Vector4(2, 2, 2, 2));
+            UIFactory.SetLayoutElement(refreshRow, minHeight: 30, flexibleHeight: 0);
+
+            var refreshButton = UIFactory.CreateButton(refreshRow, "RefreshButton", "Update", ForceUpdate);
+            UIFactory.SetLayoutElement(refreshButton.gameObject, minWidth: 65, flexibleWidth: 0);
+
+            var refreshToggle = UIFactory.CreateToggle(refreshRow, "RefreshToggle", out Toggle toggle, out Text text);
+            UIFactory.SetLayoutElement(refreshToggle, flexibleWidth: 9999);
+            text.text = "Auto-update (1 second)";
+            text.alignment = TextAnchor.MiddleLeft;
+            text.color = Color.white;
+            text.fontSize = 12;
+            toggle.isOn = false;
+            toggle.onValueChanged.AddListener((bool val) => AutoUpdate = val);
+
+            // Scene selector dropdown
             var dropdownObj = UIFactory.CreateDropdown(toolbar, out sceneDropdown, "<notset>", 13, OnDropdownChanged);
             UIFactory.SetLayoutElement(dropdownObj, minHeight: 25, flexibleHeight: 0);
 
@@ -154,8 +192,19 @@ namespace UnityExplorer.UI.Panels
             PopulateSceneDropdown();
             sceneDropdown.captionText.text = sceneToDropdownOption.First().Value.text;
 
+            // Filter row
+
+            var filterRow = UIFactory.CreateHorizontalGroup(toolbar, "FilterGroup", true, true, true, true, 2, new Vector4(2, 2, 2, 2));
+            UIFactory.SetLayoutElement(filterRow, minHeight: 25, flexibleHeight: 0);
+
+            //// filter label
+            //var label = UIFactory.CreateLabel(filterRow, "FilterLabel", "Search:", TextAnchor.MiddleLeft);
+            //UIFactory.SetLayoutElement(label.gameObject, minWidth: 50, flexibleWidth: 0);
+
             //Filter input field
-            var inputFieldObj = UIFactory.CreateInputField(toolbar, "FilterInput", "Search...", out InputField inputField, 13);
+            var inputFieldObj = UIFactory.CreateInputField(filterRow, "FilterInput", "Search...", out InputField inputField, 13);
+            inputField.targetGraphic.color = new Color(0.2f, 0.2f, 0.2f);
+            RuntimeProvider.Instance.SetColorBlock(inputField, new Color(0.4f, 0.4f, 0.4f), new Color(0.2f, 0.2f, 0.2f), new Color(0.08f, 0.08f, 0.08f));
             UIFactory.SetLayoutElement(inputFieldObj, minHeight: 25);
             inputField.onValueChanged.AddListener(OnFilterInput);
 
@@ -166,8 +215,10 @@ namespace UnityExplorer.UI.Panels
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
             UIFactory.SetLayoutElement(scrollContent, flexibleHeight: 9999);
 
-            Tree = new TransformTree(infiniteScroll);
-            Tree.GetRootEntriesMethod = GetRootEntries;
+            Tree = new TransformTree(infiniteScroll)
+            {
+                GetRootEntriesMethod = GetRootEntries
+            };
             Tree.Init();
 
             // Prototype tree cell

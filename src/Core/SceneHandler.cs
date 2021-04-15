@@ -145,7 +145,7 @@ namespace UnityExplorer.Core
             for (int i = 0; i < SceneManager.sceneCount; i++)
             {
                 Scene scene = SceneManager.GetSceneAt(i);
-                if (scene == default || scene.handle == -1)
+                if (scene == default || scene.handle == -1 || !scene.isLoaded)
                     continue;
 
                 // If no changes yet, ensure the previous list contained this handle.
@@ -184,7 +184,8 @@ namespace UnityExplorer.Core
                 var list = new List<GameObject>();
                 foreach (var obj in allObjects)
                 {
-                    if (obj.TryCast<GameObject>() is GameObject go && !go.scene.IsValid() && go.transform.parent == null)
+                    var go = obj.TryCast<GameObject>();
+                    if (go.transform.parent == null && !go.scene.IsValid())
                         list.Add(go);
                 }
                 rootObjects = list.ToArray();

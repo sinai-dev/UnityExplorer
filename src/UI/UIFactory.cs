@@ -610,7 +610,7 @@ namespace UnityExplorer.UI
             itemToggle.onValueChanged.AddListener((bool val) => { itemToggle.OnDeselect(null); });
             Image templateImage = templateObj.AddComponent<Image>();
             templateImage.type = Image.Type.Sliced;
-            templateImage.color = new Color(0.15f, 0.15f, 0.15f, 1.0f);
+            templateImage.color = new Color(0.1f, 0.1f, 0.1f, 1.0f);
 
             var scrollRect = templateObj.AddComponent<ScrollRect>();
             scrollRect.scrollSensitivity = 35;

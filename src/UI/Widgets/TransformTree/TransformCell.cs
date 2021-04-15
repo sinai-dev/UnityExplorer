@@ -45,6 +45,9 @@ namespace UnityExplorer.UI.Widgets
         //This is called from the SetCell method in DataSource
         public void ConfigureCell(CachedTransform cached, int cellIndex)
         {
+            if (cached == null || !cached.Value)
+                return;
+
             if (!Enabled)
                 Enable();
 
@@ -62,14 +65,16 @@ namespace UnityExplorer.UI.Widgets
                 nameLabel.text = $"<color=grey>[{childCount}]</color> {nameLabel.text}";
 
                 expandButton.interactable = true;
-                expandLabel.enabled = true;
+                //expandLabel.enabled = true;
                 expandLabel.text = cached.Expanded ? "▼" : "►";
                 expandLabel.color = cached.Expanded ? new Color(0.5f, 0.5f, 0.5f) : new Color(0.3f, 0.3f, 0.3f);
             }
             else
             {
                 expandButton.interactable = false;
-                expandLabel.enabled = false;
+                expandLabel.text = "▪";
+                expandLabel.color = new Color(0.3f, 0.3f, 0.3f);
+                //expandLabel.enabled = false;
             }
         }
 

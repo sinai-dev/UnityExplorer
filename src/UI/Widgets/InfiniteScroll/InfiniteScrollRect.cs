@@ -76,13 +76,11 @@ namespace UnityExplorer.UI.Widgets.InfiniteScroll
                     return;
                 this.ExternallySetting = true;
 
-                ExplorerCore.Log("Slider value changed");
-
                 // Jump to val * count (ie, 0.0 would jump to top, 1.0 would jump to bottom)
                 var index = Math.Floor(val * DataSource.ItemCount);
                 JumpToIndex((int)index);
 
-                this.ExternallySetting = false;
+                //this.ExternallySetting = false;
             });
         }
 
@@ -104,6 +102,8 @@ namespace UnityExplorer.UI.Widgets.InfiniteScroll
             _prevAnchoredPos = scrollRect.content.anchoredPosition;
 
             SetSliderFromScrollValue();
+
+            // ExternallySetting = false;
         }
 
         
