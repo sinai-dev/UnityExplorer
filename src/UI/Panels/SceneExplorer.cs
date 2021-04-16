@@ -248,53 +248,48 @@ namespace UnityExplorer.UI.Panels
             // Scene Loader
             try
             {
-                Type sceneUtil = ReflectionUtility.GetTypeByName("UnityEngine.SceneManagement.SceneUtility");
-                if (sceneUtil == null)
-                    throw new Exception("This version of Unity does not ship with the 'SceneUtility' class, or it was not unstripped.");
-                var method = sceneUtil.GetMethod("GetScenePathByBuildIndex", ReflectionUtility.AllFlags);
-
-                var title2 = UIFactory.CreateLabel(content, "SceneLoaderLabel", "Scene Loader", TextAnchor.MiddleLeft, Color.white, true, 14);
-                UIFactory.SetLayoutElement(title2.gameObject, minHeight: 25, flexibleHeight: 0);
-
-                var allSceneDropObj = UIFactory.CreateDropdown(content, out Dropdown allSceneDrop, "", 14, null);
-                UIFactory.SetLayoutElement(allSceneDropObj, minHeight: 25, minWidth: 150, flexibleWidth: 0, flexibleHeight: 0);
-
-                int sceneCount = SceneManager.sceneCountInBuildSettings;
-                for (int i = 0; i < sceneCount; i++)
+                if (SceneHandler.WasAbleToGetScenesInBuild)
                 {
-                    var scenePath = (string)method.Invoke(null, new object[] { i });
-                    allSceneDrop.options.Add(new Dropdown.OptionData(Path.GetFileNameWithoutExtension(scenePath)));
+                    var loaderTitle = UIFactory.CreateLabel(content, "SceneLoaderLabel", "Scene Loader", TextAnchor.MiddleLeft, Color.white, true, 14);
+                    UIFactory.SetLayoutElement(loaderTitle.gameObject, minHeight: 25, flexibleHeight: 0);
+
+                    var allSceneDropObj = UIFactory.CreateDropdown(content, out Dropdown allSceneDrop, "", 14, null);
+                    UIFactory.SetLayoutElement(allSceneDropObj, minHeight: 25, minWidth: 150, flexibleWidth: 0, flexibleHeight: 0);
+
+                    foreach (var scene in SceneHandler.AllSceneNames)
+                        allSceneDrop.options.Add(new Dropdown.OptionData(scene));
+
+                    allSceneDrop.value = 1;
+                    allSceneDrop.value = 0;
+
+                    var buttonRow = UIFactory.CreateHorizontalGroup(content, "LoadButtons", true, true, true, true, 4);
+
+                    var loadButton = UIFactory.CreateButton(buttonRow, "LoadSceneButton", "Load (Single)", () =>
+                    {
+                        try
+                        {
+                            SceneManager.LoadScene(allSceneDrop.options[allSceneDrop.value].text);
+                        }
+                        catch (Exception ex)
+                        {
+                            ExplorerCore.LogWarning($"Unable to load the Scene! {ex.ReflectionExToString()}");
+                        }
+                    }, new Color(0.1f, 0.3f, 0.3f));
+                    UIFactory.SetLayoutElement(loadButton.gameObject, minHeight: 25, minWidth: 150);
+
+                    var loadAdditiveButton = UIFactory.CreateButton(buttonRow, "LoadSceneButton", "Load (Additive)", () =>
+                    {
+                        try
+                        {
+                            SceneManager.LoadScene(allSceneDrop.options[allSceneDrop.value].text, LoadSceneMode.Additive);
+                        }
+                        catch (Exception ex)
+                        {
+                            ExplorerCore.LogWarning($"Unable to load the Scene! {ex.ReflectionExToString()}");
+                        }
+                    }, new Color(0.1f, 0.3f, 0.3f));
+                    UIFactory.SetLayoutElement(loadAdditiveButton.gameObject, minHeight: 25, minWidth: 150);
                 }
-                allSceneDrop.value = 1;
-                allSceneDrop.value = 0;
-
-                var buttonRow = UIFactory.CreateHorizontalGroup(content, "LoadButtons", true, true, true, true, 4);
-
-                var loadButton = UIFactory.CreateButton(buttonRow, "LoadSceneButton", "Load (Single)", () =>
-                {
-                    try
-                    {
-                        SceneManager.LoadScene(allSceneDrop.options[allSceneDrop.value].text);
-                    }
-                    catch (Exception ex)
-                    {
-                        ExplorerCore.LogWarning($"Unable to load the Scene! {ex.ReflectionExToString()}");
-                    }
-                }, new Color(0.1f, 0.3f, 0.3f));
-                UIFactory.SetLayoutElement(loadButton.gameObject, minHeight: 25, minWidth: 150);
-
-                var loadAdditiveButton = UIFactory.CreateButton(buttonRow, "LoadSceneButton", "Load (Additive)", () =>
-                {
-                    try
-                    {
-                        SceneManager.LoadScene(allSceneDrop.options[allSceneDrop.value].text, LoadSceneMode.Additive);
-                    }
-                    catch (Exception ex)
-                    {
-                        ExplorerCore.LogWarning($"Unable to load the Scene! {ex.ReflectionExToString()}");
-                    }
-                }, new Color(0.1f, 0.3f, 0.3f));
-                UIFactory.SetLayoutElement(loadAdditiveButton.gameObject, minHeight: 25, minWidth: 150);
             }
             catch (Exception ex)
             {
