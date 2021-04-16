@@ -110,9 +110,7 @@ namespace UnityExplorer.UI.Widgets.InfiniteScroll
         internal void SetSliderFromScrollValue(bool forceValue = true)
         {
             int total = DataSource.ItemCount;
-            // avoid DivideByZeroException, this is harmless if count was <= 0.
-            if (total <= 0)
-                total = 1;
+            total = Math.Max(total, 1);
 
             var spread = _cellPool.Count - (ExtraCellPoolSize * 2);
 
@@ -123,7 +121,7 @@ namespace UnityExplorer.UI.Widgets.InfiniteScroll
                     _slider.value = 0f;
                 else
                     // top-most displayed index divided by (totalCount - displayedRange)
-                    _slider.value = (float)((decimal)range.x / (total - _cellPool.Count));
+                    _slider.value = (float)((decimal)range.x / Math.Max(1, (total - _cellPool.Count)));
             }
 
             // resize the handle rect to reflect the size of the displayed content vs. the total content height.
@@ -133,6 +131,9 @@ namespace UnityExplorer.UI.Widgets.InfiniteScroll
 
                 var handleRatio = (decimal)spread / total;
                 var handleHeight = viewportHeight * (float)Math.Min(1, handleRatio);
+
+                // minimum handle size
+                handleHeight = Math.Max(handleHeight, 15f);
 
                 // need to resize the handle container area for the size of the handle (bigger handle = smaller area)
                 var container = _slider.m_HandleContainerRect;
