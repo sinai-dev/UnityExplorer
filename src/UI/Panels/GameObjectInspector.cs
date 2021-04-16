@@ -56,7 +56,7 @@ namespace UnityExplorer.UI.Panels
                 cell.buttonText.text = ToStringUtility.GetDefaultLabel(comp, ReflectionProvider.Instance.GetActualType(comp), true, false);
         }
 
-        public bool ShouldFilter(Component comp, string filter)
+        public bool ShouldDisplay(Component comp, string filter)
         {
             return comp.name.ToLower().Contains(filter);
         }
@@ -96,12 +96,12 @@ namespace UnityExplorer.UI.Panels
         public override void SetDefaultPosAndAnchors()
         {
             mainPanelRect.localPosition = Vector2.zero;
-            mainPanelRect.anchorMin = new Vector2(0.6f, 0.3f);
-            mainPanelRect.anchorMax = new Vector2(0.95f, 0.9f);
+            mainPanelRect.anchorMin = new Vector2(1, 0);
+            mainPanelRect.anchorMax = new Vector2(1, 1);
             mainPanelRect.sizeDelta = new Vector2(-300f, mainPanelRect.sizeDelta.y);
-            mainPanelRect.anchoredPosition = new Vector2(-160, 0);
-            mainPanelRect.offsetMin = new Vector2(mainPanelRect.offsetMin.x, 10);  // bottom
-            mainPanelRect.offsetMax = new Vector2(mainPanelRect.offsetMax.x, -10); // top
+            mainPanelRect.anchoredPosition = new Vector2(-200, 0);
+            mainPanelRect.offsetMin = new Vector2(mainPanelRect.offsetMin.x, 100);  // bottom
+            mainPanelRect.offsetMax = new Vector2(mainPanelRect.offsetMax.x, -50); // top
             mainPanelRect.pivot = new Vector2(0.5f, 0.5f);
         }
 
@@ -114,7 +114,7 @@ namespace UnityExplorer.UI.Panels
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
             UIFactory.SetLayoutElement(scrollContent, flexibleHeight: 9999);
 
-            ComponentList = new SimpleListSource<Component>(infiniteScroll, GetEntries, CreateCell, SetCell, ShouldFilter);
+            ComponentList = new SimpleListSource<Component>(infiniteScroll, GetEntries, CreateCell, SetCell, ShouldDisplay);
             ComponentList.Init();
 
             // Prototype tree cell

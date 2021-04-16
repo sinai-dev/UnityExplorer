@@ -165,9 +165,9 @@ namespace UnityExplorer.UI.Panels
             mainPanelRect.anchorMin = Vector3.zero;
             mainPanelRect.anchorMax = new Vector2(0, 1);
             mainPanelRect.sizeDelta = new Vector2(300f, mainPanelRect.sizeDelta.y);
-            mainPanelRect.anchoredPosition = new Vector2(160, 0);
-            mainPanelRect.offsetMin = new Vector2(mainPanelRect.offsetMin.x, 10);  // bottom
-            mainPanelRect.offsetMax = new Vector2(mainPanelRect.offsetMax.x, -10); // top
+            mainPanelRect.anchoredPosition = new Vector2(200, 0);
+            mainPanelRect.offsetMin = new Vector2(mainPanelRect.offsetMin.x, 100);  // bottom
+            mainPanelRect.offsetMax = new Vector2(mainPanelRect.offsetMax.x, -50); // top
             mainPanelRect.pivot = new Vector2(0.5f, 0.5f);
         }
 
