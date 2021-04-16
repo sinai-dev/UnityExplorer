@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.UI.Widgets.InfiniteScroll;
+using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Widgets
 {

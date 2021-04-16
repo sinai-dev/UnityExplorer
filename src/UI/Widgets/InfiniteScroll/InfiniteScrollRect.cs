@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.UI.Models;
 
-namespace UnityExplorer.UI.Widgets.InfiniteScroll
+namespace UnityExplorer.UI.Widgets
 {
     public class InfiniteScrollRect : UIBehaviourModel
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace UnityExplorer.UI.Widgets.InfiniteScroll
+namespace UnityExplorer.UI.Widgets
 {
     public static class UIExtension
     {

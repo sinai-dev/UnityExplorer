@@ -12,7 +12,6 @@ using UnityExplorer.UI.Models;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Utility;
 using UnityExplorer.UI.Widgets;
-using UnityExplorer.UI.Widgets.InfiniteScroll;
 
 namespace UnityExplorer.UI
 {
@@ -23,6 +22,7 @@ namespace UnityExplorer.UI
 
         // panels
         public static SceneExplorer SceneExplorer { get; private set; }
+        public static GameObjectInspector GOInspector { get; private set; }
 
         // bundle assets
         internal static Font ConsoleFont { get; private set; }
@@ -53,6 +53,9 @@ namespace UnityExplorer.UI
 
             SceneExplorer = new SceneExplorer();
             SceneExplorer.ConstructUI(CanvasRoot);
+
+            GOInspector = new GameObjectInspector();
+            GOInspector.ConstructUI(CanvasRoot);
 
             //MainMenu.Create();
             //InspectUnderMouse.ConstructUI();

@@ -136,11 +136,6 @@ namespace UnityExplorer.UI.Panels
             RuntimeProvider.Instance.StartCoroutine(DelayedRefresh(panel));
         }
 
-        public override void SaveToConfigManager()
-        {
-            ConfigManager.SceneExplorerData.Value = this.ToSaveData();
-        }
-
         private IEnumerator DelayedRefresh(RectTransform obj)
         {
             yield return null;
@@ -152,13 +147,16 @@ namespace UnityExplorer.UI.Panels
                 Tree.Scroller.ReloadData();
             }
             Tree.Scroller.Refresh();
+        }
 
+        public override void SaveToConfigManager()
+        {
+            ConfigManager.SceneExplorerData.Value = this.ToSaveData();
         }
 
         public override void LoadSaveData()
         {
-            var data = ConfigManager.SceneExplorerData.Value;
-            ApplySaveData(data);
+            ApplySaveData(ConfigManager.SceneExplorerData.Value);
         }
 
         public override void SetDefaultPosAndAnchors()
@@ -242,7 +240,6 @@ namespace UnityExplorer.UI.Panels
             infiniteScroll.PrototypeCell = prototype.GetComponent<RectTransform>();
 
             // some references
-            Tree.Scroller = infiniteScroll;
             previousRectHeight = mainPanelRect.rect.height;
 
             // Scene Loader
@@ -257,7 +254,7 @@ namespace UnityExplorer.UI.Panels
                     UIFactory.SetLayoutElement(allSceneDropObj, minHeight: 25, minWidth: 150, flexibleWidth: 0, flexibleHeight: 0);
 
                     foreach (var scene in SceneHandler.AllSceneNames)
-                        allSceneDrop.options.Add(new Dropdown.OptionData(scene));
+                        allSceneDrop.options.Add(new Dropdown.OptionData(Path.GetFileNameWithoutExtension(scene)));
 
                     allSceneDrop.value = 1;
                     allSceneDrop.value = 0;

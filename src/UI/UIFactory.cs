@@ -6,7 +6,6 @@ using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI.Utility;
 using UnityExplorer.UI.Widgets;
-using UnityExplorer.UI.Widgets.InfiniteScroll;
 
 namespace UnityExplorer.UI
 {
@@ -569,7 +568,7 @@ namespace UnityExplorer.UI
 
             GameObject scrollbarObj = CreateScrollbar(templateObj, "DropdownScroll", out Scrollbar scrollbar);
             scrollbar.SetDirection(Scrollbar.Direction.BottomToTop, true);
-            RuntimeProvider.Instance.SetColorBlock(scrollbar, new Color(0.3f, 0.3f, 0.3f), new Color(0.4f, 0.4f, 0.4f), new Color(0.2f, 0.2f, 0.2f));
+            RuntimeProvider.Instance.SetColorBlock(scrollbar, new Color(0.45f, 0.45f, 0.45f), new Color(0.6f, 0.6f, 0.6f), new Color(0.4f, 0.4f, 0.4f));
 
             RectTransform scrollRectTransform = scrollbarObj.GetComponent<RectTransform>();
             scrollRectTransform.anchorMin = Vector2.right;
@@ -593,18 +592,18 @@ namespace UnityExplorer.UI
             arrowRect.anchoredPosition = new Vector2(-15f, 0f);
 
             Image itemBgImage = itemBgObj.AddComponent<Image>();
-            itemBgImage.color = new Color(0.25f, 0.45f, 0.25f, 1.0f);
+            itemBgImage.color = new Color(0.25f, 0.35f, 0.25f, 1.0f);
 
             Toggle itemToggle = itemObj.AddComponent<Toggle>();
             itemToggle.targetGraphic = itemBgImage;
             itemToggle.isOn = true;
             RuntimeProvider.Instance.SetColorBlock(itemToggle,
-                new Color(0.35f, 0.35f, 0.35f, 1.0f), new Color(0.25f, 0.45f, 0.25f, 1.0f));
+                new Color(0.35f, 0.35f, 0.35f, 1.0f), new Color(0.25f, 0.55f, 0.25f, 1.0f));
 
             itemToggle.onValueChanged.AddListener((bool val) => { itemToggle.OnDeselect(null); });
             Image templateImage = templateObj.AddComponent<Image>();
             templateImage.type = Image.Type.Sliced;
-            templateImage.color = new Color(0.1f, 0.1f, 0.1f, 1.0f);
+            templateImage.color = Color.black;
 
             var scrollRect = templateObj.AddComponent<ScrollRect>();
             scrollRect.scrollSensitivity = 35;
@@ -626,7 +625,7 @@ namespace UnityExplorer.UI
             labelText.alignment = TextAnchor.MiddleLeft;
 
             Image dropdownImage = dropdownObj.AddComponent<Image>();
-            dropdownImage.color = new Color(0.2f, 0.2f, 0.2f, 1);
+            dropdownImage.color = new Color(0.07f, 0.07f, 0.07f, 1);
             dropdownImage.type = Image.Type.Sliced;
 
             dropdown = dropdownObj.AddComponent<Dropdown>();
