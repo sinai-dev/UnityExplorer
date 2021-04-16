@@ -15,7 +15,7 @@ namespace UnityExplorer.Core.Config
 
         public override void Init()
         {
-            INI_PATH = Path.Combine(ExplorerCore.Loader.ExplorerFolder, "config.ini");
+            INI_PATH = Path.Combine(ExplorerCore.Loader.ExplorerFolder, "data.ini");
             _parser = new IniDataParser();
             _parser.Configuration.CommentString = "#";
         }
