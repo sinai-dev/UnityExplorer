@@ -9,7 +9,7 @@ using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Widgets
 {
-    public class TransformTree : IListDataSource
+    public class TransformTree : IPoolDataSource
     {
         public Func<IEnumerable<GameObject>> GetRootEntriesMethod;
 
@@ -33,7 +33,7 @@ namespace UnityExplorer.UI.Widgets
         }
         private string currentFilter;
 
-        internal InfiniteScrollRect Scroller;
+        internal ScrollPool Scroller;
 
         internal readonly List<CachedTransform> displayedObjects = new List<CachedTransform>();
 
@@ -44,7 +44,7 @@ namespace UnityExplorer.UI.Widgets
 
         public int ItemCount => displayedObjects.Count;
 
-        public TransformTree(InfiniteScrollRect infiniteScroller)
+        public TransformTree(ScrollPool infiniteScroller)
         {
             Scroller = infiniteScroller;
         }

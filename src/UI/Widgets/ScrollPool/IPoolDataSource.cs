@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace UnityExplorer.UI.Widgets
 {
-    public interface IListDataSource
+    public interface IPoolDataSource
     {
         int ItemCount { get; }
 

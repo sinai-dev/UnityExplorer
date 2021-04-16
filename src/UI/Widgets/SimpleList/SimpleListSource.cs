@@ -8,9 +8,9 @@ using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Widgets
 {
-    public class SimpleListSource<T> : IListDataSource
+    public class SimpleListSource<T> : IPoolDataSource
     {
-        internal InfiniteScrollRect Scroller;
+        internal ScrollPool Scroller;
 
         public Func<List<T>> GetEntries;
         public List<T> currentEntries;
@@ -29,7 +29,7 @@ namespace UnityExplorer.UI.Widgets
         }
         private string currentFilter;
 
-        public SimpleListSource(InfiniteScrollRect infiniteScroller, Func<List<T>> getEntriesMethod, 
+        public SimpleListSource(ScrollPool infiniteScroller, Func<List<T>> getEntriesMethod, 
             Func<RectTransform, SimpleCell<T>> createCellMethod, Action<SimpleCell<T>, int> setICellMethod, 
             Func<T, string, bool> shouldFilterMethod)
         {

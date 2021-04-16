@@ -692,7 +692,7 @@ namespace UnityExplorer.UI
             return dropdownObj;
         }
 
-        public static InfiniteScrollRect CreateInfiniteScroll(GameObject parent, string name, out GameObject uiRoot,
+        public static ScrollPool CreateInfiniteScroll(GameObject parent, string name, out GameObject uiRoot,
             out GameObject content, Color? bgColor = null, bool autoResizeSliderHandle = true)
         {
             var mainObj = CreateUIObject(name, parent, new Vector2(1, 1));
@@ -752,7 +752,7 @@ namespace UnityExplorer.UI
 
             uiRoot = mainObj;
 
-            var infiniteScroll = new InfiniteScrollRect(scrollRect);
+            var infiniteScroll = new ScrollPool(scrollRect);
             infiniteScroll.AutoResizeHandleRect = autoResizeSliderHandle;
 
             return infiniteScroll;

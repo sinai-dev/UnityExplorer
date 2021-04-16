@@ -18,6 +18,8 @@ namespace UnityExplorer.UI.Widgets
             corners[3] = bottomLeft + new Vector3(rect.rect.width, 0, 0);
         }
 
+        // again, using position and rect instead of 
+
         public static float MaxY(this RectTransform rect) => rect.position.y - rect.rect.height;
 
         public static float MinY(this RectTransform rect) => rect.position.y;

@@ -9,15 +9,15 @@ using UnityExplorer.UI.Models;
 
 namespace UnityExplorer.UI.Widgets
 {
-    public class InfiniteScrollRect : UIBehaviourModel
+    public class ScrollPool : UIBehaviourModel
     {
-        public InfiniteScrollRect(ScrollRect scrollRect)
+        public ScrollPool(ScrollRect scrollRect)
         {
             this.scrollRect = scrollRect;
             Init();
         }
 
-        public IListDataSource DataSource;
+        public IPoolDataSource DataSource;
 
         public int PoolCount => _cachedCells.Count;
 
@@ -186,7 +186,7 @@ namespace UnityExplorer.UI.Widgets
         /// Initialize with the provided DataSource
         /// </summary>
         /// <param name="dataSource"></param>
-        public void Initialize(IListDataSource dataSource)
+        public void Initialize(IPoolDataSource dataSource)
         {
             DataSource = dataSource;
 
@@ -207,7 +207,7 @@ namespace UnityExplorer.UI.Widgets
             ReloadData(DataSource);
         }
 
-        public void ReloadData(IListDataSource dataSource)
+        public void ReloadData(IPoolDataSource dataSource)
         {
             if (scrollRect.onValueChanged == null)
                 return;
