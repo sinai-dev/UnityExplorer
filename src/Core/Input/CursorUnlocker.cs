@@ -41,12 +41,29 @@ namespace UnityExplorer.Core.Input
 
         public static void Init()
         {
+            if (ConfigManager.Aggressive_Force_Unlock.Value)
+                RuntimeProvider.Instance.SetupCameraDelegate();
+
             SetupPatches();
 
             UpdateCursorControl();
 
             Unlock = ConfigManager.Force_Unlock_Mouse.Value;
             ConfigManager.Force_Unlock_Mouse.OnValueChanged += (bool val) => { Unlock = val; };
+        }
+
+        public static void OnCameraPostRender(Camera _)
+        {
+            if (!UIManager.ShowMenu)
+                return;
+            UpdateIfNeeded();
+        }
+
+        public static void UpdateIfNeeded()
+        {
+            if ((!ShouldActuallyUnlock && (Cursor.visible || Cursor.lockState == CursorLockMode.None)) 
+                || (ShouldActuallyUnlock && (!Cursor.visible || Cursor.lockState != CursorLockMode.None)))
+                UpdateCursorControl();
         }
 
         public static void UpdateCursorControl()

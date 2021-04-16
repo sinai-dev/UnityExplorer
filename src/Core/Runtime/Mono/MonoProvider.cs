@@ -12,6 +12,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityExplorer.Core;
 using UnityExplorer.Core.CSharp;
+using UnityExplorer.Core.Input;
 
 namespace UnityExplorer.Core.Runtime.Mono
 {
@@ -24,6 +25,11 @@ namespace UnityExplorer.Core.Runtime.Mono
             TextureUtil = new MonoTextureUtil();
 
             DummyBehaviour.Setup();
+        }
+
+        public override void SetupCameraDelegate()
+        {
+            Camera.onPostRender += CursorUnlocker.OnCameraPostRender;
         }
 
         public override void SetupEvents()

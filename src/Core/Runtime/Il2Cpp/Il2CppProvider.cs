@@ -26,6 +26,24 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             TextureUtil = new Il2CppTextureUtil();
         }
 
+        public override void SetupCameraDelegate()
+        {
+            try
+            {
+                var action = new Action<Camera>(CursorUnlocker.OnCameraPostRender);
+                var _delegate = DelegateSupport.ConvertDelegate<Camera.CameraCallback>(action);
+                if (Camera.onPostRender == null)
+                    Camera.onPostRender = _delegate;
+                else
+                    Camera.onPostRender = Camera.onPostRender.CombineImpl(_delegate).TryCast<Camera.CameraCallback>();
+
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.LogWarning($"Exception setting up Camera.onPostRender callback: {ex}");
+            }
+        }
+
         public override void SetupEvents()
         {
             try

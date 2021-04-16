@@ -83,6 +83,9 @@ namespace UnityExplorer.UI
             if (!ShowMenu)
                 return;
 
+            if (InputManager.GetKeyDown(ConfigManager.Force_Unlock_Keybind.Value))
+                CursorUnlocker.Unlock = !CursorUnlocker.Unlock;
+
             UIBehaviourModel.UpdateInstances();
 
             if (EventSystem.current != EventSys)

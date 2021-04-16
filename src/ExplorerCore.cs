@@ -80,7 +80,7 @@ namespace UnityExplorer
             UIManager.Update();
         }
 
-        #region LOGGING
+#region LOGGING
 
         public static void Log(object message) 
             => Log(message, LogType.Log, false);
@@ -119,6 +119,6 @@ namespace UnityExplorer
             }
         }
 
-        #endregion
+#endregion
     }
 }

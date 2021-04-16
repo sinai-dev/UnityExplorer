@@ -35,6 +35,8 @@ namespace UnityExplorer
 
         public abstract void Initialize();
 
+        public abstract void SetupCameraDelegate();
+
         public abstract void SetupEvents();
 
         public abstract void StartCoroutine(IEnumerator routine);

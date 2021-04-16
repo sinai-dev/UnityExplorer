@@ -18,6 +18,8 @@ namespace UnityExplorer.Core.Config
 
         public static ConfigElement<KeyCode>    Main_Menu_Toggle;
         public static ConfigElement<bool>       Force_Unlock_Mouse;
+        public static ConfigElement<KeyCode>    Force_Unlock_Keybind;
+        public static ConfigElement<bool>       Aggressive_Force_Unlock;
         //public static ConfigElement<MenuPages>  Default_Tab;
         public static ConfigElement<int>        Default_Page_Limit;
         public static ConfigElement<string>     Default_Output_Path;
@@ -76,6 +78,18 @@ namespace UnityExplorer.Core.Config
                 "Should UnityExplorer be hidden on startup?",
                 false);
 
+            Force_Unlock_Mouse = new ConfigElement<bool>("Force Unlock Mouse",
+                "Force the Cursor to be unlocked (visible) when the UnityExplorer menu is open.",
+                true);
+
+            Force_Unlock_Keybind = new ConfigElement<KeyCode>("Force Unlock Keybind",
+                "The keybind to toggle the 'Force Unlock Mouse' setting. Only usable when UnityExplorer is open.",
+                KeyCode.F6);
+
+            Aggressive_Force_Unlock = new ConfigElement<bool>("Aggressive Mouse Unlock",
+                "Use Camera.onPostRender callback to aggressively force the Mouse to be unlocked (requires game restart).",
+                false);
+
             //Default_Tab = new ConfigElement<MenuPages>("Default Tab",
             //    "The default menu page when starting the game.",
             //    MenuPages.Home);
@@ -83,10 +97,6 @@ namespace UnityExplorer.Core.Config
             Log_Unity_Debug = new ConfigElement<bool>("Log Unity Debug",
                 "Should UnityEngine.Debug.Log messages be printed to UnityExplorer's log?",
                 false);
-
-            Force_Unlock_Mouse = new ConfigElement<bool>("Force Unlock Mouse",
-                "Force the Cursor to be unlocked (visible) when the UnityExplorer menu is open.",
-                true);
 
             Default_Page_Limit = new ConfigElement<int>("Default Page Limit",
                 "The default maximum number of elements per 'page' in UnityExplorer.",
