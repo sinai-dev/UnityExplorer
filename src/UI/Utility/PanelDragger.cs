@@ -34,7 +34,7 @@ namespace UnityExplorer.UI.Utility
 
         public GameObject m_resizeCursorObj;
 
-        internal readonly Vector2 minResize = new Vector2(400, 400);
+        internal readonly Vector2 minResize = new Vector2(200, 50);
 
         private bool WasResizing { get; set; }
         private ResizeTypes m_currentResizeType = ResizeTypes.NONE;
@@ -332,21 +332,21 @@ namespace UnityExplorer.UI.Utility
             else if (m_currentResizeType.HasFlag(ResizeTypes.Bottom))
                 anchorMin.y -= diffY;
 
+            var prevMin = Panel.anchorMin;
+            var prevMax = Panel.anchorMax;
+
             Panel.anchorMin = new Vector2(anchorMin.x, anchorMin.y);
             Panel.anchorMax = new Vector2(anchorMax.x, anchorMax.y);
 
-            var newWidth = (anchorMax.x - anchorMin.x) * Screen.width;
-            var newHeight = (anchorMax.y - anchorMin.y) * Screen.height;
-
-            if (newWidth >= minResize.x)
+            if (Panel.rect.width < minResize.x)
             {
-                Panel.anchorMin = new Vector2(anchorMin.x, Panel.anchorMin.y);
-                Panel.anchorMax = new Vector2(anchorMax.x, Panel.anchorMax.y);
+                Panel.anchorMin = new Vector2(prevMin.x, Panel.anchorMin.y);
+                Panel.anchorMax = new Vector2(prevMax.x, Panel.anchorMax.y);
             }
-            if (newHeight >= minResize.y)
+            if (Panel.rect.height < minResize.y)
             {
-                Panel.anchorMin = new Vector2(Panel.anchorMin.x, anchorMin.y);
-                Panel.anchorMax = new Vector2(Panel.anchorMax.x, anchorMax.y);
+                Panel.anchorMin = new Vector2(Panel.anchorMin.x, prevMin.y);
+                Panel.anchorMax = new Vector2(Panel.anchorMax.x, prevMax.y);
             }
         }
 
