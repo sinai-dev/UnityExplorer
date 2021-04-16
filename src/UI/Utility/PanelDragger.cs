@@ -5,24 +5,63 @@ using UnityEngine.UI;
 using UnityExplorer.Core.Input;
 using System.IO;
 using System.Diagnostics;
+using UnityExplorer.UI.Models;
+using System.Linq;
 
 namespace UnityExplorer.UI.Utility
 {
     public class PanelDragger
     {
+        static PanelDragger()
+        {
+            UIPanel.OnPanelsReordered += OnPanelsReordered;
+        }
+
+        public static void OnPanelsReordered()
+        {
+            Instances.Sort((a, b) => b.Panel.GetSiblingIndex().CompareTo(a.Panel.GetSiblingIndex()));
+        }
+
         internal static List<PanelDragger> Instances = new List<PanelDragger>();
+
+        private enum MouseState
+        {
+            Down,
+            Held,
+            NotPressed
+        }
+
+        private static bool handledInstanceThisFrame;
 
         public static void UpdateInstances()
         {
+            if (!s_resizeCursorObj)
+                CreateCursorUI();
+
+            MouseState state;
+            if (InputManager.GetMouseButtonDown(0))
+                state = MouseState.Down;
+            else if (InputManager.GetMouseButton(0))
+                state = MouseState.Held;
+            else
+                state = MouseState.NotPressed;
+
+            handledInstanceThisFrame = false;
             foreach (var instance in Instances)
-                instance.Update();
+            {
+                instance.Update(state, InputManager.MousePosition);
+                if (handledInstanceThisFrame)
+                    break;
+            }
         }
+
+        // ------- Instance -------
 
         public RectTransform Panel { get; set; }
         public event Action<RectTransform> OnFinishResize;
         public event Action<RectTransform> OnFinishDrag;
 
-        private readonly RectTransform refCanvasTransform;
+        private readonly RectTransform canvasTransform;
 
         // Dragging
         public RectTransform DragableArea { get; set; }
@@ -32,7 +71,7 @@ namespace UnityExplorer.UI.Utility
         // Resizing
         private const int RESIZE_THICKNESS = 10;
 
-        public GameObject m_resizeCursorObj;
+        public static GameObject s_resizeCursorObj;
 
         internal readonly Vector2 minResize = new Vector2(200, 50);
 
@@ -50,84 +89,90 @@ namespace UnityExplorer.UI.Utility
             Instances.Add(this);
             DragableArea = dragArea;
             Panel = panelToDrag;
-            refCanvasTransform = Panel.GetComponentInParent<Canvas>().GetComponent<RectTransform>();
+            
+            if (!canvasTransform)
+                canvasTransform = Panel.GetComponentInParent<Canvas>().GetComponent<RectTransform>();
 
             UpdateResizeCache();
         }
 
         public void Destroy()
         {
-            if (m_resizeCursorObj)
-                GameObject.Destroy(m_resizeCursorObj);
+            if (s_resizeCursorObj)
+                GameObject.Destroy(s_resizeCursorObj);
 
             if (Instances.Contains(this))
                 Instances.Remove(this);
         }
 
-        public void Update()
+        private void Update(MouseState state, Vector3 rawMousePos)
         {
-            if (!m_resizeCursorObj)
-                this.CreateCursorUI();
-
-            Vector3 rawMousePos = InputManager.MousePosition;
-
             ResizeTypes type;
             Vector3 resizePos = Panel.InverseTransformPoint(rawMousePos);
 
             Vector3 dragPos = DragableArea.InverseTransformPoint(rawMousePos);
             bool inDragPos = DragableArea.rect.Contains(dragPos);
 
-            if (WasHoveringResize && m_resizeCursorObj)
+            if (WasHoveringResize && s_resizeCursorObj)
                 UpdateHoverImagePos();
 
-            // If Mouse pressed this frame
-            if (InputManager.GetMouseButtonDown(0))
+            switch (state)
             {
-                if (inDragPos)
-                {
-                    OnBeginDrag();
-                    return;
-                }
-                else if (MouseInResizeArea(resizePos))
-                {
-                    type = GetResizeType(resizePos);
-                    if (type != ResizeTypes.NONE)
+                case MouseState.Down:
+                    if (handledInstanceThisFrame)
+                        break;
+                    if (inDragPos)
                     {
-                        OnBeginResize(type);
+                        OnBeginDrag();
+                        handledInstanceThisFrame = true;
+                        return;
                     }
-                }
-            }
-            // If mouse still pressed from last frame
-            else if (InputManager.GetMouseButton(0))
-            {
-                if (WasDragging)
-                {
-                    OnDrag();
-                }
-                else if (WasResizing)
-                {
-                    OnResize();
-                }
-            }
-            // If mouse not pressed
-            else
-            {
-                if (WasDragging)
-                {
-                    OnEndDrag();
-                }
-                else if (WasResizing)
-                {
-                    OnEndResize();
-                }
-                else if (!inDragPos && MouseInResizeArea(resizePos) && (type = GetResizeType(resizePos)) != ResizeTypes.NONE)
-                {
-                    OnHoverResize(type);
-                }
-                else if (WasHoveringResize)
-                {
-                    OnHoverResizeEnd();
-                }
+                    else if (MouseInResizeArea(resizePos))
+                    {
+                        type = GetResizeType(resizePos);
+                        if (type != ResizeTypes.NONE)
+                        {
+                            OnBeginResize(type);
+                            handledInstanceThisFrame = true;
+                        }
+                    }
+                    break;
+
+                case MouseState.Held:
+                    if (WasDragging)
+                    {
+                        OnDrag();
+                        handledInstanceThisFrame = true;
+                    }
+                    else if (WasResizing)
+                    {
+                        OnResize();
+                        handledInstanceThisFrame = true;
+                    }
+                    break;
+
+                case MouseState.NotPressed:
+                    if (WasDragging)
+                    {
+                        OnEndDrag();
+                        handledInstanceThisFrame = true;
+                    }
+                    else if (WasResizing)
+                    {
+                        OnEndResize();
+                        handledInstanceThisFrame = true;
+                    }
+                    else if (!inDragPos && MouseInResizeArea(resizePos) && (type = GetResizeType(resizePos)) != ResizeTypes.NONE)
+                    {
+                        OnHoverResize(type);
+                        handledInstanceThisFrame = true;
+                    }
+                    else if (WasHoveringResize)
+                    {
+                        OnHoverResizeEnd();
+                        handledInstanceThisFrame = true;
+                    }
+                    break;
             }
 
             return;
@@ -263,7 +308,8 @@ namespace UnityExplorer.UI.Utility
             WasHoveringResize = true;
             m_lastResizeHoverType = resizeType;
 
-            m_resizeCursorObj.SetActive(true);
+            s_resizeCursorObj.SetActive(true);
+            s_resizeCursorObj.transform.SetAsLastSibling();
 
             // set the rotation for the resize icon
             float iconRotation = 0f;
@@ -280,9 +326,9 @@ namespace UnityExplorer.UI.Utility
                     iconRotation = 135f; break;
             }
 
-            Quaternion rot = m_resizeCursorObj.transform.rotation;
+            Quaternion rot = s_resizeCursorObj.transform.rotation;
             rot.eulerAngles = new Vector3(0, 0, iconRotation);
-            m_resizeCursorObj.transform.rotation = rot;
+            s_resizeCursorObj.transform.rotation = rot;
 
             UpdateHoverImagePos();
         }
@@ -290,13 +336,13 @@ namespace UnityExplorer.UI.Utility
         // update the resize icon position to be above the mouse
         private void UpdateHoverImagePos()
         {
-            m_resizeCursorObj.transform.localPosition = refCanvasTransform.InverseTransformPoint(InputManager.MousePosition);
+            s_resizeCursorObj.transform.localPosition = canvasTransform.InverseTransformPoint(InputManager.MousePosition);
         }
 
         public void OnHoverResizeEnd()
         {
             WasHoveringResize = false;
-            m_resizeCursorObj.SetActive(false);
+            s_resizeCursorObj.SetActive(false);
         }
 
         public void OnBeginResize(ResizeTypes resizeType)
@@ -357,18 +403,18 @@ namespace UnityExplorer.UI.Utility
             OnFinishResize?.Invoke(Panel);
         }
 
-        internal void CreateCursorUI()
+        internal static void CreateCursorUI()
         {
             try
             {
-                var text = UIFactory.CreateLabel(refCanvasTransform.gameObject, "ResizeCursor", "↔", TextAnchor.MiddleCenter, Color.white, true, 35);
-                m_resizeCursorObj = text.gameObject;
+                var text = UIFactory.CreateLabel(UIManager.CanvasRoot, "ResizeCursor", "↔", TextAnchor.MiddleCenter, Color.white, true, 35);
+                s_resizeCursorObj = text.gameObject;
 
-                RectTransform rect = m_resizeCursorObj.GetComponent<RectTransform>();
+                RectTransform rect = s_resizeCursorObj.GetComponent<RectTransform>();
                 rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 64);
                 rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 64);
 
-                m_resizeCursorObj.SetActive(false);
+                s_resizeCursorObj.SetActive(false);
             }
             catch (Exception e)
             {

@@ -277,7 +277,6 @@
     <Compile Include="UI\Widgets\InfiniteScroll\InfiniteScrollRect.cs" />
     <Compile Include="UI\Widgets\InfiniteScroll\UIExtensions.cs" />
     <Compile Include="UI\Widgets\InputFieldScroller.cs" />
-    <Compile Include="UI\Widgets\PageHandler.cs" />
     <Compile Include="UI\Widgets\SimpleList\SimpleCell.cs" />
     <Compile Include="UI\Widgets\SimpleList\SimpleListSource.cs" />
     <Compile Include="UI\Widgets\SliderScrollbar.cs" />

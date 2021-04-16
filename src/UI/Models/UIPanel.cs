@@ -6,12 +6,55 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Core.Config;
+using UnityExplorer.Core.Input;
 using UnityExplorer.UI.Utility;
 
 namespace UnityExplorer.UI.Models
 {
     public abstract class UIPanel : UIBehaviourModel
     {
+        public static event Action OnPanelsReordered;
+
+        public static void UpdateFocus()
+        {
+            if (InputManager.GetMouseButtonDown(0) || InputManager.GetMouseButtonDown(1))
+            {
+                int count = UIManager.CanvasRoot.transform.childCount;
+                var mousePos = InputManager.MousePosition;
+                for (int i = count - 1; i >= 0; i--)
+                {
+                    var transform = UIManager.CanvasRoot.transform.GetChild(i);
+                    if (transformToPanelDict.TryGetValue(transform.GetInstanceID(), out UIPanel panel))
+                    {
+                        var pos = panel.mainPanelRect.InverseTransformPoint(mousePos);
+                        if (panel.Enabled && panel.mainPanelRect.rect.Contains(pos))
+                        {
+                            if (transform.GetSiblingIndex() != count - 1)
+                            {
+                                transform.SetAsLastSibling();
+                                OnPanelsReordered?.Invoke();
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        private static readonly List<UIPanel> instances = new List<UIPanel>();
+        private static readonly Dictionary<int, UIPanel> transformToPanelDict = new Dictionary<int, UIPanel>();
+
+        public UIPanel()
+        {
+            instances.Add(this);
+        }
+
+        public override void Destroy()
+        {
+            instances.Remove(this);
+            base.Destroy();
+        }
+
         public override GameObject UIRoot => uiRoot;
         protected GameObject uiRoot;
         protected RectTransform mainPanelRect;
@@ -23,12 +66,13 @@ namespace UnityExplorer.UI.Models
         public override void ConstructUI(GameObject parent)
         {
             // create core canvas 
-            var panel = UIFactory.CreatePanel(Name, out GameObject panelContent);
-            uiRoot = panel;
-            mainPanelRect = uiRoot.GetComponent<RectTransform>();
+            uiRoot = UIFactory.CreatePanel(Name, out GameObject panelContent);
+            mainPanelRect = this.uiRoot.GetComponent<RectTransform>();
             content = panelContent;
 
-            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(uiRoot, true, true, true, true, 0, 0, 0, 0, 0, TextAnchor.UpperLeft);
+            transformToPanelDict.Add(this.uiRoot.transform.GetInstanceID(), this);
+
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.uiRoot, true, true, true, true, 0, 0, 0, 0, 0, TextAnchor.UpperLeft);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(content, true, true, true, true, 2, 2, 2, 2, 2, TextAnchor.UpperLeft);
 
             // always apply default pos and anchors (save data may only be partial)
