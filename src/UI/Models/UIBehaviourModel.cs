@@ -26,7 +26,7 @@ namespace UnityExplorer.UI.Models
                         Instances.RemoveAt(i);
                         continue;
                     }
-                    if (instance.Visible)
+                    if (instance.Enabled)
                         instance.Update();
                 }
             }

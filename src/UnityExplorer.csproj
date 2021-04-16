@@ -106,6 +106,10 @@
       <HintPath>..\lib\mcs.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="INIFileParser, Version=2.5.2.0, Culture=neutral, PublicKeyToken=79af7b307b65cf3c, processorArchitecture=MSIL">
+      <HintPath>packages\ini-parser.2.5.2\lib\net20\INIFileParser.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <!-- MelonLoader refs -->
   <ItemGroup Condition="'$(IsMelonLoader)'=='true'">
@@ -154,10 +158,6 @@
   <ItemGroup Condition="'$(IsStandalone)'=='true'">
     <Reference Include="0Harmony">
       <HintPath>..\lib\0Harmony.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="INIFileParser, Version=2.5.2.0, Culture=neutral, PublicKeyToken=79af7b307b65cf3c, processorArchitecture=MSIL">
-      <HintPath>packages\ini-parser.2.5.2\lib\net20\INIFileParser.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -216,6 +216,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\Config\InternalConfigHandler.cs" />
     <Compile Include="Core\CSharp\ScriptEvaluator.cs" />
     <Compile Include="Core\CSharp\ScriptInteraction.cs" />
     <Compile Include="Core\CSharp\Suggestion.cs" />
@@ -261,8 +262,9 @@
     <Compile Include="Loader\STANDALONE\StandaloneConfigHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\InspectorManager.cs" />
-    <Compile Include="UI\Model\UIBehaviourModel.cs" />
-    <Compile Include="UI\Model\UIModel.cs" />
+    <Compile Include="UI\Models\UIBehaviourModel.cs" />
+    <Compile Include="UI\Models\UIModel.cs" />
+    <Compile Include="UI\Models\UIPanel.cs" />
     <Compile Include="UI\Panels\SceneExplorer.cs" />
     <Compile Include="UI\UIFactory.cs" />
     <Compile Include="UI\UIManager.cs" />

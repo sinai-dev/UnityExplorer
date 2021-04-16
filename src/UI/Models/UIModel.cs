@@ -10,11 +10,19 @@ namespace UnityExplorer.UI.Models
     {
         public abstract GameObject UIRoot { get; }
 
-        public bool Visible
+        public bool Enabled
         {
-            get => UIRoot && UIRoot.activeInHierarchy;
-            set { if (UIRoot) UIRoot.SetActive(value); }
+            get => UIRoot && UIRoot.activeSelf;
+            set
+            {
+                if (!UIRoot || Enabled == value)
+                    return;
+                UIRoot.SetActive(value);
+                OnToggleEnabled?.Invoke(value);
+            }
         }
+
+        public event Action<bool> OnToggleEnabled;
 
         public abstract void ConstructUI(GameObject parent);
 

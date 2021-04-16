@@ -92,14 +92,15 @@ namespace UnityExplorer.UI.Widgets
 
         public void RefreshData(bool andReload = false)
         {
-            //tempObjectCache = objectCache.ToDictionary(it => it.Key, it => it.Value);
             displayedObjects.Clear();
-            // objectCache.Clear();
 
             var rootObjects = GetRootEntriesMethod.Invoke();
 
             foreach (var obj in rootObjects)
-                Traverse(obj.transform);
+            {
+                if (obj)
+                    Traverse(obj.transform);
+            }
 
             if (andReload)
                 Scroller.Refresh();

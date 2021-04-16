@@ -65,8 +65,6 @@ namespace UnityExplorer.Core
         /// </summary>
         public static int LoadedSceneCount => SceneManager.sceneCount + 2;
 
-        // Cached on startup, will never change during runtime (and generally doesn't change between Unity versions either)
-
         internal static Scene DontDestroyScene => DontDestroyMe.scene;
         internal static int DontDestroyHandle => DontDestroyScene.handle;
 
@@ -83,6 +81,8 @@ namespace UnityExplorer.Core
             }
         }
         private static GameObject dontDestroyObject;
+
+        public static bool InspectingAssetScene => SelectedScene == AssetScene;
 
         internal static Scene AssetScene => AssetObject.scene;
         internal static int AssetHandle => AssetScene.handle;

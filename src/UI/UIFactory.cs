@@ -148,8 +148,7 @@ namespace UnityExplorer.UI
         /// <summary>
         /// Create a Panel on the UI Canvas.
         /// </summary>
-        public static GameObject CreatePanel(string name, out GameObject contentHolder, Color? bgColor = null,
-            string anchors = null, string position = null)
+        public static GameObject CreatePanel(string name, out GameObject contentHolder, Color? bgColor = null)
         {
             var panelObj = CreateUIObject(name, UIManager.CanvasRoot);
             var rect = panelObj.GetComponent<RectTransform>();
@@ -157,12 +156,6 @@ namespace UnityExplorer.UI
             rect.anchorMax = Vector2.one;
             rect.anchoredPosition = Vector2.zero;
             rect.sizeDelta = Vector2.zero;
-
-            if (anchors != null)
-                rect.SetAnchorsFromString(anchors);
-
-            if (position != null)
-                rect.SetPositionFromString(position);
 
             var maskImg = panelObj.AddComponent<Image>();
             maskImg.color = Color.white;
@@ -576,6 +569,7 @@ namespace UnityExplorer.UI
 
             GameObject scrollbarObj = CreateScrollbar(templateObj, "DropdownScroll", out Scrollbar scrollbar);
             scrollbar.SetDirection(Scrollbar.Direction.BottomToTop, true);
+            RuntimeProvider.Instance.SetColorBlock(scrollbar, new Color(0.3f, 0.3f, 0.3f), new Color(0.4f, 0.4f, 0.4f), new Color(0.2f, 0.2f, 0.2f));
 
             RectTransform scrollRectTransform = scrollbarObj.GetComponent<RectTransform>();
             scrollRectTransform.anchorMin = Vector2.right;
@@ -700,7 +694,7 @@ namespace UnityExplorer.UI
         }
 
         public static InfiniteScrollRect CreateInfiniteScroll(GameObject parent, string name, out GameObject uiRoot,
-            out GameObject content, Color? bgColor = null)
+            out GameObject content, Color? bgColor = null, bool autoResizeSliderHandle = true)
         {
             var mainObj = CreateUIObject(name, parent, new Vector2(1, 1));
             mainObj.AddComponent<Image>().color = bgColor ?? new Color(0.12f, 0.12f, 0.12f);
@@ -716,7 +710,6 @@ namespace UnityExplorer.UI
             viewportRect.offsetMax = new Vector2(-10.0f, 0.0f);
             viewportObj.AddComponent<Image>().color = Color.white;
             viewportObj.AddComponent<Mask>().showMaskGraphic = false;
-            //SetLayoutGroup<VerticalLayoutGroup>(viewportObj, true, true, true, true);
 
             content = CreateUIObject("Content", viewportObj);
             var contentRect = content.GetComponent<RectTransform>();
@@ -725,7 +718,6 @@ namespace UnityExplorer.UI
             contentRect.pivot = new Vector2(0.0f, 1.0f);
             contentRect.sizeDelta = new Vector2(0f, 0f);
             contentRect.offsetMax = new Vector2(0f, 0f);
-            //SetLayoutGroup<VerticalLayoutGroup>(content, true, false, true, false, 0, 2, 2, 2, 2);
 
             var scrollRect = mainObj.AddComponent<ScrollRect>();
             scrollRect.movementType = ScrollRect.MovementType.Clamped;
@@ -738,13 +730,31 @@ namespace UnityExplorer.UI
             scrollRect.viewport = viewportRect;
             scrollRect.content = contentRect;
 
-            var sliderObj = SliderScrollbar.CreateSliderScrollbar(mainObj, out Slider slider);
+            var sliderContainer = CreateVerticalGroup(mainObj, "SliderContainer",
+                false, false, true, true, 0, default, new Color(0.05f, 0.05f, 0.05f));
+            SetLayoutElement(sliderContainer, minWidth: 25, flexibleWidth:0, flexibleHeight: 9999);
+            sliderContainer.AddComponent<Mask>();
+
+            var sliderObj = SliderScrollbar.CreateSliderScrollbar(sliderContainer, out Slider slider);
             slider.direction = Slider.Direction.TopToBottom;
-            SetLayoutElement(sliderObj, minWidth: 25, flexibleHeight: 9999);
+            SetLayoutElement(sliderObj, minWidth: 25, flexibleWidth: 0, flexibleHeight: 9999);
+
+            if (autoResizeSliderHandle)
+            {
+                slider.handleRect.offsetMin = new Vector2(slider.handleRect.offsetMin.x, 0);
+                slider.handleRect.offsetMax = new Vector2(slider.handleRect.offsetMax.x, 0);
+                slider.handleRect.pivot = new Vector2(0.5f, 0.5f);
+
+                var container = slider.m_HandleContainerRect;
+                container.anchorMin = Vector3.zero;
+                container.anchorMax = Vector3.one;
+                container.pivot = new Vector3(0.5f, 0.5f);
+            }
 
             uiRoot = mainObj;
 
             var infiniteScroll = new InfiniteScrollRect(scrollRect);
+            infiniteScroll.AutoResizeHandleRect = autoResizeSliderHandle;
 
             return infiniteScroll;
         }

@@ -2,22 +2,23 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityExplorer.Core;
+using UnityExplorer.Core.Config;
 using UnityExplorer.UI.Models;
 using UnityExplorer.UI.Utility;
 using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Panels
 {
-    public class SceneExplorer : UIBehaviourModel
+    public class SceneExplorer : UIPanel
     {
-        public override GameObject UIRoot => uiRoot;
-        private GameObject uiRoot;
+        public override string Name => "Scene Explorer";
 
         /// <summary>
         /// Whether to automatically update per auto-update interval or not.
@@ -27,6 +28,7 @@ namespace UnityExplorer.UI.Panels
         public TransformTree Tree;
         private float timeOfLastUpdate = -1f;
 
+        private GameObject refreshRow;
         private Dropdown sceneDropdown;
         private readonly Dictionary<int, Dropdown.OptionData> sceneToDropdownOption = new Dictionary<int, Dropdown.OptionData>();
 
@@ -45,7 +47,7 @@ namespace UnityExplorer.UI.Panels
 
         public override void Update()
         {
-            if (AutoUpdate && Time.realtimeSinceStartup - timeOfLastUpdate >= 1f)
+            if ((AutoUpdate || !SceneHandler.InspectingAssetScene) && Time.realtimeSinceStartup - timeOfLastUpdate >= 1f)
             {
                 timeOfLastUpdate = Time.realtimeSinceStartup;
                 ExpensiveUpdate();
@@ -68,6 +70,7 @@ namespace UnityExplorer.UI.Panels
             SceneHandler.SelectedScene = SceneHandler.LoadedScenes[value];
             SceneHandler.Update();
             Tree.RefreshData(true);
+            OnSelectedSceneChanged(SceneHandler.SelectedScene.Value);
         }
 
         private void SceneHandler_OnInspectedSceneChanged(Scene scene)
@@ -84,6 +87,14 @@ namespace UnityExplorer.UI.Panels
                 else
                     sceneDropdown.captionText.text = opt.text;
             }
+
+            OnSelectedSceneChanged(scene);
+        }
+
+        private void OnSelectedSceneChanged(Scene scene)
+        {
+            if (refreshRow)
+                refreshRow.SetActive(!scene.IsValid());
         }
 
         private void SceneHandler_OnLoadedScenesChanged(ReadOnlyCollection<Scene> loadedScenes)
@@ -119,9 +130,15 @@ namespace UnityExplorer.UI.Panels
 
         private float previousRectHeight;
 
-        private void SceneExplorer_OnFinishResize(RectTransform obj)
+        public override void OnFinishResize(RectTransform panel)
         {
-            RuntimeProvider.Instance.StartCoroutine(DelayedRefresh(obj));
+            base.OnFinishResize(panel);
+            RuntimeProvider.Instance.StartCoroutine(DelayedRefresh(panel));
+        }
+
+        public override void SaveToConfigManager()
+        {
+            ConfigManager.SceneExplorerData.Value = this.ToSaveData();
         }
 
         private IEnumerator DelayedRefresh(RectTransform obj)
@@ -138,53 +155,33 @@ namespace UnityExplorer.UI.Panels
 
         }
 
-        public override void ConstructUI(GameObject parent)
+        public override void LoadSaveData()
         {
-            var panel = UIFactory.CreatePanel("SceneExplorer", out GameObject panelContent);
-            uiRoot = panel;
-            var panelRect = panel.GetComponent<RectTransform>();
-            panelRect.anchorMin = Vector3.zero;
-            panelRect.anchorMax = new Vector2(0, 1);
-            panelRect.sizeDelta = new Vector2(300f, panelRect.sizeDelta.y);
-            panelRect.anchoredPosition = new Vector2(160, 0);
-            panelRect.offsetMin = new Vector2(panelRect.offsetMin.x, 10);  // bottom
-            panelRect.offsetMax = new Vector2(panelRect.offsetMax.x, -10); // top
-            panelRect.pivot = new Vector2(0.5f, 0.5f);
-            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(panel, true, true, true, true, 0, 0, 0, 0, 0, TextAnchor.UpperLeft);
-            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(panelContent, true, true, true, true, 2, 2, 2, 2, 2, TextAnchor.UpperLeft);
+            var data = ConfigManager.SceneExplorerData.Value;
+            ApplySaveData(data);
+        }
 
-            // Title bar
+        public override void SetDefaultPosAndAnchors()
+        {
+            mainPanelRect.localPosition = Vector2.zero;
+            mainPanelRect.anchorMin = Vector3.zero;
+            mainPanelRect.anchorMax = new Vector2(0, 1);
+            mainPanelRect.sizeDelta = new Vector2(300f, mainPanelRect.sizeDelta.y);
+            mainPanelRect.anchoredPosition = new Vector2(160, 0);
+            mainPanelRect.offsetMin = new Vector2(mainPanelRect.offsetMin.x, 10);  // bottom
+            mainPanelRect.offsetMax = new Vector2(mainPanelRect.offsetMax.x, -10); // top
+            mainPanelRect.pivot = new Vector2(0.5f, 0.5f);
+        }
 
-            var titleBar = UIFactory.CreateLabel(panelContent, "TitleBar", "Scene Explorer", TextAnchor.MiddleLeft);
-            UIFactory.SetLayoutElement(titleBar.gameObject, minHeight: 25, flexibleHeight: 0);
+        public override void ConstructPanelContent()
+        {
+            // Tool bar (top area)
 
-            new PanelDragger(titleBar.GetComponent<RectTransform>(), panelRect)
-                .OnFinishResize += SceneExplorer_OnFinishResize;
-
-            // Tool bar
-
-            var toolbar = UIFactory.CreateVerticalGroup(panelContent, "Toolbar", true, true, true, true, 2, new Vector4(2, 2, 2, 2),
+            var toolbar = UIFactory.CreateVerticalGroup(content, "Toolbar", true, true, true, true, 2, new Vector4(2, 2, 2, 2),
                new Color(0.15f, 0.15f, 0.15f));
-            //UIFactory.SetLayoutElement(toolbar, minHeight: 25, flexibleHeight: 0);
-
-            // refresh row
-
-            var refreshRow = UIFactory.CreateHorizontalGroup(toolbar, "RefreshGroup", true, true, true, true, 2, new Vector4(2, 2, 2, 2));
-            UIFactory.SetLayoutElement(refreshRow, minHeight: 30, flexibleHeight: 0);
-
-            var refreshButton = UIFactory.CreateButton(refreshRow, "RefreshButton", "Update", ForceUpdate);
-            UIFactory.SetLayoutElement(refreshButton.gameObject, minWidth: 65, flexibleWidth: 0);
-
-            var refreshToggle = UIFactory.CreateToggle(refreshRow, "RefreshToggle", out Toggle toggle, out Text text);
-            UIFactory.SetLayoutElement(refreshToggle, flexibleWidth: 9999);
-            text.text = "Auto-update (1 second)";
-            text.alignment = TextAnchor.MiddleLeft;
-            text.color = Color.white;
-            text.fontSize = 12;
-            toggle.isOn = false;
-            toggle.onValueChanged.AddListener((bool val) => AutoUpdate = val);
 
             // Scene selector dropdown
+
             var dropdownObj = UIFactory.CreateDropdown(toolbar, out sceneDropdown, "<notset>", 13, OnDropdownChanged);
             UIFactory.SetLayoutElement(dropdownObj, minHeight: 25, flexibleHeight: 0);
 
@@ -208,9 +205,28 @@ namespace UnityExplorer.UI.Panels
             UIFactory.SetLayoutElement(inputFieldObj, minHeight: 25);
             inputField.onValueChanged.AddListener(OnFilterInput);
 
+            // refresh row
+
+            refreshRow = UIFactory.CreateHorizontalGroup(toolbar, "RefreshGroup", true, true, true, true, 2, new Vector4(2, 2, 2, 2));
+            UIFactory.SetLayoutElement(refreshRow, minHeight: 30, flexibleHeight: 0);
+
+            var refreshButton = UIFactory.CreateButton(refreshRow, "RefreshButton", "Update", ForceUpdate);
+            UIFactory.SetLayoutElement(refreshButton.gameObject, minWidth: 65, flexibleWidth: 0);
+
+            var refreshToggle = UIFactory.CreateToggle(refreshRow, "RefreshToggle", out Toggle toggle, out Text text);
+            UIFactory.SetLayoutElement(refreshToggle, flexibleWidth: 9999);
+            text.text = "Auto-update (1 second)";
+            text.alignment = TextAnchor.MiddleLeft;
+            text.color = Color.white;
+            text.fontSize = 12;
+            toggle.isOn = false;
+            toggle.onValueChanged.AddListener((bool val) => AutoUpdate = val);
+
+            refreshRow.SetActive(false);
+
             // Transform Tree
 
-            var infiniteScroll = UIFactory.CreateInfiniteScroll(panelContent, "TransformTree", out GameObject scrollObj,
+            var infiniteScroll = UIFactory.CreateInfiniteScroll(content, "TransformTree", out GameObject scrollObj,
                 out GameObject scrollContent, new Color(0.15f, 0.15f, 0.15f));
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
             UIFactory.SetLayoutElement(scrollContent, flexibleHeight: 9999);
@@ -225,10 +241,66 @@ namespace UnityExplorer.UI.Panels
             var prototype = TransformCell.CreatePrototypeCell(scrollContent);
             infiniteScroll.PrototypeCell = prototype.GetComponent<RectTransform>();
 
-            // Setup references
+            // some references
             Tree.Scroller = infiniteScroll;
+            previousRectHeight = mainPanelRect.rect.height;
 
-            previousRectHeight = panelRect.rect.height;
+            // Scene Loader
+            try
+            {
+                Type sceneUtil = ReflectionUtility.GetTypeByName("UnityEngine.SceneManagement.SceneUtility");
+                if (sceneUtil == null)
+                    throw new Exception("This version of Unity does not ship with the 'SceneUtility' class, or it was not unstripped.");
+                var method = sceneUtil.GetMethod("GetScenePathByBuildIndex", ReflectionUtility.AllFlags);
+
+                var title2 = UIFactory.CreateLabel(content, "SceneLoaderLabel", "Scene Loader", TextAnchor.MiddleLeft, Color.white, true, 14);
+                UIFactory.SetLayoutElement(title2.gameObject, minHeight: 25, flexibleHeight: 0);
+
+                var allSceneDropObj = UIFactory.CreateDropdown(content, out Dropdown allSceneDrop, "", 14, null);
+                UIFactory.SetLayoutElement(allSceneDropObj, minHeight: 25, minWidth: 150, flexibleWidth: 0, flexibleHeight: 0);
+
+                int sceneCount = SceneManager.sceneCountInBuildSettings;
+                for (int i = 0; i < sceneCount; i++)
+                {
+                    var scenePath = (string)method.Invoke(null, new object[] { i });
+                    allSceneDrop.options.Add(new Dropdown.OptionData(Path.GetFileNameWithoutExtension(scenePath)));
+                }
+                allSceneDrop.value = 1;
+                allSceneDrop.value = 0;
+
+                var buttonRow = UIFactory.CreateHorizontalGroup(content, "LoadButtons", true, true, true, true, 4);
+
+                var loadButton = UIFactory.CreateButton(buttonRow, "LoadSceneButton", "Load (Single)", () =>
+                {
+                    try
+                    {
+                        SceneManager.LoadScene(allSceneDrop.options[allSceneDrop.value].text);
+                    }
+                    catch (Exception ex)
+                    {
+                        ExplorerCore.LogWarning($"Unable to load the Scene! {ex.ReflectionExToString()}");
+                    }
+                }, new Color(0.1f, 0.3f, 0.3f));
+                UIFactory.SetLayoutElement(loadButton.gameObject, minHeight: 25, minWidth: 150);
+
+                var loadAdditiveButton = UIFactory.CreateButton(buttonRow, "LoadSceneButton", "Load (Additive)", () =>
+                {
+                    try
+                    {
+                        SceneManager.LoadScene(allSceneDrop.options[allSceneDrop.value].text, LoadSceneMode.Additive);
+                    }
+                    catch (Exception ex)
+                    {
+                        ExplorerCore.LogWarning($"Unable to load the Scene! {ex.ReflectionExToString()}");
+                    }
+                }, new Color(0.1f, 0.3f, 0.3f));
+                UIFactory.SetLayoutElement(loadAdditiveButton.gameObject, minHeight: 25, minWidth: 150);
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.LogWarning($"Could not create the Scene Loader helper! {ex.ReflectionExToString()}");
+            }
+
         }
     }
 }
