@@ -18,6 +18,10 @@ namespace UnityExplorer.Core.Config
 
         public object DefaultValue { get; }
 
+        public ConfigHandler Handler => IsInternal
+            ? ConfigManager.InternalHandler
+            : ConfigManager.Handler;
+
         public T Value
         {
             get => m_value;
@@ -51,19 +55,19 @@ namespace UnityExplorer.Core.Config
 
             m_value = value;
 
-            ConfigManager.Handler.SetConfigValue(this, value);
+            Handler.SetConfigValue(this, value);
 
             OnValueChanged?.Invoke(value);
             OnValueChangedNotify?.Invoke();
 
-            ConfigManager.Handler.OnAnyConfigChanged();
+            Handler.OnAnyConfigChanged();
         }
 
         object IConfigElement.GetLoaderConfigValue() => GetLoaderConfigValue();
 
         public T GetLoaderConfigValue()
         {
-            return ConfigManager.Handler.GetConfigValue(this);
+            return Handler.GetConfigValue(this);
         }
 
         public void RevertToDefaultValue()

@@ -5,7 +5,7 @@
         <ItemGroup>
             <InputAssemblies Include="$(OutputPath)$(AssemblyName).dll" />
             <InputAssemblies Include="..\lib\mcs.dll" />
-            <InputAssemblies Include="..\lib\INIFileParser.dll" Condition="'$(IsStandalone)' == 'true'"/>
+            <InputAssemblies Include="..\lib\INIFileParser.dll" />
         </ItemGroup>
         <ILRepack
           Parallel="true"
