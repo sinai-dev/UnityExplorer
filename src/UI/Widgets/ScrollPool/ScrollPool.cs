@@ -9,7 +9,10 @@ using UnityExplorer.UI.Models;
 
 namespace UnityExplorer.UI.Widgets
 {
-    public class ScrollPool : UIBehaviourModel
+    /// <summary>
+    /// A <see cref="ScrollRect"/> handler which pools displayed cells to improve performance.
+    /// </summary>
+    public class ScrollPool : UIBehaviourModel, IScrollPool
     {
         public ScrollPool(ScrollRect scrollRect)
         {
@@ -23,10 +26,12 @@ namespace UnityExplorer.UI.Widgets
 
         public override GameObject UIRoot => scrollRect.gameObject;
 
-        /// <summary>Use <see cref="UIFactory.CreateInfiniteScroll"/></summary>
+        /// <summary>Use <see cref="UIFactory.CreateScrollPool"/></summary>
         public override void ConstructUI(GameObject parent) => throw new NotImplementedException();
 
         internal ScrollRect scrollRect;
+
+        public bool AutoResizeHandleRect { get; set; }
 
         internal RectTransform PrototypeCell;
         internal Slider _slider;
@@ -49,9 +54,6 @@ namespace UnityExplorer.UI.Widgets
 
         internal int currentItemCount; //item count corresponding to the datasource.
         internal int topMostCellIndex, bottomMostCellIndex; //Topmost and bottommost cell in the heirarchy
-        internal int _topMostCellColoumn, _bottomMostCellColoumn; // used for recyling in Grid layout. top-most and bottom-most coloumn
-
-        public bool AutoResizeHandleRect;
 
         public bool ExternallySetting
         {
@@ -61,7 +63,7 @@ namespace UnityExplorer.UI.Widgets
                 if (externallySetting == value)
                     return;
                 timeOfLastExternalSet = Time.time;
-                externallySetting = true;
+                externallySetting = value;
             }
         }
         private bool externallySetting;
@@ -102,12 +104,12 @@ namespace UnityExplorer.UI.Widgets
             scrollRect.m_ContentStartPosition += ProcessValueChange(dir);
             _prevAnchoredPos = scrollRect.content.anchoredPosition;
 
-            SetSliderFromScrollValue();
+            UpdateSlider();
 
             // ExternallySetting = false;
         }
 
-        internal void SetSliderFromScrollValue(bool forceValue = true)
+        internal void UpdateSlider(bool forceValue = true)
         {
             int total = DataSource.ItemCount;
             total = Math.Max(total, 1);
@@ -132,10 +134,9 @@ namespace UnityExplorer.UI.Widgets
                 var handleRatio = (decimal)spread / total;
                 var handleHeight = viewportHeight * (float)Math.Min(1, handleRatio);
 
-                // minimum handle size
                 handleHeight = Math.Max(handleHeight, 15f);
 
-                // need to resize the handle container area for the size of the handle (bigger handle = smaller area)
+                // need to resize the handle container area for the size of the handle (bigger handle = smaller container)
                 var container = _slider.m_HandleContainerRect;
                 container.offsetMax = new Vector2(container.offsetMax.x, -(handleHeight * 0.5f));
                 container.offsetMin = new Vector2(container.offsetMin.x, handleHeight * 0.5f);
@@ -185,7 +186,6 @@ namespace UnityExplorer.UI.Widgets
         /// <summary>
         /// Initialize with the provided DataSource
         /// </summary>
-        /// <param name="dataSource"></param>
         public void Initialize(IPoolDataSource dataSource)
         {
             DataSource = dataSource;
@@ -242,14 +242,12 @@ namespace UnityExplorer.UI.Widgets
 
             RefreshContentSize();
 
-            //internallySetting = true;
-            SetSliderFromScrollValue(false);
-            //internallySetting = false;
+            UpdateSlider(false);
         }
 
         public void PopulateCells()
         {
-            var width = scrollRect.viewport.GetComponent<RectTransform>().rect.width;
+            var width = scrollRect.viewport.rect.width;
             scrollRect.content.sizeDelta = new Vector2(width, scrollRect.content.sizeDelta.y);
 
             int cellIndex = topMostCellIndex;
@@ -259,8 +257,6 @@ namespace UnityExplorer.UI.Widgets
             {
                 var cell = _cachedCells[cellIndex];
                 cellIndex++;
-                if (cellIndex < 0)
-                    continue;
                 if (cellIndex >= _cachedCells.Count)
                     cellIndex = 0;
                 DataSource.SetCell(cell, itemIndex);
@@ -284,7 +280,7 @@ namespace UnityExplorer.UI.Widgets
             yield return null;
             SetRecyclingBounds();
 
-            //Cell Poool
+            //Cell Pool
             CreateCellPool();
             currentItemCount = _cellPool.Count;
             topMostCellIndex = 0;
@@ -334,9 +330,6 @@ namespace UnityExplorer.UI.Widgets
             PrototypeCell.gameObject.SetActive(true);
             SetTopAnchor(PrototypeCell);
 
-            //Reset
-            _topMostCellColoumn = _bottomMostCellColoumn = 0;
-
             //Temps
             float currentPoolCoverage = 0;
             int poolSize = 0;
@@ -366,7 +359,7 @@ namespace UnityExplorer.UI.Widgets
                 //Setting data for Cell
                 var cell = DataSource.CreateCell(item);
                 _cachedCells.Add(cell);
-                DataSource.SetCell(_cachedCells[_cachedCells.Count - 1], poolSize);
+                DataSource.SetCell(cell, poolSize);
 
                 //Update the Pool size
                 poolSize++;

@@ -128,7 +128,7 @@ namespace UnityExplorer.UI.Panels
             Tree.RefreshData(true);
         }
 
-        private float previousRectHeight;
+        private float highestRectHeight;
 
         public override void OnFinishResize(RectTransform panel)
         {
@@ -140,10 +140,10 @@ namespace UnityExplorer.UI.Panels
         {
             yield return null;
 
-            if (obj.rect.height != previousRectHeight)
+            if (obj.rect.height > highestRectHeight)
             {
-                // height changed, hard refresh required.
-                previousRectHeight = obj.rect.height;
+                // height increased, hard refresh required.
+                highestRectHeight = obj.rect.height;
                 Tree.Scroller.ReloadData();
             }
             Tree.Scroller.Refresh();
@@ -224,7 +224,7 @@ namespace UnityExplorer.UI.Panels
 
             // Transform Tree
 
-            var infiniteScroll = UIFactory.CreateInfiniteScroll(content, "TransformTree", out GameObject scrollObj,
+            var infiniteScroll = UIFactory.CreateScrollPool<ScrollPool>(content, "TransformTree", out GameObject scrollObj,
                 out GameObject scrollContent, new Color(0.15f, 0.15f, 0.15f));
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
             UIFactory.SetLayoutElement(scrollContent, flexibleHeight: 9999);
@@ -240,7 +240,7 @@ namespace UnityExplorer.UI.Panels
             infiniteScroll.PrototypeCell = prototype.GetComponent<RectTransform>();
 
             // some references
-            previousRectHeight = mainPanelRect.rect.height;
+            highestRectHeight = mainPanelRect.rect.height;
 
             // Scene Loader
             try

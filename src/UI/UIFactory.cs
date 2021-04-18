@@ -4,6 +4,7 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Runtime;
+using UnityExplorer.UI.Models;
 using UnityExplorer.UI.Utility;
 using UnityExplorer.UI.Widgets;
 
@@ -692,8 +693,22 @@ namespace UnityExplorer.UI
             return dropdownObj;
         }
 
-        public static ScrollPool CreateInfiniteScroll(GameObject parent, string name, out GameObject uiRoot,
-            out GameObject content, Color? bgColor = null, bool autoResizeSliderHandle = true)
+        public static DynamicScrollPool CreateDynamicScrollPool(GameObject parent, string name, out GameObject uiRoot,
+            out GameObject content, Color? bgColor, bool autoResizeSliderHandle = true)
+        {
+            var pool = CreateScrollPool<DynamicScrollPool>(parent, name, out uiRoot, out content, bgColor, autoResizeSliderHandle);
+
+            SetLayoutGroup<VerticalLayoutGroup>(content, true, false, true, true, 2, 2, 2, 2, 2,
+                TextAnchor.UpperCenter);
+
+            var rect = content.GetComponent<RectTransform>();
+            rect.pivot = new Vector2(0.5f, 1f);
+
+            return pool;
+        }
+
+        public static T CreateScrollPool<T>(GameObject parent, string name, out GameObject uiRoot,
+            out GameObject content, Color? bgColor = null, bool autoResizeSliderHandle = true) where T : IScrollPool
         {
             var mainObj = CreateUIObject(name, parent, new Vector2(1, 1));
             mainObj.AddComponent<Image>().color = bgColor ?? new Color(0.12f, 0.12f, 0.12f);
@@ -752,10 +767,10 @@ namespace UnityExplorer.UI
 
             uiRoot = mainObj;
 
-            var infiniteScroll = new ScrollPool(scrollRect);
-            infiniteScroll.AutoResizeHandleRect = autoResizeSliderHandle;
+            var scrollPool = (T)Activator.CreateInstance(typeof(T), new object[] { scrollRect });
+            scrollPool.AutoResizeHandleRect = autoResizeSliderHandle;
 
-            return infiniteScroll;
+            return scrollPool;
         }
 
         /// <summary>

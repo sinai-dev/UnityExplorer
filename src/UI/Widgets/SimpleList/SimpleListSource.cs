@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Widgets
@@ -12,15 +13,13 @@ namespace UnityExplorer.UI.Widgets
     {
         internal ScrollPool Scroller;
 
-        public Func<List<T>> GetEntries;
+        public int ItemCount => currentEntries.Count;
         public List<T> currentEntries;
 
-        public int ItemCount => currentEntries.Count;
-
-        public Func<RectTransform, SimpleCell<T>> CreateICell;
+        public Func<List<T>> GetEntries;
         public Action<SimpleCell<T>, int> SetICell;
-
-        public Func<T, string, bool> ShouldFilter;
+        public Func<T, string, bool> ShouldDisplay;
+        public Action<SimpleCell<T>> OnCellClicked;
 
         public string CurrentFilter
         {
@@ -30,15 +29,15 @@ namespace UnityExplorer.UI.Widgets
         private string currentFilter;
 
         public SimpleListSource(ScrollPool infiniteScroller, Func<List<T>> getEntriesMethod, 
-            Func<RectTransform, SimpleCell<T>> createCellMethod, Action<SimpleCell<T>, int> setICellMethod, 
-            Func<T, string, bool> shouldFilterMethod)
+            Action<SimpleCell<T>, int> setICellMethod, Func<T, string, bool> shouldDisplayMethod,
+            Action<SimpleCell<T>> onCellClickedMethod)
         {
             Scroller = infiniteScroller;
 
             GetEntries = getEntriesMethod;
-            CreateICell = createCellMethod;
             SetICell = setICellMethod;
-            ShouldFilter = shouldFilterMethod;
+            ShouldDisplay = shouldDisplayMethod;
+            OnCellClicked = onCellClickedMethod;
         }
 
         public void Init()
@@ -64,7 +63,7 @@ namespace UnityExplorer.UI.Widgets
             {
                 if (!string.IsNullOrEmpty(currentFilter))
                 {
-                    if (!ShouldFilter.Invoke(entry, currentFilter))
+                    if (!ShouldDisplay.Invoke(entry, currentFilter))
                         continue;
 
                     list.Add(entry);
@@ -76,9 +75,13 @@ namespace UnityExplorer.UI.Widgets
             currentEntries = list;
         }
 
-        public ICell CreateCell(RectTransform cellTransform)
+        public ICell CreateCell(RectTransform rect)
         {
-            return CreateICell.Invoke(cellTransform);
+            var button = rect.GetComponentInChildren<Button>();
+            var text = button.GetComponentInChildren<Text>();
+            var cell = new SimpleCell<T>(this, rect.gameObject, button, text);
+            cell.OnClick += OnCellClicked;
+            return cell;
         }
 
         public void SetCell(ICell cell, int index)
