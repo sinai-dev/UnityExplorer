@@ -56,9 +56,9 @@ namespace UnityExplorer.UI.Panels
 
         public void ExpensiveUpdate()
         {
-            Tree.Scroller.ExternallySetting = true;
+            //Tree.Scroller.ExternallySetting = true;
             SceneHandler.Update();
-            Tree.RefreshData(true);
+            //Tree.RefreshData(true);
             // Tree.Scroller.ExternallySetting = false;
         }
 
@@ -144,9 +144,9 @@ namespace UnityExplorer.UI.Panels
             {
                 // height increased, hard refresh required.
                 highestRectHeight = obj.rect.height;
-                Tree.Scroller.ReloadData();
+                //Tree.Scroller.ReloadData();
             }
-            Tree.Scroller.Refresh();
+            Tree.Scroller.RefreshCells(true);
         }
 
         public override void SaveToConfigManager()
@@ -224,20 +224,20 @@ namespace UnityExplorer.UI.Panels
 
             // Transform Tree
 
-            var infiniteScroll = UIFactory.CreateScrollPool<ScrollPool>(content, "TransformTree", out GameObject scrollObj,
+            var infiniteScroll = UIFactory.CreateScrollPool(content, "TransformTree", out GameObject scrollObj,
                 out GameObject scrollContent, new Color(0.15f, 0.15f, 0.15f));
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
             UIFactory.SetLayoutElement(scrollContent, flexibleHeight: 9999);
+
+            // Prototype tree cell
+            var prototype = TransformCell.CreatePrototypeCell(scrollContent);
+            infiniteScroll.PrototypeCell = prototype.GetComponent<RectTransform>();
 
             Tree = new TransformTree(infiniteScroll)
             {
                 GetRootEntriesMethod = GetRootEntries
             };
             Tree.Init();
-
-            // Prototype tree cell
-            var prototype = TransformCell.CreatePrototypeCell(scrollContent);
-            infiniteScroll.PrototypeCell = prototype.GetComponent<RectTransform>();
 
             // some references
             highestRectHeight = mainPanelRect.rect.height;

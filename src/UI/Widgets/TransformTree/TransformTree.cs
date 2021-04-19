@@ -71,7 +71,6 @@ namespace UnityExplorer.UI.Widgets
             yield return null;
 
             RefreshData();
-            Scroller.DataSource = this;
             Scroller.Initialize(this);
         }
 
@@ -103,7 +102,7 @@ namespace UnityExplorer.UI.Widgets
             }
 
             if (andReload)
-                Scroller.Refresh();
+                Scroller.RefreshCells(true);
         }
 
         private void Traverse(Transform transform, CachedTransform parent = null)

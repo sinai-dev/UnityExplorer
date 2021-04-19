@@ -22,7 +22,7 @@ namespace UnityExplorer.UI
 
         // panels
         public static SceneExplorer SceneExplorer { get; private set; }
-        public static GameObjectInspector GOInspector { get; private set; }
+        public static InspectorTest GOInspector { get; private set; }
 
         // bundle assets
         internal static Font ConsoleFont { get; private set; }
@@ -54,7 +54,7 @@ namespace UnityExplorer.UI
             SceneExplorer = new SceneExplorer();
             SceneExplorer.ConstructUI(CanvasRoot);
 
-            GOInspector = new GameObjectInspector();
+            GOInspector = new InspectorTest();
             GOInspector.ConstructUI(CanvasRoot);
 
             //MainMenu.Create();

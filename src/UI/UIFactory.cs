@@ -693,22 +693,8 @@ namespace UnityExplorer.UI
             return dropdownObj;
         }
 
-        public static DynamicScrollPool CreateDynamicScrollPool(GameObject parent, string name, out GameObject uiRoot,
-            out GameObject content, Color? bgColor, bool autoResizeSliderHandle = true)
-        {
-            var pool = CreateScrollPool<DynamicScrollPool>(parent, name, out uiRoot, out content, bgColor, autoResizeSliderHandle);
-
-            SetLayoutGroup<VerticalLayoutGroup>(content, true, false, true, true, 2, 2, 2, 2, 2,
-                TextAnchor.UpperCenter);
-
-            var rect = content.GetComponent<RectTransform>();
-            rect.pivot = new Vector2(0.5f, 1f);
-
-            return pool;
-        }
-
-        public static T CreateScrollPool<T>(GameObject parent, string name, out GameObject uiRoot,
-            out GameObject content, Color? bgColor = null, bool autoResizeSliderHandle = true) where T : IScrollPool
+        public static ScrollPool CreateScrollPool(GameObject parent, string name, out GameObject uiRoot,
+            out GameObject content, Color? bgColor = null, bool autoResizeSliderHandle = true)
         {
             var mainObj = CreateUIObject(name, parent, new Vector2(1, 1));
             mainObj.AddComponent<Image>().color = bgColor ?? new Color(0.12f, 0.12f, 0.12f);
@@ -753,6 +739,8 @@ namespace UnityExplorer.UI
             slider.direction = Slider.Direction.TopToBottom;
             SetLayoutElement(sliderObj, minWidth: 25, flexibleWidth: 0, flexibleHeight: 9999);
 
+            RuntimeProvider.Instance.SetColorBlock(slider, disabled: new Color(0.1f, 0.1f, 0.1f));
+
             if (autoResizeSliderHandle)
             {
                 slider.handleRect.offsetMin = new Vector2(slider.handleRect.offsetMin.x, 0);
@@ -767,8 +755,18 @@ namespace UnityExplorer.UI
 
             uiRoot = mainObj;
 
-            var scrollPool = (T)Activator.CreateInstance(typeof(T), new object[] { scrollRect });
-            scrollPool.AutoResizeHandleRect = autoResizeSliderHandle;
+            var scrollPool = new ScrollPool(scrollRect)
+            {
+                AutoResizeHandleRect = autoResizeSliderHandle
+            };
+
+            SetLayoutGroup<VerticalLayoutGroup>(content, true, false, true, false, 0, 2, 2, 2, 2,
+                TextAnchor.UpperCenter);
+
+            //viewportObj.GetComponent<Mask>().enabled = false;
+
+            var rect = content.GetComponent<RectTransform>();
+            rect.pivot = new Vector2(0.5f, 1f);
 
             return scrollPool;
         }

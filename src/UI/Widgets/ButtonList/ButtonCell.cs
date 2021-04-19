@@ -7,20 +7,20 @@ using UnityEngine.UI;
 
 namespace UnityExplorer.UI.Widgets
 {
-    public class SimpleCell<T> : ICell
+    public class ButtonCell<T> : ICell
     {
         public bool Enabled => m_enabled;
         private bool m_enabled;
 
-        public Action<SimpleCell<T>> OnClick;
+        public Action<ButtonCell<T>> OnClick;
 
-        public SimpleListSource<T> list;
+        public ButtonListCell<T> list;
 
         public GameObject uiRoot;
         public Text buttonText;
         public Button button;
 
-        public SimpleCell(SimpleListSource<T> list, GameObject uiRoot, Button button, Text text)
+        public ButtonCell(ButtonListCell<T> list, GameObject uiRoot, Button button, Text text)
         {
             this.list = list;
             this.uiRoot = uiRoot;

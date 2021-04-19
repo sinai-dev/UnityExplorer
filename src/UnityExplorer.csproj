@@ -265,24 +265,21 @@
     <Compile Include="UI\Models\UIBehaviourModel.cs" />
     <Compile Include="UI\Models\UIModel.cs" />
     <Compile Include="UI\Models\UIPanel.cs" />
-    <Compile Include="UI\Panels\GameObjectInspector.cs" />
+    <Compile Include="UI\Panels\InspectorTest.cs" />
     <Compile Include="UI\Panels\SceneExplorer.cs" />
     <Compile Include="UI\UIFactory.cs" />
     <Compile Include="UI\UIManager.cs" />
     <Compile Include="UI\Utility\PanelDragger.cs" />
     <Compile Include="UI\Utility\SignatureHighlighter.cs" />
     <Compile Include="UI\Utility\ToStringUtility.cs" />
-    <Compile Include="UI\Widgets\ScrollPool\Dynamic\IDynamicCell.cs" />
     <Compile Include="UI\Widgets\ScrollPool\ICell.cs" />
-    <Compile Include="UI\Widgets\ScrollPool\Dynamic\IDynamicDataSource.cs" />
     <Compile Include="UI\Widgets\ScrollPool\IPoolDataSource.cs" />
-    <Compile Include="UI\Widgets\ScrollPool\IScrollPool.cs" />
+    <Compile Include="UI\Widgets\ScrollPool\ScrollPoolBak.cs" />
     <Compile Include="UI\Widgets\ScrollPool\ScrollPool.cs" />
-    <Compile Include="UI\Widgets\ScrollPool\Dynamic\DynamicScrollPool.cs" />
     <Compile Include="UI\Widgets\ScrollPool\UIExtensions.cs" />
     <Compile Include="UI\Widgets\InputFieldScroller.cs" />
-    <Compile Include="UI\Widgets\SimpleList\SimpleCell.cs" />
-    <Compile Include="UI\Widgets\SimpleList\SimpleListSource.cs" />
+    <Compile Include="UI\Widgets\ButtonList\ButtonCell.cs" />
+    <Compile Include="UI\Widgets\ButtonList\ButtonListCell.cs" />
     <Compile Include="UI\Widgets\SliderScrollbar.cs" />
     <Compile Include="UI\Widgets\TransformTree\CachedTransform.cs" />
     <Compile Include="UI\Widgets\TransformTree\TransformCell.cs" />
@@ -293,7 +290,9 @@
     <None Include="ILRepack.targets" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="UI\Widgets\ScrollPool\Dynamic\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\ILRepack.Lib.MSBuild.Task.2.0.18.1\build\ILRepack.Lib.MSBuild.Task.targets" Condition="Exists('packages\ILRepack.Lib.MSBuild.Task.2.0.18.1\build\ILRepack.Lib.MSBuild.Task.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

@@ -9,7 +9,7 @@ using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Widgets
 {
-    public class SimpleListSource<T> : IPoolDataSource
+    public class ButtonListCell<T> : IPoolDataSource
     {
         internal ScrollPool Scroller;
 
@@ -17,9 +17,9 @@ namespace UnityExplorer.UI.Widgets
         public List<T> currentEntries;
 
         public Func<List<T>> GetEntries;
-        public Action<SimpleCell<T>, int> SetICell;
+        public Action<ButtonCell<T>, int> SetICell;
         public Func<T, string, bool> ShouldDisplay;
-        public Action<SimpleCell<T>> OnCellClicked;
+        public Action<ButtonCell<T>> OnCellClicked;
 
         public string CurrentFilter
         {
@@ -28,9 +28,9 @@ namespace UnityExplorer.UI.Widgets
         }
         private string currentFilter;
 
-        public SimpleListSource(ScrollPool infiniteScroller, Func<List<T>> getEntriesMethod, 
-            Action<SimpleCell<T>, int> setICellMethod, Func<T, string, bool> shouldDisplayMethod,
-            Action<SimpleCell<T>> onCellClickedMethod)
+        public ButtonListCell(ScrollPool infiniteScroller, Func<List<T>> getEntriesMethod, 
+            Action<ButtonCell<T>, int> setICellMethod, Func<T, string, bool> shouldDisplayMethod,
+            Action<ButtonCell<T>> onCellClickedMethod)
         {
             Scroller = infiniteScroller;
 
@@ -79,7 +79,7 @@ namespace UnityExplorer.UI.Widgets
         {
             var button = rect.GetComponentInChildren<Button>();
             var text = button.GetComponentInChildren<Text>();
-            var cell = new SimpleCell<T>(this, rect.gameObject, button, text);
+            var cell = new ButtonCell<T>(this, rect.gameObject, button, text);
             cell.OnClick += OnCellClicked;
             return cell;
         }
@@ -91,7 +91,7 @@ namespace UnityExplorer.UI.Widgets
             else
             {
                 cell.Enable();
-                SetICell.Invoke((SimpleCell<T>)cell, index);
+                SetICell.Invoke((ButtonCell<T>)cell, index);
             }
         }
     }
