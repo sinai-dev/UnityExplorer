@@ -9,7 +9,7 @@ using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Widgets
 {
-    public class ButtonListCell<T> : IPoolDataSource
+    public class ButtonListSource<T> : IPoolDataSource
     {
         internal ScrollPool Scroller;
 
@@ -28,7 +28,7 @@ namespace UnityExplorer.UI.Widgets
         }
         private string currentFilter;
 
-        public ButtonListCell(ScrollPool infiniteScroller, Func<List<T>> getEntriesMethod, 
+        public ButtonListSource(ScrollPool infiniteScroller, Func<List<T>> getEntriesMethod, 
             Action<ButtonCell<T>, int> setICellMethod, Func<T, string, bool> shouldDisplayMethod,
             Action<ButtonCell<T>> onCellClickedMethod)
         {

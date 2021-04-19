@@ -47,7 +47,7 @@ namespace UnityExplorer.UI.Widgets
                 if (index >= heightCache.Count)
                 {
                     while (index > heightCache.Count)
-                        heightCache.Add(defaultCellHeight);
+                        Add(defaultCellHeight);
                     Add(value);
                     return;
                 }
@@ -138,7 +138,7 @@ namespace UnityExplorer.UI.Widgets
                 if (TotalCellHeight.Equals(value))
                     return;
                 m_totalCellHeight = value;
-                SetContentHeight();
+                //SetContentHeight();
             }
         }
         private float m_totalCellHeight;
@@ -153,28 +153,27 @@ namespace UnityExplorer.UI.Widgets
         private Vector2 _prevAnchoredPos;
         private Vector2 _prevViewportSize; // TODO track viewport height and rebuild on change
 
-        #region internal set tracking and update
+        #region Internal set tracking and update
 
-        //private bool _recycling;
-
-        public bool ExternallySetting
+        // A sanity check so only one thing is setting the value per frame.
+        public bool WritingLocked
         {
-            get => externallySetting;
+            get => writingLocked;
             internal set
             {
-                if (externallySetting == value)
+                if (writingLocked == value)
                     return;
-                timeOfLastExternalSet = Time.time;
-                externallySetting = value;
+                timeofLastWriteLock = Time.time;
+                writingLocked = value;
             }
         }
-        private bool externallySetting;
-        private float timeOfLastExternalSet;
+        private bool writingLocked;
+        private float timeofLastWriteLock;
 
         public override void Update()
         {
-            if (externallySetting && timeOfLastExternalSet < Time.time)
-                externallySetting = false;
+            if (writingLocked && timeofLastWriteLock < Time.time)
+                writingLocked = false;
         }
         #endregion
        
@@ -214,7 +213,7 @@ namespace UnityExplorer.UI.Widgets
             BuildInitialHeightCache();
             CreateCellPool();
 
-            SetContentHeight();
+            //SetContentHeight();
 
             UpdateSliderPositionAndSize();
 
@@ -239,14 +238,6 @@ namespace UnityExplorer.UI.Widgets
             var extra = (Viewport.rect.height * ExtraPoolCoverageRatio) - Viewport.rect.height;
             extra *= 0.5f;
             RecycleViewBounds = new Vector2(Viewport.MinY() + extra, Viewport.MaxY() - extra);
-        }
-
-        private void SetContentHeight()
-        {
-            var viewRect = scrollRect.viewport;
-            scrollRect.content.sizeDelta = new Vector2(
-                scrollRect.content.sizeDelta.x,
-                AdjustedTotalCellHeight - viewRect.rect.height);
         }
 
         // Refresh methods
@@ -274,8 +265,6 @@ namespace UnityExplorer.UI.Widgets
                 iterated++;
             }
         }
-
-        // TODO this is not quite right, it can move the content, it shouldnt move it
 
         public void RefreshCells(bool andReloadFromDataSource = false)
         {
@@ -310,7 +299,6 @@ namespace UnityExplorer.UI.Widgets
             }
 
             SetRecycleViewBounds();
-            SetContentHeight();
 
             if (andReloadFromDataSource)
             {
@@ -318,7 +306,6 @@ namespace UnityExplorer.UI.Widgets
                 RecycleTopToBottom();
             }
 
-            SetContentHeight();
             UpdateSliderPositionAndSize();
 
             if (jumpToBottom)
@@ -335,49 +322,14 @@ namespace UnityExplorer.UI.Widgets
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
 
-            // ExplorerCore.Log("Set cell, real height is " + cachedCell.Rect.rect.height + ", pref height is " + cachedCell.Rect.GetComponent<LayoutElement>().preferredHeight);
-
             cachedCell.Height = cachedCell.Cell.Enabled ? cachedCell.Rect.rect.height : 0f;
             DataHeightCache[dataIndex] = cachedCell.Height;
-            //ExplorerCore.Log("set to cache as " + cachedCell.Height);
         }
-
-        //private void UpdateDisplayedHeightCache()
-        //{
-        //    if (!CellPool.Any()) return;
-
-        //    var enumerator = GetPoolEnumerator();
-        //    while (enumerator.MoveNext())
-        //    {
-        //        var curr = enumerator.Current;
-        //        var cell = CellPool[curr.cellIndex];
-        //        cell.Height = cell.Rect.rect.height;
-        //        DataHeightCache[curr.dataIndex] = cell.Height;
-        //    }
-
-        //    //int cellIdx = topPoolCellIndex;
-        //    //int dataIndex = topDataIndex;
-        //    //int iterated = 0;
-        //    //while (iterated < CellPool.Count)
-        //    //{
-        //    //    var cell = CellPool[cellIdx];
-        //    //    cellIdx++;
-        //    //    if (cellIdx >= CellPool.Count)
-        //    //        cellIdx = 0;
-        //    //
-        //    //    cell.Height = cell.Rect.rect.height;
-        //    //    DataHeightCache[dataIndex] = cell.Height;
-        //    //
-        //    //    dataIndex++;
-        //    //    iterated++;
-        //    //}
-        //}
 
         // Cell pool
 
         private void CreateCellPool()
         {
-            //Reseting Pool
             if (CellPool.Any())
             {
                 foreach (var cell in CellPool)
@@ -386,10 +338,7 @@ namespace UnityExplorer.UI.Widgets
             }
 
             if (!PrototypeCell)
-            {
-                ExplorerCore.Log("no prototype cell, cannot initialize");
-                return;
-            }
+                throw new Exception("No prototype cell set, cannot initialize");
 
             //Set the prototype cell active and set cell anchor as top 
             PrototypeCell.gameObject.SetActive(true);
@@ -398,7 +347,6 @@ namespace UnityExplorer.UI.Widgets
             float requiredCoverage = scrollRect.viewport.rect.height * ExtraPoolCoverageRatio;
 
             topPoolCellIndex = 0;
-            //topDataIndex = 0;
             bottomPoolIndex = -1;
 
             // create cells until the Pool area is covered.
@@ -414,13 +362,14 @@ namespace UnityExplorer.UI.Widgets
                 CellPool.Add(new CachedCell(this, rect, cell));
                 rect.SetParent(scrollRect.content, false);
 
+                cell.Disable();
+
                 currentPoolCoverage += rect.rect.height + this.contentLayout.spacing;
             }
 
             bottomDataIndex = bottomPoolIndex;
 
             // after creating pool, set displayed cells.
-            //posY = 0f;
             for (int i = 0; i < CellPool.Count; i++)
             {
                 var cell = CellPool[i];
@@ -436,7 +385,7 @@ namespace UnityExplorer.UI.Widgets
 
         private void OnValueChangedListener(Vector2 val)
         {
-            if (ExternallySetting)
+            if (WritingLocked)
                 return;
 
             SetRecycleViewBounds();
@@ -468,23 +417,20 @@ namespace UnityExplorer.UI.Widgets
         }
 
         private bool ShouldRecycleTop => GetCellExtent(CellPool[topPoolCellIndex]) >= RecycleViewBounds.x
-                                         //&& CellPool[topMostCellIndex].Rect.position.y >= Viewport.MinY()
                                          && CellPool[bottomPoolIndex].Rect.position.y > RecycleViewBounds.y;
 
         private bool ShouldRecycleBottom => GetCellExtent(CellPool[bottomPoolIndex]) < RecycleViewBounds.y
-                                         //&& CellPool[bottomMostCellIndex].Rect.position.y < Viewport.MaxY()
                                          && CellPool[topPoolCellIndex].Rect.position.y < RecycleViewBounds.x;
 
         private float GetCellExtent(CachedCell cell) => cell.Rect.MaxY() - contentLayout.spacing;
 
         private float RecycleTopToBottom()
         {
-            ExternallySetting = true;
+            WritingLocked = true;
 
             float recycledheight = 0f;
 
             while (ShouldRecycleTop && CurrentDataCount < DataSource.ItemCount)
-            //while (GetCellExtent(CellPool[topMostCellIndex]) > Viewport.MinY() && CurrentDataCount < DataSource.ItemCount)
             {
                 var cell = CellPool[topPoolCellIndex];
 
@@ -500,7 +446,6 @@ namespace UnityExplorer.UI.Widgets
                 SetCell(cell, CurrentDataCount);
 
                 //set new indices
-                //topDataIndex++;
                 bottomDataIndex++;
 
                 bottomPoolIndex = topPoolCellIndex;
@@ -512,11 +457,9 @@ namespace UnityExplorer.UI.Widgets
 
         private float RecycleBottomToTop()
         {
-            ExternallySetting = true;
+            WritingLocked = true;
 
             float recycledheight = 0f;
-
-            // works, except when moving+resizing a cell at the top, that seems to cause issues, need to fix that.
 
             while (ShouldRecycleBottom && CurrentDataCount > CellPool.Count)
             {
@@ -531,7 +474,6 @@ namespace UnityExplorer.UI.Widgets
                 recycledheight += prevHeight + contentLayout.spacing;
 
                 //set new index
-                //topDataIndex--;
                 bottomDataIndex--;
 
                 //set Cell
@@ -542,7 +484,6 @@ namespace UnityExplorer.UI.Widgets
                 var diff = newHeight - prevHeight;
                 if (diff != 0.0f)
                 {
-                    SetContentHeight();
                     Content.anchoredPosition += Vector2.up * diff;
                     recycledheight += diff;
                 }
@@ -601,9 +542,9 @@ namespace UnityExplorer.UI.Widgets
 
         private void OnSliderValueChanged(float val)
         {
-            if (this.ExternallySetting)
+            if (this.WritingLocked)
                 return;
-            this.ExternallySetting = true;
+            this.WritingLocked = true;
 
             // TODO this cant work until we have a cache of all data heights.
             // will need to maintain that as we go and assume default height for indeterminate cells.

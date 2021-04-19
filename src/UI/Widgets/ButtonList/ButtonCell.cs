@@ -14,13 +14,13 @@ namespace UnityExplorer.UI.Widgets
 
         public Action<ButtonCell<T>> OnClick;
 
-        public ButtonListCell<T> list;
+        public ButtonListSource<T> list;
 
         public GameObject uiRoot;
         public Text buttonText;
         public Button button;
 
-        public ButtonCell(ButtonListCell<T> list, GameObject uiRoot, Button button, Text text)
+        public ButtonCell(ButtonListSource<T> list, GameObject uiRoot, Button button, Text text)
         {
             this.list = list;
             this.uiRoot = uiRoot;

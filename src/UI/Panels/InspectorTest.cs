@@ -53,19 +53,19 @@ namespace UnityExplorer.UI.Panels
                 //scrollPool.ReloadData();
             }
 
-            //scrollPool.Refresh();
+            scrollPool.RefreshCells(true);
         }
 
         public override void SetDefaultPosAndAnchors()
         {
-            mainPanelRect.localPosition = Vector2.zero;
-            mainPanelRect.anchorMin = new Vector2(1, 0);
-            mainPanelRect.anchorMax = new Vector2(1, 1);
-            mainPanelRect.sizeDelta = new Vector2(-300f, mainPanelRect.sizeDelta.y);
-            mainPanelRect.anchoredPosition = new Vector2(-200, 0);
+            mainPanelRect.localPosition = Vector2.zero; 
+            mainPanelRect.pivot = new Vector2(0.5f, 0.5f);
+            mainPanelRect.anchorMin = new Vector2(0.5f, 0);
+            mainPanelRect.anchorMax = new Vector2(0.5f, 1);
             mainPanelRect.offsetMin = new Vector2(mainPanelRect.offsetMin.x, 100);  // bottom
             mainPanelRect.offsetMax = new Vector2(mainPanelRect.offsetMax.x, -50); // top
-            mainPanelRect.pivot = new Vector2(0.5f, 0.5f);
+            mainPanelRect.sizeDelta = new Vector2(700f, mainPanelRect.sizeDelta.y);
+            mainPanelRect.anchoredPosition = new Vector2(-150, 0);
         }
 
         private ScrollPool scrollPool;
@@ -83,14 +83,14 @@ namespace UnityExplorer.UI.Panels
             var test = new DynamicListTest(scrollPool, this);
             test.Init();
 
-            var prototype = DynamicCellTest.CreatePrototypeCell(scrollContent);
+            var prototype = DynamicCell.CreatePrototypeCell(scrollContent);
             scrollPool.PrototypeCell = prototype.GetComponent<RectTransform>();
 
             dummyContentHolder = new GameObject("DummyHolder");
             dummyContentHolder.SetActive(false);
 
             GameObject.DontDestroyOnLoad(dummyContentHolder);
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 100; i++)
             {
                 dummyContents.Add(CreateDummyContent());
             }
@@ -104,15 +104,25 @@ namespace UnityExplorer.UI.Panels
         private GameObject CreateDummyContent()
         {
             var obj = UIFactory.CreateVerticalGroup(dummyContentHolder, "Content", true, true, true, true, 2, new Vector4(2, 2, 2, 2));
-            UIFactory.SetLayoutElement(obj, minHeight: 25, flexibleHeight: 9999);
+            //UIFactory.SetLayoutElement(obj, minHeight: 25, flexibleHeight: 9999);
+            obj.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             var label = UIFactory.CreateLabel(obj, "label", "Dummy " + dummyContents.Count, TextAnchor.MiddleCenter);
             UIFactory.SetLayoutElement(label.gameObject, minHeight: 25, flexibleHeight: 0);
 
-            var inputObj = UIFactory.CreateInputField(obj, "input", "...", out InputField inputField);
-            inputField.lineType = InputField.LineType.MultiLineNewline;
+            //var input = UIFactory.CreateSrollInputField(obj, "input2", "...", out InputFieldScroller inputScroller);
+            //UIFactory.SetLayoutElement(input, minHeight: 50, flexibleHeight: 9999);
+            //input.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            var inputObj = UIFactory.CreateInputField(obj, "input", "...", out var inputField);
             UIFactory.SetLayoutElement(inputObj, minHeight: 25, flexibleHeight: 9999);
-            //inputObj.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            inputObj.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            inputField.lineType = InputField.LineType.MultiLineNewline;
+
+            int numLines = UnityEngine.Random.Range(0, 10);
+            inputField.text = "This field has " + numLines + " lines";
+            for (int i = 0; i < numLines; i++)
+                inputField.text += "\r\n";
 
             return obj;
         }
@@ -138,7 +148,7 @@ namespace UnityExplorer.UI.Panels
             Scroller.Initialize(this);
         }
 
-        public ICell CreateCell(RectTransform cellTransform) => new DynamicCellTest(cellTransform.gameObject);
+        public ICell CreateCell(RectTransform cellTransform) => new DynamicCell(cellTransform.gameObject);
 
         public void SetCell(ICell icell, int index)
         {
@@ -148,58 +158,16 @@ namespace UnityExplorer.UI.Panels
                 return;
             }
 
-            var root = (icell as DynamicCellTest).uiRoot;
+            var root = (icell as DynamicCell).uiRoot;
+            var content = Inspector.dummyContents[index];
+
+            if (content.transform.parent.ReferenceEqual(root.transform))
+                return;
 
             if (root.transform.Find("Content") is Transform existing)
-            {
-                ExplorerCore.Log("removing existing content");
                 existing.transform.SetParent(Inspector.dummyContentHolder.transform, false);
-            }
 
-            var content = Inspector.dummyContents[index];
             content.transform.SetParent(root.transform, false);
-        }
-    }
-
-    public class DynamicCellTest : ICell
-    {
-        public DynamicCellTest(GameObject uiRoot)
-        {
-            this.uiRoot = uiRoot;
-        }
-
-        public bool Enabled => m_enabled;
-        private bool m_enabled;
-
-        public GameObject uiRoot;
-        public InputField input;
-
-        public void Disable()
-        {
-            m_enabled = false;
-            uiRoot.SetActive(false);
-        }
-
-        public void Enable()
-        {
-            m_enabled = true;
-            uiRoot.SetActive(true);
-        }
-
-        public static GameObject CreatePrototypeCell(GameObject parent)
-        {
-            var prototype = UIFactory.CreateVerticalGroup(parent, "PrototypeCell", true, true, true, true, 2, default,
-                new Color(0.15f, 0.15f, 0.15f), TextAnchor.MiddleCenter);
-            var rect = prototype.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0, 1);
-            rect.anchorMax = new Vector2(0, 1);
-            rect.pivot = new Vector2(0.5f, 1);
-            rect.sizeDelta = new Vector2(25, 25);
-            UIFactory.SetLayoutElement(prototype, minWidth: 100, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 9999);
-
-            prototype.SetActive(false);
-
-            return prototype;
         }
     }
 }

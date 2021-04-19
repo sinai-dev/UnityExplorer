@@ -461,7 +461,7 @@ namespace UnityExplorer.UI
 
             var mainObj = CreateScrollView(parent, "InputFieldScrollView", out GameObject scrollContent, out SliderScrollbar scroller, color);
 
-            var inputObj = CreateInputField(scrollContent, name, placeHolderText ?? "...", out InputField inputField, fontSize, 0);
+            CreateInputField(scrollContent, name, placeHolderText ?? "...", out InputField inputField, fontSize, 0);
 
             inputField.lineType = InputField.LineType.MultiLineNewline;
             inputField.targetGraphic.color = color;
@@ -469,6 +469,31 @@ namespace UnityExplorer.UI
             inputScroll = new InputFieldScroller(scroller, inputField);
 
             return mainObj;
+        }
+
+        // Little helper class to force rebuild of an input field's layout on value change.
+        // This is limited to once per frame per input field, so its not too expensive.
+        private class InputFieldRefresher
+        {
+            private float timeOfLastRebuild;
+            private readonly RectTransform rectTransform;
+
+            public InputFieldRefresher(InputField inputField)
+            {
+                if (!inputField)
+                    return;
+
+                rectTransform = inputField.GetComponent<RectTransform>();
+
+                inputField.onValueChanged.AddListener((string val) =>
+                {
+                    if (Time.time > timeOfLastRebuild)
+                    {
+                        timeOfLastRebuild = Time.time;
+                        LayoutRebuilder.ForceRebuildLayoutImmediate(rectTransform);
+                    }
+                });
+            }
         }
 
         /// <summary>
@@ -545,6 +570,8 @@ namespace UnityExplorer.UI
             SetLayoutElement(inputTextObj, minWidth: 500, flexibleWidth: 5000);
 
             inputField.textComponent = inputText;
+
+            new InputFieldRefresher(inputField);
 
             return mainObj;
         }
@@ -715,20 +742,25 @@ namespace UnityExplorer.UI
             var contentRect = content.GetComponent<RectTransform>();
             contentRect.anchorMin = Vector2.zero;
             contentRect.anchorMax = Vector2.one;
-            contentRect.pivot = new Vector2(0.0f, 1.0f);
+            contentRect.pivot = new Vector2(0.5f, 1f);
             contentRect.sizeDelta = new Vector2(0f, 0f);
             contentRect.offsetMax = new Vector2(0f, 0f);
+
+            SetLayoutGroup<VerticalLayoutGroup>(content, true, false, true, true, 0, 2, 2, 2, 2, TextAnchor.UpperCenter);
+
+            content.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             var scrollRect = mainObj.AddComponent<ScrollRect>();
             scrollRect.movementType = ScrollRect.MovementType.Clamped;
             scrollRect.inertia = false;
-            //scrollRect.decelerationRate = 0.135f;
             scrollRect.scrollSensitivity = 15;
             scrollRect.horizontal = false;
             scrollRect.vertical = true;
 
             scrollRect.viewport = viewportRect;
             scrollRect.content = contentRect;
+
+            // Slider
 
             var sliderContainer = CreateVerticalGroup(mainObj, "SliderContainer",
                 false, false, true, true, 0, default, new Color(0.05f, 0.05f, 0.05f));
@@ -753,6 +785,8 @@ namespace UnityExplorer.UI
                 container.pivot = new Vector3(0.5f, 0.5f);
             }
 
+            // finalize and create ScrollPool
+
             uiRoot = mainObj;
 
             var scrollPool = new ScrollPool(scrollRect)
@@ -760,13 +794,7 @@ namespace UnityExplorer.UI
                 AutoResizeHandleRect = autoResizeSliderHandle
             };
 
-            SetLayoutGroup<VerticalLayoutGroup>(content, true, false, true, false, 0, 2, 2, 2, 2,
-                TextAnchor.UpperCenter);
-
             //viewportObj.GetComponent<Mask>().enabled = false;
-
-            var rect = content.GetComponent<RectTransform>();
-            rect.pivot = new Vector2(0.5f, 1f);
 
             return scrollPool;
         }
