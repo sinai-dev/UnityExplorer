@@ -10,30 +10,54 @@ using UnityExplorer.UI.Models;
 namespace UnityExplorer.UI.Widgets
 {
     /// <summary>
-    /// A ScrollRect for a list of content with cells that vary in height, using VerticalLayoutGroup and LayoutElement.
+    /// An object-pooled ScrollRect, attempts to support content of any size and provide a scrollbar for it.
     /// </summary>
     public class ScrollPool : UIBehaviourModel
     {
-        // a fancy list to track our total data height
-        public class HeightCache
+        // Some helper classes to make managing the complex parts of this a bit easier.
+
+        public class CachedHeight
         {
-            private readonly List<float> heightCache = new List<float>();
+            public int dataIndex;
+            public float height, startPosition;
+
+            public static implicit operator float(CachedHeight ch) => ch.height;
+        }
+
+        public class DataHeightManager
+        {
+            private readonly List<CachedHeight> heightCache = new List<CachedHeight>();
+
+            public int Count => heightCache.Count;
 
             public float TotalHeight => totalHeight;
             private float totalHeight;
 
-            private static readonly float defaultCellHeight = 25f;
+            public float DefaultHeight => 25f;
 
-            public float this[int index]
+            // for efficient lookup of "which index is at this range"
+            // list index: DefaultHeight * index from top of data
+            // list value: the data index at this position
+            private readonly List<int> rangeToDataIndexCache = new List<int>();
+
+            public CachedHeight this[int index]
             {
                 get => heightCache[index];
-                set => OnSetIndex(index, value);
+                set => SetIndex(index, value);
             }
+
+            private float currentEndPosition;
 
             public void Add(float value)
             {
-                heightCache.Add(0f);
-                OnSetIndex(heightCache.Count - 1, value);
+                heightCache.Add(new CachedHeight()
+                {
+                    height = 0f,
+                    startPosition = currentEndPosition
+                });
+
+                currentEndPosition += value;
+                SetIndex(heightCache.Count - 1, value);
             }
 
             public void Clear()
@@ -42,46 +66,100 @@ namespace UnityExplorer.UI.Widgets
                 totalHeight = 0f;
             }
 
-            private void OnSetIndex(int index, float value)
+            public void SetIndex(int dataIndex, float value)
             {
-                if (index >= heightCache.Count)
+                if (dataIndex >= heightCache.Count)
                 {
-                    while (index > heightCache.Count)
-                        Add(defaultCellHeight);
+                    while (dataIndex > heightCache.Count)
+                        Add(DefaultHeight);
                     Add(value);
                     return;
                 }
 
-                var curr = heightCache[index];
+                var curr = heightCache[dataIndex];
                 if (curr.Equals(value))
                     return;
+
                 var diff = value - curr;
                 totalHeight += diff;
-                heightCache[index] = value;
+
+                var cache = heightCache[dataIndex];
+                cache.height = value;
+
+                if (dataIndex > 0)
+                {
+                    var prev = heightCache[dataIndex - 1];
+                    cache.startPosition = prev.startPosition + prev.height;
+                }
+
+                if (heightCache.Count > dataIndex + 1)
+                    heightCache[dataIndex + 1].startPosition += diff;
+
+                // Update the range cache
+
+                // If we are setting an index outside of our cached range we need to naively fill the gap
+                int rangeIndex = (int)Math.Floor((decimal)cache.startPosition / (decimal)DefaultHeight);
+                if (rangeToDataIndexCache.Count <= rangeIndex)
+                {
+                    if (!rangeToDataIndexCache.Any())
+                        rangeToDataIndexCache.Add(dataIndex);
+                    else
+                    {
+                        int lastCurrIndex = rangeToDataIndexCache[rangeToDataIndexCache.Count - 1];
+                        while (rangeToDataIndexCache.Count <= rangeIndex)
+                        {
+                            rangeToDataIndexCache.Add(lastCurrIndex);
+                            if (lastCurrIndex < dataIndex - 1)
+                                lastCurrIndex++;
+                        }
+                    }
+                }
+
+                // set the starting 'index' of the cell
+                rangeToDataIndexCache[rangeIndex] = dataIndex;
+
+                // if the cell spreads over multiple range indices, then set those too.
+                int spread = (int)Math.Floor((decimal)value / (decimal)25f);
+                if (spread > 1)
+                {
+                    for (int i = rangeIndex + 1; i < rangeIndex + spread - 1; i++)
+                    {
+                        if (i > rangeToDataIndexCache.Count)
+                            rangeToDataIndexCache.Add(dataIndex);
+                        else
+                            rangeToDataIndexCache[i] = dataIndex;
+                    }
+                }
+            }
+
+            public int GetDataIndexAtStartPosition(float desiredHeight)
+                => GetDataIndexAtStartPosition(desiredHeight, out _);
+
+            public int GetDataIndexAtStartPosition(float desiredHeight, out CachedHeight cache)
+            {
+                cache = null;
+
+                //desiredHeight = Math.Max(0, desiredHeight);
+                //desiredHeight = Math.Min(TotalHeight, desiredHeight);
+
+                int rangeIndex = (int)Math.Floor((decimal)desiredHeight / (decimal)DefaultHeight);
+
+                if (rangeToDataIndexCache.Count <= rangeIndex)
+                    return -1;
+
+                int dataIndex = rangeToDataIndexCache[rangeIndex];
+                cache = heightCache[dataIndex];
+
+                return dataIndex;
             }
         }
 
         // internal class used to track and manage cell views
         public class CachedCell
         {
-            public ScrollPool Pool { get; }  // reference to this scrollpool
-            public RectTransform Rect { get; }      // the Rect (actual UI object)
-            public ICell Cell { get; }       // the ICell (to interface with DataSource)
-
-            // used to automatically manage the Pool's TotalCellHeight
-            public float Height
-            {
-                get => m_height;
-                set
-                {
-                    if (value.Equals(m_height))
-                        return;
-                    var diff = value - m_height;
-                    Pool.TotalCellHeight += diff;
-                    m_height = value;
-                }
-            }
-            private float m_height;
+            public ScrollPool Pool { get; }
+            public RectTransform Rect { get; }
+            public ICell Cell { get; }
 
             public CachedCell(ScrollPool pool, RectTransform rect, ICell cell)
             {
@@ -96,12 +174,10 @@ namespace UnityExplorer.UI.Widgets
             this.scrollRect = scrollRect;
         }
 
-        public bool AutoResizeHandleRect { get; set; }
         public float ExtraPoolCoverageRatio = 1.3f;
 
         public IPoolDataSource DataSource;
         public RectTransform PrototypeCell;
-        private float DefaultCellHeight => PrototypeCell?.rect.height ?? 25f;
 
         // UI
 
@@ -119,7 +195,7 @@ namespace UnityExplorer.UI.Widgets
         /// <summary>Extra clearance height relative to Viewport height, based on <see cref="ExtraPoolCoverageRatio"/>.</summary>
         private Vector2 RecycleViewBounds;
 
-        private readonly HeightCache DataHeightCache = new HeightCache();
+        private DataHeightManager HeightCache;
 
         /// <summary>
         /// The first and last pooled indices relative to the DataSource's list
@@ -186,6 +262,7 @@ namespace UnityExplorer.UI.Widgets
 
         public void Initialize(IPoolDataSource dataSource)
         {
+            HeightCache = new DataHeightManager();
             DataSource = dataSource;
 
             this.contentLayout = scrollRect.content.GetComponent<VerticalLayoutGroup>();
@@ -210,27 +287,14 @@ namespace UnityExplorer.UI.Widgets
 
             SetRecycleViewBounds();
 
-            BuildInitialHeightCache();
+            ExplorerCore.Log("Creating cell pool");
+            float start = Time.realtimeSinceStartup;
             CreateCellPool();
 
-            //SetContentHeight();
-
-            UpdateSliderPositionAndSize();
+            SetSliderPositionAndSize();
+            ExplorerCore.Log("Done");
 
             scrollRect.onValueChanged.AddListener(OnValueChangedListener);
-        }
-
-        private void BuildInitialHeightCache()
-        {
-            DataHeightCache.Clear();
-            float defaultHeight = DefaultCellHeight;
-            for (int i = 0; i < DataSource.ItemCount; i++)
-            {
-                if (i < CellPool.Count)
-                    DataHeightCache.Add(CellPool[i].Height);
-                else
-                    DataHeightCache.Add(defaultHeight);
-            }
         }
 
         private void SetRecycleViewBounds()
@@ -266,11 +330,13 @@ namespace UnityExplorer.UI.Widgets
             }
         }
 
-        public void RefreshCells(bool andReloadFromDataSource = false)
+        public void RefreshCells(bool andReloadFromDataSource = false, bool setSlider = true)
         {
             if (!CellPool.Any()) return;
 
             SetRecycleViewBounds();
+
+            LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
 
             bool jumpToBottom = false;
             if (andReloadFromDataSource)
@@ -281,8 +347,11 @@ namespace UnityExplorer.UI.Widgets
                     bottomDataIndex = Math.Max(count - 1, CellPool.Count - 1);
                     jumpToBottom = true;
                 }
+                else if (HeightCache.Count < count)
+                    HeightCache.SetIndex(count - 1, PrototypeCell?.rect.height ?? 25f);
             }
 
+            // update date height cache, and set cells if 'andReload'
             var enumerator = GetPoolEnumerator();
             while (enumerator.MoveNext())
             {
@@ -292,21 +361,21 @@ namespace UnityExplorer.UI.Widgets
                 if (andReloadFromDataSource)
                     SetCell(cell, curr.dataIndex);
                 else
-                {
-                    cell.Height = cell.Rect.rect.height;
-                    DataHeightCache[curr.dataIndex] = cell.Height;
-                }
+                    HeightCache.SetIndex(curr.dataIndex, cell.Rect.rect.height);
             }
 
+            LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
             SetRecycleViewBounds();
 
+            // force check recycles
             if (andReloadFromDataSource)
             {
                 RecycleBottomToTop();
                 RecycleTopToBottom();
             }
 
-            UpdateSliderPositionAndSize();
+            if (setSlider)
+                SetSliderPositionAndSize();
 
             if (jumpToBottom)
             {
@@ -320,10 +389,9 @@ namespace UnityExplorer.UI.Widgets
             cachedCell.Cell.Enable();
             DataSource.SetCell(cachedCell.Cell, dataIndex);
 
-            LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(cachedCell.Rect);
 
-            cachedCell.Height = cachedCell.Cell.Enabled ? cachedCell.Rect.rect.height : 0f;
-            DataHeightCache[dataIndex] = cachedCell.Height;
+            HeightCache.SetIndex(dataIndex, cachedCell.Cell.Enabled ? cachedCell.Rect.rect.height : 0f);
         }
 
         // Cell pool
@@ -376,6 +444,8 @@ namespace UnityExplorer.UI.Widgets
                 SetCell(cell, i);
             }
 
+            LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
+
             //Deactivate prototype cell if it is not a prefab(i.e it's present in scene)
             if (PrototypeCell.gameObject.scene.IsValid())
                 PrototypeCell.gameObject.SetActive(false);
@@ -413,7 +483,7 @@ namespace UnityExplorer.UI.Widgets
             LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
             _prevAnchoredPos = scrollRect.content.anchoredPosition;
 
-            UpdateSliderPositionAndSize();
+            SetSliderPositionAndSize();
         }
 
         private bool ShouldRecycleTop => GetCellExtent(CellPool[topPoolCellIndex]) >= RecycleViewBounds.x
@@ -498,47 +568,78 @@ namespace UnityExplorer.UI.Widgets
 
         // Slider 
 
-        private void UpdateSliderPositionAndSize()
+        private void SetSliderPositionAndSize()
         {
-            int total = DataSource.ItemCount;
-            total = Math.Max(total, 1);
+            var dataHeight = HeightCache.TotalHeight;
 
-            // NAIVE TEMP DEBUG - all cells will NOT be the same height!
+            // calculate handle size based on viewport / total data height
+            var viewportHeight = Viewport.rect.height;
+            var handleHeight = viewportHeight * Math.Min(1, viewportHeight / dataHeight);
+            handleHeight = Math.Max(15f, handleHeight);
 
-            var spread = CellPool.Count(it => it.Cell.Enabled);
+            // resize the handle container area for the size of the handle (bigger handle = smaller container)
+            var container = slider.m_HandleContainerRect;
+            container.offsetMax = new Vector2(container.offsetMax.x, -(handleHeight * 0.5f));
+            container.offsetMin = new Vector2(container.offsetMin.x, handleHeight * 0.5f);
 
-            // TODO temp debug
-            bool forceValue = true;
-            if (forceValue)
+            // set handle size
+            slider.handleRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, handleHeight);
+
+            // if slider is 100% height then make it not interactable
+            slider.interactable = !Mathf.Approximately(handleHeight, viewportHeight);
+
+            GetDisplayedCellLimits(out CellInfo? topVisibleCell, out _);
+            if (topVisibleCell != null)
             {
-                if (spread >= total)
-                    slider.value = 0f;
-                else
-                    slider.value = (float)((decimal)TopDataIndex / Math.Max(1, total - CellPool.Count));
+                var topCell = CellPool[topVisibleCell.Value.cellIndex];
+
+                // get the starting height of the top displayed cell
+                float startHeight = contentLayout.padding.top;
+                int dataIndex = topVisibleCell.Value.dataIndex;
+                for (int i = 0; i < dataIndex; i++)
+                    startHeight += HeightCache[i];
+                startHeight += topCell.Rect.MinY() - Viewport.MinY(); // add the amount above the viewport min it is
+
+                // set the value of the slider
+                WritingLocked = true;
+                slider.value = (float)((decimal)startHeight / (decimal)(HeightCache.TotalHeight - Viewport.rect.height));
             }
-
-            if (AutoResizeHandleRect)
+            else
             {
-                var viewportHeight = scrollRect.viewport.rect.height;
-
-                var handleRatio = (decimal)spread / total;
-                var handleHeight = viewportHeight * (float)Math.Min(1, handleRatio);
-
-                handleHeight = Math.Max(handleHeight, 15f);
-
-                // need to resize the handle container area for the size of the handle (bigger handle = smaller container)
-                var container = slider.m_HandleContainerRect;
-                container.offsetMax = new Vector2(container.offsetMax.x, -(handleHeight * 0.5f));
-                container.offsetMin = new Vector2(container.offsetMin.x, handleHeight * 0.5f);
-
-                var handle = slider.handleRect;
-
-                handle.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, handleHeight);
-
-                // if slider is 100% height then make it not interactable.
-                slider.interactable = !Mathf.Approximately(handleHeight, viewportHeight);
+                slider.value = 0f;
             }
         }
+
+        private void GetDisplayedCellLimits(out CellInfo? top, out CellInfo? bottom)
+        {
+            // get the index of the top displayed cell
+            top = null;
+            bottom = null;
+            var enumerator = GetPoolEnumerator();
+            while (enumerator.MoveNext())
+            {
+                var curr = enumerator.Current;
+                var cell = CellPool[curr.cellIndex];
+                // if cell bottom is below viewport top
+                if (cell.Rect.MaxY() < Viewport.MinY())
+                {
+                    // and if this is the top-most displayed cell
+                    if (top == null || CellPool[top.Value.cellIndex].Rect.position.y < cell.Rect.position.y)
+                        top = curr;
+                }
+                // if cell top is above viewport bottom
+                if (cell.Rect.MinY() > Viewport.MaxY())
+                {
+                    // and if this is the bottom-most displayed cell
+                    if (bottom == null || CellPool[bottom.Value.cellIndex].Rect.position.y > cell.Rect.position.y)
+                        bottom = curr;
+                }
+            }
+
+            return;
+        }
+
+        // Mostly works, just little bit jumpy and jittery, needs some refining.
 
         private void OnSliderValueChanged(float val)
         {
@@ -546,16 +647,75 @@ namespace UnityExplorer.UI.Widgets
                 return;
             this.WritingLocked = true;
 
-            // TODO this cant work until we have a cache of all data heights.
-            // will need to maintain that as we go and assume default height for indeterminate cells.
-        }
+            var desiredPosition = val * HeightCache.TotalHeight;
 
-        private void JumpToIndex(int dataIndex)
-        {
-            // TODO this cant work until we have a cache of all data heights.
-            // will need to maintain that as we go and assume default height for indeterminate cells.
-        }
+            // add the top and bottom extra area for recycle bounds
+            var recycleExtra = Viewport.rect.height * ExtraPoolCoverageRatio - Viewport.rect.height;
+            var realMin = Math.Max(0f, desiredPosition - recycleExtra);
+            realMin = Math.Min(realMin, HeightCache.TotalHeight - Viewport.rect.height);
 
+            var realBottomIndex = HeightCache.GetDataIndexAtStartPosition(realMin);
+            if (realBottomIndex == -1)
+                realBottomIndex = DataSource.ItemCount - 1;
+            // calculate which data index should be at bottom of pool
+            bottomDataIndex = realBottomIndex + CellPool.Count - 1;
+            bottomDataIndex = Math.Min(bottomDataIndex, DataSource.ItemCount - 1);
+
+            ExplorerCore.Log("set bottom data index to " + bottomDataIndex);
+            RefreshCells(true, false);
+
+            var realDesiredIndex = HeightCache.GetDataIndexAtStartPosition(desiredPosition);
+
+            GetDisplayedCellLimits(out CellInfo? top, out CellInfo? bottom);
+
+            // TODO this is not quite right, I think this is causing the jittery jumpiness
+
+            // calculate how much we need to move up. use height cache for indices above top displayed, move that much.
+            float move = 0f;
+            if (realDesiredIndex < top.Value.dataIndex)
+            {
+                ExplorerCore.Log("desired cell is above viewport");
+                var enumerator = GetPoolEnumerator();
+                while (enumerator.MoveNext())
+                {
+                    var curr = enumerator.Current;
+                    if (curr.dataIndex == realDesiredIndex)
+                    {
+                        var cell = CellPool[curr.cellIndex];
+                        move = Viewport.MinY() - cell.Rect.MinY();
+                        ExplorerCore.Log("desired index is " + move + " above the viewport min");
+                        break;
+                    }
+                }
+            }
+            else if (realDesiredIndex > bottom.Value.dataIndex)
+            {
+                ExplorerCore.Log("desired cell is below viewport");
+                var enumerator = GetPoolEnumerator();
+                while (enumerator.MoveNext())
+                {
+                    var curr = enumerator.Current;
+                    if (curr.dataIndex == realDesiredIndex)
+                    {
+                        var cell = CellPool[curr.cellIndex];
+                        move = Viewport.MaxY() - cell.Rect.MaxY();
+                        ExplorerCore.Log("desired index is " + move + " below the viewport min");
+                        break;
+                    }
+                }
+            }
+
+            // TODO move should account for desired actual position, otherwise we just snap to cells.
+
+            if (move != 0.0f)
+            {
+                ExplorerCore.Log("Content should move " + move);
+                Content.anchoredPosition += Vector2.up * move;
+                scrollRect.m_PrevPosition += Vector2.up * move;
+            }
+
+            SetSliderPositionAndSize();
+        }
 
         /// <summary>Use <see cref="UIFactory.CreateScrollPool"/></summary>
         public override void ConstructUI(GameObject parent) => throw new NotImplementedException();

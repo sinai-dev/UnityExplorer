@@ -788,11 +788,7 @@ namespace UnityExplorer.UI
             // finalize and create ScrollPool
 
             uiRoot = mainObj;
-
-            var scrollPool = new ScrollPool(scrollRect)
-            {
-                AutoResizeHandleRect = autoResizeSliderHandle
-            };
+            var scrollPool = new ScrollPool(scrollRect);
 
             //viewportObj.GetComponent<Mask>().enabled = false;
 

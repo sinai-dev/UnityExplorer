@@ -40,7 +40,7 @@ namespace UnityExplorer.UI.Widgets
             rect.anchorMin = new Vector2(0, 1);
             rect.anchorMax = new Vector2(0, 1);
             rect.pivot = new Vector2(0.5f, 1);
-            rect.sizeDelta = new Vector2(25, 25);
+            rect.sizeDelta = new Vector2(100, 30);
             //UIFactory.SetLayoutElement(prototype, minWidth: 100, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 9999);
 
             prototype.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;

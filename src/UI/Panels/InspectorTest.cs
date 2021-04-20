@@ -90,10 +90,12 @@ namespace UnityExplorer.UI.Panels
             dummyContentHolder.SetActive(false);
 
             GameObject.DontDestroyOnLoad(dummyContentHolder);
-            for (int i = 0; i < 100; i++)
+            ExplorerCore.Log("Creating dummy objects");
+            for (int i = 0; i < 1000; i++)
             {
                 dummyContents.Add(CreateDummyContent());
             }
+            ExplorerCore.Log("Done");
 
             previousRectHeight = mainPanelRect.rect.height;
         }
@@ -104,17 +106,20 @@ namespace UnityExplorer.UI.Panels
         private GameObject CreateDummyContent()
         {
             var obj = UIFactory.CreateVerticalGroup(dummyContentHolder, "Content", true, true, true, true, 2, new Vector4(2, 2, 2, 2));
-            //UIFactory.SetLayoutElement(obj, minHeight: 25, flexibleHeight: 9999);
             obj.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-            var label = UIFactory.CreateLabel(obj, "label", "Dummy " + dummyContents.Count, TextAnchor.MiddleCenter);
-            UIFactory.SetLayoutElement(label.gameObject, minHeight: 25, flexibleHeight: 0);
+            var horiGroup = UIFactory.CreateHorizontalGroup(obj, "topGroup", true, true, true, true);
+            UIFactory.SetLayoutElement(horiGroup, minHeight: 25, flexibleHeight: 0);
 
-            //var input = UIFactory.CreateSrollInputField(obj, "input2", "...", out InputFieldScroller inputScroller);
-            //UIFactory.SetLayoutElement(input, minHeight: 50, flexibleHeight: 9999);
-            //input.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            var mainLabel = UIFactory.CreateLabel(horiGroup, "label", "Dummy " + dummyContents.Count, TextAnchor.MiddleCenter);
+            UIFactory.SetLayoutElement(mainLabel.gameObject, minHeight: 25, flexibleHeight: 0);
 
-            var inputObj = UIFactory.CreateInputField(obj, "input", "...", out var inputField);
+            var expandButton = UIFactory.CreateButton(horiGroup, "Expand", "V");
+            UIFactory.SetLayoutElement(expandButton.gameObject, minWidth: 25, flexibleWidth: 0);
+
+            var subContent = UIFactory.CreateVerticalGroup(obj, "SubContent", true, true, true, true);
+
+            var inputObj = UIFactory.CreateInputField(subContent, "input", "...", out var inputField);
             UIFactory.SetLayoutElement(inputObj, minHeight: 25, flexibleHeight: 9999);
             inputObj.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             inputField.lineType = InputField.LineType.MultiLineNewline;
@@ -123,6 +128,25 @@ namespace UnityExplorer.UI.Panels
             inputField.text = "This field has " + numLines + " lines";
             for (int i = 0; i < numLines; i++)
                 inputField.text += "\r\n";
+
+            subContent.SetActive(false);
+
+            var btnLabel = expandButton.GetComponentInChildren<Text>();
+            expandButton.onClick.AddListener(OnExpand);
+            void OnExpand()
+            {
+                bool active = !subContent.activeSelf;
+                if (active)
+                {
+                    subContent.SetActive(true);
+                    btnLabel.text = "^";
+                }
+                else
+                {
+                    subContent.SetActive(false);
+                    btnLabel.text = "V";
+                }
+            }
 
             return obj;
         }
