@@ -161,11 +161,10 @@ namespace UnityExplorer.UI.Widgets
                         break;
                     }
 
-                    // we guessed wrong. if diff is > 1 than add it and try again.
-                    // the new min start index will be at least the diff from our index.
-                    int jmp = Math.Max(0, dataIndex - rangeToDataIndexCache[i]);
-                    if (jmp > 1)
-                        i += jmp - 1;
+                    // our index is further down. add the min difference and try again.
+                    // the iterator will add 1 on the next loop so account for that.
+                    int jmp = dataIndex - rangeToDataIndexCache[i] - 1;
+                    i += jmp < 1 ? 0 : jmp;
                 }
 
                 if (rangeStart == -1)
