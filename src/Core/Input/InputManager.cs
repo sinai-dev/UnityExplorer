@@ -28,6 +28,8 @@ namespace UnityExplorer.Core.Input
 
         public static BaseInputModule UIInput => m_inputModule.UIModule;
 
+        public static Vector2 MouseScrollDelta => m_inputModule.MouseScrollDelta;
+
         public static void ActivateUIModule() => m_inputModule.ActivateModule();
 
         public static void AddUIModule()
