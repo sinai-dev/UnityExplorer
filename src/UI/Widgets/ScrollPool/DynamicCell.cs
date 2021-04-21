@@ -34,7 +34,7 @@ namespace UnityExplorer.UI.Widgets
 
         public static GameObject CreatePrototypeCell(GameObject parent)
         {
-            var prototype = UIFactory.CreateVerticalGroup(parent, "PrototypeCell", true, true, true, true, 0, new Vector4(1,1,1,1),
+            var prototype = UIFactory.CreateVerticalGroup(parent, "PrototypeCell", true, true, true, true, 0, new Vector4(1, 0, 0, 0),
                 new Color(0.15f, 0.15f, 0.15f), TextAnchor.MiddleCenter);
             var rect = prototype.GetComponent<RectTransform>();
             rect.anchorMin = new Vector2(0, 1);

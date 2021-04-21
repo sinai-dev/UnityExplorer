@@ -72,13 +72,16 @@ namespace UnityExplorer.UI.Panels
 
         public override void ConstructPanelContent()
         {
-            //UIRoot.GetComponent<Mask>().enabled = false;
-
-            // temp debug
+            // temp test
             scrollPool = UIFactory.CreateScrollPool(content, "Test", out GameObject scrollObj,
                 out GameObject scrollContent, new Color(0.15f, 0.15f, 0.15f));
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
             UIFactory.SetLayoutElement(scrollContent, flexibleHeight: 9999);
+
+            //// disable masks for debug
+            //UIRoot.GetComponent<Mask>().enabled = false;
+            //scrollPool.Viewport.GetComponent<Mask>().enabled = false;
+            //scrollPool.Content.gameObject.AddComponent<Image>().color = new Color(1f, 0f, 1f, 0.3f);
 
             var test = new DynamicListTest(scrollPool, this);
             test.Init();
@@ -91,7 +94,7 @@ namespace UnityExplorer.UI.Panels
 
             GameObject.DontDestroyOnLoad(dummyContentHolder);
             ExplorerCore.Log("Creating dummy objects");
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 100; i++)
             {
                 dummyContents.Add(CreateDummyContent());
             }
