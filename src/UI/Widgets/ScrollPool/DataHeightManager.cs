@@ -113,7 +113,7 @@ namespace UnityExplorer.UI.Widgets
 
             if (diff != 0.0f)
             {
-                ExplorerCore.LogWarning("Height for data index " + dataIndex + " changed by " + diff);
+                // ExplorerCore.LogWarning("Height for data index " + dataIndex + " changed by " + diff);
                 cache.height = value;
             }
 
