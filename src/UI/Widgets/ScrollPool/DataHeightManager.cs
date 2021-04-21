@@ -101,19 +101,14 @@ namespace UnityExplorer.UI.Widgets
                 return;
             }
 
-            var curr = heightCache[dataIndex].height;
-            //if (curr.Equals(value))
-            //    return;
-
-            // ExplorerCore.LogWarning("Updating height for data index " + dataIndex + " to " + value);
             var cache = heightCache[dataIndex];
+            var prevHeight = cache.height;
 
-            var diff = value - curr;
-            totalHeight += diff;
-
+            var diff = value - prevHeight;
             if (diff != 0.0f)
             {
                 // ExplorerCore.LogWarning("Height for data index " + dataIndex + " changed by " + diff);
+                totalHeight += diff;
                 cache.height = value;
             }
 
@@ -153,21 +148,24 @@ namespace UnityExplorer.UI.Widgets
                 int spreadDiff = spread - cache.normalizedSpread;
                 cache.normalizedSpread = spread;
 
-                //ExplorerCore.Log("Spread changed to " + spread);
-
-                // TODO improve this.
-                // this could be expensive with large lists as we need to iterate until we find our data index.
-                // could possibly maintain the 'range start index' of each data index, as long as maintaining that is 
-                // not more expensive than this.
-
                 int rangeStart = -1;
-                for (int i = 0; i < rangeToDataIndexCache.Count; i++)
+
+                // the start will always be at LEAST (no less) PrototypeHeight * index, cells can never be smaller than that.
+                int minStart = rangeToDataIndexCache[dataIndex];
+
+                for (int i = minStart; i < rangeToDataIndexCache.Count; i++)
                 {
                     if (rangeToDataIndexCache[i] == dataIndex)
                     {
                         rangeStart = i;
                         break;
                     }
+
+                    // we guessed wrong. if diff is > 1 than add it and try again.
+                    // the new min start index will be at least the diff from our index.
+                    int jmp = Math.Max(0, dataIndex - rangeToDataIndexCache[i]);
+                    if (jmp > 1)
+                        i += jmp - 1;
                 }
 
                 if (rangeStart == -1)
@@ -175,14 +173,12 @@ namespace UnityExplorer.UI.Widgets
 
                 if (spreadDiff > 0)
                 {
-                    // ExplorerCore.Log("Inserting " + spreadDiff + " at " + rangeStart);
                     // need to insert
                     for (int i = 0; i < spreadDiff; i++)
                         rangeToDataIndexCache.Insert(rangeStart, dataIndex);
                 }
                 else
                 {
-                    // ExplorerCore.Log("Removing " + -spreadDiff + " at " + rangeStart);
                     // need to remove
                     for (int i = 0; i < -spreadDiff; i++)
                         rangeToDataIndexCache.RemoveAt(rangeStart);
