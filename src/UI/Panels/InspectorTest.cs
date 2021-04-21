@@ -168,34 +168,54 @@ namespace UnityExplorer.UI.Panels
 
         public int ItemCount => Inspector.dummyContents.Count;
 
+        public void OnDisableCell(CellViewHolder cell, int dataIndex)
+        {
+            if (cell.UIRoot.transform.Find("Content") is Transform existing)
+                existing.transform.SetParent(Inspector.dummyContentHolder.transform, false);
+        }
+
         public void Init()
         {
-            var prototype = DynamicCell.CreatePrototypeCell(Scroller.UIRoot);
+            var prototype = CellViewHolder.CreatePrototypeCell(Scroller.UIRoot);
 
             Scroller.DataSource = this;
             Scroller.Initialize(this, prototype);
         }
 
-        public ICell CreateCell(RectTransform cellTransform) => new DynamicCell(cellTransform.gameObject);
+        public ICell CreateCell(RectTransform cellTransform) => new CellViewHolder(cellTransform.gameObject);
+
+        public void DisableCell(ICell icell, int index)
+        {
+            var root = (icell as CellViewHolder).UIRoot;
+            DisableContent(root);
+            icell.Disable();
+        }
 
         public void SetCell(ICell icell, int index)
         {
+            var root = (icell as CellViewHolder).UIRoot;
+
             if (index < 0 || index >= ItemCount)
             {
+                DisableContent(root);
                 icell.Disable();
                 return;
             }
 
-            var root = (icell as DynamicCell).uiRoot;
             var content = Inspector.dummyContents[index];
 
             if (content.transform.parent.ReferenceEqual(root.transform))
                 return;
 
-            if (root.transform.Find("Content") is Transform existing)
-                existing.transform.SetParent(Inspector.dummyContentHolder.transform, false);
+            DisableContent(root);
 
             content.transform.SetParent(root.transform, false);
+        }
+
+        private void DisableContent(GameObject cellRoot)
+        {
+            if (cellRoot.transform.Find("Content") is Transform existing)
+                existing.transform.SetParent(Inspector.dummyContentHolder.transform, false);
         }
     }
 }

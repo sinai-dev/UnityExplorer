@@ -17,6 +17,8 @@ namespace UnityExplorer.UI.Widgets
         public ButtonListSource<T> list;
 
         public GameObject uiRoot;
+        private RectTransform m_rect;
+        public RectTransform Rect => m_rect;
         public Text buttonText;
         public Button button;
 
@@ -24,6 +26,7 @@ namespace UnityExplorer.UI.Widgets
         {
             this.list = list;
             this.uiRoot = uiRoot;
+            this.m_rect = uiRoot.GetComponent<RectTransform>();
             this.buttonText = text;
             this.button = button;
 

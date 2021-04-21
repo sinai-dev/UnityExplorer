@@ -11,6 +11,7 @@ namespace UnityExplorer.UI.Widgets
         int ItemCount { get; }
 
         void SetCell(ICell cell, int index);
+        void DisableCell(ICell cell, int index);
 
         ICell CreateCell(RectTransform cellTransform);
     }

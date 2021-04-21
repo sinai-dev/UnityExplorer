@@ -19,6 +19,8 @@ namespace UnityExplorer.UI.Widgets
         public int _cellIndex;
 
         public GameObject uiRoot;
+        public RectTransform Rect => m_rect;
+        private readonly RectTransform m_rect;
 
         public Text nameLabel;
         public Button nameButton;
@@ -32,6 +34,7 @@ namespace UnityExplorer.UI.Widgets
         {
             this.tree = tree;
             this.uiRoot = cellUI;
+            m_rect = uiRoot.GetComponent<RectTransform>();
             this.nameButton = nameButton;
             this.nameLabel = nameButton.GetComponentInChildren<Text>();
             this.expandButton = expandButton;

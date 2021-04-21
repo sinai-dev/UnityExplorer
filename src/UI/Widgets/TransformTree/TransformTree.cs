@@ -76,6 +76,8 @@ namespace UnityExplorer.UI.Widgets
             Scroller.Initialize(this, prototype);
         }
 
+        public void DisableCell(ICell cell, int index) => cell.Disable();
+
         public ICell CreateCell(RectTransform cellTransform)
         {
             var nameButton = cellTransform.Find("NameButton").GetComponent<Button>();

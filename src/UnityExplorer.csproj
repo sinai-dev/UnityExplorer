@@ -273,7 +273,7 @@
     <Compile Include="UI\Utility\SignatureHighlighter.cs" />
     <Compile Include="UI\Utility\ToStringUtility.cs" />
     <Compile Include="UI\Widgets\ScrollPool\DataHeightManager.cs" />
-    <Compile Include="UI\Widgets\ScrollPool\DynamicCell.cs" />
+    <Compile Include="UI\Widgets\ScrollPool\CellViewHolder.cs" />
     <Compile Include="UI\Widgets\ScrollPool\ICell.cs" />
     <Compile Include="UI\Widgets\ScrollPool\IPoolDataSource.cs" />
     <Compile Include="UI\Widgets\ScrollPool\ScrollPool.cs" />

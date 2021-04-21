@@ -128,26 +128,26 @@ namespace UnityExplorer.UI.Panels
             Tree.RefreshData(true);
         }
 
-        private float highestRectHeight;
+        //private float highestRectHeight;
 
-        public override void OnFinishResize(RectTransform panel)
-        {
-            base.OnFinishResize(panel);
-            RuntimeProvider.Instance.StartCoroutine(DelayedRefresh(panel));
-        }
+        //public override void OnFinishResize(RectTransform panel)
+        //{
+        //    base.OnFinishResize(panel);
+        //    RuntimeProvider.Instance.StartCoroutine(DelayedRefresh(panel));
+        //}
 
-        private IEnumerator DelayedRefresh(RectTransform obj)
-        {
-            yield return null;
+        //private IEnumerator DelayedRefresh(RectTransform obj)
+        //{
+        //    yield return null;
 
-            if (obj.rect.height > highestRectHeight)
-            {
-                // height increased, hard refresh required.
-                highestRectHeight = obj.rect.height;
-                //Tree.Scroller.ReloadData();
-            }
-            Tree.Scroller.RefreshCells(true);
-        }
+        //    if (obj.rect.height > highestRectHeight)
+        //    {
+        //        // height increased, hard refresh required.
+        //        highestRectHeight = obj.rect.height;
+        //        //Tree.Scroller.ReloadData();
+        //    }
+        //    Tree.Scroller.RefreshCells(true);
+        //}
 
         public override void SaveToConfigManager()
         {
@@ -192,10 +192,6 @@ namespace UnityExplorer.UI.Panels
             var filterRow = UIFactory.CreateHorizontalGroup(toolbar, "FilterGroup", true, true, true, true, 2, new Vector4(2, 2, 2, 2));
             UIFactory.SetLayoutElement(filterRow, minHeight: 25, flexibleHeight: 0);
 
-            //// filter label
-            //var label = UIFactory.CreateLabel(filterRow, "FilterLabel", "Search:", TextAnchor.MiddleLeft);
-            //UIFactory.SetLayoutElement(label.gameObject, minWidth: 50, flexibleWidth: 0);
-
             //Filter input field
             var inputFieldObj = UIFactory.CreateInputField(filterRow, "FilterInput", "Search...", out InputField inputField, 13);
             inputField.targetGraphic.color = new Color(0.2f, 0.2f, 0.2f);
@@ -224,23 +220,23 @@ namespace UnityExplorer.UI.Panels
 
             // Transform Tree
             
-            //var prototype = TransformCell.CreatePrototypeCell(scrollContent);
-
             var infiniteScroll = UIFactory.CreateScrollPool(content, "TransformTree", out GameObject scrollObj,
                 out GameObject scrollContent, new Color(0.15f, 0.15f, 0.15f));
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
             UIFactory.SetLayoutElement(scrollContent, flexibleHeight: 9999);
 
-            // Prototype tree cell
-            
-            //infiniteScroll.PrototypeCell = prototype.GetComponent<RectTransform>();
-
             Tree = new TransformTree(infiniteScroll) { GetRootEntriesMethod = GetRootEntries };
             Tree.Init();
 
-            // some references
-            highestRectHeight = mainPanelRect.rect.height;
+            // Scene Loader
 
+            ConstructSceneLoader();
+        }
+
+        private const string DEFAULT_LOAD_TEXT = "[Select a scene]";
+
+        private void ConstructSceneLoader()
+        {
             // Scene Loader
             try
             {
@@ -256,7 +252,7 @@ namespace UnityExplorer.UI.Panels
                     var allSceneDropObj = UIFactory.CreateDropdown(sceneLoaderObj, out Dropdown allSceneDrop, "", 14, null);
                     UIFactory.SetLayoutElement(allSceneDropObj, minHeight: 25, minWidth: 150, flexibleWidth: 0, flexibleHeight: 0);
 
-                    allSceneDrop.options.Add(new Dropdown.OptionData("[Select a scene]"));
+                    allSceneDrop.options.Add(new Dropdown.OptionData(DEFAULT_LOAD_TEXT));
 
                     foreach (var scene in SceneHandler.AllSceneNames)
                         allSceneDrop.options.Add(new Dropdown.OptionData(Path.GetFileNameWithoutExtension(scene)));
@@ -277,20 +273,41 @@ namespace UnityExplorer.UI.Panels
                         TryLoadScene(LoadSceneMode.Additive, allSceneDrop);
                     }, new Color(0.1f, 0.3f, 0.3f));
                     UIFactory.SetLayoutElement(loadAdditiveButton.gameObject, minHeight: 25, minWidth: 150);
+
+                    var disabledColor = new Color(0.24f, 0.24f, 0.24f);
+                    RuntimeProvider.Instance.SetColorBlock(loadButton, disabled: disabledColor);
+                    RuntimeProvider.Instance.SetColorBlock(loadAdditiveButton, disabled: disabledColor);
+
+                    loadButton.interactable = false;
+                    loadAdditiveButton.interactable = false;
+
+                    allSceneDrop.onValueChanged.AddListener((int val) => 
+                    {
+                        var text = allSceneDrop.options[val].text;
+                        if (text == DEFAULT_LOAD_TEXT)
+                        {
+                            loadButton.interactable = false;
+                            loadAdditiveButton.interactable = false;
+                        }
+                        else
+                        {
+                            loadButton.interactable = true;
+                            loadAdditiveButton.interactable = true;
+                        }
+                    });
                 }
             }
             catch (Exception ex)
             {
                 ExplorerCore.LogWarning($"Could not create the Scene Loader helper! {ex.ReflectionExToString()}");
             }
-
         }
 
         private void TryLoadScene(LoadSceneMode mode, Dropdown allSceneDrop)
         {
             var text = allSceneDrop.options[allSceneDrop.value].text;
 
-            if (text == "[Select a scene]")
+            if (text == DEFAULT_LOAD_TEXT)
                 return;
 
             try
