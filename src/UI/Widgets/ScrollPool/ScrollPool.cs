@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityExplorer.Core.Input;
 using UnityExplorer.UI.Models;
 
 namespace UnityExplorer.UI.Widgets
@@ -350,6 +351,9 @@ namespace UnityExplorer.UI.Widgets
             if (WritingLocked)
                 return;
 
+            if (InputManager.MouseScrollDelta != Vector2.zero)
+                ScrollRect.StopMovement();
+
             if (!SetRecycleViewBounds(true))
                 RefreshCells();
 
@@ -505,6 +509,8 @@ namespace UnityExplorer.UI.Widgets
             if (this.WritingLocked)
                 return;
             this.WritingLocked = true;
+
+            ScrollRect.StopMovement();
 
             // normalize the scroll position for the scroll bounds.
             // this translates the value into saying "point at the center of the height of the viewport"
