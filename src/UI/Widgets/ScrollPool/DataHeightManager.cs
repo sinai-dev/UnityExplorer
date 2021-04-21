@@ -168,7 +168,7 @@ namespace UnityExplorer.UI.Widgets
                 }
 
                 if (rangeStart == -1)
-                    throw new Exception($"Couldn't find range start index, rangeStart is -1.");
+                    rangeStart = rangeToDataIndexCache.Count - 1;
 
                 if (spreadDiff > 0)
                 {
