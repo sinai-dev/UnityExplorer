@@ -12,6 +12,7 @@ namespace UnityExplorer.UI.Widgets
         public DynamicCell(GameObject uiRoot)
         {
             this.uiRoot = uiRoot;
+            m_enabled = uiRoot.activeSelf;
         }
 
         public bool Enabled => m_enabled;
@@ -32,7 +33,7 @@ namespace UnityExplorer.UI.Widgets
             uiRoot.SetActive(true);
         }
 
-        public static GameObject CreatePrototypeCell(GameObject parent)
+        public static RectTransform CreatePrototypeCell(GameObject parent)
         {
             var prototype = UIFactory.CreateVerticalGroup(parent, "PrototypeCell", true, true, true, true, 0, new Vector4(1, 0, 0, 0),
                 new Color(0.15f, 0.15f, 0.15f), TextAnchor.MiddleCenter);
@@ -47,7 +48,7 @@ namespace UnityExplorer.UI.Widgets
 
             prototype.SetActive(false);
 
-            return prototype;
+            return rect;
         }
     }
 }

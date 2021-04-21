@@ -86,8 +86,8 @@ namespace UnityExplorer.UI.Panels
             var test = new DynamicListTest(scrollPool, this);
             test.Init();
 
-            var prototype = DynamicCell.CreatePrototypeCell(scrollContent);
-            scrollPool.PrototypeCell = prototype.GetComponent<RectTransform>();
+            //var prototype = DynamicCell.CreatePrototypeCell(scrollContent);
+            //scrollPool.PrototypeCell = prototype.GetComponent<RectTransform>();
 
             dummyContentHolder = new GameObject("DummyHolder");
             dummyContentHolder.SetActive(false);
@@ -170,9 +170,10 @@ namespace UnityExplorer.UI.Panels
 
         public void Init()
         {
+            var prototype = DynamicCell.CreatePrototypeCell(Scroller.UIRoot);
 
             Scroller.DataSource = this;
-            Scroller.Initialize(this);
+            Scroller.Initialize(this, prototype);
         }
 
         public ICell CreateCell(RectTransform cellTransform) => new DynamicCell(cellTransform.gameObject);

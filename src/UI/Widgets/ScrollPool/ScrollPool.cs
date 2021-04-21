@@ -9,20 +9,19 @@ using UnityExplorer.UI.Models;
 
 namespace UnityExplorer.UI.Widgets
 {
+    // TODO: there is possibly still a bug causing the content to jump around, sometimes observed when
+    // the pooled content height is extremely large (compared to viewport). maybe it depends on the 
+    // top/bottom cells or something.
+
     /// <summary>
-    /// An object-pooled ScrollRect, attempts to support content of any size and provide a scrollbar for it.<br/>
-    /// <br/>
-    /// IMPORTANT CAVEATS:<br/>
-    /// - A cell cannot be smaller than the Prototype cell's default height<br/>
-    /// - (maybe?) A cell must start at the default height and only increase after being displayed for the first time<br/>
-    /// </summary>
+    /// An object-pooled ScrollRect, attempts to support content of any size and provide a scrollbar for it.</summary>
     public class ScrollPool : UIBehaviourModel
     {
         // used to track and manage cell views
         public class CachedCell
         {
             public ScrollPool Pool { get; }
-            public RectTransform Rect { get; }
+            public RectTransform Rect { get; internal set; }
             public ICell Cell { get; }
 
             public CachedCell(ScrollPool pool, RectTransform rect, ICell cell)
@@ -38,12 +37,14 @@ namespace UnityExplorer.UI.Widgets
             this.scrollRect = scrollRect;
         }
 
-        public int ExtraPoolCells => 10;
-        public float ExtraPoolThreshold => PrototypeCell.rect.height * ExtraPoolCells;
-        public float HalfPoolThreshold => ExtraPoolThreshold * 0.5f;
-
         public IPoolDataSource DataSource;
         public RectTransform PrototypeCell;
+
+        private float PrototypeHeight => PrototypeCell.rect.height;
+
+        public int ExtraPoolCells => 10;
+        public float ExtraPoolThreshold => PrototypeHeight * ExtraPoolCells;
+        public float HalfPoolThreshold => ExtraPoolThreshold * 0.5f;
 
         // UI
 
@@ -81,7 +82,7 @@ namespace UnityExplorer.UI.Widgets
         private int CurrentDataCount => bottomDataIndex + 1;
 
         private Vector2 _prevAnchoredPos;
-        private Vector2 _prevViewportSize; // TODO track viewport height and add if height increased
+        private float _prevViewportHeight; // TODO track viewport height and add if height increased
 
         #region Internal set tracking and update
 
@@ -111,11 +112,17 @@ namespace UnityExplorer.UI.Widgets
 
         public void Rebuild()
         {
-            Initialize(DataSource);
+            Initialize(DataSource, PrototypeCell);
         }
 
-        public void Initialize(IPoolDataSource dataSource)
+        public void Initialize(IPoolDataSource dataSource, RectTransform prototypeCell)
         {
+            if (!prototypeCell)
+                throw new Exception("No prototype cell set, cannot initialize");
+
+            this.PrototypeCell = prototypeCell;
+            PrototypeCell.transform.SetParent(Viewport, false);
+
             HeightCache = new DataHeightManager(this);
             DataSource = dataSource;
 
@@ -136,10 +143,9 @@ namespace UnityExplorer.UI.Widgets
 
             yield return null;
 
-            _prevAnchoredPos = scrollRect.content.anchoredPosition;
-            _prevViewportSize = new Vector2(scrollRect.viewport.rect.width, scrollRect.viewport.rect.height);
+            _prevAnchoredPos = Content.anchoredPosition;
 
-            SetRecycleViewBounds();
+            SetRecycleViewBounds(false);
 
             float start = Time.realtimeSinceStartup;
             CreateCellPool();
@@ -151,11 +157,114 @@ namespace UnityExplorer.UI.Widgets
             scrollRect.onValueChanged.AddListener(OnValueChangedListener);
         }
 
-        private void SetRecycleViewBounds()
+        // Cell pool
+
+        private void CreateCellPool()
+        {
+            if (CellPool.Any())
+            {
+                foreach (var cell in CellPool)
+                    GameObject.Destroy(cell.Rect.gameObject);
+                CellPool.Clear();
+            }
+
+            float currentPoolCoverage = 0f;
+            float requiredCoverage = scrollRect.viewport.rect.height + ExtraPoolThreshold;// * ExtraPoolCoverageRatio;
+
+            topPoolCellIndex = 0;
+            bottomPoolIndex = -1;
+
+            // create cells until the Pool area is covered.
+            // use minimum default height so that maximum pool count is reached.
+            while (currentPoolCoverage <= requiredCoverage)
+            {
+                bottomPoolIndex++;
+
+                //Instantiate and add to Pool
+                RectTransform rect = GameObject.Instantiate(PrototypeCell.gameObject).GetComponent<RectTransform>();
+                rect.gameObject.SetActive(true);
+                rect.name = $"Cell_{CellPool.Count + 1}";
+                var cell = DataSource.CreateCell(rect);
+                CellPool.Add(new CachedCell(this, rect, cell));
+                rect.SetParent(scrollRect.content, false);
+
+                currentPoolCoverage += rect.rect.height;
+            }
+
+            bottomDataIndex = CellPool.Count - 1;
+
+            // after creating pool, set displayed cells.
+            for (int i = 0; i < CellPool.Count; i++)
+            {
+                var cell = CellPool[i];
+                SetCell(cell, i);
+            }
+
+            LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
+        }
+
+        private void SetRecycleViewBounds(bool checkHeightGrow)
         {
             var extra = ExtraPoolThreshold;
             extra *= 0.5f;
             RecycleViewBounds = new Vector2(Viewport.MinY() + extra, Viewport.MaxY() - extra);
+
+            if (checkHeightGrow && _prevViewportHeight < Viewport.rect.height && _prevViewportHeight != 0.0f)
+                RefillCellPool();
+
+            _prevViewportHeight = Viewport.rect.height;
+        }
+
+        private void RefillCellPool()
+        {
+            // TODO buggy for some reason, not quite right.
+
+            var requiredCoverage = Math.Abs(RecycleViewBounds.y - RecycleViewBounds.x);
+            var currentCoverage = CellPool.Count * PrototypeHeight;
+            if (currentCoverage < requiredCoverage)
+            {
+                //int cellsRequired = (int)Math.Ceiling((decimal)(requiredCoverage - currentCoverage) / (decimal)PrototypeHeight);
+
+                while (currentCoverage <= requiredCoverage)
+                {
+                    //bottomPoolIndex++;
+                    ExplorerCore.Log("Adding to end of pool");
+
+                    //Instantiate and add to Pool
+                    RectTransform rect = GameObject.Instantiate(PrototypeCell.gameObject).GetComponent<RectTransform>();
+                    rect.gameObject.SetActive(true);
+                    rect.name = $"Cell_{CellPool.Count + 1}";
+                    rect.SetParent(scrollRect.content, false);
+
+                    currentCoverage += rect.rect.height;
+
+                    bottomDataIndex++;
+                }
+
+                CellPool.Clear();
+
+                int childCount = Content.childCount;
+                for (int i = 0; i < childCount; i++)
+                {
+                    var rect = Content.GetChild(i).GetComponent<RectTransform>();
+
+                    var cell = DataSource.CreateCell(rect);
+                    CellPool.Add(new CachedCell(this, rect, cell));
+
+                    ExplorerCore.Log("Assigned cell rect " + i);
+                }
+
+                // reassign cell references
+                topPoolCellIndex = 0;
+                bottomPoolIndex = CellPool.Count - 1;
+
+                // after creating pool, set displayed cells.
+                for (int i = 0; i < CellPool.Count; i++)
+                {
+                    var cell = CellPool[i];
+                    SetCell(cell, i);
+                }
+            }
         }
 
         // Refresh methods
@@ -190,7 +299,7 @@ namespace UnityExplorer.UI.Widgets
 
             // ExplorerCore.Log("RefreshCells | " + Time.time);
 
-            SetRecycleViewBounds();
+            SetRecycleViewBounds(true);
 
             // jump to bottom if the data count went below our bottom data index
             bool jumpToBottom = false;
@@ -205,7 +314,7 @@ namespace UnityExplorer.UI.Widgets
                 }
                 
                 if (HeightCache.Count < count)
-                    HeightCache.SetIndex(count - 1, PrototypeCell.rect.height);
+                    HeightCache.SetIndex(count - 1, PrototypeHeight);
                 else if (HeightCache.Count > count)
                 {
                     while (HeightCache.Count > count)
@@ -243,7 +352,7 @@ namespace UnityExplorer.UI.Widgets
             }
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
-            SetRecycleViewBounds();
+            //SetRecycleViewBounds(false);
             NormalizedScrollBounds = new Vector2(Viewport.rect.height * 0.5f, TotalDataHeight - (Viewport.rect.height * 0.5f));
             scrollRect.UpdatePrevData();
         }
@@ -259,64 +368,6 @@ namespace UnityExplorer.UI.Widgets
             HeightCache.SetIndex(dataIndex, cachedCell.Cell.Enabled ? cachedCell.Rect.rect.height : 0f);
         }
 
-        // Cell pool
-
-        private void CreateCellPool()
-        {
-            if (CellPool.Any())
-            {
-                foreach (var cell in CellPool)
-                    GameObject.Destroy(cell.Rect.gameObject);
-                CellPool.Clear();
-            }
-
-            if (!PrototypeCell)
-                throw new Exception("No prototype cell set, cannot initialize");
-
-            //Set the prototype cell active and set cell anchor as top
-            //PrototypeCell.gameObject.SetActive(true);
-
-            float currentPoolCoverage = 0f;
-            float requiredCoverage = scrollRect.viewport.rect.height + ExtraPoolThreshold;// * ExtraPoolCoverageRatio;
-
-            topPoolCellIndex = 0;
-            bottomPoolIndex = -1;
-
-            // create cells until the Pool area is covered.
-            // use minimum default height so that maximum pool count is reached.
-            while (currentPoolCoverage <= requiredCoverage)
-            {
-                bottomPoolIndex++;
-
-                //Instantiate and add to Pool
-                RectTransform rect = GameObject.Instantiate(PrototypeCell.gameObject).GetComponent<RectTransform>();
-                rect.gameObject.SetActive(true);
-                rect.name = $"Cell_{CellPool.Count + 1}";
-                var cell = DataSource.CreateCell(rect);
-                CellPool.Add(new CachedCell(this, rect, cell));
-                rect.SetParent(scrollRect.content, false);
-
-                //cell.Disable();
-
-                currentPoolCoverage += rect.rect.height;
-            }
-
-            bottomDataIndex = CellPool.Count - 1;
-
-            // after creating pool, set displayed cells.
-            for (int i = 0; i < CellPool.Count; i++)
-            {
-                var cell = CellPool[i];
-                SetCell(cell, i);
-            }
-
-            LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
-
-            //Deactivate prototype cell if it is not a prefab(i.e it's present in scene)
-            if (PrototypeCell.gameObject.scene.IsValid())
-                PrototypeCell.gameObject.SetActive(false);
-        }
-
         // Value change processor
 
         private void OnValueChangedListener(Vector2 val)
@@ -326,7 +377,7 @@ namespace UnityExplorer.UI.Widgets
 
             //ExplorerCore.Log("ScrollRect.OnValueChanged | " + Time.time + ", val: " + val.y.ToString("F5"));
 
-            SetRecycleViewBounds();
+            SetRecycleViewBounds(true);
             RefreshCells();
 
             float yChange = (scrollRect.content.anchoredPosition - _prevAnchoredPos).y;
@@ -356,11 +407,11 @@ namespace UnityExplorer.UI.Widgets
             UpdateSliderHandle();
         }
 
-        private bool ShouldRecycleTop => GetCellExtent(CellPool[topPoolCellIndex]) >= RecycleViewBounds.x
-                                         && CellPool[bottomPoolIndex].Rect.position.y < Viewport.MaxY();
+        private bool ShouldRecycleTop => GetCellExtent(CellPool[topPoolCellIndex]) >= RecycleViewBounds.x;
+                                         //&& CellPool[bottomPoolIndex].Rect.position.y < Viewport.MaxY();
 
-        private bool ShouldRecycleBottom => CellPool[bottomPoolIndex].Rect.position.y < RecycleViewBounds.y
-                                            && GetCellExtent(CellPool[topPoolCellIndex]) < Viewport.MinY();
+        private bool ShouldRecycleBottom => CellPool[bottomPoolIndex].Rect.position.y < RecycleViewBounds.y;
+                                            //&& GetCellExtent(CellPool[topPoolCellIndex]) < Viewport.MinY();
 
         private float GetCellExtent(CachedCell cell) => cell.Rect.MaxY() - contentLayout.spacing;
 

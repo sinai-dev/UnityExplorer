@@ -103,7 +103,7 @@ namespace UnityExplorer.UI.Widgets
                 ExplorerCore.LogWarning("The object was destroyed!");
         }
 
-        public static GameObject CreatePrototypeCell(GameObject parent)
+        public static RectTransform CreatePrototypeCell(GameObject parent)
         {
             var prototype = UIFactory.CreateHorizontalGroup(parent, "PrototypeCell", true, true, true, true, 2, default,
                 new Color(0.15f, 0.15f, 0.15f), TextAnchor.MiddleCenter);
@@ -136,7 +136,7 @@ namespace UnityExplorer.UI.Widgets
 
             prototype.SetActive(false);
 
-            return prototype;
+            return rect;
         }
     }
 }

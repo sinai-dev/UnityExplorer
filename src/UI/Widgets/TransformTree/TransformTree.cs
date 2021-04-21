@@ -70,8 +70,10 @@ namespace UnityExplorer.UI.Widgets
         {
             yield return null;
 
+            var prototype = TransformCell.CreatePrototypeCell(Scroller.UIRoot);
+
             RefreshData();
-            Scroller.Initialize(this);
+            Scroller.Initialize(this, prototype);
         }
 
         public ICell CreateCell(RectTransform cellTransform)

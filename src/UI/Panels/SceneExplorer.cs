@@ -223,6 +223,8 @@ namespace UnityExplorer.UI.Panels
             refreshRow.SetActive(false);
 
             // Transform Tree
+            
+            //var prototype = TransformCell.CreatePrototypeCell(scrollContent);
 
             var infiniteScroll = UIFactory.CreateScrollPool(content, "TransformTree", out GameObject scrollObj,
                 out GameObject scrollContent, new Color(0.15f, 0.15f, 0.15f));
@@ -230,13 +232,10 @@ namespace UnityExplorer.UI.Panels
             UIFactory.SetLayoutElement(scrollContent, flexibleHeight: 9999);
 
             // Prototype tree cell
-            var prototype = TransformCell.CreatePrototypeCell(scrollContent);
-            infiniteScroll.PrototypeCell = prototype.GetComponent<RectTransform>();
+            
+            //infiniteScroll.PrototypeCell = prototype.GetComponent<RectTransform>();
 
-            Tree = new TransformTree(infiniteScroll)
-            {
-                GetRootEntriesMethod = GetRootEntries
-            };
+            Tree = new TransformTree(infiniteScroll) { GetRootEntriesMethod = GetRootEntries };
             Tree.Init();
 
             // some references

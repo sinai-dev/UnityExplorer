@@ -49,9 +49,11 @@ namespace UnityExplorer.UI.Widgets
         {
             yield return null;
 
+            var proto = ButtonCell<T>.CreatePrototypeCell(Scroller.UIRoot);
+
             RefreshData();
             Scroller.DataSource = this;
-            Scroller.Initialize(this);
+            Scroller.Initialize(this, proto);
         }
 
         public void RefreshData()
