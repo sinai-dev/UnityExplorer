@@ -46,10 +46,12 @@ namespace UnityExplorer.UI.Utility
             else
                 state = MouseState.NotPressed;
 
+            var mousePos = InputManager.MousePosition;
+
             handledInstanceThisFrame = false;
             foreach (var instance in Instances)
             {
-                instance.Update(state, InputManager.MousePosition);
+                instance.Update(state, mousePos);
                 if (handledInstanceThisFrame)
                     break;
             }
@@ -162,9 +164,10 @@ namespace UnityExplorer.UI.Utility
                         OnEndResize();
                         handledInstanceThisFrame = true;
                     }
-                    else if (!inDragPos && MouseInResizeArea(resizePos) && (type = GetResizeType(resizePos)) != ResizeTypes.NONE)
+                    else if (!inDragPos && MouseInResizeArea(resizePos))
                     {
-                        OnHoverResize(type);
+                        if ((type = GetResizeType(resizePos)) != ResizeTypes.NONE)
+                            OnHoverResize(type);
                         handledInstanceThisFrame = true;
                     }
                     else if (WasHoveringResize)
