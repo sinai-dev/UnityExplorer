@@ -66,7 +66,7 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
 
         private void Application_logMessageReceived(string condition, string stackTrace, LogType type)
         {
-            ExplorerCore.Log(condition, type, true);
+            ExplorerCore.LogUnity(condition, type);
         }
 
         public override void StartCoroutine(IEnumerator routine)
