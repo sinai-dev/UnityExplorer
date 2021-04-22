@@ -80,7 +80,7 @@ namespace UnityExplorer.UI.Widgets
         public void TakeFromSister(int count)
         {
             for (int i = 0, i < count; i++)
-                Add(sisterCache[ScrollPool.DataSource.GetRealIndexForTempIndex(i)]);
+                Add(sisterCache[ScrollPool.DataSource.GetRealIndexOfTempIndex(i)]);
         }
 
         public void RemoveLast()
