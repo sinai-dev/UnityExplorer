@@ -84,19 +84,24 @@ namespace UnityExplorer
 #region LOGGING
 
         public static void Log(object message) 
-            => Log(message, LogType.Log, false);
+            => Log(message, LogType.Log);
 
         public static void LogWarning(object message) 
-            => Log(message, LogType.Warning, false);
+            => Log(message, LogType.Warning);
 
         public static void LogError(object message) 
-            => Log(message, LogType.Error, false);
+            => Log(message, LogType.Error);
 
-        internal static void Log(object message, LogType logType, bool isFromUnity = false)
+        public static void LogUnity(object message, LogType logType)
         {
-            if (isFromUnity && !ConfigManager.Log_Unity_Debug.Value)
+            if (!ConfigManager.Log_Unity_Debug.Value)
                 return;
 
+            Log($"[Unity] {message}", logType);
+        }
+
+        private static void Log(object message, LogType logType)
+        {
             string log = message?.ToString() ?? "";
 
             switch (logType)
