@@ -48,8 +48,11 @@ namespace UnityExplorer.UI.Widgets
         //This is called from the SetCell method in DataSource
         public void ConfigureCell(CachedTransform cached, int cellIndex)
         {
-            if (cached == null || !cached.Value)
+            if (cached == null)
+            {
+                ExplorerCore.LogWarning("Setting TransformTree cell but the CachedTransform is null!");
                 return;
+            }
 
             if (!Enabled)
                 Enable();
@@ -59,25 +62,31 @@ namespace UnityExplorer.UI.Widgets
 
             spacer.minWidth = cached.Depth * 15;
 
-            nameLabel.text = cached.Value.name;
-            nameLabel.color = cached.Value.gameObject.activeSelf ? Color.white : Color.grey;
-
-            int childCount = cached.Value.childCount;
-            if (childCount > 0)
+            if (cached.Value)
             {
-                nameLabel.text = $"<color=grey>[{childCount}]</color> {nameLabel.text}";
+                nameLabel.text = cached.Value.name;
+                nameLabel.color = cached.Value.gameObject.activeSelf ? Color.white : Color.grey;
 
-                expandButton.interactable = true;
-                //expandLabel.enabled = true;
-                expandLabel.text = cached.Expanded ? "▼" : "►";
-                expandLabel.color = cached.Expanded ? new Color(0.5f, 0.5f, 0.5f) : new Color(0.3f, 0.3f, 0.3f);
+                int childCount = cached.Value.childCount;
+                if (childCount > 0)
+                {
+                    nameLabel.text = $"<color=grey>[{childCount}]</color> {nameLabel.text}";
+
+                    expandButton.interactable = true;
+                    expandLabel.text = cached.Expanded ? "▼" : "►";
+                    expandLabel.color = cached.Expanded ? new Color(0.5f, 0.5f, 0.5f) : new Color(0.3f, 0.3f, 0.3f);
+                }
+                else
+                {
+                    expandButton.interactable = false;
+                    expandLabel.text = "▪";
+                    expandLabel.color = new Color(0.3f, 0.3f, 0.3f);
+                }
             }
             else
             {
-                expandButton.interactable = false;
-                expandLabel.text = "▪";
-                expandLabel.color = new Color(0.3f, 0.3f, 0.3f);
-                //expandLabel.enabled = false;
+                nameLabel.text = $"[Destroyed]";
+                nameLabel.color = Color.red;
             }
         }
 
