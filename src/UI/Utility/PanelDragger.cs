@@ -168,13 +168,12 @@ namespace UnityExplorer.UI.Utility
                     {
                         if ((type = GetResizeType(resizePos)) != ResizeTypes.NONE)
                             OnHoverResize(type);
+                        else if (WasHoveringResize)
+                            OnHoverResizeEnd();
                         handledInstanceThisFrame = true;
                     }
                     else if (WasHoveringResize)
-                    {
                         OnHoverResizeEnd();
-                        handledInstanceThisFrame = true;
-                    }
                     break;
             }
 

@@ -28,7 +28,6 @@ namespace UnityExplorer.UI.Widgets
         {
             this.sisterCache = sisterCache;
 
-            ExplorerCore.Log("Creating backup height cache, this count: " + scrollPool.DataSource.ItemCount);
             TakeFromSister(scrollPool.DataSource.ItemCount);
         }
 
@@ -79,7 +78,7 @@ namespace UnityExplorer.UI.Widgets
 
         public void TakeFromSister(int count)
         {
-            for (int i = 0, i < count; i++)
+            for (int i = 0; i < count; i++)
                 Add(sisterCache[ScrollPool.DataSource.GetRealIndexOfTempIndex(i)]);
         }
 

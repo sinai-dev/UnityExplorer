@@ -73,9 +73,8 @@ namespace UnityExplorer.UI.Panels
             contentHolder.SetActive(false);
             contentHolder.transform.SetParent(this.content.transform, false);
 
-            GameObject.DontDestroyOnLoad(contentHolder);
             ExplorerCore.Log("Creating dummy objects");
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 150; i++)
             {
                 dummyContents.Add(CreateDummyContent());
             }

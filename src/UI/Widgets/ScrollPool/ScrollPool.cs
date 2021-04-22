@@ -250,8 +250,6 @@ namespace UnityExplorer.UI.Widgets
                     DisableTempCache();
             }
 
-            bool ret = false;
-
             CheckDataSourceCountChange(out _);
 
             var requiredCoverage = Math.Abs(RecycleViewBounds.y - RecycleViewBounds.x);
@@ -259,7 +257,6 @@ namespace UnityExplorer.UI.Widgets
             int cellsRequired = (int)Math.Ceiling((decimal)(requiredCoverage - currentCoverage) / (decimal)PrototypeHeight);
             if (cellsRequired > 0 || forceRecreate)
             {
-                ret = true;
                 WritingLocked = true;
 
                 // Disable cells so DataSource can handle its content if need be
@@ -285,9 +282,11 @@ namespace UnityExplorer.UI.Widgets
 
                 SetScrollBounds();
                 UpdateSliderHandle(true);
+
+                return true;
             }
 
-            return ret;
+            return false;
         }
 
         // Refresh methods
@@ -318,7 +317,6 @@ namespace UnityExplorer.UI.Widgets
 
         private bool CheckDataSourceCountChange(out bool shouldJumpToBottom)
         {
-            bool ret = false;
             shouldJumpToBottom = false;
 
             int count = DataSource.ItemCount;
@@ -340,7 +338,7 @@ namespace UnityExplorer.UI.Widgets
                 return false;
             }
 
-            return ret;
+            return false;
         }
 
         private void RefreshCells(bool andReloadFromDataSource, bool setSlider)
@@ -585,9 +583,6 @@ namespace UnityExplorer.UI.Widgets
             int poolStartIndex = Math.Max(0, topViewportIndex - (int)(ExtraPoolCells * 0.5f));
             poolStartIndex = Math.Min(Math.Max(0, DataSource.ItemCount - CellPool.Count), poolStartIndex);
 
-            bottomDataIndex = poolStartIndex + CellPool.Count - 1;
-            RefreshCells(true, false);
-
             var topStartPos = HeightCache[poolStartIndex].startPosition;
 
             float desiredAnchor;
@@ -597,7 +592,10 @@ namespace UnityExplorer.UI.Widgets
                 desiredAnchor = desiredMinY - topStartPos;
             Content.anchoredPosition = new Vector2(0, desiredAnchor);
 
-            UpdateSliderHandle(true);
+            bottomDataIndex = poolStartIndex + CellPool.Count - 1;
+            RefreshCells(true, false);
+
+            //UpdateSliderHandle(true);
         }
 
         /// <summary>Use <see cref="UIFactory.CreateScrollPool"/></summary>
