@@ -11,16 +11,25 @@ namespace UnityExplorer.UI.Widgets
         public float height, startPosition;
         public int normalizedSpread;
 
-        public static implicit operator float(DataViewInfo ch) => ch.height;
+        public static implicit operator float(DataViewInfo it) => it.height;
     }
 
-    public class DataHeightManager
+    public class DataHeightCache
     {
         private ScrollPool ScrollPool { get; }
+        private DataHeightCache sisterCache { get; }
 
-        public DataHeightManager(ScrollPool scrollPool)
+        public DataHeightCache(ScrollPool scrollPool)
         {
             ScrollPool = scrollPool;
+        }
+
+        public DataHeightCache(ScrollPool scrollPool, DataHeightCache sisterCache) : this(scrollPool)
+        {
+            this.sisterCache = sisterCache;
+
+            ExplorerCore.Log("Creating backup height cache, this count: " + scrollPool.DataSource.ItemCount);
+            AddRange(sisterCache.Take(scrollPool.DataSource.ItemCount));
         }
 
         private readonly List<DataViewInfo> heightCache = new List<DataViewInfo>();
@@ -62,6 +71,17 @@ namespace UnityExplorer.UI.Widgets
             totalHeight += value;
         }
 
+        public void AddRange(IEnumerable<DataViewInfo> collection)
+        {
+            foreach (var entry in collection)
+                Add(entry);
+        }
+
+        public IEnumerable<DataViewInfo> Take(int count)
+        {
+            return heightCache.Take(count);
+        }
+
         public void RemoveLast()
         {
             if (!heightCache.Any())
@@ -70,13 +90,6 @@ namespace UnityExplorer.UI.Widgets
             var val = heightCache[heightCache.Count - 1];
             totalHeight -= val;
             heightCache.RemoveAt(heightCache.Count - 1);
-
-        }
-
-        public void Clear()
-        {
-            heightCache.Clear();
-            totalHeight = 0f;
         }
 
         private void AppendDataSpread(int dataIdx, int spread)
@@ -88,10 +101,17 @@ namespace UnityExplorer.UI.Widgets
             }
         }
 
-        public void SetIndex(int dataIndex, float value)
+        public void SetIndex(int dataIndex, float value, bool ignoreDataCount = false)
         {
-            if (dataIndex >= ScrollPool.DataSource.ItemCount)
-                return;
+            if (!ignoreDataCount)
+            {
+                if (dataIndex >= ScrollPool.DataSource.ItemCount)
+                {
+                    while (heightCache.Count > dataIndex)
+                        RemoveLast();
+                    return;
+                }
+            }
 
             if (dataIndex >= heightCache.Count)
             {
@@ -183,10 +203,20 @@ namespace UnityExplorer.UI.Widgets
                         rangeToDataIndexCache.RemoveAt(rangeStart);
                 }
             }
+
+            // if sister cache is set, then update it too.
+            if (sisterCache != null)
+            {
+                var realIdx = ScrollPool.DataSource.GetRealIndexOfTempIndex(dataIndex);
+                if (realIdx >= 0)
+                    sisterCache.SetIndex(realIdx, value, true);
+            }
         }
 
         public int GetDataIndexAtPosition(float desiredHeight)
-            => GetDataIndexAtPosition(desiredHeight, out _);
+        {
+            return GetDataIndexAtPosition(desiredHeight, out _);
+        }
 
         public int GetDataIndexAtPosition(float desiredHeight, out DataViewInfo cache)
         {

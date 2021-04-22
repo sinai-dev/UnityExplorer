@@ -13,6 +13,8 @@ namespace UnityExplorer.UI.Widgets
         void SetCell(ICell cell, int index);
         void DisableCell(ICell cell, int index);
 
+        int GetRealIndexOfTempIndex(int tempIndex);
+
         ICell CreateCell(RectTransform cellTransform);
     }
 }

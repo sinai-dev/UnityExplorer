@@ -125,7 +125,7 @@ namespace UnityExplorer.UI.Panels
         private void OnFilterInput(string input)
         {
             Tree.CurrentFilter = input;
-            Tree.RefreshData(true);
+            Tree.RefreshData(true, true);
         }
 
         //private float highestRectHeight;
@@ -220,13 +220,16 @@ namespace UnityExplorer.UI.Panels
 
             // Transform Tree
             
-            var infiniteScroll = UIFactory.CreateScrollPool(content, "TransformTree", out GameObject scrollObj,
+            var scrollPool = UIFactory.CreateScrollPool(content, "TransformTree", out GameObject scrollObj,
                 out GameObject scrollContent, new Color(0.15f, 0.15f, 0.15f));
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
             UIFactory.SetLayoutElement(scrollContent, flexibleHeight: 9999);
 
-            Tree = new TransformTree(infiniteScroll) { GetRootEntriesMethod = GetRootEntries };
+            Tree = new TransformTree(scrollPool) { GetRootEntriesMethod = GetRootEntries };
             Tree.Init();
+
+            //scrollPool.Viewport.GetComponent<Mask>().enabled = false;
+            //UIRoot.GetComponent<Mask>().enabled = false;
 
             // Scene Loader
 

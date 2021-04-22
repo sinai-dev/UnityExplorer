@@ -11,6 +11,8 @@ namespace UnityExplorer.UI.Widgets
 {
     public class ButtonListSource<T> : IPoolDataSource
     {
+        public int GetRealIndexOfTempIndex(int index) => throw new NotImplementedException("TODO");
+
         internal ScrollPool Scroller;
 
         public int ItemCount => currentEntries.Count;

@@ -34,28 +34,6 @@ namespace UnityExplorer.UI.Panels
             ConfigManager.GameObjectInspectorData.Value = this.ToSaveData();
         }
 
-        public override void OnFinishResize(RectTransform panel)
-        {
-            base.OnFinishResize(panel);
-            RuntimeProvider.Instance.StartCoroutine(DelayedRefresh(panel));
-        }
-
-        private float previousRectHeight;
-
-        private IEnumerator DelayedRefresh(RectTransform obj)
-        {
-            yield return null;
-
-            if (obj.rect.height != previousRectHeight)
-            {
-                // height changed, hard refresh required.
-                previousRectHeight = obj.rect.height;
-                //scrollPool.ReloadData();
-            }
-
-            scrollPool.RefreshCells(true);
-        }
-
         public override void SetDefaultPosAndAnchors()
         {
             mainPanelRect.localPosition = Vector2.zero; 
@@ -67,6 +45,8 @@ namespace UnityExplorer.UI.Panels
             mainPanelRect.sizeDelta = new Vector2(700f, mainPanelRect.sizeDelta.y);
             mainPanelRect.anchoredPosition = new Vector2(-150, 0);
         }
+
+        internal static DynamicListTest listInstance;
 
         private ScrollPool scrollPool;
 
@@ -83,32 +63,33 @@ namespace UnityExplorer.UI.Panels
             //scrollPool.Viewport.GetComponent<Mask>().enabled = false;
             //scrollPool.Content.gameObject.AddComponent<Image>().color = new Color(1f, 0f, 1f, 0.3f);
 
-            var test = new DynamicListTest(scrollPool, this);
-            test.Init();
+            listInstance = new DynamicListTest(scrollPool, this);
+            listInstance.Init();
 
             //var prototype = DynamicCell.CreatePrototypeCell(scrollContent);
             //scrollPool.PrototypeCell = prototype.GetComponent<RectTransform>();
 
-            dummyContentHolder = new GameObject("DummyHolder");
-            dummyContentHolder.SetActive(false);
+            contentHolder = new GameObject("DummyHolder");
+            contentHolder.SetActive(false);
+            contentHolder.transform.SetParent(this.content.transform, false);
 
-            GameObject.DontDestroyOnLoad(dummyContentHolder);
+            GameObject.DontDestroyOnLoad(contentHolder);
             ExplorerCore.Log("Creating dummy objects");
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 10; i++)
             {
                 dummyContents.Add(CreateDummyContent());
             }
             ExplorerCore.Log("Done");
 
-            previousRectHeight = mainPanelRect.rect.height;
+            //previousRectHeight = mainPanelRect.rect.height;
         }
 
-        internal GameObject dummyContentHolder;
+        internal GameObject contentHolder;
         internal readonly List<GameObject> dummyContents = new List<GameObject>();
 
         private GameObject CreateDummyContent()
         {
-            var obj = UIFactory.CreateVerticalGroup(dummyContentHolder, "Content", true, true, true, true, 2, new Vector4(2, 2, 2, 2));
+            var obj = UIFactory.CreateVerticalGroup(contentHolder, "Content", true, true, true, true, 2, new Vector4(2, 2, 2, 2));
             obj.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             var horiGroup = UIFactory.CreateHorizontalGroup(obj, "topGroup", true, true, true, true);
@@ -157,29 +138,76 @@ namespace UnityExplorer.UI.Panels
 
     public class DynamicListTest : IPoolDataSource
     {
-        internal ScrollPool Scroller;
+        internal ScrollPool ScrollPool;
         internal InspectorTest Inspector;
 
         public DynamicListTest(ScrollPool scroller, InspectorTest inspector) 
         {
-            Scroller = scroller;
+            ScrollPool = scroller;
             Inspector = inspector;
         }
 
-        public int ItemCount => Inspector.dummyContents.Count;
+        public int ItemCount => filtering ? filteredIndices.Count : Inspector.dummyContents.Count;
+
+        private bool filtering;
+        private readonly List<int> filteredIndices = new List<int>();
+
+        public int GetRealIndexOfTempIndex(int index)
+        {
+            if (index < 0 || index >= filteredIndices.Count)
+                return -1;
+            return filteredIndices[index];
+        }
+
+        public void ToggleFilter()
+        {
+            if (filtering)
+            {
+                DisableFilter();
+                ScrollPool.DisableTempCache();
+            }
+            else
+            {
+                EnableRandomFilter();
+                ScrollPool.EnableTempCache();
+            }
+
+            ExplorerCore.Log("Filter toggled, new count: " + ItemCount);
+            ScrollPool.Rebuild();
+        }
+
+        public void EnableRandomFilter()
+        {
+            filteredIndices.Clear();
+            filtering = true;
+
+            int counter = UnityEngine.Random.Range(0, Inspector.dummyContents.Count);
+            while (filteredIndices.Count < counter)
+            {
+                var i = UnityEngine.Random.Range(0, Inspector.dummyContents.Count);
+                if (!filteredIndices.Contains(i))
+                    filteredIndices.Add(i);
+            }
+            filteredIndices.Sort();
+        }
+
+        public void DisableFilter()
+        {
+            filtering = false;
+        }
 
         public void OnDisableCell(CellViewHolder cell, int dataIndex)
         {
             if (cell.UIRoot.transform.Find("Content") is Transform existing)
-                existing.transform.SetParent(Inspector.dummyContentHolder.transform, false);
+                existing.transform.SetParent(Inspector.contentHolder.transform, false);
         }
 
         public void Init()
         {
-            var prototype = CellViewHolder.CreatePrototypeCell(Scroller.UIRoot);
+            var prototype = CellViewHolder.CreatePrototypeCell(ScrollPool.UIRoot);
 
-            Scroller.DataSource = this;
-            Scroller.Initialize(this, prototype);
+            ScrollPool.DataSource = this;
+            ScrollPool.Initialize(this, prototype);
         }
 
         public ICell CreateCell(RectTransform cellTransform) => new CellViewHolder(cellTransform.gameObject);
@@ -202,6 +230,9 @@ namespace UnityExplorer.UI.Panels
                 return;
             }
 
+            if (filtering)
+                index = GetRealIndexOfTempIndex(index);
+
             var content = Inspector.dummyContents[index];
 
             if (content.transform.parent.ReferenceEqual(root.transform))
@@ -215,7 +246,7 @@ namespace UnityExplorer.UI.Panels
         private void DisableContent(GameObject cellRoot)
         {
             if (cellRoot.transform.Find("Content") is Transform existing)
-                existing.transform.SetParent(Inspector.dummyContentHolder.transform, false);
+                existing.transform.SetParent(Inspector.contentHolder.transform, false);
         }
     }
 }

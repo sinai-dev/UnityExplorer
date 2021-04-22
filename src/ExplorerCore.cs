@@ -7,6 +7,7 @@ using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Input;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI;
+using UnityExplorer.UI.Panels;
 
 namespace UnityExplorer
 {

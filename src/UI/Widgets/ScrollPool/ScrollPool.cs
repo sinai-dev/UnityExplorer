@@ -49,11 +49,12 @@ namespace UnityExplorer.UI.Widgets
         /// The first and last pooled indices relative to the DataSource's list
         /// </summary>
         private int bottomDataIndex;
-        private int TopDataIndex => bottomDataIndex - CellPool.Count + 1;
+        private int TopDataIndex => Math.Max(0, bottomDataIndex - CellPool.Count + 1);
 
         private readonly List<ICell> CellPool = new List<ICell>();
 
-        private DataHeightManager HeightCache;
+        internal DataHeightCache HeightCache;
+        internal DataHeightCache tempHeightCache;
 
         private float TotalDataHeight => HeightCache.TotalHeight + contentLayout.padding.top + contentLayout.padding.bottom;
 
@@ -64,8 +65,8 @@ namespace UnityExplorer.UI.Widgets
 
         private int CurrentDataCount => bottomDataIndex + 1;
 
-        private Vector2 _prevAnchoredPos;
-        private float _prevViewportHeight; // TODO track viewport height and add if height increased
+        private Vector2 prevAnchoredPos;
+        private float prevViewportHeight;
 
         #region Internal set tracking and update
 
@@ -84,19 +85,53 @@ namespace UnityExplorer.UI.Widgets
         private bool writingLocked;
         private float timeofLastWriteLock;
 
+        private float prevContentHeight;
+
         public override void Update()
         {
             if (writingLocked && timeofLastWriteLock < Time.time)
                 writingLocked = false;
+
+            if (prevContentHeight == 0.0f && Content?.rect.height != 0.0f)
+                prevContentHeight = Content.rect.height;
+            else if (Content.rect.height != prevContentHeight)
+            {
+                prevContentHeight = Content.rect.height;
+                OnValueChangedListener(Vector2.zero);
+            }
         }
         #endregion
-       
-        //  Initialize
+
+        // Public methods
 
         public void Rebuild()
         {
-            Initialize(DataSource, PrototypeCell);
+            RecreateCellPool(true, true, null); 
         }
+
+        public void EnableTempCache()
+        {
+            if (tempHeightCache == null)
+                tempHeightCache = HeightCache;
+
+            HeightCache = new DataHeightCache(this, tempHeightCache);
+        }
+
+        public void DisableTempCache()
+        {
+            if (tempHeightCache == null)
+                return;
+
+            HeightCache = tempHeightCache;
+            tempHeightCache = null;
+        }
+
+        public void RefreshCells(bool reloadData)
+        {
+            RefreshCells(reloadData, true);
+        }
+
+        // Initialize
 
         public void Initialize(IPoolDataSource dataSource, RectTransform prototypeCell)
         {
@@ -106,7 +141,7 @@ namespace UnityExplorer.UI.Widgets
             this.PrototypeCell = prototypeCell;
             PrototypeCell.transform.SetParent(Viewport, false);
 
-            HeightCache = new DataHeightManager(this);
+            HeightCache = new DataHeightCache(this);
             DataSource = dataSource;
 
             this.contentLayout = ScrollRect.content.GetComponent<VerticalLayoutGroup>();
@@ -126,7 +161,7 @@ namespace UnityExplorer.UI.Widgets
             yield return null;
 
             // set intial bounds
-            _prevAnchoredPos = Content.anchoredPosition;
+            prevAnchoredPos = Content.anchoredPosition;
             SetRecycleViewBounds(false);
 
             // create initial cell pool and set cells
@@ -197,24 +232,32 @@ namespace UnityExplorer.UI.Widgets
 
             RecycleViewBounds = new Vector2(Viewport.MinY() + HalfThreshold, Viewport.MaxY() - HalfThreshold);
 
-            if (checkHeightGrow && _prevViewportHeight < Viewport.rect.height && _prevViewportHeight != 0.0f)
-            {
-                ret = ExtendCellPool();
-            }
+            if (checkHeightGrow && prevViewportHeight < Viewport.rect.height && prevViewportHeight != 0.0f)
+                ret = RecreateCellPool(false, false, null);
 
-            _prevViewportHeight = Viewport.rect.height;
+            prevViewportHeight = Viewport.rect.height;
 
             return ret;
         }
 
-        private bool ExtendCellPool()
+        private bool RecreateCellPool(bool forceRecreate, bool resetDataIndex, bool? setTempCacheEnabledTo)
         {
+            if (setTempCacheEnabledTo != null)
+            {
+                if (setTempCacheEnabledTo == true)
+                    EnableTempCache();
+                else if (setTempCacheEnabledTo == false)
+                    DisableTempCache();
+            }
+
             bool ret = false;
+
+            CheckDataSourceCountChange(out _);
 
             var requiredCoverage = Math.Abs(RecycleViewBounds.y - RecycleViewBounds.x);
             var currentCoverage = CellPool.Count * PrototypeHeight;
             int cellsRequired = (int)Math.Ceiling((decimal)(requiredCoverage - currentCoverage) / (decimal)PrototypeHeight);
-            if (cellsRequired > 0)
+            if (cellsRequired > 0 || forceRecreate)
             {
                 ret = true;
                 WritingLocked = true;
@@ -233,7 +276,7 @@ namespace UnityExplorer.UI.Widgets
                     bottomDataIndex = maxDataIndex;
 
                 // CreateCellPool will destroy existing cells and recreate list.
-                CreateCellPool(false);
+                CreateCellPool(resetDataIndex);
 
                 LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
 
@@ -241,6 +284,7 @@ namespace UnityExplorer.UI.Widgets
                 ScrollRect.UpdatePrevData();
 
                 SetScrollBounds();
+                UpdateSliderHandle(true);
             }
 
             return ret;
@@ -272,32 +316,40 @@ namespace UnityExplorer.UI.Widgets
             }
         }
 
-        public void RefreshCells(bool andReloadFromDataSource = false, bool setSlider = true)
+        private bool CheckDataSourceCountChange(out bool shouldJumpToBottom)
+        {
+            bool ret = false;
+            shouldJumpToBottom = false;
+
+            int count = DataSource.ItemCount;
+            if (bottomDataIndex > count && bottomDataIndex >= CellPool.Count)
+            {
+                bottomDataIndex = Math.Max(count - 1, CellPool.Count - 1);
+                shouldJumpToBottom = true;
+            }
+
+            if (HeightCache.Count < count)
+            {
+                HeightCache.SetIndex(count - 1, PrototypeHeight);
+                return true;
+            }
+            else if (HeightCache.Count > count)
+            {
+                while (HeightCache.Count > count)
+                    HeightCache.RemoveLast();
+                return false;
+            }
+
+            return ret;
+        }
+
+        private void RefreshCells(bool andReloadFromDataSource, bool setSlider)
         {
             if (!CellPool.Any()) return;
 
             SetRecycleViewBounds(true);
 
-            // jump to bottom if the data count went below our bottom data index
-            bool jumpToBottom = false;
-
-            if (andReloadFromDataSource)
-            {
-                int count = DataSource.ItemCount;
-                if (bottomDataIndex > count)
-                { 
-                    bottomDataIndex = Math.Max(count - 1, CellPool.Count - 1);
-                    jumpToBottom = true;
-                }
-                
-                if (HeightCache.Count < count)
-                    HeightCache.SetIndex(count - 1, PrototypeHeight);
-                else if (HeightCache.Count > count)
-                {
-                    while (HeightCache.Count > count)
-                        HeightCache.RemoveLast();
-                }
-            }
+            CheckDataSourceCountChange(out bool jumpToBottom);
 
             // update date height cache, and set cells if 'andReload'
             var enumerator = GetPoolEnumerator();
@@ -339,9 +391,7 @@ namespace UnityExplorer.UI.Widgets
             DataSource.SetCell(cachedCell, dataIndex);
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(cachedCell.Rect);
-
-            if (dataIndex < DataSource.ItemCount)
-                HeightCache.SetIndex(dataIndex, cachedCell.Rect.rect.height);
+            HeightCache.SetIndex(dataIndex, cachedCell.Rect.rect.height);
         }
 
         // Value change processor
@@ -355,9 +405,9 @@ namespace UnityExplorer.UI.Widgets
                 ScrollRect.StopMovement();
 
             if (!SetRecycleViewBounds(true))
-                RefreshCells();
+                RefreshCells(false);
 
-            float yChange = (ScrollRect.content.anchoredPosition - _prevAnchoredPos).y;
+            float yChange = (ScrollRect.content.anchoredPosition - prevAnchoredPos).y;
             float adjust = 0f;
 
             if (yChange > 0) // Scrolling down
@@ -377,7 +427,7 @@ namespace UnityExplorer.UI.Widgets
             ScrollRect.m_PrevPosition += vector;
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
-            _prevAnchoredPos = ScrollRect.content.anchoredPosition;
+            prevAnchoredPos = ScrollRect.content.anchoredPosition;
 
             SetScrollBounds();
 
@@ -468,6 +518,8 @@ namespace UnityExplorer.UI.Widgets
 
         private void UpdateSliderHandle(bool forcePositionValue = true)
         {
+            CheckDataSourceCountChange(out _);
+
             var dataHeight = TotalDataHeight;
 
             // calculate handle size based on viewport / total data height
@@ -491,7 +543,10 @@ namespace UnityExplorer.UI.Widgets
                 float val = 0f;
                 if (TotalDataHeight > 0f)
                 {
-                    var topPos = HeightCache[TopDataIndex].startPosition;
+                    float topPos = 0f;
+                    if (HeightCache.Count > 0)
+                        topPos = HeightCache[TopDataIndex].startPosition;
+
                     var scrollPos = topPos + Content.anchoredPosition.y;
 
                     val = (float)((decimal)scrollPos / (decimal)(TotalDataHeight - Viewport.rect.height));
@@ -518,34 +573,29 @@ namespace UnityExplorer.UI.Widgets
             var desiredPosition = val * scrollHeight + NormalizedScrollBounds.x;
 
             // add offset above it for viewport height
-            var halfheight = Viewport.rect.height * 0.5f;
-            var desiredMinY = desiredPosition - halfheight;
+            var halfView = Viewport.rect.height * 0.5f;
+            var desiredMinY = desiredPosition - halfView;
 
             // get the data index at the top of the viewport
             int topViewportIndex = HeightCache.GetDataIndexAtPosition(desiredMinY);
             topViewportIndex = Math.Max(0, topViewportIndex);
+            topViewportIndex = Math.Min(DataSource.ItemCount - 1, topViewportIndex);
 
             // get the real top pooled data index to display our content
             int poolStartIndex = Math.Max(0, topViewportIndex - (int)(ExtraPoolCells * 0.5f));
-            poolStartIndex = Math.Min(DataSource.ItemCount - CellPool.Count, poolStartIndex);
-
-            // for content at the very top, just use the desired position as the anchor pos.
-            if (desiredMinY < RecycleThreshold * 0.5f)
-            {
-                Content.anchoredPosition = new Vector2(0, desiredMinY);
-            }
-            else // else calculate anchor pos 
-            {
-                var topStartPos = HeightCache[poolStartIndex].startPosition;
-
-                // how far the actual top cell is from our desired center
-                var diff = desiredMinY - topStartPos;
-
-                Content.anchoredPosition = new Vector2(0, diff);
-            }
+            poolStartIndex = Math.Min(Math.Max(0, DataSource.ItemCount - CellPool.Count), poolStartIndex);
 
             bottomDataIndex = poolStartIndex + CellPool.Count - 1;
             RefreshCells(true, false);
+
+            var topStartPos = HeightCache[poolStartIndex].startPosition;
+
+            float desiredAnchor;
+            if (desiredMinY < HalfThreshold)
+                desiredAnchor = desiredMinY;
+            else
+                desiredAnchor = desiredMinY - topStartPos;
+            Content.anchoredPosition = new Vector2(0, desiredAnchor);
 
             UpdateSliderHandle(true);
         }

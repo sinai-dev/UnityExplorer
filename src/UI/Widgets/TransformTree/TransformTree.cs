@@ -11,6 +11,8 @@ namespace UnityExplorer.UI.Widgets
 {
     public class TransformTree : IPoolDataSource
     {
+        public int GetRealIndexOfTempIndex(int index) => throw new NotImplementedException("TODO");
+
         public Func<IEnumerable<GameObject>> GetRootEntriesMethod;
 
         public bool Filtering => !string.IsNullOrEmpty(currentFilter);
@@ -93,7 +95,7 @@ namespace UnityExplorer.UI.Widgets
                              : expandedInstanceIDs.Contains(instanceID);
         }
 
-        public void RefreshData(bool andReload = false)
+        public void RefreshData(bool andReload = false, bool hardReload = false)
         {
             displayedObjects.Clear();
 
@@ -106,7 +108,12 @@ namespace UnityExplorer.UI.Widgets
             }
 
             if (andReload)
-                Scroller.RefreshCells(true);
+            {
+                if (!hardReload)
+                    Scroller.RefreshCells(true);
+                else
+                    Scroller.Rebuild();
+            }
         }
 
         private void Traverse(Transform transform, CachedTransform parent = null)
