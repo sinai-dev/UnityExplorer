@@ -29,7 +29,7 @@ namespace UnityExplorer.UI.Widgets
             this.sisterCache = sisterCache;
 
             ExplorerCore.Log("Creating backup height cache, this count: " + scrollPool.DataSource.ItemCount);
-            AddRange(sisterCache.Take(scrollPool.DataSource.ItemCount));
+            TakeFromSister(scrollPool.DataSource.ItemCount);
         }
 
         private readonly List<DataViewInfo> heightCache = new List<DataViewInfo>();
@@ -77,9 +77,10 @@ namespace UnityExplorer.UI.Widgets
                 Add(entry);
         }
 
-        public IEnumerable<DataViewInfo> Take(int count)
+        public void TakeFromSister(int count)
         {
-            return heightCache.Take(count);
+            for (int i = 0, i < count; i++)
+                Add(sisterCache[ScrollPool.DataSource.GetRealIndexForTempIndex(i)]);
         }
 
         public void RemoveLast()
