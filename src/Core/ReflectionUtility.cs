@@ -164,7 +164,7 @@ namespace UnityExplorer
         /// </summary>
         /// <param name="baseType">The base type, which can optionally be abstract / interface.</param>
         /// <returns>All implementations of the type in the current AppDomain.</returns>
-        public static HashSet<Type> GetImplementationsOf(this Type baseType, bool allowAbstract)
+        public static HashSet<Type> GetImplementationsOf(this Type baseType, bool allowAbstract, bool allowGeneric)
         {
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
@@ -183,10 +183,15 @@ namespace UnityExplorer
 
                 foreach (var asm in assemblies)
                 {
-                    foreach (var t in asm.TryGetTypes().Where(t => allowAbstract || (!t.IsAbstract && !t.IsInterface)))
+                    foreach (var t in asm.TryGetTypes().Where(t => (allowAbstract || (!t.IsAbstract && !t.IsInterface)) 
+                                                                && (allowGeneric || !t.IsGenericType)))
                     {
-                        if (baseType.IsAssignableFrom(t) && !set.Contains(t))
-                            set.Add(t);
+                        try
+                        {
+                            if (baseType.IsAssignableFrom(t) && !set.Contains(t))
+                                set.Add(t);
+                        }
+                        catch { }
                     }
                 }
 

@@ -69,8 +69,29 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             return s;
         }
 
-        public override string ProcessTypeNameInString(Type type, string theString, ref string typeName)
+        public override Type GetDeobfuscatedType(Type type)
         {
+            if (!builtDeobCache)
+                BuildDeobfuscationCache();
+
+            Type ret = type;
+            try
+            {
+                var cppType = Il2CppType.From(type);
+                var monoType = GetMonoType(cppType);
+                if (monoType != null)
+                    return monoType;
+            }
+            catch { }
+
+            return ret;
+        }
+
+        public override string ProcessTypeFullNameInString(Type type, string theString, ref string typeName)
+        {
+            if (!builtDeobCache)
+                BuildDeobfuscationCache();
+
             if (!Il2CppTypeNotNull(type))
                 return theString;
 
@@ -83,6 +104,27 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
 
             return theString;
         }
+
+        //public override string ProcessTypeFullNameInString(Type type, string theString, ref string typeName)
+        //{
+        //    if (!builtDeobCache)
+        //        BuildDeobfuscationCache();
+
+        //    try
+        //    {
+        //        var cppType = Il2CppType.From(type);
+        //        if (s_deobfuscatedTypeNames.ContainsKey(cppType.FullName))
+        //        {
+        //            typeName = s_deobfuscatedTypeNames[cppType.FullName];
+        //            theString = theString.Replace(cppType.FullName, typeName);
+        //        }
+        //    }
+        //    catch
+        //    {
+        //    }
+
+        //    return theString;
+        //}
 
         public override Type GetActualType(object obj)
         {
@@ -131,6 +173,37 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
         // keep deobfuscated type name cache, used to display proper name.
         internal static Dictionary<string, string> s_deobfuscatedTypeNames = new Dictionary<string, string>();
 
+        private static bool builtDeobCache = false;
+
+        private static void BuildDeobfuscationCache()
+        {
+            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                foreach (var type in asm.TryGetTypes())
+                {
+                    try
+                    {
+                        if (type.CustomAttributes.Any(it => it.AttributeType.Name == "ObfuscatedNameAttribute"))
+                        {
+                            var cppType = Il2CppType.From(type);
+
+                            if (!Il2CppToMonoType.ContainsKey(cppType.FullName))
+                            {
+                                Il2CppToMonoType.Add(cppType.AssemblyQualifiedName, type);
+                                s_deobfuscatedTypeNames.Add(cppType.FullName, type.FullName);
+                            }
+                        }
+                    }
+                    catch { }
+                }
+            }
+
+            builtDeobCache = true;
+
+            if (s_deobfuscatedTypeNames.Count > 0)
+                ExplorerCore.Log($"Built deobfuscation cache, count: {s_deobfuscatedTypeNames.Count}");
+        }
+
         /// <summary>
         /// Try to get the Mono (Unhollowed) Type representation of the provided <see cref="Il2CppSystem.Type"/>.
         /// </summary>
@@ -138,36 +211,15 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
         /// <returns>The Mono Type if found, otherwise null.</returns>
         public static Type GetMonoType(CppType cppType)
         {
+            if (!builtDeobCache)
+                BuildDeobfuscationCache();
+
             string name = cppType.AssemblyQualifiedName;
 
             if (Il2CppToMonoType.ContainsKey(name))
                 return Il2CppToMonoType[name];
 
             Type ret = Type.GetType(name);
-
-            // Thanks to Slaynash for this deobfuscation snippet!
-            if (ret == null)
-            {
-                string baseName = cppType.FullName;
-                string baseAssembly = cppType.Assembly.GetName().name;
-
-                ret = AppDomain.CurrentDomain
-                    .GetAssemblies()
-                    .FirstOrDefault(a
-                        => a.GetName().Name == baseAssembly)?
-                    .TryGetTypes()
-                    .FirstOrDefault(t
-                        => t.CustomAttributes.Any(ca
-                            => ca.AttributeType.Name == "ObfuscatedNameAttribute"
-                               && (string)ca.ConstructorArguments[0].Value == baseName));
-
-                if (ret != null)
-                {
-                    // deobfuscated type was found, add to cache.
-                    s_deobfuscatedTypeNames.Add(cppType.FullName, ret.FullName);
-                }
-            }
-
             Il2CppToMonoType.Add(name, ret);
 
             return ret;

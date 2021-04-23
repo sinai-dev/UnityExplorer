@@ -37,8 +37,10 @@ namespace UnityExplorer.Core.Runtime.Mono
         public override bool LoadModule(string module)
             => true;
 
-        public override string ProcessTypeNameInString(Type type, string theString, ref string typeName)
+        public override string ProcessTypeFullNameInString(Type type, string theString, ref string typeName)
             => theString;
+
+        public override Type GetDeobfuscatedType(Type type) => type;
 
         // not necessary
         public override void BoxStringToType(ref object _string, Type castTo) { }

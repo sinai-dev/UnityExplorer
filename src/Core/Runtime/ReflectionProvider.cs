@@ -18,6 +18,8 @@ namespace UnityExplorer.Core.Runtime
 
         public abstract Type GetActualType(object obj);
 
+        public abstract Type GetDeobfuscatedType(Type type);
+
         public abstract object Cast(object obj, Type castTo);
 
         public abstract T TryCast<T>(object obj);
@@ -26,7 +28,7 @@ namespace UnityExplorer.Core.Runtime
 
         public abstract bool IsReflectionSupported(Type type);
 
-        public abstract string ProcessTypeNameInString(Type type, string theString, ref string typeName);
+        public abstract string ProcessTypeFullNameInString(Type type, string theString, ref string typeName);
 
         public abstract bool LoadModule(string module);
 
