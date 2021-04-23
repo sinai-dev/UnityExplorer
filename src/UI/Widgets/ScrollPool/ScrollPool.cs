@@ -107,6 +107,17 @@ namespace UnityExplorer.UI.Widgets
         public void Rebuild()
         {
             RecreateCellPool(true, true, null);
+            writingLocked = false;
+            Content.anchoredPosition = Vector2.zero;
+            UpdateSliderHandle(true);
+        }
+
+        public void RefreshAndJumpToTop()
+        {
+            bottomDataIndex = CellPool.Count - 1;
+            RefreshCells(true);
+            Content.anchoredPosition = Vector2.zero;
+            UpdateSliderHandle(true);
         }
 
         public void EnableTempCache()
@@ -595,7 +606,7 @@ namespace UnityExplorer.UI.Widgets
             bottomDataIndex = poolStartIndex + CellPool.Count - 1;
             RefreshCells(true, false);
 
-            //UpdateSliderHandle(true);
+            UpdateSliderHandle(true);
         }
 
         /// <summary>Use <see cref="UIFactory.CreateScrollPool"/></summary>
