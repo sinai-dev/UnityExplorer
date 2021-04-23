@@ -21,7 +21,7 @@ namespace UnityExplorer.UI.Widgets
         public Func<List<T>> GetEntries;
         public Action<ButtonCell<T>, int> SetICell;
         public Func<T, string, bool> ShouldDisplay;
-        public Action<ButtonCell<T>> OnCellClicked;
+        public Action<int> OnCellClicked;
 
         public string CurrentFilter
         {
@@ -30,11 +30,11 @@ namespace UnityExplorer.UI.Widgets
         }
         private string currentFilter;
 
-        public ButtonListSource(ScrollPool infiniteScroller, Func<List<T>> getEntriesMethod, 
+        public ButtonListSource(ScrollPool scrollPool, Func<List<T>> getEntriesMethod, 
             Action<ButtonCell<T>, int> setICellMethod, Func<T, string, bool> shouldDisplayMethod,
-            Action<ButtonCell<T>> onCellClickedMethod)
+            Action<int> onCellClickedMethod)
         {
-            Scroller = infiniteScroller;
+            Scroller = scrollPool;
 
             GetEntries = getEntriesMethod;
             SetICell = setICellMethod;
@@ -44,13 +44,6 @@ namespace UnityExplorer.UI.Widgets
 
         public void Init()
         {
-            RuntimeProvider.Instance.StartCoroutine(InitCoroutine());
-        }
-
-        private IEnumerator InitCoroutine()
-        {
-            yield return null;
-
             var proto = ButtonCell<T>.CreatePrototypeCell(Scroller.UIRoot);
 
             RefreshData();
@@ -90,11 +83,15 @@ namespace UnityExplorer.UI.Widgets
 
         public void SetCell(ICell cell, int index)
         {
+            if (currentEntries == null)
+                RefreshData();
+
             if (index < 0 || index >= currentEntries.Count)
                 cell.Disable();
             else
             {
                 cell.Enable();
+                (cell as ButtonCell<T>).CurrentDataIndex = index;
                 SetICell.Invoke((ButtonCell<T>)cell, index);
             }
         }

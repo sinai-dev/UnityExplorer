@@ -13,17 +13,19 @@ namespace UnityExplorer.UI.Models
 {
     public abstract class UIPanel : UIBehaviourModel
     {
+        // STATIC
+
         public static event Action OnPanelsReordered;
 
         public static void UpdateFocus()
         {
             if (InputManager.GetMouseButtonDown(0) || InputManager.GetMouseButtonDown(1))
             {
-                int count = UIManager.CanvasRoot.transform.childCount;
+                int count = UIManager.PanelHolder.transform.childCount;
                 var mousePos = InputManager.MousePosition;
                 for (int i = count - 1; i >= 0; i--)
                 {
-                    var transform = UIManager.CanvasRoot.transform.GetChild(i);
+                    var transform = UIManager.PanelHolder.transform.GetChild(i);
                     if (transformToPanelDict.TryGetValue(transform.GetInstanceID(), out UIPanel panel))
                     {
                         var pos = panel.mainPanelRect.InverseTransformPoint(mousePos);
@@ -44,16 +46,18 @@ namespace UnityExplorer.UI.Models
         private static readonly List<UIPanel> instances = new List<UIPanel>();
         private static readonly Dictionary<int, UIPanel> transformToPanelDict = new Dictionary<int, UIPanel>();
 
+        // INSTANCE
+
         public UIPanel()
         {
             instances.Add(this);
         }
 
-        public override void Destroy()
-        {
-            instances.Remove(this);
-            base.Destroy();
-        }
+        public abstract UIManager.Panels PanelType { get; }
+
+        public abstract string Name { get; }
+
+        public virtual bool ShouldSaveActiveState => true;
 
         public override GameObject UIRoot => uiRoot;
         protected GameObject uiRoot;
@@ -61,7 +65,23 @@ namespace UnityExplorer.UI.Models
         public GameObject content;
         public PanelDragger dragger;
 
-        public abstract string Name { get; }
+        public abstract void ConstructPanelContent();
+
+        public virtual void OnFinishResize(RectTransform panel)
+        {
+            SaveToConfigManager();
+        }
+
+        public virtual void OnFinishDrag(RectTransform panel)
+        {
+            SaveToConfigManager();
+        }
+
+        public override void Destroy()
+        {
+            instances.Remove(this);
+            base.Destroy();
+        }
 
         public override void ConstructUI(GameObject parent)
         {
@@ -79,11 +99,28 @@ namespace UnityExplorer.UI.Models
             SetDefaultPosAndAnchors();
 
             // Title bar
+            var titleGroup = UIFactory.CreateHorizontalGroup(content, "TitleBar", false, true, true, true, 2,
+                new Vector4(2, 2, 2, 2), new Color(0.09f, 0.09f, 0.09f));
+            UIFactory.SetLayoutElement(titleGroup, minHeight: 25, flexibleHeight: 0);
 
-            var titleBar = UIFactory.CreateLabel(content, "TitleBar", Name, TextAnchor.MiddleLeft);
-            UIFactory.SetLayoutElement(titleBar.gameObject, minHeight: 25, flexibleHeight: 0);
+            // Title text
 
-            dragger = new PanelDragger(titleBar.GetComponent<RectTransform>(), mainPanelRect);
+            var titleTxt = UIFactory.CreateLabel(titleGroup, "TitleBar", Name, TextAnchor.MiddleLeft);
+            UIFactory.SetLayoutElement(titleTxt.gameObject, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
+
+            // close button
+
+            var closeBtn = UIFactory.CreateButton(titleGroup, "CloseButton", "X", () =>
+            {
+                UIManager.SetPanelActive(this.PanelType, false);
+            });
+            UIFactory.SetLayoutElement(closeBtn.gameObject, minHeight: 25, minWidth: 25, flexibleWidth: 0);
+            RuntimeProvider.Instance.SetColorBlock(closeBtn, new Color(0.63f, 0.32f, 0.31f),
+                new Color(0.81f, 0.25f, 0.2f), new Color(0.6f, 0.18f, 0.16f));
+
+            // Panel dragger
+
+            dragger = new PanelDragger(titleTxt.GetComponent<RectTransform>(), mainPanelRect);
             dragger.OnFinishResize += OnFinishResize;
             dragger.OnFinishDrag += OnFinishDrag;
 
@@ -97,8 +134,9 @@ namespace UnityExplorer.UI.Models
                 LoadSaveData();
                 dragger.OnEndResize();
             }
-            catch
+            catch (Exception ex)
             {
+                ExplorerCore.Log($"Exception loading panel save data: {ex}");
                 SetDefaultPosAndAnchors();
             }
 
@@ -108,18 +146,8 @@ namespace UnityExplorer.UI.Models
                 SaveToConfigManager();
             };
         }
-
-        public abstract void ConstructPanelContent();
-
-        public virtual void OnFinishResize(RectTransform panel)
-        {
-            SaveToConfigManager();
-        }
-
-        public virtual void OnFinishDrag(RectTransform panel)
-        {
-            SaveToConfigManager();
-        }
+        
+        // SAVE DATA
 
         public abstract void SaveToConfigManager();
 
@@ -127,11 +155,11 @@ namespace UnityExplorer.UI.Models
 
         public abstract void LoadSaveData();
 
-        public string ToSaveData()
+        public virtual string ToSaveData()
         {
             try
             {
-                return $"{Enabled}" +
+                return $"{(ShouldSaveActiveState ? Enabled : false)}" +
                 $"|{mainPanelRect.RectAnchorsToString()}" +
                 $"|{mainPanelRect.RectPositionToString()}";
             }
@@ -141,7 +169,7 @@ namespace UnityExplorer.UI.Models
             }
         }
 
-        public void ApplySaveData(string data)
+        public virtual void ApplySaveData(string data)
         {
             if (string.IsNullOrEmpty(data))
                 return;
@@ -150,11 +178,15 @@ namespace UnityExplorer.UI.Models
 
             try
             {
-                uiRoot.SetActive(bool.Parse(split[0]));
                 mainPanelRect.SetAnchorsFromString(split[1]);
                 mainPanelRect.SetPositionFromString(split[2]);
+                UIManager.SetPanelActive(this.PanelType, bool.Parse(split[0]));
             }
-            catch { }
+            catch 
+            {
+                ExplorerCore.LogWarning("Invalid or corrupt panel save data! Restoring to default.");
+                SetDefaultPosAndAnchors();
+            }
         }
     }
 
@@ -163,9 +195,6 @@ namespace UnityExplorer.UI.Models
         #region WINDOW ANCHORS / POSITION HELPERS
 
         // Window Anchors helpers
-
-        //private const string DEFAULT_WINDOW_ANCHORS = "0.25,0.10,0.78,0.95";
-        //private const string DEFAULT_WINDOW_POSITION = "0,0";
 
         internal static CultureInfo _enCulture = new CultureInfo("en-US");
 

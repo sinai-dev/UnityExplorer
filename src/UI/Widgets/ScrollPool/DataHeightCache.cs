@@ -223,7 +223,7 @@ namespace UnityExplorer.UI.Widgets
             cache = null;
             int rangeIndex = GetNormalizedHeight(desiredHeight);
 
-            if (rangeToDataIndexCache.Count <= rangeIndex)
+            if (rangeToDataIndexCache.Count <= rangeIndex || rangeIndex < 0)
                 return -1;
 
             int dataIndex = rangeToDataIndexCache[rangeIndex];

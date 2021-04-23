@@ -150,7 +150,7 @@ namespace UnityExplorer.UI
         /// </summary>
         public static GameObject CreatePanel(string name, out GameObject contentHolder, Color? bgColor = null)
         {
-            var panelObj = CreateUIObject(name, UIManager.CanvasRoot);
+            var panelObj = CreateUIObject(name, UIManager.PanelHolder);
             var rect = panelObj.GetComponent<RectTransform>();
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.one;
@@ -506,7 +506,7 @@ namespace UnityExplorer.UI
 
             Image mainImage = mainObj.AddComponent<Image>();
             mainImage.type = Image.Type.Sliced;
-            mainImage.color = new Color(0.15f, 0.15f, 0.15f);
+            mainImage.color = new Color(0.12f, 0.12f, 0.12f);
 
             inputField = mainObj.AddComponent<InputField>();
             Navigation nav = inputField.navigation;
@@ -721,7 +721,7 @@ namespace UnityExplorer.UI
         }
 
         public static ScrollPool CreateScrollPool(GameObject parent, string name, out GameObject uiRoot,
-            out GameObject content, Color? bgColor = null, bool autoResizeSliderHandle = true)
+            out GameObject content, Color? bgColor = null)
         {
             var mainObj = CreateUIObject(name, parent, new Vector2(1, 1));
             mainObj.AddComponent<Image>().color = bgColor ?? new Color(0.12f, 0.12f, 0.12f);
@@ -774,17 +774,14 @@ namespace UnityExplorer.UI
 
             RuntimeProvider.Instance.SetColorBlock(slider, disabled: new Color(0.1f, 0.1f, 0.1f));
 
-            if (autoResizeSliderHandle)
-            {
-                slider.handleRect.offsetMin = new Vector2(slider.handleRect.offsetMin.x, 0);
-                slider.handleRect.offsetMax = new Vector2(slider.handleRect.offsetMax.x, 0);
-                slider.handleRect.pivot = new Vector2(0.5f, 0.5f);
+            slider.handleRect.offsetMin = new Vector2(slider.handleRect.offsetMin.x, 0);
+            slider.handleRect.offsetMax = new Vector2(slider.handleRect.offsetMax.x, 0);
+            slider.handleRect.pivot = new Vector2(0.5f, 0.5f);
 
-                var container = slider.m_HandleContainerRect;
-                container.anchorMin = Vector3.zero;
-                container.anchorMax = Vector3.one;
-                container.pivot = new Vector3(0.5f, 0.5f);
-            }
+            var container = slider.m_HandleContainerRect;
+            container.anchorMin = Vector3.zero;
+            container.anchorMax = Vector3.one;
+            container.pivot = new Vector3(0.5f, 0.5f);
 
             // finalize and create ScrollPool
 

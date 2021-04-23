@@ -106,7 +106,7 @@ namespace UnityExplorer.UI.Widgets
 
         public void Rebuild()
         {
-            RecreateCellPool(true, true, null); 
+            RecreateCellPool(true, true, null);
         }
 
         public void EnableTempCache()

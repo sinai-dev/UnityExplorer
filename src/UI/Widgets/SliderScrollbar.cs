@@ -8,31 +8,34 @@ using UnityEngine.UI;
 using UnityExplorer;
 using UnityExplorer.Core;
 using UnityExplorer.UI;
+using UnityExplorer.UI.Models;
 
 namespace UnityExplorer.UI.Utility
 {
     // Basically just to fix an issue with Scrollbars, instead we use a Slider as the scrollbar.
-    public class SliderScrollbar
+    public class SliderScrollbar : UIBehaviourModel
     {
-        internal static readonly List<SliderScrollbar> Instances = new List<SliderScrollbar>();
+        //internal static readonly List<SliderScrollbar> Instances = new List<SliderScrollbar>();
 
-        public static void UpdateInstances()
-        {
-            if (!Instances.Any())
-                return;
+        //public static void UpdateInstances()
+        //{
+        //    if (!Instances.Any())
+        //        return;
 
-            for (int i = 0; i < Instances.Count; i++)
-            {
-                var slider = Instances[i];
+        //    for (int i = 0; i < Instances.Count; i++)
+        //    {
+        //        var slider = Instances[i];
 
-                if (slider.CheckDestroyed())
-                    i--;
-                else
-                    slider.Update();
-            }
-        }
+        //        if (slider.CheckDestroyed())
+        //            i--;
+        //        else
+        //            slider.Update();
+        //    }
+        //}
 
         public bool IsActive { get; private set; }
+
+        public override GameObject UIRoot => m_slider.gameObject;
 
         public event Action<float> OnValueChanged;
 
@@ -44,7 +47,7 @@ namespace UnityExplorer.UI.Utility
 
         public SliderScrollbar(Scrollbar scrollbar, Slider slider)
         {
-            Instances.Add(this);
+            //Instances.Add(this);
 
             this.m_scrollbar = scrollbar;
             this.m_slider = slider;
@@ -57,18 +60,18 @@ namespace UnityExplorer.UI.Utility
             this.m_slider.Set(1f, false);
         }
 
-        internal bool CheckDestroyed()
-        {
-            if (!m_slider || !m_scrollbar)
-            {
-                Instances.Remove(this);
-                return true;
-            }
+        //internal bool CheckDestroyed()
+        //{
+        //    if (!m_slider || !m_scrollbar)
+        //    {
+        //        Instances.Remove(this);
+        //        return true;
+        //    }
 
-            return false;
-        }
+        //    return false;
+        //}
 
-        internal void Update()
+        public override void Update()
         {
             this.RefreshVisibility();
         }
@@ -165,6 +168,11 @@ namespace UnityExplorer.UI.Utility
                 new Color(0.2f, 0.2f, 0.2f));
 
             return sliderObj;
+        }
+
+        public override void ConstructUI(GameObject parent)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion

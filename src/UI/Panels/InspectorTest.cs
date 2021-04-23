@@ -16,6 +16,8 @@ namespace UnityExplorer.UI.Panels
     public class InspectorTest : UIPanel
     {
         public override string Name => "Inspector";
+        public override UIManager.Panels PanelType => UIManager.Panels.Inspector;
+        public override bool ShouldSaveActiveState => false;
 
         //public SimpleListSource<Component> ComponentList;
 
@@ -81,6 +83,8 @@ namespace UnityExplorer.UI.Panels
             ExplorerCore.Log("Done");
 
             //previousRectHeight = mainPanelRect.rect.height;
+
+            UIManager.SetPanelActive(PanelType, false);
         }
 
         internal GameObject contentHolder;

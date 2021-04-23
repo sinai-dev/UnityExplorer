@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace UnityExplorer.UI.Utility
 {
-    public class PanelDragger
+    public class PanelDragger 
     {
         static PanelDragger()
         {
@@ -51,6 +51,9 @@ namespace UnityExplorer.UI.Utility
             handledInstanceThisFrame = false;
             foreach (var instance in Instances)
             {
+                if (!instance.Panel.gameObject.activeSelf)
+                    continue;
+
                 instance.Update(state, mousePos);
                 if (handledInstanceThisFrame)
                     break;

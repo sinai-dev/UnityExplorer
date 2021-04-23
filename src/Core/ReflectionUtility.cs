@@ -120,7 +120,7 @@ namespace UnityExplorer
         }
 
         // cache for GetBaseTypes
-        internal static readonly Dictionary<string, Type[]> s_cachedTypeInheritance = new Dictionary<string, Type[]>();
+        internal static readonly Dictionary<string, Type[]> s_cachedBaseTypes = new Dictionary<string, Type[]>();
 
         /// <summary>
         /// Get all base types of the provided Type, including itself.
@@ -137,7 +137,7 @@ namespace UnityExplorer
 
             var name = type.AssemblyQualifiedName;
 
-            if (s_cachedTypeInheritance.TryGetValue(name, out Type[] ret))
+            if (s_cachedBaseTypes.TryGetValue(name, out Type[] ret))
                 return ret;
 
             List<Type> list = new List<Type>();
@@ -150,9 +150,50 @@ namespace UnityExplorer
 
             ret = list.ToArray();
 
-            s_cachedTypeInheritance.Add(name, ret);
+            s_cachedBaseTypes.Add(name, ret);
 
             return ret;
+        }
+
+        // cache for GetImplementationsOf
+        internal static readonly Dictionary<Type, HashSet<Type>> s_cachedTypeInheritance = new Dictionary<Type, HashSet<Type>>();
+        internal static int s_lastAssemblyCount;
+
+        /// <summary>
+        /// Get all non-abstract implementations of the provided type (include itself, if not abstract) in the current AppDomain.
+        /// </summary>
+        /// <param name="baseType">The base type, which can optionally be abstract / interface.</param>
+        /// <returns>All implementations of the type in the current AppDomain.</returns>
+        public static HashSet<Type> GetImplementationsOf(this Type baseType, bool allowAbstract)
+        {
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+            if (!s_cachedTypeInheritance.ContainsKey(baseType) || assemblies.Length != s_lastAssemblyCount)
+            {
+                if (assemblies.Length != s_lastAssemblyCount)
+                {
+                    s_cachedTypeInheritance.Clear();
+                    s_lastAssemblyCount = assemblies.Length;
+                }
+
+                var set = new HashSet<Type>();
+
+                if (!baseType.IsAbstract && !baseType.IsInterface)
+                    set.Add(baseType);
+
+                foreach (var asm in assemblies)
+                {
+                    foreach (var t in asm.TryGetTypes().Where(t => allowAbstract || (!t.IsAbstract && !t.IsInterface)))
+                    {
+                        if (baseType.IsAssignableFrom(t) && !set.Contains(t))
+                            set.Add(t);
+                    }
+                }
+
+                s_cachedTypeInheritance.Add(baseType, set);
+            }
+
+            return s_cachedTypeInheritance[baseType];
         }
 
         /// <summary>

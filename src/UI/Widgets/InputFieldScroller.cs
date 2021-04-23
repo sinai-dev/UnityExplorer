@@ -7,30 +7,33 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
+using UnityExplorer.UI.Models;
 
 namespace UnityExplorer.UI.Utility
 {
     // To fix an issue with Input Fields and allow them to go inside a ScrollRect nicely.
 
-    public class InputFieldScroller
+    public class InputFieldScroller : UIBehaviourModel
     {
-        public static readonly List<InputFieldScroller> Instances = new List<InputFieldScroller>();
+        //public static readonly List<InputFieldScroller> Instances = new List<InputFieldScroller>();
 
-        public static void UpdateInstances()
-        {
-            if (!Instances.Any())
-                return;
+        //public static void UpdateInstances()
+        //{
+        //    if (!Instances.Any())
+        //        return;
 
-            for (int i = 0; i < Instances.Count; i++)
-            {
-                var input = Instances[i];
+        //    for (int i = 0; i < Instances.Count; i++)
+        //    {
+        //        var input = Instances[i];
 
-                if (input.CheckDestroyed())
-                    i--;
-                else
-                    input.Update();
-            }
-        }
+        //        if (input.CheckDestroyed())
+        //            i--;
+        //        else
+        //            input.Update();
+        //    }
+        //}
+
+        public override GameObject UIRoot => inputField.gameObject;
 
         internal SliderScrollbar sliderScroller;
         internal InputField inputField;
@@ -43,7 +46,7 @@ namespace UnityExplorer.UI.Utility
 
         public InputFieldScroller(SliderScrollbar sliderScroller, InputField inputField)
         {
-            Instances.Add(this);
+            //Instances.Add(this);
 
             this.sliderScroller = sliderScroller;
             this.inputField = inputField;
@@ -69,7 +72,7 @@ namespace UnityExplorer.UI.Utility
         // only done once, to fix height on creation.
         internal bool heightInitAfterLayout;
 
-        public void Update()
+        public override void Update()
         {
             if (!heightInitAfterLayout)
             {
@@ -85,16 +88,16 @@ namespace UnityExplorer.UI.Utility
             }
         }
 
-        internal bool CheckDestroyed()
-        {
-            if (sliderScroller == null || sliderScroller.CheckDestroyed())
-            {
-                Instances.Remove(this);
-                return true;
-            }
+        //internal bool CheckDestroyed()
+        //{
+        //    if (sliderScroller == null || sliderScroller.CheckDestroyed())
+        //    {
+        //        Instances.Remove(this);
+        //        return true;
+        //    }
 
-            return false;
-        }
+        //    return false;
+        //}
 
         internal void OnTextChanged(string text)
         {
@@ -127,6 +130,11 @@ namespace UnityExplorer.UI.Utility
             {
                 sliderScroller.m_slider.value = 0f;
             }
+        }
+
+        public override void ConstructUI(GameObject parent)
+        {
+            throw new NotImplementedException();
         }
     }
 }

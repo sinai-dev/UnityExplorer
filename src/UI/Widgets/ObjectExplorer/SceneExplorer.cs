@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -9,16 +8,25 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityExplorer.Core;
-using UnityExplorer.Core.Config;
 using UnityExplorer.UI.Models;
-using UnityExplorer.UI.Utility;
-using UnityExplorer.UI.Widgets;
+using UnityExplorer.UI.Panels;
 
-namespace UnityExplorer.UI.Panels
+namespace UnityExplorer.UI.Widgets
 {
-    public class SceneExplorer : UIPanel
+    public class SceneExplorer : UIModel
     {
-        public override string Name => "Scene Explorer";
+        public ObjectExplorer Parent { get; }
+
+        public SceneExplorer(ObjectExplorer parent)
+        {
+            Parent = parent;
+
+            SceneHandler.OnInspectedSceneChanged += SceneHandler_OnInspectedSceneChanged;
+            SceneHandler.OnLoadedScenesChanged += SceneHandler_OnLoadedScenesChanged;
+        }
+
+        public override GameObject UIRoot => m_uiRoot;
+        private GameObject m_uiRoot;
 
         /// <summary>
         /// Whether to automatically update per auto-update interval or not.
@@ -32,12 +40,6 @@ namespace UnityExplorer.UI.Panels
         private Dropdown sceneDropdown;
         private readonly Dictionary<int, Dropdown.OptionData> sceneToDropdownOption = new Dictionary<int, Dropdown.OptionData>();
 
-        public SceneExplorer()
-        {
-            SceneHandler.OnInspectedSceneChanged += SceneHandler_OnInspectedSceneChanged;
-            SceneHandler.OnLoadedScenesChanged += SceneHandler_OnLoadedScenesChanged;
-        }
-
         private IEnumerable<GameObject> GetRootEntries() => SceneHandler.CurrentRootObjects;
 
         public void ForceUpdate()
@@ -45,7 +47,7 @@ namespace UnityExplorer.UI.Panels
             ExpensiveUpdate();
         }
 
-        public override void Update()
+        public void Update()
         {
             if ((AutoUpdate || !SceneHandler.InspectingAssetScene) && Time.realtimeSinceStartup - timeOfLastUpdate >= 1f)
             {
@@ -56,10 +58,8 @@ namespace UnityExplorer.UI.Panels
 
         public void ExpensiveUpdate()
         {
-            //Tree.Scroller.WritingLocked = true;
             SceneHandler.Update();
             Tree.RefreshData(true);
-            ////Tree.Scroller.WritingLocked = false;
         }
 
         private void OnDropdownChanged(int value)
@@ -128,54 +128,33 @@ namespace UnityExplorer.UI.Panels
             Tree.RefreshData(true, true);
         }
 
-        //private float highestRectHeight;
-
-        //public override void OnFinishResize(RectTransform panel)
-        //{
-        //    base.OnFinishResize(panel);
-        //    RuntimeProvider.Instance.StartCoroutine(DelayedRefresh(panel));
-        //}
-
-        //private IEnumerator DelayedRefresh(RectTransform obj)
-        //{
-        //    yield return null;
-
-        //    if (obj.rect.height > highestRectHeight)
-        //    {
-        //        // height increased, hard refresh required.
-        //        highestRectHeight = obj.rect.height;
-        //        //Tree.Scroller.ReloadData();
-        //    }
-        //    Tree.Scroller.RefreshCells(true);
-        //}
-
-        public override void SaveToConfigManager()
+        private void TryLoadScene(LoadSceneMode mode, Dropdown allSceneDrop)
         {
-            ConfigManager.SceneExplorerData.Value = this.ToSaveData();
+            var text = allSceneDrop.options[allSceneDrop.value].text;
+
+            if (text == DEFAULT_LOAD_TEXT)
+                return;
+
+            try
+            {
+                SceneManager.LoadScene(text, mode);
+                allSceneDrop.value = 0;
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.LogWarning($"Unable to load the Scene! {ex.ReflectionExToString()}");
+            }
         }
 
-        public override void LoadSaveData()
+        public override void ConstructUI(GameObject content)
         {
-            ApplySaveData(ConfigManager.SceneExplorerData.Value);
-        }
+            m_uiRoot = UIFactory.CreateUIObject("SceneExplorer", content);
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(m_uiRoot, true, true, true, true, 0, 2, 2, 2, 2);
+            UIFactory.SetLayoutElement(m_uiRoot, flexibleHeight: 9999);
 
-        public override void SetDefaultPosAndAnchors()
-        {
-            mainPanelRect.localPosition = Vector2.zero;
-            mainPanelRect.anchorMin = Vector3.zero;
-            mainPanelRect.anchorMax = new Vector2(0, 1);
-            mainPanelRect.sizeDelta = new Vector2(300f, mainPanelRect.sizeDelta.y);
-            mainPanelRect.anchoredPosition = new Vector2(200, 0);
-            mainPanelRect.offsetMin = new Vector2(mainPanelRect.offsetMin.x, 100);  // bottom
-            mainPanelRect.offsetMax = new Vector2(mainPanelRect.offsetMax.x, -50); // top
-            mainPanelRect.pivot = new Vector2(0.5f, 0.5f);
-        }
-
-        public override void ConstructPanelContent()
-        {
             // Tool bar (top area)
 
-            var toolbar = UIFactory.CreateVerticalGroup(content, "Toolbar", true, true, true, true, 2, new Vector4(2, 2, 2, 2),
+            var toolbar = UIFactory.CreateVerticalGroup(m_uiRoot, "Toolbar", true, true, true, true, 2, new Vector4(2, 2, 2, 2),
                new Color(0.15f, 0.15f, 0.15f));
 
             // Scene selector dropdown
@@ -219,8 +198,8 @@ namespace UnityExplorer.UI.Panels
             refreshRow.SetActive(false);
 
             // Transform Tree
-            
-            var scrollPool = UIFactory.CreateScrollPool(content, "TransformTree", out GameObject scrollObj,
+
+            var scrollPool = UIFactory.CreateScrollPool(m_uiRoot, "TransformTree", out GameObject scrollObj,
                 out GameObject scrollContent, new Color(0.15f, 0.15f, 0.15f));
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
             UIFactory.SetLayoutElement(scrollContent, flexibleHeight: 9999);
@@ -245,7 +224,7 @@ namespace UnityExplorer.UI.Panels
             {
                 if (SceneHandler.WasAbleToGetScenesInBuild)
                 {
-                    var sceneLoaderObj = UIFactory.CreateVerticalGroup(content, "SceneLoader", true, true, true, true);
+                    var sceneLoaderObj = UIFactory.CreateVerticalGroup(m_uiRoot, "SceneLoader", true, true, true, true);
                     UIFactory.SetLayoutElement(sceneLoaderObj, minHeight: 25);
                     //sceneLoaderObj.SetActive(false);
 
@@ -284,7 +263,7 @@ namespace UnityExplorer.UI.Panels
                     loadButton.interactable = false;
                     loadAdditiveButton.interactable = false;
 
-                    allSceneDrop.onValueChanged.AddListener((int val) => 
+                    allSceneDrop.onValueChanged.AddListener((int val) =>
                     {
                         var text = allSceneDrop.options[val].text;
                         if (text == DEFAULT_LOAD_TEXT)
@@ -303,24 +282,6 @@ namespace UnityExplorer.UI.Panels
             catch (Exception ex)
             {
                 ExplorerCore.LogWarning($"Could not create the Scene Loader helper! {ex.ReflectionExToString()}");
-            }
-        }
-
-        private void TryLoadScene(LoadSceneMode mode, Dropdown allSceneDrop)
-        {
-            var text = allSceneDrop.options[allSceneDrop.value].text;
-
-            if (text == DEFAULT_LOAD_TEXT)
-                return;
-
-            try
-            {
-                SceneManager.LoadScene(text, mode);
-                allSceneDrop.value = 0;
-            }
-            catch (Exception ex)
-            {
-                ExplorerCore.LogWarning($"Unable to load the Scene! {ex.ReflectionExToString()}");
             }
         }
     }

@@ -219,7 +219,8 @@
     <Compile Include="Core\Config\InternalConfigHandler.cs" />
     <Compile Include="Core\CSharp\ScriptEvaluator.cs" />
     <Compile Include="Core\CSharp\ScriptInteraction.cs" />
-    <Compile Include="Core\CSharp\Suggestion.cs" />
+    <Compile Include="UI\Widgets\AutoComplete\ISuggestionProvider.cs" />
+    <Compile Include="UI\Widgets\AutoComplete\Suggestion.cs" />
     <Compile Include="Core\Config\ConfigElement.cs" />
     <Compile Include="Core\Config\ConfigHandler.cs" />
     <Compile Include="Core\Config\ConfigManager.cs" />
@@ -266,12 +267,16 @@
     <Compile Include="UI\Models\UIModel.cs" />
     <Compile Include="UI\Models\UIPanel.cs" />
     <Compile Include="UI\Panels\InspectorTest.cs" />
-    <Compile Include="UI\Panels\SceneExplorer.cs" />
+    <Compile Include="UI\Panels\ObjectExplorer.cs" />
     <Compile Include="UI\UIFactory.cs" />
     <Compile Include="UI\UIManager.cs" />
     <Compile Include="UI\Utility\PanelDragger.cs" />
     <Compile Include="UI\Utility\SignatureHighlighter.cs" />
     <Compile Include="UI\Utility\ToStringUtility.cs" />
+    <Compile Include="UI\Widgets\AutoComplete\AutoCompleter.cs" />
+    <Compile Include="UI\Widgets\AutoComplete\TypeCompleter.cs" />
+    <Compile Include="UI\Widgets\ObjectExplorer\ObjectSearch.cs" />
+    <Compile Include="UI\Widgets\ObjectExplorer\SceneExplorer.cs" />
     <Compile Include="UI\Widgets\ScrollPool\DataHeightCache.cs" />
     <Compile Include="UI\Widgets\ScrollPool\CellViewHolder.cs" />
     <Compile Include="UI\Widgets\ScrollPool\ICell.cs" />

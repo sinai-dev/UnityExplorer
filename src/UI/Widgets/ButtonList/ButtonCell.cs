@@ -12,7 +12,8 @@ namespace UnityExplorer.UI.Widgets
         public bool Enabled => m_enabled;
         private bool m_enabled;
 
-        public Action<ButtonCell<T>> OnClick;
+        public Action<int> OnClick;
+        public int CurrentDataIndex;
 
         public ButtonListSource<T> list;
 
@@ -30,7 +31,7 @@ namespace UnityExplorer.UI.Widgets
             this.buttonText = text;
             this.button = button;
 
-            button.onClick.AddListener(() => { OnClick?.Invoke(this); });
+            button.onClick.AddListener(() => { OnClick?.Invoke(CurrentDataIndex); });
         }
 
         public void Disable()

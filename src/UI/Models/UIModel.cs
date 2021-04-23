@@ -26,6 +26,13 @@ namespace UnityExplorer.UI.Models
 
         public abstract void ConstructUI(GameObject parent);
 
+        public virtual void Toggle() => SetActive(!Enabled);
+
+        public virtual void SetActive(bool active)
+        {
+            UIRoot?.SetActive(active);
+        }
+
         public virtual void Destroy()
         {
             if (UIRoot)

@@ -14,14 +14,22 @@ namespace UnityExplorer.UI.Utility
         internal static Dictionary<Type, MethodInfo> toStringMethods = new Dictionary<Type, MethodInfo>();
         internal static Dictionary<Type, MethodInfo> toStringFormattedMethods = new Dictionary<Type, MethodInfo>();
 
-        public static string GetDefaultLabel(object value, Type fallbackType, bool includeNamespace = true, bool includeName = true)
+        public static string ToString(object value, Type fallbackType, bool includeNamespace = true, bool includeName = true, bool objectAsType = false)
         {
             if (value == null && fallbackType == null)
                 return "<null>";
 
-            var type = value?.GetActualType() ?? fallbackType;
+            Type type;
+            if (objectAsType)
+                type = value.TryCast<Type>();
+            else
+                type = value?.GetActualType() ?? fallbackType;
+
 
             var richType = SignatureHighlighter.ParseFullSyntax(type, includeNamespace);
+
+            if (objectAsType)
+                return richType;
 
             if (!includeName)
                 return richType;

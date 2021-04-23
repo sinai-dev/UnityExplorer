@@ -5,11 +5,11 @@ using System.Text;
 
 namespace UnityExplorer.Core.Search
 {
-    internal enum SceneFilter
+    public enum SceneFilter
     {
         Any,
-        Asset,
+        ActivelyLoaded,
         DontDestroyOnLoad,
-        Explicit,
+        HideAndDontSave,
     }
 }

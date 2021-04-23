@@ -5,7 +5,7 @@ using System.Text;
 
 namespace UnityExplorer.Core.Search
 {
-    internal enum ChildFilter
+    public enum ChildFilter
     {
         Any,
         RootObject,

@@ -4,15 +4,16 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityExplorer.Core.Runtime;
 
 namespace UnityExplorer.Core.Search
 {
     public static class SearchProvider
     {
-        internal static object[] StaticClassSearch(string input)
+        internal static List<object> StaticClassSearch(string input)
         {
-            var list = new List<Type>();
+            var list = new List<object>();
 
             var nameFilter = "";
             if (!string.IsNullOrEmpty(input))
@@ -29,7 +30,7 @@ namespace UnityExplorer.Core.Search
                 }
             }
 
-            return list.ToArray();
+            return list;
         }
 
         internal static string[] s_instanceNames = new string[]
@@ -46,7 +47,7 @@ namespace UnityExplorer.Core.Search
             "<instance>k__BackingField",
         };
 
-        internal static object[] SingletonSearch(string input)
+        internal static List<object> SingletonSearch(string input)
         {
             var instances = new List<object>();
 
@@ -72,12 +73,31 @@ namespace UnityExplorer.Core.Search
                 }
             }
 
-            return instances.ToArray();
+            return instances;
         }
 
-        internal static object[] UnityObjectSearch(string input, string customTypeInput, SearchContext context, 
-            ChildFilter childFilter, SceneFilter sceneFilter, string sceneName = null)
+        private static bool Filter(Scene scene, SceneFilter filter)
         {
+            switch (filter)
+            {
+                case SceneFilter.Any:
+                    return true;
+                case SceneFilter.DontDestroyOnLoad:
+                    return scene == SceneHandler.DontDestroyScene;
+                case SceneFilter.HideAndDontSave:
+                    return scene == SceneHandler.AssetScene;
+                case SceneFilter.ActivelyLoaded:
+                    return scene != SceneHandler.DontDestroyScene && scene != SceneHandler.AssetScene;
+                default:
+                    return false;
+            }
+        }
+
+        internal static List<object> UnityObjectSearch(string input, string customTypeInput, SearchContext context, 
+            ChildFilter childFilter, SceneFilter sceneFilter)
+        {
+            var results = new List<object>();
+
             Type searchType = null;
             switch (context)
             {
@@ -91,13 +111,15 @@ namespace UnityExplorer.Core.Search
                     if (string.IsNullOrEmpty(customTypeInput))
                     {
                         ExplorerCore.LogWarning("Custom Type input must not be empty!");
-                        return null;
+                        return results;
                     }
                     if (ReflectionUtility.GetTypeByName(customTypeInput) is Type customType)
+                    {
                         if (typeof(UnityEngine.Object).IsAssignableFrom(customType))
                             searchType = customType;
                         else
                             ExplorerCore.LogWarning($"Custom type '{customType.FullName}' is not assignable from UnityEngine.Object!");
+                    }
                     else
                         ExplorerCore.LogWarning($"Could not find a type by the name '{customTypeInput}'!");
                     break;
@@ -106,11 +128,11 @@ namespace UnityExplorer.Core.Search
                     searchType = typeof(UnityEngine.Object); break;
             }
 
+
             if (searchType == null)
-                return null;
+                return results;
 
             var allObjects = RuntimeProvider.Instance.FindObjectsOfTypeAll(searchType);
-            var results = new List<object>();
 
             // perform filter comparers
 
@@ -121,19 +143,10 @@ namespace UnityExplorer.Core.Search
             bool canGetGameObject = (sceneFilter != SceneFilter.Any || childFilter != ChildFilter.Any)
                 && (context == SearchContext.GameObject || typeof(Component).IsAssignableFrom(searchType));
 
-            string sceneFilterString = null;
             if (!canGetGameObject)
             {
                 if (context != SearchContext.UnityObject && (sceneFilter != SceneFilter.Any || childFilter != ChildFilter.Any))
                     ExplorerCore.LogWarning($"Type '{searchType}' cannot have Scene or Child filters applied to it");
-            }
-            else
-            {
-                if (sceneFilter == SceneFilter.DontDestroyOnLoad)
-                    sceneFilterString = "DontDestroyOnLoad";
-                else if (sceneFilter == SceneFilter.Explicit)
-                    //sceneFilterString = SearchPage.Instance.m_sceneDropdown.options[SearchPage.Instance.m_sceneDropdown.value].text;
-                    sceneFilterString = sceneName;
             }
 
             foreach (var obj in allObjects)
@@ -157,12 +170,9 @@ namespace UnityExplorer.Core.Search
                         switch (context)
                         {
                             case SearchContext.GameObject:
-                                if (go.scene.name != sceneFilterString)
-                                    continue;
-                                break;
                             case SearchContext.Custom:
                             case SearchContext.Component:
-                                if (go.scene.name != sceneFilterString)
+                                if (!Filter(go.scene, sceneFilter))
                                     continue;
                                 break;
                         }
@@ -184,7 +194,7 @@ namespace UnityExplorer.Core.Search
                 results.Add(obj);
             }
 
-            return results.ToArray();
+            return results;
         }
     }
 }
