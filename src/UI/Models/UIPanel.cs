@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Input;
+using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Utility;
 
 namespace UnityExplorer.UI.Models
@@ -16,30 +17,41 @@ namespace UnityExplorer.UI.Models
         // STATIC
 
         public static event Action OnPanelsReordered;
+        public static event Action OnClickedOutsidePanels;
 
         public static void UpdateFocus()
         {
+            // if the user is clicking
             if (InputManager.GetMouseButtonDown(0) || InputManager.GetMouseButtonDown(1))
             {
                 int count = UIManager.PanelHolder.transform.childCount;
                 var mousePos = InputManager.MousePosition;
+                bool clickedInAny = false;
                 for (int i = count - 1; i >= 0; i--)
                 {
+                    // make sure this is a real recognized panel
                     var transform = UIManager.PanelHolder.transform.GetChild(i);
-                    if (transformToPanelDict.TryGetValue(transform.GetInstanceID(), out UIPanel panel))
+                    if (!transformToPanelDict.TryGetValue(transform.GetInstanceID(), out UIPanel panel))
+                        continue;
+
+                    // check if our mouse is clicking inside the panel
+                    var pos = panel.mainPanelRect.InverseTransformPoint(mousePos);
+                    if (!panel.Enabled || !panel.mainPanelRect.rect.Contains(pos))
+                        continue;
+
+                    // if this is not the top panel, reorder and invoke the onchanged event
+                    if (transform.GetSiblingIndex() != count - 1)
                     {
-                        var pos = panel.mainPanelRect.InverseTransformPoint(mousePos);
-                        if (panel.Enabled && panel.mainPanelRect.rect.Contains(pos))
-                        {
-                            if (transform.GetSiblingIndex() != count - 1)
-                            {
-                                transform.SetAsLastSibling();
-                                OnPanelsReordered?.Invoke();
-                            }
-                            break;
-                        }
+                        transform.SetAsLastSibling();
+                        OnPanelsReordered?.Invoke();
                     }
+                    // panel was found, break
+                    clickedInAny = true;
+                    break;
                 }
+
+                if (!clickedInAny)
+                    OnClickedOutsidePanels?.Invoke();
             }
         }
 
@@ -54,16 +66,19 @@ namespace UnityExplorer.UI.Models
         }
 
         public abstract UIManager.Panels PanelType { get; }
-
         public abstract string Name { get; }
 
         public virtual bool ShouldSaveActiveState => true;
+
+        public virtual bool CanDrag => true;
+        //public virtual bool CanResize => true;
+
+        public PanelDragger Dragger;
 
         public override GameObject UIRoot => uiRoot;
         protected GameObject uiRoot;
         protected RectTransform mainPanelRect;
         public GameObject content;
-        public PanelDragger dragger;
 
         public abstract void ConstructPanelContent();
 
@@ -83,7 +98,7 @@ namespace UnityExplorer.UI.Models
             base.Destroy();
         }
 
-        public override void ConstructUI(GameObject parent)
+        public void ConstructUI()
         {
             // create core canvas 
             uiRoot = UIFactory.CreatePanel(Name, out GameObject panelContent);
@@ -118,11 +133,16 @@ namespace UnityExplorer.UI.Models
             RuntimeProvider.Instance.SetColorBlock(closeBtn, new Color(0.63f, 0.32f, 0.31f),
                 new Color(0.81f, 0.25f, 0.2f), new Color(0.6f, 0.18f, 0.16f));
 
+            if (!CanDrag)
+                titleGroup.SetActive(false);
+
             // Panel dragger
 
-            dragger = new PanelDragger(titleTxt.GetComponent<RectTransform>(), mainPanelRect);
-            dragger.OnFinishResize += OnFinishResize;
-            dragger.OnFinishDrag += OnFinishDrag;
+            Dragger = new PanelDragger(titleTxt.GetComponent<RectTransform>(), mainPanelRect);
+            Dragger.OnFinishResize += OnFinishResize;
+            Dragger.OnFinishDrag += OnFinishDrag;
+            Dragger.AllowDragAndResize = this.CanDrag;
+            //Dragger.CanResize = this.CanResize;
 
             // content (abstract)
 
@@ -132,7 +152,7 @@ namespace UnityExplorer.UI.Models
             try
             {
                 LoadSaveData();
-                dragger.OnEndResize();
+                Dragger.OnEndResize();
             }
             catch (Exception ex)
             {
@@ -146,7 +166,9 @@ namespace UnityExplorer.UI.Models
                 SaveToConfigManager();
             };
         }
-        
+
+        public override void ConstructUI(GameObject parent) => ConstructUI();
+
         // SAVE DATA
 
         public abstract void SaveToConfigManager();
@@ -190,10 +212,10 @@ namespace UnityExplorer.UI.Models
         }
     }
 
+    #region WINDOW ANCHORS / POSITION HELPERS
+
     public static class RectSaveExtensions
     {
-        #region WINDOW ANCHORS / POSITION HELPERS
-
         // Window Anchors helpers
 
         internal static CultureInfo _enCulture = new CultureInfo("en-US");
@@ -255,7 +277,7 @@ namespace UnityExplorer.UI.Models
             vector.y = float.Parse(split[1], _enCulture);
             rect.localPosition = vector;
         }
-
-        #endregion
     }
+
+    #endregion
 }
