@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace UnityExplorer.UI.Widgets
 {
@@ -17,7 +18,7 @@ namespace UnityExplorer.UI.Widgets
     public class DataHeightCache
     {
         private ScrollPool ScrollPool { get; }
-        private DataHeightCache sisterCache { get; }
+        private DataHeightCache SisterCache { get; }
 
         public DataHeightCache(ScrollPool scrollPool)
         {
@@ -26,9 +27,10 @@ namespace UnityExplorer.UI.Widgets
 
         public DataHeightCache(ScrollPool scrollPool, DataHeightCache sisterCache) : this(scrollPool)
         {
-            this.sisterCache = sisterCache;
+            this.SisterCache = sisterCache;
 
-            TakeFromSister(scrollPool.DataSource.ItemCount);
+            for (int i = 0; i < scrollPool.DataSource.ItemCount; i++)
+                Add(sisterCache[ScrollPool.DataSource.GetRealIndexOfTempIndex(i)]);
         }
 
         private readonly List<DataViewInfo> heightCache = new List<DataViewInfo>();
@@ -38,9 +40,10 @@ namespace UnityExplorer.UI.Widgets
         public float TotalHeight => totalHeight;
         private float totalHeight;
 
-        public float DefaultHeight => ScrollPool.PrototypeCell.rect.height;
+        public float DefaultHeight => m_defaultHeight ?? (float)(m_defaultHeight = ScrollPool.PrototypeCell.rect.height);
+        private float? m_defaultHeight;
 
-        private int GetNormalizedHeight(float height) => (int)Math.Floor((decimal)height / (decimal)DefaultHeight);
+        private int GetRangeIndexOfPosition(float position) => (int)Math.Floor((decimal)position / (decimal)DefaultHeight);
 
         // for efficient lookup of "which data index is at this position"
         // list index: DefaultHeight * index from top of data
@@ -53,9 +56,19 @@ namespace UnityExplorer.UI.Widgets
             set => SetIndex(index, value);
         }
 
+        private int GetSpread(float startPosition, float height)
+        {
+            float rem = startPosition % DefaultHeight;
+
+            if (!Mathf.Approximately(rem, 0f))
+                height -= (DefaultHeight - rem);
+
+            return (int)Math.Ceiling((decimal)height / (decimal)DefaultHeight);
+        }
+
         public void Add(float value)
         {
-            int spread = GetNormalizedHeight(value);
+            int spread = GetSpread(totalHeight, value);
 
             heightCache.Add(new DataViewInfo()
             {
@@ -65,21 +78,10 @@ namespace UnityExplorer.UI.Widgets
             });
 
             int dataIdx = heightCache.Count - 1;
-            AppendDataSpread(dataIdx, spread);
+            for (int i = 0; i < spread; i++)
+                rangeToDataIndexCache.Add(dataIdx);
 
             totalHeight += value;
-        }
-
-        public void AddRange(IEnumerable<DataViewInfo> collection)
-        {
-            foreach (var entry in collection)
-                Add(entry);
-        }
-
-        public void TakeFromSister(int count)
-        {
-            for (int i = 0; i < count; i++)
-                Add(sisterCache[ScrollPool.DataSource.GetRealIndexOfTempIndex(i)]);
         }
 
         public void RemoveLast()
@@ -92,16 +94,7 @@ namespace UnityExplorer.UI.Widgets
             heightCache.RemoveAt(heightCache.Count - 1);
         }
 
-        private void AppendDataSpread(int dataIdx, int spread)
-        {
-            while (spread > 0)
-            {
-                rangeToDataIndexCache.Add(dataIdx);
-                spread--;
-            }
-        }
-
-        public void SetIndex(int dataIndex, float value, bool ignoreDataCount = false)
+        public void SetIndex(int dataIndex, float height, bool ignoreDataCount = false)
         {
             if (!ignoreDataCount)
             {
@@ -117,19 +110,19 @@ namespace UnityExplorer.UI.Widgets
             {
                 while (dataIndex > heightCache.Count)
                     Add(DefaultHeight);
-                Add(value);
+                Add(height);
                 return;
             }
 
             var cache = heightCache[dataIndex];
             var prevHeight = cache.height;
 
-            var diff = value - prevHeight;
+            var diff = height - prevHeight;
             if (diff != 0.0f)
             {
                 // ExplorerCore.LogWarning("Height for data index " + dataIndex + " changed by " + diff);
                 totalHeight += diff;
-                cache.height = value;
+                cache.height = height;
             }
 
             // update our start position using the previous cell (if it exists)
@@ -139,31 +132,35 @@ namespace UnityExplorer.UI.Widgets
                 cache.startPosition = prev.startPosition + prev.height;
             }
 
-            int rangeIndex = GetNormalizedHeight(cache.startPosition);
-            var spread = GetNormalizedHeight(value);
+            int rangeIndex = GetRangeIndexOfPosition(cache.startPosition);
+            // var spread = GetRangeIndexOfPosition(value);
+            int spread = GetSpread(cache.startPosition, height);
 
-            // If we are setting an index outside of our cached range we need to naively fill the gap
+            // setting range index beyond current count, need to append
             if (rangeToDataIndexCache.Count <= rangeIndex)
             {
-                if (rangeToDataIndexCache.Any())
+                // if the gap is > 1, we need to fill that gap. This shouldn't really ever happen but just in case.
+                if (rangeToDataIndexCache.Count < rangeIndex)
                 {
                     int lastDataIdx = rangeToDataIndexCache[rangeToDataIndexCache.Count - 1];
-                    while (rangeToDataIndexCache.Count <= rangeIndex)
+                    while (rangeToDataIndexCache.Count < rangeIndex)
                     {
-                        rangeToDataIndexCache.Add(lastDataIdx);
-                        heightCache[lastDataIdx].normalizedSpread++;
                         if (lastDataIdx < dataIndex - 1)
                             lastDataIdx++;
+                        rangeToDataIndexCache.Add(lastDataIdx);
+                        heightCache[lastDataIdx].normalizedSpread++;
                     }
                 }
 
-                AppendDataSpread(dataIndex, spread);
+                // apend spread for this data
+                for (int i = 0; i < spread; i++)
+                    rangeToDataIndexCache.Add(dataIndex);
+
                 cache.normalizedSpread = spread;
             }
             else if (spread != cache.normalizedSpread)
             {
-                // The cell's height has changed by +/- DefaultCellHeight since we last set the range spread cache for it.
-                // Need to add or remove accordingly.
+                // The cell's spread has changed, need to update.
 
                 int spreadDiff = spread - cache.normalizedSpread;
                 cache.normalizedSpread = spread;
@@ -205,11 +202,11 @@ namespace UnityExplorer.UI.Widgets
             }
 
             // if sister cache is set, then update it too.
-            if (sisterCache != null)
+            if (SisterCache != null)
             {
                 var realIdx = ScrollPool.DataSource.GetRealIndexOfTempIndex(dataIndex);
                 if (realIdx >= 0)
-                    sisterCache.SetIndex(realIdx, value, true);
+                    SisterCache.SetIndex(realIdx, height, true);
             }
         }
 
@@ -221,7 +218,7 @@ namespace UnityExplorer.UI.Widgets
         public int GetDataIndexAtPosition(float desiredHeight, out DataViewInfo cache)
         {
             cache = null;
-            int rangeIndex = GetNormalizedHeight(desiredHeight);
+            int rangeIndex = GetRangeIndexOfPosition(desiredHeight);
 
             if (rangeToDataIndexCache.Count <= rangeIndex || rangeIndex < 0)
                 return -1;
