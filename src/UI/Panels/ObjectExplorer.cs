@@ -51,7 +51,8 @@ namespace UnityExplorer.UI.Panels
 
         public override void Update()
         {
-            SceneExplorer.Update();
+            if (SelectedTab == 0)
+                SceneExplorer.Update();
         }
 
         public override void SaveToConfigManager()

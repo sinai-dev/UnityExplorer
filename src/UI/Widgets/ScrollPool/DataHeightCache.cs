@@ -43,12 +43,15 @@ namespace UnityExplorer.UI.Widgets
         public float DefaultHeight => m_defaultHeight ?? (float)(m_defaultHeight = ScrollPool.PrototypeCell.rect.height);
         private float? m_defaultHeight;
 
+        /// <summary>Get the first range (division of DefaultHeight) which the position appears in.</summary>
         private int GetRangeIndexOfPosition(float position) => (int)Math.Floor((decimal)position / (decimal)DefaultHeight);
 
-        // for efficient lookup of "which data index is at this position"
-        // list index: DefaultHeight * index from top of data
-        // list value: the data index at this position
-        private readonly List<int> rangeToDataIndexCache = new List<int>();
+        /// <summary>
+        /// Lookup table for "which data index first appears at this position"<br/>
+        /// Index: DefaultHeight * index from top of data<br/>
+        /// Value: the first data index at this position<br/>
+        /// </summary>
+        private readonly List<int> rangeCache = new List<int>();
 
         public DataViewInfo this[int index]
         {
@@ -56,19 +59,30 @@ namespace UnityExplorer.UI.Widgets
             set => SetIndex(index, value);
         }
 
-        private int GetSpread(float startPosition, float height)
+        /// <summary>
+        /// Get the spread of the height, starting from the start position.<br/><br/>
+        /// The "spread" begins at the start of the next interval of the DefaultHeight, then increases for
+        /// every interval beyond that.
+        /// </summary>
+        private int GetRangeSpread(float startPosition, float height)
         {
+            // get the remainder of the start position divided by min height
             float rem = startPosition % DefaultHeight;
 
+            // if there is a remainder, this means the previous cell started in 
+            // our first cell and they take priority, so reduce our height by
+            // (minHeight - remainder) to account for that. We need to fill that
+            // gap and reach the next cell before we take priority.
             if (!Mathf.Approximately(rem, 0f))
                 height -= (DefaultHeight - rem);
 
             return (int)Math.Ceiling((decimal)height / (decimal)DefaultHeight);
         }
 
+        /// <summary>Append a data index to the cache with the provided height value.</summary>
         public void Add(float value)
         {
-            int spread = GetSpread(totalHeight, value);
+            int spread = GetRangeSpread(totalHeight, value);
 
             heightCache.Add(new DataViewInfo()
             {
@@ -79,11 +93,12 @@ namespace UnityExplorer.UI.Widgets
 
             int dataIdx = heightCache.Count - 1;
             for (int i = 0; i < spread; i++)
-                rangeToDataIndexCache.Add(dataIdx);
+                rangeCache.Add(dataIdx);
 
             totalHeight += value;
         }
 
+        /// <summary>Remove the last (highest count) index from the height cache.</summary>
         public void RemoveLast()
         {
             if (!heightCache.Any())
@@ -94,6 +109,28 @@ namespace UnityExplorer.UI.Widgets
             heightCache.RemoveAt(heightCache.Count - 1);
         }
 
+        /// <summary>Get the data index at the specific position of the total height cache.</summary>
+        public int GetDataIndexAtPosition(float desiredHeight) => GetDataIndexAtPosition(desiredHeight, out _);
+
+        /// <summary>Get the data index at the specific position of the total height cache.</summary>
+        public int GetDataIndexAtPosition(float desiredHeight, out DataViewInfo cache)
+        {
+            cache = null;
+            int rangeIndex = GetRangeIndexOfPosition(desiredHeight);
+
+            if (rangeIndex <= 0)
+                return 0;
+
+            if (rangeCache.Count <= rangeIndex)
+                return rangeCache[rangeCache.Count - 1];
+
+            int dataIndex = rangeCache[rangeIndex];
+            cache = heightCache[dataIndex];
+
+            return dataIndex;
+        }
+
+        /// <summary>Set a given data index with the specified value.</summary>
         public void SetIndex(int dataIndex, float height, bool ignoreDataCount = false)
         {
             if (!ignoreDataCount)
@@ -134,29 +171,13 @@ namespace UnityExplorer.UI.Widgets
 
             int rangeIndex = GetRangeIndexOfPosition(cache.startPosition);
             // var spread = GetRangeIndexOfPosition(value);
-            int spread = GetSpread(cache.startPosition, height);
+            int spread = GetRangeSpread(cache.startPosition, height);
 
-            // setting range index beyond current count, need to append
-            if (rangeToDataIndexCache.Count <= rangeIndex)
+            if (rangeCache.Count <= rangeIndex)
             {
-                // if the gap is > 1, we need to fill that gap. This shouldn't really ever happen but just in case.
-                if (rangeToDataIndexCache.Count < rangeIndex)
-                {
-                    int lastDataIdx = rangeToDataIndexCache[rangeToDataIndexCache.Count - 1];
-                    while (rangeToDataIndexCache.Count < rangeIndex)
-                    {
-                        if (lastDataIdx < dataIndex - 1)
-                            lastDataIdx++;
-                        rangeToDataIndexCache.Add(lastDataIdx);
-                        heightCache[lastDataIdx].normalizedSpread++;
-                    }
-                }
-
-                // apend spread for this data
-                for (int i = 0; i < spread; i++)
-                    rangeToDataIndexCache.Add(dataIndex);
-
-                cache.normalizedSpread = spread;
+                // This should never happen, there is a gap in the previous data. Trigger rebuild?
+                // I stress-tested the scroll pool and didn't seem to encounter this, leaving for now.
+                ExplorerCore.LogWarning($"rangeToDataIndex.Count ({rangeCache.Count}) <= rangeIndex ({rangeIndex})?");
             }
             else if (spread != cache.normalizedSpread)
             {
@@ -168,11 +189,11 @@ namespace UnityExplorer.UI.Widgets
                 int rangeStart = -1;
 
                 // the start will always be at LEAST (no less) PrototypeHeight * index, cells can never be smaller than that.
-                int minStart = rangeToDataIndexCache[dataIndex];
+                int minStart = rangeCache[dataIndex];
 
-                for (int i = minStart; i < rangeToDataIndexCache.Count; i++)
+                for (int i = minStart; i < rangeCache.Count; i++)
                 {
-                    if (rangeToDataIndexCache[i] == dataIndex)
+                    if (rangeCache[i] == dataIndex)
                     {
                         rangeStart = i;
                         break;
@@ -180,24 +201,27 @@ namespace UnityExplorer.UI.Widgets
 
                     // our index is further down. add the min difference and try again.
                     // the iterator will add 1 on the next loop so account for that.
-                    int jmp = dataIndex - rangeToDataIndexCache[i] - 1;
+                    int jmp = dataIndex - rangeCache[i] - 1;
                     i += jmp < 1 ? 0 : jmp;
                 }
 
                 if (rangeStart == -1)
-                    rangeStart = rangeToDataIndexCache.Count - 1;
+                {
+                    ExplorerCore.LogWarning($"DataHeightCache corrupt? Couldn't find dataIndex {dataIndex} anywhere in range cache.");
+                    return;
+                }
 
                 if (spreadDiff > 0)
                 {
                     // need to insert
                     for (int i = 0; i < spreadDiff; i++)
-                        rangeToDataIndexCache.Insert(rangeStart, dataIndex);
+                        rangeCache.Insert(rangeStart, dataIndex);
                 }
                 else
                 {
                     // need to remove
                     for (int i = 0; i < -spreadDiff; i++)
-                        rangeToDataIndexCache.RemoveAt(rangeStart);
+                        rangeCache.RemoveAt(rangeStart);
                 }
             }
 
@@ -208,25 +232,6 @@ namespace UnityExplorer.UI.Widgets
                 if (realIdx >= 0)
                     SisterCache.SetIndex(realIdx, height, true);
             }
-        }
-
-        public int GetDataIndexAtPosition(float desiredHeight)
-        {
-            return GetDataIndexAtPosition(desiredHeight, out _);
-        }
-
-        public int GetDataIndexAtPosition(float desiredHeight, out DataViewInfo cache)
-        {
-            cache = null;
-            int rangeIndex = GetRangeIndexOfPosition(desiredHeight);
-
-            if (rangeToDataIndexCache.Count <= rangeIndex || rangeIndex < 0)
-                return -1;
-
-            int dataIndex = rangeToDataIndexCache[rangeIndex];
-            cache = heightCache[dataIndex];
-
-            return dataIndex;
         }
     }
 }
