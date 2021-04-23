@@ -11,23 +11,60 @@ using UnityExplorer.UI.Models;
 
 namespace UnityExplorer.UI.Widgets.AutoComplete
 {
-    // todo add a 'close' button if the user wants to manually hide the suggestions box
-
-    public static class AutoCompleter
+    public class AutoCompleter : UIPanel
     {
-        public static ISuggestionProvider CurrentHandler;
+        // Static
 
-        public static GameObject UIRoot => uiRoot;
-        public static GameObject uiRoot;
+        public static AutoCompleter Instance => UIManager.AutoCompleter;
 
-        public static ButtonListSource<Suggestion> dataHandler;
-        public static ScrollPool scrollPool;
+        // Instance
 
-        private static List<Suggestion> suggestions = new List<Suggestion>();
+        public AutoCompleter()
+        {
+            OnPanelsReordered += UIPanel_OnPanelsReordered;
+            OnClickedOutsidePanels += AutoCompleter_OnClickedOutsidePanels;
+        }
 
-        private static int lastCaretPos;
+        private void AutoCompleter_OnClickedOutsidePanels()
+        {
+            if (!this.UIRoot || !this.UIRoot.activeInHierarchy)
+                return;
 
-        public static void Update()
+            if (CurrentHandler != null)
+                ReleaseOwnership(CurrentHandler);
+            else
+                UIRoot.SetActive(false);
+        }
+
+        private void UIPanel_OnPanelsReordered()
+        {
+            if (!this.UIRoot || !this.UIRoot.activeInHierarchy)
+                return;
+
+            if (this.UIRoot.transform.GetSiblingIndex() != UIManager.PanelHolder.transform.childCount - 1)
+            {
+                if (CurrentHandler != null)
+                    ReleaseOwnership(CurrentHandler);
+                else
+                    UIRoot.SetActive(false);
+            }
+        }
+
+        public override string Name => "AutoCompleter";
+        public override UIManager.Panels PanelType => UIManager.Panels.AutoCompleter;
+
+        public override bool CanDrag => false;
+
+        public ISuggestionProvider CurrentHandler { get; private set; }
+
+        public ButtonListSource<Suggestion> dataHandler;
+        public ScrollPool scrollPool;
+
+        private List<Suggestion> suggestions = new List<Suggestion>();
+
+        private int lastCaretPos;
+
+        public override void Update()
         {
             if (!UIRoot || !UIRoot.activeSelf)
                 return;
@@ -44,12 +81,12 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             }
         }
 
-        public static void TakeOwnership(ISuggestionProvider provider)
+        public void TakeOwnership(ISuggestionProvider provider)
         {
             CurrentHandler = provider;
         }
 
-        public static void ReleaseOwnership(ISuggestionProvider provider)
+        public void ReleaseOwnership(ISuggestionProvider provider)
         {
             if (CurrentHandler == null)
                 return;
@@ -61,11 +98,11 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             }
         }
 
-        private static List<Suggestion> GetEntries() => suggestions;
+        private List<Suggestion> GetEntries() => suggestions;
 
-        private static bool ShouldDisplay(Suggestion data, string filter) => true;
+        private bool ShouldDisplay(Suggestion data, string filter) => true;
 
-        public static void SetSuggestions(List<Suggestion> collection)
+        public void SetSuggestions(List<Suggestion> collection)
         {
             suggestions = collection;
 
@@ -74,19 +111,19 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             else
             {
                 UIRoot.SetActive(true);
+                UIRoot.transform.SetAsLastSibling();
                 dataHandler.RefreshData();
-                scrollPool.Rebuild();
-                //scrollPool.RefreshCells(true);
+                scrollPool.RefreshAndJumpToTop();
             }
         }
 
-        private static void OnCellClicked(int dataIndex)
+        private void OnCellClicked(int dataIndex)
         {
             var suggestion = suggestions[dataIndex];
             CurrentHandler.OnSuggestionClicked(suggestion);
         }
 
-        private static void SetCell(ButtonCell<Suggestion> cell, int index)
+        private void SetCell(ButtonCell<Suggestion> cell, int index)
         {
             if (index < 0 || index >= suggestions.Count)
             {
@@ -98,43 +135,66 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             cell.buttonText.text = suggestion.DisplayText;
         }
 
-        private static void UpdatePosition()
+        private void UpdatePosition()
         {
             if (CurrentHandler == null || !CurrentHandler.InputField.isFocused)
                 return;
 
+            Vector3 pos;
             var input = CurrentHandler.InputField;
+
             var textGen = input.textComponent.cachedTextGenerator;
-            int caretPos = lastCaretPos;
-            caretPos--;
+            int caretPos = 0;
+            if (CurrentHandler.AnchorToCaretPosition)
+            {
+                caretPos = lastCaretPos--;
 
-            caretPos = Math.Max(0, caretPos);
-            caretPos = Math.Min(textGen.characters.Count - 1, caretPos);
+                caretPos = Math.Max(0, caretPos);
+                caretPos = Math.Min(textGen.characterCount - 1, caretPos);
+            }
 
-            var pos = textGen.characters[caretPos].cursorPos;
+            pos = textGen.characters[caretPos].cursorPos;
             pos = input.transform.TransformPoint(pos);
 
             uiRoot.transform.position = new Vector3(pos.x + 10, pos.y - 20, 0);
+
+            this.Dragger.OnEndResize();
         }
 
-        public static void ConstructUI()
+        public override void SetDefaultPosAndAnchors()
         {
-            var parent = UIManager.CanvasRoot;
-
-            dataHandler = new ButtonListSource<Suggestion>(scrollPool, GetEntries, SetCell, ShouldDisplay, OnCellClicked);
-
-            scrollPool = UIFactory.CreateScrollPool(parent, "AutoCompleter", out uiRoot, out GameObject scrollContent);
             var mainRect = uiRoot.GetComponent<RectTransform>();
             mainRect.pivot = new Vector2(0f, 1f);
-            mainRect.anchorMin = new Vector2(0.45f, 0.45f);
-            mainRect.anchorMax = new Vector2(0.65f, 0.6f);
-            mainRect.offsetMin = Vector2.zero;
-            mainRect.offsetMax = Vector2.zero;
+            mainRect.anchorMin = new Vector2(0, 1);
+            mainRect.anchorMax = new Vector2(0, 1);
+            mainRect.offsetMin = new Vector2(25, 0);
+            mainRect.offsetMax = new Vector2(525, 169);
+        }
+
+        public override void ConstructPanelContent()
+        {
+            dataHandler = new ButtonListSource<Suggestion>(scrollPool, GetEntries, SetCell, ShouldDisplay, OnCellClicked);
+
+            var prototypeCell = ButtonCell<Suggestion>.CreatePrototypeCell(this.content);
+            prototypeCell.GetComponentInChildren<Text>().supportRichText = true;
+
+            scrollPool = UIFactory.CreateScrollPool(this.content, "AutoCompleter", out GameObject scrollObj, out GameObject scrollContent);
+            scrollPool.Initialize(dataHandler, prototypeCell);
+            UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
+
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(scrollContent, true, false, true, false);
 
-            scrollPool.Initialize(dataHandler, ButtonCell<Suggestion>.CreatePrototypeCell(parent));
-
             UIRoot.SetActive(false);
+        }
+
+        public override void SaveToConfigManager()
+        {
+            // not savable
+        }
+
+        public override void LoadSaveData()
+        {
+            // not savable
         }
     }
 }

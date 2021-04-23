@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using UnityExplorer.Core.Runtime;
 
 namespace UnityExplorer.UI.Utility
 {
@@ -47,6 +48,8 @@ namespace UnityExplorer.UI.Utility
             if (type == null)
                 throw new ArgumentNullException("type");
 
+            //type = ReflectionProvider.Instance.GetDeobfuscatedType(type);
+
             string ret = "";
 
             if (type.IsGenericParameter || (type.HasElementType && type.GetElementType().IsGenericParameter))
@@ -91,8 +94,10 @@ namespace UnityExplorer.UI.Utility
             return ret;
         }
 
-        private static string HighlightTypeName(Type type)
+        public static string HighlightTypeName(Type type)
         {
+            //type = RuntimeProvider.Instance.Reflection.GetDeobfuscatedType(type);
+
             var typeName = type.Name;
 
             var gArgs = type.GetGenericArguments();
@@ -121,7 +126,7 @@ namespace UnityExplorer.UI.Utility
             return typeName;
         }
 
-        private static string ParseGenericArgs(Type[] gArgs, bool allGeneric = false)
+        public static string ParseGenericArgs(Type[] gArgs, bool allGeneric = false)
         {
             if (gArgs.Length < 1)
                 return "";
@@ -146,7 +151,7 @@ namespace UnityExplorer.UI.Utility
             return args + ">";
         }
 
-        private static string GetMemberInfoColor(MemberInfo memberInfo, out bool isStatic)
+        public static string GetMemberInfoColor(MemberInfo memberInfo, out bool isStatic)
         {
             string memberColor = "";
             isStatic = false;

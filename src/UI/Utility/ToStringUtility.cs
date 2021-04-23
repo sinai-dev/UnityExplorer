@@ -14,44 +14,38 @@ namespace UnityExplorer.UI.Utility
         internal static Dictionary<Type, MethodInfo> toStringMethods = new Dictionary<Type, MethodInfo>();
         internal static Dictionary<Type, MethodInfo> toStringFormattedMethods = new Dictionary<Type, MethodInfo>();
 
-        public static string ToString(object value, Type fallbackType, bool includeNamespace = true, bool includeName = true, bool objectAsType = false)
+        public static string ToString(object value, Type fallbackType, bool includeNamespace = true, bool includeName = true)
         {
             if (value == null && fallbackType == null)
                 return "<null>";
 
-            Type type;
-            if (objectAsType)
-                type = value.TryCast<Type>();
-            else
-                type = value?.GetActualType() ?? fallbackType;
-
+            Type type = value?.GetActualType() ?? fallbackType;
 
             var richType = SignatureHighlighter.ParseFullSyntax(type, includeNamespace);
-
-            if (objectAsType)
-                return richType;
 
             if (!includeName)
                 return richType;
 
             if (value.IsNullOrDestroyed())
-                return $"<color=grey>null</color> ({richType})";
+            {
+                if (value == null)
+                    return $"<color=grey>[null]</color> ({richType})";
+                else
+                    return $"<color=red>[Destroyed]</color> ({richType})";
+            }
+
+            // value = value.TryCast(type);
 
             string label;
 
             // Two dirty fixes for TextAsset and EventSystem, which can have very long ToString results.
             if (value is TextAsset textAsset)
             {
-                label = textAsset.text;
-
-                if (label.Length > 10)
-                    label = $"{label.Substring(0, 10)}...";
-
-                label = $"\"{label}\" {textAsset.name} ({richType})";
+                label = $"{textAsset.name} ({richType})";
             }
-            else if (value is EventSystem)
+            else if (value is EventSystem es)
             {
-                label = richType;
+                label = $"{es.name} ({richType})";
             }
             else // For everything else...
             {
@@ -73,6 +67,8 @@ namespace UnityExplorer.UI.Utility
                 var f3Method = toStringFormattedMethods[type];
                 var stdMethod = toStringMethods[type];
 
+                value = value.TryCast(type);
+
                 string toString;
                 if (f3Method != null)
                     toString = (string)f3Method.Invoke(value, new object[] { "F3" });
@@ -85,7 +81,7 @@ namespace UnityExplorer.UI.Utility
                 if (typeName.StartsWith("Il2CppSystem."))
                     typeName = typeName.Substring(6, typeName.Length - 6);
 
-                toString = ReflectionProvider.Instance.ProcessTypeNameInString(type, toString, ref typeName);
+                toString = ReflectionProvider.Instance.ProcessTypeFullNameInString(type, toString, ref typeName);
 
                 // If the ToString is just the type name, use our syntax highlighted type name instead.
                 if (toString == typeName)

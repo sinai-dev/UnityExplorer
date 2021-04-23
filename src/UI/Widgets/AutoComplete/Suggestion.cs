@@ -10,18 +10,18 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
     public struct Suggestion
     {
         public readonly string DisplayText;
+        public readonly string UnderlyingValue;
         public readonly string Prefix;
         public readonly string Addition;
-        public readonly Color TextColor;
 
         public string Full => Prefix + Addition;
 
-        public Suggestion(string displayText, string prefix, string addition, Color color)
+        public Suggestion(string displayText, string prefix, string addition, string underlyingValue)
         {
             DisplayText = displayText;
             Addition = addition;
             Prefix = prefix;
-            TextColor = color;
+            UnderlyingValue = underlyingValue;
         }
     }
 }

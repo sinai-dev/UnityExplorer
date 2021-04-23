@@ -10,24 +10,26 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 {
     public class TypeCompleter : ISuggestionProvider
     {
-        private struct CachedType
+        private class CachedType
         {
-            public string FilteredName;
+            public string FullNameForFilter;
+            public string FullNameValue;
             public string DisplayName;
         }
 
         public Type BaseType { get; }
         public InputField InputField { get; }
+        public bool AnchorToCaretPosition => false;
 
         public event Action<Suggestion> SuggestionClicked;
         public void OnSuggestionClicked(Suggestion suggestion)
         {
             SuggestionClicked?.Invoke(suggestion);
             suggestions.Clear();
-            AutoCompleter.SetSuggestions(suggestions);
+            AutoCompleter.Instance.SetSuggestions(suggestions);
 
             timeOfLastCheck = Time.time;
-            InputField.text = suggestion.DisplayText;
+            InputField.text = suggestion.UnderlyingValue;
         }
 
         private readonly List<Suggestion> suggestions = new List<Suggestion>();
@@ -48,16 +50,34 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
             inputField.onValueChanged.AddListener(OnInputFieldChanged);
 
-            var types = ReflectionUtility.GetImplementationsOf(typeof(UnityEngine.Object), true);
-            foreach (var type in types.OrderBy(it => it.FullName))
+            var types = ReflectionUtility.GetImplementationsOf(this.BaseType, true, false);
+
+            var list = new List<CachedType>();
+
+            foreach (var type in types)
             {
-                var name = type.FullName;
-                typeCache.Add(name.ToLower(), new CachedType 
-                { 
-                    DisplayName = name, 
-                    FilteredName = name.ToLower() 
+                string displayName = Utility.SignatureHighlighter.ParseFullSyntax(type, true);
+                string fullName = RuntimeProvider.Instance.Reflection.GetDeobfuscatedType(type).FullName;
+
+                string filteredName = fullName.ToLower();
+
+                list.Add(new CachedType
+                {
+                    FullNameValue = fullName,
+                    FullNameForFilter = filteredName,
+                    DisplayName = displayName,
                 });
             }
+
+            list.Sort((CachedType a, CachedType b) => a.FullNameForFilter.CompareTo(b.FullNameForFilter));
+
+            foreach (var cache in list)
+            {
+                if (typeCache.ContainsKey(cache.FullNameForFilter))
+                    continue;
+                typeCache.Add(cache.FullNameForFilter, cache);
+            }
+
         }
 
         private float timeOfLastCheck;
@@ -73,14 +93,14 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
             if (string.IsNullOrEmpty(value))
             {
-                AutoCompleter.ReleaseOwnership(this);
+                AutoCompleter.Instance.ReleaseOwnership(this);
             }
             else
             {
                 GetSuggestions(value);
 
-                AutoCompleter.TakeOwnership(this);
-                AutoCompleter.SetSuggestions(suggestions);
+                AutoCompleter.Instance.TakeOwnership(this);
+                AutoCompleter.Instance.SetSuggestions(suggestions);
             }
         }
 
@@ -91,28 +111,27 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             var added = new HashSet<string>();
 
             if (typeCache.TryGetValue(value, out CachedType cache))
-            {
-                added.Add(value);
-                suggestions.Add(new Suggestion(cache.DisplayName, 
-                    value, 
-                    cache.FilteredName.Substring(value.Length, cache.FilteredName.Length - value.Length),
-                    Color.white));
-            }
+                AddToDict(cache);
 
             foreach (var entry in typeCache.Values)
             {
-                if (added.Contains(entry.FilteredName))
+                if (added.Contains(entry.FullNameValue))
                     continue;
 
-                if (entry.FilteredName.Contains(value))
-                {
-                    suggestions.Add(new Suggestion(entry.DisplayName,
-                        value,
-                        entry.FilteredName.Substring(value.Length, entry.FilteredName.Length - value.Length),
-                        Color.white));
-                }
+                if (entry.FullNameForFilter.Contains(value))
+                    AddToDict(entry);
 
-                added.Add(value);
+                added.Add(entry.FullNameValue);
+            }
+
+            void AddToDict(CachedType entry)
+            {
+                added.Add(entry.FullNameValue);
+
+                suggestions.Add(new Suggestion(entry.DisplayName,
+                        value,
+                        entry.FullNameForFilter.Substring(value.Length, entry.FullNameForFilter.Length - value.Length),
+                        entry.FullNameValue));
             }
         }
     }

@@ -86,8 +86,12 @@ namespace UnityExplorer.UI.Widgets
 
         public void SetCell(ButtonCell<object> cell, int index)
         {
-            bool objectAsType = m_context == SearchContext.StaticClass;
-            cell.buttonText.text = ToStringUtility.ToString(currentResults[index], currentResults[index].GetActualType(), objectAsType: objectAsType);
+            if (m_context == SearchContext.StaticClass)
+            {
+                cell.buttonText.text = SignatureHighlighter.HighlightTypeName(currentResults[index].GetActualType());
+            }
+            else 
+                cell.buttonText.text = ToStringUtility.ToString(currentResults[index], currentResults[index].GetActualType());
         }
 
         private void OnCellClicked(int dataIndex)

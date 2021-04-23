@@ -25,6 +25,7 @@ namespace UnityExplorer.UI
             CSConsole,
             Options,
             ConsoleLog,
+            AutoCompleter
         }
 
         public static GameObject CanvasRoot { get; private set; }
@@ -33,16 +34,20 @@ namespace UnityExplorer.UI
 
         // panels
         internal static GameObject PanelHolder { get; private set; }
+
         public static ObjectExplorer Explorer { get; private set; }
         public static InspectorTest Inspector { get; private set; }
+        public static AutoCompleter AutoCompleter { get; private set; }
+
+        private static readonly Dictionary<Panels, Button> navButtonDict = new Dictionary<Panels, Button>();
+        internal static readonly Color navButtonEnabledColor = new Color(0.2f, 0.4f, 0.28f);
+        internal static readonly Color navButtonDisabledColor = new Color(0.25f, 0.25f, 0.25f);
 
         // bundle assets
         internal static Font ConsoleFont { get; private set; }
         internal static Shader BackupShader { get; private set; }
 
-        internal static readonly Color navButtonEnabledColor = new Color(0.2f, 0.4f, 0.28f);
-        internal static readonly Color navButtonDisabledColor = new Color(0.25f, 0.25f, 0.25f);
-
+        // main menu toggle
         public static bool ShowMenu
         {
             get => s_showMenu;
@@ -57,29 +62,6 @@ namespace UnityExplorer.UI
             }
         }
         public static bool s_showMenu = true;
-
-        internal static void InitUI()
-        {
-            LoadBundle();
-
-            UIFactory.Init();
-
-            CreateRootCanvas();
-            CreateTopNavBar();
-
-            AutoCompleter.ConstructUI();
-            //InspectUnderMouse.ConstructUI();
-
-            Explorer = new ObjectExplorer();
-            Explorer.ConstructUI(CanvasRoot);
-
-            Inspector = new InspectorTest();
-            Inspector.ConstructUI(CanvasRoot);
-
-            ShowMenu = !ConfigManager.Hide_On_Startup.Value;
-
-            ExplorerCore.Log("UI initialized.");
-        }
 
         public static void Update()
         {
@@ -109,6 +91,63 @@ namespace UnityExplorer.UI
 
             UIBehaviourModel.UpdateInstances();
             AutoCompleter.Update();
+        }
+
+        public static UIPanel GetPanel(Panels panel)
+        {
+            switch (panel)
+            {
+                case Panels.ObjectExplorer:
+                    return Explorer;
+                case Panels.Inspector:
+                    return Inspector;
+                case Panels.AutoCompleter:
+                    return AutoCompleter;
+                default:
+                    throw new NotImplementedException($"TODO GetPanel: {panel}");
+            }
+        }
+
+        public static void TogglePanel(Panels panel)
+        {
+            var uiPanel = GetPanel(panel);
+            SetPanelActive(panel, !uiPanel.Enabled);
+        }
+
+        public static void SetPanelActive(Panels panel, bool active)
+        {
+            GetPanel(panel).SetActive(active);
+
+            if (navButtonDict.ContainsKey(panel))
+            {
+                var color = active ? navButtonEnabledColor : navButtonDisabledColor;
+                RuntimeProvider.Instance.SetColorBlock(navButtonDict[panel], color, color * 1.2f);
+            }
+        }
+
+        internal static void InitUI()
+        {
+            LoadBundle();
+
+            UIFactory.Init();
+
+            CreateRootCanvas();
+            CreateTopNavBar();
+
+            AutoCompleter = new AutoCompleter();
+            AutoCompleter.ConstructUI();
+
+            //InspectUnderMouse.ConstructUI();
+
+            Explorer = new ObjectExplorer();
+            Explorer.ConstructUI();
+
+            Inspector = new InspectorTest();
+            Inspector.ConstructUI();
+
+            ShowMenu = !ConfigManager.Hide_On_Startup.Value;
+
+            ExplorerCore.Log("UI initialized.");
         }
 
         private static void CreateRootCanvas()
@@ -145,32 +184,6 @@ namespace UnityExplorer.UI
             PanelHolder.transform.SetAsFirstSibling();
         }
 
-        public static UIPanel GetPanel(Panels panel)
-        {
-            switch (panel)
-            {
-                case Panels.ObjectExplorer:
-                    return Explorer;
-                case Panels.Inspector:
-                    return Inspector;
-                default:
-                    throw new NotImplementedException($"TODO GetPanel: {panel}");
-            }
-        }
-
-        public static void TogglePanel(Panels panel)
-        {
-            var uiPanel = GetPanel(panel);
-            SetPanelActive(panel, !uiPanel.Enabled);
-        }
-
-        public static void SetPanelActive(Panels panel, bool active)
-        {
-            GetPanel(panel).SetActive(active);
-            var color = active ? navButtonEnabledColor : navButtonDisabledColor;
-            RuntimeProvider.Instance.SetColorBlock(navButtonDict[panel], color, color * 1.2f);
-        }
-
         public static void CreateTopNavBar()
         {
             var panel = UIFactory.CreateUIObject("MainNavbar", CanvasRoot);
@@ -199,8 +212,6 @@ namespace UnityExplorer.UI
             RuntimeProvider.Instance.SetColorBlock(closeBtn, new Color(0.63f, 0.32f, 0.31f),
                 new Color(0.81f, 0.25f, 0.2f), new Color(0.6f, 0.18f, 0.16f));
         }
-
-        private static readonly Dictionary<Panels, Button> navButtonDict = new Dictionary<Panels, Button>();
 
         private static void CreateNavButton(GameObject navbar, Panels panel, string label)
         {
