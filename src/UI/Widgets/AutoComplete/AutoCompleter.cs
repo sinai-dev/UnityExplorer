@@ -165,10 +165,8 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         {
             var mainRect = uiRoot.GetComponent<RectTransform>();
             mainRect.pivot = new Vector2(0f, 1f);
-            mainRect.anchorMin = new Vector2(0, 1);
-            mainRect.anchorMax = new Vector2(0, 1);
-            mainRect.offsetMin = new Vector2(25, 0);
-            mainRect.offsetMax = new Vector2(525, 169);
+            mainRect.anchorMin = new Vector2(0.42f, 0.4f);
+            mainRect.anchorMax = new Vector2(0.68f, 0.6f);
         }
 
         public override void ConstructPanelContent()

@@ -36,7 +36,7 @@ namespace UnityExplorer.UI
         internal static GameObject PanelHolder { get; private set; }
 
         public static ObjectExplorer Explorer { get; private set; }
-        public static InspectorTest Inspector { get; private set; }
+        public static InspectorPanel Inspector { get; private set; }
         public static AutoCompleter AutoCompleter { get; private set; }
 
         private static readonly Dictionary<Panels, Button> navButtonDict = new Dictionary<Panels, Button>();
@@ -116,7 +116,13 @@ namespace UnityExplorer.UI
 
         public static void SetPanelActive(Panels panel, bool active)
         {
-            GetPanel(panel).SetActive(active);
+            var obj = GetPanel(panel);
+            obj.SetActive(active);
+            if (active)
+            {
+                obj.UIRoot.transform.SetAsLastSibling();
+                UIPanel.InvokeOnPanelsReordered();
+            }
 
             if (navButtonDict.ContainsKey(panel))
             {
@@ -142,7 +148,7 @@ namespace UnityExplorer.UI
             Explorer = new ObjectExplorer();
             Explorer.ConstructUI();
 
-            Inspector = new InspectorTest();
+            Inspector = new InspectorPanel();
             Inspector.ConstructUI();
 
             ShowMenu = !ConfigManager.Hide_On_Startup.Value;

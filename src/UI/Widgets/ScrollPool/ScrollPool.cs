@@ -25,13 +25,21 @@ namespace UnityExplorer.UI.Widgets
 
         private float PrototypeHeight => PrototypeCell.rect.height;
 
-        public int ExtraPoolCells => 10;
+        public int ExtraPoolCells => 6;
         public float RecycleThreshold => PrototypeHeight * ExtraPoolCells;
         public float HalfThreshold => RecycleThreshold * 0.5f;
 
         // UI
 
-        public override GameObject UIRoot => ScrollRect.gameObject;
+        public override GameObject UIRoot
+        {
+            get
+            {
+                if (ScrollRect)
+                    return ScrollRect.gameObject;
+                return null;
+            }
+        }
 
         public RectTransform Viewport => ScrollRect.viewport;
         public RectTransform Content => ScrollRect.content;
@@ -217,7 +225,7 @@ namespace UnityExplorer.UI.Widgets
                 //Instantiate and add to Pool
                 RectTransform rect = GameObject.Instantiate(PrototypeCell.gameObject).GetComponent<RectTransform>();
                 rect.gameObject.SetActive(true);
-                rect.name = $"Cell_{CellPool.Count + 1}";
+                rect.name = $"Cell_{CellPool.Count}";
                 var cell = DataSource.CreateCell(rect);
                 CellPool.Add(cell);
                 rect.SetParent(ScrollRect.content, false);
@@ -399,7 +407,7 @@ namespace UnityExplorer.UI.Widgets
             cachedCell.Enable();
             DataSource.SetCell(cachedCell, dataIndex);
 
-            LayoutRebuilder.ForceRebuildLayoutImmediate(cachedCell.Rect);
+            //LayoutRebuilder.ForceRebuildLayoutImmediate(cachedCell.Rect);
             HeightCache.SetIndex(dataIndex, cachedCell.Rect.rect.height);
         }
 
@@ -435,7 +443,7 @@ namespace UnityExplorer.UI.Widgets
             ScrollRect.m_ContentStartPosition += vector;
             ScrollRect.m_PrevPosition += vector;
 
-            LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
+            // LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
             prevAnchoredPos = ScrollRect.content.anchoredPosition;
 
             SetScrollBounds();
@@ -603,10 +611,82 @@ namespace UnityExplorer.UI.Widgets
                 desiredAnchor = desiredMinY - topStartPos;
             Content.anchoredPosition = new Vector2(0, desiredAnchor);
 
-            bottomDataIndex = poolStartIndex + CellPool.Count - 1;
-            RefreshCells(true, false);
+            int desiredBottomIndex = poolStartIndex + CellPool.Count - 1;
 
-            UpdateSliderHandle(true);
+            // check if our pool indices contain the desired index. If so, rotate and set
+            if (bottomDataIndex == desiredBottomIndex)
+            {
+                // cells will be the same, do nothing?
+            }
+            else
+            {
+                if (TopDataIndex > poolStartIndex && TopDataIndex < desiredBottomIndex)
+                {
+                    //ExplorerCore.Log("Scroll bottom to top");
+                    // top cell falls within the new range, rotate around that
+                    int rotate = TopDataIndex - poolStartIndex;
+                    for (int i = 0; i < rotate; i++)
+                    {
+                        CellPool[bottomPoolIndex].Rect.SetAsFirstSibling();
+
+                        //set new indices
+                        topPoolIndex = bottomPoolIndex;
+                        bottomPoolIndex = (bottomPoolIndex - 1 + CellPool.Count) % CellPool.Count;
+                        bottomDataIndex--;
+
+                        SetCell(CellPool[topPoolIndex], TopDataIndex);
+                    }
+                }
+                else if (bottomDataIndex > poolStartIndex && bottomDataIndex < desiredBottomIndex)
+                {
+                    //ExplorerCore.Log("Scroll top to bottom");
+                    // bottom cells falls within the new range, rotate around that
+                    int rotate = desiredBottomIndex - bottomDataIndex;
+                    for (int i = 0; i < rotate; i++)
+                    {
+                        CellPool[topPoolIndex].Rect.SetAsLastSibling();
+
+                        //set new indices
+                        bottomPoolIndex = topPoolIndex;
+                        topPoolIndex = (topPoolIndex + 1) % CellPool.Count;
+                        bottomDataIndex++;
+
+                        SetCell(CellPool[bottomPoolIndex], bottomDataIndex);
+                    }
+                }
+                else
+                {
+                    // new cells are completely different, set all cells
+                    //ExplorerCore.Log("Scroll jump");
+
+                    bottomDataIndex = desiredBottomIndex;
+                    var enumerator = GetPoolEnumerator();
+                    while (enumerator.MoveNext())
+                    {
+                        var curr = enumerator.Current;
+                        var cell = CellPool[curr.cellIndex];
+                        SetCell(cell, curr.dataIndex);
+                    }
+                }
+            }
+
+            SetRecycleViewBounds(true);
+
+            //CheckDataSourceCountChange(out bool jumpToBottom);
+
+            //// force check recycles
+            //if (andReloadFromDataSource)
+            //{
+            //    RecycleBottomToTop();
+            //    RecycleTopToBottom();
+            //}
+
+            //LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
+
+            SetScrollBounds();
+            ScrollRect.UpdatePrevData();
+
+            UpdateSliderHandle(false);
         }
 
         /// <summary>Use <see cref="UIFactory.CreateScrollPool"/></summary>

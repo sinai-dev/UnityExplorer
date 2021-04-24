@@ -20,9 +20,9 @@ namespace UnityExplorer
 
         public static bool ReferenceEqual(this object objA, object objB)
         {
-            if (objA.TryCast<UnityEngine.Object>() is UnityEngine.Object unityA)
+            if (objA is UnityEngine.Object unityA)
             {
-                var unityB = objB.TryCast<UnityEngine.Object>();
+                var unityB = objB as UnityEngine.Object;
                 if (unityB && unityA.m_CachedPtr == unityB.m_CachedPtr)
                     return true;
             }

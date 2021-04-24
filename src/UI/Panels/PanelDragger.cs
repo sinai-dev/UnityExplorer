@@ -95,13 +95,11 @@ namespace UnityExplorer.UI.Panels
 
         internal readonly Vector2 minResize = new Vector2(200, 50);
 
-        private static int currentResizePanel;
-
         private bool WasResizing { get; set; }
         private ResizeTypes m_currentResizeType = ResizeTypes.NONE;
         private Vector2 m_lastResizePos;
 
-        private bool WasHoveringResize { get; set; }
+        private bool WasHoveringResize => s_resizeCursorObj.activeInHierarchy;
         private ResizeTypes m_lastResizeHoverType;
 
         private Rect m_totalResizeRect;
@@ -183,7 +181,7 @@ namespace UnityExplorer.UI.Panels
 
                         handledInstanceThisFrame = true;
                     }
-                    else if (inResizePos)
+                    else if (inResizePos || WasResizing)
                     {
                         if (WasResizing)
                             OnEndResize();
@@ -333,7 +331,7 @@ namespace UnityExplorer.UI.Panels
 
             // we are entering resize, or the resize type has changed.
 
-            WasHoveringResize = true;
+            //WasHoveringResize = true;
             m_lastResizeHoverType = resizeType;
 
             s_resizeCursorObj.SetActive(true);
@@ -369,7 +367,7 @@ namespace UnityExplorer.UI.Panels
 
         public void OnHoverResizeEnd()
         {
-            WasHoveringResize = false;
+            //WasHoveringResize = false;
             s_resizeCursorObj.SetActive(false);
         }
 
@@ -378,7 +376,6 @@ namespace UnityExplorer.UI.Panels
             m_currentResizeType = resizeType;
             m_lastResizePos = InputManager.MousePosition;
             WasResizing = true;
-            currentResizePanel = this.Panel.GetInstanceID();
         }
 
         public void OnResize()
@@ -428,9 +425,9 @@ namespace UnityExplorer.UI.Panels
         public void OnEndResize()
         {
             WasResizing = false;
+            try { OnHoverResizeEnd(); } catch { }
             UpdateResizeCache();
             OnFinishResize?.Invoke(Panel);
-            currentResizePanel = -1;
         }
 
         internal static void CreateCursorUI()

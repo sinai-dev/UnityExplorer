@@ -18,7 +18,7 @@ namespace UnityExplorer.UI.Widgets
     public class DataHeightCache
     {
         private ScrollPool ScrollPool { get; }
-        private DataHeightCache SisterCache { get; }
+        //private DataHeightCache SisterCache { get; }
 
         public DataHeightCache(ScrollPool scrollPool)
         {
@@ -27,10 +27,10 @@ namespace UnityExplorer.UI.Widgets
 
         public DataHeightCache(ScrollPool scrollPool, DataHeightCache sisterCache) : this(scrollPool)
         {
-            this.SisterCache = sisterCache;
+            //this.SisterCache = sisterCache;
 
-            for (int i = 0; i < scrollPool.DataSource.ItemCount; i++)
-                Add(sisterCache[ScrollPool.DataSource.GetRealIndexOfTempIndex(i)]);
+            //for (int i = 0; i < scrollPool.DataSource.ItemCount; i++)
+            //    Add(sisterCache[ScrollPool.DataSource.GetRealIndexOfTempIndex(i)]);
         }
 
         private readonly List<DataViewInfo> heightCache = new List<DataViewInfo>();
@@ -199,6 +199,7 @@ namespace UnityExplorer.UI.Widgets
                     int minStart = rangeCache[dataIndex];
                     for (int i = minStart; i < rangeCache.Count; i++)
                     {
+                        ExplorerCore.Log("manually searching for index | " + Time.realtimeSinceStartup);
                         if (rangeCache[i] == dataIndex)
                         {
                             rangeIndex = i;
@@ -248,13 +249,13 @@ namespace UnityExplorer.UI.Widgets
                 }
             }
 
-            // if sister cache is set, then update it too.
-            if (SisterCache != null)
-            {
-                var realIdx = ScrollPool.DataSource.GetRealIndexOfTempIndex(dataIndex);
-                if (realIdx >= 0)
-                    SisterCache.SetIndex(realIdx, height, true);
-            }
+            //// if sister cache is set, then update it too.
+            //if (SisterCache != null)
+            //{
+            //    var realIdx = ScrollPool.DataSource.GetRealIndexOfTempIndex(dataIndex);
+            //    if (realIdx >= 0)
+            //        SisterCache.SetIndex(realIdx, height, true);
+            //}
         }
 
         private void RebuildStartPositions(bool ignoreDataCount)

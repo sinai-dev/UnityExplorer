@@ -16,6 +16,8 @@ namespace UnityExplorer.UI.Models
     {
         // STATIC
 
+        internal static void InvokeOnPanelsReordered() => OnPanelsReordered?.Invoke();
+
         public static event Action OnPanelsReordered;
         public static event Action OnClickedOutsidePanels;
 

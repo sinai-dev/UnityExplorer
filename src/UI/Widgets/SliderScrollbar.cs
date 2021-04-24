@@ -15,27 +15,17 @@ namespace UnityExplorer.UI.Utility
     // Basically just to fix an issue with Scrollbars, instead we use a Slider as the scrollbar.
     public class SliderScrollbar : UIBehaviourModel
     {
-        //internal static readonly List<SliderScrollbar> Instances = new List<SliderScrollbar>();
-
-        //public static void UpdateInstances()
-        //{
-        //    if (!Instances.Any())
-        //        return;
-
-        //    for (int i = 0; i < Instances.Count; i++)
-        //    {
-        //        var slider = Instances[i];
-
-        //        if (slider.CheckDestroyed())
-        //            i--;
-        //        else
-        //            slider.Update();
-        //    }
-        //}
-
         public bool IsActive { get; private set; }
 
-        public override GameObject UIRoot => m_slider.gameObject;
+        public override GameObject UIRoot
+        {
+            get
+            {
+                if (m_slider)
+                    return m_slider.gameObject;
+                return null;
+            }
+        }
 
         public event Action<float> OnValueChanged;
 

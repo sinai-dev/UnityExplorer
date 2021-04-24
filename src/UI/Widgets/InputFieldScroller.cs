@@ -15,25 +15,15 @@ namespace UnityExplorer.UI.Utility
 
     public class InputFieldScroller : UIBehaviourModel
     {
-        //public static readonly List<InputFieldScroller> Instances = new List<InputFieldScroller>();
-
-        //public static void UpdateInstances()
-        //{
-        //    if (!Instances.Any())
-        //        return;
-
-        //    for (int i = 0; i < Instances.Count; i++)
-        //    {
-        //        var input = Instances[i];
-
-        //        if (input.CheckDestroyed())
-        //            i--;
-        //        else
-        //            input.Update();
-        //    }
-        //}
-
-        public override GameObject UIRoot => inputField.gameObject;
+        public override GameObject UIRoot
+        {
+            get
+            {
+                if (inputField)
+                    return inputField.gameObject;
+                return null;
+            }
+        }
 
         internal SliderScrollbar sliderScroller;
         internal InputField inputField;

@@ -5,6 +5,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Core.Search;
+using UnityExplorer.UI.Inspectors;
 using UnityExplorer.UI.Models;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Utility;
@@ -96,7 +97,10 @@ namespace UnityExplorer.UI.Widgets
 
         private void OnCellClicked(int dataIndex)
         {
-            ExplorerCore.Log("TODO");
+            if (m_context == SearchContext.StaticClass)
+                InspectorManager.InspectType(currentResults[dataIndex] as Type);
+            else
+                InspectorManager.Inspect(currentResults[dataIndex]);
         }
 
         private bool ShouldDisplayCell(object arg1, string arg2) => true;

@@ -754,7 +754,7 @@ namespace UnityExplorer.UI
             scrollRect.movementType = ScrollRect.MovementType.Clamped;
             scrollRect.inertia = true;
             scrollRect.elasticity = 0.125f;
-            scrollRect.scrollSensitivity = 15;
+            scrollRect.scrollSensitivity = 25;
             scrollRect.horizontal = false;
             scrollRect.vertical = true;
 
