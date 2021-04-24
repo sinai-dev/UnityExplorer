@@ -35,6 +35,12 @@ namespace UnityExplorer.UI.Widgets
 
         private readonly List<DataViewInfo> heightCache = new List<DataViewInfo>();
 
+        public DataViewInfo this[int index]
+        {
+            get => heightCache[index];
+            set => SetIndex(index, value);
+        }
+
         public int Count => heightCache.Count;
 
         public float TotalHeight => totalHeight;
@@ -43,9 +49,6 @@ namespace UnityExplorer.UI.Widgets
         public float DefaultHeight => m_defaultHeight ?? (float)(m_defaultHeight = ScrollPool.PrototypeCell.rect.height);
         private float? m_defaultHeight;
 
-        /// <summary>Get the first range (division of DefaultHeight) which the position appears in.</summary>
-        private int GetRangeIndexOfPosition(float position) => (int)Math.Floor((decimal)position / (decimal)DefaultHeight);
-
         /// <summary>
         /// Lookup table for "which data index first appears at this position"<br/>
         /// Index: DefaultHeight * index from top of data<br/>
@@ -53,11 +56,11 @@ namespace UnityExplorer.UI.Widgets
         /// </summary>
         private readonly List<int> rangeCache = new List<int>();
 
-        public DataViewInfo this[int index]
-        {
-            get => heightCache[index];
-            set => SetIndex(index, value);
-        }
+        /// <summary>Get the first range (division of DefaultHeight) which the position appears in.</summary>
+        private int GetRangeIndexOfPosition(float position) => (int)Math.Floor((decimal)position / (decimal)DefaultHeight);
+
+        /// <summary>Same as GetRangeIndexOfPosition, except this rounds up to the next division if there was remainder from the previous cell.</summary>
+        private int GetRangeCeilingOfPosition(float position) => (int)Math.Ceiling((decimal)position / (decimal)DefaultHeight);
 
         /// <summary>
         /// Get the spread of the height, starting from the start position.<br/><br/>
@@ -118,11 +121,11 @@ namespace UnityExplorer.UI.Widgets
             cache = null;
             int rangeIndex = GetRangeIndexOfPosition(desiredHeight);
 
-            if (rangeIndex <= 0)
-                return 0;
+            if (rangeIndex < 0)
+                throw new Exception("Range index (" + rangeIndex + ") is below 0");
 
             if (rangeCache.Count <= rangeIndex)
-                return rangeCache[rangeCache.Count - 1];
+                throw new Exception("Range index (" + rangeIndex + ") exceeded rangeCache count (" + rangeCache.Count + ")");
 
             int dataIndex = rangeCache[rangeIndex];
             cache = heightCache[dataIndex];
@@ -157,7 +160,7 @@ namespace UnityExplorer.UI.Widgets
             var diff = height - prevHeight;
             if (diff != 0.0f)
             {
-                // ExplorerCore.LogWarning("Height for data index " + dataIndex + " changed by " + diff);
+                // LogWarning("Height for data index " + dataIndex + " changed by " + diff);
                 totalHeight += diff;
                 cache.height = height;
             }
@@ -169,59 +172,79 @@ namespace UnityExplorer.UI.Widgets
                 cache.startPosition = prev.startPosition + prev.height;
             }
 
-            int rangeIndex = GetRangeIndexOfPosition(cache.startPosition);
-            // var spread = GetRangeIndexOfPosition(value);
+            int rangeIndex = GetRangeCeilingOfPosition(cache.startPosition);
             int spread = GetRangeSpread(cache.startPosition, height);
 
-            if (rangeCache.Count <= rangeIndex)
+            // check if our range cache is "corrupt" or not. If so we need to do a quick rebuild,
+            // so that each cell's start position is correct again.
+            if (rangeCache.Count <= rangeIndex || rangeCache[rangeIndex] != dataIndex)
             {
-                // This should never happen, there is a gap in the previous data. Trigger rebuild?
-                // I stress-tested the scroll pool and didn't seem to encounter this, leaving for now.
-                ExplorerCore.LogWarning($"rangeToDataIndex.Count ({rangeCache.Count}) <= rangeIndex ({rangeIndex})?");
+                RebuildStartPositions(ignoreDataCount);
+                // get these values again after rebuilding
+                rangeIndex = GetRangeCeilingOfPosition(cache.startPosition);
+                spread = GetRangeSpread(cache.startPosition, height);
             }
-            else if (spread != cache.normalizedSpread)
+
+            if (spread != cache.normalizedSpread)
             {
                 // The cell's spread has changed, need to update.
 
                 int spreadDiff = spread - cache.normalizedSpread;
                 cache.normalizedSpread = spread;
 
-                int rangeStart = -1;
-
-                // the start will always be at LEAST (no less) PrototypeHeight * index, cells can never be smaller than that.
-                int minStart = rangeCache[dataIndex];
-
-                for (int i = minStart; i < rangeCache.Count; i++)
+                if (rangeCache[rangeIndex] != dataIndex)
                 {
-                    if (rangeCache[i] == dataIndex)
+                    // In some rare cases we may not find our data index at the expected range index.
+                    // We can make some educated guesses and find the real index pretty quickly.
+                    int minStart = rangeCache[dataIndex];
+                    for (int i = minStart; i < rangeCache.Count; i++)
                     {
-                        rangeStart = i;
-                        break;
+                        if (rangeCache[i] == dataIndex)
+                        {
+                            rangeIndex = i;
+                            break;
+                        }
+
+                        // If we somehow reached the end and didn't find the data index...
+                        if (i == rangeCache.Count - 1)
+                        {
+                            // This should never happen. We might be in a rebuild right now so don't
+                            // rebuild again, we could overflow the stack. Just log it.
+                            ExplorerCore.LogWarning($"DataHeightCache: Looking for range index of data {dataIndex} but reached the end and didn't find it.");
+                            ExplorerCore.Log($"startPos: {cache.startPosition}, rangeIndex: {rangeIndex}, total height: {TotalHeight}");
+                            return;
+                        }
+
+                        // our data index is further down. add the min difference and try again.
+                        // the iterator will add 1 on the next loop so account for that.
+                        // also, add the (spread - 1) of the cell we found at this index to skip it.
+                        int jmp = dataIndex - rangeCache[i] - 1;
+                        jmp += heightCache[rangeCache[i]].normalizedSpread - 1;
+                        i += jmp < 1 ? 0 : jmp;
                     }
-
-                    // our index is further down. add the min difference and try again.
-                    // the iterator will add 1 on the next loop so account for that.
-                    int jmp = dataIndex - rangeCache[i] - 1;
-                    i += jmp < 1 ? 0 : jmp;
-                }
-
-                if (rangeStart == -1)
-                {
-                    ExplorerCore.LogWarning($"DataHeightCache corrupt? Couldn't find dataIndex {dataIndex} anywhere in range cache.");
-                    return;
                 }
 
                 if (spreadDiff > 0)
                 {
                     // need to insert
                     for (int i = 0; i < spreadDiff; i++)
-                        rangeCache.Insert(rangeStart, dataIndex);
+                    {
+                        if (rangeCache[rangeIndex] == dataIndex)
+                            rangeCache.Insert(rangeIndex, dataIndex);
+                        else
+                            ExplorerCore.LogWarning($"DataHeightCache Error increading spread of data {dataIndex}, " +
+                                $"the value at range {rangeIndex} is {rangeCache[rangeIndex]}!");
+                    }
                 }
                 else
                 {
                     // need to remove
                     for (int i = 0; i < -spreadDiff; i++)
-                        rangeCache.RemoveAt(rangeStart);
+                        if (rangeCache[rangeIndex] == dataIndex)
+                            rangeCache.RemoveAt(rangeIndex);
+                        else
+                            ExplorerCore.LogWarning($"DataHeightCache Error decreasing spread of data {dataIndex}, " +
+                                $"the value at range {rangeIndex} is {rangeCache[rangeIndex]}!");
                 }
             }
 
@@ -232,6 +255,13 @@ namespace UnityExplorer.UI.Widgets
                 if (realIdx >= 0)
                     SisterCache.SetIndex(realIdx, height, true);
             }
+        }
+
+        private void RebuildStartPositions(bool ignoreDataCount)
+        {
+            //start at 1 because 0's start pos is always 0
+            for (int i = 1; i < heightCache.Count; i++)
+                SetIndex(i, heightCache[i].height, ignoreDataCount);
         }
     }
 }
