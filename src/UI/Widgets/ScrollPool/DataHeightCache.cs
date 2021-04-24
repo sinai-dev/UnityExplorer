@@ -199,7 +199,6 @@ namespace UnityExplorer.UI.Widgets
                     int minStart = rangeCache[dataIndex];
                     for (int i = minStart; i < rangeCache.Count; i++)
                     {
-                        ExplorerCore.Log("manually searching for index | " + Time.realtimeSinceStartup);
                         if (rangeCache[i] == dataIndex)
                         {
                             rangeIndex = i;
@@ -233,7 +232,7 @@ namespace UnityExplorer.UI.Widgets
                         if (rangeCache[rangeIndex] == dataIndex)
                             rangeCache.Insert(rangeIndex, dataIndex);
                         else
-                            ExplorerCore.LogWarning($"DataHeightCache Error increading spread of data {dataIndex}, " +
+                            ExplorerCore.LogWarning($"DataHeightCache error increasing spread of data {dataIndex}, " +
                                 $"the value at range {rangeIndex} is {rangeCache[rangeIndex]}!");
                     }
                 }
@@ -244,7 +243,7 @@ namespace UnityExplorer.UI.Widgets
                         if (rangeCache[rangeIndex] == dataIndex)
                             rangeCache.RemoveAt(rangeIndex);
                         else
-                            ExplorerCore.LogWarning($"DataHeightCache Error decreasing spread of data {dataIndex}, " +
+                            ExplorerCore.LogWarning($"DataHeightCache error decreasing spread of data {dataIndex}, " +
                                 $"the value at range {rangeIndex} is {rangeCache[rangeIndex]}!");
                 }
             }
