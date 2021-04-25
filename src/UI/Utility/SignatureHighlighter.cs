@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using UnityEngine;
 using UnityExplorer.Core.Runtime;
 
@@ -29,7 +31,7 @@ namespace UnityExplorer.UI.Utility
 
         public static string CONST_VAR = "#92c470";
 
-        internal static readonly Color s_silver = new Color(0.66f, 0.66f, 0.66f);
+        public static string NAMESPACE = "#a8a8a8";
 
         internal static string GetClassColor(Type type)
         {
@@ -43,72 +45,73 @@ namespace UnityExplorer.UI.Utility
                 return CLASS_INSTANCE;
         }
 
+        private static readonly StringBuilder syntaxBuilder = new StringBuilder(8192);
+
         public static string ParseFullSyntax(Type type, bool includeNamespace, MemberInfo memberInfo = null)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
 
-            //type = ReflectionProvider.Instance.GetDeobfuscatedType(type);
-
-            string ret = "";
+            syntaxBuilder.Clear();
 
             if (type.IsGenericParameter || (type.HasElementType && type.GetElementType().IsGenericParameter))
             {
-                ret = $"<color={CONST_VAR}>{type.Name}</color>";
+                syntaxBuilder.Append($"<color={CONST_VAR}>{type.Name}</color>");
             }
             else
             {
                 if (includeNamespace && !string.IsNullOrEmpty(type.Namespace))
-                    ret += $"<color=#{s_silver.ToHex()}>{type.Namespace}</color>.";
+                    syntaxBuilder.Append($"<color=#{NAMESPACE}>{type.Namespace}</color>.");
 
                 var declaring = type.DeclaringType;
                 while (declaring != null)
                 {
-                    ret += HighlightTypeName(declaring) + ".";
+                    syntaxBuilder.Append(HighlightTypeName(declaring) + ".");
                     declaring = declaring.DeclaringType;
                 }
 
-                ret += HighlightTypeName(type);
+                syntaxBuilder.Append(HighlightTypeName(type));
             }
 
             if (memberInfo != null)
             {
-                ret += ".";
+                syntaxBuilder.Append('.');
 
-                string memberColor = GetMemberInfoColor(memberInfo, out bool isStatic);
-                string memberHighlight = $"<color={memberColor}>{memberInfo.Name}</color>";
+                string memColor = GetMemberInfoColor(memberInfo, out bool isStatic);
 
                 if (isStatic)
-                    memberHighlight = $"<i>{memberHighlight}</i>";
+                    syntaxBuilder.Append("<i>");
 
-                ret += memberHighlight;
+                syntaxBuilder.Append($"<color={memColor}>{memberInfo.Name}</color>");
 
-                // generic method args
+                if (isStatic)
+                    syntaxBuilder.Append("</i>");
+
                 if (memberInfo is MethodInfo method)
-                {
-                    var gArgs = method.GetGenericArguments();
-                    ret += ParseGenericArgs(gArgs, true);
-                }
+                    syntaxBuilder.Append(ParseGenericArgs(method.GetGenericArguments(), true));
             }
 
-            return ret;
+            return syntaxBuilder.ToString();
         }
+
+        private static readonly Dictionary<string, string> typeToRichType = new Dictionary<string, string>();
 
         public static string HighlightTypeName(Type type)
         {
-            //type = RuntimeProvider.Instance.Reflection.GetDeobfuscatedType(type);
+            if (typeToRichType.ContainsKey(type.AssemblyQualifiedName))
+                return typeToRichType[type.AssemblyQualifiedName];
 
             var typeName = type.Name;
 
-            var gArgs = type.GetGenericArguments();
+            var args = type.GetGenericArguments();
 
-            if (gArgs.Length > 0)
+            if (args.Length > 0)
             {
                 // remove the `N from the end of the type name
                 // this could actually be >9 in some cases, so get the length of the length string and use that.
                 // eg, if it was "List`15", we would remove the ending 3 chars
 
-                int suffixLen = 1 + gArgs.Length.ToString().Length;
+                int suffixLen = 1 + args.Length.ToString().Length;
 
                 // make sure the typename actually has expected "`N" format.
                 if (typeName[typeName.Length - suffixLen] == '`')
@@ -120,72 +123,78 @@ namespace UnityExplorer.UI.Utility
             typeName = $"<color={GetClassColor(type)}>{typeName}</color>";
 
             // parse the generic args, if any
-            if (gArgs.Length > 0)
-                typeName += ParseGenericArgs(gArgs);
+            if (args.Length > 0)
+                typeName += ParseGenericArgs(args);
+
+            typeToRichType.Add(type.AssemblyQualifiedName, typeName);
 
             return typeName;
         }
 
-        public static string ParseGenericArgs(Type[] gArgs, bool allGeneric = false)
-        {
-            if (gArgs.Length < 1)
-                return "";
+        private static readonly StringBuilder genericBuilder = new StringBuilder(4096);
 
-            var args = "<";
-            for (int i = 0; i < gArgs.Length; i++)
+        public static string ParseGenericArgs(Type[] args, bool isGenericParams = false)
+        {
+            if (args.Length < 1)
+                return string.Empty;
+
+            genericBuilder.Clear();
+            genericBuilder.Append('<');
+
+            for (int i = 0; i < args.Length; i++)
             {
                 if (i > 0)
-                    args += ", ";
+                    genericBuilder.Append(',');
 
-                var arg = gArgs[i];
-
-                if (allGeneric)
+                if (isGenericParams)
                 {
-                    args += $"<color={CONST_VAR}>{arg.Name}</color>";
+                    genericBuilder.Append($"<color={CONST_VAR}>{args[i].Name}</color>");
                     continue;
                 }
 
                 // using HighlightTypeName makes it recursive, so we can parse nested generic args.
-                args += HighlightTypeName(arg);
+                genericBuilder.Append(HighlightTypeName(args[i]));
             }
-            return args + ">";
+
+            genericBuilder.Append('>');
+            return genericBuilder.ToString();
         }
 
         public static string GetMemberInfoColor(MemberInfo memberInfo, out bool isStatic)
         {
-            string memberColor = "";
             isStatic = false;
             if (memberInfo is FieldInfo fi)
             {
                 if (fi.IsStatic)
                 {
                     isStatic = true;
-                    memberColor = FIELD_STATIC;
+                    return FIELD_STATIC;
                 }
                 else
-                    memberColor = FIELD_INSTANCE;
+                    return FIELD_INSTANCE;
             }
             else if (memberInfo is MethodInfo mi)
             {
                 if (mi.IsStatic)
                 {
                     isStatic = true;
-                    memberColor = METHOD_STATIC;
+                    return METHOD_STATIC;
                 }
                 else
-                    memberColor = METHOD_INSTANCE;
+                    return METHOD_INSTANCE;
             }
             else if (memberInfo is PropertyInfo pi)
             {
                 if (pi.GetAccessors(true)[0].IsStatic)
                 {
                     isStatic = true;
-                    memberColor = PROP_STATIC;
+                    return PROP_STATIC;
                 }
                 else
-                    memberColor = PROP_INSTANCE;
+                    return PROP_INSTANCE;
             }
-            return memberColor;
+
+            throw new NotImplementedException(memberInfo.GetType().Name + " is not supported");
         }
     }
 }
