@@ -10,6 +10,11 @@ using UnityExplorer.UI.Models;
 
 namespace UnityExplorer.UI.Widgets
 {
+    public struct CellInfo 
+    {
+        public int cellIndex, dataIndex;
+    }
+
     /// <summary>
     /// An object-pooled ScrollRect, attempts to support content of any size and provide a scrollbar for it.
     /// </summary>
@@ -62,7 +67,6 @@ namespace UnityExplorer.UI.Widgets
         private readonly List<ICell> CellPool = new List<ICell>();
 
         internal DataHeightCache HeightCache;
-        internal DataHeightCache tempHeightCache;
 
         private float TotalDataHeight => HeightCache.TotalHeight + contentLayout.padding.top + contentLayout.padding.bottom;
 
@@ -114,7 +118,10 @@ namespace UnityExplorer.UI.Widgets
 
         public void Rebuild()
         {
-            RecreateCellPool(true, true, null);
+            SetRecycleViewBounds(false);
+            SetScrollBounds();
+
+            RecreateCellPool(true, true);
             writingLocked = false;
             Content.anchoredPosition = Vector2.zero;
             UpdateSliderHandle(true);
@@ -128,22 +135,23 @@ namespace UnityExplorer.UI.Widgets
             UpdateSliderHandle(true);
         }
 
-        public void EnableTempCache()
+        public void RecreateHeightCache()
         {
-            if (tempHeightCache == null)
-                tempHeightCache = HeightCache;
+            //if (tempHeightCache == null)
+            //    tempHeightCache = HeightCache;
 
-            HeightCache = new DataHeightCache(this, tempHeightCache);
+            HeightCache = new DataHeightCache(this);
+            CheckDataSourceCountChange(out _);
         }
 
-        public void DisableTempCache()
-        {
-            if (tempHeightCache == null)
-                return;
+        //public void DisableTempCache()
+        //{
+        //    if (tempHeightCache == null)
+        //        return;
 
-            HeightCache = tempHeightCache;
-            tempHeightCache = null;
-        }
+        //    HeightCache = tempHeightCache;
+        //    tempHeightCache = null;
+        //}
 
         public void RefreshCells(bool reloadData)
         {
@@ -252,23 +260,15 @@ namespace UnityExplorer.UI.Widgets
             RecycleViewBounds = new Vector2(Viewport.MinY() + HalfThreshold, Viewport.MaxY() - HalfThreshold);
 
             if (checkHeightGrow && prevViewportHeight < Viewport.rect.height && prevViewportHeight != 0.0f)
-                ret = RecreateCellPool(false, false, null);
+                ret = RecreateCellPool(false, false);
 
             prevViewportHeight = Viewport.rect.height;
 
             return ret;
         }
 
-        private bool RecreateCellPool(bool forceRecreate, bool resetDataIndex, bool? setTempCacheEnabledTo)
+        private bool RecreateCellPool(bool forceRecreate, bool resetDataIndex)
         {
-            if (setTempCacheEnabledTo != null)
-            {
-                if (setTempCacheEnabledTo == true)
-                    EnableTempCache();
-                else if (setTempCacheEnabledTo == false)
-                    DisableTempCache();
-            }
-
             CheckDataSourceCountChange(out _);
 
             var requiredCoverage = Math.Abs(RecycleViewBounds.y - RecycleViewBounds.x);
@@ -310,7 +310,7 @@ namespace UnityExplorer.UI.Widgets
 
         // Refresh methods
 
-        private struct CellInfo { public int cellIndex, dataIndex; }
+        private CellInfo _cellInfo = new CellInfo();
 
         private IEnumerator<CellInfo> GetPoolEnumerator()
         {
@@ -319,11 +319,9 @@ namespace UnityExplorer.UI.Widgets
             int iterated = 0;
             while (iterated < CellPool.Count)
             {
-                yield return new CellInfo()
-                {
-                    cellIndex = cellIdx,
-                    dataIndex = dataIndex
-                };
+                _cellInfo.cellIndex = cellIdx;
+                _cellInfo.dataIndex = dataIndex;
+                yield return _cellInfo;
 
                 cellIdx++;
                 if (cellIdx >= CellPool.Count)
@@ -407,7 +405,7 @@ namespace UnityExplorer.UI.Widgets
             cachedCell.Enable();
             DataSource.SetCell(cachedCell, dataIndex);
 
-            //LayoutRebuilder.ForceRebuildLayoutImmediate(cachedCell.Rect);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(cachedCell.Rect);
             HeightCache.SetIndex(dataIndex, cachedCell.Rect.rect.height);
         }
 
@@ -443,11 +441,11 @@ namespace UnityExplorer.UI.Widgets
             ScrollRect.m_ContentStartPosition += vector;
             ScrollRect.m_PrevPosition += vector;
 
-            // LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
             prevAnchoredPos = ScrollRect.content.anchoredPosition;
 
             SetScrollBounds();
 
+            //WritingLocked = true;
             UpdateSliderHandle();
         }
 
@@ -486,6 +484,8 @@ namespace UnityExplorer.UI.Widgets
                 bottomPoolIndex = topPoolIndex;
                 topPoolIndex = (topPoolIndex + 1) % CellPool.Count;
             }
+
+            //LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
 
             return -recycledheight;
         }
@@ -527,6 +527,8 @@ namespace UnityExplorer.UI.Widgets
                 topPoolIndex = bottomPoolIndex;
                 bottomPoolIndex = (bottomPoolIndex - 1 + CellPool.Count) % CellPool.Count;
             }
+
+            //LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
 
             return recycledheight;
         }

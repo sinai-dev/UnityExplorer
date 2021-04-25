@@ -172,6 +172,8 @@ namespace UnityExplorer.UI.InteractiveValues
 
         public virtual void ConstructSubcontent()
         {
+            Owner.CheckSubcontentCreation();
+
             m_subContentConstructed = true;
         }
 
@@ -305,8 +307,11 @@ namespace UnityExplorer.UI.InteractiveValues
         {
             m_UIConstructed = true;
 
-            m_mainContent = UIFactory.CreateHorizontalGroup(parent, $"InteractiveValue_{this.GetType().Name}", false, false, true, true, 4, default, 
-                new Color(1, 1, 1, 0), TextAnchor.UpperLeft);
+            //m_mainContent = UIFactory.CreateHorizontalGroup(parent, $"InteractiveValue_{this.GetType().Name}", false, false, true, true, 4, default, 
+            //    new Color(1, 1, 1, 0), TextAnchor.UpperLeft);
+
+            m_mainContent = UIFactory.CreateUIObject($"InteractiveValue_{this.GetType().Name}", parent);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(m_mainContent, false, false, true, true, 4, 0, 0, 0, 0, TextAnchor.UpperLeft);
 
             var mainRect = m_mainContent.GetComponent<RectTransform>();
             mainRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 25);
@@ -316,7 +321,7 @@ namespace UnityExplorer.UI.InteractiveValues
             // subcontent expand button
             if (HasSubContent)
             {
-                m_subExpandBtn = UIFactory.CreateButton(m_mainContent, "ExpandSubcontentButton", "▲", ToggleSubcontent, new Color(0.3f, 0.3f, 0.3f));
+                m_subExpandBtn = UIFactory.CreateButton(m_mainContent, "ExpandSubcontentButton", "▲", ToggleSubcontent, new Color(1,1,1,0));
                 UIFactory.SetLayoutElement(m_subExpandBtn.gameObject, minHeight: 25, minWidth: 25, flexibleWidth: 0, flexibleHeight: 0);
             }
 

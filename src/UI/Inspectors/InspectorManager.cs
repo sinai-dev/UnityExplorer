@@ -30,6 +30,14 @@ namespace UnityExplorer.UI.Inspectors
             }
         }
 
+        public static void DestroyInspector(InspectorBase inspector)
+        {
+            if (inspector is ReflectionInspector ri)
+                ri.Destroy();
+            else
+                inspector.Destroy();
+        }
+
         public static void Inspect(object obj, CacheObjectBase parentMember = null)
         {
             var type = ReflectionProvider.Instance.GetActualType(obj);
@@ -70,7 +78,7 @@ namespace UnityExplorer.UI.Inspectors
             SetInspectorTab(inspector);
         }
 
-        public static void InspectType(Type type)
+        public static void Inspect(Type type)
         {
             if (type == null)
             {

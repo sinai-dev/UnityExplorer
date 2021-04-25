@@ -67,6 +67,9 @@ namespace UnityExplorer.UI.InteractiveValues
             if (_typeSupportCache.TryGetValue(type.AssemblyQualifiedName, out bool ret))
                 return ret;
 
+            if (type.FullName == "System.Void")
+                return false;
+
             ret = true;
             var fields = type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
             foreach (var field in fields)

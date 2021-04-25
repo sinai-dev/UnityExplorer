@@ -125,7 +125,10 @@ namespace UnityExplorer.UI.Inspectors.Reflection
             base.Destroy();
 
             if (this.Content)
+            {
+                GameObject.Destroy(this.InactiveHolder);
                 GameObject.Destroy(this.Content);
+            }
         }
 
         internal bool IsBlacklisted(string sig) => bl_typeAndMember.Any(it => sig.Contains(it));
@@ -262,7 +265,7 @@ namespace UnityExplorer.UI.Inspectors.Reflection
             RuntimeProvider.Instance.SetColorBlock(m_lastActiveMemButton, new Color(0.2f, 0.6f, 0.2f));
 
             FilterMembers(null, true);
-            ScrollPool.EnableTempCache();
+            ScrollPool.RecreateHeightCache();
             ScrollPool.Rebuild();
         }
 
@@ -332,7 +335,7 @@ namespace UnityExplorer.UI.Inspectors.Reflection
                 new Color(0.15f, 0.15f, 0.15f));
 
             this.m_inactiveHolder = new GameObject("InactiveContentHolder");
-            m_inactiveHolder.transform.SetParent(parent.transform, false);
+            m_inactiveHolder.transform.SetParent(Content.transform, false);
             m_inactiveHolder.SetActive(false);
 
             ConstructTopArea();
@@ -389,7 +392,7 @@ namespace UnityExplorer.UI.Inspectors.Reflection
             nameInput.onValueChanged.AddListener((string val) =>
             {
                 FilterMembers(val, true);
-                ScrollPool.EnableTempCache();
+                ScrollPool.RecreateHeightCache();
                 ScrollPool.Rebuild();
             });
             m_nameFilterText = nameInput.textComponent;

@@ -31,9 +31,6 @@ namespace UnityExplorer.UI.CacheObject
                 ConstructUI();
                 UpdateValue();
             }
-
-            //if (!m_mainContent.activeSelf)
-            //    m_mainContent.SetActive(true);
         }
 
         public virtual void Disable()
@@ -79,31 +76,42 @@ namespace UnityExplorer.UI.CacheObject
         internal GameObject m_parentContent;
         internal RectTransform m_mainRect;
         internal GameObject UIRoot;
+
         internal GameObject SubContentGroup;
+        internal bool constructedSubcontent;
 
         // Make base UI holder for CacheObject, this doesnt actually display anything.
         internal virtual void ConstructUI()
         {
             m_constructedUI = true;
 
-            UIRoot = UIFactory.CreateVerticalGroup(m_parentContent, $"{this.GetType().Name}.MainContent", true, true, true, true, 2, 
-                new Vector4(0, 5, 0, 0), new Color(0.1f, 0.1f, 0.1f), TextAnchor.UpperLeft);
+            //UIRoot = UIFactory.CreateVerticalGroup(m_parentContent, $"{this.GetType().Name}.MainContent", true, true, true, true, 2, 
+            //    new Vector4(0, 5, 0, 0), new Color(0.1f, 0.1f, 0.1f), TextAnchor.UpperLeft);
+
+            UIRoot = UIFactory.CreateUIObject($"{this.GetType().Name}.MainContent", m_parentContent);
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(UIRoot, true, true, true, true, 2, 0, 5, 0, 0, TextAnchor.UpperLeft);
             m_mainRect = UIRoot.GetComponent<RectTransform>();
             m_mainRect.pivot = new Vector2(0, 1);
             m_mainRect.anchorMin = Vector2.zero;
             m_mainRect.anchorMax = Vector2.one;
             UIFactory.SetLayoutElement(UIRoot, minHeight: 30, flexibleHeight: 9999, minWidth: 200, flexibleWidth: 5000);
-            //UIRoot.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-            // subcontent
-
-            SubContentGroup = UIFactory.CreateVerticalGroup(UIRoot, $"{this.GetType().Name}.SubContent", true, false, true, true, 0, default, 
-                new Color(0.085f, 0.085f, 0.085f));
+            SubContentGroup = new GameObject("SubContent");
+            SubContentGroup.transform.parent = UIRoot.transform;
             UIFactory.SetLayoutElement(SubContentGroup, minHeight: 30, flexibleHeight: 9999, minWidth: 125, flexibleWidth: 9000);
-
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(SubContentGroup, true, false, true, true);
             SubContentGroup.SetActive(false);
 
             IValue.m_subContentParent = SubContentGroup;
+        }
+
+        public virtual void CheckSubcontentCreation()
+        {
+            if (!constructedSubcontent)
+            {
+                SubContentGroup.AddComponent<Image>().color = new Color(0.08f, 0.08f, 0.08f);
+                constructedSubcontent = true;
+            }
         }
 
         #endregion

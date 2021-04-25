@@ -42,7 +42,7 @@ namespace UnityExplorer.UI.InteractiveValues
         {
             get
             {
-                if (m_recacheWanted)
+                if (m_recacheWanted && Value != null)
                     return true;
                 else return m_entries.Count > 0;
             }

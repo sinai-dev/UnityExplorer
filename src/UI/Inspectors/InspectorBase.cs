@@ -106,7 +106,7 @@ namespace UnityExplorer.UI.Inspectors
             var closeBtn = UIFactory.CreateButton(tabGroupObj,
                 "CloseButton",
                 "X",
-                parent.Destroy,
+                () => { InspectorManager.DestroyInspector(parent); },
                 new Color(0.2f, 0.2f, 0.2f, 1));
 
             UIFactory.SetLayoutElement(closeBtn.gameObject, minWidth: 20, flexibleWidth: 0);

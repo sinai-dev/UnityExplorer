@@ -16,7 +16,7 @@ namespace UnityExplorer.UI.Widgets
         internal ScrollPool Scroller;
 
         public int ItemCount => currentEntries.Count;
-        public List<T> currentEntries;
+        public readonly List<T> currentEntries = new List<T>();
 
         public Func<List<T>> GetEntries;
         public Action<ButtonCell<T>, int> SetICell;
@@ -54,7 +54,7 @@ namespace UnityExplorer.UI.Widgets
         public void RefreshData()
         {
             var allEntries = GetEntries.Invoke();
-            var list = new List<T>();
+            currentEntries.Clear();
 
             foreach (var entry in allEntries)
             {
@@ -63,13 +63,11 @@ namespace UnityExplorer.UI.Widgets
                     if (!ShouldDisplay.Invoke(entry, currentFilter))
                         continue;
 
-                    list.Add(entry);
+                    currentEntries.Add(entry);
                 }
                 else
-                    list.Add(entry);
+                    currentEntries.Add(entry);
             }
-
-            currentEntries = list;
         }
 
         public ICell CreateCell(RectTransform rect)

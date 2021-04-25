@@ -29,48 +29,33 @@ namespace UnityExplorer.UI.Inspectors.Reflection
 
         public ICell CreateCell(RectTransform cellTransform) => new CellViewHolder(cellTransform.gameObject);
 
-        public void DisableCell(ICell cell, int index)
-        {
-            var root = (cell as CellViewHolder).UIRoot;
-            DisableContent(root);
-            cell.Disable();
-        }
-
         public void SetCell(ICell icell, int index)
         {
-            var root = (icell as CellViewHolder).UIRoot;
+            var cell = icell as CellViewHolder;
 
             if (index < 0 || index >= ItemCount)
             {
-                DisableContent(root);
-                icell.Disable();
+                var existing = cell.DisableContent();
+                if (existing)
+                    existing.transform.SetParent(Inspector.InactiveHolder.transform, false);
                 return;
             }
 
-            float start = Time.realtimeSinceStartup;
             index = GetRealIndexOfTempIndex(index);
 
             var cache = Inspector.allMembers[index];
             cache.Enable();
 
-            var content = cache.UIRoot;
-
-            if (content.transform.parent.ReferenceEqual(root.transform))
-                return;
-
-            var orig = content.transform.parent;
-
-            DisableContent(root);
-
-            content.transform.SetParent(root.transform, false);
-            //ExplorerCore.Log("Set cell " + index + ", took " + (Time.realtimeSinceStartup - start) + " secs");
-            //ExplorerCore.Log("orig parent was " + (orig?.name ?? " <null>"));
+            var prev = cell.SetContent(cache.UIRoot);
+            if (prev)
+                prev.transform.SetParent(Inspector.InactiveHolder.transform, false);
         }
 
-        private void DisableContent(GameObject cellRoot)
+        public void DisableCell(ICell cell, int index)
         {
-            if (cellRoot.transform.childCount > 0 && cellRoot.transform.GetChild(0) is Transform existing)
-                existing.transform.SetParent(Inspector.InactiveHolder.transform, false);
+            var content = (cell as CellViewHolder).DisableContent();
+            if (content)
+                content.transform.SetParent(Inspector.InactiveHolder.transform, false);
         }
     }
 }

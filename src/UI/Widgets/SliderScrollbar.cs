@@ -37,8 +37,6 @@ namespace UnityExplorer.UI.Utility
 
         public SliderScrollbar(Scrollbar scrollbar, Slider slider)
         {
-            //Instances.Add(this);
-
             this.m_scrollbar = scrollbar;
             this.m_slider = slider;
             this.m_scrollRect = scrollbar.transform.parent.GetComponent<RectTransform>();
@@ -49,17 +47,6 @@ namespace UnityExplorer.UI.Utility
             this.RefreshVisibility();
             this.m_slider.Set(1f, false);
         }
-
-        //internal bool CheckDestroyed()
-        //{
-        //    if (!m_slider || !m_scrollbar)
-        //    {
-        //        Instances.Remove(this);
-        //        return true;
-        //    }
-
-        //    return false;
-        //}
 
         public override void Update()
         {
@@ -75,12 +62,12 @@ namespace UnityExplorer.UI.Utility
             }
 
             bool shouldShow = !Mathf.Approximately(this.m_scrollbar.size, 1);
-            var obj = this.m_slider.handleRect.gameObject;
+            //var obj = this.m_slider.handleRect.gameObject;
 
             if (IsActive != shouldShow)
             {
                 IsActive = shouldShow;
-                obj.SetActive(IsActive);
+                m_slider.interactable = shouldShow;
 
                 if (IsActive)
                     this.m_slider.Set(this.m_scrollbar.value, false);
@@ -109,14 +96,12 @@ namespace UnityExplorer.UI.Utility
             GameObject sliderObj = UIFactory.CreateUIObject("SliderScrollbar", parent, UIFactory._smallElementSize);
 
             GameObject bgObj = UIFactory.CreateUIObject("Background", sliderObj);
-            //GameObject fillAreaObj = UIFactory.CreateUIObject("Fill Area", sliderObj);
-            //GameObject fillObj = UIFactory.CreateUIObject("Fill", fillAreaObj);
             GameObject handleSlideAreaObj = UIFactory.CreateUIObject("Handle Slide Area", sliderObj);
             GameObject handleObj = UIFactory.CreateUIObject("Handle", handleSlideAreaObj);
 
             Image bgImage = bgObj.AddComponent<Image>();
             bgImage.type = Image.Type.Sliced;
-            bgImage.color = new Color(0.05f, 0.05f, 0.05f, 1.0f);
+            bgImage.color = new Color(0.1f, 0.1f, 0.1f, 1.0f);
 
             RectTransform bgRect = bgObj.GetComponent<RectTransform>();
             bgRect.anchorMin = Vector2.zero;
@@ -128,7 +113,7 @@ namespace UnityExplorer.UI.Utility
             handleSlideRect.anchorMin = new Vector2(0f, 0f);
             handleSlideRect.anchorMax = new Vector2(1f, 1f);
             handleSlideRect.pivot = new Vector2(0.5f, 0.5f);
-            handleSlideRect.offsetMin = new Vector2(27f, 30f);
+            handleSlideRect.offsetMin = new Vector2(25f, 30f);
             handleSlideRect.offsetMax = new Vector2(-15f, 0f);
             handleSlideRect.sizeDelta = new Vector2(-20f, -30f);
 
@@ -147,14 +132,14 @@ namespace UnityExplorer.UI.Utility
             sliderBarLayout.flexibleHeight = 5000;
 
             slider = sliderObj.AddComponent<Slider>();
-            //slider.fillRect = fillObj.GetComponent<RectTransform>();
             slider.handleRect = handleObj.GetComponent<RectTransform>();
             slider.targetGraphic = handleImage;
             slider.direction = Slider.Direction.BottomToTop;
 
-            RuntimeProvider.Instance.SetColorBlock(slider, 
-                new Color(0.25f, 0.25f, 0.25f), 
-                new Color(0.3f, 0.3f, 0.3f), 
+            RuntimeProvider.Instance.SetColorBlock(slider,
+                new Color(0.4f, 0.4f, 0.4f),
+                new Color(0.5f, 0.5f, 0.5f),
+                new Color(0.3f, 0.3f, 0.3f),
                 new Color(0.2f, 0.2f, 0.2f));
 
             return sliderObj;

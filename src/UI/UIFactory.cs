@@ -33,7 +33,7 @@ namespace UnityExplorer.UI
             var obj = new GameObject(name)
             {
                 layer = 5,
-                hideFlags = HideFlags.HideAndDontSave
+                hideFlags = HideFlags.HideAndDontSave,
             };
 
             obj.transform.SetParent(parent.transform, false);
@@ -752,6 +752,7 @@ namespace UnityExplorer.UI
 
             var scrollRect = mainObj.AddComponent<ScrollRect>();
             scrollRect.movementType = ScrollRect.MovementType.Clamped;
+            //scrollRect.inertia = false;
             scrollRect.inertia = true;
             scrollRect.elasticity = 0.125f;
             scrollRect.scrollSensitivity = 25;

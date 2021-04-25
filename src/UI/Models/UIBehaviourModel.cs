@@ -22,7 +22,6 @@ namespace UnityExplorer.UI.Models
                     var instance = Instances[i];
                     if (instance == null || !instance.UIRoot)
                     {
-                        ExplorerCore.Log($"Instance {instance?.GetType().Name ?? "<null>"} has no UIRoot or it was destroyed!");
                         Instances.RemoveAt(i);
                         continue;
                     }

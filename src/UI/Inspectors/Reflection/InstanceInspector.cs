@@ -39,7 +39,7 @@ namespace UnityExplorer.UI.Inspectors.Reflection
 
             FilterMembers(null, true);
 
-            ScrollPool.EnableTempCache();
+            ScrollPool.RecreateHeightCache();
             ScrollPool.RefreshAndJumpToTop();
             //RefreshDisplay();
             //m_sliderScroller.m_slider.value = 1f;
@@ -134,23 +134,21 @@ namespace UnityExplorer.UI.Inspectors.Reflection
 
         internal void ConstructTextureHelper()
         {
-            var rowObj = UIFactory.CreateHorizontalGroup(Content, "TextureHelper", true, false, true, true, 5, new Vector4(3, 3, 3, 3),
+            var rowObj = UIFactory.CreateHorizontalGroup(Content, "TextureHelper", false, false, true, true, 5, new Vector4(3, 3, 3, 3),
                 new Color(0.1f, 0.1f, 0.1f));
             UIFactory.SetLayoutElement(rowObj, minHeight: 25, flexibleHeight: 0);
 
-            var showBtn = UIFactory.CreateButton(rowObj, "ShowButton", "Show", null, new Color(0.2f, 0.6f, 0.2f));
-            UIFactory.SetLayoutElement(showBtn.gameObject, minWidth: 50, flexibleWidth: 0);
+            var showBtn = UIFactory.CreateButton(rowObj, "ShowButton", "Show", null, new Color(0.2f, 0.3f, 0.2f));
+            UIFactory.SetLayoutElement(showBtn.gameObject, minWidth: 50, flexibleWidth: 0, minHeight: 20);
 
             UIFactory.CreateLabel(rowObj, "TextureViewerLabel", "Texture Viewer", TextAnchor.MiddleLeft);
 
-            var textureViewerObj = UIFactory.CreateScrollView(Content, "TextureViewerContent", out GameObject scrollContent, out _,
+            m_textureViewerObj = UIFactory.CreateScrollView(Content, "TextureViewerContent", out GameObject scrollContent, out _,
                 new Color(0.1f, 0.1f, 0.1f));
-            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(textureViewerObj, false, false, true, true);
-            UIFactory.SetLayoutElement(textureViewerObj, minHeight: 100, flexibleHeight: 9999, flexibleWidth: 9999);
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(scrollContent, false, false, true, true);
+            UIFactory.SetLayoutElement(m_textureViewerObj, minHeight: 100, flexibleHeight: 9999, flexibleWidth: 9999);
 
-            textureViewerObj.SetActive(false);
-
-            m_textureViewerObj = textureViewerObj;
+            m_textureViewerObj.SetActive(false);
 
             var showText = showBtn.GetComponentInChildren<Text>();
             showBtn.onClick.AddListener(() =>
@@ -249,7 +247,7 @@ namespace UnityExplorer.UI.Inspectors.Reflection
             m_textureViewerObj.SetActive(enabled);
 
             m_filterAreaObj.SetActive(!enabled);
-            //m_memberListObj.SetActive(!enabled);
+            this.ScrollPool.UIRoot.SetActive(!enabled);
             m_updateRowObj.SetActive(!enabled);
         }
     }

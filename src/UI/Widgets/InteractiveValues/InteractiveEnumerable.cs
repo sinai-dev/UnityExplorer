@@ -11,11 +11,90 @@ using UnityExplorer.Core.Config;
 using UnityExplorer.UI;
 using UnityExplorer.UI.CacheObject;
 using UnityExplorer.UI.Utility;
+using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.InteractiveValues
 {
-    public class InteractiveEnumerable : InteractiveValue
+    public class InteractiveEnumerable : InteractiveValue, IPoolDataSource
     {
+        // IPoolDataSource
+
+        public ScrollPool ScrollPool;
+        public GameObject InactiveHolder;
+        internal LayoutElement listLayout;
+
+        public int ItemCount => m_entries?.Count ?? 0;
+
+        public void SetCell(ICell icell, int index)
+        {
+            var cell = icell as CellViewHolder;
+
+            if (index < 0 || index >= ItemCount)
+            {
+                var existing = cell.DisableContent();
+                if (existing)
+                    existing.transform.SetParent(InactiveHolder.transform, false);
+                return;
+            }
+
+            var cache = m_entries[index];
+            cache.Enable();
+
+            var prev = cell.SetContent(cache.UIRoot);
+            if (prev)
+                prev.transform.SetParent(InactiveHolder.transform, false);
+        }
+
+        public void DisableCell(ICell cell, int index)
+        {
+            var content = (cell as CellViewHolder).DisableContent();
+            if (content)
+                content.transform.SetParent(InactiveHolder.transform, false);
+        }
+
+        //public void SetCell(ICell cell, int index)
+        //{
+        //    var root = (cell as CellViewHolder).UIRoot;
+
+        //    if (index < 0 || index >= ItemCount)
+        //    {
+        //        DisableContent(root);
+        //        cell.Disable();
+        //        return;
+        //    }
+
+        //    var cache = m_entries[index];
+        //    cache.Enable();
+
+        //    var content = cache.UIRoot;
+
+        //    if (content.transform.parent.ReferenceEqual(root.transform))
+        //        return;
+
+        //    DisableContent(root);
+
+        //    content.transform.SetParent(root.transform, false);
+        //}
+
+        //public void DisableCell(ICell cell, int index)
+        //{
+        //    var root = (cell as CellViewHolder).UIRoot;
+        //    DisableContent(root);
+        //    cell.Disable();
+        //}
+
+        //private void DisableContent(GameObject cellRoot)
+        //{
+        //    if (cellRoot.transform.childCount > 0 && cellRoot.transform.GetChild(0) is Transform existing)
+        //        existing.transform.SetParent(InactiveHolder.transform, false);
+        //}
+
+        public ICell CreateCell(RectTransform cellTransform) => new CellViewHolder(cellTransform.gameObject);
+
+        public int GetRealIndexOfTempIndex(int tempIndex) => throw new NotImplementedException("Filtering not supported");
+
+        // InteractiveEnumerable
+
         public InteractiveEnumerable(object value, Type valueType) : base(value, valueType) 
         {
             if (valueType.IsGenericType)
@@ -30,11 +109,12 @@ namespace UnityExplorer.UI.InteractiveValues
         {
             get
             {
-                if (m_recacheWanted)
+                if (m_recacheWanted && Value != null)
                     return true;
                 else return m_entries.Count > 0;
             }
         }
+
 
         internal IEnumerable RefIEnumerable;
         internal IList RefIList;
@@ -50,13 +130,14 @@ namespace UnityExplorer.UI.InteractiveValues
             RefIEnumerable = Value as IEnumerable;
             RefIList = Value as IList;
 
-            if (m_subContentParent.activeSelf)
+            if (m_subContentParent && m_subContentParent.activeSelf)
             {
-                GetCacheEntries();
-                RefreshDisplay();
+                ToggleSubcontent();
+                //GetCacheEntries();
+                //RefreshDisplay();
             }
-            else
-                m_recacheWanted = true;
+
+            m_recacheWanted = true;
 
             base.OnValueUpdated();
         }
@@ -64,11 +145,6 @@ namespace UnityExplorer.UI.InteractiveValues
         public override void OnException(CacheMember member)
         {
             base.OnException(member);
-        }
-
-        private void OnPageTurned()
-        {
-            RefreshDisplay();
         }
 
         public override void RefreshUIForValue()
@@ -95,8 +171,6 @@ namespace UnityExplorer.UI.InteractiveValues
         {
             if (m_entries.Any())
             {
-                // maybe improve this, probably could be more efficient i guess
-
                 foreach (var entry in m_entries)
                     entry.Destroy();
 
@@ -111,7 +185,7 @@ namespace UnityExplorer.UI.InteractiveValues
                 int index = 0;
                 foreach (var entry in RefIEnumerable)
                 {
-                    var cache = new CacheEnumerated(index, this, RefIList, this.m_listContent);
+                    var cache = new CacheEnumerated(index, this, RefIList, this.InactiveHolder);
                     cache.CreateIValue(entry, m_baseEntryType);
                     m_entries.Add(cache);
 
@@ -126,32 +200,9 @@ namespace UnityExplorer.UI.InteractiveValues
 
         public void RefreshDisplay()
         {
-            //var entries = m_entries;
-            //m_pageHandler.ListCount = entries.Count;
-            //
-            //for (int i = 0; i < m_displayedEntries.Length; i++)
-            //{
-            //    var entry = m_displayedEntries[i];
-            //    if (entry != null)
-            //        entry.Disable();
-            //    else
-            //        break;
-            //}
-            //
-            //if (entries.Count < 1)
-            //    return;
-            //
-            //foreach (var itemIndex in m_pageHandler)
-            //{
-            //    if (itemIndex >= entries.Count)
-            //        break;
-            //
-            //    CacheEnumerated entry = entries[itemIndex];
-            //    m_displayedEntries[itemIndex - m_pageHandler.StartIndex] = entry;
-            //    entry.Enable();
-            //}
-            //
-            ////UpdateSubcontentHeight();
+            ScrollPool.RefreshCells(true);
+
+            listLayout.minHeight = Math.Min(500f, m_entries.Count * 32f);
         }
 
         internal override void OnToggleSubcontent(bool active)
@@ -168,39 +219,27 @@ namespace UnityExplorer.UI.InteractiveValues
             RefreshDisplay();
         }
 
-
-        internal GameObject m_listContent;
-        internal LayoutElement m_listLayout;
-
-        //internal PageHandler m_pageHandler;
-
         public override void ConstructUI(GameObject parent, GameObject subGroup)
         {
             base.ConstructUI(parent, subGroup);
+
+            InactiveHolder = new GameObject("InactiveHolder");
+            InactiveHolder.transform.SetParent(parent.transform, false);
+            InactiveHolder.SetActive(false);
         }
 
         public override void ConstructSubcontent()
         {
             base.ConstructSubcontent();
 
-            //m_pageHandler = new PageHandler(null);
-            //m_pageHandler.ConstructUI(m_subContentParent);
-            //m_pageHandler.OnPageChanged += OnPageTurned;
+            ScrollPool = UIFactory.CreateScrollPool(m_subContentParent, "ListEntries", out GameObject scrollRoot, out GameObject scrollContent,
+                new Color(0.05f, 0.05f, 0.05f));
 
-            m_listContent = UIFactory.CreateVerticalGroup(this.m_subContentParent, "EnumerableContent", true, true, true, true, 2, new Vector4(5,5,5,5),
-                new Color(0.08f, 0.08f, 0.08f));
+            listLayout = scrollRoot.AddComponent<LayoutElement>();
 
-            var scrollRect = m_listContent.GetComponent<RectTransform>();
-            scrollRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 0);
-
-            m_listLayout = Owner.UIRoot.GetComponent<LayoutElement>();
-            m_listLayout.minHeight = 25;
-            m_listLayout.flexibleHeight = 0;
-            Owner.m_mainRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 25);
-
-            var contentFitter = m_listContent.AddComponent<ContentSizeFitter>();
-            contentFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
-            contentFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            var proto = CellViewHolder.CreatePrototypeCell(scrollRoot);
+            proto.sizeDelta = new Vector2(100, 30);
+            ScrollPool.Initialize(this, proto);
         }
     }
 }

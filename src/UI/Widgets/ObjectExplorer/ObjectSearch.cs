@@ -66,6 +66,8 @@ namespace UnityExplorer.UI.Widgets
 
         public void DoSearch()
         {
+            cachedCellTexts.Clear();
+
             if (m_context == SearchContext.Singleton)
                 currentResults = SearchProvider.SingletonSearch(nameInputField.text);
             else if (m_context == SearchContext.StaticClass)
@@ -85,20 +87,29 @@ namespace UnityExplorer.UI.Widgets
             resultsLabel.text = $"{currentResults.Count} results";
         }
 
+        // Cache the syntax-highlighted text for each search result to reduce allocs.
+        private static readonly Dictionary<int, string> cachedCellTexts = new Dictionary<int, string>();
+
         public void SetCell(ButtonCell<object> cell, int index)
         {
-            if (m_context == SearchContext.StaticClass)
+            if (!cachedCellTexts.ContainsKey(index))
             {
-                cell.buttonText.text = SignatureHighlighter.HighlightTypeName(currentResults[index].GetActualType());
+                string text;
+                if (m_context == SearchContext.StaticClass)
+                    text = SignatureHighlighter.HighlightTypeName(currentResults[index].GetActualType());
+                else
+                    text = ToStringUtility.ToString(currentResults[index], currentResults[index].GetActualType());
+
+                cachedCellTexts.Add(index, text);
             }
-            else 
-                cell.buttonText.text = ToStringUtility.ToString(currentResults[index], currentResults[index].GetActualType());
+
+            cell.buttonText.text = cachedCellTexts[index];
         }
 
         private void OnCellClicked(int dataIndex)
         {
             if (m_context == SearchContext.StaticClass)
-                InspectorManager.InspectType(currentResults[dataIndex] as Type);
+                InspectorManager.Inspect(currentResults[dataIndex] as Type);
             else
                 InspectorManager.Inspect(currentResults[dataIndex]);
         }
