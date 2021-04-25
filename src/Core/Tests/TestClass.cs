@@ -7,7 +7,14 @@ namespace UnityExplorer.Tests
 {
     public static class TestClass
     {
-        //public static UI.Main.PanelDragger.ResizeTypes flags = UI.Main.PanelDragger.ResizeTypes.NONE;
+        static TestClass()
+        {
+            List = new List<string>();
+            for (int i = 0; i < 10000; i++)
+                List.Add(i.ToString());
+        }
+
+        public static List<string> List;
 
 #if CPP
         public static string testStringOne = "Test";
