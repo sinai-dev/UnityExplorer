@@ -6,15 +6,15 @@ using UnityEngine;
 
 namespace UnityExplorer.UI.Widgets
 {
-    public interface IPoolDataSource
+    public interface IPoolDataSource<T> where T : ICell
     {
         int ItemCount { get; }
-
-        void SetCell(ICell cell, int index);
-        void DisableCell(ICell cell, int index);
-
         int GetRealIndexOfTempIndex(int tempIndex);
 
-        ICell CreateCell(RectTransform cellTransform);
+        void OnCellBorrowed(T cell);
+        void OnCellReturned(T cell);
+
+        void SetCell(T cell, int index);
+        void DisableCell(T cell, int index);
     }
 }

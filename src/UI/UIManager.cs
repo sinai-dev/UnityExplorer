@@ -32,6 +32,8 @@ namespace UnityExplorer.UI
         public static Canvas Canvas { get; private set; }
         public static EventSystem EventSys { get; private set; }
 
+        internal static GameObject PoolHolder { get; private set; }
+
         // panels
         internal static GameObject PanelHolder { get; private set; }
 
@@ -138,6 +140,11 @@ namespace UnityExplorer.UI
             UIFactory.Init();
 
             CreateRootCanvas();
+
+            PoolHolder = new GameObject("PoolHolder");
+            PoolHolder.transform.parent = CanvasRoot.transform;
+            PoolHolder.SetActive(false);
+
             CreateTopNavBar();
 
             AutoCompleter = new AutoCompleter();
@@ -213,22 +220,24 @@ namespace UnityExplorer.UI
 
             // close button
 
-            var closeBtn = UIFactory.CreateButton(panel, "CloseButton", "X", () => { ShowMenu = false; });
-            UIFactory.SetLayoutElement(closeBtn.gameObject, minHeight: 25, minWidth: 25, flexibleWidth: 0);
-            RuntimeProvider.Instance.SetColorBlock(closeBtn, new Color(0.63f, 0.32f, 0.31f),
+            var closeBtn = UIFactory.CreateButton(panel, "CloseButton", "X");
+            UIFactory.SetLayoutElement(closeBtn.Button.gameObject, minHeight: 25, minWidth: 25, flexibleWidth: 0);
+            RuntimeProvider.Instance.SetColorBlock(closeBtn.Button, new Color(0.63f, 0.32f, 0.31f),
                 new Color(0.81f, 0.25f, 0.2f), new Color(0.6f, 0.18f, 0.16f));
+
+            closeBtn.OnClick += () => { ShowMenu = false; };
         }
 
         private static void CreateNavButton(GameObject navbar, Panels panel, string label)
         {
             var button = UIFactory.CreateButton(navbar, $"Button_{panel}", label);
-            UIFactory.SetLayoutElement(button.gameObject, minWidth: 118, flexibleWidth: 0);
-            RuntimeProvider.Instance.SetColorBlock(button, navButtonDisabledColor, navButtonDisabledColor * 1.2f);
-            button.onClick.AddListener(() =>
+            UIFactory.SetLayoutElement(button.Button.gameObject, minWidth: 118, flexibleWidth: 0);
+            RuntimeProvider.Instance.SetColorBlock(button.Button, navButtonDisabledColor, navButtonDisabledColor * 1.2f);
+            button.OnClick += () =>
             {
                 TogglePanel(panel);
-            });
-            navButtonDict.Add(panel, button);
+            };
+            navButtonDict.Add(panel, button.Button);
         }
 
         // Could be cool, need to investigate properly.

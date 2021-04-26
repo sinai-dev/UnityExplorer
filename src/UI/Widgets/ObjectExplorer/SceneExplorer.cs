@@ -159,8 +159,14 @@ namespace UnityExplorer.UI.Widgets
 
             // Scene selector dropdown
 
-            var dropdownObj = UIFactory.CreateDropdown(toolbar, out sceneDropdown, "<notset>", 13, OnDropdownChanged);
-            UIFactory.SetLayoutElement(dropdownObj, minHeight: 25, flexibleHeight: 0);
+            var dropRow = UIFactory.CreateHorizontalGroup(toolbar, "DropdownRow", true, true, true, true, 5, default, new Color(1, 1, 1, 0));
+            UIFactory.SetLayoutElement(dropRow, minHeight: 25, flexibleWidth: 9999);
+
+            var dropLabel = UIFactory.CreateLabel(dropRow, "SelectorLabel", "Scene:", TextAnchor.MiddleLeft, Color.cyan, false, 15);
+            UIFactory.SetLayoutElement(dropLabel.gameObject, minHeight: 25, minWidth: 60, flexibleWidth: 0);
+
+            var dropdownObj = UIFactory.CreateDropdown(dropRow, out sceneDropdown, "<notset>", 13, OnDropdownChanged);
+            UIFactory.SetLayoutElement(dropdownObj, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
 
             SceneHandler.Update();
             PopulateSceneDropdown();
@@ -183,8 +189,9 @@ namespace UnityExplorer.UI.Widgets
             refreshRow = UIFactory.CreateHorizontalGroup(toolbar, "RefreshGroup", true, true, true, true, 2, new Vector4(2, 2, 2, 2));
             UIFactory.SetLayoutElement(refreshRow, minHeight: 30, flexibleHeight: 0);
 
-            var refreshButton = UIFactory.CreateButton(refreshRow, "RefreshButton", "Update", ForceUpdate);
-            UIFactory.SetLayoutElement(refreshButton.gameObject, minWidth: 65, flexibleWidth: 0);
+            var refreshButton = UIFactory.CreateButton(refreshRow, "RefreshButton", "Update");
+            UIFactory.SetLayoutElement(refreshButton.Button.gameObject, minWidth: 65, flexibleWidth: 0);
+            refreshButton.OnClick += ForceUpdate;
 
             var refreshToggle = UIFactory.CreateToggle(refreshRow, "RefreshToggle", out Toggle toggle, out Text text);
             UIFactory.SetLayoutElement(refreshToggle, flexibleWidth: 9999);
@@ -199,14 +206,14 @@ namespace UnityExplorer.UI.Widgets
 
             // Transform Tree
 
-            var scrollPool = UIFactory.CreateScrollPool(m_uiRoot, "TransformTree", out GameObject scrollObj,
-                out GameObject scrollContent, new Color(0.15f, 0.15f, 0.15f));
+            var scrollPool = UIFactory.CreateScrollPool<TransformCell>(m_uiRoot, "TransformTree", out GameObject scrollObj,
+                out GameObject scrollContent, new Color(0.11f, 0.11f, 0.11f));
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
             UIFactory.SetLayoutElement(scrollContent, flexibleHeight: 9999);
 
             Tree = new TransformTree(scrollPool) { GetRootEntriesMethod = GetRootEntries };
             Tree.Init();
-
+            Tree.RefreshData(true, true);
             //scrollPool.Viewport.GetComponent<Mask>().enabled = false;
             //UIRoot.GetComponent<Mask>().enabled = false;
 
@@ -244,37 +251,39 @@ namespace UnityExplorer.UI.Widgets
 
                     var buttonRow = UIFactory.CreateHorizontalGroup(sceneLoaderObj, "LoadButtons", true, true, true, true, 4);
 
-                    var loadButton = UIFactory.CreateButton(buttonRow, "LoadSceneButton", "Load (Single)", () =>
+                    var loadButton = UIFactory.CreateButton(buttonRow, "LoadSceneButton", "Load (Single)", new Color(0.1f, 0.3f, 0.3f));
+                    UIFactory.SetLayoutElement(loadButton.Button.gameObject, minHeight: 25, minWidth: 150);
+                    loadButton.OnClick += () =>
                     {
                         TryLoadScene(LoadSceneMode.Single, allSceneDrop);
-                    }, new Color(0.1f, 0.3f, 0.3f));
-                    UIFactory.SetLayoutElement(loadButton.gameObject, minHeight: 25, minWidth: 150);
+                    };
 
-                    var loadAdditiveButton = UIFactory.CreateButton(buttonRow, "LoadSceneButton", "Load (Additive)", () =>
+                    var loadAdditiveButton = UIFactory.CreateButton(buttonRow, "LoadSceneButton", "Load (Additive)", new Color(0.1f, 0.3f, 0.3f));
+                    UIFactory.SetLayoutElement(loadAdditiveButton.Button.gameObject, minHeight: 25, minWidth: 150);
+                    loadAdditiveButton.OnClick += () =>
                     {
                         TryLoadScene(LoadSceneMode.Additive, allSceneDrop);
-                    }, new Color(0.1f, 0.3f, 0.3f));
-                    UIFactory.SetLayoutElement(loadAdditiveButton.gameObject, minHeight: 25, minWidth: 150);
+                    };
 
                     var disabledColor = new Color(0.24f, 0.24f, 0.24f);
-                    RuntimeProvider.Instance.SetColorBlock(loadButton, disabled: disabledColor);
-                    RuntimeProvider.Instance.SetColorBlock(loadAdditiveButton, disabled: disabledColor);
+                    RuntimeProvider.Instance.SetColorBlock(loadButton.Button, disabled: disabledColor);
+                    RuntimeProvider.Instance.SetColorBlock(loadAdditiveButton.Button, disabled: disabledColor);
 
-                    loadButton.interactable = false;
-                    loadAdditiveButton.interactable = false;
+                    loadButton.Button.interactable = false;
+                    loadAdditiveButton.Button.interactable = false;
 
                     allSceneDrop.onValueChanged.AddListener((int val) =>
                     {
                         var text = allSceneDrop.options[val].text;
                         if (text == DEFAULT_LOAD_TEXT)
                         {
-                            loadButton.interactable = false;
-                            loadAdditiveButton.interactable = false;
+                            loadButton.Button.interactable = false;
+                            loadAdditiveButton.Button.interactable = false;
                         }
                         else
                         {
-                            loadButton.interactable = true;
-                            loadAdditiveButton.interactable = true;
+                            loadButton.Button.interactable = true;
+                            loadAdditiveButton.Button.interactable = true;
                         }
                     });
                 }

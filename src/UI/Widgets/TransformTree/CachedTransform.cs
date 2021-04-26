@@ -19,21 +19,21 @@ namespace UnityExplorer.UI.Widgets
 
         public bool Expanded => Tree.IsCellExpanded(InstanceID);
 
-        public CachedTransform(TransformTree tree, Transform transform, CachedTransform parent = null)
+        public CachedTransform(TransformTree tree, Transform transform, int depth, CachedTransform parent = null)
         {
             Tree = tree;
             Value = transform;
             Parent = parent;
-            Update(transform);
+            Update(transform, depth);
         }
 
-        public void Update(Transform transform)
+        public void Update(Transform transform, int depth)
         {
             Value = transform;
             InstanceID = transform.GetInstanceID();
             //Name = Value.name;
             //ChildCount = Value.childCount;
-            Depth = Parent?.Depth + 1 ?? 0;
+            Depth = depth;
         }
     }
 }

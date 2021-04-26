@@ -61,7 +61,7 @@ namespace UnityExplorer.UI.Utility
             else
             {
                 if (includeNamespace && !string.IsNullOrEmpty(type.Namespace))
-                    syntaxBuilder.Append($"<color=#{NAMESPACE}>{type.Namespace}</color>.");
+                    syntaxBuilder.Append($"<color={NAMESPACE}>{type.Namespace}</color>.");
 
                 var declaring = type.DeclaringType;
                 while (declaring != null)

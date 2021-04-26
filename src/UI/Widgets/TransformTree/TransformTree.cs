@@ -5,14 +5,13 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityExplorer.UI.ObjectPool;
 using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Widgets
 {
-    public class TransformTree : IPoolDataSource
+    public class TransformTree : IPoolDataSource<TransformCell>
     {
-        public int GetRealIndexOfTempIndex(int index) => throw new NotImplementedException("TODO");
-
         public Func<IEnumerable<GameObject>> GetRootEntriesMethod;
 
         public bool Filtering => !string.IsNullOrEmpty(currentFilter);
@@ -35,7 +34,7 @@ namespace UnityExplorer.UI.Widgets
         }
         private string currentFilter;
 
-        internal ScrollPool Scroller;
+        internal ScrollPool<TransformCell> ScrollPool;
 
         internal readonly List<CachedTransform> displayedObjects = new List<CachedTransform>();
 
@@ -46,53 +45,33 @@ namespace UnityExplorer.UI.Widgets
 
         public int ItemCount => displayedObjects.Count;
 
-        public TransformTree(ScrollPool infiniteScroller)
+        public TransformTree(ScrollPool<TransformCell> scrollPool)
         {
-            Scroller = infiniteScroller;
+            ScrollPool = scrollPool;
         }
 
         public void Init()
         {
-            RuntimeProvider.Instance.StartCoroutine(InitCoroutine());
-
-            //test
-            var root = new GameObject("StressTest");
-            for (int i = 0; i < 100; i++)
-            {
-                var obj = new GameObject("GameObject " + i);
-                obj.transform.parent = root.transform;
-                for (int j = 0; j < 100; j++)
-                {
-                    new GameObject("Child " + j).transform.parent = obj.transform;
-                }
-            }
+            ScrollPool.Initialize(this);
         }
 
-        private IEnumerator InitCoroutine()
-        {
-            yield return null;
+        public int GetRealIndexOfTempIndex(int index) => -1;// not needed
 
-            var prototype = TransformCell.CreatePrototypeCell(Scroller.UIRoot);
+        public void DisableCell(TransformCell cell, int index) => cell.Disable();
 
-            RefreshData();
-            Scroller.Initialize(this, prototype);
-        }
-
-        public void DisableCell(ICell cell, int index) => cell.Disable();
-
-        public ICell CreateCell(RectTransform cellTransform)
-        {
-            var nameButton = cellTransform.Find("NameButton").GetComponent<Button>();
-            var expandButton = cellTransform.Find("ExpandButton").GetComponent<Button>();
-            var spacer = cellTransform.Find("Spacer").GetComponent<LayoutElement>();
-
-            return new TransformCell(this, cellTransform.gameObject, nameButton, expandButton, spacer);
-        }
 
         public bool IsCellExpanded(int instanceID)
         {
             return Filtering ? autoExpandedIDs.Contains(instanceID)
                              : expandedInstanceIDs.Contains(instanceID);
+        }
+
+        public void Rebuild()
+        {
+            autoExpandedIDs.Clear();
+            expandedInstanceIDs.Clear();
+
+            RefreshData(true, true);
         }
 
         public void RefreshData(bool andReload = false, bool hardReload = false)
@@ -110,13 +89,13 @@ namespace UnityExplorer.UI.Widgets
             if (andReload)
             {
                 if (!hardReload)
-                    Scroller.RefreshCells(true);
+                    ScrollPool.RefreshCells(true);
                 else
-                    Scroller.Rebuild();
+                    ScrollPool.Rebuild();
             }
         }
 
-        private void Traverse(Transform transform, CachedTransform parent = null)
+        private void Traverse(Transform transform, CachedTransform parent = null, int depth = 0)
         {
             int instanceID = transform.GetInstanceID();
 
@@ -137,11 +116,11 @@ namespace UnityExplorer.UI.Widgets
             if (objectCache.ContainsKey(instanceID))
             {
                 cached = objectCache[instanceID];
-                cached.Update(transform);
+                cached.Update(transform, depth);
             }
             else
             {
-                cached = new CachedTransform(this, transform, parent);
+                cached = new CachedTransform(this, transform, depth, parent);
                 objectCache.Add(instanceID, cached);
             }
 
@@ -150,7 +129,7 @@ namespace UnityExplorer.UI.Widgets
             if (IsCellExpanded(instanceID) && cached.Value.childCount > 0)
             {
                 for (int i = 0; i < transform.childCount; i++)
-                    Traverse(transform.GetChild(i), cached);
+                    Traverse(transform.GetChild(i), cached, depth + 1);
             }
         }
 
@@ -169,7 +148,7 @@ namespace UnityExplorer.UI.Widgets
             return false;
         }
 
-        public void SetCell(ICell iCell, int index)
+        public void SetCell(TransformCell iCell, int index)
         {
             var cell = iCell as TransformCell;
 
@@ -179,15 +158,25 @@ namespace UnityExplorer.UI.Widgets
                 cell.Disable();
         }
 
-        public void ToggleExpandCell(TransformCell cell)
+        public void ToggleExpandCell(CachedTransform cache)
         {
-            var instanceID = cell.cachedTransform.InstanceID;
+            var instanceID = cache.InstanceID;
             if (expandedInstanceIDs.Contains(instanceID))
                 expandedInstanceIDs.Remove(instanceID);
             else
                 expandedInstanceIDs.Add(instanceID);
 
             RefreshData(true);
+        }
+
+        public void OnCellBorrowed(TransformCell cell)
+        {
+            cell.OnExpandToggled += ToggleExpandCell;
+        }
+
+        public void OnCellReturned(TransformCell cell)
+        {
+            cell.OnExpandToggled -= ToggleExpandCell;
         }
     }
 }

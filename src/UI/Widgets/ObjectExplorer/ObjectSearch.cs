@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using UnityExplorer.Core.Search;
 using UnityExplorer.UI.Inspectors;
 using UnityExplorer.UI.Models;
+using UnityExplorer.UI.ObjectPool;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Utility;
 using UnityExplorer.UI.Widgets.AutoComplete;
@@ -28,7 +29,7 @@ namespace UnityExplorer.UI.Widgets
 
         public ButtonListSource<object> dataHandler;
 
-        private ScrollPool resultsScrollPool;
+        private ScrollPool<ButtonCell> resultsScrollPool;
         private List<object> currentResults = new List<object>();
 
         public override GameObject UIRoot => uiRoot;
@@ -90,7 +91,7 @@ namespace UnityExplorer.UI.Widgets
         // Cache the syntax-highlighted text for each search result to reduce allocs.
         private static readonly Dictionary<int, string> cachedCellTexts = new Dictionary<int, string>();
 
-        public void SetCell(ButtonCell<object> cell, int index)
+        public void SetCell(ButtonCell cell, int index)
         {
             if (!cachedCellTexts.ContainsKey(index))
             {
@@ -103,7 +104,7 @@ namespace UnityExplorer.UI.Widgets
                 cachedCellTexts.Add(index, text);
             }
 
-            cell.buttonText.text = cachedCellTexts[index];
+            cell.Button.ButtonText.text = cachedCellTexts[index];
         }
 
         private void OnCellClicked(int dataIndex)
@@ -192,8 +193,9 @@ namespace UnityExplorer.UI.Widgets
 
             // Search button
 
-            var searchButton = UIFactory.CreateButton(uiRoot, "SearchButton", "Search", DoSearch);
-            UIFactory.SetLayoutElement(searchButton.gameObject, minHeight: 25, flexibleHeight: 0);
+            var searchButton = UIFactory.CreateButton(uiRoot, "SearchButton", "Search");
+            UIFactory.SetLayoutElement(searchButton.Button.gameObject, minHeight: 25, flexibleHeight: 0);
+            searchButton.OnClick += DoSearch;
 
             // Results count label
 
@@ -205,8 +207,12 @@ namespace UnityExplorer.UI.Widgets
             // RESULTS SCROLL POOL
 
             dataHandler = new ButtonListSource<object>(resultsScrollPool, GetEntries, SetCell, ShouldDisplayCell, OnCellClicked);
-            resultsScrollPool = UIFactory.CreateScrollPool(uiRoot, "ResultsList", out GameObject scrollObj, out GameObject scrollContent);
-            resultsScrollPool.Initialize(dataHandler, ButtonCell<object>.CreatePrototypeCell(uiRoot));
+            resultsScrollPool = UIFactory.CreateScrollPool<ButtonCell>(uiRoot, "ResultsList", out GameObject scrollObj, out GameObject scrollContent);
+
+            //if (!Pool<ButtonCell>.PrototypeObject)
+            //    Pool<ButtonCell>.PrototypeObject = ButtonCell.CreatePrototypeCell(Pool<ButtonCell>.InactiveHolder).gameObject;
+
+            resultsScrollPool.Initialize(dataHandler);//, ButtonCell.CreatePrototypeCell(uiRoot));
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
         }
     }

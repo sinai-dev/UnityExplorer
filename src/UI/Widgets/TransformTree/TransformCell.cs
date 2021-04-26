@@ -4,48 +4,33 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityExplorer.UI.Inspectors;
 using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Widgets
 {
     public class TransformCell : ICell
     {
+        public float DefaultHeight => 25f;
+
         public bool Enabled => m_enabled;
         private bool m_enabled;
 
-        public TransformTree tree;
+        public Action<CachedTransform> OnExpandToggled;
 
         public CachedTransform cachedTransform;
         public int _cellIndex;
 
+        public GameObject UIRoot => uiRoot;
         public GameObject uiRoot;
         public RectTransform Rect => m_rect;
-        private readonly RectTransform m_rect;
+        private RectTransform m_rect;
 
-        public Text nameLabel;
-        public Button nameButton;
-
-        public Text expandLabel;
-        public Button expandButton;
+        public ButtonRef ExpandButton;
+        public ButtonRef NameButton;
 
         public LayoutElement spacer;
 
-        public TransformCell(TransformTree tree, GameObject cellUI, Button nameButton, Button expandButton, LayoutElement spacer)
-        {
-            this.tree = tree;
-            this.uiRoot = cellUI;
-            m_rect = uiRoot.GetComponent<RectTransform>();
-            this.nameButton = nameButton;
-            this.nameLabel = nameButton.GetComponentInChildren<Text>();
-            this.expandButton = expandButton;
-            this.expandLabel = expandButton.GetComponentInChildren<Text>();
-            this.spacer = spacer;
-
-            nameButton.onClick.AddListener(OnMainButtonClicked);
-            expandButton.onClick.AddListener(OnExpandClicked);
-        }
-
-        //This is called from the SetCell method in DataSource
         public void ConfigureCell(CachedTransform cached, int cellIndex)
         {
             if (cached == null)
@@ -64,29 +49,29 @@ namespace UnityExplorer.UI.Widgets
 
             if (cached.Value)
             {
-                nameLabel.text = cached.Value.name;
-                nameLabel.color = cached.Value.gameObject.activeSelf ? Color.white : Color.grey;
+                NameButton.ButtonText.text = cached.Value.name;
+                NameButton.ButtonText.color = cached.Value.gameObject.activeSelf ? Color.white : Color.grey;
 
                 int childCount = cached.Value.childCount;
                 if (childCount > 0)
                 {
-                    nameLabel.text = $"<color=grey>[{childCount}]</color> {nameLabel.text}";
+                    NameButton.ButtonText.text = $"<color=grey>[{childCount}]</color> {NameButton.ButtonText.text}";
 
-                    expandButton.interactable = true;
-                    expandLabel.text = cached.Expanded ? "▼" : "►";
-                    expandLabel.color = cached.Expanded ? new Color(0.5f, 0.5f, 0.5f) : new Color(0.3f, 0.3f, 0.3f);
+                    ExpandButton.Button.interactable = true;
+                    ExpandButton.ButtonText.text = cached.Expanded ? "▼" : "►";
+                    ExpandButton.ButtonText.color = cached.Expanded ? new Color(0.5f, 0.5f, 0.5f) : new Color(0.3f, 0.3f, 0.3f);
                 }
                 else
                 {
-                    expandButton.interactable = false;
-                    expandLabel.text = "▪";
-                    expandLabel.color = new Color(0.3f, 0.3f, 0.3f);
+                    ExpandButton.Button.interactable = false;
+                    ExpandButton.ButtonText.text = "▪";
+                    ExpandButton.ButtonText.color = new Color(0.3f, 0.3f, 0.3f);
                 }
             }
             else
             {
-                nameLabel.text = $"[Destroyed]";
-                nameLabel.color = Color.red;
+                NameButton.ButtonText.text = $"[Destroyed]";
+                NameButton.ButtonText.color = Color.red;
             }
         }
 
@@ -104,51 +89,54 @@ namespace UnityExplorer.UI.Widgets
 
         public void OnExpandClicked()
         {
-            tree.ToggleExpandCell(this);
+            OnExpandToggled?.Invoke(cachedTransform);
         }
 
         public void OnMainButtonClicked()
         {
             if (cachedTransform.Value)
-                ExplorerCore.Log($"TODO Inspect {cachedTransform.Value.name}");
+                InspectorManager.Inspect(cachedTransform.Value.gameObject);
             else
                 ExplorerCore.LogWarning("The object was destroyed!");
         }
 
-        public static RectTransform CreatePrototypeCell(GameObject parent)
+        public GameObject CreateContent(GameObject parent)
         {
-            var prototype = UIFactory.CreateHorizontalGroup(parent, "PrototypeCell", true, true, true, true, 2, default,
-                new Color(0.15f, 0.15f, 0.15f), TextAnchor.MiddleCenter);
-            //var cell = prototype.AddComponent<TransformCell>();
-            var rect = prototype.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0, 1);
-            rect.anchorMax = new Vector2(0, 1);
-            rect.pivot = new Vector2(0.5f, 1);
-            rect.sizeDelta = new Vector2(25, 25);
-            UIFactory.SetLayoutElement(prototype, minWidth: 100, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
+            uiRoot = UIFactory.CreateUIObject("TransformCell", parent);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(uiRoot, true, true, true, true, 2, childAlignment: TextAnchor.MiddleCenter);
+            m_rect = uiRoot.GetComponent<RectTransform>();
+            m_rect.anchorMin = new Vector2(0, 1);
+            m_rect.anchorMax = new Vector2(0, 1);
+            m_rect.pivot = new Vector2(0.5f, 1);
+            m_rect.sizeDelta = new Vector2(25, 25);
+            UIFactory.SetLayoutElement(uiRoot, minWidth: 100, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
 
-            var spacer = UIFactory.CreateUIObject("Spacer", prototype, new Vector2(0, 0));
-            UIFactory.SetLayoutElement(spacer, minWidth: 0, flexibleWidth: 0, minHeight: 0, flexibleHeight: 0);
+            var spacerObj = UIFactory.CreateUIObject("Spacer", uiRoot, new Vector2(0, 0));
+            UIFactory.SetLayoutElement(spacerObj, minWidth: 0, flexibleWidth: 0, minHeight: 0, flexibleHeight: 0);
+            this.spacer = spacerObj.GetComponent<LayoutElement>();
 
-            var expandButton = UIFactory.CreateButton(prototype, "ExpandButton", "►", null);
-            UIFactory.SetLayoutElement(expandButton.gameObject, minWidth: 15, flexibleWidth: 0, minHeight: 25, flexibleHeight: 0);
+            ExpandButton = UIFactory.CreateButton(this.uiRoot, "ExpandButton", "►");
+            UIFactory.SetLayoutElement(ExpandButton.Button.gameObject, minWidth: 15, flexibleWidth: 0, minHeight: 25, flexibleHeight: 0);
 
-            var nameButton = UIFactory.CreateButton(prototype, "NameButton", "Name", null);
-            UIFactory.SetLayoutElement(nameButton.gameObject, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
-            var nameLabel = nameButton.GetComponentInChildren<Text>();
+            NameButton = UIFactory.CreateButton(this.uiRoot, "NameButton", "Name", null);
+            UIFactory.SetLayoutElement(NameButton.Button.gameObject, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
+            var nameLabel = NameButton.Button.GetComponentInChildren<Text>();
             nameLabel.horizontalOverflow = HorizontalWrapMode.Overflow;
             nameLabel.alignment = TextAnchor.MiddleLeft;
 
-            Color normal = new Color(0.15f, 0.15f, 0.15f);
+            Color normal = new Color(0.11f, 0.11f, 0.11f);
             Color highlight = new Color(0.25f, 0.25f, 0.25f);
             Color pressed = new Color(0.05f, 0.05f, 0.05f);
             Color disabled = new Color(1, 1, 1, 0);
-            RuntimeProvider.Instance.SetColorBlock(expandButton, normal, highlight, pressed, disabled);
-            RuntimeProvider.Instance.SetColorBlock(nameButton, normal, highlight, pressed, disabled);
+            RuntimeProvider.Instance.SetColorBlock(ExpandButton.Button, normal, highlight, pressed, disabled);
+            RuntimeProvider.Instance.SetColorBlock(NameButton.Button, normal, highlight, pressed, disabled);
 
-            prototype.SetActive(false);
+            NameButton.OnClick += OnMainButtonClicked;
+            ExpandButton.OnClick += OnExpandClicked;
 
-            return rect;
+            uiRoot.SetActive(false);
+
+            return this.uiRoot;
         }
     }
 }

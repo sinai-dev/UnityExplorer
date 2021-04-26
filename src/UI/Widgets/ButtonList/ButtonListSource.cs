@@ -5,21 +5,22 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityExplorer.UI.ObjectPool;
 using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Widgets
 {
-    public class ButtonListSource<T> : IPoolDataSource
+    public class ButtonListSource<T> : IPoolDataSource<ButtonCell>
     {
         public int GetRealIndexOfTempIndex(int index) => throw new NotImplementedException("TODO");
 
-        internal ScrollPool Scroller;
+        internal ScrollPool<ButtonCell> ScrollPool;
 
         public int ItemCount => currentEntries.Count;
         public readonly List<T> currentEntries = new List<T>();
 
         public Func<List<T>> GetEntries;
-        public Action<ButtonCell<T>, int> SetICell;
+        public Action<ButtonCell, int> SetICell;
         public Func<T, string, bool> ShouldDisplay;
         public Action<int> OnCellClicked;
 
@@ -30,25 +31,16 @@ namespace UnityExplorer.UI.Widgets
         }
         private string currentFilter;
 
-        public ButtonListSource(ScrollPool scrollPool, Func<List<T>> getEntriesMethod, 
-            Action<ButtonCell<T>, int> setICellMethod, Func<T, string, bool> shouldDisplayMethod,
+        public ButtonListSource(ScrollPool<ButtonCell> scrollPool, Func<List<T>> getEntriesMethod, 
+            Action<ButtonCell, int> setICellMethod, Func<T, string, bool> shouldDisplayMethod,
             Action<int> onCellClickedMethod)
         {
-            Scroller = scrollPool;
+            ScrollPool = scrollPool;
 
             GetEntries = getEntriesMethod;
             SetICell = setICellMethod;
             ShouldDisplay = shouldDisplayMethod;
             OnCellClicked = onCellClickedMethod;
-        }
-
-        public void Init()
-        {
-            var proto = ButtonCell<T>.CreatePrototypeCell(Scroller.UIRoot);
-
-            RefreshData();
-            Scroller.DataSource = this;
-            Scroller.Initialize(this, proto);
         }
 
         public void RefreshData()
@@ -70,16 +62,17 @@ namespace UnityExplorer.UI.Widgets
             }
         }
 
-        public ICell CreateCell(RectTransform rect)
+        public void OnCellBorrowed(ButtonCell cell)
         {
-            var button = rect.GetComponentInChildren<Button>();
-            var text = button.GetComponentInChildren<Text>();
-            var cell = new ButtonCell<T>(this, rect.gameObject, button, text);
             cell.OnClick += OnCellClicked;
-            return cell;
         }
 
-        public void SetCell(ICell cell, int index)
+        public void OnCellReturned(ButtonCell cell)
+        {
+            cell.OnClick -= OnCellClicked;
+        }
+
+        public void SetCell(ButtonCell cell, int index)
         {
             if (currentEntries == null)
                 RefreshData();
@@ -89,11 +82,11 @@ namespace UnityExplorer.UI.Widgets
             else
             {
                 cell.Enable();
-                (cell as ButtonCell<T>).CurrentDataIndex = index;
-                SetICell.Invoke((ButtonCell<T>)cell, index);
+                cell.CurrentDataIndex = index;
+                SetICell.Invoke(cell, index);
             }
         }
 
-        public void DisableCell(ICell cell, int index) => cell.Disable();
+        public void DisableCell(ButtonCell cell, int index) => cell.Disable();
     }
 }

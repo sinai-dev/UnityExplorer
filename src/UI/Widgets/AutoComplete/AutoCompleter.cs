@@ -8,6 +8,7 @@ using UnityExplorer.Core.Input;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Models;
+using UnityExplorer.UI.ObjectPool;
 
 namespace UnityExplorer.UI.Widgets.AutoComplete
 {
@@ -58,7 +59,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         public ISuggestionProvider CurrentHandler { get; private set; }
 
         public ButtonListSource<Suggestion> dataHandler;
-        public ScrollPool scrollPool;
+        public ScrollPool<ButtonCell> scrollPool;
 
         private List<Suggestion> suggestions = new List<Suggestion>();
 
@@ -123,7 +124,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             CurrentHandler.OnSuggestionClicked(suggestion);
         }
 
-        private void SetCell(ButtonCell<Suggestion> cell, int index)
+        private void SetCell(ButtonCell cell, int index)
         {
             if (index < 0 || index >= suggestions.Count)
             {
@@ -132,7 +133,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             }
 
             var suggestion = suggestions[index];
-            cell.buttonText.text = suggestion.DisplayText;
+            cell.Button.ButtonText.text = suggestion.DisplayText;
         }
 
         private void UpdatePosition()
@@ -173,11 +174,8 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         {
             dataHandler = new ButtonListSource<Suggestion>(scrollPool, GetEntries, SetCell, ShouldDisplay, OnCellClicked);
 
-            var prototypeCell = ButtonCell<Suggestion>.CreatePrototypeCell(this.content);
-            prototypeCell.GetComponentInChildren<Text>().supportRichText = true;
-
-            scrollPool = UIFactory.CreateScrollPool(this.content, "AutoCompleter", out GameObject scrollObj, out GameObject scrollContent);
-            scrollPool.Initialize(dataHandler, prototypeCell);
+            scrollPool = UIFactory.CreateScrollPool<ButtonCell>(this.content, "AutoCompleter", out GameObject scrollObj, out GameObject scrollContent);
+            scrollPool.Initialize(dataHandler);
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
 
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(scrollContent, true, false, true, false);

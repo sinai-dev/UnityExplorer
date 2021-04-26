@@ -6,6 +6,7 @@ using UnityExplorer.Core;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Input;
 using UnityExplorer.Core.Runtime;
+using UnityExplorer.Tests;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
 
@@ -68,7 +69,7 @@ namespace UnityExplorer
 
             UIManager.InitUI();
 
-            //InspectorManager.Instance.Inspect(typeof(TestClass));
+            //InspectorManager.Inspect(typeof(TestClass));
         }
 
         /// <summary>

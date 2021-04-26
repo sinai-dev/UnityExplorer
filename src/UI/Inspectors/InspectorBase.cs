@@ -1,122 +1,64 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityExplorer.UI.ObjectPool;
 using UnityExplorer.UI.Panels;
 
 namespace UnityExplorer.UI.Inspectors
 {
-    public abstract class InspectorBase
+    public abstract class InspectorBase : IPooledObject
     {
-        public object Target;
-        public bool IsActive { get; private set; }
+        public InspectorTab Tab { get; internal set; }
+        public bool IsActive { get; internal set; }
 
-        public abstract string TabLabel { get; }
+        public abstract GameObject UIRoot { get; }
 
-        internal bool m_pendingDestroy;
+        private static readonly Color _enabledTabColor = new Color(0.2f, 0.4f, 0.2f);
+        private static readonly Color _disabledTabColor = new Color(0.25f, 0.25f, 0.25f);
 
-        public InspectorBase(object target)
+        public float DefaultHeight => -1f;
+        public abstract GameObject CreateContent(GameObject content);
+
+        public abstract void Update();
+
+        public virtual void OnBorrowedFromPool(object target)
         {
-            Target = target;
+            Tab = Pool<InspectorTab>.Borrow();
+            Tab.UIRoot.transform.SetParent(InspectorPanel.Instance.NavbarHolder.transform, false);
 
-            if (Target.IsNullOrDestroyed(false))
-            {
-                Destroy();
-                return;
-            }
-
-            AddInspectorTab(this);
+            Tab.TabButton.OnClick += OnTabButtonClicked;
+            Tab.CloseButton.OnClick += OnCloseClicked;
         }
 
-        public virtual void SetActive()
+        public virtual void OnReturnToPool()
         {
-            this.IsActive = true;
-            Content?.SetActive(true);
+            Pool<InspectorTab>.Return(Tab);
+
+            Tab.TabButton.OnClick -= OnTabButtonClicked;
+            Tab.CloseButton.OnClick -= OnCloseClicked;
         }
 
-        public virtual void SetInactive()
+        public virtual void OnSetActive()
         {
-            this.IsActive = false;
-            Content?.SetActive(false);
+            RuntimeProvider.Instance.SetColorBlock(Tab.TabButton.Button, _enabledTabColor, _enabledTabColor * 1.2f);
+            UIRoot.SetActive(true);
+            IsActive = true;
         }
 
-        public virtual void Update()
+        public virtual void OnSetInactive()
         {
-            if (Target.IsNullOrDestroyed(false))
-            {
-                Destroy();
-                return;
-            }
-
-            m_tabText.text = TabLabel;
+            RuntimeProvider.Instance.SetColorBlock(Tab.TabButton.Button, _disabledTabColor, _disabledTabColor * 1.2f);
+            UIRoot.SetActive(false);
+            IsActive = false;
         }
 
-        public virtual void Destroy()
+        private void OnTabButtonClicked()
         {
-            m_pendingDestroy = true;
-
-            GameObject tabGroup = m_tabButton?.transform.parent.gameObject;
-
-            if (tabGroup)
-                GameObject.Destroy(tabGroup);
-
-            int thisIndex = -1;
-            if (InspectorManager.ActiveInspectors.Contains(this))
-            {
-                thisIndex = InspectorManager.ActiveInspectors.IndexOf(this);
-                InspectorManager.ActiveInspectors.Remove(this);
-            }
-
-            if (ReferenceEquals(InspectorManager.m_activeInspector, this))
-            {
-                InspectorManager.UnsetInspectorTab();
-
-                if (InspectorManager.ActiveInspectors.Count > 0)
-                {
-                    var prevTab = InspectorManager.ActiveInspectors[thisIndex > 0 ? thisIndex - 1 : 0];
-                    InspectorManager.SetInspectorTab(prevTab);
-                }
-            }
+            InspectorManager.SetInspectorActive(this);
         }
 
-        #region UI
-
-        public abstract GameObject Content { get; set; }
-        public Button m_tabButton;
-        public Text m_tabText;
-
-        public void AddInspectorTab(InspectorBase parent)
-        {
-            var tabContent = InspectorPanel.Instance.NavbarHolder;
-
-            var tabGroupObj = UIFactory.CreateHorizontalGroup(tabContent, "TabObject", true, true, true, true);
-            UIFactory.SetLayoutElement(tabGroupObj, minWidth: 185, flexibleWidth: 0);
-            tabGroupObj.AddComponent<Mask>();
-
-            m_tabButton = UIFactory.CreateButton(tabGroupObj,
-                "TabButton",
-                "",
-                () => { InspectorManager.SetInspectorTab(parent); });
-
-            UIFactory.SetLayoutElement(m_tabButton.gameObject, minWidth: 165, flexibleWidth: 0);
-
-            m_tabText = m_tabButton.GetComponentInChildren<Text>();
-            m_tabText.horizontalOverflow = HorizontalWrapMode.Overflow;
-            m_tabText.alignment = TextAnchor.MiddleLeft;
-
-            var closeBtn = UIFactory.CreateButton(tabGroupObj,
-                "CloseButton",
-                "X",
-                () => { InspectorManager.DestroyInspector(parent); },
-                new Color(0.2f, 0.2f, 0.2f, 1));
-
-            UIFactory.SetLayoutElement(closeBtn.gameObject, minWidth: 20, flexibleWidth: 0);
-
-            var closeBtnText = closeBtn.GetComponentInChildren<Text>();
-            closeBtnText.color = new Color(1, 0, 0, 1);
-        }
-
-        public virtual void OnPanelResized() { }
-
-        #endregion
+        protected abstract void OnCloseClicked();
     }
 }

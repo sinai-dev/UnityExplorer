@@ -127,13 +127,15 @@ namespace UnityExplorer.UI.Models
 
             // close button
 
-            var closeBtn = UIFactory.CreateButton(titleGroup, "CloseButton", "X", () =>
+            var closeBtn = UIFactory.CreateButton(titleGroup, "CloseButton", "X");
+            UIFactory.SetLayoutElement(closeBtn.Button.gameObject, minHeight: 25, minWidth: 25, flexibleWidth: 0);
+            RuntimeProvider.Instance.SetColorBlock(closeBtn.Button, new Color(0.63f, 0.32f, 0.31f),
+                new Color(0.81f, 0.25f, 0.2f), new Color(0.6f, 0.18f, 0.16f));
+
+            closeBtn.OnClick += () =>
             {
                 UIManager.SetPanelActive(this.PanelType, false);
-            });
-            UIFactory.SetLayoutElement(closeBtn.gameObject, minHeight: 25, minWidth: 25, flexibleWidth: 0);
-            RuntimeProvider.Instance.SetColorBlock(closeBtn, new Color(0.63f, 0.32f, 0.31f),
-                new Color(0.81f, 0.25f, 0.2f), new Color(0.6f, 0.18f, 0.16f));
+            };
 
             if (!CanDrag)
                 titleGroup.SetActive(false);

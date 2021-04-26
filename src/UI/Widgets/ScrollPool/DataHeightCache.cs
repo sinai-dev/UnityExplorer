@@ -15,11 +15,11 @@ namespace UnityExplorer.UI.Widgets
         public static implicit operator float(DataViewInfo it) => it.height;
     }
 
-    public class DataHeightCache
+    public class DataHeightCache<T> where T : ICell
     {
-        private ScrollPool ScrollPool { get; }
+        private ScrollPool<T> ScrollPool { get; }
 
-        public DataHeightCache(ScrollPool scrollPool)
+        public DataHeightCache(ScrollPool<T> scrollPool)
         {
             ScrollPool = scrollPool;
         }
@@ -38,7 +38,7 @@ namespace UnityExplorer.UI.Widgets
         public float TotalHeight => totalHeight;
         private float totalHeight;
 
-        public float DefaultHeight => m_defaultHeight ?? (float)(m_defaultHeight = ScrollPool.PrototypeCell.rect.height);
+        public float DefaultHeight => m_defaultHeight ?? (float)(m_defaultHeight = ScrollPool.PrototypeHeight);
         private float? m_defaultHeight;
 
         /// <summary>
@@ -100,8 +100,16 @@ namespace UnityExplorer.UI.Widgets
                 return;
 
             var val = heightCache[heightCache.Count - 1];
-            totalHeight -= val;
+            totalHeight -= val;            
             heightCache.RemoveAt(heightCache.Count - 1);
+
+            int idx = heightCache.Count;
+            if (idx > 0)
+            {
+                while (rangeCache[rangeCache.Count - 1] == idx)
+                    rangeCache.RemoveAt(rangeCache.Count - 1);
+            }
+
         }
 
         /// <summary>Get the data index at the specific position of the total height cache.</summary>

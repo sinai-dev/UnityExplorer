@@ -26,7 +26,7 @@ namespace UnityExplorer.UI.Panels
 
         public int SelectedTab = -1;
         private readonly List<UIModel> tabPages = new List<UIModel>();
-        private readonly List<Button> tabButtons = new List<Button>();
+        private readonly List<ButtonRef> tabButtons = new List<ButtonRef>();
 
         public void SetTab(int tabIndex)
         {
@@ -37,7 +37,7 @@ namespace UnityExplorer.UI.Panels
             content.SetActive(true);
 
             var button = tabButtons[tabIndex];
-            RuntimeProvider.Instance.SetColorBlock(button, UIManager.navButtonEnabledColor, UIManager.navButtonEnabledColor * 1.2f);
+            RuntimeProvider.Instance.SetColorBlock(button.Button, UIManager.navButtonEnabledColor, UIManager.navButtonEnabledColor * 1.2f);
 
             SelectedTab = tabIndex;
             SaveToConfigManager();
@@ -46,7 +46,7 @@ namespace UnityExplorer.UI.Panels
         private void DisableTab(int tabIndex)
         {
             tabPages[tabIndex].SetActive(false);
-            RuntimeProvider.Instance.SetColorBlock(tabButtons[tabIndex], UIManager.navButtonDisabledColor, UIManager.navButtonDisabledColor * 1.2f);
+            RuntimeProvider.Instance.SetColorBlock(tabButtons[tabIndex].Button, UIManager.navButtonDisabledColor, UIManager.navButtonDisabledColor * 1.2f);
         }
 
         public override void Update()
@@ -130,7 +130,8 @@ namespace UnityExplorer.UI.Panels
             var button = UIFactory.CreateButton(tabGroup, $"Button_{label}", label);
 
             int idx = tabButtons.Count;
-            button.onClick.AddListener(() => { SetTab(idx); });
+            //button.onClick.AddListener(() => { SetTab(idx); });
+            button.OnClick += () => { SetTab(idx); };
 
             tabButtons.Add(button);
 

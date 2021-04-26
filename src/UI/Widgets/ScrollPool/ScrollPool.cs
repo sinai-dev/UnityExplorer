@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Core.Input;
 using UnityExplorer.UI.Models;
+using UnityExplorer.UI.ObjectPool;
 
 namespace UnityExplorer.UI.Widgets
 {
@@ -15,20 +16,31 @@ namespace UnityExplorer.UI.Widgets
         public int cellIndex, dataIndex;
     }
 
+    //public abstract class ScrollPool : UIBehaviourModel
+    //{
+    //    public abstract IPoolDataSource DataSource { get; set; }
+    //    public abstract RectTransform PrototypeCell { get; }
+    //
+    //    public abstract void Initialize(IPoolDataSource dataSource);
+    //
+    //}
+
     /// <summary>
     /// An object-pooled ScrollRect, attempts to support content of any size and provide a scrollbar for it.
     /// </summary>
-    public class ScrollPool : UIBehaviourModel
+    public class ScrollPool<T> : UIBehaviourModel where T : ICell
     {
         public ScrollPool(ScrollRect scrollRect)
         {
             this.ScrollRect = scrollRect;
         }
 
-        public IPoolDataSource DataSource;
-        public RectTransform PrototypeCell;
+        public IPoolDataSource<T> DataSource { get; set; }
 
-        private float PrototypeHeight => PrototypeCell.rect.height;
+        public float PrototypeHeight => _protoHeight ?? (float)(_protoHeight = Pool<T>.Instance.DefaultHeight);
+        private float? _protoHeight;
+
+        //private float PrototypeHeight => DefaultHeight.rect.height;
 
         public int ExtraPoolCells => 6;
         public float RecycleThreshold => PrototypeHeight * ExtraPoolCells;
@@ -64,9 +76,9 @@ namespace UnityExplorer.UI.Widgets
         private int bottomDataIndex;
         private int TopDataIndex => Math.Max(0, bottomDataIndex - CellPool.Count + 1);
 
-        private readonly List<ICell> CellPool = new List<ICell>();
+        private readonly List<T> CellPool = new List<T>();
 
-        internal DataHeightCache HeightCache;
+        internal DataHeightCache<T> HeightCache;
 
         private float TotalDataHeight => HeightCache.TotalHeight + contentLayout.padding.top + contentLayout.padding.bottom;
 
@@ -99,8 +111,16 @@ namespace UnityExplorer.UI.Widgets
 
         private float prevContentHeight;
 
+        public void SetUninitialized()
+        {
+            m_initialized = false;
+        }
+
         public override void Update()
         {
+            if (!m_initialized || !ScrollRect || DataSource == null)
+                return;
+
             if (writingLocked && timeofLastWriteLock < Time.time)
                 writingLocked = false;
 
@@ -125,6 +145,8 @@ namespace UnityExplorer.UI.Widgets
             writingLocked = false;
             Content.anchoredPosition = Vector2.zero;
             UpdateSliderHandle(true);
+
+            m_initialized = true;
         }
 
         public void RefreshAndJumpToTop()
@@ -137,21 +159,9 @@ namespace UnityExplorer.UI.Widgets
 
         public void RecreateHeightCache()
         {
-            //if (tempHeightCache == null)
-            //    tempHeightCache = HeightCache;
-
-            HeightCache = new DataHeightCache(this);
+            HeightCache = new DataHeightCache<T>(this);
             CheckDataSourceCountChange(out _);
         }
-
-        //public void DisableTempCache()
-        //{
-        //    if (tempHeightCache == null)
-        //        return;
-
-        //    HeightCache = tempHeightCache;
-        //    tempHeightCache = null;
-        //}
 
         public void RefreshCells(bool reloadData)
         {
@@ -160,15 +170,14 @@ namespace UnityExplorer.UI.Widgets
 
         // Initialize
 
-        public void Initialize(IPoolDataSource dataSource, RectTransform prototypeCell)
+        private bool m_initialized;
+
+        public void Initialize(IPoolDataSource<T> dataSource)
         {
-            if (!prototypeCell)
-                throw new Exception("No prototype cell set, cannot initialize");
+            // Ensure the pool for the cell type is initialized.
+            Pool<T>.GetPool();
 
-            this.PrototypeCell = prototypeCell;
-            PrototypeCell.transform.SetParent(Viewport, false);
-
-            HeightCache = new DataHeightCache(this);
+            HeightCache = new DataHeightCache<T>(this);
             DataSource = dataSource;
 
             this.contentLayout = ScrollRect.content.GetComponent<VerticalLayoutGroup>();
@@ -200,6 +209,8 @@ namespace UnityExplorer.UI.Widgets
 
             // add onValueChanged listener after setup
             ScrollRect.onValueChanged.AddListener(OnValueChangedListener);
+
+            m_initialized = true;
         }
 
         private void SetScrollBounds()
@@ -209,14 +220,22 @@ namespace UnityExplorer.UI.Widgets
 
         // Cell pool
 
-        private void CreateCellPool(bool andResetDataIndex = true)
+        public void ReturnCells()
         {
             if (CellPool.Any())
             {
                 foreach (var cell in CellPool)
-                    GameObject.Destroy(cell.Rect.gameObject);
+                {
+                    DataSource.OnCellReturned(cell);
+                    Pool<T>.Return(cell);
+                }
                 CellPool.Clear();
             }
+        }
+
+        private void CreateCellPool(bool andResetDataIndex = true)
+        {
+            ReturnCells();
 
             float currentPoolCoverage = 0f;
             float requiredCoverage = ScrollRect.viewport.rect.height + RecycleThreshold;
@@ -230,11 +249,17 @@ namespace UnityExplorer.UI.Widgets
             {
                 bottomPoolIndex++;
 
-                //Instantiate and add to Pool
-                RectTransform rect = GameObject.Instantiate(PrototypeCell.gameObject).GetComponent<RectTransform>();
-                rect.gameObject.SetActive(true);
-                rect.name = $"Cell_{CellPool.Count}";
-                var cell = DataSource.CreateCell(rect);
+                ////Instantiate and add to Pool
+                //RectTransform rect = GameObject.Instantiate(PrototypeCell.gameObject).GetComponent<RectTransform>();
+                //rect.gameObject.SetActive(true);
+                //rect.name = $"Cell_{CellPool.Count}";
+                //var cell = DataSource.CreateCell(rect);
+                //CellPool.Add(cell);
+                //rect.SetParent(ScrollRect.content, false);
+
+                var cell = Pool<T>.Borrow();
+                DataSource.OnCellBorrowed(cell);
+                var rect = cell.Rect;
                 CellPool.Add(cell);
                 rect.SetParent(ScrollRect.content, false);
 
@@ -400,7 +425,7 @@ namespace UnityExplorer.UI.Widgets
             ScrollRect.UpdatePrevData();
         }
 
-        private void SetCell(ICell cachedCell, int dataIndex)
+        private void SetCell(T cachedCell, int dataIndex)
         {
             cachedCell.Enable();
             DataSource.SetCell(cachedCell, dataIndex);

@@ -27,6 +27,7 @@ namespace UnityExplorer.UI
             if (!parent)
             {
                 ExplorerCore.LogWarning("Cannot create UI object as the parent is null or destroyed! (" + name + ")");
+                ExplorerCore.Log(Environment.StackTrace);
                 return null;
             }
 
@@ -56,10 +57,6 @@ namespace UnityExplorer.UI
         {
             RuntimeProvider.Instance.SetColorBlock(selectable, new Color(0.2f, 0.2f, 0.2f),
                 new Color(0.3f, 0.3f, 0.3f), new Color(0.15f, 0.15f, 0.15f));
-
-            // Deselect all Buttons after they are clicked.
-            if (selectable is Button button)
-                button.onClick.AddListener(() => { button.OnDeselect(null); });
         }
 
         /// <summary>
@@ -258,19 +255,19 @@ namespace UnityExplorer.UI
             return textComp;
         }
 
-        public static Button CreateButton(GameObject parent, string name, string text, Action onClick = null, Color? normalColor = null)
+        public static ButtonRef CreateButton(GameObject parent, string name, string text, Color? normalColor = null)
         {
             var colors = new ColorBlock();
             normalColor = normalColor ?? new Color(0.25f, 0.25f, 0.25f);
 
-            var btn = CreateButton(parent, name, text, onClick, colors);
+            var btn = CreateButton(parent, name, text, colors);
 
-            RuntimeProvider.Instance.SetColorBlock(btn, normalColor, new Color(0.4f, 0.4f, 0.4f), new Color(0.15f, 0.15f, 0.15f));
+            RuntimeProvider.Instance.SetColorBlock(btn.Button, normalColor, normalColor * 1.2f, normalColor * 0.7f);
 
             return btn;
         }
 
-        public static Button CreateButton(GameObject parent, string name, string text, Action onClick, ColorBlock colors)
+        public static ButtonRef CreateButton(GameObject parent, string name, string text, ColorBlock colors)
         {
             GameObject buttonObj = CreateUIObject(name, parent, _smallElementSize);
 
@@ -296,10 +293,17 @@ namespace UnityExplorer.UI
             rect.anchorMax = Vector2.one;
             rect.sizeDelta = Vector2.zero;
 
-            if (onClick != null)
-                button.onClick.AddListener(onClick);
+            SetButtonDeselectListener(button);
 
-            return button;
+            return new ButtonRef(button);
+        }
+
+        public static void SetButtonDeselectListener(Button button)
+        {
+            button.onClick.AddListener(() =>
+            {
+                button.OnDeselect(null);
+            });
         }
 
         /// <summary>
@@ -720,8 +724,8 @@ namespace UnityExplorer.UI
             return dropdownObj;
         }
 
-        public static ScrollPool CreateScrollPool(GameObject parent, string name, out GameObject uiRoot,
-            out GameObject content, Color? bgColor = null)
+        public static ScrollPool<T> CreateScrollPool<T>(GameObject parent, string name, out GameObject uiRoot,
+            out GameObject content, Color? bgColor = null) where T : ICell
         {
             var mainObj = CreateUIObject(name, parent, new Vector2(1, 1));
             mainObj.AddComponent<Image>().color = bgColor ?? new Color(0.12f, 0.12f, 0.12f);
@@ -787,7 +791,7 @@ namespace UnityExplorer.UI
             // finalize and create ScrollPool
 
             uiRoot = mainObj;
-            var scrollPool = new ScrollPool(scrollRect);
+            var scrollPool = new ScrollPool<T>(scrollRect);
 
             //viewportObj.GetComponent<Mask>().enabled = false;
 
