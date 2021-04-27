@@ -47,30 +47,41 @@ namespace UnityExplorer.Core.Input
 
         private static void InitHandler()
         {
+            // First, just try to use the legacy input, see if its working.
+            // The InputSystem package may be present but not actually activated, so we can find out this way.
+
+            if (LegacyInput.TInput != null || (ReflectionUtility.LoadModule("UnityEngine.InputLegacyModule") && LegacyInput.TInput != null))
+            {
+                try
+                {
+                    m_inputModule = new LegacyInput();
+                    CurrentType = InputType.Legacy;
+
+                    // make sure its working
+                    GetKeyDown(KeyCode.F5);
+
+                    ExplorerCore.Log("Initialized Legacy Input support");
+                    return;
+                }
+                catch 
+                {
+                    // It's not working, we'll fall back to InputSystem.
+                }
+            }
+
             if (InputSystem.TKeyboard != null || (ReflectionUtility.LoadModule("Unity.InputSystem") && InputSystem.TKeyboard != null))
             {
                 try
                 {
                     m_inputModule = new InputSystem();
                     CurrentType = InputType.InputSystem;
-
-                    // make sure its working, the package may be present but not enabled.
-                    GetKeyDown(KeyCode.F5);
-
+                    ExplorerCore.Log("Initialized new InputSystem support.");
                     return;
                 }
-                catch
+                catch (Exception ex)
                 {
-                    ExplorerCore.LogWarning("The InputSystem package was found but it does not seem to be working, defaulting to legacy Input...");
+                    ExplorerCore.Log(ex);
                 }
-            }
-
-            if (LegacyInput.TInput != null || (ReflectionUtility.LoadModule("UnityEngine.InputLegacyModule") && LegacyInput.TInput != null))
-            {
-                m_inputModule = new LegacyInput();
-                CurrentType = InputType.Legacy;
-
-                return;
             }
 
             ExplorerCore.LogWarning("Could not find any Input Module Type!");

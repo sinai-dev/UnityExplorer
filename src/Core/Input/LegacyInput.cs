@@ -10,8 +10,6 @@ namespace UnityExplorer.Core.Input
     {
         public LegacyInput()
         {
-            ExplorerCore.Log("Initializing Legacy Input support...");
-
             m_mousePositionProp = TInput.GetProperty("mousePosition");
             m_mouseDeltaProp = TInput.GetProperty("mouseScrollDelta");
             m_getKeyMethod = TInput.GetMethod("GetKey", new Type[] { typeof(KeyCode) });

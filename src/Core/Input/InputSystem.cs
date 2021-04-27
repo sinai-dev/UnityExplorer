@@ -12,8 +12,6 @@ namespace UnityExplorer.Core.Input
     {
         public InputSystem()
         {
-            ExplorerCore.Log("Initializing new InputSystem support...");
-
             m_kbCurrentProp = TKeyboard.GetProperty("current");
             m_kbIndexer = TKeyboard.GetProperty("Item", new Type[] { TKey });
 
