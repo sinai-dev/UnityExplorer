@@ -306,7 +306,7 @@ namespace UnityExplorer
         /// <param name="e">The Exception to convert to string.</param>
         /// <param name="innerMost">Should the inner-most Exception of the stack be used? If false, the Exception you provided will be used directly.</param>
         /// <returns>The exception to string.</returns>
-        public static string ReflectionExToString(this Exception e, bool innerMost = false)
+        public static string ReflectionExToString(this Exception e, bool innerMost = true)
         {
             if (innerMost)
             {
