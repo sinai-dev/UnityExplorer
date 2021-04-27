@@ -6,28 +6,43 @@ using UnityEngine;
 
 namespace UnityExplorer.UI.ObjectPool
 {
-    public interface IObjectPool { }
-
-    public class Pool<T> : IObjectPool where T : IPooledObject
+    // Abstract non-generic class, handles the pool dictionary and interfacing with the generic pools.
+    public abstract class Pool
     {
-        // internal pool management
+        protected static readonly Dictionary<Type, Pool> pools = new Dictionary<Type, Pool>();
 
-        private static readonly Dictionary<Type, IObjectPool> pools = new Dictionary<Type, IObjectPool>();
-
-        public static Pool<T> GetPool()
+        public static Pool GetPool(Type type)
         {
-            var type = typeof(T);
-            if (!pools.ContainsKey(type))
-                CreatePool();
-            return (Pool<T>)pools[type];
-        }
-
-        private static Pool<T> CreatePool()
-        {
-            var pool = new Pool<T>();
-            pools.Add(typeof(T), pool);
+            if (!pools.TryGetValue(type, out Pool pool))
+                pool = CreatePool(type);
             return pool;
         }
+
+        protected static Pool CreatePool(Type type)
+        {
+            Pool pool = (Pool)Activator.CreateInstance(typeof(Pool<>).MakeGenericType(new[] { type }));
+            pools.Add(type, pool);
+            return pool;
+        }
+
+        public static IPooledObject Borrow(Type type)
+        {
+            return GetPool(type).TryBorrow();
+        }
+
+        public static void Return(Type type, IPooledObject obj)
+        {
+            GetPool(type).TryReturn(obj);
+        }
+
+        protected abstract IPooledObject TryBorrow();
+        protected abstract void TryReturn(IPooledObject obj);
+    }
+
+    // Each generic implementation has its own pool, business logic is here
+    public class Pool<T> : Pool where T : IPooledObject
+    {
+        public static Pool<T> GetPool() => (Pool<T>)GetPool(typeof(T));
 
         public static T Borrow()
         {
@@ -43,7 +58,7 @@ namespace UnityExplorer.UI.ObjectPool
 
         public static Pool<T> Instance
         {
-            get => s_instance ?? CreatePool();
+            get => s_instance ?? (Pool<T>)CreatePool(typeof(T));
         }
         private static Pool<T> s_instance;
 
@@ -58,9 +73,7 @@ namespace UnityExplorer.UI.ObjectPool
             InactiveHolder.hideFlags |= HideFlags.HideAndDontSave;
             InactiveHolder.SetActive(false);
 
-            // Create an instance (not content) to grab the default height.
-            // Tiny bit wasteful, but not a big deal, only happens once per type 
-            // and its just the C# wrapper class being created.
+            // Create an instance (not content) to grab the default height
             var obj = (T)Activator.CreateInstance(typeof(T));
             DefaultHeight = obj.DefaultHeight;
         }
@@ -71,7 +84,7 @@ namespace UnityExplorer.UI.ObjectPool
         private readonly HashSet<T> available = new HashSet<T>();
         private readonly HashSet<T> borrowed = new HashSet<T>();
 
-        public int AvailableObjects => available.Count;
+        public int AvailableCount => available.Count;
 
         private void IncrementPool()
         {
@@ -102,5 +115,9 @@ namespace UnityExplorer.UI.ObjectPool
             available.Add(obj);
             obj.UIRoot.transform.SetParent(InactiveHolder.transform, false);
         }
+
+        protected override IPooledObject TryBorrow() => Borrow();
+
+        protected override void TryReturn(IPooledObject obj) => Return((T)obj);
     }
 }

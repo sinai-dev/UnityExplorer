@@ -24,6 +24,8 @@ namespace UnityExplorer.UI.Panels
         public SceneExplorer SceneExplorer;
         public ObjectSearch ObjectSearch;
 
+        public override bool ShouldSaveActiveState => true;
+
         public int SelectedTab = -1;
         private readonly List<UIModel> tabPages = new List<UIModel>();
         private readonly List<ButtonRef> tabButtons = new List<ButtonRef>();

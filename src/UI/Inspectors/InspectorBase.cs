@@ -10,8 +10,9 @@ namespace UnityExplorer.UI.Inspectors
 {
     public abstract class InspectorBase : IPooledObject
     {
-        public InspectorTab Tab { get; internal set; }
         public bool IsActive { get; internal set; }
+
+        public InspectorTab Tab { get; internal set; }
 
         public abstract GameObject UIRoot { get; }
 
@@ -19,7 +20,7 @@ namespace UnityExplorer.UI.Inspectors
         private static readonly Color _disabledTabColor = new Color(0.25f, 0.25f, 0.25f);
 
         public float DefaultHeight => -1f;
-        public abstract GameObject CreateContent(GameObject content);
+        public abstract GameObject CreateContent(GameObject parent);
 
         public abstract void Update();
 

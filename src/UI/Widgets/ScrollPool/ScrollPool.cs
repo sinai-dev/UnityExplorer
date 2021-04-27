@@ -16,15 +16,6 @@ namespace UnityExplorer.UI.Widgets
         public int cellIndex, dataIndex;
     }
 
-    //public abstract class ScrollPool : UIBehaviourModel
-    //{
-    //    public abstract IPoolDataSource DataSource { get; set; }
-    //    public abstract RectTransform PrototypeCell { get; }
-    //
-    //    public abstract void Initialize(IPoolDataSource dataSource);
-    //
-    //}
-
     /// <summary>
     /// An object-pooled ScrollRect, attempts to support content of any size and provide a scrollbar for it.
     /// </summary>
@@ -37,12 +28,16 @@ namespace UnityExplorer.UI.Widgets
 
         public IPoolDataSource<T> DataSource { get; set; }
 
+        public readonly List<T> CellPool = new List<T>();
+
+        internal DataHeightCache<T> HeightCache;
+
         public float PrototypeHeight => _protoHeight ?? (float)(_protoHeight = Pool<T>.Instance.DefaultHeight);
         private float? _protoHeight;
 
         //private float PrototypeHeight => DefaultHeight.rect.height;
 
-        public int ExtraPoolCells => 6;
+        public int ExtraPoolCells => 10;
         public float RecycleThreshold => PrototypeHeight * ExtraPoolCells;
         public float HalfThreshold => RecycleThreshold * 0.5f;
 
@@ -75,10 +70,6 @@ namespace UnityExplorer.UI.Widgets
         /// </summary>
         private int bottomDataIndex;
         private int TopDataIndex => Math.Max(0, bottomDataIndex - CellPool.Count + 1);
-
-        private readonly List<T> CellPool = new List<T>();
-
-        internal DataHeightCache<T> HeightCache;
 
         private float TotalDataHeight => HeightCache.TotalHeight + contentLayout.padding.top + contentLayout.padding.bottom;
 
@@ -269,12 +260,12 @@ namespace UnityExplorer.UI.Widgets
             if (andResetDataIndex)
                 bottomDataIndex = CellPool.Count - 1;
 
+            LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
+
             // after creating pool, set displayed cells.
             var enumerator = GetPoolEnumerator();
             while (enumerator.MoveNext())
                 SetCell(CellPool[enumerator.Current.cellIndex], enumerator.Current.dataIndex);
-
-            LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
         }
 
         /// <summary>ret = cell pool was extended</summary>
@@ -303,13 +294,13 @@ namespace UnityExplorer.UI.Widgets
             {
                 WritingLocked = true;
 
-                // Disable cells so DataSource can handle its content if need be
-                var enumerator = GetPoolEnumerator();
-                while (enumerator.MoveNext())
-                {
-                    var curr = enumerator.Current;
-                    DataSource.DisableCell(CellPool[curr.cellIndex], curr.dataIndex);
-                }
+                //// Disable cells so DataSource can handle its content if need be
+                //var enumerator = GetPoolEnumerator();
+                //while (enumerator.MoveNext())
+                //{
+                //    var curr = enumerator.Current;
+                //    DataSource.DisableCell(CellPool[curr.cellIndex], curr.dataIndex);
+                //}
 
                 bottomDataIndex += cellsRequired;
                 int maxDataIndex = Math.Max(CellPool.Count + cellsRequired - 1, DataSource.ItemCount - 1);
@@ -438,14 +429,16 @@ namespace UnityExplorer.UI.Widgets
 
         private void OnValueChangedListener(Vector2 val)
         {
-            if (WritingLocked)
+            if (WritingLocked || !m_initialized)
                 return;
 
             if (InputManager.MouseScrollDelta != Vector2.zero)
                 ScrollRect.StopMovement();
 
-            if (!SetRecycleViewBounds(true))
-                RefreshCells(false);
+            SetRecycleViewBounds(true);
+
+            //if (!SetRecycleViewBounds(true))
+            //    RefreshCells(false);
 
             float yChange = (ScrollRect.content.anchoredPosition - prevAnchoredPos).y;
             float adjust = 0f;
@@ -605,7 +598,7 @@ namespace UnityExplorer.UI.Widgets
 
         private void OnSliderValueChanged(float val)
         {
-            if (this.WritingLocked)
+            if (this.WritingLocked || !m_initialized)
                 return;
             this.WritingLocked = true;
 

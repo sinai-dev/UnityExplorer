@@ -7,10 +7,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Input;
-using UnityExplorer.UI.Panels;
+using UnityExplorer.UI.Models;
 using UnityExplorer.UI.Utility;
 
-namespace UnityExplorer.UI.Models
+namespace UnityExplorer.UI.Panels
 {
     public abstract class UIPanel : UIBehaviourModel
     {
@@ -135,6 +135,7 @@ namespace UnityExplorer.UI.Models
             closeBtn.OnClick += () =>
             {
                 UIManager.SetPanelActive(this.PanelType, false);
+                SaveToConfigManager();
             };
 
             if (!CanDrag)
@@ -185,7 +186,7 @@ namespace UnityExplorer.UI.Models
         {
             try
             {
-                return $"{(ShouldSaveActiveState ? Enabled : false)}" +
+                return $"{ShouldSaveActiveState && Enabled}" +
                 $"|{mainPanelRect.RectAnchorsToString()}" +
                 $"|{mainPanelRect.RectPositionToString()}";
             }

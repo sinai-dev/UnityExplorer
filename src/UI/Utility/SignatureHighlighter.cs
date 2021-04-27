@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -54,24 +55,17 @@ namespace UnityExplorer.UI.Utility
 
             syntaxBuilder.Clear();
 
-            if (type.IsGenericParameter || (type.HasElementType && type.GetElementType().IsGenericParameter))
-            {
-                syntaxBuilder.Append($"<color={CONST_VAR}>{type.Name}</color>");
-            }
-            else
-            {
-                if (includeNamespace && !string.IsNullOrEmpty(type.Namespace))
-                    syntaxBuilder.Append($"<color={NAMESPACE}>{type.Namespace}</color>.");
+            if (includeNamespace && !string.IsNullOrEmpty(type.Namespace))
+                syntaxBuilder.Append($"<color={NAMESPACE}>{type.Namespace}</color>.");
 
-                var declaring = type.DeclaringType;
-                while (declaring != null)
-                {
-                    syntaxBuilder.Append(HighlightTypeName(declaring) + ".");
-                    declaring = declaring.DeclaringType;
-                }
-
-                syntaxBuilder.Append(HighlightTypeName(type));
+            var declaring = type.DeclaringType;
+            while (declaring != null)
+            {
+                syntaxBuilder.Append(HighlightTypeName(declaring) + ".");
+                declaring = declaring.DeclaringType;
             }
+
+            syntaxBuilder.Append(HighlightTypeName(type));
 
             if (memberInfo != null)
             {
@@ -96,37 +90,73 @@ namespace UnityExplorer.UI.Utility
 
         private static readonly Dictionary<string, string> typeToRichType = new Dictionary<string, string>();
 
-        public static string HighlightTypeName(Type type)
+        public static string HighlightTypeName(Type type, bool includeNamespace = false, bool includeDllName = false)
         {
-            if (typeToRichType.ContainsKey(type.AssemblyQualifiedName))
-                return typeToRichType[type.AssemblyQualifiedName];
+            string ret = HighlightType(type);
+            
+            if (includeNamespace && !string.IsNullOrEmpty(type.Namespace))
+                ret = $"<color={NAMESPACE}>{type.Namespace}</color>.{ret}";
+
+            if (includeDllName)
+            {
+                if (!string.IsNullOrEmpty(type.Assembly.Location))
+                    ret = $"{ret} ({Path.GetFileName(type.Assembly.Location)})";
+                else
+                    ret = $"{ret} ({type.Assembly.GetName().Name})";
+            }
+
+            return ret;
+        }
+
+        private static string HighlightType(Type type)
+        {
+            string key = type.ToString();
+            if (typeToRichType.ContainsKey(key))
+                return typeToRichType[key];
 
             var typeName = type.Name;
 
-            var args = type.GetGenericArguments();
-
-            if (args.Length > 0)
+            bool isArray = false;
+            if (typeName.EndsWith("[]"))
             {
-                // remove the `N from the end of the type name
-                // this could actually be >9 in some cases, so get the length of the length string and use that.
-                // eg, if it was "List`15", we would remove the ending 3 chars
-
-                int suffixLen = 1 + args.Length.ToString().Length;
-
-                // make sure the typename actually has expected "`N" format.
-                if (typeName[typeName.Length - suffixLen] == '`')
-                    typeName = typeName.Substring(0, typeName.Length - suffixLen);
+                isArray = true;
+                typeName = typeName.Substring(0, typeName.Length - 2);
             }
 
-            // highlight the base name itself
-            // do this after removing the `N suffix, so only the name itself is in the color tags.
-            typeName = $"<color={GetClassColor(type)}>{typeName}</color>";
+            if (type.IsGenericParameter || (type.HasElementType && type.GetElementType().IsGenericParameter))
+            {
+                typeName = $"<color={CONST_VAR}>{typeName}</color>";
+            }
+            else
+            {
+                var args = type.GetGenericArguments();
 
-            // parse the generic args, if any
-            if (args.Length > 0)
-                typeName += ParseGenericArgs(args);
+                if (args.Length > 0)
+                {
+                    // remove the `N from the end of the type name
+                    // this could actually be >9 in some cases, so get the length of the length string and use that.
+                    // eg, if it was "List`15", we would remove the ending 3 chars
 
-            typeToRichType.Add(type.AssemblyQualifiedName, typeName);
+                    int suffixLen = 1 + args.Length.ToString().Length;
+
+                    // make sure the typename actually has expected "`N" format.
+                    if (typeName[typeName.Length - suffixLen] == '`')
+                        typeName = typeName.Substring(0, typeName.Length - suffixLen);
+                }
+
+                // highlight the base name itself
+                // do this after removing the `N suffix, so only the name itself is in the color tags.
+                typeName = $"<color={GetClassColor(type)}>{typeName}</color>";
+
+                // parse the generic args, if any
+                if (args.Length > 0)
+                    typeName += ParseGenericArgs(args);
+            }
+
+            if (isArray)
+                typeName += "[]";
+
+            typeToRichType.Add(key, typeName);
 
             return typeName;
         }

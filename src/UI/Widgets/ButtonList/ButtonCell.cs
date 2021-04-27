@@ -15,12 +15,12 @@ namespace UnityExplorer.UI.Widgets
         public Action<int> OnClick;
         public int CurrentDataIndex;
 
-        public GameObject UIRoot => uiRoot;
-        public GameObject uiRoot;
-
         public ButtonRef Button;
 
         #region ICell
+
+        public GameObject UIRoot => uiRoot;
+        public GameObject uiRoot;
 
         public bool Enabled => m_enabled;
         private bool m_enabled;
@@ -69,7 +69,7 @@ namespace UnityExplorer.UI.Widgets
 
             Button.OnClick += () => { OnClick?.Invoke(CurrentDataIndex); };
 
-            return m_rect.gameObject;
+            return uiRoot;
         }
     }
 }

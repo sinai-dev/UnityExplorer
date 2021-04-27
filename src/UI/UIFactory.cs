@@ -732,7 +732,7 @@ namespace UnityExplorer.UI
             SetLayoutGroup<HorizontalLayoutGroup>(mainObj, false, true, true, true);
 
             GameObject viewportObj = CreateUIObject("Viewport", mainObj);
-            SetLayoutElement(viewportObj, flexibleWidth: 9999);
+            SetLayoutElement(viewportObj, flexibleWidth: 9999, flexibleHeight: 9999);
             var viewportRect = viewportObj.GetComponent<RectTransform>();
             viewportRect.anchorMin = Vector2.zero;
             viewportRect.anchorMax = Vector2.one;

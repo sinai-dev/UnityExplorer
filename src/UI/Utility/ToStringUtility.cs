@@ -11,8 +11,8 @@ namespace UnityExplorer.UI.Utility
 {
     public static class ToStringUtility
     {
-        internal static Dictionary<Type, MethodInfo> toStringMethods = new Dictionary<Type, MethodInfo>();
-        internal static Dictionary<Type, MethodInfo> toStringFormattedMethods = new Dictionary<Type, MethodInfo>();
+        internal static Dictionary<string, MethodInfo> toStringMethods = new Dictionary<string, MethodInfo>();
+        internal static Dictionary<string, MethodInfo> toStringFormattedMethods = new Dictionary<string, MethodInfo>();
 
         // string allocs
         private static readonly StringBuilder _stringBuilder = new StringBuilder(16384);
@@ -20,18 +20,54 @@ namespace UnityExplorer.UI.Utility
         private const string nullString = "<color=grey>[null]</color>";
         private const string destroyedString = "<color=red>[Destroyed]</color>";
 
-        public static string ToString(object value, Type fallbackType, bool includeNamespace = true, bool includeName = true)
+        public static string ToString(object value, Type type)
+        {
+            if (value.IsNullOrDestroyed())
+            {
+                if (value == null)
+                    return nullString;
+                else // destroyed unity object
+                    return destroyedString;
+            }
+
+            if (!toStringMethods.ContainsKey(type.AssemblyQualifiedName))
+            {
+                try
+                {
+                    var formatMethod = type.GetMethod("ToString", new Type[] { typeof(string) });
+                    formatMethod.Invoke(value, new object[] { "F3" });
+                    toStringFormattedMethods.Add(type.AssemblyQualifiedName, formatMethod);
+                    toStringMethods.Add(type.AssemblyQualifiedName, null);
+                }
+                catch
+                {
+                    var toStringMethod = type.GetMethod("ToString", new Type[0]);
+                    toStringMethods.Add(type.AssemblyQualifiedName, toStringMethod);
+                }
+            }
+
+            value = value.TryCast(type);
+
+            string toString;
+            if (toStringFormattedMethods.TryGetValue(type.AssemblyQualifiedName, out MethodInfo f3method))
+                toString = (string)f3method.Invoke(value, new object[] { "F3" });
+            else
+                toString = (string)toStringMethods[type.AssemblyQualifiedName].Invoke(value, new object[0]);
+
+            return toString;
+        }
+
+        public static string ToStringWithType(object value, Type fallbackType, bool includeNamespace = true)
         {
             if (value == null && fallbackType == null)
                 return unknownString;
 
             Type type = value?.GetActualType() ?? fallbackType;
 
-            // todo SB this too
             string richType = SignatureHighlighter.ParseFullSyntax(type, includeNamespace);
 
-            if (!includeName)
-                return richType;
+            //if (!includeName)
+            //    return richType;
 
             _stringBuilder.Clear();
 
@@ -58,33 +94,9 @@ namespace UnityExplorer.UI.Utility
             }
             else
             {
-                if (!toStringMethods.ContainsKey(type))
-                {
-                    var toStringMethod = type.GetMethod("ToString", new Type[0]);
-                    var formatMethod = type.GetMethod("ToString", new Type[] { typeof(string) });
+                var toString = ToString(value, type);
 
-                    if (formatMethod != null)
-                    {
-                        try { formatMethod.Invoke(value, new object[] { "F3" }); }
-                        catch { formatMethod = null; }
-                    }
-
-                    toStringMethods.Add(type, toStringMethod);
-                    toStringFormattedMethods.Add(type, formatMethod);
-                }
-
-                var f3Method = toStringFormattedMethods[type];
-                var stdMethod = toStringMethods[type];
-
-                value = value.TryCast(type);
-
-                string toString;
-                if (f3Method != null)
-                    toString = (string)f3Method.Invoke(value, new object[] { "F3" });
-                else
-                    toString = (string)stdMethod.Invoke(value, new object[0]);
-
-                if (toString == type.FullName || toString == $"Il2Cpp{type.FullName}")
+                if (toString == type.FullName || toString == $"Il2Cpp{type.FullName}" || type.FullName == $"Il2Cpp{toString}")
                 {
                     // the ToString was just the default object.ToString(), use our
                     // syntax highlighted type name instead.
@@ -99,36 +111,6 @@ namespace UnityExplorer.UI.Utility
 
                     AppendRichType(_stringBuilder, richType);
                 }
-
-                ////string toString;
-
-                //
-                //toString = toString ?? "";
-                //
-                //string typeName = type.FullName;
-                //if (typeName.StartsWith("Il2CppSystem."))
-                //    typeName = typeName.Substring(6, typeName.Length - 6);
-                //
-                //toString = ReflectionProvider.Instance.ProcessTypeFullNameInString(type, toString, ref typeName);
-                //
-                //// If the ToString is just the type name, use our syntax highlighted type name instead.
-                //if (toString == typeName)
-                //{
-                //    label = richType;
-                //}
-                //else // Otherwise, parse the result and put our highlighted name in.
-                //{
-                //    if (toString.Length > 200)
-                //        toString = toString.Substring(0, 200) + "...";
-                //
-                //    label = toString;
-                //
-                //    var unityType = $"({type.FullName})";
-                //    if (value is UnityEngine.Object && label.Contains(unityType))
-                //        label = label.Replace(unityType, $"({richType})");
-                //    else
-                //        label += $" ({richType})";
-                //}
             }
 
             return _stringBuilder.ToString();

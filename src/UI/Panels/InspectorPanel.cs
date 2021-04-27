@@ -26,6 +26,7 @@ namespace UnityExplorer.UI.Panels
 
         public GameObject NavbarHolder;
         public GameObject ContentHolder;
+        public RectTransform ContentRect;
 
         public static float CurrentPanelWidth => Instance.mainPanelRect.rect.width;
 
@@ -38,12 +39,14 @@ namespace UnityExplorer.UI.Panels
         {
             base.OnFinishResize(panel);
 
-            InspectorManager.OnPanelResized();
+            InspectorManager.OnPanelResized(panel.rect.width);
         }
 
         public override void LoadSaveData()
         {
             ApplySaveData(ConfigManager.GameObjectInspectorData.Value);
+
+            InspectorManager.PanelWidth = this.mainPanelRect.rect.width;
         }
 
         public override void SaveToConfigManager()
@@ -77,6 +80,7 @@ namespace UnityExplorer.UI.Panels
             this.ContentHolder = UIFactory.CreateVerticalGroup(this.content, "ContentHolder", true, true, true, true, 0, default,
                 new Color(0.1f, 0.1f, 0.1f));
             UIFactory.SetLayoutElement(ContentHolder, flexibleHeight: 9999);
+            ContentRect = ContentHolder.GetComponent<RectTransform>();
 
             UIManager.SetPanelActive(PanelType, false);
         }

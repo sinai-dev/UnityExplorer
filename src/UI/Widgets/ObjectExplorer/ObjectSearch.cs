@@ -97,9 +97,9 @@ namespace UnityExplorer.UI.Widgets
             {
                 string text;
                 if (m_context == SearchContext.StaticClass)
-                    text = SignatureHighlighter.HighlightTypeName(currentResults[index].GetActualType());
+                    text = SignatureHighlighter.HighlightTypeName(currentResults[index] as Type, true, true);
                 else
-                    text = ToStringUtility.ToString(currentResults[index], currentResults[index].GetActualType());
+                    text = ToStringUtility.ToStringWithType(currentResults[index], currentResults[index]?.GetActualType());
 
                 cachedCellTexts.Add(index, text);
             }
@@ -110,7 +110,7 @@ namespace UnityExplorer.UI.Widgets
         private void OnCellClicked(int dataIndex)
         {
             if (m_context == SearchContext.StaticClass)
-                InspectorManager.Inspect(currentResults[dataIndex] as Type);
+                InspectorManager.InspectStatic(currentResults[dataIndex] as Type);
             else
                 InspectorManager.Inspect(currentResults[dataIndex]);
         }

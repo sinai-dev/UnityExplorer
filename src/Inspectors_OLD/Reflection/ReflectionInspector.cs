@@ -35,26 +35,6 @@
 //        //    ActiveInstance.m_widthUpdateWanted = true;
 //        //}
 
-//        // Blacklists
-//        private static readonly HashSet<string> bl_typeAndMember = new HashSet<string>
-//        {
-//#if CPP
-//            // these cause a crash in IL2CPP
-//            "Type.DeclaringMethod",
-//            "Rigidbody2D.Cast",
-//            "Collider2D.Cast",
-//            "Collider2D.Raycast",
-//            "Texture2D.SetPixelDataImpl",
-//            "Camera.CalculateProjectionMatrixFromPhysicalProperties",
-//#endif
-//        };
-//        private static readonly HashSet<string> bl_methodNameStartsWith = new HashSet<string>
-//        {
-//            // these are redundant, just adds noise, properties are supported directly
-//            "get_",
-//            "set_",
-//        };
-
 //        #endregion
 
 //        #region INSTANCE
@@ -130,6 +110,26 @@
 //                GameObject.Destroy(this.Content);
 //            }
 //        }
+
+//        // Blacklists
+//        private static readonly HashSet<string> bl_typeAndMember = new HashSet<string>
+//        {
+//#if CPP
+//            // these cause a crash in IL2CPP
+//            "Type.DeclaringMethod",
+//            "Rigidbody2D.Cast",
+//            "Collider2D.Cast",
+//            "Collider2D.Raycast",
+//            "Texture2D.SetPixelDataImpl",
+//            "Camera.CalculateProjectionMatrixFromPhysicalProperties",
+//#endif
+//        };
+//        private static readonly HashSet<string> bl_methodNameStartsWith = new HashSet<string>
+//        {
+//            // these are redundant, just adds noise, properties are supported directly
+//            "get_",
+//            "set_",
+//        };
 
 //        internal bool IsBlacklisted(string sig) => bl_typeAndMember.Any(it => sig.Contains(it));
 //        internal bool IsBlacklisted(MethodInfo method) => bl_methodNameStartsWith.Any(it => method.Name.StartsWith(it));

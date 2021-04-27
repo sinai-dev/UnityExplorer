@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityExplorer.UI.ObjectPool;
 using UnityExplorer.UI.Panels;
 
@@ -13,19 +14,24 @@ namespace UnityExplorer.UI.Inspectors
         public static readonly List<InspectorBase> Inspectors = new List<InspectorBase>();
 
         public static InspectorBase ActiveInspector { get; private set; }
-        
+
+        public static float PanelWidth;
+
         public static void Inspect(object obj)
         {
+            if (obj.IsNullOrDestroyed())
+                return;
+
             obj = obj.TryCast();
             if (obj is GameObject)
                 CreateInspector<GameObjectInspector>(obj);
             else
-                CreateInspector<InstanceInspector>(obj);
+                CreateInspector<ReflectionInspector>(obj);
         }
 
-        public static void Inspect(Type type)
+        public static void InspectStatic(Type type)
         {
-            CreateInspector<StaticInspector>(type);
+            CreateInspector<ReflectionInspector>(type, true);
         }
 
         public static void SetInspectorActive(InspectorBase inspector)
@@ -42,17 +48,19 @@ namespace UnityExplorer.UI.Inspectors
                 ActiveInspector.OnSetInactive();
         }
 
-        private static void CreateInspector<T>(object target) where T : InspectorBase
+        private static void CreateInspector<T>(object target, bool staticReflection = false) where T : InspectorBase
         {
             var inspector = Pool<T>.Borrow();
             Inspectors.Add(inspector);
 
+            UIManager.SetPanelActive(UIManager.Panels.Inspector, true);
             inspector.UIRoot.transform.SetParent(InspectorPanel.Instance.ContentHolder.transform, false);
+
+            if (inspector is ReflectionInspector reflectInspector)
+                reflectInspector.StaticOnly = staticReflection;
 
             inspector.OnBorrowedFromPool(target);
             SetInspectorActive(inspector);
-
-            UIManager.SetPanelActive(UIManager.Panels.Inspector, true);
         }
 
         internal static void ReleaseInspector<T>(T inspector) where T : InspectorBase
@@ -65,15 +73,21 @@ namespace UnityExplorer.UI.Inspectors
 
         internal static void Update()
         {
-            foreach (var inspector in Inspectors)
-            {
-                inspector.Update();
-            }
+            for (int i = Inspectors.Count - 1; i >= 0; i--)
+                Inspectors[i].Update();
         }
 
-        internal static void OnPanelResized()
+        internal static void OnPanelResized(float width)
         {
-            
+            PanelWidth = width;
+
+            foreach (var obj in Inspectors)
+            {
+                if (obj is ReflectionInspector inspector)
+                {
+                    inspector.SetLayouts();
+                }
+            }
         }
     }
 }
