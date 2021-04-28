@@ -124,10 +124,9 @@ namespace UnityExplorer.UI.Widgets
                 return 0;
             if (rangeIndex >= rangeCache.Count)
             {
-                ExplorerCore.Log("desiredHeight is " + desiredHeight + ", but our total height is " + totalHeight + ", clamping to data count");
-                ExplorerCore.Log("highest data index: " + (ScrollPool.DataSource.ItemCount - 1) + ", rangeIndex was " + rangeIndex + ", actual range limit is " + (rangeCache.Count - 1));
-                cache = heightCache[heightCache.Count - 1];
-                return ScrollPool.DataSource.ItemCount - 1;
+                int idx = ScrollPool.DataSource.ItemCount - 1;
+                cache = heightCache[idx];
+                return idx;
             }
 
             int dataIndex = rangeCache[rangeIndex];
