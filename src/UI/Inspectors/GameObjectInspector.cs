@@ -124,7 +124,7 @@ namespace UnityExplorer.UI.Inspectors
             if (!compToStringCache.ContainsKey(type.AssemblyQualifiedName))
             {
                 compToStringCache.Add(type.AssemblyQualifiedName,
-                    $"<color={SignatureHighlighter.NAMESPACE}>{type.Namespace}</color>.{SignatureHighlighter.HighlightTypeName(type)}");
+                    $"<color={SignatureHighlighter.NAMESPACE}>{type.Namespace}</color>.{SignatureHighlighter.ParseFullType(type)}");
             }
 
             cell.Button.ButtonText.text = compToStringCache[type.AssemblyQualifiedName];

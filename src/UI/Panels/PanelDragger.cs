@@ -100,6 +100,9 @@ namespace UnityExplorer.UI.Panels
         private Vector2 m_lastResizePos;
 
         private bool WasHoveringResize => s_resizeCursorObj.activeInHierarchy;
+
+        public static bool ResizePrompting => s_resizeCursorObj && s_resizeCursorObj.activeSelf;
+
         private ResizeTypes m_lastResizeHoverType;
 
         private Rect m_totalResizeRect;
@@ -140,6 +143,9 @@ namespace UnityExplorer.UI.Panels
             switch (state)
             {
                 case MouseState.Down:
+                    if (inDragPos || inResizePos)
+                        UIManager.SetPanelActive(Panel, true);
+
                     if (inDragPos)
                     {
                         if (AllowDragAndResize)

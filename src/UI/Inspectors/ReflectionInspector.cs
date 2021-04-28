@@ -82,7 +82,7 @@ namespace UnityExplorer.UI.Inspectors
                 asmText = $"{TargetType.Assembly.GetName().Name} <color=grey><i>(in memory)</i></color>";
             AssemblyText.text = $"<color=grey>Assembly:</color> {asmText}";
 
-            Tab.TabText.text = $"{prefix} {SignatureHighlighter.HighlightTypeName(TargetType)}";
+            Tab.TabText.text = $"{prefix} {SignatureHighlighter.ParseFullType(TargetType)}";
 
             this.members = CacheMember.GetCacheMembers(Target, TargetType, this);
             FilterMembers();

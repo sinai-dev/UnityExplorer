@@ -20,14 +20,22 @@ namespace UnityExplorer
 
         public static bool ReferenceEqual(this object objA, object objB)
         {
-            if (objA is UnityEngine.Object unityA)
+            if (object.ReferenceEquals(objA, objB))
+                return true;
+
+            if (objA is UnityEngine.Object unityA && objB is UnityEngine.Object unityB)
             {
-                var unityB = objB as UnityEngine.Object;
-                if (unityB && unityA.m_CachedPtr == unityB.m_CachedPtr)
+                if (unityA && unityB && unityA.m_CachedPtr == unityB.m_CachedPtr)
                     return true;
             }
 
-            return object.ReferenceEquals(objA, objB);
+#if CPP
+            if (objA is Il2CppSystem.Object cppA && objB is Il2CppSystem.Object cppB
+                && cppA.Pointer == cppB.Pointer)
+                return true;
+#endif
+
+            return false;
         }
 
         /// <summary>

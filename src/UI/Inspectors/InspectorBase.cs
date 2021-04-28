@@ -11,13 +11,11 @@ namespace UnityExplorer.UI.Inspectors
     public abstract class InspectorBase : IPooledObject
     {
         public bool IsActive { get; internal set; }
+        public object InspectorTarget { get; internal set; }
 
         public InspectorTab Tab { get; internal set; }
 
         public abstract GameObject UIRoot { get; }
-
-        private static readonly Color _enabledTabColor = new Color(0.2f, 0.4f, 0.2f);
-        private static readonly Color _disabledTabColor = new Color(0.25f, 0.25f, 0.25f);
 
         public float DefaultHeight => -1f;
         public abstract GameObject CreateContent(GameObject parent);
@@ -43,14 +41,14 @@ namespace UnityExplorer.UI.Inspectors
 
         public virtual void OnSetActive()
         {
-            RuntimeProvider.Instance.SetColorBlock(Tab.TabButton.Button, _enabledTabColor, _enabledTabColor * 1.2f);
+            Tab.SetTabColor(true);
             UIRoot.SetActive(true);
             IsActive = true;
         }
 
         public virtual void OnSetInactive()
         {
-            RuntimeProvider.Instance.SetColorBlock(Tab.TabButton.Button, _disabledTabColor, _disabledTabColor * 1.2f);
+            Tab.SetTabColor(false);
             UIRoot.SetActive(false);
             IsActive = false;
         }

@@ -9,20 +9,27 @@ using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Input;
 using UnityExplorer.UI.Models;
 using UnityExplorer.UI.Utility;
+using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Panels
 {
     public abstract class UIPanel : UIBehaviourModel
     {
-        // STATIC
+        #region STATIC
 
         internal static void InvokeOnPanelsReordered() => OnPanelsReordered?.Invoke();
 
         public static event Action OnPanelsReordered;
         public static event Action OnClickedOutsidePanels;
 
+        internal static readonly List<UIPanel> instances = new List<UIPanel>();
+        internal static readonly Dictionary<int, UIPanel> transformToPanelDict = new Dictionary<int, UIPanel>();
+
         public static void UpdateFocus()
         {
+            if (PanelDragger.ResizePrompting)
+                return;
+
             // if the user is clicking
             if (InputManager.GetMouseButtonDown(0) || InputManager.GetMouseButtonDown(1))
             {
@@ -57,8 +64,7 @@ namespace UnityExplorer.UI.Panels
             }
         }
 
-        private static readonly List<UIPanel> instances = new List<UIPanel>();
-        private static readonly Dictionary<int, UIPanel> transformToPanelDict = new Dictionary<int, UIPanel>();
+        #endregion
 
         // INSTANCE
 
@@ -71,10 +77,10 @@ namespace UnityExplorer.UI.Panels
         public abstract string Name { get; }
 
         public virtual bool ShouldSaveActiveState => true;
+        public virtual bool CanDragAndResize => true;
+        public virtual bool NavButtonWanted => true;
 
-        public virtual bool CanDrag => true;
-        //public virtual bool CanResize => true;
-
+        public ButtonRef NavButton;
         public PanelDragger Dragger;
 
         public override GameObject UIRoot => uiRoot;
@@ -94,6 +100,19 @@ namespace UnityExplorer.UI.Panels
             SaveToConfigManager();
         }
 
+        public override void SetActive(bool active)
+        {
+            base.SetActive(active);
+
+            if (NavButtonWanted)
+            {
+                if (active)
+                    RuntimeProvider.Instance.SetColorBlock(NavButton.Button, UIManager.navButtonEnabledColor, UIManager.navButtonEnabledColor * 1.2f);
+                else
+                    RuntimeProvider.Instance.SetColorBlock(NavButton.Button, UIManager.navButtonDisabledColor, UIManager.navButtonDisabledColor * 1.2f);
+            }
+        }
+
         public override void Destroy()
         {
             instances.Remove(this);
@@ -102,22 +121,36 @@ namespace UnityExplorer.UI.Panels
 
         public void ConstructUI()
         {
+            if (NavButtonWanted)
+            {
+                // create navbar button
+
+                NavButton = UIFactory.CreateButton(UIManager.navbarButtonHolder, $"Button_{PanelType}", Name);
+                UIFactory.SetLayoutElement(NavButton.Button.gameObject, minWidth: 118, flexibleWidth: 0);
+                RuntimeProvider.Instance.SetColorBlock(NavButton.Button, UIManager.navButtonDisabledColor, UIManager.navButtonDisabledColor * 1.2f);
+                NavButton.OnClick += () =>
+                {
+                    UIManager.TogglePanel(PanelType);
+                };
+            }
+
             // create core canvas 
             uiRoot = UIFactory.CreatePanel(Name, out GameObject panelContent);
             mainPanelRect = this.uiRoot.GetComponent<RectTransform>();
             content = panelContent;
 
-            transformToPanelDict.Add(this.uiRoot.transform.GetInstanceID(), this);
+            int id = this.uiRoot.transform.GetInstanceID();
+            transformToPanelDict.Add(id, this);
 
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.uiRoot, true, true, true, true, 0, 0, 0, 0, 0, TextAnchor.UpperLeft);
-            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(content, true, true, true, true, 2, 2, 2, 2, 2, TextAnchor.UpperLeft);
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.content, true, true, true, true, 2, 2, 2, 2, 2, TextAnchor.UpperLeft);
 
             // always apply default pos and anchors (save data may only be partial)
             SetDefaultPosAndAnchors();
 
             // Title bar
             var titleGroup = UIFactory.CreateHorizontalGroup(content, "TitleBar", false, true, true, true, 2,
-                new Vector4(2, 2, 2, 2), new Color(0.09f, 0.09f, 0.09f));
+                new Vector4(2, 2, 2, 2), new Color(0.06f, 0.06f, 0.06f));
             UIFactory.SetLayoutElement(titleGroup, minHeight: 25, flexibleHeight: 0);
 
             // Title text
@@ -138,7 +171,7 @@ namespace UnityExplorer.UI.Panels
                 SaveToConfigManager();
             };
 
-            if (!CanDrag)
+            if (!CanDragAndResize)
                 titleGroup.SetActive(false);
 
             // Panel dragger
@@ -146,7 +179,7 @@ namespace UnityExplorer.UI.Panels
             Dragger = new PanelDragger(titleTxt.GetComponent<RectTransform>(), mainPanelRect);
             Dragger.OnFinishResize += OnFinishResize;
             Dragger.OnFinishDrag += OnFinishDrag;
-            Dragger.AllowDragAndResize = this.CanDrag;
+            Dragger.AllowDragAndResize = this.CanDragAndResize;
             //Dragger.CanResize = this.CanResize;
 
             // content (abstract)

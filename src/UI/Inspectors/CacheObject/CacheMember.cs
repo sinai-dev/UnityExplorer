@@ -55,7 +55,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             this.FallbackType = returnType;
             this.MemberLabelText = SignatureHighlighter.ParseFullSyntax(declaringType, false, member);
             this.NameForFiltering = $"{declaringType.Name}.{member.Name}";
-            this.TypeLabelText = SignatureHighlighter.HighlightTypeName(FallbackType, false);
+            this.TypeLabelText = SignatureHighlighter.ParseFullType(FallbackType, false);
             this.ValueLabelText = GetValueLabel();
         }
 
@@ -72,6 +72,9 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
         public void Evaluate()
         {
             TryEvaluate();
+
+            if (!Value.IsNullOrDestroyed())
+                Value = Value.TryCast();
 
             ProcessOnEvaluate();
         }
@@ -120,7 +123,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             switch (State)
             {
                 case ValueState.NotEvaluated:
-                    return $"<i>{NOT_YET_EVAL} ({SignatureHighlighter.HighlightTypeName(FallbackType, true)})</i>";
+                    return $"<i>{NOT_YET_EVAL} ({SignatureHighlighter.ParseFullType(FallbackType, true)})</i>";
                 case ValueState.Exception:
                     return $"<i><color=red>{ReflectionUtility.ReflectionExToString(LastException)}</color></i>";
                 case ValueState.Boolean:

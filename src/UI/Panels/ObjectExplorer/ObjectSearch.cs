@@ -97,7 +97,7 @@ namespace UnityExplorer.UI.Panels
             {
                 string text;
                 if (m_context == SearchContext.StaticClass)
-                    text = SignatureHighlighter.HighlightTypeName(currentResults[index] as Type, true, true);
+                    text = SignatureHighlighter.ParseFullType(currentResults[index] as Type, true, true);
                 else
                     text = ToStringUtility.ToStringWithType(currentResults[index], currentResults[index]?.GetActualType());
 

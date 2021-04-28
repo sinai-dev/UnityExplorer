@@ -63,17 +63,26 @@ namespace UnityExplorer.UI.Utility
 
             syntaxBuilder.Clear();
 
+            // Namespace
+
             if (includeNamespace && !string.IsNullOrEmpty(type.Namespace))
                 syntaxBuilder.Append($"<color={NAMESPACE}>{type.Namespace}</color>.");
+
+            // Declaring type
 
             var declaring = type.DeclaringType;
             while (declaring != null)
             {
-                syntaxBuilder.Append(HighlightTypeName(declaring) + ".");
+                syntaxBuilder.Append(HighlightType(declaring));
+                syntaxBuilder.Append('.');
                 declaring = declaring.DeclaringType;
             }
 
-            syntaxBuilder.Append(HighlightTypeName(type));
+            // Highlight the type name
+
+            syntaxBuilder.Append(HighlightType(type));
+
+            // If memberInfo, highlight the member info
 
             if (memberInfo != null)
             {
@@ -100,9 +109,7 @@ namespace UnityExplorer.UI.Utility
             return syntaxBuilder.ToString();
         }
 
-        private static readonly Dictionary<string, string> typeToRichType = new Dictionary<string, string>();
-
-        public static string HighlightTypeName(Type type, bool includeNamespace = false, bool includeDllName = false)
+        public static string ParseFullType(Type type, bool includeNamespace = false, bool includeDllName = false)
         {
             string ret = HighlightType(type);
             
@@ -120,6 +127,8 @@ namespace UnityExplorer.UI.Utility
             return ret;
         }
 
+        private static readonly Dictionary<string, string> typeToRichType = new Dictionary<string, string>();
+
         private static string HighlightType(Type type)
         {
             string key = type.ToString();
@@ -133,6 +142,7 @@ namespace UnityExplorer.UI.Utility
             {
                 isArray = true;
                 typeName = typeName.Substring(0, typeName.Length - 2);
+                type = type.GetElementType();
             }
 
             if (type.IsGenericParameter || (type.HasElementType && type.GetElementType().IsGenericParameter))
@@ -194,7 +204,7 @@ namespace UnityExplorer.UI.Utility
                 }
 
                 // using HighlightTypeName makes it recursive, so we can parse nested generic args.
-                ret += HighlightTypeName(args[i]);
+                ret += ParseFullType(args[i]);
             }
 
             return ret;

@@ -210,9 +210,11 @@ namespace UnityExplorer.UI.Widgets
                         // If we somehow reached the end and didn't find the data index...
                         if (i == rangeCache.Count - 1)
                         {
-                            // This should never happen. We might be in a rebuild right now so don't
-                            // rebuild again, we could overflow the stack. Just log it.
-                            ExplorerCore.LogWarning($"DataHeightCache: Looking for range index of data {dataIndex} but reached the end and didn't find it.");
+                            if (!inRebuild)
+                                RebuildCache();
+                            else
+                                ExplorerCore.LogWarning($"DataHeightCache: Looking for range index of data {dataIndex} but " +
+                                    $"reached the end and didn't find it. Count: {rangeCache.Count}, last index: {rangeCache[rangeCache.Count - 1]}");
                             return;
                         }
 

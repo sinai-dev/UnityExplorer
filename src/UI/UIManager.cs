@@ -36,18 +36,17 @@ namespace UnityExplorer.UI
 
         // panels
         internal static GameObject PanelHolder { get; private set; }
-
+       
         public static ObjectExplorer Explorer { get; private set; }
         public static InspectorPanel Inspector { get; private set; }
         public static AutoCompleter AutoCompleter { get; private set; }
 
-        private static readonly Dictionary<Panels, Button> navButtonDict = new Dictionary<Panels, Button>();
-        internal static readonly Color navButtonEnabledColor = new Color(0.2f, 0.4f, 0.28f);
-        internal static readonly Color navButtonDisabledColor = new Color(0.25f, 0.25f, 0.25f);
-
-        // bundle assets
+        // other
         internal static Font ConsoleFont { get; private set; }
         internal static Shader BackupShader { get; private set; }
+
+        internal static readonly Color navButtonEnabledColor = new Color(0.2f, 0.4f, 0.28f);
+        internal static readonly Color navButtonDisabledColor = new Color(0.25f, 0.25f, 0.25f);
 
         // main menu toggle
         public static bool ShowMenu
@@ -119,18 +118,23 @@ namespace UnityExplorer.UI
         public static void SetPanelActive(Panels panel, bool active)
         {
             var obj = GetPanel(panel);
-            obj.SetActive(active);
+            SetPanelActive(obj, active);
+        }
+
+        public static void SetPanelActive(UIPanel panel, bool active)
+        {
+            panel.SetActive(active);
             if (active)
             {
-                obj.UIRoot.transform.SetAsLastSibling();
+                panel.UIRoot.transform.SetAsLastSibling();
                 UIPanel.InvokeOnPanelsReordered();
             }
+        }
 
-            if (navButtonDict.ContainsKey(panel))
-            {
-                var color = active ? navButtonEnabledColor : navButtonDisabledColor;
-                RuntimeProvider.Instance.SetColorBlock(navButtonDict[panel], color, color * 1.2f);
-            }
+        internal static void SetPanelActive(Transform transform, bool value)
+        {
+            if (UIPanel.transformToPanelDict.TryGetValue(transform.GetInstanceID(), out UIPanel panel))
+                SetPanelActive(panel, value);
         }
 
         internal static void InitUI()
@@ -197,47 +201,41 @@ namespace UnityExplorer.UI
             PanelHolder.transform.SetAsFirstSibling();
         }
 
-        public static void CreateTopNavBar()
+        internal static GameObject navbarButtonHolder;
+
+        private static void CreateTopNavBar()
         {
-            var panel = UIFactory.CreateUIObject("MainNavbar", CanvasRoot);
-            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(panel, false, true, true, true, 5, 3, 3, 10, 10, TextAnchor.MiddleCenter);
-            panel.AddComponent<Image>().color = new Color(0.1f, 0.1f, 0.1f);
-            var panelRect = panel.GetComponent<RectTransform>();
+            var navbarPanel = UIFactory.CreateUIObject("MainNavbar", CanvasRoot);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(navbarPanel, false, true, true, true, 5, 4, 4, 4, 4, TextAnchor.MiddleCenter);
+            navbarPanel.AddComponent<Image>().color = new Color(0.1f, 0.1f, 0.1f);
+            var panelRect = navbarPanel.GetComponent<RectTransform>();
             panelRect.pivot = new Vector2(0.5f, 1f);
             panelRect.anchorMin = new Vector2(0.5f, 1f);
             panelRect.anchorMax = new Vector2(0.5f, 1f);
             panelRect.sizeDelta = new Vector2(900f, 35f);
 
+            // UnityExplorer title
+
             string titleTxt = $"{ExplorerCore.NAME} <i><color=grey>{ExplorerCore.VERSION}</color></i>";
-            var title = UIFactory.CreateLabel(panel, "Title", titleTxt, TextAnchor.MiddleLeft, default, true, 18);
-            UIFactory.SetLayoutElement(title.gameObject, minWidth: 240, flexibleWidth: 0);
+            var title = UIFactory.CreateLabel(navbarPanel, "Title", titleTxt, TextAnchor.MiddleLeft, default, true, 18);
+            UIFactory.SetLayoutElement(title.gameObject, minWidth: 240, flexibleWidth: 0);// close button
 
-            CreateNavButton(panel, Panels.ObjectExplorer, "Object Explorer");
-            CreateNavButton(panel, Panels.Inspector,      "Inspector");
-            CreateNavButton(panel, Panels.CSConsole,      "C# Console");
-            CreateNavButton(panel, Panels.Options,        "Options");
-            CreateNavButton(panel, Panels.ConsoleLog,     "Console Log");
+            // Navbar
 
-            // close button
+            navbarButtonHolder = UIFactory.CreateUIObject("NavButtonHolder", navbarPanel);
+            UIFactory.SetLayoutElement(navbarButtonHolder, flexibleHeight: 999, flexibleWidth: 999);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(navbarButtonHolder, true, true, true, true, 4, 2, 2, 2, 2);
 
-            var closeBtn = UIFactory.CreateButton(panel, "CloseButton", "X");
-            UIFactory.SetLayoutElement(closeBtn.Button.gameObject, minHeight: 25, minWidth: 25, flexibleWidth: 0);
+            // Hide menu button
+
+            var closeBtn = UIFactory.CreateButton(navbarPanel, "CloseButton", ConfigManager.Main_Menu_Toggle.Value.ToString());
+            UIFactory.SetLayoutElement(closeBtn.Button.gameObject, minHeight: 25, minWidth: 80, flexibleWidth: 0);
             RuntimeProvider.Instance.SetColorBlock(closeBtn.Button, new Color(0.63f, 0.32f, 0.31f),
                 new Color(0.81f, 0.25f, 0.2f), new Color(0.6f, 0.18f, 0.16f));
 
-            closeBtn.OnClick += () => { ShowMenu = false; };
-        }
+            ConfigManager.Main_Menu_Toggle.OnValueChanged += (KeyCode val) => { closeBtn.ButtonText.text = val.ToString(); };
 
-        private static void CreateNavButton(GameObject navbar, Panels panel, string label)
-        {
-            var button = UIFactory.CreateButton(navbar, $"Button_{panel}", label);
-            UIFactory.SetLayoutElement(button.Button.gameObject, minWidth: 118, flexibleWidth: 0);
-            RuntimeProvider.Instance.SetColorBlock(button.Button, navButtonDisabledColor, navButtonDisabledColor * 1.2f);
-            button.OnClick += () =>
-            {
-                TogglePanel(panel);
-            };
-            navButtonDict.Add(panel, button.Button);
+            closeBtn.OnClick += () => { ShowMenu = false; };
         }
 
         // Could be cool, need to investigate properly.

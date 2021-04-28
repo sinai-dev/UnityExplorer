@@ -70,9 +70,9 @@ namespace UnityExplorer.UI.Panels
         {
             // this.UIRoot.GetComponent<Mask>().enabled = false;
 
-            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.content, forceHeight: true, spacing: 10, padLeft: 5, padRight: 5);
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.content, forceHeight: true, spacing: 4, padLeft: 5, padRight: 5);
 
-            this.NavbarHolder = UIFactory.CreateGridGroup(this.content, "Navbar", new Vector2(200, 22), new Vector2(4, 2),
+            this.NavbarHolder = UIFactory.CreateGridGroup(this.content, "Navbar", new Vector2(200, 22), new Vector2(4, 4),
                 new Color(0.12f, 0.12f, 0.12f));
             //UIFactory.SetLayoutElement(NavbarHolder, flexibleWidth: 9999, minHeight: 0, preferredHeight: 0, flexibleHeight: 9999);
             NavbarHolder.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;

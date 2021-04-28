@@ -20,6 +20,22 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         // Instance
 
+        public override string Name => "AutoCompleter";
+        public override UIManager.Panels PanelType => UIManager.Panels.AutoCompleter;
+
+        public override bool CanDragAndResize => false;
+        public override bool ShouldSaveActiveState => false;
+        public override bool NavButtonWanted => false;
+
+        public ISuggestionProvider CurrentHandler { get; private set; }
+
+        public ButtonListSource<Suggestion> dataHandler;
+        public ScrollPool<ButtonCell> scrollPool;
+
+        private List<Suggestion> suggestions = new List<Suggestion>();
+
+        private int lastCaretPos;
+
         public AutoCompleter()
         {
             OnPanelsReordered += UIPanel_OnPanelsReordered;
@@ -50,20 +66,6 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
                     UIRoot.SetActive(false);
             }
         }
-
-        public override string Name => "AutoCompleter";
-        public override UIManager.Panels PanelType => UIManager.Panels.AutoCompleter;
-
-        public override bool CanDrag => false;
-
-        public ISuggestionProvider CurrentHandler { get; private set; }
-
-        public ButtonListSource<Suggestion> dataHandler;
-        public ScrollPool<ButtonCell> scrollPool;
-
-        private List<Suggestion> suggestions = new List<Suggestion>();
-
-        private int lastCaretPos;
 
         public override void Update()
         {

@@ -23,10 +23,28 @@ namespace UnityExplorer.UI.Inspectors
                 return;
 
             obj = obj.TryCast();
+
+            if (TryFocusActiveInspector(obj))
+                return;
+
             if (obj is GameObject)
                 CreateInspector<GameObjectInspector>(obj);
             else
                 CreateInspector<ReflectionInspector>(obj);
+        }
+
+        private static bool TryFocusActiveInspector(object target)
+        {
+            foreach (var inspector in Inspectors)
+            {
+                if (inspector.InspectorTarget.ReferenceEqual(target))
+                {
+                    UIManager.SetPanelActive(UIManager.Panels.Inspector, true);
+                    SetInspectorActive(inspector);
+                    return true;
+                }
+            }
+            return false;
         }
 
         public static void Inspect(Type type)
@@ -52,6 +70,7 @@ namespace UnityExplorer.UI.Inspectors
         {
             var inspector = Pool<T>.Borrow();
             Inspectors.Add(inspector);
+            inspector.InspectorTarget = target;
 
             UIManager.SetPanelActive(UIManager.Panels.Inspector, true);
             inspector.UIRoot.transform.SetParent(InspectorPanel.Instance.ContentHolder.transform, false);

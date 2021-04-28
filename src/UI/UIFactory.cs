@@ -165,7 +165,7 @@ namespace UnityExplorer.UI
             Image bgImage = contentHolder.AddComponent<Image>();
             bgImage.type = Image.Type.Filled;
             if (bgColor == null)
-                bgImage.color = new Color(0.1f, 0.1f, 0.1f);
+                bgImage.color = new Color(0.06f, 0.06f, 0.06f);
             else
                 bgImage.color = (Color)bgColor;
 
