@@ -276,7 +276,6 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
                 infos.Clear();
                 infos.AddRange(declaringType.GetProperties(flags));
                 infos.AddRange(declaringType.GetFields(flags));
-                infos.AddRange(declaringType.GetEvents(flags));
                 infos.AddRange(declaringType.GetMethods(flags));
 
                 foreach (var member in infos)
