@@ -100,7 +100,7 @@ namespace UnityExplorer.UI.Widgets
         private bool writingLocked;
         private float timeofLastWriteLock;
 
-        private float prevContentHeight;
+        private float prevContentHeight = 1.0f;
 
         public void SetUninitialized()
         {
@@ -115,8 +115,10 @@ namespace UnityExplorer.UI.Widgets
             if (writingLocked && timeofLastWriteLock < Time.time)
                 writingLocked = false;
 
-            if (prevContentHeight == 0.0f && Content?.rect.height != 0.0f)
+            if (prevContentHeight <= 1f && Content?.rect.height > 1f)
+            {
                 prevContentHeight = Content.rect.height;
+            }
             else if (Content.rect.height != prevContentHeight)
             {
                 prevContentHeight = Content.rect.height;
@@ -240,21 +242,13 @@ namespace UnityExplorer.UI.Widgets
             {
                 bottomPoolIndex++;
 
-                ////Instantiate and add to Pool
-                //RectTransform rect = GameObject.Instantiate(PrototypeCell.gameObject).GetComponent<RectTransform>();
-                //rect.gameObject.SetActive(true);
-                //rect.name = $"Cell_{CellPool.Count}";
-                //var cell = DataSource.CreateCell(rect);
-                //CellPool.Add(cell);
-                //rect.SetParent(ScrollRect.content, false);
-
                 var cell = Pool<T>.Borrow();
                 DataSource.OnCellBorrowed(cell);
-                var rect = cell.Rect;
+                //var rect = cell.Rect;
                 CellPool.Add(cell);
-                rect.SetParent(ScrollRect.content, false);
+                cell.Rect.SetParent(ScrollRect.content, false);
 
-                currentPoolCoverage += rect.rect.height;
+                currentPoolCoverage += PrototypeHeight;
             }
 
             if (andResetDataIndex)
@@ -289,30 +283,29 @@ namespace UnityExplorer.UI.Widgets
 
             var requiredCoverage = Math.Abs(RecycleViewBounds.y - RecycleViewBounds.x);
             var currentCoverage = CellPool.Count * PrototypeHeight;
-            int cellsRequired = (int)Math.Ceiling((decimal)(requiredCoverage - currentCoverage) / (decimal)PrototypeHeight);
+            int cellsRequired = (int)Math.Floor((decimal)(requiredCoverage - currentCoverage) / (decimal)PrototypeHeight);
             if (cellsRequired > 0 || forceRecreate)
             {
                 WritingLocked = true;
-
-                //// Disable cells so DataSource can handle its content if need be
-                //var enumerator = GetPoolEnumerator();
-                //while (enumerator.MoveNext())
-                //{
-                //    var curr = enumerator.Current;
-                //    DataSource.DisableCell(CellPool[curr.cellIndex], curr.dataIndex);
-                //}
 
                 bottomDataIndex += cellsRequired;
                 int maxDataIndex = Math.Max(CellPool.Count + cellsRequired - 1, DataSource.ItemCount - 1);
                 if (bottomDataIndex > maxDataIndex)
                     bottomDataIndex = maxDataIndex;
 
-                // CreateCellPool will destroy existing cells and recreate list.
+                float curAnchor = Content.localPosition.y;
+                float curHeight = Content.rect.height;
+
                 CreateCellPool(resetDataIndex);
 
-                LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
+                // fix slight jumping when resizing panel and size increases
 
-                //Content.anchoredPosition = new Vector2(0, pos);
+                if (Content.rect.height != curHeight)
+                {
+                    var diff = Content.rect.height - curHeight;
+                    Content.localPosition = new Vector3(Content.localPosition.x, Content.localPosition.y + (diff * 0.5f));
+                }
+
                 ScrollRect.UpdatePrevData();
 
                 SetScrollBounds();
@@ -437,10 +430,7 @@ namespace UnityExplorer.UI.Widgets
 
             SetRecycleViewBounds(true);
 
-            //if (!SetRecycleViewBounds(true))
-            //    RefreshCells(false);
-
-            float yChange = (ScrollRect.content.anchoredPosition - prevAnchoredPos).y;
+            float yChange = ((Vector2)ScrollRect.content.localPosition - prevAnchoredPos).y;
             float adjust = 0f;
 
             if (yChange > 0) // Scrolling down
@@ -642,7 +632,6 @@ namespace UnityExplorer.UI.Widgets
             {
                 if (TopDataIndex > poolStartIndex && TopDataIndex < desiredBottomIndex)
                 {
-                    //ExplorerCore.Log("Scroll bottom to top");
                     // top cell falls within the new range, rotate around that
                     int rotate = TopDataIndex - poolStartIndex;
                     for (int i = 0; i < rotate; i++)
@@ -659,7 +648,6 @@ namespace UnityExplorer.UI.Widgets
                 }
                 else if (bottomDataIndex > poolStartIndex && bottomDataIndex < desiredBottomIndex)
                 {
-                    //ExplorerCore.Log("Scroll top to bottom");
                     // bottom cells falls within the new range, rotate around that
                     int rotate = desiredBottomIndex - bottomDataIndex;
                     for (int i = 0; i < rotate; i++)
@@ -676,9 +664,6 @@ namespace UnityExplorer.UI.Widgets
                 }
                 else
                 {
-                    // new cells are completely different, set all cells
-                    //ExplorerCore.Log("Scroll jump");
-
                     bottomDataIndex = desiredBottomIndex;
                     var enumerator = GetPoolEnumerator();
                     while (enumerator.MoveNext())
@@ -691,17 +676,6 @@ namespace UnityExplorer.UI.Widgets
             }
 
             SetRecycleViewBounds(true);
-
-            //CheckDataSourceCountChange(out bool jumpToBottom);
-
-            //// force check recycles
-            //if (andReloadFromDataSource)
-            //{
-            //    RecycleBottomToTop();
-            //    RecycleTopToBottom();
-            //}
-
-            //LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
 
             SetScrollBounds();
             ScrollRect.UpdatePrevData();

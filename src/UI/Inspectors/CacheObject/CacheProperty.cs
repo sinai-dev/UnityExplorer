@@ -10,11 +10,14 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
     {
         public PropertyInfo PropertyInfo { get; internal set; }
 
+        public override bool ShouldAutoEvaluate => !HasArguments;
+
         public override void Initialize(ReflectionInspector inspector, Type declaringType, MemberInfo member, Type returnType)
         {
             base.Initialize(inspector, declaringType, member, returnType);
 
-
+            this.CanWrite = PropertyInfo.CanWrite;
+            Arguments = PropertyInfo.GetIndexParameters();
         }
 
         protected override void TryEvaluate()

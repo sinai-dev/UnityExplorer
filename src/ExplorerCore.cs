@@ -2,44 +2,40 @@
 using System.Collections;
 using System.IO;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityExplorer.Core;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Input;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.Tests;
 using UnityExplorer.UI;
+using UnityExplorer.UI.Inspectors;
 using UnityExplorer.UI.Panels;
 
 namespace UnityExplorer
 {
-    public class ExplorerCore
+    public static class ExplorerCore
     {
         public const string NAME = "UnityExplorer";
         public const string VERSION = "3.4.0";
         public const string AUTHOR = "Sinai";
         public const string GUID = "com.sinai.unityexplorer";
 
-        public static ExplorerCore Instance { get; private set; }
-
         public static IExplorerLoader Loader { get; private set; }
         public static RuntimeContext Context { get; internal set; }
-
-        // Prevent using ctor, must use Init method.
-        private ExplorerCore() { }
 
         /// <summary>
         /// Initialize UnityExplorer with the provided Loader implementation.
         /// </summary>
         public static void Init(IExplorerLoader loader)
         {
-            if (Instance != null)
+            if (Loader != null)
             {
-                Log("An instance of UnityExplorer is already active!");
+                LogWarning("UnityExplorer is already loaded!");
                 return;
             }
 
             Loader = loader;
-            Instance = new ExplorerCore();
 
             if (!Directory.Exists(Loader.ExplorerFolder))
                 Directory.CreateDirectory(Loader.ExplorerFolder);
@@ -69,7 +65,9 @@ namespace UnityExplorer
 
             UIManager.InitUI();
 
-            //InspectorManager.Inspect(typeof(TestClass));
+            InspectorManager.Inspect(typeof(TestClass));
+            //InspectorManager.Inspect(UIManager.CanvasRoot.gameObject.GetComponent<GraphicRaycaster>());
+            //InspectorManager.InspectType(typeof(ReflectionUtility));
         }
 
         /// <summary>

@@ -55,8 +55,6 @@ namespace UnityExplorer.UI.Widgets
             ScrollPool.Initialize(this);
         }
 
-        public int GetRealIndexOfTempIndex(int index) => -1;// not needed
-
         public void DisableCell(TransformCell cell, int index) => cell.Disable();
 
 

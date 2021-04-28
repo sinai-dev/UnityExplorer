@@ -9,7 +9,6 @@ namespace UnityExplorer.UI.Widgets
     public interface IPoolDataSource<T> where T : ICell
     {
         int ItemCount { get; }
-        int GetRealIndexOfTempIndex(int tempIndex);
 
         void OnCellBorrowed(T cell);
         void OnCellReturned(T cell);

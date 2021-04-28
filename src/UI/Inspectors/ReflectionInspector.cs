@@ -28,7 +28,6 @@ namespace UnityExplorer.UI.Inspectors
 
         private List<CacheMember> members = new List<CacheMember>();
         private readonly List<CacheMember> filteredMembers = new List<CacheMember>();
-        private readonly List<int> filteredIndices = new List<int>();
 
         public override GameObject UIRoot => uiRoot;
         private GameObject uiRoot;
@@ -37,7 +36,6 @@ namespace UnityExplorer.UI.Inspectors
         public Text AssemblyText;
 
         private LayoutElement memberTitleLayout;
-        private LayoutElement typeTitleLayout;
 
         public override void OnBorrowedFromPool(object target)
         {
@@ -97,21 +95,22 @@ namespace UnityExplorer.UI.Inspectors
             {
                 var member = members[i];
                 filteredMembers.Add(member);
-                filteredIndices.Add(i);
             }
         }
 
         public override void OnReturnToPool()
         {
-            base.OnReturnToPool();
+            foreach (var member in members)
+                member.OnDestroyed();
 
             members.Clear();
             filteredMembers.Clear();
-            filteredIndices.Clear();
 
             // release all cachememberviews
             MemberScrollPool.ReturnCells();
             MemberScrollPool.SetUninitialized();
+
+            base.OnReturnToPool();
         }
 
         public override void OnSetActive()
@@ -141,6 +140,7 @@ namespace UnityExplorer.UI.Inspectors
             {
                 timeOfLastUpdate = Time.time;
 
+                // Update displayed values (TODO)
             }
         }
 
@@ -154,33 +154,54 @@ namespace UnityExplorer.UI.Inspectors
 
         public int ItemCount => filteredMembers.Count;
 
-        public int GetRealIndexOfTempIndex(int tempIndex)
-        {
-            if (filteredIndices.Count <= tempIndex)
-                return -1;
-
-            return filteredIndices[tempIndex];
-        }
-
         public void OnCellBorrowed(CacheMemberCell cell)
         {
             cell.CurrentOwner = this;
 
             // todo add listeners
+            cell.OnInspectClicked += OnCellInspect;
+            cell.OnApplyClicked += OnCellApply;
+            cell.OnSubContentClicked += OnCellSubContentToggle;
+            cell.OnUpdateClicked += OnCellUpdateClicked;
+            cell.OnEvaluateClicked += OnCellEvaluateClicked;
+        }
+
+        private void OnCellInspect(CacheMember occupant)
+        {
+            InspectorManager.Inspect(occupant.Value);
+        }
+
+        private void OnCellApply(CacheMember occupant)
+        {
+            ExplorerCore.Log($"TODO OnApply: {occupant.NameForFiltering}");
+        }
+
+        private void OnCellSubContentToggle(CacheMember occupant)
+        {
+            ExplorerCore.Log($"TODO SubContentToggle: {occupant.NameForFiltering}");
+        }
+
+        private void OnCellUpdateClicked(CacheMember occupant)
+        {
+            ExplorerCore.Log("TODO Update: " + occupant.NameForFiltering);
+        }
+
+        private void OnCellEvaluateClicked(CacheMember occupant)
+        {
+            ExplorerCore.Log("TODO Evaluate or toggle: " + occupant);
         }
 
         public void OnCellReturned(CacheMemberCell cell)
         {
-            // todo remove listeners
-
-            // return ivalue
-
-            cell.CurrentOwner = null;
+            cell.OnReturnToPool();
         }
 
         public void SetCell(CacheMemberCell cell, int index)
         {
-            index = GetRealIndexOfTempIndex(index);
+            if (cell.CurrentOccupant != null)
+            {
+                // TODO
+            }
 
             if (index < 0 || index >= filteredMembers.Count)
             {
@@ -188,7 +209,9 @@ namespace UnityExplorer.UI.Inspectors
                 return;
             }
 
-            members[index].SetCell(cell);
+            var member = filteredMembers[index];
+            cell.CurrentOccupant = member;
+            member.SetCell(cell);
 
             SetCellLayout(cell);
         }
@@ -198,20 +221,25 @@ namespace UnityExplorer.UI.Inspectors
             // need to do anything?
         }
 
-        private static float MemLabelWidth => Math.Min(400f, 0.35f * InspectorManager.PanelWidth - 5);
-        private static float ReturnLabelWidth => Math.Min(225f, 0.25f * InspectorManager.PanelWidth - 5);
-        private static float RightGroupWidth => InspectorManager.PanelWidth - MemLabelWidth - ReturnLabelWidth - 50;
+        #endregion
+
+        // Cell layout (fake table alignment)
+
+        private static float MemLabelWidth { get; set; }
+        private static float RightGroupWidth { get; set; }
 
         private void SetTitleLayouts()
         {
+            // Calculate sizes
+            MemLabelWidth = Math.Max(200, Math.Min(450f, 0.4f * InspectorManager.PanelWidth - 5));
+            RightGroupWidth = Math.Max(200, InspectorManager.PanelWidth - MemLabelWidth - 55);
+
             memberTitleLayout.minWidth = MemLabelWidth;
-            typeTitleLayout.minWidth = ReturnLabelWidth;
         }
 
         private void SetCellLayout(CacheMemberCell cell)
         {
             cell.MemberLayout.minWidth = MemLabelWidth;
-            cell.ReturnTypeLayout.minWidth = ReturnLabelWidth;
             cell.RightGroupLayout.minWidth = RightGroupWidth;
         }
 
@@ -222,8 +250,6 @@ namespace UnityExplorer.UI.Inspectors
             foreach (var cell in MemberScrollPool.CellPool)
                 SetCellLayout(cell);
         }
-
-        #endregion
 
         public override GameObject CreateContent(GameObject parent)
         {
@@ -243,16 +269,16 @@ namespace UnityExplorer.UI.Inspectors
             var memberTitle = UIFactory.CreateLabel(listTitles, "MemberTitle", "Member Name", TextAnchor.LowerLeft, Color.grey, fontSize: 15);
             memberTitleLayout = memberTitle.gameObject.AddComponent<LayoutElement>();
 
-            var typeTitle = UIFactory.CreateLabel(listTitles, "TypeTitle", "Type", TextAnchor.LowerLeft, Color.grey, fontSize: 15);
-            typeTitleLayout = typeTitle.gameObject.AddComponent<LayoutElement>();
+            //var typeTitle = UIFactory.CreateLabel(listTitles, "TypeTitle", "Type", TextAnchor.LowerLeft, Color.grey, fontSize: 15);
+            //typeTitleLayout = typeTitle.gameObject.AddComponent<LayoutElement>();
 
             var valueTitle = UIFactory.CreateLabel(listTitles, "ValueTitle", "Value", TextAnchor.LowerLeft, Color.grey, fontSize: 15);
-            UIFactory.SetLayoutElement(valueTitle.gameObject, flexibleWidth: 9999);
+            UIFactory.SetLayoutElement(valueTitle.gameObject, minWidth: 150, flexibleWidth: 9999);
 
             MemberScrollPool = UIFactory.CreateScrollPool<CacheMemberCell>(uiRoot, "MemberList", out GameObject scrollObj,
                 out GameObject scrollContent, new Color(0.09f, 0.09f, 0.09f));
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
-            UIFactory.SetLayoutElement(scrollContent, flexibleHeight: 9999);
+            //UIFactory.SetLayoutElement(scrollContent, flexibleHeight: 9999);
 
             MemberScrollPool.Initialize(this);
 

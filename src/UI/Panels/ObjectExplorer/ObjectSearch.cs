@@ -8,11 +8,11 @@ using UnityExplorer.Core.Search;
 using UnityExplorer.UI.Inspectors;
 using UnityExplorer.UI.Models;
 using UnityExplorer.UI.ObjectPool;
-using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Utility;
+using UnityExplorer.UI.Widgets;
 using UnityExplorer.UI.Widgets.AutoComplete;
 
-namespace UnityExplorer.UI.Widgets
+namespace UnityExplorer.UI.Panels
 {
     public class ObjectSearch : UIModel
     {
@@ -110,7 +110,7 @@ namespace UnityExplorer.UI.Widgets
         private void OnCellClicked(int dataIndex)
         {
             if (m_context == SearchContext.StaticClass)
-                InspectorManager.InspectStatic(currentResults[dataIndex] as Type);
+                InspectorManager.Inspect(currentResults[dataIndex] as Type);
             else
                 InspectorManager.Inspect(currentResults[dataIndex]);
         }

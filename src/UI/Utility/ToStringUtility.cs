@@ -16,11 +16,11 @@ namespace UnityExplorer.UI.Utility
 
         // string allocs
         private static readonly StringBuilder _stringBuilder = new StringBuilder(16384);
-        private const string unknownString = "<unknown>";
-        private const string nullString = "<color=grey>[null]</color>";
-        private const string destroyedString = "<color=red>[Destroyed]</color>";
+        private const string nullString = "<color=grey>null</color>";
+        private const string destroyedString = "<color=red>Destroyed</color>";
+        private const string untitledString = "<i><color=grey>untitled</color></i>";
 
-        public static string ToString(object value, Type type)
+        public static string ToString(object value)
         {
             if (value.IsNullOrDestroyed())
             {
@@ -29,6 +29,10 @@ namespace UnityExplorer.UI.Utility
                 else // destroyed unity object
                     return destroyedString;
             }
+
+            var type = value.GetActualType();
+
+            // Find and cache the relevant ToString method for this Type, if haven't already.
 
             if (!toStringMethods.ContainsKey(type.AssemblyQualifiedName))
             {
@@ -46,6 +50,8 @@ namespace UnityExplorer.UI.Utility
                 }
             }
 
+            // Invoke the ToString method on the object
+
             value = value.TryCast(type);
 
             string toString;
@@ -60,7 +66,7 @@ namespace UnityExplorer.UI.Utility
         public static string ToStringWithType(object value, Type fallbackType, bool includeNamespace = true)
         {
             if (value == null && fallbackType == null)
-                return unknownString;
+                return nullString;
 
             Type type = value?.GetActualType() ?? fallbackType;
 
@@ -89,17 +95,18 @@ namespace UnityExplorer.UI.Utility
 
             if (value is UnityEngine.Object obj)
             { 
-                _stringBuilder.Append(obj.name);
+                _stringBuilder.Append(string.IsNullOrEmpty(obj.name) ? untitledString : obj.name);
                 AppendRichType(_stringBuilder, richType);
             }
             else
             {
-                var toString = ToString(value, type);
+                var toString = ToString(value);
 
-                if (toString == type.FullName || toString == $"Il2Cpp{type.FullName}" || type.FullName == $"Il2Cpp{toString}")
+                if (type.IsGenericType 
+                    || toString == type.FullName 
+                    || toString == $"{type.FullName} {type.FullName}"
+                    || toString == $"Il2Cpp{type.FullName}" || type.FullName == $"Il2Cpp{toString}")
                 {
-                    // the ToString was just the default object.ToString(), use our
-                    // syntax highlighted type name instead.
                     _stringBuilder.Append(richType);
                 }
                 else // the ToString contains some actual implementation, use that value.
@@ -116,8 +123,6 @@ namespace UnityExplorer.UI.Utility
             return _stringBuilder.ToString();
         }
 
-        // Just a little optimization, append chars directly instead of allocating every time
-        // we want to do this.
         private static void AppendRichType(StringBuilder sb, string richType)
         {
             sb.Append(' ');

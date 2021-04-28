@@ -20,7 +20,6 @@ namespace UnityExplorer.Core.Config
         public static ConfigElement<bool>       Force_Unlock_Mouse;
         public static ConfigElement<KeyCode>    Force_Unlock_Keybind;
         public static ConfigElement<bool>       Aggressive_Force_Unlock;
-        //public static ConfigElement<MenuPages>  Default_Tab;
         public static ConfigElement<int>        Default_Page_Limit;
         public static ConfigElement<string>     Default_Output_Path;
         public static ConfigElement<bool>       Log_Unity_Debug;
@@ -84,7 +83,7 @@ namespace UnityExplorer.Core.Config
 
             Force_Unlock_Keybind = new ConfigElement<KeyCode>("Force Unlock Keybind",
                 "The keybind to toggle the 'Force Unlock Mouse' setting. Only usable when UnityExplorer is open.",
-                KeyCode.F6);
+                KeyCode.None);
 
             Aggressive_Force_Unlock = new ConfigElement<bool>("Aggressive Mouse Unlock",
                 "Use Camera.onPostRender callback to aggressively force the Mouse to be unlocked (requires game restart).",

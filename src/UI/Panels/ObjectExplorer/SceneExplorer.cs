@@ -9,9 +9,9 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityExplorer.Core;
 using UnityExplorer.UI.Models;
-using UnityExplorer.UI.Panels;
+using UnityExplorer.UI.Widgets;
 
-namespace UnityExplorer.UI.Widgets
+namespace UnityExplorer.UI.Panels
 {
     public class SceneExplorer : UIModel
     {

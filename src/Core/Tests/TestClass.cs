@@ -7,14 +7,15 @@ namespace UnityExplorer.Tests
 {
     public static class TestClass
     {
-        static TestClass()
-        {
-            List = new List<string>();
-            for (int i = 0; i < 10000; i++)
-                List.Add(i.ToString());
-        }
-
         public static List<string> List;
+
+        public const int ConstantInt = 5;
+
+        public static string LongString = @"#######################################################################################################
+###############################################################################################################################
+#####################################################################################################################################
+#########################################################################################################################
+######################################################################################################";
 
 #if CPP
         public static string testStringOne = "Test";
@@ -24,9 +25,15 @@ namespace UnityExplorer.Tests
 
         public static Il2CppSystem.Collections.Hashtable testHashset;
         public static Il2CppSystem.Collections.Generic.List<Il2CppSystem.Object> testList;
+#endif
 
         static TestClass()
         {
+            List = new List<string>();
+            for (int i = 0; i < 10000; i++)
+                List.Add(i.ToString());
+
+#if CPP
             testHashset = new Il2CppSystem.Collections.Hashtable();
             testHashset.Add("key1", "itemOne");
             testHashset.Add("key2", "itemTwo");
@@ -36,8 +43,7 @@ namespace UnityExplorer.Tests
             testList.Add("One");
             testList.Add("Two");
             testList.Add("Three");
-            //testIList = list.TryCast<Il2CppSystem.Collections.IList>();
-        }
 #endif
+        }
     }
 }

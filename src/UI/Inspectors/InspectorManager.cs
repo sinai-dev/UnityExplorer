@@ -29,7 +29,7 @@ namespace UnityExplorer.UI.Inspectors
                 CreateInspector<ReflectionInspector>(obj);
         }
 
-        public static void InspectStatic(Type type)
+        public static void Inspect(Type type)
         {
             CreateInspector<ReflectionInspector>(type, true);
         }

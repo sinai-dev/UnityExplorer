@@ -10,11 +10,14 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
     {
         public FieldInfo FieldInfo { get; internal set; }
 
+        public override bool ShouldAutoEvaluate => true;
+
         public override void Initialize(ReflectionInspector inspector, Type declaringType, MemberInfo member, Type returnType)
         {
             base.Initialize(inspector, declaringType, member, returnType);
 
-            CanWrite = true;
+            // not constant
+            CanWrite = !(FieldInfo.IsLiteral && !FieldInfo.IsInitOnly);
         }
 
         protected override void TryEvaluate()

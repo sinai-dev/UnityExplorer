@@ -20,8 +20,19 @@ namespace UnityExplorer.Core.Input
 
         public static Vector3 MousePosition => m_inputModule.MousePosition;
 
-        public static bool GetKeyDown(KeyCode key) => m_inputModule.GetKeyDown(key);
-        public static bool GetKey(KeyCode key) => m_inputModule.GetKey(key);
+        public static bool GetKeyDown(KeyCode key)
+        {
+            if (key == KeyCode.None)
+                return false;
+            return m_inputModule.GetKeyDown(key);
+        }
+
+        public static bool GetKey(KeyCode key)
+        {
+            if (key == KeyCode.None)
+                return false;
+            return m_inputModule.GetKey(key);
+        }
 
         public static bool GetMouseButtonDown(int btn) => m_inputModule.GetMouseButtonDown(btn);
         public static bool GetMouseButton(int btn) => m_inputModule.GetMouseButton(btn);

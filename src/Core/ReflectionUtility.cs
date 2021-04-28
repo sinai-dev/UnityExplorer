@@ -69,7 +69,8 @@ namespace UnityExplorer
         /// <param name="t">The Type to check</param>
         /// <returns>True if the Type is assignable to IEnumerable, otherwise false.</returns>
         public static bool IsEnumerable(this Type t)
-            => ReflectionProvider.Instance.IsAssignableFrom(typeof(IEnumerable), t);
+            => !typeof(UnityEngine.Transform).IsAssignableFrom(t)
+            && ReflectionProvider.Instance.IsAssignableFrom(typeof(IEnumerable), t);
 
         /// <summary>
         /// Check if the provided Type is assignable to IDictionary.

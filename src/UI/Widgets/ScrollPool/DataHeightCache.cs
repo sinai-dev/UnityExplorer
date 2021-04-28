@@ -24,8 +24,7 @@ namespace UnityExplorer.UI.Widgets
             ScrollPool = scrollPool;
         }
 
-        // initialize with a reasonably sized pool, most caches will allocate a fair bit.
-        private readonly List<DataViewInfo> heightCache = new List<DataViewInfo>(16384);
+        private readonly List<DataViewInfo> heightCache = new List<DataViewInfo>();
 
         public DataViewInfo this[int index]
         {
@@ -104,12 +103,8 @@ namespace UnityExplorer.UI.Widgets
             heightCache.RemoveAt(heightCache.Count - 1);
 
             int idx = heightCache.Count;
-            if (idx > 0)
-            {
-                while (rangeCache[rangeCache.Count - 1] == idx)
-                    rangeCache.RemoveAt(rangeCache.Count - 1);
-            }
-
+            while (rangeCache.Count > 0 && rangeCache[rangeCache.Count - 1] == idx)
+                rangeCache.RemoveAt(rangeCache.Count - 1);
         }
 
         /// <summary>Get the data index at the specific position of the total height cache.</summary>
@@ -119,31 +114,29 @@ namespace UnityExplorer.UI.Widgets
         public int GetDataIndexAtPosition(float desiredHeight, out DataViewInfo cache)
         {
             cache = default;
+
+            if (!heightCache.Any())
+                return 0;
+
             int rangeIndex = GetRangeIndexOfPosition(desiredHeight);
 
             if (rangeIndex < 0)
+                return 0;
+            if (rangeIndex >= rangeCache.Count)
             {
-                ExplorerCore.LogWarning("RangeIndex < 0? " + rangeIndex);
-                return -1;
-            }
-
-            if (rangeCache.Count <= rangeIndex)
-            {
-                ExplorerCore.LogWarning("Want range index " + rangeIndex + " but count is " + rangeCache.Count);
-                RebuildCache();
-                rangeIndex = GetRangeIndexOfPosition(desiredHeight);
-                if (rangeCache.Count <= rangeIndex)
-                    throw new Exception("Range index (" + rangeIndex + ") exceeded rangeCache count (" + rangeCache.Count + ")");
+                ExplorerCore.Log("desiredHeight is " + desiredHeight + ", but our total height is " + totalHeight + ", clamping to data count");
+                ExplorerCore.Log("highest data index: " + (ScrollPool.DataSource.ItemCount - 1) + ", rangeIndex was " + rangeIndex + ", actual range limit is " + (rangeCache.Count - 1));
+                cache = heightCache[heightCache.Count - 1];
+                return ScrollPool.DataSource.ItemCount - 1;
             }
 
             int dataIndex = rangeCache[rangeIndex];
             cache = heightCache[dataIndex];
-
             return dataIndex;
         }
 
         /// <summary>Set a given data index with the specified value.</summary>
-        public void SetIndex(int dataIndex, float height)
+        public void SetIndex(int dataIndex, float height, bool inRebuild = false)
         {
             if (dataIndex >= ScrollPool.DataSource.ItemCount)
             {
@@ -166,7 +159,6 @@ namespace UnityExplorer.UI.Widgets
             var diff = height - prevHeight;
             if (diff != 0.0f)
             {
-                // LogWarning("Height for data index " + dataIndex + " changed by " + diff);
                 totalHeight += diff;
                 cache.height = height;
             }
@@ -183,8 +175,16 @@ namespace UnityExplorer.UI.Widgets
 
             if (rangeCache.Count <= rangeIndex)
             {
-                RebuildCache();
-                return;
+                if (rangeCache[rangeCache.Count - 1] != dataIndex - 1)
+                {
+                    // The previous index in the range cache is not the previous data index for the data we were given.
+                    // Need to rebuild.
+                    if (!inRebuild)
+                        RebuildCache();
+                    else
+                        throw new Exception($"DataHeightCache rebuild failed. Trying to set {rangeIndex} but current count is {rangeCache.Count}!");
+                    return;
+                }
             }
 
             if (spread != cache.normalizedSpread)
@@ -199,6 +199,7 @@ namespace UnityExplorer.UI.Widgets
                     // In some rare cases we may not find our data index at the expected range index.
                     // We can make some educated guesses and find the real index pretty quickly.
                     int minStart = GetRangeIndexOfPosition(dataIndex * DefaultHeight);
+                    if (minStart < 0) minStart = 0;
                     for (int i = minStart; i < rangeCache.Count; i++)
                     {
                         if (rangeCache[i] == dataIndex)
@@ -218,10 +219,8 @@ namespace UnityExplorer.UI.Widgets
 
                         // our data index is further down. add the min difference and try again.
                         // the iterator will add 1 on the next loop so account for that.
-                        // also, add the (spread - 1) of the cell we found at this index to skip it.
-                        var spreadCurr = heightCache[rangeCache[i]].normalizedSpread;
+                        
                         int jmp = dataIndex - rangeCache[i] - 1;
-                        jmp += spreadCurr - 2;
                         i = (jmp < 1 ? i : i + jmp);
                     }
                 }
@@ -263,7 +262,7 @@ namespace UnityExplorer.UI.Widgets
         {
             //start at 1 because 0's start pos is always 0
             for (int i = 1; i < heightCache.Count; i++)
-                SetIndex(i, heightCache[i].height);
+                SetIndex(i, heightCache[i].height, true);
         }
     }
 }

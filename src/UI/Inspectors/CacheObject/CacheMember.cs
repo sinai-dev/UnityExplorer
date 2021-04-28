@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using UnityEngine;
 using UnityExplorer.UI.Inspectors.CacheObject.Views;
 using UnityExplorer.UI.Utility;
 
 namespace UnityExplorer.UI.Inspectors.CacheObject
 {
+    // TODO some of this can be reused for CacheEnumerated / CacheKVP as well, just doing members for now.
+    // Will put shared stuff in CacheObjectBase.
+
     public abstract class CacheMember : CacheObjectBase
     {
         public ReflectionInspector ParentInspector { get; internal set; }
@@ -18,8 +22,9 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
         public object Value { get; protected set; }
         public Type FallbackType { get; private set; }
 
-        public bool HasEvaluated { get; protected set; }
-        public bool HasArguments { get; protected set; }
+        public abstract bool ShouldAutoEvaluate { get; }
+        public bool HasArguments => Arguments?.Length > 0;
+        public ParameterInfo[] Arguments { get; protected set; }
         public bool Evaluating { get; protected set; }
         public bool CanWrite { get; protected set; }
         public bool HadException { get; protected set; }
@@ -29,6 +34,20 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
         public string TypeLabelText { get; protected set; }
         public string ValueLabelText { get; protected set; }
 
+        public enum ValueState
+        {
+            NotEvaluated, Exception, NullValue,
+            Boolean, Number, String, Enum, 
+            Collection, ValueStruct, Unsupported
+        }
+
+        protected ValueState State = ValueState.NotEvaluated;
+
+        private const string NOT_YET_EVAL = "<color=grey>Not yet evaluated</color>";
+
+        /// <summary>
+        /// Initialize the CacheMember when an Inspector is opened and caches the member
+        /// </summary>
         public virtual void Initialize(ReflectionInspector inspector, Type declaringType, MemberInfo member, Type returnType)
         {
             this.DeclaringType = declaringType;
@@ -36,72 +55,183 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             this.FallbackType = returnType;
             this.MemberLabelText = SignatureHighlighter.ParseFullSyntax(declaringType, false, member);
             this.NameForFiltering = $"{declaringType.Name}.{member.Name}";
-            this.TypeLabelText = SignatureHighlighter.HighlightTypeName(returnType);
+            this.TypeLabelText = SignatureHighlighter.HighlightTypeName(FallbackType, false);
+            this.ValueLabelText = GetValueLabel();
         }
 
-        public void SetCell(CacheMemberCell cell)
+        public virtual void OnDestroyed()
         {
-            cell.MemberLabel.text = MemberLabelText;
-            cell.TypeLabel.text = TypeLabelText;
-
-            if (HasArguments && !HasEvaluated)
-            {
-                // todo
-                cell.ValueLabel.text = "Not yet evalulated";
-            }
-            else if (!HasEvaluated)
-                Evaluate();
-
-            if (HadException)
-            {
-                cell.InspectButton.Button.gameObject.SetActive(false);
-                cell.ValueLabel.gameObject.SetActive(true);
-                cell.ValueLabel.supportRichText = true;
-                cell.ValueLabel.text = $"<color=red>{ReflectionUtility.ReflectionExToString(LastException)}</color>";
-            }
-            else if (Value.IsNullOrDestroyed())
-            {
-                cell.InspectButton.Button.gameObject.SetActive(false);
-                cell.ValueLabel.gameObject.SetActive(true);
-                cell.ValueLabel.supportRichText = true;
-                cell.ValueLabel.text = ValueLabelText;
-            }
-            else
-            {
-                cell.ValueLabel.supportRichText = false;
-                cell.ValueLabel.text = ValueLabelText;
-
-                var valueType = Value.GetActualType();
-                if (valueType.IsPrimitive || valueType == typeof(decimal))
-                {
-                    cell.InspectButton.Button.gameObject.SetActive(false);
-                    cell.ValueLabel.gameObject.SetActive(true);
-                }
-                else if (valueType == typeof(string))
-                {
-                    cell.InspectButton.Button.gameObject.SetActive(false);
-                    cell.ValueLabel.gameObject.SetActive(true);
-                }
-                else
-                {
-                    cell.InspectButton.Button.gameObject.SetActive(true);
-                    cell.ValueLabel.gameObject.SetActive(true);
-                }
-            }
+            // TODO release IValue / Evaluate back to pool, etc
         }
 
         protected abstract void TryEvaluate();
 
+        /// <summary>
+        /// Evaluate when first shown (if ShouldAutoEvaluate), or else when Evaluate button is clicked.
+        /// </summary>
         public void Evaluate()
         {
             TryEvaluate();
 
-            if (!HadException)
+            ProcessOnEvaluate();
+        }
+
+        /// <summary>
+        /// Process the CacheMember state when the value has been evaluated (or re-evaluated)
+        /// </summary>
+        protected virtual void ProcessOnEvaluate()
+        {
+            var prevState = State;
+
+            if (HadException)
+                State = ValueState.Exception;
+            else if (Value.IsNullOrDestroyed())
+                State = ValueState.NullValue;
+            else
             {
-                ValueLabelText = ToStringUtility.ToString(Value, FallbackType);
+                var type = Value.GetActualType();
+
+                if (type == typeof(bool))
+                    State = ValueState.Boolean;
+                else if (type.IsPrimitive || type == typeof(decimal))
+                    State = ValueState.Number;
+                else if (type == typeof(string))
+                    State = ValueState.String;
+                else if (type.IsEnum)
+                    State = ValueState.Enum;
+                else if (type.IsEnumerable() || type.IsDictionary())
+                    State = ValueState.Collection;
+                // todo Color and ValueStruct
+                else
+                    State = ValueState.Unsupported;
             }
 
-            HasEvaluated = true;
+            // Set label text
+            ValueLabelText = GetValueLabel();
+
+            if (State != prevState)
+            {
+                // TODO handle if subcontent / evaluate shown, check type change, etc
+            }
+        }
+
+        private string GetValueLabel()
+        {
+            switch (State)
+            {
+                case ValueState.NotEvaluated:
+                    return $"<i>{NOT_YET_EVAL} ({SignatureHighlighter.HighlightTypeName(FallbackType, true)})</i>";
+                case ValueState.Exception:
+                    return $"<i><color=red>{ReflectionUtility.ReflectionExToString(LastException)}</color></i>";
+                case ValueState.Boolean:
+                case ValueState.Number:
+                    return null;
+                case ValueState.String:
+                    string s = Value as string;
+                    if (s.Length > 200)
+                        s = $"{s.Substring(0, 200)}...";
+                    return $"\"{s}\"";
+                case ValueState.NullValue:
+                    return $"<i>{ToStringUtility.ToStringWithType(Value, FallbackType, true)}</i>";
+                case ValueState.Enum:
+                case ValueState.Collection:
+                case ValueState.ValueStruct:
+                case ValueState.Unsupported:
+                default:
+                    return ToStringUtility.ToStringWithType(Value, FallbackType, true);
+            }
+        }
+
+        /// <summary>
+        /// Set the cell view for an enabled cell based on this CacheMember model.
+        /// </summary>
+        public void SetCell(CacheMemberCell cell)
+        {
+            cell.MemberLabel.text = MemberLabelText;
+            cell.ValueLabel.gameObject.SetActive(true);
+
+            cell.EvaluateHolder.SetActive(!ShouldAutoEvaluate);
+            if (!ShouldAutoEvaluate)
+            {
+                cell.EvaluateButton.Button.gameObject.SetActive(true);
+                if (HasArguments)
+                    cell.EvaluateButton.ButtonText.text = $"Evaluate ({Arguments.Length})";
+                else
+                    cell.EvaluateButton.ButtonText.text = "Evaluate";
+            }
+
+            if (State == ValueState.NotEvaluated && !ShouldAutoEvaluate)
+            {
+                // todo evaluate buttons etc
+                SetCellState(cell, true, true, Color.white, false, false, false, false, false, false);
+
+                return;
+            }
+
+            if (State == ValueState.NotEvaluated)
+                Evaluate();
+
+            switch (State)
+            {
+                case ValueState.Exception:
+                case ValueState.NullValue:
+                    SetCellState(cell, true, true, Color.white, false, false, false, false, false, false);
+                    break;
+                case ValueState.Boolean:
+                    SetCellState(cell, false, false, default, true, toggleActive: true, false, CanWrite, false, false); 
+                    break;
+                case ValueState.Number:
+                    SetCellState(cell, false, true, Color.white, true, false, inputActive: true, CanWrite, false, false);
+                    break;
+                case ValueState.String:
+                    SetCellState(cell, true, false, SignatureHighlighter.StringOrange, false, false, false, false, false, true);
+                    break;
+                case ValueState.Enum:
+                    SetCellState(cell, true, true, Color.white, false, false, false, false, false, true);
+                    break;
+                case ValueState.Collection:
+                case ValueState.ValueStruct:
+                    SetCellState(cell, true, true, Color.white, false, false, false, false, true, true);
+                    break;
+                case ValueState.Unsupported:
+                    SetCellState(cell, true, true, Color.white, false, false, false, false, true, false);
+                    break;
+            }
+        }
+
+        private void SetCellState(CacheMemberCell cell, bool valueActive, bool valueRichText, Color valueColor,
+            bool typeLabelActive, bool toggleActive, bool inputActive, bool applyActive, bool inspectActive, bool subContentActive)
+        {
+            //cell.ValueLabel.gameObject.SetActive(valueActive);
+            if (valueActive)
+            {
+                cell.ValueLabel.text = ValueLabelText;
+                cell.ValueLabel.supportRichText = valueRichText;
+                cell.ValueLabel.color = valueColor;
+            }
+            else
+                cell.ValueLabel.text = "";
+
+            cell.TypeLabel.gameObject.SetActive(typeLabelActive);
+            if (typeLabelActive)
+                cell.TypeLabel.text = TypeLabelText;
+
+            cell.Toggle.gameObject.SetActive(toggleActive);
+            if (toggleActive)
+            {
+                cell.Toggle.isOn = (bool)Value;
+                cell.ToggleText.text = Value.ToString();
+            }
+
+            cell.InputField.gameObject.SetActive(inputActive);
+            if (inputActive)
+                cell.InputField.text = Value.ToString();
+
+            cell.ApplyButton.Button.gameObject.SetActive(applyActive);
+            cell.InspectButton.Button.gameObject.SetActive(inspectActive);
+            cell.SubContentButton.Button.gameObject.SetActive(subContentActive);
+
+            cell.UpdateButton.Button.gameObject.SetActive(ShouldAutoEvaluate);
         }
 
 
@@ -144,9 +274,10 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
                     target = target.TryCast(declaringType);
 
                 infos.Clear();
-                infos.AddRange(declaringType.GetMethods(flags));
                 infos.AddRange(declaringType.GetProperties(flags));
                 infos.AddRange(declaringType.GetFields(flags));
+                infos.AddRange(declaringType.GetEvents(flags));
+                infos.AddRange(declaringType.GetMethods(flags));
 
                 foreach (var member in infos)
                 {

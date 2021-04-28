@@ -14,6 +14,16 @@ namespace UnityExplorer.UI.Utility
     /// </summary>
     public class SignatureHighlighter
     {
+        public const string NAMESPACE = "#a8a8a8";
+
+        public const string CONST = "#92c470";
+
+        public const string CLASS_STATIC = "#3a8d71";
+        public const string CLASS_INSTANCE = "#2df7b2";
+
+        public const string STRUCT = "#0fba3a";
+        public const string INTERFACE = "#9b9b82";
+
         public const string FIELD_STATIC = "#8d8dc6";
         public const string FIELD_INSTANCE = "#c266ff";
 
@@ -23,30 +33,28 @@ namespace UnityExplorer.UI.Utility
         public const string PROP_STATIC = "#588075";
         public const string PROP_INSTANCE = "#55a38e";
 
-        public const string CLASS_STATIC = "#3a8d71";
-        public const string CLASS_INSTANCE = "#2df7b2";
-
-        public const string CLASS_STRUCT = "#0fba3a";
-
         public const string LOCAL_ARG = "#a6e9e9";
 
-        public static string CONST_VAR = "#92c470";
-
-        public static string NAMESPACE = "#a8a8a8";
+        public static readonly Color StringOrange = new Color(0.83f, 0.61f, 0.52f);
+        public static readonly Color EnumGreen = new Color(0.57f, 0.76f, 0.43f);
+        public static readonly Color KeywordBlue = new Color(0.3f, 0.61f, 0.83f);
+        public static readonly Color NumberGreen = new Color(0.71f, 0.8f, 0.65f);
 
         internal static string GetClassColor(Type type)
         {
             if (type.IsAbstract && type.IsSealed)
                 return CLASS_STATIC;
             else if (type.IsEnum || type.IsGenericParameter)
-                return CONST_VAR;
+                return CONST;
             else if (type.IsValueType)
-                return CLASS_STRUCT;
+                return STRUCT;
+            else if (type.IsInterface)
+                return INTERFACE;
             else
                 return CLASS_INSTANCE;
         }
 
-        private static readonly StringBuilder syntaxBuilder = new StringBuilder(8192);
+        private static readonly StringBuilder syntaxBuilder = new StringBuilder(2156);
 
         public static string ParseFullSyntax(Type type, bool includeNamespace, MemberInfo memberInfo = null)
         {
@@ -82,7 +90,11 @@ namespace UnityExplorer.UI.Utility
                     syntaxBuilder.Append("</i>");
 
                 if (memberInfo is MethodInfo method)
-                    syntaxBuilder.Append(ParseGenericArgs(method.GetGenericArguments(), true));
+                {
+                    var args = method.GetGenericArguments();
+                    if (args.Length > 0)
+                        syntaxBuilder.Append($"<{ParseGenericArgs(args, true)}>");
+                }
             }
 
             return syntaxBuilder.ToString();
@@ -125,7 +137,7 @@ namespace UnityExplorer.UI.Utility
 
             if (type.IsGenericParameter || (type.HasElementType && type.GetElementType().IsGenericParameter))
             {
-                typeName = $"<color={CONST_VAR}>{typeName}</color>";
+                typeName = $"<color={CONST}>{typeName}</color>";
             }
             else
             {
@@ -150,7 +162,9 @@ namespace UnityExplorer.UI.Utility
 
                 // parse the generic args, if any
                 if (args.Length > 0)
-                    typeName += ParseGenericArgs(args);
+                {
+                    typeName += $"<{ParseGenericArgs(args)}>";
+                }
             }
 
             if (isArray)
@@ -161,33 +175,29 @@ namespace UnityExplorer.UI.Utility
             return typeName;
         }
 
-        private static readonly StringBuilder genericBuilder = new StringBuilder(4096);
-
         public static string ParseGenericArgs(Type[] args, bool isGenericParams = false)
         {
             if (args.Length < 1)
                 return string.Empty;
 
-            genericBuilder.Clear();
-            genericBuilder.Append('<');
+            string ret = "";
 
             for (int i = 0; i < args.Length; i++)
             {
                 if (i > 0)
-                    genericBuilder.Append(',');
+                    ret += ",";
 
                 if (isGenericParams)
                 {
-                    genericBuilder.Append($"<color={CONST_VAR}>{args[i].Name}</color>");
+                    ret += $"<color={CONST}>{args[i].Name}</color>";
                     continue;
                 }
 
                 // using HighlightTypeName makes it recursive, so we can parse nested generic args.
-                genericBuilder.Append(HighlightTypeName(args[i]));
+                ret += HighlightTypeName(args[i]);
             }
 
-            genericBuilder.Append('>');
-            return genericBuilder.ToString();
+            return ret;
         }
 
         public static string GetMemberInfoColor(MemberInfo memberInfo, out bool isStatic)
@@ -200,8 +210,8 @@ namespace UnityExplorer.UI.Utility
                     isStatic = true;
                     return FIELD_STATIC;
                 }
-                else
-                    return FIELD_INSTANCE;
+                
+                return FIELD_INSTANCE;
             }
             else if (memberInfo is MethodInfo mi)
             {
@@ -210,8 +220,8 @@ namespace UnityExplorer.UI.Utility
                     isStatic = true;
                     return METHOD_STATIC;
                 }
-                else
-                    return METHOD_INSTANCE;
+                
+                return METHOD_INSTANCE;
             }
             else if (memberInfo is PropertyInfo pi)
             {
@@ -220,9 +230,19 @@ namespace UnityExplorer.UI.Utility
                     isStatic = true;
                     return PROP_STATIC;
                 }
-                else
-                    return PROP_INSTANCE;
+                
+                return PROP_INSTANCE;
             }
+            //else if (memberInfo is EventInfo ei)
+            //{
+            //    if (ei.GetAddMethod().IsStatic)
+            //    {
+            //        isStatic = true;
+            //        return EVENT_STATIC;
+            //    }
+               
+            //    return EVENT_INSTANCE;
+            //}
 
             throw new NotImplementedException(memberInfo.GetType().Name + " is not supported");
         }
