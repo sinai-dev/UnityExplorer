@@ -7,6 +7,7 @@ using BF = System.Reflection.BindingFlags;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Core;
 using UnityExplorer.UI;
+using System.Collections;
 #if ML
 using Harmony;
 #else
@@ -48,6 +49,36 @@ namespace UnityExplorer.Core.Input
 
             Unlock = ConfigManager.Force_Unlock_Mouse.Value;
             ConfigManager.Force_Unlock_Mouse.OnValueChanged += (bool val) => { Unlock = val; };
+
+            if (ConfigManager.Aggressive_Force_Unlock.Value)
+                SetupAggressiveUnlock();
+        }
+
+        public static void SetupAggressiveUnlock()
+        {
+            try
+            {
+                RuntimeProvider.Instance.StartCoroutine(AggressiveUnlockCoroutine());
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.LogWarning($"Exception setting up Camera.onPostRender callback: {ex}");
+            }
+        }
+
+        private static readonly WaitForEndOfFrame _waitForEndOfFrame = new WaitForEndOfFrame();
+
+        private static IEnumerator AggressiveUnlockCoroutine()
+        {
+            while (true)
+            {
+                ExplorerCore.Log("Yielding end of frame");
+                yield return _waitForEndOfFrame;
+                ExplorerCore.Log("Yielded");
+
+                if (UIManager.ShowMenu)
+                    UpdateCursorControl();
+            }
         }
 
         public static void UpdateCursorControl()

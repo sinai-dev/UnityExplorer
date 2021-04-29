@@ -19,6 +19,7 @@ namespace UnityExplorer.Core.Config
 
         public static ConfigElement<KeyCode>    Main_Menu_Toggle;
         public static ConfigElement<bool>       Force_Unlock_Mouse;
+        public static ConfigElement<bool>       Aggressive_Force_Unlock;
         public static ConfigElement<MenuPages>  Default_Tab;
         public static ConfigElement<int>        Default_Page_Limit;
         public static ConfigElement<string>     Default_Output_Path;
@@ -77,6 +78,10 @@ namespace UnityExplorer.Core.Config
             Force_Unlock_Mouse = new ConfigElement<bool>("Force Unlock Mouse",
                 "Force the Cursor to be unlocked (visible) when the UnityExplorer menu is open.",
                 true);
+
+            Aggressive_Force_Unlock = new ConfigElement<bool>("Aggressive Mouse Unlock",
+                "Use WaitForEndOfFrame to aggressively force the Mouse to be unlocked (requires game restart).",
+                false);
 
             Default_Page_Limit = new ConfigElement<int>("Default Page Limit",
                 "The default maximum number of elements per 'page' in UnityExplorer.",
