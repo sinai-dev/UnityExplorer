@@ -102,7 +102,13 @@ namespace UnityExplorer.UI.Panels
 
         public override void SetActive(bool active)
         {
+            if (this.Enabled.Equals(active))
+                return;
+
             base.SetActive(active);
+
+            if (!ApplyingSaveData)
+                SaveToConfigManager();
 
             if (NavButtonWanted)
             {
@@ -186,6 +192,7 @@ namespace UnityExplorer.UI.Panels
 
             ConstructPanelContent();
 
+            ApplyingSaveData = true;
             // apply panel save data or revert to default
             try
             {
@@ -203,17 +210,28 @@ namespace UnityExplorer.UI.Panels
             {
                 SaveToConfigManager();
             };
+            ApplyingSaveData = false;
         }
 
         public override void ConstructUI(GameObject parent) => ConstructUI();
 
         // SAVE DATA
 
-        public abstract void SaveToConfigManager();
+        public void SaveToConfigManager()
+        {
+            if (UIManager.Initializing)
+                return;
+
+            DoSaveToConfigElement();
+        }
+
+        public abstract void DoSaveToConfigElement();
 
         public abstract void SetDefaultPosAndAnchors();
 
         public abstract void LoadSaveData();
+
+        public bool ApplyingSaveData { get; set; }
 
         public virtual string ToSaveData()
         {
@@ -223,8 +241,9 @@ namespace UnityExplorer.UI.Panels
                 $"|{mainPanelRect.RectAnchorsToString()}" +
                 $"|{mainPanelRect.RectPositionToString()}";
             }
-            catch
+            catch (Exception ex)
             {
+                ExplorerCore.LogWarning($"Exception generating Panel save data: {ex}");
                 return "";
             }
         }

@@ -26,7 +26,7 @@ namespace UnityExplorer.UI.Panels
 
         public override bool ShouldSaveActiveState => true;
 
-        public int SelectedTab = -1;
+        public int SelectedTab = 0;
         private readonly List<UIModel> tabPages = new List<UIModel>();
         private readonly List<ButtonRef> tabButtons = new List<ButtonRef>();
 
@@ -57,14 +57,14 @@ namespace UnityExplorer.UI.Panels
                 SceneExplorer.Update();
         }
 
-        public override void SaveToConfigManager()
+        public override void DoSaveToConfigElement()
         {
-            ConfigManager.SceneExplorerData.Value = this.ToSaveData();
+            ConfigManager.ObjectExplorerData.Value = this.ToSaveData();
         }
 
         public override void LoadSaveData()
         {
-            ApplySaveData(ConfigManager.SceneExplorerData.Value);
+            ApplySaveData(ConfigManager.ObjectExplorerData.Value);
         }
 
         public override string ToSaveData()
@@ -87,6 +87,9 @@ namespace UnityExplorer.UI.Panels
             {
                 SelectedTab = 0;
             }
+
+            SelectedTab = Math.Max(0, SelectedTab);
+            SelectedTab = Math.Min(1, SelectedTab);
 
             SetTab(SelectedTab);
         }

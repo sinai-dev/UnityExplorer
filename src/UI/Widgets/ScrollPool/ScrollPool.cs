@@ -134,7 +134,7 @@ namespace UnityExplorer.UI.Widgets
             SetRecycleViewBounds(false);
             SetScrollBounds();
 
-            RecreateCellPool(true, true);
+            ExtendCellPool();
             writingLocked = false;
             Content.anchoredPosition = Vector2.zero;
             UpdateSliderHandle(true);
@@ -244,7 +244,6 @@ namespace UnityExplorer.UI.Widgets
 
                 var cell = Pool<T>.Borrow();
                 DataSource.OnCellBorrowed(cell);
-                //var rect = cell.Rect;
                 CellPool.Add(cell);
                 cell.Rect.SetParent(ScrollRect.content, false);
 
@@ -262,48 +261,53 @@ namespace UnityExplorer.UI.Widgets
                 SetCell(CellPool[enumerator.Current.cellIndex], enumerator.Current.dataIndex);
         }
 
-        /// <summary>ret = cell pool was extended</summary>
-        private bool SetRecycleViewBounds(bool checkHeightGrow)
+        private void SetRecycleViewBounds(bool extendPoolIfGrown)
         {
-            bool ret = false;
-
             RecycleViewBounds = new Vector2(Viewport.MinY() + HalfThreshold, Viewport.MaxY() - HalfThreshold);
 
-            if (checkHeightGrow && prevViewportHeight < Viewport.rect.height && prevViewportHeight != 0.0f)
-                ret = RecreateCellPool(false, false);
+            if (extendPoolIfGrown && prevViewportHeight < Viewport.rect.height && prevViewportHeight != 0.0f)
+                ExtendCellPool();
 
             prevViewportHeight = Viewport.rect.height;
 
-            return ret;
         }
 
-        private bool RecreateCellPool(bool forceRecreate, bool resetDataIndex)
+        private bool ExtendCellPool()
         {
             CheckDataSourceCountChange(out _);
 
             var requiredCoverage = Math.Abs(RecycleViewBounds.y - RecycleViewBounds.x);
             var currentCoverage = CellPool.Count * PrototypeHeight;
             int cellsRequired = (int)Math.Floor((decimal)(requiredCoverage - currentCoverage) / (decimal)PrototypeHeight);
-            if (cellsRequired > 0 || forceRecreate)
+            if (cellsRequired > 0)
             {
                 WritingLocked = true;
 
                 bottomDataIndex += cellsRequired;
-                int maxDataIndex = Math.Max(CellPool.Count + cellsRequired - 1, DataSource.ItemCount - 1);
-                if (bottomDataIndex > maxDataIndex)
-                    bottomDataIndex = maxDataIndex;
 
-                float curAnchor = Content.localPosition.y;
-                float curHeight = Content.rect.height;
+                float prevAnchor = Content.localPosition.y;
+                float prevHeight = Content.rect.height;
 
-                CreateCellPool(resetDataIndex);
-
-                // fix slight jumping when resizing panel and size increases
-
-                if (Content.rect.height != curHeight)
+                for (int i = 0; i < cellsRequired; i++)
                 {
-                    var diff = Content.rect.height - curHeight;
-                    Content.localPosition = new Vector3(Content.localPosition.x, Content.localPosition.y + (diff * 0.5f));
+                    var cell = Pool<T>.Borrow();
+                    DataSource.OnCellBorrowed(cell);
+                    cell.Rect.SetParent(ScrollRect.content, false);
+                    CellPool.Add(cell);
+
+                    if (CellPool.Count > 1)
+                    {
+                        int index = CellPool.Count - 1 - (topPoolIndex % (CellPool.Count - 1));
+                        cell.Rect.SetSiblingIndex(index);
+                    }
+                }
+
+                RefreshCells(true);
+
+                if (Content.localPosition.y != prevAnchor)
+                {
+                    var diff = Content.localPosition.y - prevAnchor;
+                    Content.localPosition = new Vector3(Content.localPosition.x, Content.localPosition.y - diff);
                 }
 
                 ScrollRect.UpdatePrevData();
@@ -321,7 +325,7 @@ namespace UnityExplorer.UI.Widgets
 
         private CellInfo _cellInfo = new CellInfo();
 
-        private IEnumerator<CellInfo> GetPoolEnumerator()
+        public IEnumerator<CellInfo> GetPoolEnumerator()
         {
             int cellIdx = topPoolIndex;
             int dataIndex = TopDataIndex;

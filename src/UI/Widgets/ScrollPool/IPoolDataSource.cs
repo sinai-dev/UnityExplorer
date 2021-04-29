@@ -14,6 +14,6 @@ namespace UnityExplorer.UI.Widgets
         void OnCellReturned(T cell);
 
         void SetCell(T cell, int index);
-        void DisableCell(T cell, int index);
+        //void DisableCell(T cell, int index);
     }
 }

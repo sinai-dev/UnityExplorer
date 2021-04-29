@@ -32,5 +32,22 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
                 LastException = ex;
             }
         }
+
+        protected override void TrySetValue(object value)
+        {
+            if (!CanWrite)
+                return;
+
+            try
+            {
+                // TODO property indexers
+
+                PropertyInfo.SetValue(PropertyInfo.GetSetMethod().IsStatic ? null : ParentInspector.Target, value, null);
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.LogWarning(ex);
+            }
+        }
     }
 }

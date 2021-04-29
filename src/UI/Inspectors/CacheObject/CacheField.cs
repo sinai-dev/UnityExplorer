@@ -32,5 +32,17 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
                 LastException = ex;
             }
         }
+
+        protected override void TrySetValue(object value)
+        {
+            try
+            {
+                FieldInfo.SetValue(FieldInfo.IsStatic ? null : ParentInspector.Target, value);
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.LogWarning(ex);
+            }
+        }
     }
 }

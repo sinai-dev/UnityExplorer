@@ -28,6 +28,8 @@ namespace UnityExplorer.UI
             AutoCompleter
         }
 
+        public static bool Initializing { get; private set; } = true;
+
         public static GameObject CanvasRoot { get; private set; }
         public static Canvas Canvas { get; private set; }
         public static EventSystem EventSys { get; private set; }
@@ -66,7 +68,7 @@ namespace UnityExplorer.UI
 
         public static void Update()
         {
-            if (!CanvasRoot)
+            if (!CanvasRoot || Initializing)
                 return;
 
             //if (InspectUnderMouse.Inspecting)
@@ -165,6 +167,7 @@ namespace UnityExplorer.UI
             ShowMenu = !ConfigManager.Hide_On_Startup.Value;
 
             ExplorerCore.Log("UI initialized.");
+            Initializing = false;
         }
 
         private static void CreateRootCanvas()
@@ -237,20 +240,6 @@ namespace UnityExplorer.UI
 
             closeBtn.OnClick += () => { ShowMenu = false; };
         }
-
-        // Could be cool, need to investigate properly.
-        // It works but the input/eventsystem doesnt respond properly or at all.
-        //public static void TrySetTargetDisplay(int displayIndex)
-        //{
-        //    ExplorerCore.Log("displays connected: " + Display.displays.Length);
-        //    // Display.displays[0] is the primary, default display and is always ON, so start at index 1.
-
-        //    if (Display.displays.Length > displayIndex)
-        //    { 
-        //        Display.displays[displayIndex].Activate();
-        //        Canvas.targetDisplay = displayIndex;
-        //    }
-        //}
 
         #region UI AssetBundle
 

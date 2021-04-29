@@ -31,5 +31,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
                 LastException = ex;
             }
         }
+
+        protected override void TrySetValue(object value) => throw new NotImplementedException("You can't set a method");
     }
 }

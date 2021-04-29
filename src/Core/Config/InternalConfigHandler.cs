@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityExplorer.UI;
 
 namespace UnityExplorer.Core.Config
 {
@@ -33,8 +34,7 @@ namespace UnityExplorer.Core.Config
 
         public override void SetConfigValue<T>(ConfigElement<T> element, T value)
         {
-            // Not necessary, just save.
-            SaveConfig();
+            // Not necessary
         }
 
         public override T GetConfigValue<T>(ConfigElement<T> element)
@@ -43,10 +43,17 @@ namespace UnityExplorer.Core.Config
             return element.Value;
         }
 
+        public override void OnAnyConfigChanged()
+        {
+            SaveConfig();
+        }
+
         public bool TryLoadConfig()
         {
             try
             {
+                ExplorerCore.Log("Loading internal data");
+
                 if (!File.Exists(INI_PATH))
                     return false;
 
@@ -60,33 +67,22 @@ namespace UnityExplorer.Core.Config
                         configElement.BoxedValue = StringToConfigValue(config.Value, configElement.ElementType);
                 }
 
+                ExplorerCore.Log("Loaded");
+
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                ExplorerCore.LogWarning("Error loading internal data: " + ex.ToString());
                 return false;
             }
         }
 
-        public object StringToConfigValue(string value, Type elementType)
-        {
-            if (elementType.IsEnum)
-                return Enum.Parse(elementType, value);
-            else if (elementType == typeof(bool))
-                return bool.Parse(value);
-            else if (elementType == typeof(int))
-                return int.Parse(value);
-            else
-                return value;
-        }
-
-        public override void OnAnyConfigChanged()
-        {
-            SaveConfig();
-        }
-
         public override void SaveConfig()
         {
+            if (UIManager.Initializing)
+                return;
+
             var data = new IniParser.Model.IniData();
 
             data.Sections.AddSection("Config");
@@ -99,6 +95,18 @@ namespace UnityExplorer.Core.Config
                 Directory.CreateDirectory(ExplorerCore.Loader.ConfigFolder);
 
             File.WriteAllText(INI_PATH, data.ToString());
+        }
+
+        public object StringToConfigValue(string value, Type elementType)
+        {
+            if (elementType.IsEnum)
+                return Enum.Parse(elementType, value);
+            else if (elementType == typeof(bool))
+                return bool.Parse(value);
+            else if (elementType == typeof(int))
+                return int.Parse(value);
+            else
+                return value;
         }
     }
 }

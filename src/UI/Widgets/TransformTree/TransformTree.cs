@@ -55,7 +55,7 @@ namespace UnityExplorer.UI.Widgets
             ScrollPool.Initialize(this);
         }
 
-        public void DisableCell(TransformCell cell, int index) => cell.Disable();
+        //public void DisableCell(TransformCell cell, int index) => cell.Disable();
 
 
         public bool IsCellExpanded(int instanceID)

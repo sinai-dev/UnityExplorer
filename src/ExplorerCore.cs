@@ -17,7 +17,7 @@ namespace UnityExplorer
     public static class ExplorerCore
     {
         public const string NAME = "UnityExplorer";
-        public const string VERSION = "3.4.0";
+        public const string VERSION = "4.0.0";
         public const string AUTHOR = "Sinai";
         public const string GUID = "com.sinai.unityexplorer";
 
@@ -34,6 +34,22 @@ namespace UnityExplorer
                 LogWarning("UnityExplorer is already loaded!");
                 return;
             }
+
+            // TEMP DEBUG TEST FOR TRANSFORM TREE
+
+            var stressTest = new GameObject("StressTest");
+            for (int i = 0; i < 100; i++)
+            {
+                var obj = new GameObject($"Parent_{i}");
+                obj.transform.parent = stressTest.transform;
+                for (int j = 0; j < 100; j++)
+                {
+                    var obj2 = new GameObject($"Child_{j}");
+                    obj2.transform.parent = obj.transform;
+                }
+            }
+
+            // END
 
             Loader = loader;
 

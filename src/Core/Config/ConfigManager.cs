@@ -29,10 +29,8 @@ namespace UnityExplorer.Core.Config
         // internal configs
         internal static InternalConfigHandler InternalHandler { get; private set; }
 
-        public static ConfigElement<string> SceneExplorerData;
-        public static ConfigElement<string> GameObjectInspectorData;
-        public static ConfigElement<string> MainWindowData;
-        public static ConfigElement<string> DebugConsoleData;
+        public static ConfigElement<string> ObjectExplorerData;
+        public static ConfigElement<string> InspectorData;
 
         internal static readonly Dictionary<string, IConfigElement> ConfigElements = new Dictionary<string, IConfigElement>();
         internal static readonly Dictionary<string, IConfigElement> InternalConfigs = new Dictionary<string, IConfigElement>();
@@ -86,12 +84,8 @@ namespace UnityExplorer.Core.Config
                 KeyCode.None);
 
             Aggressive_Force_Unlock = new ConfigElement<bool>("Aggressive Mouse Unlock",
-                "Use Camera.onPostRender callback to aggressively force the Mouse to be unlocked (requires game restart).",
+                "Use WaitForEndOfFrame to aggressively force the Mouse to be unlocked (requires game restart).",
                 false);
-
-            //Default_Tab = new ConfigElement<MenuPages>("Default Tab",
-            //    "The default menu page when starting the game.",
-            //    MenuPages.Home);
 
             Log_Unity_Debug = new ConfigElement<bool>("Log Unity Debug",
                 "Should UnityEngine.Debug.Log messages be printed to UnityExplorer's log?",
@@ -111,10 +105,8 @@ namespace UnityExplorer.Core.Config
 
             // Internal configs
 
-            SceneExplorerData = new ConfigElement<string>("SceneExplorer", "", "", true);
-            GameObjectInspectorData = new ConfigElement<string>("GameObjectInspector", "", "", true);
-            MainWindowData = new ConfigElement<string>("MainWindow", "", "", true);
-            DebugConsoleData = new ConfigElement<string>("DebugConsole", "", "", true);
+            ObjectExplorerData = new ConfigElement<string>("ObjectExplorer", "", "", true);
+            InspectorData = new ConfigElement<string>("Inspector", "", "", true);
         }
     }
 }

@@ -27,11 +27,6 @@ namespace UnityExplorer.Core.Runtime.Mono
             DummyBehaviour.Setup();
         }
 
-        public override void SetupCameraDelegate()
-        {
-            Camera.onPostRender += CursorUnlocker.OnCameraPostRender;
-        }
-
         public override void SetupEvents()
         {
             Application.logMessageReceived += Application_logMessageReceived;

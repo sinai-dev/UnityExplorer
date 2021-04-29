@@ -85,6 +85,6 @@ namespace UnityExplorer.UI.Widgets
             }
         }
 
-        public void DisableCell(ButtonCell cell, int index) => cell.Disable();
+        //public void DisableCell(ButtonCell cell, int index) => cell.Disable();
     }
 }

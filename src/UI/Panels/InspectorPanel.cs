@@ -44,14 +44,14 @@ namespace UnityExplorer.UI.Panels
 
         public override void LoadSaveData()
         {
-            ApplySaveData(ConfigManager.GameObjectInspectorData.Value);
+            ApplySaveData(ConfigManager.InspectorData.Value);
 
             InspectorManager.PanelWidth = this.mainPanelRect.rect.width;
         }
 
-        public override void SaveToConfigManager()
+        public override void DoSaveToConfigElement()
         {
-            ConfigManager.GameObjectInspectorData.Value = this.ToSaveData();
+            ConfigManager.InspectorData.Value = this.ToSaveData();
         }
 
         public override void SetDefaultPosAndAnchors()

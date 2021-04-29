@@ -185,7 +185,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             UIRoot.SetActive(false);
         }
 
-        public override void SaveToConfigManager()
+        public override void DoSaveToConfigElement()
         {
             // not savable
         }

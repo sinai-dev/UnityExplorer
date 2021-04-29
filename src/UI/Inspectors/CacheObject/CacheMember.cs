@@ -15,6 +15,8 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
     public abstract class CacheMember : CacheObjectBase
     {
         public ReflectionInspector ParentInspector { get; internal set; }
+        public CacheMemberCell CurrentView { get; internal set; }
+        public bool AutoUpdateWanted { get; internal set; }
 
         public Type DeclaringType { get; private set; }
         public string NameForFiltering { get; private set; }
@@ -33,6 +35,8 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
         public string MemberLabelText { get; private set; }
         public string TypeLabelText { get; protected set; }
         public string ValueLabelText { get; protected set; }
+
+        private static readonly Dictionary<string, MethodInfo> numberParseMethods = new Dictionary<string, MethodInfo>();
 
         public enum ValueState
         {
@@ -65,6 +69,43 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
         }
 
         protected abstract void TryEvaluate();
+
+        public void SetValue(object value)
+        {
+            // TODO unbox string, cast, etc
+
+            TrySetValue(value);
+
+            Evaluate();
+        }
+
+        protected abstract void TrySetValue(object value);
+
+        public void OnCellApplyClicked()
+        {
+            if (CurrentView == null)
+            {
+                ExplorerCore.LogWarning("Trying to apply CacheMember but current cell reference is null!");
+                return;
+            }
+
+            if (State == ValueState.Boolean)
+                SetValue(this.CurrentView.Toggle.isOn);
+            else
+            {
+                if (!numberParseMethods.ContainsKey(FallbackType.AssemblyQualifiedName))
+                {
+                    var method = FallbackType.GetMethod("Parse", new Type[] { typeof(string) });
+                    numberParseMethods.Add(FallbackType.AssemblyQualifiedName, method);
+                }
+
+                var val = numberParseMethods[FallbackType.AssemblyQualifiedName]
+                    .Invoke(null, new object[] { CurrentView.InputField.text });
+                SetValue(val);
+            }
+
+            SetCell(this.CurrentView);
+        }
 
         /// <summary>
         /// Evaluate when first shown (if ShouldAutoEvaluate), or else when Evaluate button is clicked.
@@ -156,17 +197,23 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             cell.EvaluateHolder.SetActive(!ShouldAutoEvaluate);
             if (!ShouldAutoEvaluate)
             {
+                cell.UpdateToggle.gameObject.SetActive(false);
                 cell.EvaluateButton.Button.gameObject.SetActive(true);
                 if (HasArguments)
                     cell.EvaluateButton.ButtonText.text = $"Evaluate ({Arguments.Length})";
                 else
                     cell.EvaluateButton.ButtonText.text = "Evaluate";
             }
+            else
+            { 
+                cell.UpdateToggle.gameObject.SetActive(true);
+                cell.UpdateToggle.isOn = AutoUpdateWanted;
+            }
 
             if (State == ValueState.NotEvaluated && !ShouldAutoEvaluate)
             {
                 // todo evaluate buttons etc
-                SetCellState(cell, true, true, Color.white, false, false, false, false, false, false);
+                SetValueState(cell, true, true, Color.white, false, false, false, false, false, false);
 
                 return;
             }
@@ -178,31 +225,31 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             {
                 case ValueState.Exception:
                 case ValueState.NullValue:
-                    SetCellState(cell, true, true, Color.white, false, false, false, false, false, false);
+                    SetValueState(cell, true, true, Color.white, false, false, false, false, false, false);
                     break;
                 case ValueState.Boolean:
-                    SetCellState(cell, false, false, default, true, toggleActive: true, false, CanWrite, false, false); 
+                    SetValueState(cell, false, false, default, true, toggleActive: true, false, CanWrite, false, false); 
                     break;
                 case ValueState.Number:
-                    SetCellState(cell, false, true, Color.white, true, false, inputActive: true, CanWrite, false, false);
+                    SetValueState(cell, false, true, Color.white, true, false, inputActive: true, CanWrite, false, false);
                     break;
                 case ValueState.String:
-                    SetCellState(cell, true, false, SignatureHighlighter.StringOrange, false, false, false, false, false, true);
+                    SetValueState(cell, true, false, SignatureHighlighter.StringOrange, false, false, false, false, false, true);
                     break;
                 case ValueState.Enum:
-                    SetCellState(cell, true, true, Color.white, false, false, false, false, false, true);
+                    SetValueState(cell, true, true, Color.white, false, false, false, false, false, true);
                     break;
                 case ValueState.Collection:
                 case ValueState.ValueStruct:
-                    SetCellState(cell, true, true, Color.white, false, false, false, false, true, true);
+                    SetValueState(cell, true, true, Color.white, false, false, false, false, true, true);
                     break;
                 case ValueState.Unsupported:
-                    SetCellState(cell, true, true, Color.white, false, false, false, false, true, false);
+                    SetValueState(cell, true, true, Color.white, false, false, false, false, true, false);
                     break;
             }
         }
 
-        private void SetCellState(CacheMemberCell cell, bool valueActive, bool valueRichText, Color valueColor,
+        private void SetValueState(CacheMemberCell cell, bool valueActive, bool valueRichText, Color valueColor,
             bool typeLabelActive, bool toggleActive, bool inputActive, bool applyActive, bool inspectActive, bool subContentActive)
         {
             //cell.ValueLabel.gameObject.SetActive(valueActive);
@@ -228,13 +275,16 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
 
             cell.InputField.gameObject.SetActive(inputActive);
             if (inputActive)
+            {
                 cell.InputField.text = Value.ToString();
+                cell.InputField.readOnly = !CanWrite;
+            }
 
             cell.ApplyButton.Button.gameObject.SetActive(applyActive);
             cell.InspectButton.Button.gameObject.SetActive(inspectActive);
             cell.SubContentButton.Button.gameObject.SetActive(subContentActive);
 
-            cell.UpdateButton.Button.gameObject.SetActive(ShouldAutoEvaluate);
+            cell.UpdateToggle.gameObject.SetActive(ShouldAutoEvaluate);
         }
 
 
