@@ -42,15 +42,15 @@ namespace UnityExplorer.Core.Input
 
         public static void Init()
         {
-            if (ConfigManager.Aggressive_Force_Unlock.Value)
-                SetupAggressiveUnlock();
-
             SetupPatches();
 
             UpdateCursorControl();
 
             Unlock = ConfigManager.Force_Unlock_Mouse.Value;
             ConfigManager.Force_Unlock_Mouse.OnValueChanged += (bool val) => { Unlock = val; };
+
+            if (ConfigManager.Aggressive_Force_Unlock.Value)
+                SetupAggressiveUnlock();
         }
 
         public static void SetupAggressiveUnlock()
