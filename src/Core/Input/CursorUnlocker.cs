@@ -62,7 +62,7 @@ namespace UnityExplorer.Core.Input
             }
             catch (Exception ex)
             {
-                ExplorerCore.LogWarning($"Exception setting up Camera.onPostRender callback: {ex}");
+                ExplorerCore.LogWarning($"Exception setting up Aggressive Mouse Unlock: {ex}");
             }
         }
 
@@ -72,9 +72,7 @@ namespace UnityExplorer.Core.Input
         {
             while (true)
             {
-                ExplorerCore.Log("Yielding end of frame");
                 yield return _waitForEndOfFrame;
-                ExplorerCore.Log("Yielded");
 
                 if (UIManager.ShowMenu)
                     UpdateCursorControl();
