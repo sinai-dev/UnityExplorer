@@ -22,7 +22,7 @@ namespace UnityExplorer.UI.Widgets
             get => currentFilter;
             set
             {
-                currentFilter = value?.ToLower() ?? "";
+                currentFilter = value ?? "";
                 if (!wasFiltering && Filtering)
                     wasFiltering = true;
                 else if (wasFiltering && !Filtering)
@@ -133,7 +133,7 @@ namespace UnityExplorer.UI.Widgets
 
         private bool FilterHierarchy(Transform obj)
         {
-            if (obj.name.ToLower().Contains(currentFilter))
+            if (obj.name.ContainsIgnoreCase(currentFilter))
                 return true;
 
             if (obj.childCount <= 0)
@@ -146,10 +146,8 @@ namespace UnityExplorer.UI.Widgets
             return false;
         }
 
-        public void SetCell(TransformCell iCell, int index)
+        public void SetCell(TransformCell cell, int index)
         {
-            var cell = iCell as TransformCell;
-
             if (index < displayedObjects.Count)
                 cell.ConfigureCell(displayedObjects[index], index);
             else

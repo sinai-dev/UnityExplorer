@@ -219,6 +219,7 @@
     <Compile Include="Core\Config\InternalConfigHandler.cs" />
     <Compile Include="Core\CSharp\ScriptEvaluator.cs" />
     <Compile Include="Core\CSharp\ScriptInteraction.cs" />
+    <Compile Include="Core\Utility\MiscUtility.cs" />
     <Compile Include="Inspectors_OLD\GameObjects\ChildList.cs" />
     <Compile Include="Inspectors_OLD\GameObjects\ComponentList.cs" />
     <Compile Include="Inspectors_OLD\GameObjects\GameObjectControls.cs" />
@@ -280,7 +281,7 @@
     <Compile Include="Core\Search\SearchContext.cs" />
     <Compile Include="Core\Search\SearchProvider.cs" />
     <Compile Include="Core\Tests\TestClass.cs" />
-    <Compile Include="Core\Unity\UnityHelpers.cs" />
+    <Compile Include="Core\Utility\UnityHelpers.cs" />
     <Compile Include="ExplorerCore.cs" />
     <Compile Include="Loader\BIE\BepInExConfigHandler.cs" />
     <Compile Include="Loader\BIE\ExplorerBepInPlugin.cs" />

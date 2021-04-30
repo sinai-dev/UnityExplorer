@@ -25,7 +25,7 @@ namespace UnityExplorer.UI.Widgets
         public string CurrentFilter
         {
             get => currentFilter;
-            set => currentFilter = value?.ToLower() ?? "";
+            set => currentFilter = value ?? "";
         }
         private string currentFilter;
 

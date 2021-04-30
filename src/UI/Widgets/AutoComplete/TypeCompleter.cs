@@ -59,7 +59,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
                 string displayName = Utility.SignatureHighlighter.ParseFullSyntax(type, true);
                 string fullName = RuntimeProvider.Instance.Reflection.GetDeobfuscatedType(type).FullName;
 
-                string filteredName = fullName.ToLower();
+                string filteredName = fullName;
 
                 list.Add(new CachedType
                 {
@@ -89,7 +89,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
             timeOfLastCheck = Time.time;
 
-            value = value?.ToLower() ?? "";
+            value = value ?? "";
 
             if (string.IsNullOrEmpty(value))
             {
@@ -118,7 +118,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
                 if (added.Contains(entry.FullNameValue))
                     continue;
 
-                if (entry.FullNameForFilter.Contains(value))
+                if (entry.FullNameForFilter.ContainsIgnoreCase(value))
                     AddToDict(entry);
 
                 added.Add(entry.FullNameValue);

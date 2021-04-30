@@ -17,13 +17,13 @@ namespace UnityExplorer.Core.Search
 
             var nameFilter = "";
             if (!string.IsNullOrEmpty(input))
-                nameFilter = input.ToLower();
+                nameFilter = input;
 
             foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
             {
                 foreach (var type in asm.TryGetTypes().Where(it => it.IsSealed && it.IsAbstract))
                 {
-                    if (!string.IsNullOrEmpty(nameFilter) && !type.FullName.ToLower().Contains(nameFilter))
+                    if (!string.IsNullOrEmpty(nameFilter) && !type.FullName.ContainsIgnoreCase(nameFilter))
                         continue;
 
                     list.Add(type);
@@ -53,7 +53,7 @@ namespace UnityExplorer.Core.Search
 
             var nameFilter = "";
             if (!string.IsNullOrEmpty(input))
-                nameFilter = input.ToLower();
+                nameFilter = input;
 
             var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
 
@@ -64,7 +64,7 @@ namespace UnityExplorer.Core.Search
                 {
                     try
                     {
-                        if (!string.IsNullOrEmpty(nameFilter) && !type.FullName.ToLower().Contains(nameFilter))
+                        if (!string.IsNullOrEmpty(nameFilter) && !type.FullName.ContainsIgnoreCase(nameFilter))
                             continue;
 
                         ReflectionProvider.Instance.FindSingleton(s_instanceNames, type, flags, instances);
@@ -138,7 +138,7 @@ namespace UnityExplorer.Core.Search
 
             string nameFilter = null;
             if (!string.IsNullOrEmpty(input))
-                nameFilter = input.ToLower();
+                nameFilter = input;
 
             bool canGetGameObject = (sceneFilter != SceneFilter.Any || childFilter != ChildFilter.Any)
                 && (context == SearchContext.GameObject || typeof(Component).IsAssignableFrom(searchType));
@@ -152,7 +152,7 @@ namespace UnityExplorer.Core.Search
             foreach (var obj in allObjects)
             {
                 // name check
-                if (!string.IsNullOrEmpty(nameFilter) && !obj.name.ToLower().Contains(nameFilter))
+                if (!string.IsNullOrEmpty(nameFilter) && !obj.name.ContainsIgnoreCase(nameFilter))
                     continue;
 
                 if (canGetGameObject)
