@@ -59,18 +59,6 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
 
         public GameObject SubContentHolder;
 
-        public virtual void OnReturnToPool()
-        {
-            if (Occupant != null)
-            {
-                // TODO ?
-
-                SubContentHolder.SetActive(false);
-
-                Occupant = null;
-            }
-        }
-
         protected virtual void ApplyClicked()
         {
             Occupant.OnCellApplyClicked();

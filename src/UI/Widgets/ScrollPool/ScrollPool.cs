@@ -35,9 +35,7 @@ namespace UnityExplorer.UI.Widgets
         public float PrototypeHeight => _protoHeight ?? (float)(_protoHeight = Pool<T>.Instance.DefaultHeight);
         private float? _protoHeight;
 
-        //private float PrototypeHeight => DefaultHeight.rect.height;
-
-        public int ExtraPoolCells => 10;
+        public int ExtraPoolCells => 6;
         public float RecycleThreshold => PrototypeHeight * ExtraPoolCells;
         public float HalfThreshold => RecycleThreshold * 0.5f;
 
@@ -70,6 +68,7 @@ namespace UnityExplorer.UI.Widgets
         /// </summary>
         private int bottomDataIndex;
         private int TopDataIndex => Math.Max(0, bottomDataIndex - CellPool.Count + 1);
+        private int CurrentDataCount => bottomDataIndex + 1;
 
         private float TotalDataHeight => HeightCache.TotalHeight + contentLayout.padding.top + contentLayout.padding.bottom;
 
@@ -77,8 +76,6 @@ namespace UnityExplorer.UI.Widgets
         /// The first and last indices of our CellPool in the transform heirarchy
         /// </summary>
         private int topPoolIndex, bottomPoolIndex;
-
-        private int CurrentDataCount => bottomDataIndex + 1;
 
         private Vector2 prevAnchoredPos;
         private float prevViewportHeight;
@@ -102,14 +99,9 @@ namespace UnityExplorer.UI.Widgets
 
         private float prevContentHeight = 1.0f;
 
-        public void SetUninitialized()
-        {
-            m_initialized = false;
-        }
-
         public override void Update()
         {
-            if (!m_initialized || !ScrollRect || DataSource == null)
+            if (!ScrollRect || DataSource == null)
                 return;
 
             if (writingLocked && timeofLastWriteLock < Time.time)
@@ -129,65 +121,38 @@ namespace UnityExplorer.UI.Widgets
 
         // Public methods
 
-        public void Rebuild()
+        public void Refresh(bool setCellData, bool jumpToTop = false)
         {
-            HeightCache = new DataHeightCache<T>(this);
+            if (jumpToTop)
+            { 
+                bottomDataIndex = CellPool.Count - 1;
+                Content.anchoredPosition = Vector2.zero;
+            }
 
-            SetRecycleViewBounds(false);
-            SetScrollBounds();
-
-            CheckExtendCellPool();
-            writingLocked = false;
-            Content.anchoredPosition = Vector2.zero;
-            UpdateSliderHandle(true);
-
-            m_initialized = true;
-        }
-
-        public void RefreshAndJumpToTop()
-        {
-            bottomDataIndex = CellPool.Count - 1;
-            RefreshCells(true);
-            Content.anchoredPosition = Vector2.zero;
-            UpdateSliderHandle(true);
-        }
-
-        public void RecreateHeightCache()
-        {
-            HeightCache = new DataHeightCache<T>(this);
-            CheckDataSourceCountChange(out _);
-        }
-
-        public void RefreshCells(bool reloadData)
-        {
-            RefreshCells(reloadData, true);
+            RefreshCells(setCellData, true);
         }
 
         // Initialize
 
-        private bool m_doneFirstInit;
-        private bool m_initialized;
+        //private bool Initialized;
 
+        /// <summary>Should be called only once, when the scroll pool is created.</summary>
         public void Initialize(IPoolDataSource<T> dataSource)
         {
+            this.DataSource = dataSource;
+            HeightCache = new DataHeightCache<T>(this);
+
             // Ensure the pool for the cell type is initialized.
             Pool<T>.GetPool();
 
-            HeightCache = new DataHeightCache<T>(this);
-            DataSource = dataSource;
+            this.contentLayout = ScrollRect.content.GetComponent<VerticalLayoutGroup>();
+            this.slider = ScrollRect.GetComponentInChildren<Slider>();
+            slider.onValueChanged.AddListener(OnSliderValueChanged);
 
-            if (!m_doneFirstInit)
-            {
-                m_doneFirstInit = true;
-                this.contentLayout = ScrollRect.content.GetComponent<VerticalLayoutGroup>();
-                this.slider = ScrollRect.GetComponentInChildren<Slider>();
-                slider.onValueChanged.AddListener(OnSliderValueChanged);
+            ScrollRect.vertical = true;
+            ScrollRect.horizontal = false;
 
-                ScrollRect.vertical = true;
-                ScrollRect.horizontal = false;
-            }
-
-            ScrollRect.onValueChanged.RemoveListener(OnValueChangedListener);
+            //ScrollRect.onValueChanged.RemoveListener(OnValueChangedListener);
             RuntimeProvider.Instance.StartCoroutine(InitCoroutine());
         }
 
@@ -196,6 +161,8 @@ namespace UnityExplorer.UI.Widgets
             ScrollRect.content.anchoredPosition = Vector2.zero;
             yield return null;
 
+            LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
+
             // set intial bounds
             prevAnchoredPos = Content.anchoredPosition;
             SetRecycleViewBounds(false);
@@ -203,14 +170,18 @@ namespace UnityExplorer.UI.Widgets
             // create initial cell pool and set cells
             CreateCellPool();
 
+            var enumerator = GetPoolEnumerator();
+            while (enumerator.MoveNext())
+                SetCell(CellPool[enumerator.Current.cellIndex], enumerator.Current.dataIndex);
+
+            LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
+
             // update slider
             SetScrollBounds();
             UpdateSliderHandle();
 
             // add onValueChanged listener after setup
             ScrollRect.onValueChanged.AddListener(OnValueChangedListener);
-
-            m_initialized = true;
         }
 
         private void SetScrollBounds()
@@ -218,28 +189,43 @@ namespace UnityExplorer.UI.Widgets
             NormalizedScrollBounds = new Vector2(Viewport.rect.height * 0.5f, TotalDataHeight - (Viewport.rect.height * 0.5f));
         }
 
+        private void SetRecycleViewBounds(bool extendPoolIfGrown)
+        {
+            RecycleViewBounds = new Vector2(Viewport.MinY() + HalfThreshold, Viewport.MaxY() - HalfThreshold);
+
+            if (extendPoolIfGrown && prevViewportHeight < Viewport.rect.height && prevViewportHeight != 0.0f)
+                CheckExtendCellPool();
+
+            prevViewportHeight = Viewport.rect.height;
+        }
+
         // Cell pool
 
-        public void ReturnCells()
-        {
-            if (CellPool.Any())
-            {
-                foreach (var cell in CellPool)
-                {
-                    DataSource.OnCellReturned(cell);
-                    Pool<T>.Return(cell);
-                }
-                CellPool.Clear();
-            }
+        private CellInfo _cellInfo = new CellInfo();
 
-            bottomDataIndex = -1;
-            topPoolIndex = 0;
-            bottomPoolIndex = 0;
+        public IEnumerator<CellInfo> GetPoolEnumerator()
+        {
+            int cellIdx = topPoolIndex;
+            int dataIndex = TopDataIndex;
+            int iterated = 0;
+            while (iterated < CellPool.Count)
+            {
+                _cellInfo.cellIndex = cellIdx;
+                _cellInfo.dataIndex = dataIndex;
+                yield return _cellInfo;
+
+                cellIdx++;
+                if (cellIdx >= CellPool.Count)
+                    cellIdx = 0;
+
+                dataIndex++;
+                iterated++;
+            }
         }
 
         private void CreateCellPool()
         {
-            ReturnCells();
+            //ReleaseCells();
 
             CheckDataSourceCountChange(out _);
 
@@ -256,8 +242,8 @@ namespace UnityExplorer.UI.Widgets
                 bottomPoolIndex++;
 
                 var cell = Pool<T>.Borrow();
-                DataSource.OnCellBorrowed(cell);
                 CellPool.Add(cell);
+                DataSource.OnCellBorrowed(cell);
                 cell.Rect.SetParent(ScrollRect.content, false);
 
                 currentPoolCoverage += PrototypeHeight;
@@ -266,26 +252,11 @@ namespace UnityExplorer.UI.Widgets
             bottomDataIndex = CellPool.Count - 1;
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
-
-            // after creating pool, set displayed cells.
-            var enumerator = GetPoolEnumerator();
-            while (enumerator.MoveNext())
-                SetCell(CellPool[enumerator.Current.cellIndex], enumerator.Current.dataIndex);
-        }
-
-        private void SetRecycleViewBounds(bool extendPoolIfGrown)
-        {
-            RecycleViewBounds = new Vector2(Viewport.MinY() + HalfThreshold, Viewport.MaxY() - HalfThreshold);
-
-            if (extendPoolIfGrown && prevViewportHeight < Viewport.rect.height && prevViewportHeight != 0.0f)
-                CheckExtendCellPool();
-
-            prevViewportHeight = Viewport.rect.height;
         }
 
         private bool CheckExtendCellPool()
         {
-            CheckDataSourceCountChange(out _);
+            CheckDataSourceCountChange();
 
             var requiredCoverage = Math.Abs(RecycleViewBounds.y - RecycleViewBounds.x);
             var currentCoverage = CellPool.Count * PrototypeHeight;
@@ -317,7 +288,7 @@ namespace UnityExplorer.UI.Widgets
                     }
                 }
 
-                RefreshCells(true);
+                RefreshCells(true, true);
 
                 //ExplorerCore.Log("Anchor: " + Content.localPosition.y + ", prev: " + prevAnchor);
                 //ExplorerCore.Log("Height: " + Content.rect.height + ", prev:" + prevHeight);
@@ -343,27 +314,7 @@ namespace UnityExplorer.UI.Widgets
 
         // Refresh methods
 
-        private CellInfo _cellInfo = new CellInfo();
-
-        public IEnumerator<CellInfo> GetPoolEnumerator()
-        {
-            int cellIdx = topPoolIndex;
-            int dataIndex = TopDataIndex;
-            int iterated = 0;
-            while (iterated < CellPool.Count)
-            {
-                _cellInfo.cellIndex = cellIdx;
-                _cellInfo.dataIndex = dataIndex;
-                yield return _cellInfo;
-
-                cellIdx++;
-                if (cellIdx >= CellPool.Count)
-                    cellIdx = 0;
-
-                dataIndex++;
-                iterated++;
-            }
-        }
+        private bool CheckDataSourceCountChange() => CheckDataSourceCountChange(out _);
 
         private bool CheckDataSourceCountChange(out bool shouldJumpToBottom)
         {
@@ -428,7 +379,9 @@ namespace UnityExplorer.UI.Widgets
                 Content.anchoredPosition += Vector2.up * diff;
             }
 
-            LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
+            if (andReloadFromDataSource)
+                LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
+
             SetScrollBounds();
             ScrollRect.UpdatePrevData();
         }
@@ -456,7 +409,7 @@ namespace UnityExplorer.UI.Widgets
 
         private void OnValueChangedListener(Vector2 val)
         {
-            if (WritingLocked || !m_initialized)
+            if (WritingLocked || DataSource == null)
                 return;
 
             if (InputManager.MouseScrollDelta != Vector2.zero)
@@ -529,8 +482,6 @@ namespace UnityExplorer.UI.Widgets
                 topPoolIndex = (topPoolIndex + 1) % CellPool.Count;
             }
 
-            //LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
-
             return -recycledheight;
         }
 
@@ -571,8 +522,6 @@ namespace UnityExplorer.UI.Widgets
                 topPoolIndex = bottomPoolIndex;
                 bottomPoolIndex = (bottomPoolIndex - 1 + CellPool.Count) % CellPool.Count;
             }
-
-            //LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
 
             return recycledheight;
         }
@@ -624,7 +573,7 @@ namespace UnityExplorer.UI.Widgets
 
         private void OnSliderValueChanged(float val)
         {
-            if (this.WritingLocked || !m_initialized)
+            if (this.WritingLocked || DataSource == null)
                 return;
             this.WritingLocked = true;
 

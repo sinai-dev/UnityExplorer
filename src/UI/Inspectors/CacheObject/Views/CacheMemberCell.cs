@@ -10,7 +10,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
 {
     public class CacheMemberCell : CacheObjectCell
     {
-        public ReflectionInspector CurrentOwner { get; set; }
+        public ReflectionInspector Owner { get; set; }
 
         public CacheMember MemberOccupant => Occupant as CacheMember;
 
@@ -22,15 +22,6 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
         protected virtual void EvaluateClicked()
         {
             // TODO
-        }
-
-        public override void OnReturnToPool()
-        {
-            base.OnReturnToPool();
-
-            // TODO ?
-
-            CurrentOwner = null;
         }
 
         protected override void ConstructEvaluateHolder(GameObject parent)

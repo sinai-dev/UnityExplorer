@@ -116,7 +116,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
                 UIRoot.SetActive(true);
                 UIRoot.transform.SetAsLastSibling();
                 dataHandler.RefreshData();
-                scrollPool.RefreshAndJumpToTop();
+                scrollPool.Refresh(true, true);
             }
         }
 

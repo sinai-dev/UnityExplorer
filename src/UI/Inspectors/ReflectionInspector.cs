@@ -46,7 +46,8 @@ namespace UnityExplorer.UI.Inspectors
             SetTitleLayouts();
             SetTarget(target);
 
-            MemberScrollPool.Initialize(this);
+            // MemberScrollPool.SetDataSource(this);
+            MemberScrollPool.Refresh(true, true);
             RuntimeProvider.Instance.StartCoroutine(InitCoroutine());
         }
 
@@ -60,11 +61,7 @@ namespace UnityExplorer.UI.Inspectors
         public override void OnReturnToPool()
         {
             foreach (var member in members)
-                member.OnDestroyed();
-
-            // release all cachememberviews
-            MemberScrollPool.ReturnCells();
-            MemberScrollPool.SetUninitialized();
+                member.ReleasePooledObjects();
 
             members.Clear();
             filteredMembers.Clear();
@@ -173,7 +170,7 @@ namespace UnityExplorer.UI.Inspectors
             }
 
             if (shouldRefresh)
-                MemberScrollPool.RefreshCells(false);
+                MemberScrollPool.Refresh(false);
         }
 
         // Member cells
@@ -182,12 +179,7 @@ namespace UnityExplorer.UI.Inspectors
 
         public void OnCellBorrowed(CacheMemberCell cell)
         {
-            cell.CurrentOwner = this;
-        }
-
-        public void OnCellReturned(CacheMemberCell cell)
-        {
-            cell.OnReturnToPool();
+            cell.Owner = this;
         }
 
         public void SetCell(CacheMemberCell cell, int index)
@@ -315,6 +307,7 @@ namespace UnityExplorer.UI.Inspectors
             MemberScrollPool = UIFactory.CreateScrollPool<CacheMemberCell>(uiRoot, "MemberList", out GameObject scrollObj,
                 out GameObject _, new Color(0.09f, 0.09f, 0.09f));
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
+            MemberScrollPool.Initialize(this);
 
             //InspectorPanel.Instance.UIRoot.GetComponent<Mask>().enabled = false;
             //MemberScrollPool.Viewport.GetComponent<Mask>().enabled = false;

@@ -72,7 +72,7 @@ namespace UnityExplorer.UI.Widgets
             RefreshData(true, true);
         }
 
-        public void RefreshData(bool andReload = false, bool hardReload = false)
+        public void RefreshData(bool andReload = false, bool jumpToTop = false)
         {
             displayedObjects.Clear();
 
@@ -86,10 +86,10 @@ namespace UnityExplorer.UI.Widgets
 
             if (andReload)
             {
-                if (!hardReload)
-                    ScrollPool.RefreshCells(true);
+                if (!jumpToTop)
+                    ScrollPool.Refresh(true);
                 else
-                    ScrollPool.Rebuild();
+                    ScrollPool.Refresh(true, true);
             }
         }
 
@@ -172,7 +172,7 @@ namespace UnityExplorer.UI.Widgets
             cell.OnExpandToggled += ToggleExpandCell;
         }
 
-        public void OnCellReturned(TransformCell cell)
+        public void ReleaseCell(TransformCell cell)
         {
             cell.OnExpandToggled -= ToggleExpandCell;
         }

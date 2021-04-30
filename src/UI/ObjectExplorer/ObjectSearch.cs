@@ -83,7 +83,7 @@ namespace UnityExplorer.UI.Panels
             }
 
             dataHandler.RefreshData();
-            resultsScrollPool.RefreshCells(true);
+            resultsScrollPool.Refresh(true);
 
             resultsLabel.text = $"{currentResults.Count} results";
         }
@@ -212,7 +212,7 @@ namespace UnityExplorer.UI.Panels
             //if (!Pool<ButtonCell>.PrototypeObject)
             //    Pool<ButtonCell>.PrototypeObject = ButtonCell.CreatePrototypeCell(Pool<ButtonCell>.InactiveHolder).gameObject;
 
-            resultsScrollPool.Initialize(dataHandler);//, ButtonCell.CreatePrototypeCell(uiRoot));
+            resultsScrollPool.Initialize(dataHandler);
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
         }
     }

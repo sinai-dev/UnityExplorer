@@ -11,7 +11,7 @@ namespace UnityExplorer.UI.Widgets
         int ItemCount { get; }
 
         void OnCellBorrowed(T cell);
-        void OnCellReturned(T cell);
+        //void ReleaseCell(T cell);
 
         void SetCell(T cell, int index);
         //void DisableCell(T cell, int index);

@@ -65,7 +65,7 @@ namespace UnityExplorer.UI.Widgets
             cell.OnClick += OnCellClicked;
         }
 
-        public void OnCellReturned(ButtonCell cell)
+        public void ReleaseCell(ButtonCell cell)
         {
             cell.OnClick -= OnCellClicked;
         }

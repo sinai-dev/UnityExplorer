@@ -49,7 +49,7 @@ namespace UnityExplorer.UI.Inspectors
 
             TransformTree.Rebuild();
 
-            ComponentList.ScrollPool.Rebuild();
+            ComponentList.ScrollPool.Refresh(true, true);
             UpdateComponents();
         }
 
@@ -57,12 +57,12 @@ namespace UnityExplorer.UI.Inspectors
         {
             base.OnReturnToPool();
 
-            // release component and transform lists
-            this.TransformTree.ScrollPool.ReturnCells();
-            this.TransformTree.ScrollPool.SetUninitialized();
-
-            this.ComponentList.ScrollPool.ReturnCells();
-            this.ComponentList.ScrollPool.SetUninitialized();
+            //// release component and transform lists
+            //this.TransformTree.ScrollPool.ReleaseCells();
+            //this.TransformTree.ScrollPool.SetUninitialized();
+            //
+            //this.ComponentList.ScrollPool.ReleaseCells();
+            //this.ComponentList.ScrollPool.SetUninitialized();
         }
 
         private float timeOfLastUpdate;
@@ -150,7 +150,7 @@ namespace UnityExplorer.UI.Inspectors
                 _componentEntries.Add(comp);
 
             ComponentList.RefreshData();
-            ComponentList.ScrollPool.RefreshCells(true);
+            ComponentList.ScrollPool.Refresh(true);
         }
 
         protected override void OnCloseClicked()

@@ -72,7 +72,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
 
         // On parent destroying this
 
-        public virtual void OnDestroyed()
+        public virtual void ReleasePooledObjects()
         {
             // TODO release IValue / Evaluate back to pool, etc
             ReleaseIValue();
@@ -237,6 +237,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             if (this.IValue == null)
             {
                 IValue = (InteractiveValue)Pool.Borrow(typeof(InteractiveValue));
+                CurrentIValueType = IValue.GetType();
                 IValue.SetOwner(this);
                 IValue.UIRoot.transform.SetParent(CellView.SubContentHolder.transform, false);
                 CellView.SubContentHolder.SetActive(true);
