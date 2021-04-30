@@ -65,7 +65,9 @@ namespace UnityExplorer.UI.Utility
 
             // Namespace
 
-            if (includeNamespace && !string.IsNullOrEmpty(type.Namespace))
+            bool isGeneric = type.IsGenericParameter || (type.HasElementType && type.GetElementType().IsGenericParameter);
+
+            if (!isGeneric && includeNamespace && !string.IsNullOrEmpty(type.Namespace))
                 syntaxBuilder.Append($"<color={NAMESPACE}>{type.Namespace}</color>.");
 
             // Declaring type
@@ -112,8 +114,10 @@ namespace UnityExplorer.UI.Utility
         public static string ParseFullType(Type type, bool includeNamespace = false, bool includeDllName = false)
         {
             string ret = HighlightType(type);
-            
-            if (includeNamespace && !string.IsNullOrEmpty(type.Namespace))
+
+            bool isGeneric = type.IsGenericParameter || (type.HasElementType && type.GetElementType().IsGenericParameter);
+
+            if (!isGeneric && includeNamespace && !string.IsNullOrEmpty(type.Namespace))
                 ret = $"<color={NAMESPACE}>{type.Namespace}</color>.{ret}";
 
             if (includeDllName)
