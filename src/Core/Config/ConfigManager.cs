@@ -31,6 +31,7 @@ namespace UnityExplorer.Core.Config
 
         public static ConfigElement<string> ObjectExplorerData;
         public static ConfigElement<string> InspectorData;
+        public static ConfigElement<string> CSConsoleData;
 
         internal static readonly Dictionary<string, IConfigElement> ConfigElements = new Dictionary<string, IConfigElement>();
         internal static readonly Dictionary<string, IConfigElement> InternalConfigs = new Dictionary<string, IConfigElement>();
@@ -107,6 +108,7 @@ namespace UnityExplorer.Core.Config
 
             ObjectExplorerData = new ConfigElement<string>("ObjectExplorer", "", "", true);
             InspectorData = new ConfigElement<string>("Inspector", "", "", true);
+            CSConsoleData = new ConfigElement<string>("CSConsole", "", "", true);
         }
     }
 }

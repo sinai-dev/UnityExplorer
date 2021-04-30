@@ -19,7 +19,6 @@ namespace UnityExplorer.UI.Inspectors
     public class ReflectionInspector : InspectorBase, IPoolDataSource<CacheMemberCell>
     {
         public bool StaticOnly { get; internal set; }
-        //public bool AutoUpdate { get; internal set; }
 
         public object Target { get; private set; }
         public Type TargetType { get; private set; }
@@ -38,6 +37,8 @@ namespace UnityExplorer.UI.Inspectors
 
         private LayoutElement memberTitleLayout;
 
+        private Toggle autoUpdateToggle;
+
         public override void OnBorrowedFromPool(object target)
         {
             base.OnBorrowedFromPool(target);
@@ -45,6 +46,7 @@ namespace UnityExplorer.UI.Inspectors
             SetTitleLayouts();
             SetTarget(target);
 
+            MemberScrollPool.Initialize(this);
             RuntimeProvider.Instance.StartCoroutine(InitCoroutine());
         }
 
@@ -53,9 +55,6 @@ namespace UnityExplorer.UI.Inspectors
             yield return null;
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(InspectorPanel.Instance.ContentRect);
-
-            MemberScrollPool.RecreateHeightCache();
-            MemberScrollPool.Rebuild();
         }
 
         public override void OnReturnToPool()
@@ -70,6 +69,8 @@ namespace UnityExplorer.UI.Inspectors
             members.Clear();
             filteredMembers.Clear();
             displayedMembers.Clear();
+
+            autoUpdateToggle.isOn = false;
 
             base.OnReturnToPool();
         }
@@ -113,6 +114,8 @@ namespace UnityExplorer.UI.Inspectors
                 var member = members[i];
                 filteredMembers.Add(member);
             }
+
+            //MemberScrollPool.RecreateHeightCache();
         }
 
         public override void OnSetActive()
@@ -161,11 +164,11 @@ namespace UnityExplorer.UI.Inspectors
             bool shouldRefresh = false;
             foreach (var member in displayedMembers)
             {
-                if (!onlyAutoUpdate || member.AutoUpdateWanted)
+                if (member.ShouldAutoEvaluate && (!onlyAutoUpdate || member.AutoUpdateWanted))
                 {
                     shouldRefresh = true;
                     member.Evaluate();
-                    member.SetCell(member.CurrentView);
+                    member.SetCell(member.CellView);
                 }
             }
 
@@ -191,12 +194,12 @@ namespace UnityExplorer.UI.Inspectors
         {
             if (index < 0 || index >= filteredMembers.Count)
             {
-                if (cell.CurrentOccupant != null)
+                if (cell.Occupant != null)
                 {
-                    if (displayedMembers.Contains(cell.CurrentOccupant))
-                        displayedMembers.Remove(cell.CurrentOccupant);
+                    if (displayedMembers.Contains(cell.MemberOccupant))
+                        displayedMembers.Remove(cell.MemberOccupant);
 
-                    cell.CurrentOccupant.CurrentView = null;
+                    cell.Occupant.CellView = null;
                 }
 
                 cell.Disable();
@@ -205,25 +208,35 @@ namespace UnityExplorer.UI.Inspectors
 
             var member = filteredMembers[index];
 
-            if (member != cell.CurrentOccupant)
+            if (member != cell.Occupant)
             {
-                if (cell.CurrentOccupant != null)
+                if (cell.Occupant != null)
                 {
-                    // TODO
-                    // changing occupant, put subcontent/evaluator on temp holder, etc
-
-                    displayedMembers.Remove(cell.CurrentOccupant);
-                    cell.CurrentOccupant.CurrentView = null;
+                    cell.Occupant.HideIValue();
+                    displayedMembers.Remove(cell.MemberOccupant);
+                    cell.Occupant.CellView = null;
                 }
 
-                cell.CurrentOccupant = member;
-                member.CurrentView = cell;
+                cell.Occupant = member;
+                member.CellView = cell;
                 displayedMembers.Add(member);
             }
             
             member.SetCell(cell);
 
             SetCellLayout(cell);
+        }
+
+        private void ToggleAllAutoUpdateStates(bool state)
+        {
+            if (members == null || !members.Any())
+                return;
+
+            foreach (var member in members)
+                member.AutoUpdateWanted = state;
+
+            foreach (var cell in MemberScrollPool.CellPool)
+                cell.UpdateToggle.isOn = state;
         }
 
         // Cell layout (fake table alignment)
@@ -240,7 +253,7 @@ namespace UnityExplorer.UI.Inspectors
             memberTitleLayout.minWidth = MemLabelWidth;
         }
 
-        private void SetCellLayout(CacheMemberCell cell)
+        private void SetCellLayout(CacheObjectCell cell)
         {
             cell.MemberLayout.minWidth = MemLabelWidth;
             cell.RightGroupLayout.minWidth = RightGroupWidth;
@@ -279,7 +292,7 @@ namespace UnityExplorer.UI.Inspectors
             memberTitleLayout = memberTitle.gameObject.AddComponent<LayoutElement>();
 
             var valueTitle = UIFactory.CreateLabel(listTitles, "ValueTitle", "Value", TextAnchor.LowerLeft, Color.grey, fontSize: 15);
-            UIFactory.SetLayoutElement(valueTitle.gameObject, minWidth: 150, flexibleWidth: 9999);
+            UIFactory.SetLayoutElement(valueTitle.gameObject, minWidth: 50, flexibleWidth: 9999);
 
             var updateButton = UIFactory.CreateButton(listTitles, "UpdateButton", "Update values", new Color(0.22f, 0.28f, 0.22f));
             UIFactory.SetLayoutElement(updateButton.Button.gameObject, minHeight: 25, minWidth: 130, flexibleWidth: 0);
@@ -288,17 +301,24 @@ namespace UnityExplorer.UI.Inspectors
             var updateText = UIFactory.CreateLabel(listTitles, "AutoUpdateLabel", "Auto-update", TextAnchor.MiddleRight, Color.grey);
             UIFactory.SetLayoutElement(updateText.gameObject, minHeight: 25, minWidth: 80, flexibleWidth: 0);
 
+            var toggleObj = UIFactory.CreateToggle(listTitles, "AutoUpdateToggle", out autoUpdateToggle, out Text toggleText);
+            GameObject.DestroyImmediate(toggleText);
+            UIFactory.SetLayoutElement(toggleObj, minHeight: 25, minWidth: 25);
+            autoUpdateToggle.isOn = false;
+            autoUpdateToggle.onValueChanged.AddListener((bool val) => { ToggleAllAutoUpdateStates(val); });
+
+            var spacer = UIFactory.CreateUIObject("spacer", listTitles);
+            UIFactory.SetLayoutElement(spacer, minWidth: 25, flexibleWidth: 0);
+
             // Member scroll pool
 
             MemberScrollPool = UIFactory.CreateScrollPool<CacheMemberCell>(uiRoot, "MemberList", out GameObject scrollObj,
                 out GameObject _, new Color(0.09f, 0.09f, 0.09f));
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
 
-            MemberScrollPool.Initialize(this);
-
-            InspectorPanel.Instance.UIRoot.GetComponent<Mask>().enabled = false;
-            MemberScrollPool.Viewport.GetComponent<Mask>().enabled = false;
-            MemberScrollPool.Viewport.GetComponent<Image>().color = new Color(0.12f, 0.12f, 0.12f);
+            //InspectorPanel.Instance.UIRoot.GetComponent<Mask>().enabled = false;
+            //MemberScrollPool.Viewport.GetComponent<Mask>().enabled = false;
+            //MemberScrollPool.Viewport.GetComponent<Image>().color = new Color(0.12f, 0.12f, 0.12f);
 
             return uiRoot;
         }

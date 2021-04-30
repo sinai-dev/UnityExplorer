@@ -61,7 +61,7 @@ namespace UnityExplorer.Core.Input
             }
             catch (Exception ex)
             {
-                ExplorerCore.LogWarning($"Exception setting up Camera.onPostRender callback: {ex}");
+                ExplorerCore.LogWarning($"Exception setting up Aggressive Mouse Unlock: {ex}");
             }
         }
 

@@ -24,6 +24,7 @@ namespace UnityExplorer.UI.Panels
         public SceneExplorer SceneExplorer;
         public ObjectSearch ObjectSearch;
 
+        public override bool ShowByDefault => true;
         public override bool ShouldSaveActiveState => true;
 
         public int SelectedTab = 0;

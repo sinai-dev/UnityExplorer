@@ -67,7 +67,7 @@ namespace UnityExplorer.UI.Widgets
             // our first cell and they take priority, so reduce our height by
             // (minHeight - remainder) to account for that. We need to fill that
             // gap and reach the next cell before we take priority.
-            if (!Mathf.Approximately(rem, 0f))
+            if (rem != 0.0f)
                 height -= (DefaultHeight - rem);
 
             return (int)Math.Ceiling((decimal)height / (decimal)DefaultHeight);
@@ -139,8 +139,11 @@ namespace UnityExplorer.UI.Widgets
         {
             if (dataIndex >= ScrollPool.DataSource.ItemCount)
             {
-                while (heightCache.Count > dataIndex)
-                    RemoveLast();
+                if (heightCache.Count > dataIndex)
+                {
+                    while (heightCache.Count > dataIndex)
+                        RemoveLast();
+                }
                 return;
             }
 
@@ -249,14 +252,6 @@ namespace UnityExplorer.UI.Widgets
                     }
                 }
             }
-
-            //// if sister cache is set, then update it too.
-            //if (SisterCache != null)
-            //{
-            //    var realIdx = ScrollPool.DataSource.GetRealIndexOfTempIndex(dataIndex);
-            //    if (realIdx >= 0)
-            //        SisterCache.SetIndex(realIdx, height, true);
-            //}
         }
 
         private void RebuildCache()

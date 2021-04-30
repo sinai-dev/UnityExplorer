@@ -12,7 +12,7 @@ namespace UnityExplorer.UI.Models
 
         public bool Enabled
         {
-            get => UIRoot && UIRoot.activeSelf;
+            get => UIRoot && UIRoot.activeInHierarchy;
             set
             {
                 if (!UIRoot || Enabled == value)

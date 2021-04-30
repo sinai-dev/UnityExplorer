@@ -76,6 +76,7 @@ namespace UnityExplorer.UI.Panels
         public abstract UIManager.Panels PanelType { get; }
         public abstract string Name { get; }
 
+        public virtual bool ShowByDefault => false;
         public virtual bool ShouldSaveActiveState => true;
         public virtual bool CanDragAndResize => true;
         public virtual bool NavButtonWanted => true;
@@ -127,6 +128,8 @@ namespace UnityExplorer.UI.Panels
 
         public void ConstructUI()
         {
+            //this.Enabled = true;
+
             if (NavButtonWanted)
             {
                 // create navbar button
@@ -143,12 +146,12 @@ namespace UnityExplorer.UI.Panels
             // create core canvas 
             uiRoot = UIFactory.CreatePanel(Name, out GameObject panelContent);
             mainPanelRect = this.uiRoot.GetComponent<RectTransform>();
-            content = panelContent;
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.uiRoot, true, true, true, true, 0, 2, 2, 2, 2, TextAnchor.UpperLeft);
 
             int id = this.uiRoot.transform.GetInstanceID();
             transformToPanelDict.Add(id, this);
 
-            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.uiRoot, true, true, true, true, 0, 0, 0, 0, 0, TextAnchor.UpperLeft);
+            content = panelContent;
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.content, true, true, true, true, 2, 2, 2, 2, 2, TextAnchor.UpperLeft);
 
             // always apply default pos and anchors (save data may only be partial)
@@ -166,10 +169,9 @@ namespace UnityExplorer.UI.Panels
 
             // close button
 
-            var closeBtn = UIFactory.CreateButton(titleGroup, "CloseButton", "X");
+            var closeBtn = UIFactory.CreateButton(titleGroup, "CloseButton", "—");
             UIFactory.SetLayoutElement(closeBtn.Button.gameObject, minHeight: 25, minWidth: 25, flexibleWidth: 0);
-            RuntimeProvider.Instance.SetColorBlock(closeBtn.Button, new Color(0.63f, 0.32f, 0.31f),
-                new Color(0.81f, 0.25f, 0.2f), new Color(0.6f, 0.18f, 0.16f));
+            RuntimeProvider.Instance.SetColorBlock(closeBtn.Button, new Color(0.33f, 0.32f, 0.31f));
 
             closeBtn.OnClick += () =>
             {
@@ -186,11 +188,13 @@ namespace UnityExplorer.UI.Panels
             Dragger.OnFinishResize += OnFinishResize;
             Dragger.OnFinishDrag += OnFinishDrag;
             Dragger.AllowDragAndResize = this.CanDragAndResize;
-            //Dragger.CanResize = this.CanResize;
 
             // content (abstract)
 
             ConstructPanelContent();
+
+            UIManager.SetPanelActive(this.PanelType, false);
+            UIManager.SetPanelActive(this.PanelType, ShowByDefault);
 
             ApplyingSaveData = true;
             // apply panel save data or revert to default

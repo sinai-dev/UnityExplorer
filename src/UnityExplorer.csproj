@@ -230,6 +230,7 @@
     <Compile Include="Inspectors_OLD\Reflection\InstanceInspector.cs" />
     <Compile Include="Inspectors_OLD\Reflection\ReflectionInspector.cs" />
     <Compile Include="Inspectors_OLD\Reflection\StaticInspector.cs" />
+    <Compile Include="UI\CSConsole\CSConsoleManager.cs" />
     <Compile Include="UI\Inspectors\CacheObject\CacheField.cs" />
     <Compile Include="UI\Inspectors\CacheObject\CacheMember.cs" />
     <Compile Include="UI\Inspectors\CacheObject\CacheMethod.cs" />
@@ -241,10 +242,11 @@
     <Compile Include="UI\Inspectors\InspectorManager.cs" />
     <Compile Include="UI\Inspectors\InspectorTab.cs" />
     <Compile Include="UI\Inspectors\InspectorBase.cs" />
-    <Compile Include="UI\Inspectors\IValues\IValueTest.cs" />
+    <Compile Include="UI\Inspectors\IValues\InteractiveValue.cs" />
     <Compile Include="UI\Inspectors\ReflectionInspector.cs" />
     <Compile Include="UI\ObjectPool\IPooledObject.cs" />
     <Compile Include="UI\ObjectPool\Pool.cs" />
+    <Compile Include="UI\Panels\CSConsolePanel.cs" />
     <Compile Include="UI\Widgets\AutoComplete\ISuggestionProvider.cs" />
     <Compile Include="UI\Widgets\AutoComplete\Suggestion.cs" />
     <Compile Include="Core\Config\ConfigElement.cs" />
@@ -330,7 +332,7 @@
     <Compile Include="UI\Widgets\InputFieldScroller.cs" />
     <Compile Include="UI\Widgets\ButtonList\ButtonCell.cs" />
     <Compile Include="UI\Widgets\ButtonList\ButtonListSource.cs" />
-    <Compile Include="UI\Widgets\SliderScrollbar.cs" />
+    <Compile Include="UI\Widgets\AutoSliderScrollbar.cs" />
     <Compile Include="UI\Widgets\TransformTree\CachedTransform.cs" />
     <Compile Include="UI\Widgets\TransformTree\TransformCell.cs" />
     <Compile Include="UI\Widgets\TransformTree\TransformTree.cs" />

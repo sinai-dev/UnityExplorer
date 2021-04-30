@@ -12,9 +12,9 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
 
         public override bool ShouldAutoEvaluate => false;
 
-        public override void Initialize(ReflectionInspector inspector, Type declaringType, MemberInfo member, Type returnType)
+        public override void SetInspectorOwner(ReflectionInspector inspector, MemberInfo member)
         {
-            base.Initialize(inspector, declaringType, member, returnType);
+            base.SetInspectorOwner(inspector, member);
 
             Arguments = MethodInfo.GetParameters();
         }

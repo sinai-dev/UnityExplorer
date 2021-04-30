@@ -41,6 +41,8 @@ namespace UnityExplorer.UI
        
         public static ObjectExplorer Explorer { get; private set; }
         public static InspectorPanel Inspector { get; private set; }
+        public static CSConsolePanel CSConsole { get; private set; }
+
         public static AutoCompleter AutoCompleter { get; private set; }
 
         // other
@@ -49,6 +51,23 @@ namespace UnityExplorer.UI
 
         internal static readonly Color navButtonEnabledColor = new Color(0.2f, 0.4f, 0.28f);
         internal static readonly Color navButtonDisabledColor = new Color(0.25f, 0.25f, 0.25f);
+
+        public static UIPanel GetPanel(Panels panel)
+        {
+            switch (panel)
+            {
+                case Panels.ObjectExplorer:
+                    return Explorer;
+                case Panels.Inspector:
+                    return Inspector;
+                case Panels.AutoCompleter:
+                    return AutoCompleter;
+                case Panels.CSConsole:
+                    return CSConsole;
+                default:
+                    throw new NotImplementedException($"TODO GetPanel: {panel}");
+            }
+        }
 
         // main menu toggle
         public static bool ShowMenu
@@ -96,21 +115,6 @@ namespace UnityExplorer.UI
             AutoCompleter.Update();
         }
 
-        public static UIPanel GetPanel(Panels panel)
-        {
-            switch (panel)
-            {
-                case Panels.ObjectExplorer:
-                    return Explorer;
-                case Panels.Inspector:
-                    return Inspector;
-                case Panels.AutoCompleter:
-                    return AutoCompleter;
-                default:
-                    throw new NotImplementedException($"TODO GetPanel: {panel}");
-            }
-        }
-
         public static void TogglePanel(Panels panel)
         {
             var uiPanel = GetPanel(panel);
@@ -153,16 +157,19 @@ namespace UnityExplorer.UI
 
             CreateTopNavBar();
 
+            //InspectUnderMouse.ConstructUI();
+
             AutoCompleter = new AutoCompleter();
             AutoCompleter.ConstructUI();
-
-            //InspectUnderMouse.ConstructUI();
 
             Explorer = new ObjectExplorer();
             Explorer.ConstructUI();
 
             Inspector = new InspectorPanel();
             Inspector.ConstructUI();
+
+            CSConsole = new CSConsolePanel();
+            CSConsole.ConstructUI();
 
             ShowMenu = !ConfigManager.Hide_On_Startup.Value;
 

@@ -19,75 +19,66 @@ namespace UnityExplorer.UI.Utility
         {
             get
             {
-                if (inputField)
-                    return inputField.gameObject;
+                if (InputField)
+                    return InputField.gameObject;
                 return null;
             }
         }
 
-        internal SliderScrollbar sliderScroller;
-        internal InputField inputField;
+        internal AutoSliderScrollbar Slider;
+        internal InputField InputField;
 
-        internal RectTransform inputRect;
-        internal LayoutElement layoutElement;
-        internal VerticalLayoutGroup parentLayoutGroup;
+        internal RectTransform ContentRect;
+        internal RectTransform ViewportRect;
 
-        internal static CanvasScaler canvasScaler;
+        internal static CanvasScaler RootScaler;
 
-        public InputFieldScroller(SliderScrollbar sliderScroller, InputField inputField)
+        public InputFieldScroller(AutoSliderScrollbar sliderScroller, InputField inputField)
         {
-            //Instances.Add(this);
-
-            this.sliderScroller = sliderScroller;
-            this.inputField = inputField;
-
-            sliderScroller.m_parentInputScroller = this;
+            this.Slider = sliderScroller;
+            this.InputField = inputField;
 
             inputField.onValueChanged.AddListener(OnTextChanged);
 
-            inputRect = inputField.GetComponent<RectTransform>();
-            layoutElement = inputField.gameObject.AddComponent<LayoutElement>();
-            parentLayoutGroup = inputField.transform.parent.GetComponent<VerticalLayoutGroup>();
+            ContentRect = inputField.GetComponent<RectTransform>();
+            ViewportRect = ContentRect.transform.parent.GetComponent<RectTransform>();
 
-            layoutElement.minHeight = 25;
-            layoutElement.minWidth = 100;
-
-            if (!canvasScaler)
-                canvasScaler = UIManager.CanvasRoot.GetComponent<CanvasScaler>();
+            if (!RootScaler)
+                RootScaler = UIManager.CanvasRoot.GetComponent<CanvasScaler>();
         }
 
         internal string m_lastText;
         internal bool m_updateWanted;
-
-        // only done once, to fix height on creation.
-        internal bool heightInitAfterLayout;
+        internal bool m_wantJumpToBottom;
+        private float m_desiredContentHeight;
 
         public override void Update()
         {
-            if (!heightInitAfterLayout)
-            {
-                heightInitAfterLayout = true;
-                var height = sliderScroller.m_scrollRect.parent.parent.GetComponent<RectTransform>().rect.height;
-                layoutElement.preferredHeight = height;
-            }
-
-            if (m_updateWanted && inputField.gameObject.activeInHierarchy)
+            if (m_updateWanted)
             {
                 m_updateWanted = false;
-                RefreshUI();
+                ProcessInputText();
+            }
+
+            float desiredHeight = Math.Max(m_desiredContentHeight, ViewportRect.rect.height);
+
+            if (ContentRect.rect.height < desiredHeight)
+            {
+                ContentRect.sizeDelta = new Vector2(0, desiredHeight);
+                this.Slider.UpdateSliderHandle();
+            }
+            else if (ContentRect.rect.height > desiredHeight)
+            {
+                ContentRect.sizeDelta = new Vector2(0, desiredHeight);
+                this.Slider.UpdateSliderHandle();
+            }
+
+            if (m_wantJumpToBottom)
+            {
+                Slider.Slider.value = 1f;
+                m_wantJumpToBottom = false;
             }
         }
-
-        //internal bool CheckDestroyed()
-        //{
-        //    if (sliderScroller == null || sliderScroller.CheckDestroyed())
-        //    {
-        //        Instances.Remove(this);
-        //        return true;
-        //    }
-
-        //    return false;
-        //}
 
         internal void OnTextChanged(string text)
         {
@@ -95,30 +86,26 @@ namespace UnityExplorer.UI.Utility
             m_updateWanted = true;
         }
 
-        internal void RefreshUI()
+        internal void ProcessInputText()
         {
-            var curInputRect = inputField.textComponent.rectTransform.rect;
-            var scaleFactor = canvasScaler.scaleFactor;
+            var curInputRect = InputField.textComponent.rectTransform.rect;
+            var scaleFactor = RootScaler.scaleFactor;
 
             // Current text settings
-            var texGenSettings = inputField.textComponent.GetGenerationSettings(curInputRect.size);
+            var texGenSettings = InputField.textComponent.GetGenerationSettings(curInputRect.size);
             texGenSettings.generateOutOfBounds = false;
             texGenSettings.scaleFactor = scaleFactor;
 
             // Preferred text rect height
-            var textGen = inputField.textComponent.cachedTextGeneratorForLayout;
-            float preferredHeight = textGen.GetPreferredHeight(m_lastText, texGenSettings) + 10;
+            var textGen = InputField.textComponent.cachedTextGeneratorForLayout;
+            m_desiredContentHeight = textGen.GetPreferredHeight(m_lastText, texGenSettings) + 10;
 
-            // Default text rect height (fit to scroll parent or expand to fit text)
-            float minHeight = Mathf.Max(preferredHeight, sliderScroller.m_scrollRect.rect.height - 25);
-
-            layoutElement.preferredHeight = minHeight;
-
-            if (inputField.caretPosition == inputField.text.Length
-                && inputField.text.Length > 0
-                && inputField.text[inputField.text.Length - 1] == '\n')
+            // jump to bottom
+            if (InputField.caretPosition == InputField.text.Length
+                && InputField.text.Length > 0
+                && InputField.text[InputField.text.Length - 1] == '\n')
             {
-                sliderScroller.m_slider.value = 0f;
+                m_wantJumpToBottom = true;
             }
         }
 
