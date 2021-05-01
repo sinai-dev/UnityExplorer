@@ -201,12 +201,17 @@ The following helper methods are available:
 
         internal static bool IsUserCopyPasting()
         {
+            return inputsWithinThreshold > inputThreshold;
             return (InputManager.GetKey(KeyCode.LeftControl) || InputManager.GetKey(KeyCode.RightControl))
                 && InputManager.GetKeyDown(KeyCode.V);
         }
 
         public void UpdateConsole()
         {
+            if (inputsWithinThreshold > 0 && DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond - lastInputChange >= inputSpamThresholdMs * 2)
+            {
+                inputsWithinThreshold = 0;
+            }
             if (s_copyPasteBuffer != null)
             {
                 if (!IsUserCopyPasting())
@@ -289,9 +294,27 @@ The following helper methods are available:
         }
 
         internal static string s_copyPasteBuffer;
+        
+        internal static long lastInputChange;
+        internal static int inputsWithinThreshold;
+        
+        internal static readonly long inputSpamThresholdMs = 5;
+        internal static readonly long inputThreshold = 1;
 
         public void OnInputChanged(string newText, bool forceUpdate = false)
         {
+            var timeSinceLastInput = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond - lastInputChange;
+            lastInputChange = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+
+            if (timeSinceLastInput < lastInputChange)
+            {
+                inputsWithinThreshold++;
+            }
+            else
+            {
+                inputsWithinThreshold = 0;
+            }
+            
             if (IsUserCopyPasting())
             {
                 //Console.WriteLine("Copy+Paste detected!");
