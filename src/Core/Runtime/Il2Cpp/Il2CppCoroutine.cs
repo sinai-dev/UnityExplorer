@@ -124,8 +124,11 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
                     if (nextAsEnumerator != null) // il2cpp IEnumerator also handles CustomYieldInstruction
                         next = new Il2CppEnumeratorWrapper(nextAsEnumerator);
                     else
-                        ExplorerCore.LogWarning($"Unknown coroutine yield object of type {il2CppObjectBase} for coroutine {enumerator}");
-                    break;
+                        ExplorerCore.LogWarning($"Unknown coroutine yield object of type '{il2CppObjectBase}' for coroutine '{enumerator}'");
+                    return;
+                default:
+                    ExplorerCore.LogWarning($"Unknown coroutine yield object of type '{next}' for coroutine '{enumerator}'");
+                    return;
             }
 
             ourCoroutinesStore.Add(new CoroTuple { WaitCondition = next, Coroutine = enumerator });

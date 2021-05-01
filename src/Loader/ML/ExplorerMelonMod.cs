@@ -41,12 +41,12 @@ namespace UnityExplorer
             ExplorerCore.Init(this);
         }
 
-        public override void OnUpdate()
-        {
-            ExplorerCore.Update();
-        }
+        //public override void OnUpdate()
+        //{
+        //    ExplorerCore.Update();
+        //}
 
-        public void SetupPatches()
+        public void SetupCursorPatches()
         {
             try
             {

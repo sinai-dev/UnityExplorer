@@ -143,6 +143,9 @@ namespace UnityExplorer.Core.Input
 
         public static void ReleaseEventSystem()
         {
+            if (EventSystem.current != UIManager.EventSys)
+                return;
+
             if (InputManager.CurrentType == InputType.InputSystem)
                 return;
 
@@ -173,7 +176,7 @@ namespace UnityExplorer.Core.Input
                 m_lastVisibleState = (bool?)CursorType.GetProperty("visible", BF.Public | BF.Static)?.GetValue(null, null)
                                      ?? false;
 
-                ExplorerCore.Loader.SetupPatches();
+                ExplorerCore.Loader.SetupCursorPatches();
             }
             catch (Exception e)
             {

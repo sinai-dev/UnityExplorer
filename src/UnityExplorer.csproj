@@ -219,6 +219,7 @@
     <Compile Include="Core\Config\InternalConfigHandler.cs" />
     <Compile Include="Core\CSharp\ScriptEvaluator.cs" />
     <Compile Include="Core\CSharp\ScriptInteraction.cs" />
+    <Compile Include="Core\ExplorerBehaviour.cs" />
     <Compile Include="Core\Utility\MiscUtility.cs" />
     <Compile Include="Inspectors_OLD\GameObjects\ChildList.cs" />
     <Compile Include="Inspectors_OLD\GameObjects\ComponentList.cs" />
@@ -233,16 +234,19 @@
     <Compile Include="Inspectors_OLD\Reflection\StaticInspector.cs" />
     <Compile Include="UI\CSConsole\CSConsoleManager.cs" />
     <Compile Include="UI\Inspectors\CacheObject\CacheField.cs" />
+    <Compile Include="UI\Inspectors\CacheObject\CacheListEntry.cs" />
     <Compile Include="UI\Inspectors\CacheObject\CacheMember.cs" />
     <Compile Include="UI\Inspectors\CacheObject\CacheMethod.cs" />
     <Compile Include="UI\Inspectors\CacheObject\CacheObjectBase.cs" />
     <Compile Include="UI\Inspectors\CacheObject\CacheProperty.cs" />
+    <Compile Include="UI\Inspectors\CacheObject\Views\CacheListEntryCell.cs" />
     <Compile Include="UI\Inspectors\CacheObject\Views\CacheMemberCell.cs" />
     <Compile Include="UI\Inspectors\CacheObject\Views\CacheObjectCell.cs" />
     <Compile Include="UI\Inspectors\GameObjectInspector.cs" />
     <Compile Include="UI\Inspectors\InspectorManager.cs" />
     <Compile Include="UI\Inspectors\InspectorTab.cs" />
     <Compile Include="UI\Inspectors\InspectorBase.cs" />
+    <Compile Include="UI\Inspectors\IValues\InteractiveList.cs" />
     <Compile Include="UI\Inspectors\IValues\InteractiveValue.cs" />
     <Compile Include="UI\Inspectors\ReflectionInspector.cs" />
     <Compile Include="UI\ObjectPool\IPooledObject.cs" />
@@ -267,7 +271,6 @@
     <Compile Include="Core\Runtime\Il2Cpp\Il2CppProvider.cs" />
     <Compile Include="Core\Runtime\Il2Cpp\Il2CppReflection.cs" />
     <Compile Include="Core\Runtime\Il2Cpp\Il2CppTextureUtil.cs" />
-    <Compile Include="Core\Runtime\Mono\DummyBehaviour.cs" />
     <Compile Include="Core\Runtime\Mono\MonoProvider.cs" />
     <Compile Include="Core\Runtime\Mono\MonoReflection.cs" />
     <Compile Include="Core\Runtime\Mono\MonoTextureUtil.cs" />

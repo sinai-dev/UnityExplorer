@@ -34,8 +34,9 @@ namespace UnityExplorer
                 LogWarning("UnityExplorer is already loaded!");
                 return;
             }
-
             Loader = loader;
+
+            ExplorerBehaviour.Setup();
 
             if (!Directory.Exists(Loader.ExplorerFolder))
                 Directory.CreateDirectory(Loader.ExplorerFolder);
@@ -94,6 +95,16 @@ namespace UnityExplorer
             RuntimeProvider.Instance.Update();
 
             UIManager.Update();
+        }
+
+        public static void FixedUpdate()
+        {
+            RuntimeProvider.Instance.ProcessFixedUpdate();
+        }
+
+        public static void OnPostRender()
+        {
+            RuntimeProvider.Instance.ProcessOnPostRender();
         }
 
 #region LOGGING

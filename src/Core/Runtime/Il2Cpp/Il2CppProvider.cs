@@ -56,6 +56,11 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             Il2CppCoroutine.Start(routine);
         }
 
+        internal override void ProcessOnPostRender()
+        {
+            Il2CppCoroutine.ProcessWaitForEndOfFrame();
+        }
+
         public override void Update()
         {
             Il2CppCoroutine.Process();

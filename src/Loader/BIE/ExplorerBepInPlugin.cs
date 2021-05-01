@@ -57,53 +57,23 @@ namespace UnityExplorer
         {
             Instance = this;
             _configHandler = new BepInExConfigHandler();
+            ExplorerCore.Init(this);
         }
 
-#if MONO // Mono-specific
+#if MONO // Mono
         internal void Awake()
         {
             UniversalInit();
-            ExplorerCore.Init(this);
         }
 
-        internal void Update()
-        {
-            ExplorerCore.Update();
-        }
-
-#else   // Il2Cpp-specific
+#else   // Il2Cpp
         public override void Load()
         {
             UniversalInit();
-
-            ClassInjector.RegisterTypeInIl2Cpp<ExplorerBehaviour>();
-
-            var obj = new GameObject("ExplorerBehaviour");
-            obj.AddComponent<ExplorerBehaviour>();
-            obj.hideFlags = HideFlags.HideAndDontSave;
-            GameObject.DontDestroyOnLoad(obj);
-
-            ExplorerCore.Init(this);
-        }
-
-        // BepInEx Il2Cpp mod class doesn't have monobehaviour methods yet, so wrap them in a dummy.
-        public class ExplorerBehaviour : MonoBehaviour
-        {
-            public ExplorerBehaviour(IntPtr ptr) : base(ptr) { }
-
-            internal void Awake()
-            {
-                Instance.LogSource.LogMessage("ExplorerBehaviour.Awake");
-            }
-
-            internal void Update()
-            {
-                ExplorerCore.Update();
-            }
         }
 #endif
 
-        public void SetupPatches()
+        public void SetupCursorPatches()
         {
             try
             {

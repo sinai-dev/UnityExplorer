@@ -65,5 +65,13 @@ namespace UnityExplorer
 
         public abstract void SetColorBlock(Selectable selectable, Color? normal = null, Color? highlighted = null, Color? pressed = null,
             Color? disabled = null);
+
+        internal virtual void ProcessOnPostRender()
+        {
+        }
+
+        internal virtual void ProcessFixedUpdate()
+        {
+        }
     }
 }

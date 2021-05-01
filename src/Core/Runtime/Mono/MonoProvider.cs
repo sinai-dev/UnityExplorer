@@ -23,8 +23,6 @@ namespace UnityExplorer.Core.Runtime.Mono
             ExplorerCore.Context = RuntimeContext.Mono;
             Reflection = new MonoReflection();
             TextureUtil = new MonoTextureUtil();
-
-            DummyBehaviour.Setup();
         }
 
         public override void SetupEvents()
@@ -39,7 +37,7 @@ namespace UnityExplorer.Core.Runtime.Mono
 
         public override void StartCoroutine(IEnumerator routine)
         {
-            DummyBehaviour.Instance.StartCoroutine(routine);
+            ExplorerBehaviour.Instance.StartCoroutine(routine);
         }
 
         public override void Update()

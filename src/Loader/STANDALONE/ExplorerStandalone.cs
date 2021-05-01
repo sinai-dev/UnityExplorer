@@ -87,30 +87,10 @@ namespace UnityExplorer
             Instance = this;
             _configHandler = new StandaloneConfigHandler();
 
-#if CPP
-            ClassInjector.RegisterTypeInIl2Cpp<ExplorerBehaviour>();
-#endif
-            var obj = new GameObject("ExplorerBehaviour");
-            obj.AddComponent<ExplorerBehaviour>();
-
-            GameObject.DontDestroyOnLoad(obj);
-            obj.hideFlags = HideFlags.HideAndDontSave;
-
             ExplorerCore.Init(this);
         }
 
-        public class ExplorerBehaviour : MonoBehaviour
-        {
-#if CPP
-            public ExplorerBehaviour(IntPtr ptr) : base(ptr) { }
-#endif
-            internal void Update()
-            {
-                ExplorerCore.Update();
-            }
-        }
-
-        public void SetupPatches()
+        public void SetupCursorPatches()
         {
             try
             {
