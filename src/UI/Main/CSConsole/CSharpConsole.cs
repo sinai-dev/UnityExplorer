@@ -199,23 +199,8 @@ The following helper methods are available:
             InputField.onValueChanged.AddListener((string s) => { OnInputChanged(s); });
         }
 
-        internal static bool IsUserCopyPasting()
-        {
-            return (InputManager.GetKey(KeyCode.LeftControl) || InputManager.GetKey(KeyCode.RightControl))
-                && InputManager.GetKeyDown(KeyCode.V);
-        }
-
         public void UpdateConsole()
         {
-            if (s_copyPasteBuffer != null)
-            {
-                if (!IsUserCopyPasting())
-                {
-                    OnInputChanged(s_copyPasteBuffer);
-
-                    s_copyPasteBuffer = null;
-                }
-            }
 
             if (EnableCtrlRShortcut)
             {
@@ -288,16 +273,14 @@ The following helper methods are available:
             AutoCompleter.ClearAutocompletes();
         }
 
-        internal static string s_copyPasteBuffer;
+        private static float s_timeOfLastUpdate;
 
         public void OnInputChanged(string newText, bool forceUpdate = false)
         {
-            if (IsUserCopyPasting())
-            {
-                //Console.WriteLine("Copy+Paste detected!");
-                s_copyPasteBuffer = newText;
+            if (Time.time <= s_timeOfLastUpdate)
                 return;
-            }
+
+            s_timeOfLastUpdate = Time.time;
 
             if (EnableAutoIndent)
                 UpdateIndent(newText);
