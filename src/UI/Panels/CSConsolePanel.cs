@@ -51,7 +51,7 @@ namespace UnityExplorer.UI.Panels
 
         private void InvokeOnValueChanged(string value)
         {
-            if (Time.time - m_timeOfLastInputInvoke <= 0f)
+            if (Time.time <= m_timeOfLastInputInvoke)
                 return;
 
             m_timeOfLastInputInvoke = Time.time;

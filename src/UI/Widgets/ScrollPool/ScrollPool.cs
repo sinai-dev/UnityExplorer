@@ -114,7 +114,8 @@ namespace UnityExplorer.UI.Widgets
             else if (Content.rect.height != prevContentHeight)
             {
                 prevContentHeight = Content.rect.height;
-                OnValueChangedListener(Vector2.zero);
+                if (!writingLocked)
+                    OnValueChangedListener(Vector2.zero);
             }
         }
         #endregion
@@ -152,7 +153,7 @@ namespace UnityExplorer.UI.Widgets
             ScrollRect.vertical = true;
             ScrollRect.horizontal = false;
 
-            //ScrollRect.onValueChanged.RemoveListener(OnValueChangedListener);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
             RuntimeProvider.Instance.StartCoroutine(InitCoroutine());
         }
 
@@ -182,6 +183,8 @@ namespace UnityExplorer.UI.Widgets
 
             // add onValueChanged listener after setup
             ScrollRect.onValueChanged.AddListener(OnValueChangedListener);
+
+            ExplorerCore.Log("ScrollPool Init finished");
         }
 
         private void SetScrollBounds()

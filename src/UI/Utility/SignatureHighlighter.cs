@@ -12,7 +12,7 @@ namespace UnityExplorer.UI.Utility
     /// <summary>
     /// Syntax-highlights a member's signature, by either the Type name or a Type and Member together.
     /// </summary>
-    public class SignatureHighlighter
+    public static class SignatureHighlighter
     {
         public const string NAMESPACE = "#a8a8a8";
 
@@ -56,6 +56,12 @@ namespace UnityExplorer.UI.Utility
 
         private static readonly StringBuilder syntaxBuilder = new StringBuilder(2156);
 
+        private static bool GetNamespace(Type type, out string ns)
+        {
+            var ret = !string.IsNullOrEmpty(ns = type.Namespace?.Trim());
+            return ret;
+        }
+
         public static string ParseFullSyntax(Type type, bool includeNamespace, MemberInfo memberInfo = null)
         {
             if (type == null)
@@ -67,8 +73,8 @@ namespace UnityExplorer.UI.Utility
 
             bool isGeneric = type.IsGenericParameter || (type.HasElementType && type.GetElementType().IsGenericParameter);
 
-            if (!isGeneric && includeNamespace && !string.IsNullOrEmpty(type.Namespace))
-                syntaxBuilder.Append($"<color={NAMESPACE}>{type.Namespace}</color>.");
+            if (!isGeneric && includeNamespace && GetNamespace(type, out string ns))
+                syntaxBuilder.Append($"<color={NAMESPACE}>{ns}</color>.");
 
             // Declaring type
 
@@ -117,8 +123,8 @@ namespace UnityExplorer.UI.Utility
 
             bool isGeneric = type.IsGenericParameter || (type.HasElementType && type.GetElementType().IsGenericParameter);
 
-            if (!isGeneric && includeNamespace && !string.IsNullOrEmpty(type.Namespace))
-                ret = $"<color={NAMESPACE}>{type.Namespace}</color>.{ret}";
+            if (!isGeneric && includeNamespace && GetNamespace(type, out string ns))
+                ret = $"<color={NAMESPACE}>{ns}</color>.{ret}";
 
             if (includeDllName)
             {

@@ -9,6 +9,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
     public class CacheField : CacheMember
     {
         public FieldInfo FieldInfo { get; internal set; }
+        public override Type DeclaringType => FieldInfo.DeclaringType;
 
         public override bool ShouldAutoEvaluate => true;
 

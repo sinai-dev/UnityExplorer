@@ -16,9 +16,6 @@ namespace UnityExplorer.UI.Inspectors
     {
         public GameObject Target;
 
-        public override GameObject UIRoot => uiRoot;
-        private GameObject uiRoot;
-
         private Text NameText;
 
         public TransformTree TransformTree;
@@ -123,8 +120,7 @@ namespace UnityExplorer.UI.Inspectors
 
             if (!compToStringCache.ContainsKey(type.AssemblyQualifiedName))
             {
-                compToStringCache.Add(type.AssemblyQualifiedName,
-                    $"<color={SignatureHighlighter.NAMESPACE}>{type.Namespace}</color>.{SignatureHighlighter.ParseFullType(type)}");
+                compToStringCache.Add(type.AssemblyQualifiedName, SignatureHighlighter.ParseFullType(type, true));
             }
 
             cell.Button.ButtonText.text = compToStringCache[type.AssemblyQualifiedName];
@@ -160,13 +156,13 @@ namespace UnityExplorer.UI.Inspectors
 
         public override GameObject CreateContent(GameObject parent)
         {
-            uiRoot = UIFactory.CreateVerticalGroup(Pool<GameObjectInspector>.Instance.InactiveHolder,
+            UIRoot = UIFactory.CreateVerticalGroup(Pool<GameObjectInspector>.Instance.InactiveHolder,
                 "GameObjectInspector", true, true, true, true, 5, new Vector4(4, 4, 4, 4), new Color(0.12f, 0.12f, 0.12f));
 
-            NameText = UIFactory.CreateLabel(uiRoot, "Title", "not set", TextAnchor.MiddleLeft, fontSize: 20);
+            NameText = UIFactory.CreateLabel(UIRoot, "Title", "not set", TextAnchor.MiddleLeft, fontSize: 20);
             UIFactory.SetLayoutElement(NameText.gameObject, minHeight: 30, flexibleHeight: 0);
 
-            var listHolder = UIFactory.CreateHorizontalGroup(uiRoot, "ListHolder", true, true, true, true, 5, new Vector4(2, 2, 2, 2));
+            var listHolder = UIFactory.CreateHorizontalGroup(UIRoot, "ListHolder", true, true, true, true, 5, new Vector4(2, 2, 2, 2));
             UIFactory.SetLayoutElement(listHolder, flexibleWidth: 9999, flexibleHeight: 9999);
 
             transformScroll = UIFactory.CreateScrollPool<TransformCell>(listHolder, "TransformTree", out GameObject transformObj,
@@ -185,7 +181,7 @@ namespace UnityExplorer.UI.Inspectors
             ComponentList = new ButtonListSource<Component>(componentScroll, GetComponentEntries, SetComponentCell, ShouldDisplay, OnComponentClicked);
             componentScroll.Initialize(ComponentList);
 
-            return uiRoot;
+            return UIRoot;
         }
     }
 }

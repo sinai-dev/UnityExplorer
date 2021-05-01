@@ -11,8 +11,7 @@ namespace UnityExplorer.UI.Inspectors
 {
     public class InspectorTab : IPooledObject
     {
-        public GameObject UIRoot => uiRoot;
-        private GameObject uiRoot;
+        public GameObject UIRoot { get; set; }
 
         public float DefaultHeight => 25f;
 
@@ -34,12 +33,12 @@ namespace UnityExplorer.UI.Inspectors
 
         public GameObject CreateContent(GameObject parent)
         {
-            uiRoot = UIFactory.CreateHorizontalGroup(parent, "TabObject", true, true, true, true, 0, 
+            UIRoot = UIFactory.CreateHorizontalGroup(parent, "TabObject", true, true, true, true, 0, 
                 new Vector4(0, 0, 3, 0), new Color(0.13f, 0.13f, 0.13f));
-            UIFactory.SetLayoutElement(uiRoot, minWidth: 185, flexibleWidth: 0);
-            uiRoot.AddComponent<Mask>();
+            UIFactory.SetLayoutElement(UIRoot, minWidth: 185, flexibleWidth: 0);
+            UIRoot.AddComponent<Mask>();
 
-            TabButton = UIFactory.CreateButton(uiRoot, "TabButton", "");
+            TabButton = UIFactory.CreateButton(UIRoot, "TabButton", "");
 
             UIFactory.SetLayoutElement(TabButton.Button.gameObject, minWidth: 165, flexibleWidth: 0);
 
@@ -47,12 +46,12 @@ namespace UnityExplorer.UI.Inspectors
             TabText.horizontalOverflow = HorizontalWrapMode.Overflow;
             TabText.alignment = TextAnchor.MiddleLeft;
 
-            CloseButton = UIFactory.CreateButton(uiRoot, "CloseButton", "X", new Color(0.2f, 0.2f, 0.2f, 1));
+            CloseButton = UIFactory.CreateButton(UIRoot, "CloseButton", "X", new Color(0.2f, 0.2f, 0.2f, 1));
             UIFactory.SetLayoutElement(CloseButton.Button.gameObject, minWidth: 20, flexibleWidth: 0);
             var closeBtnText = CloseButton.Button.GetComponentInChildren<Text>();
             closeBtnText.color = Color.red;
 
-            return uiRoot;
+            return UIRoot;
         }
     }
 }

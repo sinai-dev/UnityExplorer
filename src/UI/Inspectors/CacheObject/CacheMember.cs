@@ -9,15 +9,12 @@ using UnityExplorer.UI.Utility;
 
 namespace UnityExplorer.UI.Inspectors.CacheObject
 {
-    // TODO some of this can be reused for CacheEnumerated / CacheKVP as well, just doing members for now.
-    // Will put shared stuff in CacheObjectBase.
-
     public abstract class CacheMember : CacheObjectBase
     {
         public ReflectionInspector ParentInspector { get; internal set; }
-        public bool AutoUpdateWanted { get; internal set; }
+        //public bool AutoUpdateWanted { get; internal set; }
         
-        public Type DeclaringType { get; protected set; }
+        public abstract Type DeclaringType { get; }
         public string NameForFiltering { get; protected set; }
 
         public override bool HasArguments => Arguments?.Length > 0;
@@ -36,16 +33,12 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
         protected abstract void TrySetValue(object value);
 
         /// <summary>
-        /// Evaluate when first shown (if ShouldAutoEvaluate), or else when Evaluate button is clicked.
+        /// Evaluate when first shown (if ShouldAutoEvaluate), or else when Evaluate button is clicked, or auto-updated.
         /// </summary>
         public void Evaluate()
         {
             TryEvaluate();
-
-            if (!Value.IsNullOrDestroyed())
-                Value = Value.TryCast();
-
-            ProcessOnEvaluate();
+            SetValueFromSource(Value);
         }
 
         public override void SetUserValue(object value)
@@ -57,13 +50,12 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             Evaluate();
         }
 
-        protected override void SetValueState(CacheObjectCell cell, bool valueActive, bool valueRichText, Color valueColor, 
-            bool typeLabelActive, bool toggleActive, bool inputActive, bool applyActive, bool inspectActive, bool subContentActive)
+        protected override void SetValueState(CacheObjectCell cell, ValueStateArgs args)
         {
-            base.SetValueState(cell, valueActive, valueRichText, valueColor, typeLabelActive, toggleActive, inputActive, applyActive, 
-                inspectActive, subContentActive);
+            base.SetValueState(cell, args);
 
-            (cell as CacheMemberCell).UpdateToggle.gameObject.SetActive(ShouldAutoEvaluate);
+            //var memCell = cell as CacheMemberCell;
+            //memCell.UpdateToggle.gameObject.SetActive(ShouldAutoEvaluate);
         }
 
         protected override bool SetCellEvaluateState(CacheObjectCell objectcell)
@@ -73,7 +65,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             cell.EvaluateHolder.SetActive(!ShouldAutoEvaluate);
             if (!ShouldAutoEvaluate)
             {
-                cell.UpdateToggle.gameObject.SetActive(false);
+                //cell.UpdateToggle.gameObject.SetActive(false);
                 cell.EvaluateButton.Button.gameObject.SetActive(true);
                 if (HasArguments)
                     cell.EvaluateButton.ButtonText.text = $"Evaluate ({Arguments.Length})";
@@ -82,14 +74,14 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             }
             else
             {
-                cell.UpdateToggle.gameObject.SetActive(true);
-                cell.UpdateToggle.isOn = AutoUpdateWanted;
+                //cell.UpdateToggle.gameObject.SetActive(true);
+                //cell.UpdateToggle.isOn = AutoUpdateWanted;
             }
 
             if (State == ValueState.NotEvaluated && !ShouldAutoEvaluate)
             {
                 // todo evaluate buttons etc
-                SetValueState(cell, true, true, Color.white, false, false, false, false, false, false);
+                SetValueState(cell, ValueStateArgs.Default);
 
                 return true;
             }

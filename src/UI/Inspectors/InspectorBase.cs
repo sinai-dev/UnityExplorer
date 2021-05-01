@@ -15,7 +15,7 @@ namespace UnityExplorer.UI.Inspectors
 
         public InspectorTab Tab { get; internal set; }
 
-        public abstract GameObject UIRoot { get; }
+        public GameObject UIRoot { get; set; }
 
         public float DefaultHeight => -1f;
         public abstract GameObject CreateContent(GameObject parent);

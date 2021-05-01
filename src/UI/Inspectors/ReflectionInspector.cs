@@ -29,14 +29,12 @@ namespace UnityExplorer.UI.Inspectors
         private readonly List<CacheMember> filteredMembers = new List<CacheMember>();
         private readonly HashSet<CacheMember> displayedMembers = new HashSet<CacheMember>();
 
-        public override GameObject UIRoot => uiRoot;
-        private GameObject uiRoot;
-
         public Text NameText;
         public Text AssemblyText;
 
         private LayoutElement memberTitleLayout;
 
+        public bool AutoUpdateWanted { get; set; }
         private Toggle autoUpdateToggle;
 
         public override void OnBorrowedFromPool(object target)
@@ -46,7 +44,6 @@ namespace UnityExplorer.UI.Inspectors
             SetTitleLayouts();
             SetTarget(target);
 
-            // MemberScrollPool.SetDataSource(this);
             MemberScrollPool.Refresh(true, true);
             RuntimeProvider.Instance.StartCoroutine(InitCoroutine());
         }
@@ -68,6 +65,7 @@ namespace UnityExplorer.UI.Inspectors
             displayedMembers.Clear();
 
             autoUpdateToggle.isOn = false;
+            AutoUpdateWanted = false;
 
             base.OnReturnToPool();
         }
@@ -112,7 +110,7 @@ namespace UnityExplorer.UI.Inspectors
                 filteredMembers.Add(member);
             }
 
-            //MemberScrollPool.RecreateHeightCache();
+            //MemberScrollPool.Refresh
         }
 
         public override void OnSetActive()
@@ -147,21 +145,17 @@ namespace UnityExplorer.UI.Inspectors
             {
                 timeOfLastUpdate = Time.time;
 
-                UpdateDisplayedMembers(true);
+                if (AutoUpdateWanted)
+                    UpdateDisplayedMembers();// true);
             }
         }
 
-        private void UpdateDisplayedMembers()
-        {
-            UpdateDisplayedMembers(false);
-        }
-
-        private void UpdateDisplayedMembers(bool onlyAutoUpdate)
+        private void UpdateDisplayedMembers()// bool onlyAutoUpdate)
         {
             bool shouldRefresh = false;
             foreach (var member in displayedMembers)
             {
-                if (member.ShouldAutoEvaluate && (!onlyAutoUpdate || member.AutoUpdateWanted))
+                if (member.ShouldAutoEvaluate) // && (!onlyAutoUpdate || member.AutoUpdateWanted))
                 {
                     shouldRefresh = true;
                     member.Evaluate();
@@ -192,6 +186,7 @@ namespace UnityExplorer.UI.Inspectors
                         displayedMembers.Remove(cell.MemberOccupant);
 
                     cell.Occupant.CellView = null;
+                    cell.Occupant = null;
                 }
 
                 cell.Disable();
@@ -207,6 +202,7 @@ namespace UnityExplorer.UI.Inspectors
                     cell.Occupant.HideIValue();
                     displayedMembers.Remove(cell.MemberOccupant);
                     cell.Occupant.CellView = null;
+                    cell.Occupant = null;
                 }
 
                 cell.Occupant = member;
@@ -217,18 +213,6 @@ namespace UnityExplorer.UI.Inspectors
             member.SetCell(cell);
 
             SetCellLayout(cell);
-        }
-
-        private void ToggleAllAutoUpdateStates(bool state)
-        {
-            if (members == null || !members.Any())
-                return;
-
-            foreach (var member in members)
-                member.AutoUpdateWanted = state;
-
-            foreach (var cell in MemberScrollPool.CellPool)
-                cell.UpdateToggle.isOn = state;
         }
 
         // Cell layout (fake table alignment)
@@ -247,7 +231,7 @@ namespace UnityExplorer.UI.Inspectors
 
         private void SetCellLayout(CacheObjectCell cell)
         {
-            cell.MemberLayout.minWidth = MemLabelWidth;
+            cell.NameLayout.minWidth = MemLabelWidth;
             cell.RightGroupLayout.minWidth = RightGroupWidth;
         }
 
@@ -261,22 +245,24 @@ namespace UnityExplorer.UI.Inspectors
 
         public override GameObject CreateContent(GameObject parent)
         {
-            uiRoot = UIFactory.CreateVerticalGroup(parent, "ReflectionInspector", true, true, true, true, 5, 
+            UIRoot = UIFactory.CreateVerticalGroup(parent, "ReflectionInspector", true, true, true, true, 5, 
                 new Vector4(4, 4, 4, 4), new Color(0.12f, 0.12f, 0.12f));
 
             // Class name, assembly. TODO more details
 
-            NameText = UIFactory.CreateLabel(uiRoot, "Title", "not set", TextAnchor.MiddleLeft, fontSize: 20);
+            NameText = UIFactory.CreateLabel(UIRoot, "Title", "not set", TextAnchor.MiddleLeft, fontSize: 20);
             UIFactory.SetLayoutElement(NameText.gameObject, minHeight: 25, flexibleHeight: 0);
 
-            AssemblyText = UIFactory.CreateLabel(uiRoot, "AssemblyLabel", "not set", TextAnchor.MiddleLeft);
+            AssemblyText = UIFactory.CreateLabel(UIRoot, "AssemblyLabel", "not set", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(AssemblyText.gameObject, minHeight: 25, flexibleWidth: 9999);
 
             // TODO filter row
 
-            // Member list
 
-            var listTitles = UIFactory.CreateUIObject("ListTitles", uiRoot);
+
+            // Member list titles
+
+            var listTitles = UIFactory.CreateUIObject("ListTitles", UIRoot);
             UIFactory.SetLayoutElement(listTitles, minHeight: 25);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(listTitles, true, true, true, true, 5, 1, 1, 1, 1);
 
@@ -286,25 +272,20 @@ namespace UnityExplorer.UI.Inspectors
             var valueTitle = UIFactory.CreateLabel(listTitles, "ValueTitle", "Value", TextAnchor.LowerLeft, Color.grey, fontSize: 15);
             UIFactory.SetLayoutElement(valueTitle.gameObject, minWidth: 50, flexibleWidth: 9999);
 
-            var updateButton = UIFactory.CreateButton(listTitles, "UpdateButton", "Update values", new Color(0.22f, 0.28f, 0.22f));
-            UIFactory.SetLayoutElement(updateButton.Button.gameObject, minHeight: 25, minWidth: 130, flexibleWidth: 0);
+            var updateButton = UIFactory.CreateButton(listTitles, "UpdateButton", "Update displayed values", new Color(0.22f, 0.28f, 0.22f));
+            UIFactory.SetLayoutElement(updateButton.Button.gameObject, minHeight: 25, minWidth: 160, flexibleWidth: 0);
             updateButton.OnClick += UpdateDisplayedMembers;
 
-            var updateText = UIFactory.CreateLabel(listTitles, "AutoUpdateLabel", "Auto-update", TextAnchor.MiddleRight, Color.grey);
-            UIFactory.SetLayoutElement(updateText.gameObject, minHeight: 25, minWidth: 80, flexibleWidth: 0);
-
             var toggleObj = UIFactory.CreateToggle(listTitles, "AutoUpdateToggle", out autoUpdateToggle, out Text toggleText);
-            GameObject.DestroyImmediate(toggleText);
-            UIFactory.SetLayoutElement(toggleObj, minHeight: 25, minWidth: 25);
+            //GameObject.DestroyImmediate(toggleText);
+            UIFactory.SetLayoutElement(toggleObj, minWidth: 185, minHeight: 25);
             autoUpdateToggle.isOn = false;
-            autoUpdateToggle.onValueChanged.AddListener((bool val) => { ToggleAllAutoUpdateStates(val); });
-
-            var spacer = UIFactory.CreateUIObject("spacer", listTitles);
-            UIFactory.SetLayoutElement(spacer, minWidth: 25, flexibleWidth: 0);
+            autoUpdateToggle.onValueChanged.AddListener((bool val) => { AutoUpdateWanted = val; });
+            toggleText.text = "Auto-update displayed";
 
             // Member scroll pool
 
-            MemberScrollPool = UIFactory.CreateScrollPool<CacheMemberCell>(uiRoot, "MemberList", out GameObject scrollObj,
+            MemberScrollPool = UIFactory.CreateScrollPool<CacheMemberCell>(UIRoot, "MemberList", out GameObject scrollObj,
                 out GameObject _, new Color(0.09f, 0.09f, 0.09f));
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
             MemberScrollPool.Initialize(this);
@@ -313,7 +294,7 @@ namespace UnityExplorer.UI.Inspectors
             //MemberScrollPool.Viewport.GetComponent<Mask>().enabled = false;
             //MemberScrollPool.Viewport.GetComponent<Image>().color = new Color(0.12f, 0.12f, 0.12f);
 
-            return uiRoot;
+            return UIRoot;
         }
     }
 }

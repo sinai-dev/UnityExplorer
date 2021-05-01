@@ -11,7 +11,7 @@ namespace UnityExplorer.UI.Widgets
     {
         bool Enabled { get; }
 
-        RectTransform Rect { get; }
+        RectTransform Rect { get; set; }
 
         void Enable();
         void Disable();

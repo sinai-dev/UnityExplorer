@@ -11,6 +11,22 @@ using UnityExplorer.UI.Utility;
 
 namespace UnityExplorer.UI.Inspectors.CacheObject
 {
+    public enum ValueState
+    {
+        NotEvaluated,
+        Exception,
+        NullValue,
+        Boolean,
+        Number,
+        String,
+        Enum,
+        Collection,
+        Dictionary,
+        ValueStruct,
+        Color,
+        Unsupported
+    }
+
     public abstract class CacheObjectBase
     {
         public CacheObjectCell CellView { get; internal set; }
@@ -23,7 +39,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
         public Type FallbackType { get; protected set; }
 
         public string NameLabelText { get; protected set; }
-        public string TypeLabelText { get; protected set; }
+        //public string TypeLabelText { get; set; }
         public string ValueLabelText { get; protected set; }
 
         public abstract bool ShouldAutoEvaluate { get; }
@@ -35,20 +51,13 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
         public virtual void Initialize(Type fallbackType)
         {
             this.FallbackType = fallbackType;
-            this.TypeLabelText = SignatureHighlighter.ParseFullType(FallbackType, false);
+            //this.TypeLabelText = SignatureHighlighter.ParseFullType(FallbackType, false);
             this.ValueLabelText = GetValueLabel();
         }
 
         // internals
 
         private static readonly Dictionary<string, MethodInfo> numberParseMethods = new Dictionary<string, MethodInfo>();
-
-        public enum ValueState
-        {
-            NotEvaluated, Exception, NullValue,
-            Boolean, Number, String, Enum,
-            Collection, ValueStruct, Unsupported
-        }
 
         public ValueState State = ValueState.NotEvaluated;
 
@@ -74,11 +83,42 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
 
         public virtual void ReleasePooledObjects()
         {
-            // TODO release IValue / Evaluate back to pool, etc
-            ReleaseIValue();
+            if (this.IValue != null)
+                ReleaseIValue();
+
+            // TODO release Evaluate
+
+            if (this.CellView != null)
+            {
+                this.CellView.Occupant = null;
+                this.CellView.SubContentHolder.SetActive(false);
+                this.CellView = null;
+            }
+            
         }
 
         // Updating and applying values
+
+        public virtual void SetValueFromSource(object value)
+        {
+            this.Value = value;
+
+            if (!Value.IsNullOrDestroyed())
+                Value = Value.TryCast();
+
+            var prevState = State;
+            ProcessOnEvaluate();
+
+            if (State != prevState)
+            {
+                // TODO handle if subcontent / evaluate shown, check type change, etc
+            }
+
+            if (this.IValue != null)
+            {
+                this.IValue.SetValue(Value);
+            }
+        }
 
         public abstract void SetUserValue(object value);
 
@@ -87,7 +127,6 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
         /// </summary>
         protected virtual void ProcessOnEvaluate()
         {
-            var prevState = State;
 
             if (HadException)
                 State = ValueState.Exception;
@@ -105,8 +144,10 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
                     State = ValueState.String;
                 else if (type.IsEnum)
                     State = ValueState.Enum;
-                else if (type.IsEnumerable() || type.IsDictionary())
+                else if (type.IsEnumerable())
                     State = ValueState.Collection;
+                else if (type.IsDictionary())
+                    State = ValueState.Dictionary;
                 // todo Color and ValueStruct
                 else
                     State = ValueState.Unsupported;
@@ -114,11 +155,6 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
 
             // Set label text
             ValueLabelText = GetValueLabel();
-
-            if (State != prevState)
-            {
-                // TODO handle if subcontent / evaluate shown, check type change, etc
-            }
         }
 
         protected string GetValueLabel()
@@ -148,6 +184,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             }
         }
 
+        /// <summary>Return true if SetCell should abort, false if it should continue.</summary>
         protected abstract bool SetCellEvaluateState(CacheObjectCell cell);
 
         public virtual void SetCell(CacheObjectCell cell)
@@ -167,81 +204,96 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
                 case ValueState.Exception:
                 case ValueState.NullValue:
                     ReleaseIValue();
-                    SetValueState(cell, true, true, Color.white, false, false, false, false, false, false);
+                    SetValueState(cell, ValueStateArgs.Default);
                     break;
                 case ValueState.Boolean:
-                    SetValueState(cell, false, false, default, false, toggleActive: true, false, CanWrite, false, false);
+                    SetValueState(cell, new ValueStateArgs(false, toggleActive:true, applyActive: CanWrite));
                     break;
                 case ValueState.Number:
-                    SetValueState(cell, false, true, Color.white, true, false, inputActive: true, CanWrite, false, false);
+                    SetValueState(cell, new ValueStateArgs(false, typeLabelActive: true, inputActive: true, applyActive: CanWrite));
                     break;
                 case ValueState.String:
-                    UpdateIValueOnValueUpdate();
-                    SetValueState(cell, true, false, SignatureHighlighter.StringOrange, false, false, false, false, false, true);
+                    SetIValueState();
+                    SetValueState(cell, new ValueStateArgs(true, false, SignatureHighlighter.StringOrange, subContentButtonActive: true));
                     break;
                 case ValueState.Enum:
-                    UpdateIValueOnValueUpdate();
-                    SetValueState(cell, true, true, Color.white, false, false, false, false, false, true);
+                    SetIValueState();
+                    SetValueState(cell, new ValueStateArgs(true, subContentButtonActive: true));
                     break;
                 case ValueState.Collection:
                 case ValueState.ValueStruct:
-                    UpdateIValueOnValueUpdate();
-                    SetValueState(cell, true, true, Color.white, false, false, false, false, true, true);
+                    SetIValueState();
+                    SetValueState(cell, new ValueStateArgs(true, inspectActive: true, subContentButtonActive: true));
                     break;
                 case ValueState.Unsupported:
-                    SetValueState(cell, true, true, Color.white, false, false, false, false, true, false);
+                    SetValueState(cell, new ValueStateArgs(true, inspectActive: true));
                     break;
             }
         }
 
-        protected virtual void SetValueState(CacheObjectCell cell, bool valueActive, bool valueRichText, Color valueColor,
-            bool typeLabelActive, bool toggleActive, bool inputActive, bool applyActive, bool inspectActive, bool subContentActive)
+        protected virtual void SetValueState(CacheObjectCell cell, ValueStateArgs args)
         {
-            //cell.ValueLabel.gameObject.SetActive(valueActive);
-            if (valueActive)
+            if (args.valueActive)
             {
                 cell.ValueLabel.text = ValueLabelText;
-                cell.ValueLabel.supportRichText = valueRichText;
-                cell.ValueLabel.color = valueColor;
+                cell.ValueLabel.supportRichText = args.valueRichText;
+                cell.ValueLabel.color = args.valueColor;
             }
             else
                 cell.ValueLabel.text = "";
 
-            cell.TypeLabel.gameObject.SetActive(typeLabelActive);
-            if (typeLabelActive)
-                cell.TypeLabel.text = TypeLabelText;
+            cell.TypeLabel.gameObject.SetActive(args.typeLabelActive);
+            if (args.typeLabelActive)
+                cell.TypeLabel.text = SignatureHighlighter.ParseFullType(Value.GetActualType(), false);
 
-            cell.Toggle.gameObject.SetActive(toggleActive);
-            if (toggleActive)
+            cell.Toggle.gameObject.SetActive(args.toggleActive);
+            if (args.toggleActive)
             {
                 cell.Toggle.isOn = (bool)Value;
                 cell.ToggleText.text = Value.ToString();
             }
 
-            cell.InputField.gameObject.SetActive(inputActive);
-            if (inputActive)
+            cell.InputField.gameObject.SetActive(args.inputActive);
+            if (args.inputActive)
             {
                 cell.InputField.text = Value.ToString();
                 cell.InputField.readOnly = !CanWrite;
             }
 
-            cell.ApplyButton.Button.gameObject.SetActive(applyActive);
-            cell.InspectButton.Button.gameObject.SetActive(inspectActive);
-            cell.SubContentButton.Button.gameObject.SetActive(subContentActive);
+            cell.ApplyButton.Button.gameObject.SetActive(args.applyActive);
+            cell.InspectButton.Button.gameObject.SetActive(args.inspectActive);
+            cell.SubContentButton.Button.gameObject.SetActive(args.subContentButtonActive);
         }
 
         // IValues
 
+        /// <summary>Called from SetCellState if SubContent button is wanted.</summary>
+        public void SetIValueState()
+        {
+            if (this.IValue == null)
+                return;
+
+            // TODO ?
+        }
+
+        // temp for testing
         public virtual void OnCellSubContentToggle()
         {
             if (this.IValue == null)
             {
-                IValue = (InteractiveValue)Pool.Borrow(typeof(InteractiveValue));
-                CurrentIValueType = IValue.GetType();
+                var ivalueType = InteractiveValue.GetIValueTypeForState(State);
+                IValue = (InteractiveValue)Pool.Borrow(ivalueType);
+                CurrentIValueType = ivalueType;
+
                 IValue.SetOwner(this);
+                IValue.SetValue(this.Value);
                 IValue.UIRoot.transform.SetParent(CellView.SubContentHolder.transform, false);
                 CellView.SubContentHolder.SetActive(true);
                 SubContentState = true;
+
+                // update our cell after creating the ivalue (the value may have updated, make sure its consistent)
+                this.ProcessOnEvaluate();
+                this.SetCell(this.CellView);
             }
             else
             {
@@ -255,7 +307,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             if (IValue == null)
                 return;
 
-            IValue.OnOwnerReleased();
+            IValue.ReleaseFromOwner();
             Pool.Return(CurrentIValueType, IValue);
 
             IValue = null;
@@ -267,14 +319,6 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
                 return;
 
             this.IValue.UIRoot.transform.SetParent(InactiveIValueHolder.transform, false);
-        }
-
-        public void UpdateIValueOnValueUpdate()
-        {
-            if (this.IValue == null)
-                return;
-
-            IValue.SetValue(Value);
         }
 
         // CacheObjectCell Apply
@@ -303,6 +347,32 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             }
 
             SetCell(this.CellView);
+        }
+
+        public struct ValueStateArgs
+        {
+            public ValueStateArgs(bool valueActive = true, bool valueRichText = true, Color? valueColor = null,
+                bool typeLabelActive = false, bool toggleActive = false, bool inputActive = false, bool applyActive = false,
+                bool inspectActive = false, bool subContentButtonActive = false)
+            {
+                this.valueActive = valueActive;
+                this.valueRichText = valueRichText;
+                this.valueColor = valueColor == null ? Color.white : (Color)valueColor;
+                this.typeLabelActive = typeLabelActive;
+                this.toggleActive = toggleActive;
+                this.inputActive = inputActive;
+                this.applyActive = applyActive;
+                this.inspectActive = inspectActive;
+                this.subContentButtonActive = subContentButtonActive;
+            }
+
+            public static ValueStateArgs Default => _default;
+            private static ValueStateArgs _default = new ValueStateArgs(true);
+
+            public bool valueActive, valueRichText, typeLabelActive, toggleActive,
+                inputActive, applyActive, inspectActive, subContentButtonActive;
+
+            public Color valueColor;
         }
     }
 }

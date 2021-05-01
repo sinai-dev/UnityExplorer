@@ -7,17 +7,41 @@ namespace UnityExplorer.Tests
 {
     public static class TestClass
     {
-        public static List<string> List;
+        public static List<object> List
+        {
+            get
+            {
+                var list = new List<object>();
+                int count = UnityEngine.Random.Range(0, 100);
+                for (int i = 0; i < count; i++)
+                    list.Add(GetRandomObject());
+                return list;
+            }
+        }
+
+        private static object GetRandomObject()
+        {
+            object ret = null;
+
+            int ran = UnityEngine.Random.Range(0, 7);
+            switch (ran)
+            {
+                case 0: return null;
+                case 1: return 123;
+                case 2: return true;
+                case 3: return "hello";
+                case 4: return 50.5f;
+                case 5: return UnityEngine.CameraClearFlags.Color;
+                case 6: return new List<string> { "sub list", "lol" };
+            }
+
+            return ret;
+        }
 
         public const int ConstantInt = 5;
 
         public static byte[] ByteArray = new byte[16];
-
-        public static string LongString = @"#######################################################################################################
-###############################################################################################################################
-#####################################################################################################################################
-#########################################################################################################################
-######################################################################################################";
+        public static string LongString = new string('#', 10000);
 
 #if CPP
         public static string testStringOne = "Test";
@@ -31,10 +55,6 @@ namespace UnityExplorer.Tests
 
         static TestClass()
         {
-            List = new List<string>();
-            for (int i = 0; i < 10000; i++)
-                List.Add(i.ToString());
-
 #if CPP
             testHashset = new Il2CppSystem.Collections.Hashtable();
             testHashset.Add("key1", "itemOne");

@@ -19,43 +19,40 @@ namespace UnityExplorer.UI.Widgets
 
         #region ICell
 
-        public GameObject UIRoot => uiRoot;
-        public GameObject uiRoot;
-
         public bool Enabled => m_enabled;
         private bool m_enabled;
 
-        public RectTransform Rect => m_rect;
-        private RectTransform m_rect;
+        public GameObject UIRoot { get; set; }
+        public RectTransform Rect { get; set; }
 
         public void Disable()
         {
             m_enabled = false;
-            uiRoot.SetActive(false);
+            UIRoot.SetActive(false);
         }
 
         public void Enable()
         {
             m_enabled = true;
-            uiRoot.SetActive(true);
+            UIRoot.SetActive(true);
         }
 
         #endregion
 
         public GameObject CreateContent(GameObject parent)
         {
-            uiRoot = UIFactory.CreateHorizontalGroup(parent, "ButtonCell", true, true, true, true, 2, default,
+            UIRoot = UIFactory.CreateHorizontalGroup(parent, "ButtonCell", true, true, true, true, 2, default,
                 new Color(0.11f, 0.11f, 0.11f), TextAnchor.MiddleCenter);
-            m_rect = uiRoot.GetComponent<RectTransform>();
-            m_rect.anchorMin = new Vector2(0, 1);
-            m_rect.anchorMax = new Vector2(0, 1);
-            m_rect.pivot = new Vector2(0.5f, 1);
-            m_rect.sizeDelta = new Vector2(25, 25);
-            UIFactory.SetLayoutElement(uiRoot, minWidth: 100, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
+            Rect = UIRoot.GetComponent<RectTransform>();
+            Rect.anchorMin = new Vector2(0, 1);
+            Rect.anchorMax = new Vector2(0, 1);
+            Rect.pivot = new Vector2(0.5f, 1);
+            Rect.sizeDelta = new Vector2(25, 25);
+            UIFactory.SetLayoutElement(UIRoot, minWidth: 100, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
 
-            uiRoot.SetActive(false);
+            UIRoot.SetActive(false);
 
-            this.Button = UIFactory.CreateButton(uiRoot, "NameButton", "Name");
+            this.Button = UIFactory.CreateButton(UIRoot, "NameButton", "Name");
             UIFactory.SetLayoutElement(Button.Button.gameObject, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
             var buttonText = Button.Button.GetComponentInChildren<Text>();
             buttonText.horizontalOverflow = HorizontalWrapMode.Overflow;
@@ -69,7 +66,7 @@ namespace UnityExplorer.UI.Widgets
 
             Button.OnClick += () => { OnClick?.Invoke(CurrentDataIndex); };
 
-            return uiRoot;
+            return UIRoot;
         }
     }
 }

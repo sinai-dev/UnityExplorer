@@ -89,6 +89,7 @@ namespace UnityExplorer.UI.Utility
 
             if (totalHeight <= viewportHeight)
             {
+                Slider.handleRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 0f);
                 Slider.value = 0f;
                 Slider.interactable = false;
                 return;

@@ -8,7 +8,7 @@ namespace UnityExplorer.UI.ObjectPool
 {
     public interface IPooledObject
     {
-        GameObject UIRoot { get; }
+        GameObject UIRoot { get; set; }
 
         GameObject CreateContent(GameObject parent);
 

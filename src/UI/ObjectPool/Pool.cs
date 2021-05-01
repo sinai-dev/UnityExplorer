@@ -66,9 +66,9 @@ namespace UnityExplorer.UI.ObjectPool
         {
             s_instance = this;
 
-            ExplorerCore.LogWarning("Creating Pool<" + typeof(T).Name + ">");
+            //ExplorerCore.LogWarning("Creating Pool<" + typeof(T).Name + ">");
 
-            InactiveHolder = new GameObject($"InactiveHolder_{typeof(T).Name}");
+            InactiveHolder = new GameObject($"PoolHolder_{typeof(T).Name}");
             InactiveHolder.transform.parent = UIManager.PoolHolder.transform;
             InactiveHolder.hideFlags |= HideFlags.HideAndDontSave;
             InactiveHolder.SetActive(false);

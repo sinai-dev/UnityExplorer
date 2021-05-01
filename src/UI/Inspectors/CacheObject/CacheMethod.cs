@@ -9,6 +9,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
     public class CacheMethod : CacheMember
     {
         public MethodInfo MethodInfo { get; internal set; }
+        public override Type DeclaringType => MethodInfo.DeclaringType;
 
         public override bool ShouldAutoEvaluate => false;
 

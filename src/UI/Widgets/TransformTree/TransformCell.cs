@@ -21,10 +21,8 @@ namespace UnityExplorer.UI.Widgets
         public CachedTransform cachedTransform;
         public int _cellIndex;
 
-        public GameObject UIRoot => uiRoot;
-        public GameObject uiRoot;
-        public RectTransform Rect => m_rect;
-        private RectTransform m_rect;
+        public GameObject UIRoot { get; set; }
+        public RectTransform Rect { get; set; }
 
         public ButtonRef ExpandButton;
         public ButtonRef NameButton;
@@ -78,13 +76,13 @@ namespace UnityExplorer.UI.Widgets
         public void Disable()
         {
             m_enabled = false;
-            uiRoot.SetActive(false);
+            UIRoot.SetActive(false);
         }
 
         public void Enable()
         {
             m_enabled = true;
-            uiRoot.SetActive(true);
+            UIRoot.SetActive(true);
         }
 
         public void OnExpandClicked()
@@ -102,23 +100,23 @@ namespace UnityExplorer.UI.Widgets
 
         public GameObject CreateContent(GameObject parent)
         {
-            uiRoot = UIFactory.CreateUIObject("TransformCell", parent);
-            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(uiRoot, true, true, true, true, 2, childAlignment: TextAnchor.MiddleCenter);
-            m_rect = uiRoot.GetComponent<RectTransform>();
-            m_rect.anchorMin = new Vector2(0, 1);
-            m_rect.anchorMax = new Vector2(0, 1);
-            m_rect.pivot = new Vector2(0.5f, 1);
-            m_rect.sizeDelta = new Vector2(25, 25);
-            UIFactory.SetLayoutElement(uiRoot, minWidth: 100, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
+            UIRoot = UIFactory.CreateUIObject("TransformCell", parent);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(UIRoot, true, true, true, true, 2, childAlignment: TextAnchor.MiddleCenter);
+            Rect = UIRoot.GetComponent<RectTransform>();
+            Rect.anchorMin = new Vector2(0, 1);
+            Rect.anchorMax = new Vector2(0, 1);
+            Rect.pivot = new Vector2(0.5f, 1);
+            Rect.sizeDelta = new Vector2(25, 25);
+            UIFactory.SetLayoutElement(UIRoot, minWidth: 100, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
 
-            var spacerObj = UIFactory.CreateUIObject("Spacer", uiRoot, new Vector2(0, 0));
+            var spacerObj = UIFactory.CreateUIObject("Spacer", UIRoot, new Vector2(0, 0));
             UIFactory.SetLayoutElement(spacerObj, minWidth: 0, flexibleWidth: 0, minHeight: 0, flexibleHeight: 0);
             this.spacer = spacerObj.GetComponent<LayoutElement>();
 
-            ExpandButton = UIFactory.CreateButton(this.uiRoot, "ExpandButton", "►");
+            ExpandButton = UIFactory.CreateButton(this.UIRoot, "ExpandButton", "►");
             UIFactory.SetLayoutElement(ExpandButton.Button.gameObject, minWidth: 15, flexibleWidth: 0, minHeight: 25, flexibleHeight: 0);
 
-            NameButton = UIFactory.CreateButton(this.uiRoot, "NameButton", "Name", null);
+            NameButton = UIFactory.CreateButton(this.UIRoot, "NameButton", "Name", null);
             UIFactory.SetLayoutElement(NameButton.Button.gameObject, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
             var nameLabel = NameButton.Button.GetComponentInChildren<Text>();
             nameLabel.horizontalOverflow = HorizontalWrapMode.Overflow;
@@ -134,9 +132,9 @@ namespace UnityExplorer.UI.Widgets
             NameButton.OnClick += OnMainButtonClicked;
             ExpandButton.OnClick += OnExpandClicked;
 
-            uiRoot.SetActive(false);
+            UIRoot.SetActive(false);
 
-            return this.uiRoot;
+            return this.UIRoot;
         }
     }
 }

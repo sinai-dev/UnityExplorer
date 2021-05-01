@@ -11,22 +11,43 @@ namespace UnityExplorer.UI.Inspectors.IValues
 {
     public class InteractiveValue : IPooledObject
     {
-        public GameObject UIRoot => uiRoot;
-        private GameObject uiRoot;
+        public GameObject UIRoot { get; set; }
 
         public float DefaultHeight => -1f;
+
+        public virtual bool CanWrite => this.CurrentOwner.CanWrite;
 
         public CacheObjectBase CurrentOwner { get; }
         private CacheObjectBase m_owner;
 
         public object EditedValue { get; private set; }
 
+        public static Type GetIValueTypeForState(ValueState state)
+        {
+            switch (state)
+            {
+                //case ValueState.String:
+                //    return null;
+                //case ValueState.Enum:
+                //    return null;
+                case ValueState.Collection:
+                    return typeof(InteractiveList);
+                //case ValueState.Dictionary:
+                //    return null;
+                //case ValueState.ValueStruct:
+                //    return null;
+                //case ValueState.Color:
+                //    return null;
+                default: return typeof(InteractiveValue);
+            }
+        }
+
         public virtual void SetOwner(CacheObjectBase owner)
         {
             if (this.m_owner != null)
             {
                 ExplorerCore.LogWarning("Setting an IValue's owner but there is already one set. Maybe it wasn't cleaned up?");
-                OnOwnerReleased();
+                ReleaseFromOwner();
             }
 
             this.m_owner = owner;
@@ -38,23 +59,22 @@ namespace UnityExplorer.UI.Inspectors.IValues
             this.EditedValue = value;
         }
 
-        public virtual void OnOwnerReleased()
+        public virtual void ReleaseFromOwner()
         {
             if (this.m_owner == null)
                 return;
 
-            // ...
             this.m_owner = null;
         }
 
-        public GameObject CreateContent(GameObject parent)
+        public virtual GameObject CreateContent(GameObject parent)
         {
-            uiRoot = UIFactory.CreateUIObject(this.GetType().Name, parent);
-            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(uiRoot, true, true, true, true, 3, childAlignment: TextAnchor.MiddleLeft);
+            UIRoot = UIFactory.CreateUIObject(this.GetType().Name, parent);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(UIRoot, true, true, true, true, 3, childAlignment: TextAnchor.MiddleLeft);
 
-            UIFactory.CreateLabel(uiRoot, "Label", "this is an ivalue", TextAnchor.MiddleLeft);
+            UIFactory.CreateLabel(UIRoot, "Label", "this is an ivalue", TextAnchor.MiddleLeft);
 
-            return uiRoot;
+            return UIRoot;
         }
     }
 }

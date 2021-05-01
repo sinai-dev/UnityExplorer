@@ -17,7 +17,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
         public GameObject EvaluateHolder;
         public ButtonRef EvaluateButton;
 
-        public Toggle UpdateToggle;
+        //public Toggle UpdateToggle;
 
         protected virtual void EvaluateClicked()
         {
@@ -37,15 +37,15 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
             EvaluateButton.OnClick += EvaluateClicked;
         }
 
-        protected override void ConstructUpdateToggle(GameObject parent)
-        {
-            // Auto-update toggle
-
-            var updateToggle = UIFactory.CreateToggle(parent, "AutoUpdate", out UpdateToggle, out Text autoText);
-            UIFactory.SetLayoutElement(updateToggle, minHeight: 25, minWidth: 30, flexibleWidth: 0, flexibleHeight: 0);
-            GameObject.Destroy(autoText);
-            UpdateToggle.isOn = false;
-            UpdateToggle.onValueChanged.AddListener((bool val) => { MemberOccupant.AutoUpdateWanted = val; });
-        }
+        //protected override void ConstructUpdateToggle(GameObject parent)
+        //{
+        //    // Auto-update toggle
+        //
+        //    var updateToggle = UIFactory.CreateToggle(parent, "AutoUpdate", out UpdateToggle, out Text autoText);
+        //    UIFactory.SetLayoutElement(updateToggle, minHeight: 25, minWidth: 30, flexibleWidth: 0, flexibleHeight: 0);
+        //    GameObject.Destroy(autoText);
+        //    UpdateToggle.isOn = false;
+        //    UpdateToggle.onValueChanged.AddListener((bool val) => { MemberOccupant.AutoUpdateWanted = val; });
+        //}
     }
 }

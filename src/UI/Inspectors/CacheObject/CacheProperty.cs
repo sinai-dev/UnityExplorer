@@ -9,6 +9,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
     public class CacheProperty : CacheMember
     {
         public PropertyInfo PropertyInfo { get; internal set; }
+        public override Type DeclaringType => PropertyInfo.DeclaringType;
 
         public override bool ShouldAutoEvaluate => !HasArguments;
 

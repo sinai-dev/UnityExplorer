@@ -17,25 +17,23 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
 
         public float DefaultHeight => 30f;
 
-        public GameObject UIRoot => uiRoot;
-        public GameObject uiRoot;
+        public GameObject UIRoot { get; set; }
 
         public bool Enabled => m_enabled;
         private bool m_enabled;
 
-        public RectTransform Rect => m_rect;
-        private RectTransform m_rect;
+        public RectTransform Rect { get; set; }
 
         public void Disable()
         {
             m_enabled = false;
-            uiRoot.SetActive(false);
+            UIRoot.SetActive(false);
         }
 
         public void Enable()
         {
             m_enabled = true;
-            uiRoot.SetActive(true);
+            UIRoot.SetActive(true);
         }
 
         #endregion
@@ -43,7 +41,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
         public CacheObjectBase Occupant { get; set; }
         public bool SubContentActive => SubContentHolder.activeSelf;
 
-        public LayoutElement MemberLayout;
+        public LayoutElement NameLayout;
         public LayoutElement RightGroupLayout;
 
         public Text NameLabel;
@@ -81,25 +79,26 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
 
         protected abstract void ConstructEvaluateHolder(GameObject parent);
 
-        protected abstract void ConstructUpdateToggle(GameObject parent);
+        // protected abstract void ConstructUpdateToggle(GameObject parent);
 
         // Todo could create these as needed maybe, just need to make sure the transform order is correct.
 
-        public GameObject CreateContent(GameObject parent)
+        public virtual GameObject CreateContent(GameObject parent)
         {
             // Main layout
 
-            uiRoot = UIFactory.CreateUIObject("CacheMemberCell", parent, new Vector2(100, 30));
-            m_rect = uiRoot.GetComponent<RectTransform>();
-            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(uiRoot, true, false, true, true, 2, 0);
-            UIFactory.SetLayoutElement(uiRoot, minWidth: 100, flexibleWidth: 9999, minHeight: 30, flexibleHeight: 600);
+            UIRoot = UIFactory.CreateUIObject(this.GetType().Name, parent, new Vector2(100, 30));
+            Rect = UIRoot.GetComponent<RectTransform>();
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(UIRoot, true, false, true, true, 0, 0);
+            UIFactory.SetLayoutElement(UIRoot, minWidth: 100, flexibleWidth: 9999, minHeight: 30, flexibleHeight: 600);
             UIRoot.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-            var separator = UIFactory.CreateUIObject("TopSeperator", uiRoot);
-            UIFactory.SetLayoutElement(separator, minHeight: 1, flexibleHeight: 0, flexibleWidth: 9999);
-            separator.AddComponent<Image>().color = Color.black;
+            var content = UIFactory.CreateUIObject("Content", UIRoot);
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(content, true, false, true, true, 2, 0);
+            UIFactory.SetLayoutElement(content, minWidth: 100, flexibleWidth: 9999, minHeight: 30, flexibleHeight: 600);
+            content.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-            var horiRow = UIFactory.CreateUIObject("HoriGroup", uiRoot);
+            var horiRow = UIFactory.CreateUIObject("HoriGroup", content);
             UIFactory.SetLayoutElement(horiRow, minHeight: 29, flexibleHeight: 150, flexibleWidth: 9999);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(horiRow, false, false, true, true, 5, 2, childAlignment: TextAnchor.UpperLeft);
             horiRow.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
@@ -109,7 +108,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
             NameLabel = UIFactory.CreateLabel(horiRow, "MemberLabel", "<notset>", TextAnchor.MiddleLeft);
             NameLabel.horizontalOverflow = HorizontalWrapMode.Wrap;
             UIFactory.SetLayoutElement(NameLabel.gameObject, minHeight: 25, minWidth: 20, flexibleHeight: 300, flexibleWidth: 0);
-            MemberLayout = NameLabel.GetComponent<LayoutElement>();
+            NameLayout = NameLabel.GetComponent<LayoutElement>();
 
             // Right vertical group
 
@@ -162,17 +161,20 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
             ValueLabel.horizontalOverflow = HorizontalWrapMode.Wrap;
             UIFactory.SetLayoutElement(ValueLabel.gameObject, minHeight: 25, flexibleHeight: 150, flexibleWidth: 9999);
 
-            ConstructUpdateToggle(rightHoriGroup);
+            // Subcontent
 
-            // Subcontent (todo?)
-
-            SubContentHolder = UIFactory.CreateUIObject("SubContent", uiRoot);
+            SubContentHolder = UIFactory.CreateUIObject("SubContent", content);
             UIFactory.SetLayoutElement(SubContentHolder.gameObject, minHeight: 30, flexibleHeight: 500, minWidth: 100, flexibleWidth: 9999);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(SubContentHolder, true, false, true, true, 2, childAlignment: TextAnchor.UpperLeft);
             
             SubContentHolder.SetActive(false);
 
-            return uiRoot;
+            // Bottom separator
+            var separator = UIFactory.CreateUIObject("BottomSeperator", UIRoot);
+            UIFactory.SetLayoutElement(separator, minHeight: 1, flexibleHeight: 0, flexibleWidth: 9999);
+            separator.AddComponent<Image>().color = Color.black;
+
+            return UIRoot;
         }
     }
 }
