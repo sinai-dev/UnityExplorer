@@ -201,9 +201,8 @@ The following helper methods are available:
 
         internal static bool IsUserCopyPasting()
         {
-            return inputsWithinThreshold > inputThreshold;
-            return (InputManager.GetKey(KeyCode.LeftControl) || InputManager.GetKey(KeyCode.RightControl))
-                && InputManager.GetKeyDown(KeyCode.V);
+            return ((InputManager.GetKey(KeyCode.LeftControl) || InputManager.GetKey(KeyCode.RightControl))
+                && InputManager.GetKeyDown(KeyCode.V)) || inputsWithinThreshold > inputThreshold;
         }
 
         public void UpdateConsole()
