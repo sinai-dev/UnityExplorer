@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityExplorer.UI.ObjectPool;
 using UnityExplorer.UI.Panels;
 
@@ -11,7 +12,7 @@ namespace UnityExplorer.UI.Inspectors
     public abstract class InspectorBase : IPooledObject
     {
         public bool IsActive { get; internal set; }
-        public object InspectorTarget { get; internal set; }
+        public object Target { get; set; }
 
         public InspectorTab Tab { get; internal set; }
 
@@ -24,6 +25,7 @@ namespace UnityExplorer.UI.Inspectors
 
         public virtual void OnBorrowedFromPool(object target)
         {
+            this.Target = target;
             Tab = Pool<InspectorTab>.Borrow();
             Tab.UIRoot.transform.SetParent(InspectorPanel.Instance.NavbarHolder.transform, false);
 
@@ -44,6 +46,7 @@ namespace UnityExplorer.UI.Inspectors
             Tab.SetTabColor(true);
             UIRoot.SetActive(true);
             IsActive = true;
+            LayoutRebuilder.ForceRebuildLayoutImmediate(UIRoot.GetComponent<RectTransform>());
         }
 
         public virtual void OnSetInactive()

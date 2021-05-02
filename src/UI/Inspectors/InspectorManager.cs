@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityExplorer.UI.Inspectors.CacheObject;
 using UnityExplorer.UI.ObjectPool;
 using UnityExplorer.UI.Panels;
 
@@ -17,7 +18,7 @@ namespace UnityExplorer.UI.Inspectors
 
         public static float PanelWidth;
 
-        public static void Inspect(object obj)
+        public static void Inspect(object obj, CacheObjectBase sourceCache = null)
         {
             if (obj.IsNullOrDestroyed())
                 return;
@@ -27,17 +28,21 @@ namespace UnityExplorer.UI.Inspectors
             if (TryFocusActiveInspector(obj))
                 return;
 
+            // var type = obj.GetActualType();
+            //if (type.IsEnumerable())
+            //    CreateInspector<ListInspector>(obj, false, sourceCache);
+            //// todo dict
             if (obj is GameObject)
                 CreateInspector<GameObjectInspector>(obj);
             else
-                CreateInspector<ReflectionInspector>(obj);
+                CreateInspector<ReflectionInspector>(obj, false, sourceCache);
         }
 
         private static bool TryFocusActiveInspector(object target)
         {
             foreach (var inspector in Inspectors)
             {
-                if (inspector.InspectorTarget.ReferenceEqual(target))
+                if (inspector.Target.ReferenceEqual(target))
                 {
                     UIManager.SetPanelActive(UIManager.Panels.Inspector, true);
                     SetInspectorActive(inspector);
@@ -66,11 +71,14 @@ namespace UnityExplorer.UI.Inspectors
                 ActiveInspector.OnSetInactive();
         }
 
-        private static void CreateInspector<T>(object target, bool staticReflection = false) where T : InspectorBase
+        private static void CreateInspector<T>(object target, bool staticReflection = false, CacheObjectBase sourceCache = null) where T : InspectorBase
         {
             var inspector = Pool<T>.Borrow();
             Inspectors.Add(inspector);
-            inspector.InspectorTarget = target;
+            inspector.Target = target;
+
+            if (sourceCache != null && inspector is ReflectionInspector ri)
+                ri.ParentCacheObject = sourceCache;
 
             UIManager.SetPanelActive(UIManager.Panels.Inspector, true);
             inspector.UIRoot.transform.SetParent(InspectorPanel.Instance.ContentHolder.transform, false);

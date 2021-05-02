@@ -531,7 +531,7 @@ namespace UnityExplorer.UI
             placeHolderRect.offsetMin = Vector2.zero;
             placeHolderRect.offsetMax = Vector2.zero;
 
-            SetLayoutElement(placeHolderObj, minWidth: 200, flexibleWidth: 5000);
+            //SetLayoutElement(placeHolderObj, minWidth: 20, flexibleWidth: 5000);
 
             inputField.placeholder = placeholderText;
 
@@ -550,9 +550,10 @@ namespace UnityExplorer.UI
             inputTextRect.offsetMin = Vector2.zero;
             inputTextRect.offsetMax = Vector2.zero;
 
-            SetLayoutElement(inputTextObj, minWidth: 200, flexibleWidth: 5000);
+            //SetLayoutElement(inputTextObj, minWidth: 200, flexibleWidth: 5000);
 
             inputField.textComponent = inputText;
+            inputField.characterLimit = UIManager.MAX_INPUTFIELD_CHARS;
 
             new InputFieldRefresher(inputField);
 

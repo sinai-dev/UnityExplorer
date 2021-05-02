@@ -11,7 +11,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
 {
     public abstract class CacheMember : CacheObjectBase
     {
-        public ReflectionInspector ParentInspector { get; internal set; }
+        //public ReflectionInspector ParentInspector { get; internal set; }
         //public bool AutoUpdateWanted { get; internal set; }
         
         public abstract Type DeclaringType { get; }
@@ -23,7 +23,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
         
         public virtual void SetInspectorOwner(ReflectionInspector inspector, MemberInfo member)
         {
-            this.ParentInspector = inspector;
+            this.Owner = inspector;
             this.NameLabelText = SignatureHighlighter.ParseFullSyntax(member.DeclaringType, false, member);
             this.NameForFiltering = $"{member.DeclaringType.Name}.{member.Name}";
         }
@@ -82,6 +82,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             {
                 // todo evaluate buttons etc
                 SetValueState(cell, ValueStateArgs.Default);
+                cell.RefreshSubcontentButton();
 
                 return true;
             }
@@ -235,7 +236,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
                 cachedSigs.Add(sig);
 
                 //cached.Initialize(_inspector, declaringType, member, returnType);
-                cached.Initialize(returnType);
+                cached.SetFallbackType(returnType);
                 cached.SetInspectorOwner(_inspector, member);
 
                 list.Add(cached);

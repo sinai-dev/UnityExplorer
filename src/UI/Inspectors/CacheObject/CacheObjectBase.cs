@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityExplorer.UI.Inspectors.CacheObject.Views;
 using UnityExplorer.UI.Inspectors.IValues;
 using UnityExplorer.UI.ObjectPool;
@@ -29,30 +30,30 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
 
     public abstract class CacheObjectBase
     {
-        public CacheObjectCell CellView { get; internal set; }
+        public ICacheObjectController Owner { get; set; }
 
-        public InteractiveValue IValue { get; private set; }
-        public Type CurrentIValueType { get; private set; }
-        public bool SubContentState { get; private set; }
+        public CacheObjectCell CellView { get; internal set; }
 
         public object Value { get; protected set; }
         public Type FallbackType { get; protected set; }
 
+        public InteractiveValue IValue { get; private set; }
+        public Type CurrentIValueType { get; private set; }
+        public bool SubContentShowWanted { get; private set; }
+
         public string NameLabelText { get; protected set; }
-        //public string TypeLabelText { get; set; }
         public string ValueLabelText { get; protected set; }
 
         public abstract bool ShouldAutoEvaluate { get; }
         public abstract bool HasArguments { get; }
-        public bool CanWrite { get; protected set; }
+        public abstract bool CanWrite { get; }
         public bool HadException { get; protected set; }
         public Exception LastException { get; protected set; }
 
-        public virtual void Initialize(Type fallbackType)
+        public virtual void SetFallbackType(Type fallbackType)
         {
             this.FallbackType = fallbackType;
-            //this.TypeLabelText = SignatureHighlighter.ParseFullType(FallbackType, false);
-            this.ValueLabelText = GetValueLabel();
+            GetValueLabel();
         }
 
         // internals
@@ -144,44 +145,50 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
                     State = ValueState.String;
                 else if (type.IsEnum)
                     State = ValueState.Enum;
-                else if (type.IsEnumerable())
-                    State = ValueState.Collection;
+
+                // todo Color and ValueStruct
+
                 else if (type.IsDictionary())
                     State = ValueState.Dictionary;
-                // todo Color and ValueStruct
+                else if (type.IsEnumerable())
+                    State = ValueState.Collection;
                 else
                     State = ValueState.Unsupported;
             }
 
             // Set label text
-            ValueLabelText = GetValueLabel();
+            GetValueLabel();
         }
 
-        protected string GetValueLabel()
+        protected void GetValueLabel()
         {
+            string label;
             switch (State)
             {
                 case ValueState.NotEvaluated:
-                    return $"<i>{NOT_YET_EVAL} ({SignatureHighlighter.ParseFullType(FallbackType, true)})</i>";
+                    label = $"<i>{NOT_YET_EVAL} ({SignatureHighlighter.ParseFullType(FallbackType, true)})</i>"; break;
                 case ValueState.Exception:
-                    return $"<i><color=red>{ReflectionUtility.ReflectionExToString(LastException)}</color></i>";
+                    label = $"<i><color=red>{ReflectionUtility.ReflectionExToString(LastException)}</color></i>"; break;
                 case ValueState.Boolean:
                 case ValueState.Number:
-                    return null;
+                    label = null; break;
                 case ValueState.String:
                     string s = Value as string;
                     if (s.Length > 200)
                         s = $"{s.Substring(0, 200)}...";
-                    return $"\"{s}\"";
+                    label = $"\"{s}\""; break;
                 case ValueState.NullValue:
-                    return $"<i>{ToStringUtility.ToStringWithType(Value, FallbackType, true)}</i>";
+                    label = $"<i>{ToStringUtility.ToStringWithType(Value, FallbackType, true)}</i>"; break;
                 case ValueState.Enum:
                 case ValueState.Collection:
+                case ValueState.Dictionary:
                 case ValueState.ValueStruct:
+                case ValueState.Color:
                 case ValueState.Unsupported:
                 default:
-                    return ToStringUtility.ToStringWithType(Value, FallbackType, true);
+                    label = ToStringUtility.ToStringWithType(Value, FallbackType, true); break;
             }
+            this.ValueLabelText = label;
         }
 
         /// <summary>Return true if SetCell should abort, false if it should continue.</summary>
@@ -192,9 +199,12 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             cell.NameLabel.text = NameLabelText;
             cell.ValueLabel.gameObject.SetActive(true);
 
-            cell.SubContentHolder.gameObject.SetActive(SubContentState);
+            cell.SubContentHolder.gameObject.SetActive(SubContentShowWanted);
             if (IValue != null)
+            { 
                 IValue.UIRoot.transform.SetParent(cell.SubContentHolder.transform, false);
+                IValue.SetLayout();
+            }
 
             if (SetCellEvaluateState(cell))
                 return;
@@ -221,7 +231,9 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
                     SetValueState(cell, new ValueStateArgs(true, subContentButtonActive: true));
                     break;
                 case ValueState.Collection:
+                case ValueState.Dictionary:
                 case ValueState.ValueStruct:
+                case ValueState.Color:
                     SetIValueState();
                     SetValueState(cell, new ValueStateArgs(true, inspectActive: true, subContentButtonActive: true));
                     break;
@@ -229,6 +241,8 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
                     SetValueState(cell, new ValueStateArgs(true, inspectActive: true));
                     break;
             }
+
+            cell.RefreshSubcontentButton();
         }
 
         protected virtual void SetValueState(CacheObjectCell cell, ValueStateArgs args)
@@ -285,11 +299,11 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
                 IValue = (InteractiveValue)Pool.Borrow(ivalueType);
                 CurrentIValueType = ivalueType;
 
-                IValue.SetOwner(this);
+                IValue.OnBorrowed(this);
                 IValue.SetValue(this.Value);
                 IValue.UIRoot.transform.SetParent(CellView.SubContentHolder.transform, false);
                 CellView.SubContentHolder.SetActive(true);
-                SubContentState = true;
+                SubContentShowWanted = true;
 
                 // update our cell after creating the ivalue (the value may have updated, make sure its consistent)
                 this.ProcessOnEvaluate();
@@ -297,9 +311,11 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             }
             else
             {
-                SubContentState = !SubContentState;
-                CellView.SubContentHolder.SetActive(SubContentState); 
+                SubContentShowWanted = !SubContentShowWanted;
+                CellView.SubContentHolder.SetActive(SubContentShowWanted); 
             }
+
+            CellView.RefreshSubcontentButton();
         }
 
         public virtual void ReleaseIValue()
@@ -335,13 +351,14 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
                 SetUserValue(this.CellView.Toggle.isOn);
             else
             {
-                if (!numberParseMethods.ContainsKey(FallbackType.AssemblyQualifiedName))
+                var type = Value.GetActualType();
+                if (!numberParseMethods.ContainsKey(type.AssemblyQualifiedName))
                 {
-                    var method = FallbackType.GetMethod("Parse", new Type[] { typeof(string) });
-                    numberParseMethods.Add(FallbackType.AssemblyQualifiedName, method);
+                    var method = type.GetMethod("Parse", new Type[] { typeof(string) });
+                    numberParseMethods.Add(type.AssemblyQualifiedName, method);
                 }
 
-                var val = numberParseMethods[FallbackType.AssemblyQualifiedName]
+                var val = numberParseMethods[type.AssemblyQualifiedName]
                     .Invoke(null, new object[] { CellView.InputField.text });
                 SetUserValue(val);
             }

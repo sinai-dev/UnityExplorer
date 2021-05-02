@@ -51,6 +51,9 @@ namespace UnityExplorer.UI.Panels
 
         private void InvokeOnValueChanged(string value)
         {
+            if (value.Length == UIManager.MAX_INPUTFIELD_CHARS)
+                ExplorerCore.LogWarning($"Reached maximum InputField character length! ({UIManager.MAX_INPUTFIELD_CHARS})");
+
             if (Time.time <= m_timeOfLastInputInvoke)
                 return;
 

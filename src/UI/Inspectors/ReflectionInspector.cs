@@ -16,12 +16,16 @@ using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Inspectors
 {
-    public class ReflectionInspector : InspectorBase, IPoolDataSource<CacheMemberCell>
+    public class ReflectionInspector : InspectorBase, IPoolDataSource<CacheMemberCell>, ICacheObjectController
     {
+        // TODO
+        public CacheObjectBase ParentCacheObject { get; set; }
+
         public bool StaticOnly { get; internal set; }
 
-        public object Target { get; private set; }
+        //public object Target { get; private set; }
         public Type TargetType { get; private set; }
+        public bool CanWrite => true;
 
         public ScrollPool<CacheMemberCell> MemberScrollPool { get; private set; }
 
@@ -81,10 +85,11 @@ namespace UnityExplorer.UI.Inspectors
             }
             else
             {
-                Target = target;
                 TargetType = target.GetActualType();
                 prefix = "[R]";
             }
+
+            Tab.TabText.text = $"{prefix} {SignatureHighlighter.ParseFullType(TargetType)}";
 
             NameText.text = SignatureHighlighter.ParseFullSyntax(TargetType, true);
 
@@ -95,7 +100,6 @@ namespace UnityExplorer.UI.Inspectors
                 asmText = $"{TargetType.Assembly.GetName().Name} <color=grey><i>(in memory)</i></color>";
             AssemblyText.text = $"<color=grey>Assembly:</color> {asmText}";
 
-            Tab.TabText.text = $"{prefix} {SignatureHighlighter.ParseFullType(TargetType)}";
 
             this.members = CacheMember.GetCacheMembers(Target, TargetType, this);
             FilterMembers();
@@ -217,22 +221,25 @@ namespace UnityExplorer.UI.Inspectors
 
         // Cell layout (fake table alignment)
 
-        private static float MemLabelWidth { get; set; }
-        private static float RightGroupWidth { get; set; }
+        private static int LeftGroupWidth { get; set; }
+        private static int RightGroupWidth { get; set; }
 
         private void SetTitleLayouts()
         {
             // Calculate sizes
-            MemLabelWidth = Math.Max(200, Math.Min(450f, 0.4f * InspectorManager.PanelWidth - 5));
-            RightGroupWidth = Math.Max(200, InspectorManager.PanelWidth - MemLabelWidth - 55);
+            LeftGroupWidth = (int)Math.Max(200, (0.45f * InspectorManager.PanelWidth) - 5);// Math.Min(450f, 0.4f * InspectorManager.PanelWidth - 5));
+            RightGroupWidth = (int)Math.Max(200, InspectorManager.PanelWidth - LeftGroupWidth - 55);
 
-            memberTitleLayout.minWidth = MemLabelWidth;
+            memberTitleLayout.minWidth = LeftGroupWidth;
         }
 
         private void SetCellLayout(CacheObjectCell cell)
         {
-            cell.NameLayout.minWidth = MemLabelWidth;
+            cell.NameLayout.minWidth = LeftGroupWidth;
             cell.RightGroupLayout.minWidth = RightGroupWidth;
+
+            if (cell.Occupant?.IValue != null)
+                cell.Occupant.IValue.SetLayout();
         }
 
         internal void SetLayouts()

@@ -64,7 +64,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
 
         protected virtual void InspectClicked()
         {
-            InspectorManager.Inspect(Occupant.Value);
+            InspectorManager.Inspect(Occupant.Value, this.Occupant);
         }
 
         protected virtual void ToggleClicked(bool value)
@@ -75,6 +75,23 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
         protected virtual void SubContentClicked()
         {
             this.Occupant.OnCellSubContentToggle();
+        }
+
+        private readonly Color subInactiveColor = new Color(0.23f, 0.23f, 0.23f);
+        private readonly Color subActiveColor = new Color(0.23f, 0.33f, 0.23f);
+
+        public void RefreshSubcontentButton()
+        {
+            if (!this.SubContentHolder.activeSelf)
+            {
+                this.SubContentButton.ButtonText.text = "▲";
+                RuntimeProvider.Instance.SetColorBlock(SubContentButton.Button, subInactiveColor, subInactiveColor * 1.3f);
+            }
+            else
+            {
+                this.SubContentButton.ButtonText.text = "▼";
+                RuntimeProvider.Instance.SetColorBlock(SubContentButton.Button, subActiveColor, subActiveColor * 1.3f);
+            }
         }
 
         protected abstract void ConstructEvaluateHolder(GameObject parent);
@@ -89,16 +106,16 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
 
             UIRoot = UIFactory.CreateUIObject(this.GetType().Name, parent, new Vector2(100, 30));
             Rect = UIRoot.GetComponent<RectTransform>();
-            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(UIRoot, true, false, true, true, 0, 0);
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(UIRoot, false, false, true, true, 0, 0);
             UIFactory.SetLayoutElement(UIRoot, minWidth: 100, flexibleWidth: 9999, minHeight: 30, flexibleHeight: 600);
             UIRoot.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-            var content = UIFactory.CreateUIObject("Content", UIRoot);
-            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(content, true, false, true, true, 2, 0);
-            UIFactory.SetLayoutElement(content, minWidth: 100, flexibleWidth: 9999, minHeight: 30, flexibleHeight: 600);
-            content.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            //var content = UIFactory.CreateUIObject("Content", UIRoot);
+            //UIFactory.SetLayoutGroup<VerticalLayoutGroup>(content, true, false, true, true, 2, 0);
+            //UIFactory.SetLayoutElement(content, minWidth: 100, flexibleWidth: 9999, minHeight: 30, flexibleHeight: 600);
+            //content.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-            var horiRow = UIFactory.CreateUIObject("HoriGroup", content);
+            var horiRow = UIFactory.CreateUIObject("HoriGroup", UIRoot);
             UIFactory.SetLayoutElement(horiRow, minHeight: 29, flexibleHeight: 150, flexibleWidth: 9999);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(horiRow, false, false, true, true, 5, 2, childAlignment: TextAnchor.UpperLeft);
             horiRow.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
@@ -125,7 +142,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(rightHoriGroup, false, false, true, true, 4, childAlignment: TextAnchor.UpperLeft);
             UIFactory.SetLayoutElement(rightHoriGroup, minHeight: 25, minWidth: 200, flexibleWidth: 9999, flexibleHeight: 800);
 
-            SubContentButton = UIFactory.CreateButton(rightHoriGroup, "SubContentButton", "▲");
+            SubContentButton = UIFactory.CreateButton(rightHoriGroup, "SubContentButton", "▲", subInactiveColor);
             UIFactory.SetLayoutElement(SubContentButton.Button.gameObject, minWidth: 25, minHeight: 25, flexibleWidth: 0, flexibleHeight: 0);
             SubContentButton.OnClick += SubContentClicked;
 
@@ -163,10 +180,10 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
 
             // Subcontent
 
-            SubContentHolder = UIFactory.CreateUIObject("SubContent", content);
-            UIFactory.SetLayoutElement(SubContentHolder.gameObject, minHeight: 30, flexibleHeight: 500, minWidth: 100, flexibleWidth: 9999);
-            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(SubContentHolder, true, false, true, true, 2, childAlignment: TextAnchor.UpperLeft);
-            
+            SubContentHolder = UIFactory.CreateUIObject("SubContent", UIRoot);
+            UIFactory.SetLayoutElement(SubContentHolder.gameObject, minHeight: 30, flexibleHeight: 600, minWidth: 100, flexibleWidth: 9999);
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(SubContentHolder, true, true, true, true, 2, childAlignment: TextAnchor.UpperLeft);
+            //SubContentHolder.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.MinSize;
             SubContentHolder.SetActive(false);
 
             // Bottom separator

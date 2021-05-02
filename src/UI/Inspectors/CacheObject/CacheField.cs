@@ -10,22 +10,21 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
     {
         public FieldInfo FieldInfo { get; internal set; }
         public override Type DeclaringType => FieldInfo.DeclaringType;
+        public override bool CanWrite => m_canWrite ?? (bool)(m_canWrite = !(FieldInfo.IsLiteral && !FieldInfo.IsInitOnly));
+        private bool? m_canWrite;
 
         public override bool ShouldAutoEvaluate => true;
 
         public override void SetInspectorOwner(ReflectionInspector inspector, MemberInfo member)
         {
             base.SetInspectorOwner(inspector, member);
-
-            // not constant
-            CanWrite = !(FieldInfo.IsLiteral && !FieldInfo.IsInitOnly);
         }
 
         protected override void TryEvaluate()
         {
             try
             {
-                Value = FieldInfo.GetValue(this.ParentInspector.Target.TryCast(this.DeclaringType));
+                Value = FieldInfo.GetValue(this.Owner.Target.TryCast(this.DeclaringType));
             }
             catch (Exception ex)
             {
@@ -38,7 +37,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
         {
             try
             {
-                FieldInfo.SetValue(FieldInfo.IsStatic ? null : ParentInspector.Target, value);
+                FieldInfo.SetValue(FieldInfo.IsStatic ? null : Owner.Target, value);
             }
             catch (Exception ex)
             {

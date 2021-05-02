@@ -14,7 +14,8 @@ namespace UnityExplorer.UI.Inspectors
 {
     public class GameObjectInspector : InspectorBase
     {
-        public GameObject Target;
+        //public GameObject Target;
+        public GameObject GOTarget => Target as GameObject;
 
         private Text NameText;
 
@@ -32,8 +33,8 @@ namespace UnityExplorer.UI.Inspectors
 
             Target = target as GameObject;
 
-            NameText.text = Target.name;
-            Tab.TabText.text = $"[G] {Target.name}";
+            NameText.text = GOTarget.name;
+            Tab.TabText.text = $"[G] {GOTarget.name}";
 
             RuntimeProvider.Instance.StartCoroutine(InitCoroutine());
         }
@@ -84,15 +85,15 @@ namespace UnityExplorer.UI.Inspectors
 
                 UpdateComponents();
 
-                Tab.TabText.text = $"[G] {Target.name}";
+                Tab.TabText.text = $"[G] {GOTarget.name}";
             }
         }
 
         private IEnumerable<GameObject> GetTransformEntries()
         {
             _rootEntries.Clear();
-            for (int i = 0; i < Target.transform.childCount; i++)
-                _rootEntries.Add(Target.transform.GetChild(i).gameObject);
+            for (int i = 0; i < GOTarget.transform.childCount; i++)
+                _rootEntries.Add(GOTarget.transform.GetChild(i).gameObject);
             return _rootEntries;
         }
 
@@ -141,7 +142,7 @@ namespace UnityExplorer.UI.Inspectors
         private void UpdateComponents()
         {
             _componentEntries.Clear();
-            var comps = Target.GetComponents<Component>();
+            var comps = GOTarget.GetComponents<Component>();
             foreach (var comp in comps)
                 _componentEntries.Add(comp);
 

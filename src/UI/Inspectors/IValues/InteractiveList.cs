@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.UI.Inspectors.CacheObject;
@@ -12,16 +11,15 @@ using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Inspectors.IValues
 {
-    // TODO
-    // - set fallback type from generic arguments
-    // - handle setting through IList
-    // - handle il2cpp lists
-
-    public class InteractiveList : InteractiveValue, IPoolDataSource<CacheListEntryCell>
+    public class InteractiveList : InteractiveValue, IPoolDataSource<CacheListEntryCell>, ICacheObjectController
     {
-        public override bool CanWrite => base.CanWrite && RefIList != null;
+        CacheObjectBase ICacheObjectController.ParentCacheObject => this.CurrentOwner;
+        object ICacheObjectController.Target => this.CurrentOwner.Value;
+        public Type TargetType { get; private set; }
 
-        public Type FallbackEntryType;
+        public override bool CanWrite => RefIList != null && !RefIList.IsReadOnly;
+
+        public Type EntryType;
         public IEnumerable RefIEnumerable;
         public IList RefIList;
 
@@ -31,13 +29,26 @@ namespace UnityExplorer.UI.Inspectors.IValues
 
         public ScrollPool<CacheListEntryCell> ListScrollPool { get; private set; }
 
-        public LayoutElement ScrollPoolLayout;
         public Text TopLabel;
 
-        public override void SetOwner(CacheObjectBase owner)
+        public override void OnBorrowed(CacheObjectBase owner)
         {
-            base.SetOwner(owner);
+            base.OnBorrowed(owner);
         }
+
+        public override void SetLayout()
+        {
+            var minHeight = 5f;
+
+            foreach (var cell in ListScrollPool.CellPool)
+            {
+                if (cell.Enabled)
+                    minHeight += cell.Rect.rect.height;
+            }
+
+            this.scrollLayout.minHeight = Math.Min(400f, minHeight);
+        }
+
 
         public override void ReleaseFromOwner()
         {
@@ -56,33 +67,28 @@ namespace UnityExplorer.UI.Inspectors.IValues
             cachedEntries.Clear();
         }
 
-        // TODO temp for testing, needs improvement
         public override void SetValue(object value)
         {
-            //// TEMP
-            //if (values.Any())
-            //    ClearAndRelease();
-
             if (value == null)
             {
+                // should never be null
                 if (values.Any())
                     ClearAndRelease();
             }
             else
             {
-                // todo can improve this
                 var type = value.GetActualType();
                 if (type.IsGenericType)
-                    FallbackEntryType = type.GetGenericArguments()[0];
+                    EntryType = type.GetGenericArguments()[0];
                 else
-                    FallbackEntryType = typeof(object);
+                    EntryType = typeof(object);
 
                 CacheEntries(value);
+
+                TopLabel.text = $"[{cachedEntries.Count}] {SignatureHighlighter.ParseFullType(type, true)}";
             }
 
-            TopLabel.text = $"{cachedEntries.Count} entries";
-
-            this.ScrollPoolLayout.minHeight = Math.Min(400f, 35f * values.Count);
+            //this.ScrollPoolLayout.minHeight = Math.Min(400f, 35f * values.Count);
             this.ListScrollPool.Refresh(true, false);
         }
 
@@ -93,7 +99,8 @@ namespace UnityExplorer.UI.Inspectors.IValues
 
             if (RefIEnumerable == null)
             {
-                // todo il2cpp ...?
+                // todo il2cpp
+                return;
             }
 
             values.Clear();
@@ -113,7 +120,7 @@ namespace UnityExplorer.UI.Inspectors.IValues
                 else
                     cache = cachedEntries[idx];
 
-                cache.Initialize(this.FallbackEntryType);
+                cache.SetFallbackType(this.EntryType);
                 cache.SetValueFromSource(entry);
                 idx++;
             }
@@ -139,7 +146,7 @@ namespace UnityExplorer.UI.Inspectors.IValues
 
         public void OnCellBorrowed(CacheListEntryCell cell)
         {
-            cell.ListOwner = this;
+
         }
 
         public void SetCell(CacheListEntryCell cell, int index)
@@ -174,24 +181,27 @@ namespace UnityExplorer.UI.Inspectors.IValues
             entry.SetCell(cell);
         }
 
+        private LayoutElement scrollLayout;
+
         public override GameObject CreateContent(GameObject parent)
         {
-            UIRoot = UIFactory.CreateVerticalGroup(parent, "InteractiveList", true, true, true, true, 2, new Vector4(4, 4, 4, 4), 
+            UIRoot = UIFactory.CreateVerticalGroup(parent, "InteractiveList", true, true, true, true, 6, new Vector4(10, 3, 15, 4),
                 new Color(0.05f, 0.05f, 0.05f));
-
             UIFactory.SetLayoutElement(UIRoot, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 600);
+            UIRoot.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             // Entries label
 
-            TopLabel = UIFactory.CreateLabel(UIRoot, "EntryLabel", "not set", TextAnchor.MiddleLeft);
+            TopLabel = UIFactory.CreateLabel(UIRoot, "EntryLabel", "not set", TextAnchor.MiddleLeft, fontSize: 16);
+            TopLabel.horizontalOverflow = HorizontalWrapMode.Overflow;
 
             // entry scroll pool
 
             ListScrollPool = UIFactory.CreateScrollPool<CacheListEntryCell>(UIRoot, "EntryList", out GameObject scrollObj,
                 out GameObject _, new Color(0.09f, 0.09f, 0.09f));
-            UIFactory.SetLayoutElement(scrollObj, minHeight: 25, flexibleHeight: 0);
-            ListScrollPool.Initialize(this);
-            ScrollPoolLayout = scrollObj.GetComponent<LayoutElement>();
+            UIFactory.SetLayoutElement(scrollObj, minHeight: 400, flexibleHeight: 0);
+            ListScrollPool.Initialize(this, SetLayout);
+            scrollLayout = scrollObj.GetComponent<LayoutElement>();
 
             return UIRoot;
         }

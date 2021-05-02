@@ -10,6 +10,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
     {
         public PropertyInfo PropertyInfo { get; internal set; }
         public override Type DeclaringType => PropertyInfo.DeclaringType;
+        public override bool CanWrite => PropertyInfo.CanWrite;
 
         public override bool ShouldAutoEvaluate => !HasArguments;
 
@@ -17,7 +18,6 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
         {
             base.SetInspectorOwner(inspector, member);
 
-            this.CanWrite = PropertyInfo.CanWrite;
             Arguments = PropertyInfo.GetIndexParameters();
         }
 
@@ -25,7 +25,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
         {
             try
             {
-                Value = PropertyInfo.GetValue(ParentInspector.Target.TryCast(DeclaringType), null);
+                Value = PropertyInfo.GetValue(Owner.Target.TryCast(DeclaringType), null);
             }
             catch (Exception ex)
             {
@@ -43,7 +43,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             {
                 // TODO property indexers
 
-                PropertyInfo.SetValue(PropertyInfo.GetSetMethod().IsStatic ? null : ParentInspector.Target, value, null);
+                PropertyInfo.SetValue(PropertyInfo.GetSetMethod().IsStatic ? null : Owner.Target, value, null);
             }
             catch (Exception ex)
             {

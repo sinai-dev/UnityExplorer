@@ -98,6 +98,7 @@ namespace UnityExplorer.UI.Widgets
         private float timeofLastWriteLock;
 
         private float prevContentHeight = 1.0f;
+        private event Action onHeightChanged;
 
         public override void Update()
         {
@@ -116,6 +117,8 @@ namespace UnityExplorer.UI.Widgets
                 prevContentHeight = Content.rect.height;
                 if (!writingLocked)
                     OnValueChangedListener(Vector2.zero);
+
+                onHeightChanged?.Invoke();
             }
         }
         #endregion
@@ -138,7 +141,7 @@ namespace UnityExplorer.UI.Widgets
         //private bool Initialized;
 
         /// <summary>Should be called only once, when the scroll pool is created.</summary>
-        public void Initialize(IPoolDataSource<T> dataSource)
+        public void Initialize(IPoolDataSource<T> dataSource, Action onHeightChangedListener = null)
         {
             this.DataSource = dataSource;
             HeightCache = new DataHeightCache<T>(this);
@@ -153,14 +156,16 @@ namespace UnityExplorer.UI.Widgets
             ScrollRect.vertical = true;
             ScrollRect.horizontal = false;
 
-            LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
-            RuntimeProvider.Instance.StartCoroutine(InitCoroutine());
+            RuntimeProvider.Instance.StartCoroutine(InitCoroutine(onHeightChangedListener));
         }
 
-        private IEnumerator InitCoroutine()
+        private readonly WaitForEndOfFrame waitForEndOfFrame = new WaitForEndOfFrame();
+
+        private IEnumerator InitCoroutine(Action onHeightChangedListener)
         {
             ScrollRect.content.anchoredPosition = Vector2.zero;
-            yield return null;
+            //yield return null;
+            yield return waitForEndOfFrame;
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
 
@@ -184,7 +189,8 @@ namespace UnityExplorer.UI.Widgets
             // add onValueChanged listener after setup
             ScrollRect.onValueChanged.AddListener(OnValueChangedListener);
 
-            ExplorerCore.Log("ScrollPool Init finished");
+            onHeightChanged += onHeightChangedListener;
+            onHeightChangedListener?.Invoke();
         }
 
         private void SetScrollBounds()
@@ -564,7 +570,11 @@ namespace UnityExplorer.UI.Widgets
 
                     var scrollPos = topPos + Content.anchoredPosition.y;
 
-                    val = (float)((decimal)scrollPos / (decimal)(TotalDataHeight - Viewport.rect.height));
+                    var viewHeight = TotalDataHeight - Viewport.rect.height;
+                    if (viewHeight != 0.0f)
+                        val = (float)((decimal)scrollPos / (decimal)(viewHeight));
+                    else
+                        val = 0f;
                 }
 
                 bool prev = writingLocked;

@@ -22,6 +22,8 @@ namespace UnityExplorer.UI.Inspectors.IValues
 
         public object EditedValue { get; private set; }
 
+        public virtual void SetLayout() { }
+
         public static Type GetIValueTypeForState(ValueState state)
         {
             switch (state)
@@ -32,8 +34,8 @@ namespace UnityExplorer.UI.Inspectors.IValues
                 //    return null;
                 case ValueState.Collection:
                     return typeof(InteractiveList);
-                //case ValueState.Dictionary:
-                //    return null;
+                case ValueState.Dictionary:
+                    return typeof(InteractiveDictionary);
                 //case ValueState.ValueStruct:
                 //    return null;
                 //case ValueState.Color:
@@ -42,7 +44,7 @@ namespace UnityExplorer.UI.Inspectors.IValues
             }
         }
 
-        public virtual void SetOwner(CacheObjectBase owner)
+        public virtual void OnBorrowed(CacheObjectBase owner)
         {
             if (this.m_owner != null)
             {

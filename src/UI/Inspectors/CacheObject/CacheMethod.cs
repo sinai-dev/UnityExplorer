@@ -10,6 +10,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
     {
         public MethodInfo MethodInfo { get; internal set; }
         public override Type DeclaringType => MethodInfo.DeclaringType;
+        public override bool CanWrite => false;
 
         public override bool ShouldAutoEvaluate => false;
 
