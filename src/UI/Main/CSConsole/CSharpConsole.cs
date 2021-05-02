@@ -201,6 +201,8 @@ The following helper methods are available:
 
         public void UpdateConsole()
         {
+            if (Time.time > s_timeOfLastInternalSet)
+                Writing = false;
 
             if (EnableCtrlRShortcut)
             {
@@ -259,6 +261,8 @@ The following helper methods are available:
 
         public void UseAutocomplete(string suggestion)
         {
+            Writing = true;
+
             string input = InputField.text;
             input = input.Insert(m_lastCaretPos, suggestion);
             InputField.text = input;
@@ -274,16 +278,30 @@ The following helper methods are available:
         }
 
         private static float s_timeOfLastUpdate;
+        private static bool Writing
+        {
+            get => s_writing;
+            set
+            {
+                if (value)
+                    s_timeOfLastInternalSet = Time.time;
+                s_writing = value;
+            }
+        }
+        private static bool s_writing;
+        private static float s_timeOfLastInternalSet;
 
         public void OnInputChanged(string newText, bool forceUpdate = false)
         {
-            if (Time.time <= s_timeOfLastUpdate)
+            if (!Writing && Time.time <= s_timeOfLastUpdate)
                 return;
 
             s_timeOfLastUpdate = Time.time;
 
             if (EnableAutoIndent)
                 UpdateIndent(newText);
+
+            Writing = true;
 
             if (!forceUpdate && string.IsNullOrEmpty(newText))
                 inputHighlightText.text = string.Empty;
@@ -361,6 +379,8 @@ The following helper methods are available:
 
         private void AutoIndentCaret()
         {
+            Writing = true;
+
             if (CurrentIndent > 0)
             {
                 string indent = GetAutoIndentTab(CurrentIndent);
