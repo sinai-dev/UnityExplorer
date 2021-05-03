@@ -1,7 +1,6 @@
 ﻿#if ML
 using System;
 using System.IO;
-using Harmony;
 using MelonLoader;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -10,6 +9,12 @@ using UnityExplorer.Core;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Input;
 using UnityExplorer.Loader.ML;
+
+// TEMPORARY - JUST REQUIRED UNTIL ML 0.3.1 RELEASED
+using Harmony;
+
+// ML 0.3.1 SUPPORT
+//using HarmonyLib;
 
 [assembly: MelonInfo(typeof(ExplorerMelonMod), ExplorerCore.NAME, ExplorerCore.VERSION, ExplorerCore.AUTHOR)]
 [assembly: MelonGame(null, null)]
@@ -31,6 +36,7 @@ namespace UnityExplorer
         public Action<object> OnLogWarning => MelonLogger.Warning;
         public Action<object> OnLogError   => MelonLogger.Error;
 
+        // TEMPORARY - JUST REQUIRED UNTIL ML 0.3.1 RELEASED
         public Harmony.HarmonyInstance HarmonyInstance => Instance.Harmony;
 
         public override void OnApplicationStart()
@@ -73,7 +79,7 @@ namespace UnityExplorer
             try
             {
                 var prop = type.GetProperty(property);
-                this.Harmony.Patch(prop.GetSetMethod(), prefix: prefix);
+                HarmonyInstance.Patch(prop.GetSetMethod(), prefix: prefix);
             }
             catch (Exception e)
             {
