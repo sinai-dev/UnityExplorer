@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Diagnostics;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
@@ -82,8 +83,8 @@ namespace UnityExplorer
 
             // END
 
-            //InspectorManager.Inspect(typeof(TestClass));
             InspectorManager.Inspect(UIManager.CanvasRoot.gameObject.GetComponent<GraphicRaycaster>());
+            InspectorManager.Inspect(typeof(TestClass));
             //InspectorManager.InspectType(typeof(ReflectionUtility));
         }
 

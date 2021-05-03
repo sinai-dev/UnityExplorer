@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace UnityExplorer.UI.Widgets
+namespace UnityExplorer.UI
 {
     public static class UIExtension
     {

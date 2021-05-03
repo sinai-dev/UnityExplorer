@@ -41,22 +41,17 @@ namespace UnityExplorer.UI.Panels
         private readonly Dictionary<int, Dropdown.OptionData> sceneToDropdownOption = new Dictionary<int, Dropdown.OptionData>();
 
         private IEnumerable<GameObject> GetRootEntries() => SceneHandler.CurrentRootObjects;
-
-        public void ForceUpdate()
-        {
-            ExpensiveUpdate();
-        }
-
+        
         public void Update()
         {
-            if ((AutoUpdate || !SceneHandler.InspectingAssetScene) && Time.realtimeSinceStartup - timeOfLastUpdate >= 1f)
+            if (AutoUpdate && Time.realtimeSinceStartup - timeOfLastUpdate >= 1f)
             {
                 timeOfLastUpdate = Time.realtimeSinceStartup;
-                ExpensiveUpdate();
+                UpdateTree();
             }
         }
 
-        public void ExpensiveUpdate()
+        public void UpdateTree()
         {
             SceneHandler.Update();
             Tree.RefreshData(true);
@@ -70,7 +65,7 @@ namespace UnityExplorer.UI.Panels
             SceneHandler.SelectedScene = SceneHandler.LoadedScenes[value];
             SceneHandler.Update();
             Tree.RefreshData(true);
-            OnSelectedSceneChanged(SceneHandler.SelectedScene.Value);
+            //OnSelectedSceneChanged(SceneHandler.SelectedScene.Value);
         }
 
         private void SceneHandler_OnInspectedSceneChanged(Scene scene)
@@ -88,14 +83,14 @@ namespace UnityExplorer.UI.Panels
                     sceneDropdown.captionText.text = opt.text;
             }
 
-            OnSelectedSceneChanged(scene);
+            //OnSelectedSceneChanged(scene);
         }
 
-        private void OnSelectedSceneChanged(Scene scene)
-        {
-            if (refreshRow)
-                refreshRow.SetActive(!scene.IsValid());
-        }
+        //private void OnSelectedSceneChanged(Scene scene)
+        //{
+        //    if (refreshRow)
+        //        refreshRow.SetActive(!scene.IsValid());
+        //}
 
         private void SceneHandler_OnLoadedScenesChanged(ReadOnlyCollection<Scene> loadedScenes)
         {
@@ -191,7 +186,7 @@ namespace UnityExplorer.UI.Panels
 
             var refreshButton = UIFactory.CreateButton(refreshRow, "RefreshButton", "Update");
             UIFactory.SetLayoutElement(refreshButton.Button.gameObject, minWidth: 65, flexibleWidth: 0);
-            refreshButton.OnClick += ForceUpdate;
+            refreshButton.OnClick += UpdateTree;
 
             var refreshToggle = UIFactory.CreateToggle(refreshRow, "RefreshToggle", out Toggle toggle, out Text text);
             UIFactory.SetLayoutElement(refreshToggle, flexibleWidth: 9999);
@@ -202,7 +197,7 @@ namespace UnityExplorer.UI.Panels
             toggle.isOn = false;
             toggle.onValueChanged.AddListener((bool val) => AutoUpdate = val);
 
-            refreshRow.SetActive(false);
+            //refreshRow.SetActive(false);
 
             // Transform Tree
 

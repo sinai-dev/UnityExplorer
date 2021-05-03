@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.UI.Inspectors.CacheObject;
 using UnityExplorer.UI.Inspectors.CacheObject.Views;
+using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Utility;
 using UnityExplorer.UI.Widgets;
 
@@ -82,7 +83,7 @@ namespace UnityExplorer.UI.Inspectors.IValues
 
                 CacheEntries(value);
 
-                TopLabel.text = $"[{cachedEntries.Count}] {SignatureHighlighter.ParseFullType(type, true)}";
+                TopLabel.text = $"[{cachedEntries.Count}] {SignatureHighlighter.ParseFullType(type, false)}";
             }
 
 
@@ -196,7 +197,7 @@ namespace UnityExplorer.UI.Inspectors.IValues
                     minHeight += cell.Rect.rect.height;
             }
 
-            this.scrollLayout.minHeight = Math.Min(400f, minHeight);
+            this.scrollLayout.minHeight = Math.Min(InspectorPanel.CurrentPanelHeight - 400f, minHeight);
         }
 
         private void SetCellLayout(CacheKeyValuePairCell cell)

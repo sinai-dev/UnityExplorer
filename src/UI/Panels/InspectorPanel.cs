@@ -29,6 +29,7 @@ namespace UnityExplorer.UI.Panels
         public RectTransform ContentRect;
 
         public static float CurrentPanelWidth => Instance.mainPanelRect.rect.width;
+        public static float CurrentPanelHeight => Instance.mainPanelRect.rect.height;
 
         public override void Update()
         {
@@ -57,9 +58,9 @@ namespace UnityExplorer.UI.Panels
         public override void SetDefaultPosAndAnchors()
         {
             mainPanelRect.localPosition = Vector2.zero;
-            mainPanelRect.pivot = new Vector2(0.5f, 0.5f);
-            mainPanelRect.anchorMin = new Vector2(0.5f, 0);
-            mainPanelRect.anchorMax = new Vector2(0.5f, 1);
+            mainPanelRect.pivot = new Vector2(0f, 1f);
+            mainPanelRect.anchorMin = new Vector2(0.1f, 0.15f);
+            mainPanelRect.anchorMax = new Vector2(0.1f, 0.95f);
             mainPanelRect.offsetMin = new Vector2(mainPanelRect.offsetMin.x, 100);  // bottom
             mainPanelRect.offsetMax = new Vector2(mainPanelRect.offsetMax.x, -50); // top
             mainPanelRect.sizeDelta = new Vector2(700f, mainPanelRect.sizeDelta.y);

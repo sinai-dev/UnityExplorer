@@ -1,13 +1,70 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace UnityExplorer.Tests
 {
     public static class TestClass
     {
-        public static List<object> List
+        public static IEnumerable ANestedList = new List<List<List<string>>>
+        {
+            new List<List<string>>
+            {
+                new List<string>
+                {
+                    "one",
+                    "two",
+                    "one",
+                    "two",
+                    "one",
+                    "two",
+                    "one",
+                    "two",
+                    "one",
+                    "two",
+                    "one",
+                    "two",
+                    "one",
+                    "two",
+                    "one",
+                    "two",
+                },
+                new List<string>
+                {
+                    "three",
+                    "four",
+                }
+            },
+            new List<List<string>>
+            {
+                new List<string>
+                {
+                    "five"
+                }
+            }
+        };
+
+        public static IDictionary DictTest = new Dictionary<object, object>
+        {
+            { 1, 2 },
+            { "one", "two" },
+            { true, false },
+            { new Vector3(0,1,2), new Vector3(1,2,3) },
+            { CameraClearFlags.Depth, CameraClearFlags.Color },
+            { "################################################\r\n##########", null },
+            { "subdict", new Dictionary<object,object> { { "key", "value" } } }
+        };
+
+        public const int ConstantInt = 5;
+
+        public static byte[] ByteArray = new byte[16];
+        public static string LongString = new string('#', 10000);
+        public static List<string> BigList = new List<string>(10000);
+
+        public static List<object> RandomList
         {
             get
             {
@@ -38,11 +95,6 @@ namespace UnityExplorer.Tests
             return ret;
         }
 
-        public const int ConstantInt = 5;
-
-        public static byte[] ByteArray = new byte[16];
-        public static string LongString = new string('#', 10000);
-
 #if CPP
         public static string testStringOne = "Test";
         public static Il2CppSystem.Object testStringTwo = "string boxed as cpp object";
@@ -55,6 +107,9 @@ namespace UnityExplorer.Tests
 
         static TestClass()
         {
+            for (int i = 0; i < BigList.Capacity; i++)
+                BigList.Add(i.ToString());
+
 #if CPP
             testHashset = new Il2CppSystem.Collections.Hashtable();
             testHashset.Add("key1", "itemOne");

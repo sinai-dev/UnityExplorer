@@ -18,7 +18,6 @@ namespace UnityExplorer.UI.Inspectors
 {
     public class ReflectionInspector : InspectorBase, IPoolDataSource<CacheMemberCell>, ICacheObjectController
     {
-        // TODO
         public CacheObjectBase ParentCacheObject { get; set; }
 
         public bool StaticOnly { get; internal set; }
@@ -145,9 +144,9 @@ namespace UnityExplorer.UI.Inspectors
                 return;
             }
 
-            if (Time.time - timeOfLastUpdate > 1f)
+            if (timeOfLastUpdate.OccuredEarlierThan(1))
             {
-                timeOfLastUpdate = Time.time;
+                timeOfLastUpdate = Time.realtimeSinceStartup;
 
                 if (AutoUpdateWanted)
                     UpdateDisplayedMembers();// true);

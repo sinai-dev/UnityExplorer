@@ -12,6 +12,19 @@ namespace UnityExplorer
 {
     public static class UnityHelpers
     {
+        // Time helpers, can't use Time.time since timeScale will affect it.
+
+        // default 10ms (one frame at 100fps)
+        public static bool OccuredEarlierThanDefault(this float time)
+        {
+            return Time.realtimeSinceStartup - 0.01f >= time;
+        }
+
+        public static bool OccuredEarlierThan(this float time, float secondsAgo)
+        {
+            return Time.realtimeSinceStartup - secondsAgo >= time;
+        }
+
         /// <summary>
         /// Check if an object is null, and if it's a UnityEngine.Object then also check if it was destroyed.
         /// </summary>

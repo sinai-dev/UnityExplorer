@@ -470,9 +470,9 @@ namespace UnityExplorer.UI
 
                 inputField.onValueChanged.AddListener((string val) =>
                 {
-                    if (Time.time > timeOfLastRebuild)
+                    if (timeOfLastRebuild.OccuredEarlierThanDefault())
                     {
-                        timeOfLastRebuild = Time.time;
+                        timeOfLastRebuild = Time.realtimeSinceStartup;
                         LayoutRebuilder.ForceRebuildLayoutImmediate(rectTransform);
                     }
                 });
@@ -767,7 +767,7 @@ namespace UnityExplorer.UI
 
         public static GameObject CreateSliderScrollbar(GameObject parent, out Slider slider)
         {
-            GameObject mainObj = CreateUIObject("SliderScrollbar", parent, UIFactory._smallElementSize);
+            GameObject mainObj = CreateUIObject("SliderScrollbar", parent, _smallElementSize);
 
             GameObject bgImageObj = CreateUIObject("Background", mainObj);
             GameObject handleSlideAreaObj = CreateUIObject("Handle Slide Area", mainObj);

@@ -54,10 +54,10 @@ namespace UnityExplorer.UI.Panels
             if (value.Length == UIManager.MAX_INPUTFIELD_CHARS)
                 ExplorerCore.LogWarning($"Reached maximum InputField character length! ({UIManager.MAX_INPUTFIELD_CHARS})");
 
-            if (Time.time <= m_timeOfLastInputInvoke)
+            if (m_timeOfLastInputInvoke.OccuredEarlierThanDefault())
                 return;
 
-            m_timeOfLastInputInvoke = Time.time;
+            m_timeOfLastInputInvoke = Time.realtimeSinceStartup;
             OnInputChanged?.Invoke(value);
         }
 
@@ -103,7 +103,7 @@ namespace UnityExplorer.UI.Panels
         public override void SetDefaultPosAndAnchors()
         {
             mainPanelRect.localPosition = Vector2.zero;
-            mainPanelRect.pivot = new Vector2(0.5f, 0.5f);
+            mainPanelRect.pivot = new Vector2(0f, 1f);
             mainPanelRect.anchorMin = new Vector2(0.5f, 0);
             mainPanelRect.anchorMax = new Vector2(0.5f, 1);
             mainPanelRect.offsetMin = new Vector2(mainPanelRect.offsetMin.x, 100);  // bottom

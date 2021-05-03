@@ -76,9 +76,9 @@ namespace UnityExplorer.UI.Inspectors
                 return;
             }
 
-            if (Time.time - timeOfLastUpdate > 1f)
+            if (timeOfLastUpdate.OccuredEarlierThan(1))
             {
-                timeOfLastUpdate = Time.time;
+                timeOfLastUpdate = Time.realtimeSinceStartup;
 
                 // Refresh children and components
                 TransformTree.RefreshData(true, false);

@@ -15,6 +15,8 @@ namespace UnityExplorer.UI.Panels
     {
         #region Static
 
+        public static bool Resizing { get; private set; }
+
         internal static List<PanelDragger> Instances = new List<PanelDragger>();
 
         static PanelDragger()
@@ -86,7 +88,7 @@ namespace UnityExplorer.UI.Panels
         // Dragging
         public RectTransform DragableArea { get; set; }
         public bool WasDragging { get; set; }
-        private Vector3 m_lastDragPosition;
+        private Vector2 m_lastDragPosition;
 
         // Resizing
         private const int RESIZE_THICKNESS = 10;
@@ -132,7 +134,8 @@ namespace UnityExplorer.UI.Panels
         {
             ResizeTypes type;
             Vector3 resizePos = Panel.InverseTransformPoint(rawMousePos);
-            bool inResizePos = MouseInResizeArea(resizePos);
+            bool inResizePos = !UIManager.NavBarRect.rect.Contains(UIManager.NavBarRect.InverseTransformPoint(rawMousePos))
+                && MouseInResizeArea(resizePos);
 
             Vector3 dragPos = DragableArea.InverseTransformPoint(rawMousePos);
             bool inDragPos = DragableArea.rect.Contains(dragPos);
@@ -218,15 +221,25 @@ namespace UnityExplorer.UI.Panels
 
         public void OnDrag()
         {
-            Vector3 diff = InputManager.MousePosition - m_lastDragPosition;
+            Vector2 diff = (Vector2)InputManager.MousePosition - m_lastDragPosition;
             m_lastDragPosition = InputManager.MousePosition;
 
-            // update position while preserving the z value
             Vector3 pos = Panel.localPosition;
-            float z = pos.z;
-            pos += diff;
-            pos.z = z;
+            pos += (Vector3)diff;
             Panel.localPosition = pos;
+
+            // TODO prevent dragging the navbar outside the window completely.
+            // this was not that, but should do that.
+
+            //var halfHeight = Panel.rect.height * 0.5f;
+            //var halfWidth = Panel.rect.width * 0.5f;
+            //if (Panel.MinY() - halfHeight + 25 < 0 
+            //    || Panel.MinX() - halfWidth + 25 < 0
+            //    || Panel.MaxY() + halfWidth - 25 > Screen.height 
+            //    || Panel.MinX() + halfWidth - 25 > Screen.width)
+            //{
+            //    Panel.localPosition -= (Vector3)diff;
+            //}
         }
 
         public void OnEndDrag()
@@ -382,6 +395,7 @@ namespace UnityExplorer.UI.Panels
             m_currentResizeType = resizeType;
             m_lastResizePos = InputManager.MousePosition;
             WasResizing = true;
+            Resizing = true;
         }
 
         public void OnResize()
@@ -431,6 +445,7 @@ namespace UnityExplorer.UI.Panels
         public void OnEndResize()
         {
             WasResizing = false;
+            Resizing = false;
             try { OnHoverResizeEnd(); } catch { }
             UpdateResizeCache();
             OnFinishResize?.Invoke(Panel);

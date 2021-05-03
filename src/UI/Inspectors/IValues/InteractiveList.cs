@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.UI.Inspectors.CacheObject;
 using UnityExplorer.UI.Inspectors.CacheObject.Views;
+using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Utility;
 using UnityExplorer.UI.Widgets;
 
@@ -35,20 +36,6 @@ namespace UnityExplorer.UI.Inspectors.IValues
         {
             base.OnBorrowed(owner);
         }
-
-        public override void SetLayout()
-        {
-            var minHeight = 5f;
-
-            foreach (var cell in ListScrollPool.CellPool)
-            {
-                if (cell.Enabled)
-                    minHeight += cell.Rect.rect.height;
-            }
-
-            this.scrollLayout.minHeight = Math.Min(400f, minHeight);
-        }
-
 
         public override void ReleaseFromOwner()
         {
@@ -85,7 +72,7 @@ namespace UnityExplorer.UI.Inspectors.IValues
 
                 CacheEntries(value);
 
-                TopLabel.text = $"[{cachedEntries.Count}] {SignatureHighlighter.ParseFullType(type, true)}";
+                TopLabel.text = $"[{cachedEntries.Count}] {SignatureHighlighter.ParseFullType(type, false)}";
             }
 
             //this.ScrollPoolLayout.minHeight = Math.Min(400f, 35f * values.Count);
@@ -143,6 +130,19 @@ namespace UnityExplorer.UI.Inspectors.IValues
         }
 
         // List entry scroll pool
+
+        public override void SetLayout()
+        {
+            var minHeight = 5f;
+
+            foreach (var cell in ListScrollPool.CellPool)
+            {
+                if (cell.Enabled)
+                    minHeight += cell.Rect.rect.height;
+            }
+
+            this.scrollLayout.minHeight = Math.Min(InspectorPanel.CurrentPanelHeight - 400f, minHeight);
+        }
 
         public void OnCellBorrowed(CacheListEntryCell cell)
         {

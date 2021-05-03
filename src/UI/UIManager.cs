@@ -45,9 +45,13 @@ namespace UnityExplorer.UI
 
         public static AutoCompleter AutoCompleter { get; private set; }
 
-        // other
+        // assets
         internal static Font ConsoleFont { get; private set; }
         internal static Shader BackupShader { get; private set; }
+
+        // Main Navbar UI
+        public static RectTransform NavBarRect;
+        public static GameObject NavbarButtonHolder;
 
         internal static readonly Color navButtonEnabledColor = new Color(0.2f, 0.4f, 0.28f);
         internal static readonly Color navButtonDisabledColor = new Color(0.25f, 0.25f, 0.25f);
@@ -213,30 +217,53 @@ namespace UnityExplorer.UI
             PanelHolder.transform.SetAsFirstSibling();
         }
 
-        internal static GameObject navbarButtonHolder;
+        //// temp
+        //private static float lastTimeSpeed;
+        //private static bool pausing;
 
         private static void CreateTopNavBar()
         {
             var navbarPanel = UIFactory.CreateUIObject("MainNavbar", CanvasRoot);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(navbarPanel, false, true, true, true, 5, 4, 4, 4, 4, TextAnchor.MiddleCenter);
             navbarPanel.AddComponent<Image>().color = new Color(0.1f, 0.1f, 0.1f);
-            var panelRect = navbarPanel.GetComponent<RectTransform>();
-            panelRect.pivot = new Vector2(0.5f, 1f);
-            panelRect.anchorMin = new Vector2(0.5f, 1f);
-            panelRect.anchorMax = new Vector2(0.5f, 1f);
-            panelRect.sizeDelta = new Vector2(900f, 35f);
+            NavBarRect = navbarPanel.GetComponent<RectTransform>();
+            NavBarRect.pivot = new Vector2(0.5f, 1f);
+            NavBarRect.anchorMin = new Vector2(0.5f, 1f);
+            NavBarRect.anchorMax = new Vector2(0.5f, 1f);
+            NavBarRect.sizeDelta = new Vector2(900f, 35f);
 
             // UnityExplorer title
 
             string titleTxt = $"{ExplorerCore.NAME} <i><color=grey>{ExplorerCore.VERSION}</color></i>";
             var title = UIFactory.CreateLabel(navbarPanel, "Title", titleTxt, TextAnchor.MiddleLeft, default, true, 18);
-            UIFactory.SetLayoutElement(title.gameObject, minWidth: 240, flexibleWidth: 0);// close button
+            UIFactory.SetLayoutElement(title.gameObject, minWidth: 240, flexibleWidth: 0);
+
+            // TODO something nicer for this, maybe a 'Tools' dropout below the main navbar with a few helpers like this.
+
+            //var btn = UIFactory.CreateButton(navbarPanel, "Button", "pause", new Color(0.2f, 0.2f, 0.2f));
+            //UIFactory.SetLayoutElement(btn.Button.gameObject, minWidth: 30, flexibleWidth: 0, minHeight: 25);
+            //btn.OnClick += () =>
+            //{
+            //    if (!pausing)
+            //    {
+            //        lastTimeSpeed = Time.timeScale;
+            //        Time.timeScale = 0;
+            //        pausing = true;
+            //        btn.ButtonText.text = "resume";
+            //    }
+            //    else
+            //    {
+            //        Time.timeScale = lastTimeSpeed;
+            //        pausing = false;
+            //        btn.ButtonText.text = "pause";
+            //    }
+            //};
 
             // Navbar
 
-            navbarButtonHolder = UIFactory.CreateUIObject("NavButtonHolder", navbarPanel);
-            UIFactory.SetLayoutElement(navbarButtonHolder, flexibleHeight: 999, flexibleWidth: 999);
-            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(navbarButtonHolder, true, true, true, true, 4, 2, 2, 2, 2);
+            NavbarButtonHolder = UIFactory.CreateUIObject("NavButtonHolder", navbarPanel);
+            UIFactory.SetLayoutElement(NavbarButtonHolder, flexibleHeight: 999, flexibleWidth: 999);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(NavbarButtonHolder, true, true, true, true, 4, 2, 2, 2, 2);
 
             // Hide menu button
 

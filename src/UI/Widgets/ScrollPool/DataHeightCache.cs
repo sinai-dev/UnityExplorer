@@ -40,6 +40,47 @@ namespace UnityExplorer.UI.Widgets
         public float DefaultHeight => m_defaultHeight ?? (float)(m_defaultHeight = ScrollPool.PrototypeHeight);
         private float? m_defaultHeight;
 
+        /// <summary>Get the data index at the specified position of the total height cache.</summary>
+        public int GetFirstDataIndexAtPosition(float desiredHeight) => GetFirstDataIndexAtPosition(desiredHeight, out _);
+
+        /// <summary>Get the data index and DataViewInfo at the specified position of the total height cache.</summary>
+        public int GetFirstDataIndexAtPosition(float desiredHeight, out DataViewInfo cache)
+        {
+            cache = default;
+
+            if (!heightCache.Any())
+                return 0;
+
+            int rangeIndex = GetRangeFloorOfPosition(desiredHeight);
+
+            // probably shouldnt happen but just in case
+            if (rangeIndex < 0)
+                return 0;
+            if (rangeIndex >= rangeCache.Count)
+            {
+                int idx = ScrollPool.DataSource.ItemCount - 1;
+                cache = heightCache[idx];
+                return idx;
+            }
+
+            int dataIndex = rangeCache[rangeIndex];
+            cache = heightCache[dataIndex];
+
+            // if the DataViewInfo is outdated, need to rebuild
+            int expectedMin = GetRangeCeilingOfPosition(cache.startPosition);
+            int expectedMax = expectedMin + cache.normalizedSpread - 1;
+            if (rangeIndex < expectedMin || rangeIndex > expectedMax)
+            {
+                RecalculateStartPositions(Math.Max(dataIndex, expectedMax));
+
+                rangeIndex = GetRangeFloorOfPosition(desiredHeight);
+                dataIndex = rangeCache[rangeIndex];
+                cache = heightCache[dataIndex];
+            }
+
+            return dataIndex;
+        }
+
         /// <summary>
         /// Lookup table for "which data index first appears at this position"<br/>
         /// Index: DefaultHeight * index from top of data<br/>
@@ -48,7 +89,7 @@ namespace UnityExplorer.UI.Widgets
         private readonly List<int> rangeCache = new List<int>();
 
         /// <summary>Get the first range (division of DefaultHeight) which the position appears in.</summary>
-        private int GetRangeIndexOfPosition(float position) => (int)Math.Floor((decimal)position / (decimal)DefaultHeight);
+        private int GetRangeFloorOfPosition(float position) => (int)Math.Floor((decimal)position / (decimal)DefaultHeight);
 
         /// <summary>Same as GetRangeIndexOfPosition, except this rounds up to the next division if there was remainder from the previous cell.</summary>
         private int GetRangeCeilingOfPosition(float position) => (int)Math.Ceiling((decimal)position / (decimal)DefaultHeight);
@@ -104,33 +145,6 @@ namespace UnityExplorer.UI.Widgets
             int idx = heightCache.Count;
             while (rangeCache.Count > 0 && rangeCache[rangeCache.Count - 1] == idx)
                 rangeCache.RemoveAt(rangeCache.Count - 1);
-        }
-
-        /// <summary>Get the data index at the specified position of the total height cache.</summary>
-        public int GetDataIndexAtPosition(float desiredHeight) => GetDataIndexAtPosition(desiredHeight, out _);
-
-        /// <summary>Get the data index and DataViewInfo at the specified position of the total height cache.</summary>
-        public int GetDataIndexAtPosition(float desiredHeight, out DataViewInfo cache)
-        {
-            cache = default;
-
-            if (!heightCache.Any())
-                return 0;
-
-            int rangeIndex = GetRangeIndexOfPosition(desiredHeight);
-
-            if (rangeIndex < 0)
-                return 0;
-            if (rangeIndex >= rangeCache.Count)
-            {
-                int idx = ScrollPool.DataSource.ItemCount - 1;
-                cache = heightCache[idx];
-                return idx;
-            }
-
-            int dataIndex = rangeCache[rangeIndex];
-            cache = heightCache[dataIndex];
-            return dataIndex;
         }
 
         /// <summary>Set a given data index with the specified value.</summary>
@@ -192,8 +206,6 @@ namespace UnityExplorer.UI.Widgets
 
             if (spread != cache.normalizedSpread)
             {
-                ExplorerCore.Log("Updating spread for " + dataIndex + " from " + cache.normalizedSpread + " to " + spread);
-
                 int spreadDiff = spread - cache.normalizedSpread;
                 cache.normalizedSpread = spread;
 
@@ -217,7 +229,7 @@ namespace UnityExplorer.UI.Widgets
 
         private void RecalculateStartPositions(int toIndex)
         {
-            if (heightCache.Count < 2)
+            if (heightCache.Count <= 1)
                 return;
 
             DataViewInfo cache;

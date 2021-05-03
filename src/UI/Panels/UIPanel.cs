@@ -134,7 +134,7 @@ namespace UnityExplorer.UI.Panels
             {
                 // create navbar button
 
-                NavButton = UIFactory.CreateButton(UIManager.navbarButtonHolder, $"Button_{PanelType}", Name);
+                NavButton = UIFactory.CreateButton(UIManager.NavbarButtonHolder, $"Button_{PanelType}", Name);
                 UIFactory.SetLayoutElement(NavButton.Button.gameObject, minWidth: 118, flexibleWidth: 0);
                 RuntimeProvider.Instance.SetColorBlock(NavButton.Button, UIManager.navButtonDisabledColor, UIManager.navButtonDisabledColor * 1.2f);
                 NavButton.OnClick += () =>

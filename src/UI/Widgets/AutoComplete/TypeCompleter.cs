@@ -28,7 +28,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             suggestions.Clear();
             AutoCompleter.Instance.SetSuggestions(suggestions);
 
-            timeOfLastCheck = Time.time;
+            timeOfLastCheck = Time.realtimeSinceStartup;
             InputField.text = suggestion.UnderlyingValue;
         }
 
@@ -84,10 +84,10 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         private void OnInputFieldChanged(string value)
         {
-            if (timeOfLastCheck == Time.time)
+            if (!timeOfLastCheck.OccuredEarlierThanDefault())
                 return;
 
-            timeOfLastCheck = Time.time;
+            timeOfLastCheck = Time.realtimeSinceStartup;
 
             value = value ?? "";
 

@@ -98,13 +98,17 @@ namespace UnityExplorer.UI.Panels
         public override void SetDefaultPosAndAnchors()
         {
             mainPanelRect.localPosition = Vector2.zero;
-            mainPanelRect.anchorMin = Vector3.zero;
-            mainPanelRect.anchorMax = new Vector2(0, 1);
-            mainPanelRect.sizeDelta = new Vector2(320f, mainPanelRect.sizeDelta.y);
-            mainPanelRect.anchoredPosition = new Vector2(200, 0);
-            mainPanelRect.offsetMin = new Vector2(mainPanelRect.offsetMin.x, 100);  // bottom
-            mainPanelRect.offsetMax = new Vector2(mainPanelRect.offsetMax.x, -50); // top
-            mainPanelRect.pivot = new Vector2(0.5f, 0.5f);
+            mainPanelRect.pivot = new Vector2(0f, 1f);
+            mainPanelRect.anchorMin = new Vector2(0.1f, 0.2f);
+            mainPanelRect.anchorMax = new Vector2(0.25f, 0.9f);
+
+
+            //mainPanelRect.anchorMin = Vector3.zero;
+            //mainPanelRect.anchorMax = new Vector2(0, 1);
+            //mainPanelRect.sizeDelta = new Vector2(320f, mainPanelRect.sizeDelta.y);
+            //mainPanelRect.anchoredPosition = new Vector2(200, 0);
+            //mainPanelRect.offsetMin = new Vector2(mainPanelRect.offsetMin.x, 100);  // bottom
+            //mainPanelRect.offsetMax = new Vector2(mainPanelRect.offsetMax.x, -50); // top
         }
 
         public override void ConstructPanelContent()

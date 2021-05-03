@@ -72,9 +72,14 @@ namespace UnityExplorer.UI.Inspectors.IValues
         public virtual GameObject CreateContent(GameObject parent)
         {
             UIRoot = UIFactory.CreateUIObject(this.GetType().Name, parent);
-            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(UIRoot, true, true, true, true, 3, childAlignment: TextAnchor.MiddleLeft);
+            UIRoot.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(UIRoot, true, true, true, true, 3, childAlignment: TextAnchor.MiddleLeft);
 
             UIFactory.CreateLabel(UIRoot, "Label", "this is an ivalue", TextAnchor.MiddleLeft);
+            UIFactory.CreateInputField(UIRoot, "InputFIeld", "...", out var input);
+            UIFactory.SetLayoutElement(input.gameObject, minHeight: 25, flexibleHeight: 500);
+            input.lineType = InputField.LineType.MultiLineNewline;
+            input.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             return UIRoot;
         }

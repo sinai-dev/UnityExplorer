@@ -8,6 +8,7 @@ using UnityEngine.UI;
 using UnityExplorer.Core.Input;
 using UnityExplorer.UI.Models;
 using UnityExplorer.UI.ObjectPool;
+using UnityExplorer.UI.Panels;
 
 namespace UnityExplorer.UI.Widgets
 {
@@ -35,7 +36,7 @@ namespace UnityExplorer.UI.Widgets
         public float PrototypeHeight => _protoHeight ?? (float)(_protoHeight = Pool<T>.Instance.DefaultHeight);
         private float? _protoHeight;
 
-        public int ExtraPoolCells => 6;
+        public int ExtraPoolCells => 10;
         public float RecycleThreshold => PrototypeHeight * ExtraPoolCells;
         public float HalfThreshold => RecycleThreshold * 0.5f;
 
@@ -85,12 +86,12 @@ namespace UnityExplorer.UI.Widgets
         // A sanity check so only one thing is setting the value per frame.
         public bool WritingLocked
         {
-            get => writingLocked;
+            get => writingLocked || PanelDragger.Resizing;
             internal set
             {
                 if (writingLocked == value)
                     return;
-                timeofLastWriteLock = Time.time;
+                timeofLastWriteLock = Time.realtimeSinceStartup;
                 writingLocked = value;
             }
         }
@@ -98,28 +99,32 @@ namespace UnityExplorer.UI.Widgets
         private float timeofLastWriteLock;
 
         private float prevContentHeight = 1.0f;
-        private event Action onHeightChanged;
+        private event Action OnHeightChanged;
 
         public override void Update()
         {
             if (!ScrollRect || DataSource == null)
                 return;
 
-            if (writingLocked && timeofLastWriteLock < Time.time)
+            if (writingLocked && timeofLastWriteLock.OccuredEarlierThanDefault())
                 writingLocked = false;
 
-            if (prevContentHeight <= 1f && Content.rect.height > 1f)
+            if (!writingLocked)
             {
-                prevContentHeight = Content.rect.height;
-            }
-            else if (Content.rect.height != prevContentHeight)
-            {
-                prevContentHeight = Content.rect.height;
-                if (!writingLocked)
-                    OnValueChangedListener(Vector2.zero);
+                if (prevContentHeight <= 1f && Content.rect.height > 1f)
+                {
+                    prevContentHeight = Content.rect.height;
+                }
+                else if (Content.rect.height != prevContentHeight)
+                {
+                    prevContentHeight = Content.rect.height;
+                    if (!writingLocked)
+                        OnValueChangedListener(Vector2.zero);
 
-                onHeightChanged?.Invoke();
+                    OnHeightChanged?.Invoke();
+                }
             }
+            
         }
         #endregion
 
@@ -189,7 +194,7 @@ namespace UnityExplorer.UI.Widgets
             // add onValueChanged listener after setup
             ScrollRect.onValueChanged.AddListener(OnValueChangedListener);
 
-            onHeightChanged += onHeightChangedListener;
+            OnHeightChanged += onHeightChangedListener;
             onHeightChangedListener?.Invoke();
         }
 
@@ -244,6 +249,7 @@ namespace UnityExplorer.UI.Widgets
             topPoolIndex = 0;
             bottomPoolIndex = -1;
 
+            WritingLocked = true;
             // create cells until the Pool area is covered.
             // use minimum default height so that maximum pool count is reached.
             while (currentPoolCoverage <= requiredCoverage)
@@ -450,9 +456,7 @@ namespace UnityExplorer.UI.Widgets
             prevAnchoredPos = ScrollRect.content.anchoredPosition;
 
             SetScrollBounds();
-
-            //WritingLocked = true;
-            UpdateSliderHandle(true);
+            UpdateSliderHandle();
         }
 
         private bool ShouldRecycleTop => GetCellExtent(CellPool[topPoolIndex].Rect) > RecycleViewBounds.x
@@ -465,12 +469,11 @@ namespace UnityExplorer.UI.Widgets
 
         private float RecycleTopToBottom()
         {
-            WritingLocked = true;
-
             float recycledheight = 0f;
 
             while (ShouldRecycleTop && CurrentDataCount < DataSource.ItemCount)
             {
+                WritingLocked = true;
                 var cell = CellPool[topPoolIndex];
 
                 //Move top cell to bottom
@@ -496,12 +499,11 @@ namespace UnityExplorer.UI.Widgets
 
         private float RecycleBottomToTop()
         {
-            WritingLocked = true;
-
             float recycledheight = 0f;
 
             while (ShouldRecycleBottom && CurrentDataCount > CellPool.Count)
             {
+                WritingLocked = true;
                 var cell = CellPool[bottomPoolIndex];
 
                 //Move bottom cell to top
@@ -537,74 +539,26 @@ namespace UnityExplorer.UI.Widgets
 
         // Slider 
 
-        private void UpdateSliderHandle(bool forcePositionValue = true)
-        {
-            CheckDataSourceCountChange(out _);
-
-            var dataHeight = TotalDataHeight;
-
-            // calculate handle size based on viewport / total data height
-            var viewportHeight = Viewport.rect.height;
-            var handleHeight = viewportHeight * Math.Min(1, viewportHeight / dataHeight);
-            handleHeight = Math.Max(15f, handleHeight);
-
-            // resize the handle container area for the size of the handle (bigger handle = smaller container)
-            var container = slider.m_HandleContainerRect;
-            container.offsetMax = new Vector2(container.offsetMax.x, -(handleHeight * 0.5f));
-            container.offsetMin = new Vector2(container.offsetMin.x, handleHeight * 0.5f);
-
-            // set handle size
-            slider.handleRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, handleHeight);
-
-            // if slider is 100% height then make it not interactable
-            slider.interactable = !Mathf.Approximately(handleHeight, viewportHeight);
-
-            if (forcePositionValue)
-            {
-                float val = 0f;
-                if (TotalDataHeight > 0f)
-                {
-                    float topPos = 0f;
-                    if (HeightCache.Count > 0)
-                        topPos = HeightCache[TopDataIndex].startPosition;
-
-                    var scrollPos = topPos + Content.anchoredPosition.y;
-
-                    var viewHeight = TotalDataHeight - Viewport.rect.height;
-                    if (viewHeight != 0.0f)
-                        val = (float)((decimal)scrollPos / (decimal)(viewHeight));
-                    else
-                        val = 0f;
-                }
-
-                bool prev = writingLocked;
-                WritingLocked = true;
-                slider.value = val;
-                WritingLocked = prev;
-            }
-        }
-
         private void OnSliderValueChanged(float val)
         {
-            if (this.WritingLocked || DataSource == null)
+            // Prevent spam invokes unless value is 0 or 1 (so we dont skip over the start/end)
+            if (DataSource == null || (WritingLocked && val != 0 && val != 1))
                 return;
             this.WritingLocked = true;
 
             ScrollRect.StopMovement();
-
             RefreshCellHeightsFast();
 
             // normalize the scroll position for the scroll bounds.
-            // this translates the value into saying "point at the center of the height of the viewport"
-            var scrollHeight = NormalizedScrollBounds.y - NormalizedScrollBounds.x;
-            var desiredPosition = val * scrollHeight + NormalizedScrollBounds.x;
+            // point at the center of the viewport
+            var desiredPosition = val * (NormalizedScrollBounds.y - NormalizedScrollBounds.x) + NormalizedScrollBounds.x;
 
             // add offset above it for viewport height
             var halfView = Viewport.rect.height * 0.5f;
             var desiredMinY = desiredPosition - halfView;
 
             // get the data index at the top of the viewport
-            int topViewportIndex = HeightCache.GetDataIndexAtPosition(desiredMinY);
+            int topViewportIndex = HeightCache.GetFirstDataIndexAtPosition(desiredMinY);
             topViewportIndex = Math.Max(0, topViewportIndex);
             topViewportIndex = Math.Min(DataSource.ItemCount - 1, topViewportIndex);
 
@@ -677,7 +631,48 @@ namespace UnityExplorer.UI.Widgets
             SetScrollBounds();
             ScrollRect.UpdatePrevData();
 
-            UpdateSliderHandle(false);
+            UpdateSliderHandle();
+        }
+
+        private void UpdateSliderHandle()// bool forcePositionValue = true)
+        {
+            CheckDataSourceCountChange(out _);
+
+            var dataHeight = TotalDataHeight;
+
+            // calculate handle size based on viewport / total data height
+            var viewportHeight = Viewport.rect.height;
+            var handleHeight = viewportHeight * Math.Min(1, viewportHeight / dataHeight);
+            handleHeight = Math.Max(15f, handleHeight);
+
+            // resize the handle container area for the size of the handle (bigger handle = smaller container)
+            var container = slider.m_HandleContainerRect;
+            container.offsetMax = new Vector2(container.offsetMax.x, -(handleHeight * 0.5f));
+            container.offsetMin = new Vector2(container.offsetMin.x, handleHeight * 0.5f);
+
+            // set handle size
+            slider.handleRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, handleHeight);
+
+            // if slider is 100% height then make it not interactable
+            slider.interactable = !Mathf.Approximately(handleHeight, viewportHeight);
+
+            float val = 0f;
+            if (TotalDataHeight > 0f)
+            {
+                float topPos = 0f;
+                if (HeightCache.Count > 0)
+                    topPos = HeightCache[TopDataIndex].startPosition;
+
+                var scrollPos = topPos + Content.anchoredPosition.y;
+
+                var viewHeight = TotalDataHeight - Viewport.rect.height;
+                if (viewHeight != 0.0f)
+                    val = (float)((decimal)scrollPos / (decimal)(viewHeight));
+                else
+                    val = 0f;
+            }
+
+            slider.Set(val, false);
         }
 
         /// <summary>Use <see cref="UIFactory.CreateScrollPool"/></summary>

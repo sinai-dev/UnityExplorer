@@ -61,17 +61,17 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
 
             // label
 
-            KeyLabel = UIFactory.CreateLabel(keyGroup, "KeyLabel", "not set (key)", TextAnchor.MiddleLeft);
+            KeyLabel = UIFactory.CreateLabel(keyGroup, "KeyLabel", "<i>empty</i>", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(KeyLabel.gameObject, minWidth: 50, flexibleWidth: 999, minHeight: 30);
 
             // Type label for input field
 
-            KeyInputTypeLabel = UIFactory.CreateLabel(keyGroup, "InputTypeLabel", "not set", TextAnchor.MiddleLeft);
+            KeyInputTypeLabel = UIFactory.CreateLabel(keyGroup, "InputTypeLabel", "<i>null</i>", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(KeyInputTypeLabel.gameObject, minWidth: 55, flexibleWidth: 0, minHeight: 30);
 
             // input field
 
-            var keyInputObj = UIFactory.CreateInputField(keyGroup, "KeyInput", "not set", out KeyInputField);
+            var keyInputObj = UIFactory.CreateInputField(keyGroup, "KeyInput", "empty", out KeyInputField);
             UIFactory.SetLayoutElement(keyInputObj, minHeight: 30, flexibleHeight: 0, flexibleWidth: 200);
             //KeyInputField.lineType = InputField.LineType.MultiLineNewline;
             KeyInputField.readOnly = true;
