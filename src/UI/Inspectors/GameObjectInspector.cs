@@ -98,10 +98,49 @@ namespace UnityExplorer.UI.Inspectors
         }
 
         private readonly List<Component> _componentEntries = new List<Component>();
+        private readonly HashSet<int> _compInstanceIDs = new HashSet<int>();
 
         private List<Component> GetComponentEntries()
         {
             return _componentEntries;
+        }
+
+        private void UpdateComponents()
+        {
+            // Check if we actually need to refresh the component cells or not.
+            // Doing this check is far more efficient than blindly setting cells.
+
+            var comps = GOTarget.GetComponents<Component>();
+
+            bool needRefresh = false;
+            if (comps.Length != _componentEntries.Count)
+                needRefresh = true;
+            else
+            {
+                foreach (var comp in comps)
+                {
+                    if (!_compInstanceIDs.Contains(comp.GetInstanceID()))
+                    {
+                        needRefresh = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!needRefresh)
+                return;
+
+            _componentEntries.Clear();
+            _compInstanceIDs.Clear();
+
+            foreach (var comp in comps)
+            {
+                _componentEntries.Add(comp);
+                _compInstanceIDs.Add(comp.GetInstanceID());
+            }
+
+            ComponentList.RefreshData();
+            ComponentList.ScrollPool.Refresh(true);
         }
 
         private static readonly Dictionary<string, string> compToStringCache = new Dictionary<string, string>();
@@ -137,17 +176,6 @@ namespace UnityExplorer.UI.Inspectors
             var comp = _componentEntries[index];
             if (comp)
                 InspectorManager.Inspect(comp);
-        }
-
-        private void UpdateComponents()
-        {
-            _componentEntries.Clear();
-            var comps = GOTarget.GetComponents<Component>();
-            foreach (var comp in comps)
-                _componentEntries.Add(comp);
-
-            ComponentList.RefreshData();
-            ComponentList.ScrollPool.Refresh(true);
         }
 
         protected override void OnCloseClicked()
