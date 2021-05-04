@@ -19,9 +19,7 @@ namespace UnityExplorer
         public static AssetBundle LoadFromFile(string path)
         {
             var iCall = ICallManager.GetICall<d_LoadFromFile>("UnityEngine.AssetBundle::LoadFromFile_Internal");
-
             var ptr = iCall.Invoke(IL2CPP.ManagedStringToIl2Cpp(path), 0u, 0UL);
-
             return new AssetBundle(ptr);
         }
         
@@ -30,10 +28,18 @@ namespace UnityExplorer
         public static AssetBundle LoadFromMemory(byte[] binary, uint crc = 0)
         {
             var iCall = ICallManager.GetICall<d_LoadFromMemory>("UnityEngine.AssetBundle::LoadFromMemory_Internal");
-
             var ptr = iCall(((Il2CppStructArray<byte>) binary).Pointer, crc);
-
             return new AssetBundle(ptr);
+        }
+
+        // static void UnloadAllAssetBundles(bool unloadAllObjects);
+
+        internal delegate void d_UnloadAllAssetBundles(bool unloadAllObjects);
+
+        public static void UnloadAllAssetBundles(bool unloadAllObjects)
+        {
+            var iCall = ICallManager.GetICall<d_UnloadAllAssetBundles>("UnityEngine.AssetBundle::UnloadAllAssetBundles");
+            iCall.Invoke(unloadAllObjects);
         }
 
         // ~~~~~~~~~~~~ Instance ~~~~~~~~~~~~
@@ -70,6 +76,15 @@ namespace UnityExplorer
                 return null;
 
             return new UnityEngine.Object(ptr).TryCast<T>();
+        }
+
+        // public extern void Unload(bool unloadAllLoadedObjects);
+        internal delegate void d_Unload(IntPtr _this, bool unloadAllLoadedObjects);
+
+        public void Unload(bool unloadAssets = true)
+        {
+            var iCall = ICallManager.GetICall<d_Unload>("UnityEngine.AssetBundle::Unload");
+            iCall.Invoke(this.m_bundlePtr, unloadAssets);
         }
     }
 }

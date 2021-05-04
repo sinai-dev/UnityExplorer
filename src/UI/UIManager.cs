@@ -53,8 +53,8 @@ namespace UnityExplorer.UI
         public static RectTransform NavBarRect;
         public static GameObject NavbarButtonHolder;
 
-        internal static readonly Color navButtonEnabledColor = new Color(0.2f, 0.4f, 0.28f);
-        internal static readonly Color navButtonDisabledColor = new Color(0.25f, 0.25f, 0.25f);
+        internal static readonly Color enabledButtonColor = new Color(0.2f, 0.4f, 0.28f);
+        internal static readonly Color disabledButtonColor = new Color(0.25f, 0.25f, 0.25f);
 
         public const int MAX_INPUTFIELD_CHARS = 16000;
 

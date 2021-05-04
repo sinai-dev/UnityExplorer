@@ -21,16 +21,26 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             Arguments = PropertyInfo.GetIndexParameters();
         }
 
-        protected override void TryEvaluate()
+        protected override object TryEvaluate()
         {
             try
             {
-                Value = PropertyInfo.GetValue(Owner.Target.TryCast(DeclaringType), null);
+                bool _static = PropertyInfo.GetAccessors(true)[0].IsStatic;
+                var target = _static ? null : Owner.Target.TryCast(DeclaringType);
+
+                if (HasArguments)
+                    return PropertyInfo.GetValue(target, this.Evaluator.TryParseArguments());
+
+                var ret = PropertyInfo.GetValue(target, null);
+                HadException = false;
+                LastException = null;
+                return ret;
             }
             catch (Exception ex)
             {
                 HadException = true;
                 LastException = ex;
+                return null;
             }
         }
 
@@ -41,9 +51,13 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
 
             try
             {
-                // TODO property indexers
+                bool _static = PropertyInfo.GetAccessors(true)[0].IsStatic;
+                var target = _static ? null : Owner.Target.TryCast(DeclaringType);
 
-                PropertyInfo.SetValue(PropertyInfo.GetSetMethod().IsStatic ? null : Owner.Target, value, null);
+                if (HasArguments)
+                    PropertyInfo.SetValue(target, value, Evaluator.TryParseArguments());
+                else
+                    PropertyInfo.SetValue(target, value, null);
             }
             catch (Exception ex)
             {

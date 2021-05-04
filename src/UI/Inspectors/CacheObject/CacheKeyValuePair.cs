@@ -42,7 +42,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             {
                 KeyInputWanted = true;
                 KeyInputText = key.ToString();
-                KeyInputTypeText = SignatureHighlighter.ParseFullType(type, false);
+                KeyInputTypeText = SignatureHighlighter.ParseType(type, false);
             }
             else
             {

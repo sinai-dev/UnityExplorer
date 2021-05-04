@@ -128,7 +128,6 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
         /// </summary>
         protected virtual void ProcessOnEvaluate()
         {
-
             if (HadException)
                 State = ValueState.Exception;
             else if (Value.IsNullOrDestroyed())
@@ -166,7 +165,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             switch (State)
             {
                 case ValueState.NotEvaluated:
-                    label = $"<i>{NOT_YET_EVAL} ({SignatureHighlighter.ParseFullType(FallbackType, true)})</i>"; break;
+                    label = $"<i>{NOT_YET_EVAL} ({SignatureHighlighter.ParseType(FallbackType, true)})</i>"; break;
                 case ValueState.Exception:
                     label = $"<i><color=red>{ReflectionUtility.ReflectionExToString(LastException)}</color></i>"; break;
                 case ValueState.Boolean:
@@ -228,7 +227,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
                     break;
                 case ValueState.Enum:
                     SetIValueState();
-                    SetValueState(cell, new ValueStateArgs(true, subContentButtonActive: true));
+                    SetValueState(cell, new ValueStateArgs(true, subContentButtonActive: CanWrite));
                     break;
                 case ValueState.Collection:
                 case ValueState.Dictionary:
@@ -258,11 +257,12 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
 
             cell.TypeLabel.gameObject.SetActive(args.typeLabelActive);
             if (args.typeLabelActive)
-                cell.TypeLabel.text = SignatureHighlighter.ParseFullType(Value.GetActualType(), false);
+                cell.TypeLabel.text = SignatureHighlighter.ParseType(Value.GetActualType(), false);
 
             cell.Toggle.gameObject.SetActive(args.toggleActive);
             if (args.toggleActive)
             {
+                cell.Toggle.interactable = CanWrite;
                 cell.Toggle.isOn = (bool)Value;
                 cell.ToggleText.text = Value.ToString();
             }
@@ -329,7 +329,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             IValue = null;
         }
 
-        internal void HideIValue()
+        internal virtual void HidePooledObjects()
         {
             if (this.IValue == null)
                 return;

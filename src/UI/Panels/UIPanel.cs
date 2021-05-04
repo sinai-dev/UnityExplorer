@@ -114,9 +114,9 @@ namespace UnityExplorer.UI.Panels
             if (NavButtonWanted)
             {
                 if (active)
-                    RuntimeProvider.Instance.SetColorBlock(NavButton.Button, UIManager.navButtonEnabledColor, UIManager.navButtonEnabledColor * 1.2f);
+                    RuntimeProvider.Instance.SetColorBlock(NavButton.Button, UIManager.enabledButtonColor, UIManager.enabledButtonColor * 1.2f);
                 else
-                    RuntimeProvider.Instance.SetColorBlock(NavButton.Button, UIManager.navButtonDisabledColor, UIManager.navButtonDisabledColor * 1.2f);
+                    RuntimeProvider.Instance.SetColorBlock(NavButton.Button, UIManager.disabledButtonColor, UIManager.disabledButtonColor * 1.2f);
             }
         }
 
@@ -136,7 +136,7 @@ namespace UnityExplorer.UI.Panels
 
                 NavButton = UIFactory.CreateButton(UIManager.NavbarButtonHolder, $"Button_{PanelType}", Name);
                 UIFactory.SetLayoutElement(NavButton.Button.gameObject, minWidth: 118, flexibleWidth: 0);
-                RuntimeProvider.Instance.SetColorBlock(NavButton.Button, UIManager.navButtonDisabledColor, UIManager.navButtonDisabledColor * 1.2f);
+                RuntimeProvider.Instance.SetColorBlock(NavButton.Button, UIManager.disabledButtonColor, UIManager.disabledButtonColor * 1.2f);
                 NavButton.OnClick += () =>
                 {
                     UIManager.TogglePanel(PanelType);

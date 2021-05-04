@@ -30,7 +30,7 @@ namespace UnityExplorer.UI.Inspectors
 
         private List<CacheMember> members = new List<CacheMember>();
         private readonly List<CacheMember> filteredMembers = new List<CacheMember>();
-        private readonly HashSet<CacheMember> displayedMembers = new HashSet<CacheMember>();
+        // private readonly HashSet<CacheMember> displayedMembers = new HashSet<CacheMember>();
 
         public Text NameText;
         public Text AssemblyText;
@@ -65,7 +65,6 @@ namespace UnityExplorer.UI.Inspectors
 
             members.Clear();
             filteredMembers.Clear();
-            displayedMembers.Clear();
 
             autoUpdateToggle.isOn = false;
             AutoUpdateWanted = false;
@@ -88,7 +87,7 @@ namespace UnityExplorer.UI.Inspectors
                 prefix = "[R]";
             }
 
-            Tab.TabText.text = $"{prefix} {SignatureHighlighter.ParseFullType(TargetType)}";
+            Tab.TabText.text = $"{prefix} {SignatureHighlighter.ParseType(TargetType)}";
 
             NameText.text = SignatureHighlighter.ParseFullSyntax(TargetType, true);
 
@@ -156,8 +155,11 @@ namespace UnityExplorer.UI.Inspectors
         private void UpdateDisplayedMembers()// bool onlyAutoUpdate)
         {
             bool shouldRefresh = false;
-            foreach (var member in displayedMembers)
+            foreach (var cell in MemberScrollPool.CellPool)
             {
+                if (!cell.Enabled || cell.Occupant == null)
+                    continue;
+                var member = cell.MemberOccupant;
                 if (member.ShouldAutoEvaluate) // && (!onlyAutoUpdate || member.AutoUpdateWanted))
                 {
                     shouldRefresh = true;
@@ -185,9 +187,6 @@ namespace UnityExplorer.UI.Inspectors
             {
                 if (cell.Occupant != null)
                 {
-                    if (displayedMembers.Contains(cell.MemberOccupant))
-                        displayedMembers.Remove(cell.MemberOccupant);
-
                     cell.Occupant.CellView = null;
                     cell.Occupant = null;
                 }
@@ -202,15 +201,13 @@ namespace UnityExplorer.UI.Inspectors
             {
                 if (cell.Occupant != null)
                 {
-                    cell.Occupant.HideIValue();
-                    displayedMembers.Remove(cell.MemberOccupant);
+                    cell.Occupant.HidePooledObjects();
                     cell.Occupant.CellView = null;
                     cell.Occupant = null;
                 }
 
                 cell.Occupant = member;
                 member.CellView = cell;
-                displayedMembers.Add(member);
             }
             
             member.SetCell(cell);

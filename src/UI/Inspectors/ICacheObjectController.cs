@@ -8,7 +8,7 @@ namespace UnityExplorer.UI.Inspectors
 {
     public interface ICacheObjectController
     {
-        CacheObjectBase ParentCacheObject { get; } // TODO
+        CacheObjectBase ParentCacheObject { get; }
 
         object Target { get; }
         Type TargetType { get; }

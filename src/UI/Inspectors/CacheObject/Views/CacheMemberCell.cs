@@ -21,7 +21,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
 
         protected virtual void EvaluateClicked()
         {
-            // TODO
+            this.MemberOccupant.OnEvaluateClicked();
         }
 
         protected override void ConstructEvaluateHolder(GameObject parent)

@@ -40,7 +40,7 @@ namespace UnityExplorer.UI.Panels
             content.SetActive(true);
 
             var button = tabButtons[tabIndex];
-            RuntimeProvider.Instance.SetColorBlock(button.Button, UIManager.navButtonEnabledColor, UIManager.navButtonEnabledColor * 1.2f);
+            RuntimeProvider.Instance.SetColorBlock(button.Button, UIManager.enabledButtonColor, UIManager.enabledButtonColor * 1.2f);
 
             SelectedTab = tabIndex;
             SaveToConfigManager();
@@ -49,7 +49,7 @@ namespace UnityExplorer.UI.Panels
         private void DisableTab(int tabIndex)
         {
             tabPages[tabIndex].SetActive(false);
-            RuntimeProvider.Instance.SetColorBlock(tabButtons[tabIndex].Button, UIManager.navButtonDisabledColor, UIManager.navButtonDisabledColor * 1.2f);
+            RuntimeProvider.Instance.SetColorBlock(tabButtons[tabIndex].Button, UIManager.disabledButtonColor, UIManager.disabledButtonColor * 1.2f);
         }
 
         public override void Update()
@@ -97,10 +97,11 @@ namespace UnityExplorer.UI.Panels
 
         public override void SetDefaultPosAndAnchors()
         {
+            // todo proper default size
             mainPanelRect.localPosition = Vector2.zero;
             mainPanelRect.pivot = new Vector2(0f, 1f);
-            mainPanelRect.anchorMin = new Vector2(0.1f, 0.2f);
-            mainPanelRect.anchorMax = new Vector2(0.25f, 0.9f);
+            mainPanelRect.anchorMin = new Vector2(0.1f, 0.25f);
+            mainPanelRect.anchorMax = new Vector2(0.25f, 0.8f);
 
 
             //mainPanelRect.anchorMin = Vector3.zero;

@@ -24,7 +24,7 @@ namespace UnityExplorer.UI
 
         public static float MinY(this RectTransform rect) => rect.position.y;
 
-        public static float MaxX(this RectTransform rect) => rect.position.x - rect.rect.width;
+        public static float MaxX(this RectTransform rect) => rect.position.x + rect.rect.width;
 
         public static float MinX(this RectTransform rect) => rect.position.x;
     }

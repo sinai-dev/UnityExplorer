@@ -133,35 +133,37 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
 
             var type = obj.GetType();
 
-            if (obj is Il2CppSystem.Object cppObject)
+            try
             {
-                // weird specific case - if the object is an Il2CppSystem.Type, then return so manually.
-                if (cppObject is CppType)
-                    return typeof(CppType);
-
-                if (!string.IsNullOrEmpty(type.Namespace))
+                if ((Il2CppSystem.Object)obj is Il2CppSystem.Object cppObject)
                 {
-                    // Il2CppSystem-namespace objects should just return GetType,
-                    // because using GetIl2CppType returns the System namespace type instead.
-                    if (type.Namespace.StartsWith("System.") || type.Namespace.StartsWith("Il2CppSystem."))
-                        return cppObject.GetType();
+                    // weird specific case - if the object is an Il2CppSystem.Type, then return so manually.
+                    if (cppObject is CppType)
+                        return typeof(CppType);
+
+                    if (type.FullName.StartsWith("System.") || type.FullName.StartsWith("Il2CppSystem."))
+                        return type;
+
+                    var cppType = cppObject.GetIl2CppType();
+
+                    // check if type is injected
+                    IntPtr classPtr = il2cpp_object_get_class(cppObject.Pointer);
+                    if (RuntimeSpecificsStore.IsInjected(classPtr))
+                    {
+                        var typeByName = ReflectionUtility.GetTypeByName(cppType.FullName);
+                        if (typeByName != null)
+                            return typeByName;
+                    }
+
+                    // this should be fine for all other il2cpp objects
+                    var getType = GetMonoType(cppType);
+                    if (getType != null)
+                        return getType;
                 }
-
-                var cppType = cppObject.GetIl2CppType();
-
-                // check if type is injected
-                IntPtr classPtr = il2cpp_object_get_class(cppObject.Pointer);
-                if (RuntimeSpecificsStore.IsInjected(classPtr))
-                {
-                    var typeByName = ReflectionUtility.GetTypeByName(cppType.FullName);
-                    if (typeByName != null)
-                        return typeByName;
-                }
-
-                // this should be fine for all other il2cpp objects
-                var getType = GetMonoType(cppType);
-                if (getType != null)
-                    return getType;
+            }
+            catch // (Exception ex)
+            {
+                // ExplorerCore.LogWarning("Exception in GetActualType: " + ex);
             }
 
             return type;

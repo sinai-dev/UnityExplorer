@@ -729,9 +729,7 @@ namespace UnityExplorer.UI
             contentRect.pivot = new Vector2(0.5f, 1f);
             contentRect.sizeDelta = new Vector2(0f, 0f);
             contentRect.offsetMax = new Vector2(0f, 0f);
-
             SetLayoutGroup<VerticalLayoutGroup>(content, true, false, true, true, 0, 2, 2, 2, 2, TextAnchor.UpperCenter);
-
             content.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             var scrollRect = mainObj.AddComponent<ScrollRect>();

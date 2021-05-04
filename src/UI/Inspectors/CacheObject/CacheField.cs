@@ -20,16 +20,20 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             base.SetInspectorOwner(inspector, member);
         }
 
-        protected override void TryEvaluate()
+        protected override object TryEvaluate()
         {
             try
             {
-                Value = FieldInfo.GetValue(this.Owner.Target.TryCast(this.DeclaringType));
+                var ret = FieldInfo.GetValue(this.Owner.Target.TryCast(this.DeclaringType));
+                HadException = false;
+                LastException = null;
+                return ret;
             }
             catch (Exception ex)
             {
                 HadException = true;
                 LastException = ex;
+                return null;
             }
         }
 
@@ -37,7 +41,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
         {
             try
             {
-                FieldInfo.SetValue(FieldInfo.IsStatic ? null : Owner.Target, value);
+                FieldInfo.SetValue(FieldInfo.IsStatic ? null : Owner.Target.TryCast(this.DeclaringType), value);
             }
             catch (Exception ex)
             {

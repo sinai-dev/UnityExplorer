@@ -35,6 +35,12 @@ namespace UnityExplorer.UI.Utility
 
         public const string LOCAL_ARG = "#a6e9e9";
 
+        internal const string ARRAY_TOKEN = "[]";
+        internal const string OPEN_COLOR = "<color=";
+        internal const string CLOSE_COLOR = "</color>";
+        internal const string OPEN_ITALIC = "<i>";
+        internal const string CLOSE_ITALIC = "</i>";
+
         public static readonly Color StringOrange = new Color(0.83f, 0.61f, 0.52f);
         public static readonly Color EnumGreen = new Color(0.57f, 0.76f, 0.43f);
         public static readonly Color KeywordBlue = new Color(0.3f, 0.61f, 0.83f);
@@ -73,17 +79,20 @@ namespace UnityExplorer.UI.Utility
 
             bool isGeneric = type.IsGenericParameter || (type.HasElementType && type.GetElementType().IsGenericParameter);
 
-            if (!isGeneric && includeNamespace && GetNamespace(type, out string ns))
-                syntaxBuilder.Append($"<color={NAMESPACE}>{ns}</color>.");
-
-            // Declaring type
-
-            var declaring = type.DeclaringType;
-            while (declaring != null)
+            if (!isGeneric)
             {
-                syntaxBuilder.Append(HighlightType(declaring));
-                syntaxBuilder.Append('.');
-                declaring = declaring.DeclaringType;
+                if (includeNamespace && GetNamespace(type, out string ns))
+                    syntaxBuilder.Append(OPEN_COLOR).Append(NAMESPACE).Append('>').Append(ns).Append(CLOSE_COLOR).Append('.');
+
+                // Declaring type
+
+                var declaring = type.DeclaringType;
+                while (declaring != null)
+                {
+                    syntaxBuilder.Append(HighlightType(declaring));
+                    syntaxBuilder.Append('.');
+                    declaring = declaring.DeclaringType;
+                }
             }
 
             // Highlight the type name
@@ -96,68 +105,101 @@ namespace UnityExplorer.UI.Utility
             {
                 syntaxBuilder.Append('.');
 
-                string memColor = GetMemberInfoColor(memberInfo, out bool isStatic);
+                //string memColor = GetMemberInfoColor(memberInfo, out bool isStatic);
+
+                //if (isStatic)
+                //    syntaxBuilder.Append(OPEN_ITALIC);
+
+                //syntaxBuilder.Append($"<color={memColor}>{memberInfo.Name}{CLOSE_COLOR}");
+                int start = syntaxBuilder.Length - 1;
+                syntaxBuilder.Append(OPEN_COLOR)
+                    .Append(GetMemberInfoColor(memberInfo, out bool isStatic))
+                    .Append('>')
+                    .Append(memberInfo.Name)
+                    .Append(CLOSE_COLOR);
 
                 if (isStatic)
-                    syntaxBuilder.Append("<i>");
-
-                syntaxBuilder.Append($"<color={memColor}>{memberInfo.Name}</color>");
-
-                if (isStatic)
-                    syntaxBuilder.Append("</i>");
+                {
+                    syntaxBuilder.Insert(start, OPEN_ITALIC);
+                    syntaxBuilder.Append(CLOSE_ITALIC);
+                }
 
                 if (memberInfo is MethodInfo method)
                 {
                     var args = method.GetGenericArguments();
                     if (args.Length > 0)
-                        syntaxBuilder.Append($"<{ParseGenericArgs(args, true)}>");
+                        //syntaxBuilder.Append($"<{ParseGenericArgs(args, true)}>");
+                        syntaxBuilder.Append('<').Append(ParseGenericArgs(args, true)).Append('>');
                 }
             }
 
             return syntaxBuilder.ToString();
         }
 
-        public static string ParseFullType(Type type, bool includeNamespace = false, bool includeDllName = false)
+        public static string ParseType(Type type, bool includeNamespace = false, bool includeDllName = false)
         {
-            string ret = HighlightType(type);
+            var sb = new StringBuilder();
 
             bool isGeneric = type.IsGenericParameter || (type.HasElementType && type.GetElementType().IsGenericParameter);
 
             if (!isGeneric && includeNamespace && GetNamespace(type, out string ns))
-                ret = $"<color={NAMESPACE}>{ns}</color>.{ret}";
+                //sb.Append($"<color={NAMESPACE}>{ns}{CLOSE_COLOR}.");
+                sb.Append(OPEN_COLOR).Append(NAMESPACE).Append('>').Append(ns).Append(CLOSE_COLOR).Append('.');
+
+            sb.Append(HighlightType(type));
 
             if (includeDllName)
             {
                 if (!string.IsNullOrEmpty(type.Assembly.Location))
-                    ret = $"{ret} ({Path.GetFileName(type.Assembly.Location)})";
+                    //sb.Append($" ({Path.GetFileName(type.Assembly.Location)})");
+                    sb.Append(' ').Append('(').Append(Path.GetFileName(type.Assembly.Location)).Append(')');
                 else
-                    ret = $"{ret} ({type.Assembly.GetName().Name})";
+                    //sb.Append($" ({type.Assembly.GetName().Name})");
+                    sb.Append(' ').Append('(').Append(type.Assembly.GetName().Name).Append(')');
             }
 
-            return ret;
+            return sb.ToString();
         }
 
         private static readonly Dictionary<string, string> typeToRichType = new Dictionary<string, string>();
+
+        private static bool EndsWith(this StringBuilder sb, string _string)
+        {
+            int len = _string.Length;
+
+            if (sb.Length < len)
+                return false;
+
+            int stringpos = 0;
+            for (int i = sb.Length - len; i < sb.Length; i++, stringpos++)
+            {
+                if (sb[i] != _string[stringpos])
+                    return false;
+            }
+            return true;
+        }
 
         private static string HighlightType(Type type)
         {
             string key = type.ToString();
             if (typeToRichType.ContainsKey(key))
                 return typeToRichType[key];
-
-            var typeName = type.Name;
+            
+            var sb = new StringBuilder(type.Name);
 
             bool isArray = false;
-            if (typeName.EndsWith("[]"))
+            if (sb.EndsWith(ARRAY_TOKEN))
             {
                 isArray = true;
-                typeName = typeName.Substring(0, typeName.Length - 2);
+                sb.Remove(sb.Length - 2, 2);
                 type = type.GetElementType();
             }
 
             if (type.IsGenericParameter || (type.HasElementType && type.GetElementType().IsGenericParameter))
             {
-                typeName = $"<color={CONST}>{typeName}</color>";
+                //typeName = $"<color={CONST}>{typeName}</color>";
+                sb.Insert(0, $"<color={CONST}>");
+                sb.Append(CLOSE_COLOR);
             }
             else
             {
@@ -172,27 +214,33 @@ namespace UnityExplorer.UI.Utility
                     int suffixLen = 1 + args.Length.ToString().Length;
 
                     // make sure the typename actually has expected "`N" format.
-                    if (typeName[typeName.Length - suffixLen] == '`')
-                        typeName = typeName.Substring(0, typeName.Length - suffixLen);
+                    if (sb[sb.Length - suffixLen] == '`')
+                        //typeName = typeName.Substring(0, typeName.Length - suffixLen);
+                        sb.Remove(sb.Length - suffixLen, suffixLen);
                 }
 
                 // highlight the base name itself
                 // do this after removing the `N suffix, so only the name itself is in the color tags.
-                typeName = $"<color={GetClassColor(type)}>{typeName}</color>";
+                //typeName = $"<color={GetClassColor(type)}>{typeName}</color>";
+                sb.Insert(0, $"{OPEN_COLOR}{GetClassColor(type)}>");
+                sb.Append(CLOSE_COLOR);
 
                 // parse the generic args, if any
                 if (args.Length > 0)
                 {
-                    typeName += $"<{ParseGenericArgs(args)}>";
+                    //typeName += $"<{ParseGenericArgs(args)}>";
+                    sb.Append('<').Append(ParseGenericArgs(args)).Append('>');
                 }
             }
 
             if (isArray)
-                typeName += "[]";
+                //typeName += "[]";
+                sb.Append('[').Append(']');
 
-            typeToRichType.Add(key, typeName);
+            var ret = sb.ToString();
+            typeToRichType.Add(key, ret);
 
-            return typeName;
+            return ret;
         }
 
         public static string ParseGenericArgs(Type[] args, bool isGenericParams = false)
@@ -200,24 +248,27 @@ namespace UnityExplorer.UI.Utility
             if (args.Length < 1)
                 return string.Empty;
 
-            string ret = "";
+            //string ret = "";
+            var sb = new StringBuilder();
 
             for (int i = 0; i < args.Length; i++)
             {
                 if (i > 0)
-                    ret += ", ";
+                    //ret += ", ";
+                    sb.Append(',').Append(' ');
 
                 if (isGenericParams)
                 {
-                    ret += $"<color={CONST}>{args[i].Name}</color>";
+                    //ret += $"<color={CONST}>{args[i].Name}</color>";
+                    sb.Append(OPEN_COLOR).Append(CONST).Append('>').Append(args[i].Name).Append(CLOSE_COLOR);
                     continue;
                 }
 
-                // using HighlightTypeName makes it recursive, so we can parse nested generic args.
-                ret += ParseFullType(args[i]);
+                //ret += ParseType(args[i]);
+                sb.Append(ParseType(args[i]));
             }
 
-            return ret;
+            return sb.ToString();
         }
 
         public static string GetMemberInfoColor(MemberInfo memberInfo, out bool isStatic)

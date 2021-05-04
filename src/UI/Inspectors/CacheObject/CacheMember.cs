@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityExplorer.UI.Inspectors.CacheObject.Views;
+using UnityExplorer.UI.ObjectPool;
 using UnityExplorer.UI.Utility;
 
 namespace UnityExplorer.UI.Inspectors.CacheObject
@@ -17,9 +18,11 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
         public abstract Type DeclaringType { get; }
         public string NameForFiltering { get; protected set; }
 
-        public override bool HasArguments => Arguments?.Length > 0;
-        public ParameterInfo[] Arguments { get; protected set; }
-        public bool Evaluating { get; protected set; }
+        public override bool HasArguments => Arguments?.Length > 0 || GenericArguments.Length > 0;
+        public ParameterInfo[] Arguments { get; protected set; } = new ParameterInfo[0];
+        public Type[] GenericArguments { get; protected set; } = new Type[0];
+        public EvaluateWidget Evaluator { get; protected set; }
+        public bool Evaluating => Evaluator != null && Evaluator.UIRoot.activeSelf;
         
         public virtual void SetInspectorOwner(ReflectionInspector inspector, MemberInfo member)
         {
@@ -28,17 +31,43 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             this.NameForFiltering = $"{member.DeclaringType.Name}.{member.Name}";
         }
 
-        protected abstract void TryEvaluate();
+        public override void ReleasePooledObjects()
+        {
+            base.ReleasePooledObjects();
+
+            if (this.Evaluator != null)
+            {
+                this.Evaluator.OnReturnToPool();
+                Pool<EvaluateWidget>.Return(this.Evaluator);
+                this.Evaluator = null;
+            }
+        }
+
+        internal override void HidePooledObjects()
+        {
+            base.HidePooledObjects();
+
+            if (this.Evaluator != null)
+                this.Evaluator.UIRoot.transform.SetParent(Pool<EvaluateWidget>.Instance.InactiveHolder.transform, false);
+        }
+
+        protected abstract object TryEvaluate();
 
         protected abstract void TrySetValue(object value);
+
+        public void EvaluateAndSetCell()
+        {
+            Evaluate();
+            if (CellView != null)
+                SetCell(CellView);
+        }
 
         /// <summary>
         /// Evaluate when first shown (if ShouldAutoEvaluate), or else when Evaluate button is clicked, or auto-updated.
         /// </summary>
         public void Evaluate()
         {
-            TryEvaluate();
-            SetValueFromSource(Value);
+            SetValueFromSource(TryEvaluate());
         }
 
         public override void SetUserValue(object value)
@@ -58,6 +87,9 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             //memCell.UpdateToggle.gameObject.SetActive(ShouldAutoEvaluate);
         }
 
+        private static readonly Color evalEnabledColor = new Color(0.15f, 0.25f, 0.15f);
+        private static readonly Color evalDisabledColor = new Color(0.15f, 0.15f, 0.15f);
+
         protected override bool SetCellEvaluateState(CacheObjectCell objectcell)
         {
             var cell = objectcell as CacheMemberCell;
@@ -68,15 +100,27 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
                 //cell.UpdateToggle.gameObject.SetActive(false);
                 cell.EvaluateButton.Button.gameObject.SetActive(true);
                 if (HasArguments)
-                    cell.EvaluateButton.ButtonText.text = $"Evaluate ({Arguments.Length})";
+                {
+                    if (!Evaluating)
+                        cell.EvaluateButton.ButtonText.text = $"Evaluate ({Arguments.Length + GenericArguments.Length})";
+                    else
+                    {
+                        cell.EvaluateButton.ButtonText.text = "Hide";
+                        Evaluator.UIRoot.transform.SetParent(cell.EvaluateHolder.transform, false);
+                        RuntimeProvider.Instance.SetColorBlock(cell.EvaluateButton.Button, evalEnabledColor, evalEnabledColor * 1.3f);
+                    }
+                }
                 else
                     cell.EvaluateButton.ButtonText.text = "Evaluate";
+
+                if (!Evaluating)
+                    RuntimeProvider.Instance.SetColorBlock(cell.EvaluateButton.Button, evalDisabledColor, evalDisabledColor * 1.3f);
             }
-            else
-            {
-                //cell.UpdateToggle.gameObject.SetActive(true);
-                //cell.UpdateToggle.isOn = AutoUpdateWanted;
-            }
+            //else
+            //{
+            //    cell.UpdateToggle.gameObject.SetActive(true);
+            //    cell.UpdateToggle.isOn = AutoUpdateWanted;
+            //}
 
             if (State == ValueState.NotEvaluated && !ShouldAutoEvaluate)
             {
@@ -92,6 +136,35 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
 
             return false;
         }
+
+
+        public void OnEvaluateClicked()
+        {
+            if (!HasArguments)
+            {
+                EvaluateAndSetCell();
+            }
+            else
+            {
+                if (Evaluator == null)
+                {
+                    this.Evaluator = Pool<EvaluateWidget>.Borrow();
+                    Evaluator.OnBorrowedFromPool(this);
+                    Evaluator.UIRoot.transform.SetParent((CellView as CacheMemberCell).EvaluateHolder.transform, false);
+                    SetCellEvaluateState(CellView);
+                }
+                else
+                {
+                    if (Evaluator.UIRoot.activeSelf)
+                        Evaluator.UIRoot.SetActive(false);
+                    else
+                        Evaluator.UIRoot.SetActive(true);
+
+                    SetCellEvaluateState(CellView);
+                }
+            }
+        }
+
 
         #region Cache Member Util
 

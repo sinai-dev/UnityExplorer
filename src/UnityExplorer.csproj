@@ -246,6 +246,7 @@
     <Compile Include="UI\Inspectors\CacheObject\Views\CacheListEntryCell.cs" />
     <Compile Include="UI\Inspectors\CacheObject\Views\CacheMemberCell.cs" />
     <Compile Include="UI\Inspectors\CacheObject\Views\CacheObjectCell.cs" />
+    <Compile Include="UI\Inspectors\CacheObject\Views\EvaluateWidget.cs" />
     <Compile Include="UI\Inspectors\GameObjectInspector.cs" />
     <Compile Include="UI\Inspectors\ICacheObjectController.cs" />
     <Compile Include="UI\Inspectors\InspectorManager.cs" />

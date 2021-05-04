@@ -30,9 +30,6 @@ namespace UnityExplorer.UI.Utility
 
             string richType = SignatureHighlighter.ParseFullSyntax(type, includeNamespace);
 
-            //if (!includeName)
-            //    return richType;
-
             _stringBuilder.Clear();
 
             if (value.IsNullOrDestroyed())
@@ -142,10 +139,20 @@ namespace UnityExplorer.UI.Utility
             value = value.TryCast(type);
 
             string toString;
-            if (toStringFormattedMethods.TryGetValue(type.AssemblyQualifiedName, out MethodInfo f3method))
-                toString = (string)f3method.Invoke(value, new object[] { "F3" });
-            else
-                toString = (string)toStringMethods[type.AssemblyQualifiedName].Invoke(value, new object[0]);
+            try
+            {
+                if (toStringFormattedMethods.TryGetValue(type.AssemblyQualifiedName, out MethodInfo f3method))
+                    toString = (string)f3method.Invoke(value, new object[] { "F3" });
+                else
+                    toString = (string)toStringMethods[type.AssemblyQualifiedName].Invoke(value, new object[0]);
+            }
+            catch (Exception ex)
+            {
+                toString = ex.ReflectionExToString();
+            }
+
+            string _ = null;
+            toString = ReflectionProvider.Instance.ProcessTypeFullNameInString(type, toString, ref _);
 
             return toString;
         }

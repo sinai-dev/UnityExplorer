@@ -103,6 +103,11 @@ namespace UnityExplorer.Tests
 
         public static Il2CppSystem.Collections.Hashtable testHashset;
         public static Il2CppSystem.Collections.Generic.List<Il2CppSystem.Object> testList;
+
+
+        //public static Il2CppSystem.Nullable<Quaternion> NullableQuaternion;
+        //public static Il2CppSystem.Nullable<int> NullableInt = new Il2CppSystem.Nullable<int>(5);
+        //public static Il2CppSystem.Nullable<bool> NullableBool = new Il2CppSystem.Nullable<bool>(false);
 #endif
 
         static TestClass()
@@ -111,6 +116,9 @@ namespace UnityExplorer.Tests
                 BigList.Add(i.ToString());
 
 #if CPP
+            //NullableQuaternion = new Il2CppSystem.Nullable<Quaternion>();
+            //NullableQuaternion.value = Quaternion.identity;
+
             testHashset = new Il2CppSystem.Collections.Hashtable();
             testHashset.Add("key1", "itemOne");
             testHashset.Add("key2", "itemTwo");

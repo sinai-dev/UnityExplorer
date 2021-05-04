@@ -41,10 +41,10 @@ namespace UnityExplorer.UI.Panels
         private readonly Dictionary<int, Dropdown.OptionData> sceneToDropdownOption = new Dictionary<int, Dropdown.OptionData>();
 
         private IEnumerable<GameObject> GetRootEntries() => SceneHandler.CurrentRootObjects;
-        
+
         public void Update()
         {
-            if (AutoUpdate && Time.realtimeSinceStartup - timeOfLastUpdate >= 1f)
+            if ((AutoUpdate || !SceneHandler.InspectingAssetScene) && Time.realtimeSinceStartup - timeOfLastUpdate >= 1f)
             {
                 timeOfLastUpdate = Time.realtimeSinceStartup;
                 UpdateTree();
@@ -65,7 +65,7 @@ namespace UnityExplorer.UI.Panels
             SceneHandler.SelectedScene = SceneHandler.LoadedScenes[value];
             SceneHandler.Update();
             Tree.RefreshData(true);
-            //OnSelectedSceneChanged(SceneHandler.SelectedScene.Value);
+            OnSelectedSceneChanged(SceneHandler.SelectedScene.Value);
         }
 
         private void SceneHandler_OnInspectedSceneChanged(Scene scene)
@@ -83,14 +83,14 @@ namespace UnityExplorer.UI.Panels
                     sceneDropdown.captionText.text = opt.text;
             }
 
-            //OnSelectedSceneChanged(scene);
+            OnSelectedSceneChanged(scene);
         }
 
-        //private void OnSelectedSceneChanged(Scene scene)
-        //{
-        //    if (refreshRow)
-        //        refreshRow.SetActive(!scene.IsValid());
-        //}
+        private void OnSelectedSceneChanged(Scene scene)
+        {
+            if (refreshRow)
+                refreshRow.SetActive(!scene.IsValid());
+        }
 
         private void SceneHandler_OnLoadedScenesChanged(ReadOnlyCollection<Scene> loadedScenes)
         {

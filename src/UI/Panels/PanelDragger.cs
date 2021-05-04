@@ -227,19 +227,6 @@ namespace UnityExplorer.UI.Panels
             Vector3 pos = Panel.localPosition;
             pos += (Vector3)diff;
             Panel.localPosition = pos;
-
-            // TODO prevent dragging the navbar outside the window completely.
-            // this was not that, but should do that.
-
-            //var halfHeight = Panel.rect.height * 0.5f;
-            //var halfWidth = Panel.rect.width * 0.5f;
-            //if (Panel.MinY() - halfHeight + 25 < 0 
-            //    || Panel.MinX() - halfWidth + 25 < 0
-            //    || Panel.MaxY() + halfWidth - 25 > Screen.height 
-            //    || Panel.MinX() + halfWidth - 25 > Screen.width)
-            //{
-            //    Panel.localPosition -= (Vector3)diff;
-            //}
         }
 
         public void OnEndDrag()

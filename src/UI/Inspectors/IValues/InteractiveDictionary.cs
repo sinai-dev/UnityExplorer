@@ -39,6 +39,8 @@ namespace UnityExplorer.UI.Inspectors.IValues
         public override void OnBorrowed(CacheObjectBase owner)
         {
             base.OnBorrowed(owner);
+
+            DictScrollPool.Refresh(true, true);
         }
 
         public override void ReleaseFromOwner()
@@ -83,7 +85,7 @@ namespace UnityExplorer.UI.Inspectors.IValues
 
                 CacheEntries(value);
 
-                TopLabel.text = $"[{cachedEntries.Count}] {SignatureHighlighter.ParseFullType(type, false)}";
+                TopLabel.text = $"[{cachedEntries.Count}] {SignatureHighlighter.ParseType(type, false)}";
             }
 
 
@@ -172,7 +174,7 @@ namespace UnityExplorer.UI.Inspectors.IValues
             {
                 if (cell.Occupant != null)
                 {
-                    cell.Occupant.HideIValue();
+                    cell.Occupant.HidePooledObjects();
                     cell.Occupant.CellView = null;
                     cell.Occupant = null;
                 }

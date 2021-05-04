@@ -52,8 +52,6 @@ namespace UnityExplorer.Core.Config
         {
             try
             {
-                ExplorerCore.Log("Loading internal data");
-
                 if (!File.Exists(INI_PATH))
                     return false;
 
@@ -66,8 +64,6 @@ namespace UnityExplorer.Core.Config
                     if (ConfigManager.InternalConfigs.TryGetValue(config.KeyName, out IConfigElement configElement))
                         configElement.BoxedValue = StringToConfigValue(config.Value, configElement.ElementType);
                 }
-
-                ExplorerCore.Log("Loaded");
 
                 return true;
             }

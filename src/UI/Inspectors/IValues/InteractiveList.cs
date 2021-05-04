@@ -35,6 +35,8 @@ namespace UnityExplorer.UI.Inspectors.IValues
         public override void OnBorrowed(CacheObjectBase owner)
         {
             base.OnBorrowed(owner);
+
+            ListScrollPool.Refresh(true, true);
         }
 
         public override void ReleaseFromOwner()
@@ -72,7 +74,7 @@ namespace UnityExplorer.UI.Inspectors.IValues
 
                 CacheEntries(value);
 
-                TopLabel.text = $"[{cachedEntries.Count}] {SignatureHighlighter.ParseFullType(type, false)}";
+                TopLabel.text = $"[{cachedEntries.Count}] {SignatureHighlighter.ParseType(type, false)}";
             }
 
             //this.ScrollPoolLayout.minHeight = Math.Min(400f, 35f * values.Count);
@@ -169,7 +171,7 @@ namespace UnityExplorer.UI.Inspectors.IValues
             {
                 if (cell.Occupant != null)
                 {
-                    cell.Occupant.HideIValue();
+                    cell.Occupant.HidePooledObjects();
                     cell.Occupant.CellView = null;
                     cell.Occupant = null;
                 }

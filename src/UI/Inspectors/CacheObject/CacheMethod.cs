@@ -19,18 +19,35 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             base.SetInspectorOwner(inspector, member);
 
             Arguments = MethodInfo.GetParameters();
+            if (MethodInfo.IsGenericMethod)
+                GenericArguments = MethodInfo.GetGenericArguments();
         }
 
-        protected override void TryEvaluate()
+        protected override object TryEvaluate()
         {
             try
             {
-                throw new NotImplementedException("TODO");
+                var methodInfo = MethodInfo;
+
+                if (methodInfo.IsGenericMethod)
+                    methodInfo = MethodInfo.MakeGenericMethod(Evaluator.TryParseGenericArguments());
+
+                var target = MethodInfo.IsStatic ? null : Owner.Target.TryCast(DeclaringType);
+
+                if (Arguments.Length > 0)
+                    return methodInfo.Invoke(target, Evaluator.TryParseArguments());
+
+                var ret = methodInfo.Invoke(target, new object[0]);
+
+                HadException = false;
+                LastException = null;
+                return ret;
             }
             catch (Exception ex)
             {
                 HadException = true;
                 LastException = ex;
+                return null;
             }
         }
 
