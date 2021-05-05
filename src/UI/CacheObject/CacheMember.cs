@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
+using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI.CacheObject.Views;
 using UnityExplorer.UI.Inspectors;
 using UnityExplorer.UI.ObjectPool;
@@ -74,10 +75,11 @@ namespace UnityExplorer.UI.CacheObject
             SetValueFromSource(TryEvaluate());
         }
 
-        public override void SetUserValue(object value)
+        public override void TrySetUserValue(object value)
         {
-            // TODO unbox string, cast, etc
-
+            if (State == ValueState.String)
+                ReflectionProvider.Instance.BoxStringToType(ref value, FallbackType);
+            
             TrySetValue(value);
 
             Evaluate();

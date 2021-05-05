@@ -31,7 +31,7 @@ namespace UnityExplorer.UI.CacheObject
             listCell.Image.color = ListIndex % 2 == 0 ? CacheListEntryCell.EvenColor : CacheListEntryCell.OddColor;
         }
 
-        public override void SetUserValue(object value)
+        public override void TrySetUserValue(object value)
         {
             throw new NotImplementedException("TODO");
         }

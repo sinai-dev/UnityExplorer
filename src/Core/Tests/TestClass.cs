@@ -126,9 +126,13 @@ namespace UnityExplorer.Tests
         public static Il2CppSystem.String testStringThree = "string boxed as cpp string";
         public static string nullString = null;
 
+        public static List<Il2CppSystem.Object> boxedList;
+
+        public static Il2CppSystem.Object boxedInt;
+        public static Il2CppSystem.Int32 cppint;
+
         public static Il2CppSystem.Collections.Hashtable testHashset;
         public static Il2CppSystem.Collections.Generic.List<Il2CppSystem.Object> testList;
-
 
         //public static Il2CppSystem.Nullable<Quaternion> NullableQuaternion;
         //public static Il2CppSystem.Nullable<int> NullableInt = new Il2CppSystem.Nullable<int>(5);
@@ -143,6 +147,12 @@ namespace UnityExplorer.Tests
 #if CPP
             //NullableQuaternion = new Il2CppSystem.Nullable<Quaternion>();
             //NullableQuaternion.value = Quaternion.identity;
+
+            boxedInt = new Il2CppSystem.Int32() { m_value = 5 }.BoxIl2CppObject();
+            boxedList = new List<Il2CppSystem.Object>();
+            boxedList.Add((Il2CppSystem.String)"boxedString");
+            boxedList.Add(new Il2CppSystem.Int32 { m_value = 5 }.BoxIl2CppObject());
+            cppint = new Il2CppSystem.Int32 { m_value = 420 };
 
             testHashset = new Il2CppSystem.Collections.Hashtable();
             testHashset.Add("key1", "itemOne");

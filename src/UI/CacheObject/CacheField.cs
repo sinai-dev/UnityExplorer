@@ -43,7 +43,7 @@ namespace UnityExplorer.UI.CacheObject
         {
             try
             {
-                FieldInfo.SetValue(FieldInfo.IsStatic ? null : Owner.Target.TryCast(this.DeclaringType), value);
+                FieldInfo.SetValue(DeclaringInstance, value);
             }
             catch (Exception ex)
             {

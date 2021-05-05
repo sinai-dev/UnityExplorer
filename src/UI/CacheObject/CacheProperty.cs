@@ -52,12 +52,11 @@ namespace UnityExplorer.UI.CacheObject
             try
             {
                 bool _static = PropertyInfo.GetAccessors(true)[0].IsStatic;
-                var target = _static ? null : Owner.Target.TryCast(DeclaringType);
 
                 if (HasArguments)
-                    PropertyInfo.SetValue(target, value, Evaluator.TryParseArguments());
+                    PropertyInfo.SetValue(DeclaringInstance, value, Evaluator.TryParseArguments());
                 else
-                    PropertyInfo.SetValue(target, value, null);
+                    PropertyInfo.SetValue(DeclaringInstance, value, null);
             }
             catch (Exception ex)
             {

@@ -95,7 +95,13 @@ namespace UnityExplorer.UI.CacheObject
 
         // Updating and applying values
 
-        public abstract void SetUserValue(object value);
+        public void SetUserValue(object value)
+        {
+            value = value.TryCast(FallbackType);
+            TrySetUserValue(value);
+        }
+
+        public abstract void TrySetUserValue(object value);
 
         public virtual void SetValueFromSource(object value)
         {

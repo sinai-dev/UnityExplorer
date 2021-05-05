@@ -26,7 +26,7 @@ namespace UnityExplorer.Core.Runtime
 
         public abstract bool IsAssignableFrom(Type toAssignTo, Type toAssignFrom);
 
-        public abstract bool IsReflectionSupported(Type type);
+        //public abstract bool IsReflectionSupported(Type type);
 
         public abstract string ProcessTypeFullNameInString(Type type, string theString, ref string typeName);
 

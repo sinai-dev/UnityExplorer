@@ -53,67 +53,6 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             }
         }
 
-        public override bool IsString(object obj)
-        {
-            return obj is string || obj is Il2CppSystem.String;
-        }
-
-        public override void BoxStringToType(ref object value, Type castTo)
-        {
-            if (castTo == typeof(Il2CppSystem.String))
-                value = (Il2CppSystem.String)(value as string);
-            else
-                value = (Il2CppSystem.Object)(value as string);
-        }
-
-        public override string UnboxString(object value)
-        {
-            if (value is string s)
-                return s;
-
-            s = null;
-            // strings boxed as Il2CppSystem.Objects can behave weirdly.
-            // GetActualType will find they are a string, but if its boxed
-            // then we need to unbox it like this...
-            if (value is Il2CppSystem.Object cppObject)
-                s = cppObject.ToString();
-            else if (value is Il2CppSystem.String cppString)
-                s = cppString;
-
-            return s;
-        }
-
-        public override Type GetDeobfuscatedType(Type type)
-        {
-            try
-            {
-                if (Il2CppToMonoType.ContainsKey(type.AssemblyQualifiedName))
-                    return Il2CppToMonoType[type.AssemblyQualifiedName];
-                //var cppType = Il2CppType.From(type);
-                //var monoType = GetMonoType(cppType);
-                //if (monoType != null)
-                //    return monoType;
-            }
-            catch { }
-
-            return type;
-        }
-
-        public override string ProcessTypeFullNameInString(Type type, string theString, ref string typeName)
-        {
-            if (!Il2CppTypeNotNull(type))
-                return theString;
-
-            var cppType = Il2CppType.From(type);
-            if (cppType != null && s_deobfuscatedTypeNames.ContainsKey(cppType.FullName))
-            {
-                typeName = s_deobfuscatedTypeNames[cppType.FullName];
-                theString = theString.Replace(cppType.FullName, typeName);
-            }
-
-            return theString;
-        }
-
         public override Type GetActualType(object obj)
         {
             if (obj == null)
@@ -125,13 +64,6 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             {
                 if (obj is Il2CppSystem.Object cppObject)
                 {
-                    // weird specific case - if the object is an Il2CppSystem.Type, then return so manually.
-                    if (cppObject is CppType)
-                        return typeof(CppType);
-
-                    if (type.FullName.StartsWith("System.") || type.FullName.StartsWith("Il2CppSystem."))
-                        return type;
-
                     var cppType = cppObject.GetIl2CppType();
 
                     // check if type is injected
@@ -141,15 +73,10 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
                         // Note: This will fail on injected subclasses.
                         // - {Namespace}.{Class}.{Subclass} would be {Namespace}.{Subclass} when injected.
                         // Not sure on solution yet.
-                        var typeByName = ReflectionUtility.GetTypeByName(cppType.FullName);
-                        if (typeByName != null)
-                            return typeByName;
+                        return ReflectionUtility.GetTypeByName(cppType.FullName) ?? type;
                     }
 
-                    // this should be fine for all other il2cpp objects
-                    var getType = GetMonoType(cppType);
-                    if (getType != null)
-                        return getType;
+                    return GetMonoType(cppType) ?? type;
                 }
             }
             catch //(Exception ex)
@@ -160,58 +87,17 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             return type;
         }
 
-        // caching for GetMonoType
-        private static readonly Dictionary<string, Type> Il2CppToMonoType = new Dictionary<string, Type>();
-
-        // keep deobfuscated type name cache, used to display proper name.
-        internal static Dictionary<string, string> s_deobfuscatedTypeNames = new Dictionary<string, string>();
-
-        private static void BuildDeobfuscationCache()
-        {
-            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                foreach (var type in asm.TryGetTypes())
-                    TryCacheDeobfuscatedType(type);
-            }
-
-            if (s_deobfuscatedTypeNames.Count > 0)
-                ExplorerCore.Log($"Built deobfuscation cache, count: {s_deobfuscatedTypeNames.Count}");
-        }
-
-        private static void TryCacheDeobfuscatedType(Type type)
-        {
-            try
-            {
-                if (type.CustomAttributes.Any(it => it.AttributeType.Name == "ObfuscatedNameAttribute"))
-                {
-                    var cppType = Il2CppType.From(type);
-
-                    if (!Il2CppToMonoType.ContainsKey(cppType.AssemblyQualifiedName))
-                    {
-                        Il2CppToMonoType.Add(cppType.AssemblyQualifiedName, type);
-                        s_deobfuscatedTypeNames.Add(cppType.FullName, type.FullName);
-                    }
-                }
-            }
-            catch { }
-        }
-
-        /// <summary>
-        /// Try to get the Mono (Unhollowed) Type representation of the provided <see cref="Il2CppSystem.Type"/>.
-        /// </summary>
-        /// <param name="cppType">The Cpp Type you want to convert to Mono.</param>
-        /// <returns>The Mono Type if found, otherwise null.</returns>
         public static Type GetMonoType(CppType cppType)
         {
-            string name = cppType.AssemblyQualifiedName;
+            if (DeobfuscatedTypes.TryGetValue(cppType.AssemblyQualifiedName, out Type deob))
+                return deob;
 
-            if (Il2CppToMonoType.ContainsKey(name))
-                return Il2CppToMonoType[name];
+            var fullname = cppType.FullName;
+            if (fullname.StartsWith("System."))
+                fullname = $"Il2Cpp{fullname}";
 
-            Type ret = Type.GetType(name);
-            Il2CppToMonoType.Add(name, ret);
-
-            return ret;
+            ReflectionUtility.AllTypes.TryGetValue(fullname, out Type monoType);
+            return monoType;
         }
 
         // cached class pointers for Il2CppCast
@@ -232,8 +118,23 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
         /// <returns>The object, as the type (or a normal C# object) if successful or the input value if not.</returns>
         public static object Il2CppCast(object obj, Type castTo)
         {
+            if (obj == null)
+                return null;
+
+            var type = obj.GetType();
+
+            if (type.IsValueType && typeof(Il2CppSystem.Object).IsAssignableFrom(castTo))
+                return BoxIl2CppObject(obj);
+
             if (!(obj is Il2CppSystem.Object cppObj))
                 return obj;
+
+            if (castTo.IsValueType)
+            {
+                if (castTo.FullName.StartsWith("Il2CppSystem."))
+                    ReflectionUtility.AllTypes.TryGetValue(cppObj.GetIl2CppType().FullName, out castTo);
+                return Unbox(cppObj, castTo);
+            }
 
             if (!Il2CppTypeNotNull(castTo, out IntPtr castToPtr))
                 return obj;
@@ -249,9 +150,6 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
                 return injectedObj ?? obj;
             }
 
-            if (castTo == typeof(string))
-                return cppObj.ToString();
-
             try
             {
                 return Activator.CreateInstance(castTo, cppObj.Pointer);
@@ -261,6 +159,129 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
                 return obj;
             }
         }
+
+        // struct boxing
+
+        // cached il2cpp unbox methods
+        internal static readonly Dictionary<string, MethodInfo> s_unboxMethods = new Dictionary<string, MethodInfo>();
+
+        /// <summary>
+        /// Attempt to unbox the object to the underlying struct type.
+        /// </summary>
+        /// <param name="obj">The object which is a struct underneath.</param>
+        /// <returns>The struct if successful, otherwise null.</returns>
+        public static object Unbox(object obj) => Unbox(obj, Instance.GetActualType(obj));
+
+        /// <summary>
+        /// Attempt to unbox the object to the struct type.
+        /// </summary>
+        /// <param name="obj">The object which is a struct underneath.</param>
+        /// <param name="type">The type of the struct you want to unbox to.</param>
+        /// <returns>The struct if successful, otherwise null.</returns>
+        public static object Unbox(object obj, Type type)
+        {
+            if (!type.IsValueType)
+                return null;
+
+            if (!(obj is Il2CppSystem.Object))
+                return obj;
+
+            var name = type.AssemblyQualifiedName;
+
+            if (!s_unboxMethods.ContainsKey(name))
+            {
+                s_unboxMethods.Add(name, typeof(Il2CppObjectBase)
+                                            .GetMethod("Unbox")
+                                            .MakeGenericMethod(type));
+            }
+
+            return s_unboxMethods[name].Invoke(obj, new object[0]);
+        }
+
+        //internal static Dictionary<string, Type> monoToIl2CppType = new Dictionary<string, Type>();
+        internal static Dictionary<Type, MethodInfo> structBoxMethods = new Dictionary<Type, MethodInfo>();
+        internal static Dictionary<Type, FieldInfo> structValueFields = new Dictionary<Type, FieldInfo>();
+
+        /// <summary>
+        /// Try to box a value to Il2CppSystem.Object using the Il2CppSystem representation of the value type.
+        /// </summary>
+        /// <param name="value">The value, eg 5 (System.Int32)</param>
+        /// <returns>The boxed Il2CppSystem.Object for the value, eg for '5' it would be a boxed Il2CppSytem.Int32.</returns>
+        public static Il2CppSystem.Object BoxIl2CppObject(object value)
+        {
+            string key = $"Il2Cpp{value.GetType().FullName}";
+
+            if (ReflectionUtility.AllTypes.TryGetValue(key, out Type type) && type.IsValueType)
+            {
+                var cppStruct = Activator.CreateInstance(type);
+
+                if (!structValueFields.ContainsKey(type))
+                    structValueFields.Add(type, type.GetField("m_value"));
+
+                structValueFields[type].SetValue(cppStruct, value);
+
+                if (!structBoxMethods.ContainsKey(type))
+                    structBoxMethods.Add(type, type.GetMethod("BoxIl2CppObject"));
+
+                return structBoxMethods[type].Invoke(cppStruct, null) as Il2CppSystem.Object;
+            }
+            else
+            {
+                ExplorerCore.LogWarning("Couldn't get type to box to");
+                return null;
+            }
+        }
+
+        // deobfuscation
+
+        private static readonly Dictionary<string, Type> DeobfuscatedTypes = new Dictionary<string, Type>();
+        internal static Dictionary<string, string> s_deobfuscatedTypeNames = new Dictionary<string, string>();
+
+        private static void BuildDeobfuscationCache()
+        {
+            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                foreach (var type in asm.TryGetTypes())
+                    TryCacheDeobfuscatedType(type);
+            }
+
+            if (s_deobfuscatedTypeNames.Count > 0)
+                ExplorerCore.Log($"Built deobfuscation cache, count: {s_deobfuscatedTypeNames.Count}");
+        }
+
+        private static void TryCacheDeobfuscatedType(Type type)
+        {
+            try
+            {
+                // Thanks to Slaynash for this
+
+                if (type.CustomAttributes.Any(it => it.AttributeType.Name == "ObfuscatedNameAttribute"))
+                {
+                    var cppType = Il2CppType.From(type);
+
+                    if (!DeobfuscatedTypes.ContainsKey(cppType.AssemblyQualifiedName))
+                    {
+                        DeobfuscatedTypes.Add(cppType.AssemblyQualifiedName, type);
+                        s_deobfuscatedTypeNames.Add(cppType.FullName, type.FullName);
+                    }
+                }
+            }
+            catch { }
+        }
+
+        public override Type GetDeobfuscatedType(Type type)
+        {
+            try
+            {
+                if (DeobfuscatedTypes.ContainsKey(type.AssemblyQualifiedName))
+                    return DeobfuscatedTypes[type.AssemblyQualifiedName];
+            }
+            catch { }
+
+            return type;
+        }
+
+        // misc helpers
 
         /// <summary>
         /// Get the Il2Cpp Class Pointer for the provided Mono (Unhollowed) Type.
@@ -296,6 +317,132 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
 
         [DllImport("GameAssembly", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern IntPtr il2cpp_object_get_class(IntPtr obj);
+
+        public override bool IsString(object obj)
+        {
+            return obj is string || obj is Il2CppSystem.String;
+        }
+
+        public override void BoxStringToType(ref object value, Type castTo)
+        {
+            if (castTo == typeof(Il2CppSystem.String))
+                value = (Il2CppSystem.String)(value as string);
+            else
+                value = (Il2CppSystem.Object)(value as string);
+        }
+
+        public override string UnboxString(object value)
+        {
+            if (value is string s)
+                return s;
+
+            s = null;
+            // strings boxed as Il2CppSystem.Objects can behave weirdly.
+            // GetActualType will find they are a string, but if its boxed
+            // then we need to unbox it like this...
+            if (value is Il2CppSystem.Object cppObject)
+                s = cppObject.ToString();
+            else if (value is Il2CppSystem.String cppString)
+                s = cppString;
+
+            return s;
+        }
+
+        public override string ProcessTypeFullNameInString(Type type, string theString, ref string typeName)
+        {
+            if (!Il2CppTypeNotNull(type))
+                return theString;
+
+            var cppType = Il2CppType.From(type);
+            if (cppType != null && s_deobfuscatedTypeNames.ContainsKey(cppType.FullName))
+            {
+                typeName = s_deobfuscatedTypeNames[cppType.FullName];
+                theString = theString.Replace(cppType.FullName, typeName);
+            }
+
+            return theString;
+        }
+
+
+        //// Not currently using, not sure if its necessary anymore, was necessary to prevent crashes at one point.
+        //public override bool IsReflectionSupported(Type type)
+        //{
+        //    try
+        //    {
+        //        var gArgs = type.GetGenericArguments();
+        //        if (!gArgs.Any())
+        //            return true;
+        //
+        //        foreach (var gType in gArgs)
+        //        {
+        //            if (!Supported(gType))
+        //                return false;
+        //        }
+        //
+        //        return true;
+        //
+        //        bool Supported(Type t)
+        //        {
+        //            if (!typeof(Il2CppSystem.Object).IsAssignableFrom(t))
+        //                return true;
+        //
+        //            if (!Il2CppTypeNotNull(t, out IntPtr ptr))
+        //                return false;
+        //
+        //            return CppType.internal_from_handle(IL2CPP.il2cpp_class_get_type(ptr)) is CppType;
+        //        }
+        //    }
+        //    catch
+        //    {
+        //        return false;
+        //    }
+        //}
+
+
+
+        #region FORCE LOADING GAME MODULES
+
+        // Helper for IL2CPP to try to make sure the Unhollowed game assemblies are actually loaded.
+
+        internal static void TryLoadGameModules()
+        {
+            Instance.LoadModule("Assembly-CSharp");
+            Instance.LoadModule("Assembly-CSharp-firstpass");
+        }
+
+        public override bool LoadModule(string module)
+        {
+#if ML
+            var path = Path.Combine("MelonLoader", "Managed", $"{module}.dll");
+#else
+            var path = Path.Combine("BepInEx", "unhollowed", $"{module}.dll");
+#endif
+            return LoadModuleInternal(path);
+        }
+
+        internal static bool LoadModuleInternal(string fullPath)
+        {
+            if (!File.Exists(fullPath))
+                return false;
+
+            try
+            {
+                Assembly.Load(File.ReadAllBytes(fullPath));
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.GetType() + ", " + e.Message);
+            }
+
+            return false;
+        }
+
+        #endregion
+
+        #region IL2CPP IENUMERABLE / IDICTIONARY
+
+        // dictionary and enumerable cast helpers (until unhollower rewrite)
 
         internal static IntPtr s_cppEnumerableClassPtr;
         internal static IntPtr s_cppDictionaryClassPtr;
@@ -336,76 +483,6 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
                     }
                 }
                 catch { }
-            }
-
-            return false;
-        }
-
-        // Not currently using, not sure if its necessary anymore, was necessary to prevent crashes at one point.
-        public override bool IsReflectionSupported(Type type)
-        {
-            try
-            {
-                var gArgs = type.GetGenericArguments();
-                if (!gArgs.Any())
-                    return true;
-
-                foreach (var gType in gArgs)
-                {
-                    if (!Supported(gType))
-                        return false;
-                }
-
-                return true;
-
-                bool Supported(Type t)
-                {
-                    if (!typeof(Il2CppSystem.Object).IsAssignableFrom(t))
-                        return true;
-
-                    if (!Il2CppTypeNotNull(t, out IntPtr ptr))
-                        return false;
-
-                    return CppType.internal_from_handle(IL2CPP.il2cpp_class_get_type(ptr)) is CppType;
-                }
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        // Helper for IL2CPP to try to make sure the Unhollowed game assemblies are actually loaded.
-
-        internal static void TryLoadGameModules()
-        {
-            Instance.LoadModule("Assembly-CSharp");
-            Instance.LoadModule("Assembly-CSharp-firstpass");
-        }
-
-        public override bool LoadModule(string module)
-        {
-#if ML
-            var path = Path.Combine("MelonLoader", "Managed", $"{module}.dll");
-#else
-            var path = Path.Combine("BepInEx", "unhollowed", $"{module}.dll");
-#endif
-            return LoadModuleInternal(path);
-        }
-
-        internal static bool LoadModuleInternal(string fullPath)
-        {
-            if (!File.Exists(fullPath))
-                return false;
-
-            try
-            {
-                Assembly.Load(File.ReadAllBytes(fullPath));
-                return true;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.GetType() + ", " + e.Message);
             }
 
             return false;
@@ -536,43 +613,7 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             base.FindSingleton(possibleNames, type, flags, instances);
         }
 
-        // ~~~~~~~~~~ not used ~~~~~~~~~~~~
-
-        // cached il2cpp unbox methods
-        internal static readonly Dictionary<string, MethodInfo> s_unboxMethods = new Dictionary<string, MethodInfo>();
-
-        /// <summary>
-        /// Attempt to unbox the object to the underlying struct type.
-        /// </summary>
-        /// <param name="obj">The object which is a struct underneath.</param>
-        /// <returns>The struct if successful, otherwise null.</returns>
-        public static object Unbox(object obj) => Unbox(obj, Instance.GetActualType(obj));
-
-        /// <summary>
-        /// Attempt to unbox the object to the struct type.
-        /// </summary>
-        /// <param name="obj">The object which is a struct underneath.</param>
-        /// <param name="type">The type of the struct you want to unbox to.</param>
-        /// <returns>The struct if successful, otherwise null.</returns>
-        public static object Unbox(object obj, Type type)
-        {
-            if (!type.IsValueType)
-                return null;
-
-            if (!(obj is Il2CppSystem.Object))
-                return obj;
-
-            var name = type.AssemblyQualifiedName;
-
-            if (!s_unboxMethods.ContainsKey(name))
-            {
-                s_unboxMethods.Add(name, typeof(Il2CppObjectBase)
-                                            .GetMethod("Unbox")
-                                            .MakeGenericMethod(type));
-            }
-
-            return s_unboxMethods[name].Invoke(obj, new object[0]);
-        }
+        #endregion
     }
 }
 

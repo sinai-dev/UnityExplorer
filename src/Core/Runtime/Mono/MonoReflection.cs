@@ -31,9 +31,6 @@ namespace UnityExplorer.Core.Runtime.Mono
         public override bool IsAssignableFrom(Type toAssignTo, Type toAssignFrom)
             => toAssignTo.IsAssignableFrom(toAssignFrom);
 
-        public override bool IsReflectionSupported(Type type)
-            => true;
-
         public override bool LoadModule(string module)
             => true;
 

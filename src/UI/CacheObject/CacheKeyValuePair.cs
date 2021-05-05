@@ -82,7 +82,7 @@ namespace UnityExplorer.UI.CacheObject
             }
         }
 
-        public override void SetUserValue(object value)
+        public override void TrySetUserValue(object value)
         {
             throw new NotImplementedException("TODO");
         }

@@ -105,14 +105,7 @@ namespace UnityExplorer
         /// </summary>
         /// <param name="obj">The object to cast</param>
         /// <returns>The object, cast to the underlying Type if possible, otherwise the original object.</returns>
-        public static object TryCast(this object obj)
-        {
-            var type = GetActualType(obj);
-
-            if (type.IsValueType)
-                return obj;
-            return ReflectionProvider.Instance.Cast(obj, type);
-        }
+        public static object TryCast(this object obj) => ReflectionProvider.Instance.Cast(obj, GetActualType(obj));
 
         /// <summary>
         /// Cast an object to a Type, if possible.
@@ -120,20 +113,10 @@ namespace UnityExplorer
         /// <param name="obj">The object to cast</param>
         /// <param name="castTo">The Type to cast to </param>
         /// <returns>The object, cast to the Type provided if possible, otherwise the original object.</returns>
-        public static object TryCast(this object obj, Type castTo)
-        {
-            if (castTo.IsValueType)
-                return obj;
-            return ReflectionProvider.Instance.Cast(obj, castTo);
-        }
+        public static object TryCast(this object obj, Type castTo) => ReflectionProvider.Instance.Cast(obj, castTo);
 
-        public static T TryCast<T>(this object obj)
-        {
-            var type = typeof(T);
-            if (type.IsValueType)
-                return (T)obj;
-            return ReflectionProvider.Instance.TryCast<T>(obj);
-        }
+        /// <summary>Try to cast the object to the type.</summary>
+        public static T TryCast<T>(this object obj) => ReflectionProvider.Instance.TryCast<T>(obj);
 
         /// <summary>
         /// Check if the provided Type is assignable to IEnumerable.
