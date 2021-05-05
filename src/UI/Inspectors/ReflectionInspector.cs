@@ -230,7 +230,6 @@ namespace UnityExplorer.UI.Inspectors
 
         private void UpdateDisplayedMembers()// bool onlyAutoUpdate)
         {
-            ExplorerCore.Log("Updating values...");
             bool shouldRefresh = false;
             foreach (var cell in MemberScrollPool.CellPool)
             {
@@ -239,7 +238,6 @@ namespace UnityExplorer.UI.Inspectors
                 var member = cell.MemberOccupant;
                 if (member.ShouldAutoEvaluate) // && (!onlyAutoUpdate || member.AutoUpdateWanted))
                 {
-                    ExplorerCore.Log("Evaluating cell " + cell.MemberOccupant.NameForFiltering);
                     shouldRefresh = true;
                     member.Evaluate();
                     member.SetDataToCell(member.CellView);
