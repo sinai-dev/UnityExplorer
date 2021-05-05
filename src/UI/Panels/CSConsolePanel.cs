@@ -15,6 +15,8 @@ namespace UnityExplorer.UI.Panels
     {
         public override string Name => "C# Console";
         public override UIManager.Panels PanelType => UIManager.Panels.CSConsole;
+        public override int MinWidth => 400;
+        public override int MinHeight => 300;
 
         public static CSConsolePanel Instance { get; private set; }
 
@@ -95,24 +97,17 @@ namespace UnityExplorer.UI.Panels
             ConfigManager.CSConsoleData.Value = this.ToSaveData();
         }
 
-        public override void LoadSaveData()
-        {
-            this.ApplySaveData(ConfigManager.CSConsoleData.Value);
-        }
+        public override string GetSaveData() => ConfigManager.CSConsoleData.Value;
 
-        public override void SetDefaultPosAndAnchors()
+        // UI Construction
+
+        protected internal override void DoSetDefaultPosAndAnchors()
         {
             mainPanelRect.localPosition = Vector2.zero;
             mainPanelRect.pivot = new Vector2(0f, 1f);
-            mainPanelRect.anchorMin = new Vector2(0.5f, 0);
-            mainPanelRect.anchorMax = new Vector2(0.5f, 1);
-            mainPanelRect.offsetMin = new Vector2(mainPanelRect.offsetMin.x, 100);  // bottom
-            mainPanelRect.offsetMax = new Vector2(mainPanelRect.offsetMax.x, -50); // top
-            mainPanelRect.sizeDelta = new Vector2(700f, mainPanelRect.sizeDelta.y);
-            mainPanelRect.anchoredPosition = new Vector2(-150, 0);
+            mainPanelRect.anchorMin = new Vector2(0.4f, 0.1f);
+            mainPanelRect.anchorMax = new Vector2(0.9f, 0.85f);
         }
-
-        // UI Construction
 
         public override void ConstructPanelContent()
         {

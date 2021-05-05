@@ -77,7 +77,8 @@ namespace UnityExplorer.UI.Panels
 
         // Instance
 
-        public bool AllowDragAndResize { get; set; }
+        public UIPanel UIPanel { get; private set; }
+        public bool AllowDragAndResize => UIPanel.CanDragAndResize;
 
         public RectTransform Panel { get; set; }
         public event Action<RectTransform> OnFinishResize;
@@ -95,7 +96,7 @@ namespace UnityExplorer.UI.Panels
 
         public static GameObject s_resizeCursorObj;
 
-        internal readonly Vector2 minResize = new Vector2(200, 50);
+        //internal readonly Vector2 minResize = new Vector2(200, 50);
 
         private bool WasResizing { get; set; }
         private ResizeTypes m_currentResizeType = ResizeTypes.NONE;
@@ -109,8 +110,9 @@ namespace UnityExplorer.UI.Panels
 
         private Rect m_totalResizeRect;
 
-        public PanelDragger(RectTransform dragArea, RectTransform panelToDrag)
+        public PanelDragger(RectTransform dragArea, RectTransform panelToDrag, UIPanel panel)
         {
+            this.UIPanel = panel;
             Instances.Add(this);
             DragableArea = dragArea;
             Panel = panelToDrag;
@@ -417,12 +419,12 @@ namespace UnityExplorer.UI.Panels
             Panel.anchorMin = new Vector2(anchorMin.x, anchorMin.y);
             Panel.anchorMax = new Vector2(anchorMax.x, anchorMax.y);
 
-            if (Panel.rect.width < minResize.x)
+            if (Panel.rect.width < UIPanel.MinWidth)
             {
                 Panel.anchorMin = new Vector2(prevMin.x, Panel.anchorMin.y);
                 Panel.anchorMax = new Vector2(prevMax.x, Panel.anchorMax.y);
             }
-            if (Panel.rect.height < minResize.y)
+            if (Panel.rect.height < UIPanel.MinHeight)
             {
                 Panel.anchorMin = new Vector2(Panel.anchorMin.x, prevMin.y);
                 Panel.anchorMax = new Vector2(Panel.anchorMax.x, prevMax.y);
@@ -458,15 +460,5 @@ namespace UnityExplorer.UI.Panels
         }
 
         #endregion
-    }
-
-    // Just to allow Enum to do .HasFlag() in NET 3.5
-    public static class Net35FlagsEx
-    {
-        public static bool HasFlag(this Enum flags, Enum value)
-        {
-            ulong num = Convert.ToUInt64(value);
-            return (Convert.ToUInt64(flags) & num) == num;
-        }
     }
 }

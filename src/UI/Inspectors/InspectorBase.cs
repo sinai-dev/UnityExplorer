@@ -37,6 +37,8 @@ namespace UnityExplorer.UI.Inspectors
         {
             Pool<InspectorTab>.Return(Tab);
 
+            this.Target = null;
+
             Tab.TabButton.OnClick -= OnTabButtonClicked;
             Tab.CloseButton.OnClick -= OnCloseClicked;
         }

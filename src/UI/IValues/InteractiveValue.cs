@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.UI.Inspectors.CacheObject;
+using UnityExplorer.UI.CacheObject;
 using UnityExplorer.UI.ObjectPool;
 
-namespace UnityExplorer.UI.Inspectors.IValues
+namespace UnityExplorer.UI.IValues
 {
     public class InteractiveValue : IPooledObject
     {

@@ -26,11 +26,16 @@ namespace UnityExplorer.UI.Panels
         private SearchContext m_context = SearchContext.UnityObject;
         private SceneFilter m_sceneFilter = SceneFilter.Any;
         private ChildFilter m_childFilter = ChildFilter.Any;
+        private string desiredTypeInput;
+        private string lastCheckedTypeInput;
+        private bool lastTypeCanHaveGO; 
 
         public ButtonListSource<object> dataHandler;
 
         private ScrollPool<ButtonCell> resultsScrollPool;
         private List<object> currentResults = new List<object>();
+
+        public TypeCompleter typeAutocompleter;
 
         public override GameObject UIRoot => uiRoot;
         private GameObject uiRoot;
@@ -38,32 +43,11 @@ namespace UnityExplorer.UI.Panels
         private GameObject sceneFilterRow;
         private GameObject childFilterRow;
         private GameObject unityObjectClassRow;
-
         private InputField nameInputField;
-        private InputField classInputField;
 
         private Text resultsLabel;
 
         public List<object> GetEntries() => currentResults;
-
-        private void OnContextDropdownChanged(int value)
-        {
-            m_context = (SearchContext)value;
-
-            // show/hide other filters depending on what we just selected.
-            bool shouldShowGoFilters = m_context == SearchContext.GameObject 
-                                       || m_context == SearchContext.Component 
-                                       || m_context == SearchContext.Custom;
-
-            sceneFilterRow.SetActive(shouldShowGoFilters);
-            childFilterRow.SetActive(shouldShowGoFilters);
-
-            unityObjectClassRow.SetActive(m_context == SearchContext.Custom);
-        }
-
-        private void OnSceneFilterDropChanged(int value) => m_sceneFilter = (SceneFilter)value;
-
-        private void OnChildFilterDropChanged(int value) => m_childFilter = (ChildFilter)value;
 
         public void DoSearch()
         {
@@ -76,8 +60,8 @@ namespace UnityExplorer.UI.Panels
             else
             {
                 string compType = "";
-                if (m_context == SearchContext.Custom)
-                    compType = classInputField.text;
+                if (m_context == SearchContext.UnityObject)
+                    compType = this.desiredTypeInput;
 
                 currentResults = SearchProvider.UnityObjectSearch(nameInputField.text, compType, m_context, m_childFilter, m_sceneFilter);
             }
@@ -86,6 +70,59 @@ namespace UnityExplorer.UI.Panels
             resultsScrollPool.Refresh(true);
 
             resultsLabel.text = $"{currentResults.Count} results";
+        }
+
+        public void Update()
+        {
+            if (lastCheckedTypeInput != desiredTypeInput)
+            {
+                lastCheckedTypeInput = desiredTypeInput;
+
+                //var type = ReflectionUtility.GetTypeByName(desiredTypeInput);
+                if (typeAutocompleter.AllTypes.TryGetValue(desiredTypeInput, out var cachedType))
+                {
+                    var type = cachedType.Type;
+                    lastTypeCanHaveGO = typeof(Component).IsAssignableFrom(type) || type == typeof(GameObject);
+                    sceneFilterRow.SetActive(lastTypeCanHaveGO);
+                    childFilterRow.SetActive(lastTypeCanHaveGO);
+                }
+                else
+                {
+                    sceneFilterRow.SetActive(false);
+                    childFilterRow.SetActive(false);
+                    lastTypeCanHaveGO = false;
+                }
+            }
+        }
+
+        // UI Callbacks
+
+        private void OnContextDropdownChanged(int value)
+        {
+            m_context = (SearchContext)value;
+
+            bool shouldShowGoFilters = m_context == SearchContext.GameObject || m_context == SearchContext.UnityObject;
+
+            sceneFilterRow.SetActive(shouldShowGoFilters);
+            childFilterRow.SetActive(shouldShowGoFilters);
+
+            unityObjectClassRow.SetActive(m_context == SearchContext.UnityObject);
+        }
+
+        private void OnSceneFilterDropChanged(int value) => m_sceneFilter = (SceneFilter)value;
+
+        private void OnChildFilterDropChanged(int value) => m_childFilter = (ChildFilter)value;
+
+        private void OnTypeInputChanged(string val)
+        {
+            desiredTypeInput = val;
+
+            if (string.IsNullOrEmpty(val))
+            {
+                sceneFilterRow.SetActive(false);
+                childFilterRow.SetActive(false);
+                lastCheckedTypeInput = val;
+            }
         }
 
         // Cache the syntax-highlighted text for each search result to reduce allocs.
@@ -143,12 +180,13 @@ namespace UnityExplorer.UI.Panels
             var unityClassLbl = UIFactory.CreateLabel(unityObjectClassRow, "UnityClassLabel", "Custom Type:", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(unityClassLbl.gameObject, minWidth: 110, flexibleWidth: 0);
 
-            var classInputObj = UIFactory.CreateInputField(unityObjectClassRow, "ClassInput", "...", out this.classInputField);
+            var classInputObj = UIFactory.CreateInputField(unityObjectClassRow, "ClassInput", "...", out var classInputField);
             UIFactory.SetLayoutElement(classInputObj, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
 
-            new TypeCompleter(typeof(UnityEngine.Object), classInputField);
+            typeAutocompleter = new TypeCompleter(typeof(UnityEngine.Object), classInputField);
+            classInputField.onValueChanged.AddListener(OnTypeInputChanged);
 
-            unityObjectClassRow.SetActive(false);
+            //unityObjectClassRow.SetActive(false);
 
             // Child filter row
 

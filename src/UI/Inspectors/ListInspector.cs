@@ -5,8 +5,8 @@
 //using System.Text;
 //using UnityEngine;
 //using UnityEngine.UI;
-//using UnityExplorer.UI.Inspectors.CacheObject;
-//using UnityExplorer.UI.Inspectors.CacheObject.Views;
+//using UnityExplorer.UI.CacheObject;
+//using UnityExplorer.UI.CacheObject.Views;
 //using UnityExplorer.UI.Utility;
 //using UnityExplorer.UI.Widgets;
 

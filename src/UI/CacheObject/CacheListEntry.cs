@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using UnityExplorer.UI.Inspectors.CacheObject.Views;
-using UnityExplorer.UI.Inspectors.IValues;
+using UnityExplorer.UI.CacheObject.Views;
+using UnityExplorer.UI.IValues;
 
-namespace UnityExplorer.UI.Inspectors.CacheObject
+namespace UnityExplorer.UI.CacheObject
 {
     public class CacheListEntry : CacheObjectBase
     {
@@ -21,9 +21,9 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             this.ListIndex = listIndex;
         }
 
-        public override void SetCell(CacheObjectCell cell)
+        public override void SetDataToCell(CacheObjectCell cell)
         {
-            base.SetCell(cell);
+            base.SetDataToCell(cell);
 
             var listCell = cell as CacheListEntryCell;
 

@@ -25,6 +25,15 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             Instance = this;
 
             TryLoadGameModules();
+
+            BuildDeobfuscationCache();
+            AppDomain.CurrentDomain.AssemblyLoad += OnAssemblyLoaded;
+        }
+
+        private void OnAssemblyLoaded(object sender, AssemblyLoadEventArgs args)
+        {
+            foreach (var type in args.LoadedAssembly.TryGetTypes())
+                TryCacheDeobfuscatedType(type);
         }
 
         public override object Cast(object obj, Type castTo)
@@ -71,10 +80,6 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
 
         public override Type GetDeobfuscatedType(Type type)
         {
-            if (!builtDeobCache)
-                BuildDeobfuscationCache();
-
-            Type ret = type;
             try
             {
                 var cppType = Il2CppType.From(type);
@@ -84,14 +89,11 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             }
             catch { }
 
-            return ret;
+            return type;
         }
 
         public override string ProcessTypeFullNameInString(Type type, string theString, ref string typeName)
         {
-            if (!builtDeobCache)
-                BuildDeobfuscationCache();
-
             if (!Il2CppTypeNotNull(type))
                 return theString;
 
@@ -104,27 +106,6 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
 
             return theString;
         }
-
-        //public override string ProcessTypeFullNameInString(Type type, string theString, ref string typeName)
-        //{
-        //    if (!builtDeobCache)
-        //        BuildDeobfuscationCache();
-
-        //    try
-        //    {
-        //        var cppType = Il2CppType.From(type);
-        //        if (s_deobfuscatedTypeNames.ContainsKey(cppType.FullName))
-        //        {
-        //            typeName = s_deobfuscatedTypeNames[cppType.FullName];
-        //            theString = theString.Replace(cppType.FullName, typeName);
-        //        }
-        //    }
-        //    catch
-        //    {
-        //    }
-
-        //    return theString;
-        //}
 
         public override Type GetActualType(object obj)
         {
@@ -161,9 +142,9 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
                         return getType;
                 }
             }
-            catch // (Exception ex)
+            catch (Exception ex)
             {
-                // ExplorerCore.LogWarning("Exception in GetActualType: " + ex);
+                ExplorerCore.LogWarning("Exception in GetActualType: " + ex);
             }
 
             return type;
@@ -175,35 +156,34 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
         // keep deobfuscated type name cache, used to display proper name.
         internal static Dictionary<string, string> s_deobfuscatedTypeNames = new Dictionary<string, string>();
 
-        private static bool builtDeobCache = false;
-
         private static void BuildDeobfuscationCache()
         {
             foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
             {
                 foreach (var type in asm.TryGetTypes())
-                {
-                    try
-                    {
-                        if (type.CustomAttributes.Any(it => it.AttributeType.Name == "ObfuscatedNameAttribute"))
-                        {
-                            var cppType = Il2CppType.From(type);
-
-                            if (!Il2CppToMonoType.ContainsKey(cppType.FullName))
-                            {
-                                Il2CppToMonoType.Add(cppType.AssemblyQualifiedName, type);
-                                s_deobfuscatedTypeNames.Add(cppType.FullName, type.FullName);
-                            }
-                        }
-                    }
-                    catch { }
-                }
+                    TryCacheDeobfuscatedType(type);
             }
-
-            builtDeobCache = true;
 
             if (s_deobfuscatedTypeNames.Count > 0)
                 ExplorerCore.Log($"Built deobfuscation cache, count: {s_deobfuscatedTypeNames.Count}");
+        }
+
+        private static void TryCacheDeobfuscatedType(Type type)
+        {
+            try
+            {
+                if (type.CustomAttributes.Any(it => it.AttributeType.Name == "ObfuscatedNameAttribute"))
+                {
+                    var cppType = Il2CppType.From(type);
+
+                    if (!Il2CppToMonoType.ContainsKey(cppType.FullName))
+                    {
+                        Il2CppToMonoType.Add(cppType.AssemblyQualifiedName, type);
+                        s_deobfuscatedTypeNames.Add(cppType.FullName, type.FullName);
+                    }
+                }
+            }
+            catch { }
         }
 
         /// <summary>
@@ -213,9 +193,6 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
         /// <returns>The Mono Type if found, otherwise null.</returns>
         public static Type GetMonoType(CppType cppType)
         {
-            if (!builtDeobCache)
-                BuildDeobfuscationCache();
-
             string name = cppType.AssemblyQualifiedName;
 
             if (Il2CppToMonoType.ContainsKey(name))
@@ -344,6 +321,7 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             return false;
         }
 
+        // Not currently using, not sure if its necessary anymore, was necessary to prevent crashes at one point.
         public override bool IsReflectionSupported(Type type)
         {
             try
@@ -467,7 +445,6 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             var valueList = new List<object>();
 
             var hashtable = value.TryCast(typeof(Il2CppSystem.Collections.Hashtable)) as Il2CppSystem.Collections.Hashtable;
-
             if (hashtable != null)
             {
                 EnumerateCppHashtable(hashtable, keyList, valueList);

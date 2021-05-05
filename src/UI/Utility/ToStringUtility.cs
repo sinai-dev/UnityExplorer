@@ -21,6 +21,8 @@ namespace UnityExplorer.UI.Utility
         private const string destroyedString = "<color=red>Destroyed</color>";
         private const string untitledString = "<i><color=grey>untitled</color></i>";
 
+        private const string eventSystemNamespace = "UnityEngine.EventSystem";
+
         public static string ToStringWithType(object value, Type fallbackType, bool includeNamespace = true)
         {
             if (value == null && fallbackType == null)
@@ -49,9 +51,20 @@ namespace UnityExplorer.UI.Utility
             }
 
             if (value is UnityEngine.Object obj)
-            { 
-                _stringBuilder.Append(string.IsNullOrEmpty(obj.name) ? untitledString : obj.name);
+            {
+                var name = obj.name;
+                if (string.IsNullOrEmpty(name))
+                    name = untitledString;
+                else if (name.Length > 50)
+                    name = $"{name.Substring(0, 50)}...";
+
+                _stringBuilder.Append($"\"{name}\"");
                 AppendRichType(_stringBuilder, richType);
+            }
+            else if (type.FullName.StartsWith(eventSystemNamespace))
+            {
+                // UnityEngine.EventSystem classes can have some obnoxious ToString results with rich text.
+                _stringBuilder.Append(richType);
             }
             else
             {
@@ -84,8 +97,10 @@ namespace UnityExplorer.UI.Utility
                 }
                 else // the ToString contains some actual implementation, use that value.
                 {
-                    if (toString.Length > 200)
-                        _stringBuilder.Append(toString.Substring(0, 200));
+                    // prune long strings unless they're unity structs
+                    // (Matrix4x4 and Rect can have some longs ones that we want to display fully)
+                    if (toString.Length > 100 && !(type.IsValueType && type.FullName.StartsWith("UnityEngine")))
+                        _stringBuilder.Append(toString.Substring(0, 100));
                     else
                         _stringBuilder.Append(toString);
 
@@ -153,6 +168,15 @@ namespace UnityExplorer.UI.Utility
 
             string _ = null;
             toString = ReflectionProvider.Instance.ProcessTypeFullNameInString(type, toString, ref _);
+
+#if CPP
+            if (value is Il2CppSystem.Type cppType)
+            {
+                var monoType = Core.Runtime.Il2Cpp.Il2CppReflection.GetMonoType(cppType);
+                if (monoType != null)
+                    toString = ReflectionProvider.Instance.ProcessTypeFullNameInString(monoType, toString, ref _);
+            }
+#endif
 
             return toString;
         }

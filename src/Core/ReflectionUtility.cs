@@ -6,11 +6,48 @@ using System.Linq;
 using System.Reflection;
 using BF = System.Reflection.BindingFlags;
 using UnityExplorer.Core.Runtime;
+using System.Text;
 
 namespace UnityExplorer
 {
     public static class ReflectionUtility
     {
+        static ReflectionUtility()
+        {
+            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+                CacheTypes(asm);
+
+            AppDomain.CurrentDomain.AssemblyLoad += AssemblyLoaded;
+        }
+
+        private static readonly Dictionary<string, Type> allCachedTypes = new Dictionary<string, Type>();
+
+        private static void CacheTypes(Assembly asm)
+        {
+            foreach (var type in asm.TryGetTypes())
+            {
+                if (allCachedTypes.ContainsKey(type.FullName))
+                    continue;
+
+                if (type.FullName.ContainsIgnoreCase("PrivateImplementationDetails"))
+                    continue;
+
+                allCachedTypes.Add(type.FullName, type);
+            }
+        }
+
+        private static void AssemblyLoaded(object sender, AssemblyLoadEventArgs args)
+        {
+            if (args.LoadedAssembly == null)
+                return;
+
+            s_cachedTypeInheritance.Clear();
+            s_cachedGenericParameterInheritance.Clear();
+
+            CacheTypes(args.LoadedAssembly);
+        }
+
+
         public const BF AllFlags = BF.Public | BF.Instance | BF.NonPublic | BF.Static;
 
         public static bool ValueEqual<T>(this T objA, T objB)
@@ -119,28 +156,8 @@ namespace UnityExplorer
         /// <returns>The Type if found, otherwise null.</returns>
         public static Type GetTypeByName(string fullName)
         {
-            s_typesByName.TryGetValue(fullName, out Type ret);
-
-            if (ret != null)
-                return ret;
-
-            foreach (var type in from asm in AppDomain.CurrentDomain.GetAssemblies() 
-                                 from type in asm.TryGetTypes() 
-                                 select type)
-            {
-                if (type.FullName == fullName)
-                {
-                    ret = type;
-                    break;
-                }
-            }
-
-            if (s_typesByName.ContainsKey(fullName))
-                s_typesByName[fullName] = ret;
-            else
-                s_typesByName.Add(fullName, ret);
-
-            return ret;
+            allCachedTypes.TryGetValue(fullName, out Type type);
+            return type;
         }
 
         // cache for GetBaseTypes
@@ -180,49 +197,47 @@ namespace UnityExplorer
         }
 
         // cache for GetImplementationsOf
-        internal static readonly Dictionary<Type, HashSet<Type>> s_cachedTypeInheritance = new Dictionary<Type, HashSet<Type>>();
-        internal static int s_lastAssemblyCount;
+        internal static readonly Dictionary<string, HashSet<Type>> s_cachedTypeInheritance = new Dictionary<string, HashSet<Type>>();
+        internal static readonly Dictionary<string, HashSet<Type>> s_cachedGenericParameterInheritance = new Dictionary<string, HashSet<Type>>();
 
         /// <summary>
         /// Get all non-abstract implementations of the provided type (include itself, if not abstract) in the current AppDomain.
+        /// Also works for generic parameters by analyzing the constraints.
         /// </summary>
         /// <param name="baseType">The base type, which can optionally be abstract / interface.</param>
         /// <returns>All implementations of the type in the current AppDomain.</returns>
         public static HashSet<Type> GetImplementationsOf(this Type baseType, bool allowAbstract, bool allowGeneric)
         {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            var key = baseType.AssemblyQualifiedName;
 
-            if (!s_cachedTypeInheritance.ContainsKey(baseType) || assemblies.Length != s_lastAssemblyCount)
+            if (!s_cachedTypeInheritance.ContainsKey(key))
             {
-                if (assemblies.Length != s_lastAssemblyCount)
-                {
-                    s_cachedTypeInheritance.Clear();
-                    s_lastAssemblyCount = assemblies.Length;
-                }
-
                 var set = new HashSet<Type>();
 
                 if (!baseType.IsAbstract && !baseType.IsInterface)
                     set.Add(baseType);
 
-                foreach (var asm in assemblies)
+                var keys = allCachedTypes.Keys.ToArray();
+                for (int i = 0; i < keys.Length; i++)
                 {
-                    foreach (var t in asm.TryGetTypes().Where(t => (allowAbstract || (!t.IsAbstract && !t.IsInterface)) 
-                                                                && (allowGeneric || !t.IsGenericType)))
+                    var type = allCachedTypes[keys[i]];
+                    try
                     {
-                        try
-                        {
-                            if (baseType.IsAssignableFrom(t) && !set.Contains(t))
-                                set.Add(t);
-                        }
-                        catch { }
+                        if ((type.IsAbstract && type.IsSealed) // ignore static classes
+                        || (!allowAbstract && type.IsAbstract)
+                        || (!allowGeneric && (type.IsGenericType || type.IsGenericTypeDefinition)))
+                            continue;
+
+                        if (baseType.IsAssignableFrom(type) && !set.Contains(type))
+                            set.Add(type);
                     }
+                    catch { }
                 }
 
-                s_cachedTypeInheritance.Add(baseType, set);
+                s_cachedTypeInheritance.Add(key, set);
             }
 
-            return s_cachedTypeInheritance[baseType];
+            return s_cachedTypeInheritance[key];
         }
 
         /// <summary>

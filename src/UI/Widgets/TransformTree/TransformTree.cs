@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -13,6 +14,21 @@ namespace UnityExplorer.UI.Widgets
     public class TransformTree : IPoolDataSource<TransformCell>
     {
         public Func<IEnumerable<GameObject>> GetRootEntriesMethod;
+
+        internal ScrollPool<TransformCell> ScrollPool;
+
+        // Using an OrderedDictionary because we need constant-time lookup of both key and index.
+        /// <summary>
+        /// Key: UnityEngine.Transform instance ID<br/>
+        /// Value: CachedTransform
+        /// </summary>
+        private readonly OrderedDictionary displayedObjects = new OrderedDictionary();
+
+        // for keeping track of which actual transforms are expanded or not, outside of the cache data.
+        private readonly HashSet<int> expandedInstanceIDs = new HashSet<int>();
+        private readonly HashSet<int> autoExpandedIDs = new HashSet<int>();
+
+        public int ItemCount => displayedObjects.Count;
 
         public bool Filtering => !string.IsNullOrEmpty(currentFilter);
         private bool wasFiltering;
@@ -33,17 +49,6 @@ namespace UnityExplorer.UI.Widgets
             }
         }
         private string currentFilter;
-
-        internal ScrollPool<TransformCell> ScrollPool;
-
-        internal readonly List<CachedTransform> displayedObjects = new List<CachedTransform>();
-
-        private readonly Dictionary<int, CachedTransform> objectCache = new Dictionary<int, CachedTransform>();
-
-        private readonly HashSet<int> expandedInstanceIDs = new HashSet<int>();
-        private readonly HashSet<int> autoExpandedIDs = new HashSet<int>();
-
-        public int ItemCount => displayedObjects.Count;
 
         public TransformTree(ScrollPool<TransformCell> scrollPool)
         {
@@ -72,17 +77,37 @@ namespace UnityExplorer.UI.Widgets
             RefreshData(true, true);
         }
 
+        private readonly HashSet<int> visited = new HashSet<int>();
+        private bool needRefresh;
+        private int displayIndex;
+
         public void RefreshData(bool andReload = false, bool jumpToTop = false)
         {
-            displayedObjects.Clear();
+            visited.Clear();
+            displayIndex = 0;
+            needRefresh = false;
 
             var rootObjects = GetRootEntriesMethod.Invoke();
 
+            //int displayIndex = 0;
             foreach (var obj in rootObjects)
+                if (obj) Traverse(obj.transform);
+
+            // Prune displayed transforms that we didnt visit in that traverse
+            for (int i = displayedObjects.Count - 1; i >= 0; i--)
             {
-                if (obj)
-                    Traverse(obj.transform);
+                var obj = (CachedTransform)displayedObjects[i];
+                if (!visited.Contains(obj.InstanceID))
+                {
+                    displayedObjects.Remove(obj.InstanceID);
+                    needRefresh = true;
+                }
             }
+
+            if (!needRefresh)
+                return;
+
+            //displayedObjects.Clear();
 
             if (andReload)
             {
@@ -97,32 +122,36 @@ namespace UnityExplorer.UI.Widgets
         {
             int instanceID = transform.GetInstanceID();
 
+            if (visited.Contains(instanceID))
+                return;
+            visited.Add(instanceID);
+
             if (Filtering)
             {
-                //auto - expand to show results: works, but then we need to collapse after the search ends.
-
-                if (FilterHierarchy(transform))
-                {
-                    if (!autoExpandedIDs.Contains(instanceID))
-                        autoExpandedIDs.Add(instanceID);
-                }
-                else
+                if (!FilterHierarchy(transform))
                     return;
+
+                if (!autoExpandedIDs.Contains(instanceID))
+                    autoExpandedIDs.Add(instanceID);
             }
 
             CachedTransform cached;
-            if (objectCache.ContainsKey(instanceID))
+            if (displayedObjects.Contains(instanceID))
             {
-                cached = objectCache[instanceID];
+                cached = (CachedTransform)displayedObjects[(object)instanceID];
                 cached.Update(transform, depth);
             }
             else
             {
+                needRefresh = true;
                 cached = new CachedTransform(this, transform, depth, parent);
-                objectCache.Add(instanceID, cached);
+                if (displayedObjects.Count <= displayIndex)
+                    displayedObjects.Add(instanceID, cached);
+                else
+                    displayedObjects.Insert(displayIndex, instanceID, cached);
             }
 
-            displayedObjects.Add(cached);
+            displayIndex++;
 
             if (IsCellExpanded(instanceID) && cached.Value.childCount > 0)
             {
@@ -149,7 +178,7 @@ namespace UnityExplorer.UI.Widgets
         public void SetCell(TransformCell cell, int index)
         {
             if (index < displayedObjects.Count)
-                cell.ConfigureCell(displayedObjects[index], index);
+                cell.ConfigureCell((CachedTransform)displayedObjects[index], index);
             else
                 cell.Disable();
         }

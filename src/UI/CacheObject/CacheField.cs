@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using UnityExplorer.UI.Inspectors;
 
-namespace UnityExplorer.UI.Inspectors.CacheObject
+namespace UnityExplorer.UI.CacheObject
 {
     public class CacheField : CacheMember
     {
         public FieldInfo FieldInfo { get; internal set; }
         public override Type DeclaringType => FieldInfo.DeclaringType;
+        public override bool IsStatic => FieldInfo.IsStatic;
         public override bool CanWrite => m_canWrite ?? (bool)(m_canWrite = !(FieldInfo.IsLiteral && !FieldInfo.IsInitOnly));
         private bool? m_canWrite;
 

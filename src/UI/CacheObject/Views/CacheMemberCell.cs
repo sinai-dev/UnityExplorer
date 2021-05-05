@@ -6,11 +6,11 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.UI.Widgets;
 
-namespace UnityExplorer.UI.Inspectors.CacheObject.Views
+namespace UnityExplorer.UI.CacheObject.Views
 {
     public class CacheMemberCell : CacheObjectCell
     {
-        public ReflectionInspector Owner { get; set; }
+        //public ReflectionInspector Owner { get; set; }
 
         public CacheMember MemberOccupant => Occupant as CacheMember;
 

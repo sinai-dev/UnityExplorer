@@ -9,8 +9,8 @@ namespace UnityExplorer.Core.Search
     {
         UnityObject,
         GameObject,
-        Component,
-        Custom,
+        //Component,
+        //Custom,
         Singleton,
         StaticClass
     }

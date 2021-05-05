@@ -76,6 +76,31 @@ namespace UnityExplorer.Tests
             }
         }
 
+        private static void TestGeneric<T>() 
+        {
+            ExplorerCore.Log("Test1 " + typeof(T).FullName);
+        }
+        
+        private static void TestGenericClass<T>() where T : class
+        {
+            ExplorerCore.Log("Test2 " + typeof(T).FullName);
+        }
+        
+        //private static void TestGenericMultiInterface<T>() where T : IEnumerable, IList, ICollection
+        //{
+        //    ExplorerCore.Log("Test3 " + typeof(T).FullName);
+        //}
+        
+        private static void TestComponent<T>() where T : Component
+        {
+            ExplorerCore.Log("Test3 " + typeof(T).FullName);
+        }
+        
+        private static void TestStruct<T>() where T : struct
+        {
+            ExplorerCore.Log("Test3 " + typeof(T).FullName);
+        }
+
         private static object GetRandomObject()
         {
             object ret = null;

@@ -1,47 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI.Models;
+using UnityExplorer.UI.Panels;
 
 namespace UnityExplorer.UI.Widgets.AutoComplete
 {
     public class TypeCompleter : ISuggestionProvider
     {
-        private class CachedType
+        public class CachedType
         {
-            public string FullNameForFilter;
+            public Type Type;
             public string FullNameValue;
             public string DisplayName;
         }
 
-        public Type BaseType { get; }
+        public event Action<Suggestion> SuggestionClicked;
+
+        public Type BaseType { get; set; }
+        public Type[] GenericConstraints { get; set; }
+
         public InputField InputField { get; }
         public bool AnchorToCaretPosition => false;
 
-        public event Action<Suggestion> SuggestionClicked;
-        public void OnSuggestionClicked(Suggestion suggestion)
-        {
-            SuggestionClicked?.Invoke(suggestion);
-            suggestions.Clear();
-            AutoCompleter.Instance.SetSuggestions(suggestions);
-
-            timeOfLastCheck = Time.realtimeSinceStartup;
-            InputField.text = suggestion.UnderlyingValue;
-        }
-
         private readonly List<Suggestion> suggestions = new List<Suggestion>();
+        private float timeOfLastCheck;
 
-        private readonly Dictionary<string, CachedType> typeCache = new Dictionary<string, CachedType>();
+        public Dictionary<string, CachedType> AllTypes = new Dictionary<string, CachedType>();
 
-        //// cached list of names for displaying (with proper case)
-        //private readonly List<string> cachedTypesNames = new List<string>();
-        //// cached list of lookup by index (lowercase)
-        //private readonly List<string> cachedTypesFilter = new List<string>();
-        //// cached hashset of names (lower case)
-        //private readonly HashSet<string> cachedTypesSet = new HashSet<string>();
+        // cached type trees from all autocompleters
+        private static readonly Dictionary<string, Dictionary<string, CachedType>> typeCache = new Dictionary<string, Dictionary<string, CachedType>>();
 
         public TypeCompleter(Type baseType, InputField inputField)
         {
@@ -50,37 +43,20 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
             inputField.onValueChanged.AddListener(OnInputFieldChanged);
 
-            var types = ReflectionUtility.GetImplementationsOf(this.BaseType, true, false);
-
-            var list = new List<CachedType>();
-
-            foreach (var type in types)
-            {
-                string displayName = Utility.SignatureHighlighter.ParseFullSyntax(type, true);
-                string fullName = RuntimeProvider.Instance.Reflection.GetDeobfuscatedType(type).FullName;
-
-                string filteredName = fullName;
-
-                list.Add(new CachedType
-                {
-                    FullNameValue = fullName,
-                    FullNameForFilter = filteredName,
-                    DisplayName = displayName,
-                });
-            }
-
-            list.Sort((CachedType a, CachedType b) => a.FullNameForFilter.CompareTo(b.FullNameForFilter));
-
-            foreach (var cache in list)
-            {
-                if (typeCache.ContainsKey(cache.FullNameForFilter))
-                    continue;
-                typeCache.Add(cache.FullNameForFilter, cache);
-            }
-
+            if (BaseType != null)
+                CacheTypes();
         }
 
-        private float timeOfLastCheck;
+        public void OnSuggestionClicked(Suggestion suggestion)
+        {
+            timeOfLastCheck = Time.realtimeSinceStartup;
+
+            InputField.text = suggestion.UnderlyingValue;
+            SuggestionClicked?.Invoke(suggestion);
+
+            suggestions.Clear();
+            AutoCompleter.Instance.SetSuggestions(suggestions);
+        }
 
         private void OnInputFieldChanged(string value)
         {
@@ -110,29 +86,59 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
             var added = new HashSet<string>();
 
-            if (typeCache.TryGetValue(value, out CachedType cache))
-                AddToDict(cache);
+            // Check for exact match first
+            if (AllTypes.TryGetValue(value, out CachedType cache))
+                AddSuggestion(cache);
 
-            foreach (var entry in typeCache.Values)
+            foreach (var entry in AllTypes.Values)
+                AddSuggestion(entry);
+
+            void AddSuggestion(CachedType entry)
             {
+                if (entry.FullNameValue == null)
+                    entry.FullNameValue = ReflectionProvider.Instance.GetDeobfuscatedType(entry.Type).FullName;
+
                 if (added.Contains(entry.FullNameValue))
-                    continue;
-
-                if (entry.FullNameForFilter.ContainsIgnoreCase(value))
-                    AddToDict(entry);
-
+                    return;
                 added.Add(entry.FullNameValue);
-            }
 
-            void AddToDict(CachedType entry)
+                if (entry.DisplayName == null)
+                    entry.DisplayName = Utility.SignatureHighlighter.ParseFullSyntax(entry.Type, true);
+
+                suggestions.Add(new Suggestion(entry.DisplayName, entry.FullNameValue));
+            }
+        }
+
+        public void CacheTypes()
+        {
+            var key = BaseType.AssemblyQualifiedName;
+
+            if (typeCache.ContainsKey(key))
             {
-                added.Add(entry.FullNameValue);
-
-                suggestions.Add(new Suggestion(entry.DisplayName,
-                        value,
-                        entry.FullNameForFilter.Substring(value.Length, entry.FullNameForFilter.Length - value.Length),
-                        entry.FullNameValue));
+                AllTypes = typeCache[key];
+                return;
             }
+
+            AllTypes = new Dictionary<string, CachedType>();
+
+            var list = ReflectionUtility.GetImplementationsOf(BaseType, true, false)
+                .Select(it => new CachedType() 
+                {
+                    Type = it, 
+                    FullNameValue = ReflectionProvider.Instance.GetDeobfuscatedType(it).FullName 
+                })
+                .ToList();
+
+            list.Sort((CachedType a, CachedType b) => a.FullNameValue.CompareTo(b.FullNameValue));
+
+            foreach (var cache in list)
+            {
+                if (AllTypes.ContainsKey(cache.FullNameValue))
+                    continue;
+                AllTypes.Add(cache.FullNameValue, cache);
+            }
+
+            typeCache.Add(key, AllTypes);
         }
     }
 }

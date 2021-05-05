@@ -5,12 +5,12 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.UI.Inspectors.CacheObject.Views;
-using UnityExplorer.UI.Inspectors.IValues;
+using UnityExplorer.UI.CacheObject.Views;
+using UnityExplorer.UI.IValues;
 using UnityExplorer.UI.ObjectPool;
 using UnityExplorer.UI.Utility;
 
-namespace UnityExplorer.UI.Inspectors.CacheObject
+namespace UnityExplorer.UI.CacheObject
 {
     public enum ValueState
     {
@@ -64,38 +64,32 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
 
         protected const string NOT_YET_EVAL = "<color=grey>Not yet evaluated</color>";
 
-        internal static GameObject InactiveIValueHolder
-        {
-            get
-            {
-                if (!inactiveIValueHolder)
-                {
-                    inactiveIValueHolder = new GameObject("InactiveIValueHolder");
-                    GameObject.DontDestroyOnLoad(inactiveIValueHolder);
-                    inactiveIValueHolder.transform.parent = UIManager.PoolHolder.transform;
-                    inactiveIValueHolder.SetActive(false);
-                }
-                return inactiveIValueHolder;
-            }
-        }
-        private static GameObject inactiveIValueHolder;
-
-        // On parent destroying this
 
         public virtual void ReleasePooledObjects()
         {
             if (this.IValue != null)
                 ReleaseIValue();
 
-            // TODO release Evaluate
-
             if (this.CellView != null)
-            {
-                this.CellView.Occupant = null;
-                this.CellView.SubContentHolder.SetActive(false);
-                this.CellView = null;
-            }
-            
+                UnlinkFromView();
+        }
+
+        public virtual void SetView(CacheObjectCell cellView)
+        {
+            this.CellView = cellView;
+            cellView.Occupant = this;
+        }
+
+        public virtual void UnlinkFromView()
+        {
+            if (this.CellView == null)
+                return;
+
+            this.CellView.Occupant = null;
+            this.CellView = null;
+
+            if (this.IValue != null)
+                this.IValue.UIRoot.transform.SetParent(InactiveIValueHolder.transform, false);
         }
 
         // Updating and applying values
@@ -112,13 +106,16 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
 
             if (State != prevState)
             {
-                // TODO handle if subcontent / evaluate shown, check type change, etc
+                if (this.IValue != null)
+                {
+                    // State has changed, need to return IValue
+                    ReleaseIValue();
+                    SubContentShowWanted = false;
+                }
             }
 
             if (this.IValue != null)
-            {
                 this.IValue.SetValue(Value);
-            }
         }
 
         public abstract void SetUserValue(object value);
@@ -190,10 +187,12 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             this.ValueLabelText = label;
         }
 
+        // Setting cell state from our model
+
         /// <summary>Return true if SetCell should abort, false if it should continue.</summary>
         protected abstract bool SetCellEvaluateState(CacheObjectCell cell);
 
-        public virtual void SetCell(CacheObjectCell cell)
+        public virtual void SetDataToCell(CacheObjectCell cell)
         {
             cell.NameLabel.text = NameLabelText;
             cell.ValueLabel.gameObject.SetActive(true);
@@ -212,7 +211,6 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             {
                 case ValueState.Exception:
                 case ValueState.NullValue:
-                    ReleaseIValue();
                     SetValueState(cell, ValueStateArgs.Default);
                     break;
                 case ValueState.Boolean:
@@ -222,18 +220,15 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
                     SetValueState(cell, new ValueStateArgs(false, typeLabelActive: true, inputActive: true, applyActive: CanWrite));
                     break;
                 case ValueState.String:
-                    SetIValueState();
                     SetValueState(cell, new ValueStateArgs(true, false, SignatureHighlighter.StringOrange, subContentButtonActive: true));
                     break;
                 case ValueState.Enum:
-                    SetIValueState();
                     SetValueState(cell, new ValueStateArgs(true, subContentButtonActive: CanWrite));
                     break;
                 case ValueState.Collection:
                 case ValueState.Dictionary:
                 case ValueState.ValueStruct:
                 case ValueState.Color:
-                    SetIValueState();
                     SetValueState(cell, new ValueStateArgs(true, inspectActive: true, subContentButtonActive: true));
                     break;
                 case ValueState.Unsupported:
@@ -281,16 +276,22 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
 
         // IValues
 
-        /// <summary>Called from SetCellState if SubContent button is wanted.</summary>
-        public void SetIValueState()
+        internal static GameObject InactiveIValueHolder
         {
-            if (this.IValue == null)
-                return;
-
-            // TODO ?
+            get
+            {
+                if (!inactiveIValueHolder)
+                {
+                    inactiveIValueHolder = new GameObject("Temp_IValue_Holder");
+                    GameObject.DontDestroyOnLoad(inactiveIValueHolder);
+                    inactiveIValueHolder.transform.parent = UIManager.PoolHolder.transform;
+                    inactiveIValueHolder.SetActive(false);
+                }
+                return inactiveIValueHolder;
+            }
         }
+        private static GameObject inactiveIValueHolder;
 
-        // temp for testing
         public virtual void OnCellSubContentToggle()
         {
             if (this.IValue == null)
@@ -307,7 +308,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
 
                 // update our cell after creating the ivalue (the value may have updated, make sure its consistent)
                 this.ProcessOnEvaluate();
-                this.SetCell(this.CellView);
+                this.SetDataToCell(this.CellView);
             }
             else
             {
@@ -327,14 +328,6 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             Pool.Return(CurrentIValueType, IValue);
 
             IValue = null;
-        }
-
-        internal virtual void HidePooledObjects()
-        {
-            if (this.IValue == null)
-                return;
-
-            this.IValue.UIRoot.transform.SetParent(InactiveIValueHolder.transform, false);
         }
 
         // CacheObjectCell Apply
@@ -363,7 +356,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
                 SetUserValue(val);
             }
 
-            SetCell(this.CellView);
+            SetDataToCell(this.CellView);
         }
 
         public struct ValueStateArgs

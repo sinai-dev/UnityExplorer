@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using UnityExplorer.UI.Inspectors.CacheObject.Views;
-using UnityExplorer.UI.Inspectors.IValues;
+using UnityExplorer.UI.CacheObject.Views;
+using UnityExplorer.UI.IValues;
 using UnityExplorer.UI.Utility;
 
-namespace UnityExplorer.UI.Inspectors.CacheObject
+namespace UnityExplorer.UI.CacheObject
 {
     public class CacheKeyValuePair : CacheObjectBase
     {
@@ -52,9 +52,9 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             }
         }
 
-        public override void SetCell(CacheObjectCell cell)
+        public override void SetDataToCell(CacheObjectCell cell)
         {
-            base.SetCell(cell);
+            base.SetDataToCell(cell);
 
             var kvpCell = cell as CacheKeyValuePairCell;
 

@@ -4,13 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.UI.Inspectors.CacheObject;
-using UnityExplorer.UI.Inspectors.CacheObject.Views;
+using UnityExplorer.UI.CacheObject;
+using UnityExplorer.UI.CacheObject.Views;
+using UnityExplorer.UI.Inspectors;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Utility;
 using UnityExplorer.UI.Widgets;
 
-namespace UnityExplorer.UI.Inspectors.IValues
+namespace UnityExplorer.UI.IValues
 {
     public class InteractiveList : InteractiveValue, IPoolDataSource<CacheListEntryCell>, ICacheObjectController
     {
@@ -51,7 +52,10 @@ namespace UnityExplorer.UI.Inspectors.IValues
             values.Clear();
 
             foreach (var entry in cachedEntries)
+            {
+                entry.UnlinkFromView();
                 entry.ReleasePooledObjects();
+            }
 
             cachedEntries.Clear();
         }
@@ -121,10 +125,8 @@ namespace UnityExplorer.UI.Inspectors.IValues
                 {
                     var cache = cachedEntries[i];
                     if (cache.CellView != null)
-                    {
-                        cache.CellView.Occupant = null;
-                        cache.CellView = null;
-                    }
+                        cache.UnlinkFromView();
+
                     cache.ReleasePooledObjects();
                     cachedEntries.RemoveAt(i);
                 }
@@ -146,20 +148,14 @@ namespace UnityExplorer.UI.Inspectors.IValues
             this.scrollLayout.minHeight = Math.Min(InspectorPanel.CurrentPanelHeight - 400f, minHeight);
         }
 
-        public void OnCellBorrowed(CacheListEntryCell cell)
-        {
-
-        }
+        public void OnCellBorrowed(CacheListEntryCell cell) { } // not needed
 
         public void SetCell(CacheListEntryCell cell, int index)
         {
             if (index < 0 || index >= cachedEntries.Count)
             {
                 if (cell.Occupant != null)
-                {
-                    cell.Occupant.CellView = null;
-                    cell.Occupant = null;
-                }
+                    cell.Occupant.UnlinkFromView();
 
                 cell.Disable();
                 return;
@@ -167,20 +163,11 @@ namespace UnityExplorer.UI.Inspectors.IValues
 
             var entry = cachedEntries[index];
 
-            if (entry != cell.Occupant)
-            {
-                if (cell.Occupant != null)
-                {
-                    cell.Occupant.HidePooledObjects();
-                    cell.Occupant.CellView = null;
-                    cell.Occupant = null;
-                }
+            if (cell.Occupant != null && entry != cell.Occupant)
+                cell.Occupant.UnlinkFromView();
 
-                cell.Occupant = entry;
-                entry.CellView = cell;
-            }
-
-            entry.SetCell(cell);
+            entry.SetView(cell);
+            entry.SetDataToCell(cell);
         }
 
         private LayoutElement scrollLayout;

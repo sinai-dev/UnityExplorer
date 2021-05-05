@@ -11,6 +11,114 @@ namespace UnityExplorer.Core.Search
 {
     public static class SearchProvider
     {
+       
+        private static bool Filter(Scene scene, SceneFilter filter)
+        {
+            switch (filter)
+            {
+                case SceneFilter.Any:
+                    return true;
+                case SceneFilter.DontDestroyOnLoad:
+                    return scene == SceneHandler.DontDestroyScene;
+                case SceneFilter.HideAndDontSave:
+                    return scene == SceneHandler.AssetScene;
+                case SceneFilter.ActivelyLoaded:
+                    return scene != SceneHandler.DontDestroyScene && scene != SceneHandler.AssetScene;
+                default:
+                    return false;
+            }
+        }
+
+        internal static List<object> UnityObjectSearch(string input, string customTypeInput, SearchContext context, 
+            ChildFilter childFilter, SceneFilter sceneFilter)
+        {
+            var results = new List<object>();
+
+            Type searchType;
+            switch (context)
+            {
+                case SearchContext.GameObject:
+                    searchType = typeof(GameObject); 
+                    break;
+
+                case SearchContext.UnityObject:
+                default:
+
+                    if (!string.IsNullOrEmpty(customTypeInput))
+                    {
+                        if (ReflectionUtility.GetTypeByName(customTypeInput) is Type customType)
+                        {
+                            if (typeof(UnityEngine.Object).IsAssignableFrom(customType))
+                            {
+                                searchType = customType;
+                                break;
+                            }
+                            else
+                                ExplorerCore.LogWarning($"Custom type '{customType.FullName}' is not assignable from UnityEngine.Object!");
+                        }
+                        else
+                            ExplorerCore.LogWarning($"Could not find any type by name '{customTypeInput}'!");
+                    }
+
+                    searchType = typeof(UnityEngine.Object); 
+                    break;
+            }
+
+
+            if (searchType == null)
+                return results;
+
+            var allObjects = RuntimeProvider.Instance.FindObjectsOfTypeAll(searchType);
+
+            // perform filter comparers
+
+            string nameFilter = null;
+            if (!string.IsNullOrEmpty(input))
+                nameFilter = input;
+
+            bool canGetGameObject = context == SearchContext.GameObject || typeof(Component).IsAssignableFrom(searchType);
+
+            foreach (var obj in allObjects)
+            {
+                // name check
+                if (!string.IsNullOrEmpty(nameFilter) && !obj.name.ContainsIgnoreCase(nameFilter))
+                    continue;
+
+                if (canGetGameObject)
+                {
+                    var go = context == SearchContext.GameObject
+                            ? obj.TryCast<GameObject>()
+                            : obj.TryCast<Component>().gameObject;
+
+                    if (go)
+                    {
+                        // scene check
+                        if (sceneFilter != SceneFilter.Any)
+                        {
+                            if (!Filter(go.scene, sceneFilter))
+                                continue;
+                        }
+
+                        if (childFilter != ChildFilter.Any)
+                        {
+                            if (!go)
+                                continue;
+
+                            // root object check (no parent)
+                            if (childFilter == ChildFilter.HasParent && !go.transform.parent)
+                                continue;
+                            else if (childFilter == ChildFilter.RootObject && go.transform.parent)
+                                continue;
+                        }
+                    }
+                }
+
+                results.Add(obj);
+            }
+
+            return results;
+        }
+
         internal static List<object> StaticClassSearch(string input)
         {
             var list = new List<object>();
@@ -76,125 +184,5 @@ namespace UnityExplorer.Core.Search
             return instances;
         }
 
-        private static bool Filter(Scene scene, SceneFilter filter)
-        {
-            switch (filter)
-            {
-                case SceneFilter.Any:
-                    return true;
-                case SceneFilter.DontDestroyOnLoad:
-                    return scene == SceneHandler.DontDestroyScene;
-                case SceneFilter.HideAndDontSave:
-                    return scene == SceneHandler.AssetScene;
-                case SceneFilter.ActivelyLoaded:
-                    return scene != SceneHandler.DontDestroyScene && scene != SceneHandler.AssetScene;
-                default:
-                    return false;
-            }
-        }
-
-        internal static List<object> UnityObjectSearch(string input, string customTypeInput, SearchContext context, 
-            ChildFilter childFilter, SceneFilter sceneFilter)
-        {
-            var results = new List<object>();
-
-            Type searchType = null;
-            switch (context)
-            {
-                case SearchContext.GameObject:
-                    searchType = typeof(GameObject); break;
-
-                case SearchContext.Component:
-                    searchType = typeof(Component); break;
-
-                case SearchContext.Custom:
-                    if (string.IsNullOrEmpty(customTypeInput))
-                    {
-                        ExplorerCore.LogWarning("Custom Type input must not be empty!");
-                        return results;
-                    }
-                    if (ReflectionUtility.GetTypeByName(customTypeInput) is Type customType)
-                    {
-                        if (typeof(UnityEngine.Object).IsAssignableFrom(customType))
-                            searchType = customType;
-                        else
-                            ExplorerCore.LogWarning($"Custom type '{customType.FullName}' is not assignable from UnityEngine.Object!");
-                    }
-                    else
-                        ExplorerCore.LogWarning($"Could not find a type by the name '{customTypeInput}'!");
-                    break;
-
-                default:
-                    searchType = typeof(UnityEngine.Object); break;
-            }
-
-
-            if (searchType == null)
-                return results;
-
-            var allObjects = RuntimeProvider.Instance.FindObjectsOfTypeAll(searchType);
-
-            // perform filter comparers
-
-            string nameFilter = null;
-            if (!string.IsNullOrEmpty(input))
-                nameFilter = input;
-
-            bool canGetGameObject = (sceneFilter != SceneFilter.Any || childFilter != ChildFilter.Any)
-                && (context == SearchContext.GameObject || typeof(Component).IsAssignableFrom(searchType));
-
-            if (!canGetGameObject)
-            {
-                if (context != SearchContext.UnityObject && (sceneFilter != SceneFilter.Any || childFilter != ChildFilter.Any))
-                    ExplorerCore.LogWarning($"Type '{searchType}' cannot have Scene or Child filters applied to it");
-            }
-
-            foreach (var obj in allObjects)
-            {
-                // name check
-                if (!string.IsNullOrEmpty(nameFilter) && !obj.name.ContainsIgnoreCase(nameFilter))
-                    continue;
-
-                if (canGetGameObject)
-                {
-                    var go = context == SearchContext.GameObject
-                            ? obj.TryCast<GameObject>()
-                            : obj.TryCast<Component>().gameObject;
-
-                    // scene check
-                    if (sceneFilter != SceneFilter.Any)
-                    {
-                        if (!go)
-                            continue;
-
-                        switch (context)
-                        {
-                            case SearchContext.GameObject:
-                            case SearchContext.Custom:
-                            case SearchContext.Component:
-                                if (!Filter(go.scene, sceneFilter))
-                                    continue;
-                                break;
-                        }
-                    }
-
-                    if (childFilter != ChildFilter.Any)
-                    {
-                        if (!go)
-                            continue;
-
-                        // root object check (no parent)
-                        if (childFilter == ChildFilter.HasParent && !go.transform.parent)
-                            continue;
-                        else if (childFilter == ChildFilter.RootObject && go.transform.parent)
-                            continue;
-                    }
-                }
-
-                results.Add(obj);
-            }
-
-            return results;
-        }
     }
 }

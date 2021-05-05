@@ -4,11 +4,12 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
-using UnityExplorer.UI.Inspectors.CacheObject.Views;
+using UnityExplorer.UI.CacheObject.Views;
+using UnityExplorer.UI.Inspectors;
 using UnityExplorer.UI.ObjectPool;
 using UnityExplorer.UI.Utility;
 
-namespace UnityExplorer.UI.Inspectors.CacheObject
+namespace UnityExplorer.UI.CacheObject
 {
     public abstract class CacheMember : CacheObjectBase
     {
@@ -18,6 +19,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
         public abstract Type DeclaringType { get; }
         public string NameForFiltering { get; protected set; }
 
+        public abstract bool IsStatic { get; }
         public override bool HasArguments => Arguments?.Length > 0 || GenericArguments.Length > 0;
         public ParameterInfo[] Arguments { get; protected set; } = new ParameterInfo[0];
         public Type[] GenericArguments { get; protected set; } = new Type[0];
@@ -43,12 +45,12 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
             }
         }
 
-        internal override void HidePooledObjects()
+        public override void UnlinkFromView()
         {
-            base.HidePooledObjects();
-
             if (this.Evaluator != null)
                 this.Evaluator.UIRoot.transform.SetParent(Pool<EvaluateWidget>.Instance.InactiveHolder.transform, false);
+
+            base.UnlinkFromView();
         }
 
         protected abstract object TryEvaluate();
@@ -59,7 +61,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
         {
             Evaluate();
             if (CellView != null)
-                SetCell(CellView);
+                SetDataToCell(CellView);
         }
 
         /// <summary>

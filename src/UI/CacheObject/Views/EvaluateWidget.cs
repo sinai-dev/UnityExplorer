@@ -7,8 +7,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.UI.ObjectPool;
 using UnityExplorer.UI.Utility;
+using UnityExplorer.UI.Widgets.AutoComplete;
 
-namespace UnityExplorer.UI.Inspectors.CacheObject.Views
+namespace UnityExplorer.UI.CacheObject.Views
 {
     public class EvaluateWidget : IPooledObject
     {
@@ -117,7 +118,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
             if (genericArguments.Any())
             {
                 genericArgHolder.SetActive(true);
-                SetupGenericArgs();
+                SetGenericRows();
             }
             else
                 genericArgHolder.SetActive(false);
@@ -125,13 +126,13 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
             if (arguments.Any())
             {
                 argHolder.SetActive(true);
-                SetupArgs();
+                SetNormalArgRows();
             }
             else
                 argHolder.SetActive(false);
         }
 
-        private void SetupGenericArgs()
+        private void SetGenericRows()
         {
             for (int i = 0; i < genericArguments.Length || i < genericArgRows.Count; i++)
             {
@@ -152,15 +153,18 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
 
                 genericArgRows[i].SetActive(true);
 
+                var constraints = arg.GetGenericParameterConstraints();
+
+                // TODO show "class" constraints as they dont show up, "struct" does effectively.
+
                 var sb = new StringBuilder($"<color={SignatureHighlighter.CONST}>{arg.Name}</color>");
 
-                var constraints = arg.GetGenericParameterConstraints();
                 for (int j = 0; j < constraints.Length; j++)
                 {
                     if (j == 0) sb.Append(' ').Append('(');
                     else sb.Append(',').Append(' ');
 
-                    sb.Append(SignatureHighlighter.ParseType(constraints[i]));
+                    sb.Append(SignatureHighlighter.ParseType(constraints[j]));
 
                     if (j + 1 == constraints.Length)
                         sb.Append(')');
@@ -170,7 +174,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
             }
         }
 
-        private void SetupArgs()
+        private void SetNormalArgRows()
         {
             for (int i = 0; i < arguments.Length || i < argRows.Count; i++)
             {
@@ -197,16 +201,17 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
         private void AddArgRow(int index, bool generic)
         {
             if (!generic)
-                AddArgRow(index, argHolder, argRows, argLabels, argumentInput);
+                AddArgRow(index, argHolder, argRows, argLabels, argumentInput);//, false);
             else
-                AddArgRow(index, genericArgHolder, genericArgRows, genericArgLabels, genericInput);
+                AddArgRow(index, genericArgHolder, genericArgRows, genericArgLabels, genericInput);//, true);
         }
 
-        private void AddArgRow(int index, GameObject parent, List<GameObject> objectList, List<Text> labelList, string[] inputArray)
+        private void AddArgRow(int index, GameObject parent, List<GameObject> objectList, List<Text> labelList, string[] inputArray)//, bool autocomplete)
         {
             var horiGroup = UIFactory.CreateUIObject("ArgRow_" + index, parent);
             UIFactory.SetLayoutElement(horiGroup, minHeight: 25, flexibleHeight: 50, minWidth: 50, flexibleWidth: 9999);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(horiGroup, false, false, true, true, 5);
+            horiGroup.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             objectList.Add(horiGroup);
 
             var label = UIFactory.CreateLabel(horiGroup, "ArgLabel", "not set", TextAnchor.MiddleLeft);
@@ -215,8 +220,9 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
             label.horizontalOverflow = HorizontalWrapMode.Wrap;
 
             var inputObj = UIFactory.CreateInputField(horiGroup, "InputField", "...", out InputField inputField);
-            UIFactory.SetLayoutElement(inputObj, minHeight: 25, flexibleHeight: 0, minWidth: 100, flexibleWidth: 1000);
+            UIFactory.SetLayoutElement(inputObj, minHeight: 25, flexibleHeight: 50, minWidth: 100, flexibleWidth: 1000);
             inputField.lineType = InputField.LineType.MultiLineNewline;
+            inputObj.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             inputField.onValueChanged.AddListener((string val) => { inputArray[index] = val; });
             inputFieldCache.Add(inputField);
         }
@@ -226,6 +232,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
             UIRoot = UIFactory.CreateVerticalGroup(parent, "EvaluateWidget", false, false, true, true, 3, new Vector4(2, 2, 2, 2), 
                 new Color(0.15f, 0.15f, 0.15f));
             UIFactory.SetLayoutElement(UIRoot, minWidth: 50, flexibleWidth: 9999, minHeight: 50, flexibleHeight: 800);
+            //UIRoot.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             // generic args
             this.genericArgHolder = UIFactory.CreateUIObject("GenericHolder", UIRoot);
@@ -234,6 +241,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
             UIFactory.SetLayoutElement(genericsTitle.gameObject, minHeight: 25, flexibleWidth: 1000);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(genericArgHolder, false, false, true, true, 3);
             UIFactory.SetLayoutElement(genericArgHolder, minHeight: 25, flexibleHeight: 750, minWidth: 50, flexibleWidth: 9999);
+            //genericArgHolder.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             // args
             this.argHolder = UIFactory.CreateUIObject("ArgHolder", UIRoot);
@@ -242,6 +250,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
             UIFactory.SetLayoutElement(argsTitle.gameObject, minHeight: 25, flexibleWidth: 1000);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(argHolder, false, false, true, true, 3);
             UIFactory.SetLayoutElement(argHolder, minHeight: 25, flexibleHeight: 750, minWidth: 50, flexibleWidth: 9999);
+            //argHolder.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             // evaluate button
             var evalButton = UIFactory.CreateButton(UIRoot, "EvaluateButton", "Evaluate", new Color(0.2f, 0.2f, 0.2f));

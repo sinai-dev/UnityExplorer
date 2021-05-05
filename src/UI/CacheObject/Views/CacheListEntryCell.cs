@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.UI.Inspectors.IValues;
+using UnityExplorer.UI.IValues;
 
-namespace UnityExplorer.UI.Inspectors.CacheObject.Views
+namespace UnityExplorer.UI.CacheObject.Views
 {
     public class CacheListEntryCell : CacheObjectCell
     {
@@ -24,7 +24,8 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
 
             this.NameLayout.minWidth = 40;
             this.NameLayout.flexibleWidth = 50;
-            this.NameLayout.minHeight = 30;
+            this.NameLayout.minHeight = 25;
+            this.NameLayout.flexibleHeight = 0;
             this.NameLabel.alignment = TextAnchor.MiddleRight;
 
             return root;

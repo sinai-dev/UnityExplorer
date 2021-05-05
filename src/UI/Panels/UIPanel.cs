@@ -75,6 +75,8 @@ namespace UnityExplorer.UI.Panels
 
         public abstract UIManager.Panels PanelType { get; }
         public abstract string Name { get; }
+        public abstract int MinWidth { get; }
+        public abstract int MinHeight { get; }
 
         public virtual bool ShowByDefault => false;
         public virtual bool ShouldSaveActiveState => true;
@@ -126,6 +128,18 @@ namespace UnityExplorer.UI.Panels
             base.Destroy();
         }
 
+        protected internal abstract void DoSetDefaultPosAndAnchors();
+
+        public void SetTransformDefaults()
+        {
+            DoSetDefaultPosAndAnchors();
+
+            if (mainPanelRect.rect.width < MinWidth)
+                mainPanelRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, MinWidth);
+            if (mainPanelRect.rect.height < MinHeight)
+                mainPanelRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, MinHeight);
+        }
+
         public void ConstructUI()
         {
             //this.Enabled = true;
@@ -146,16 +160,16 @@ namespace UnityExplorer.UI.Panels
             // create core canvas 
             uiRoot = UIFactory.CreatePanel(Name, out GameObject panelContent);
             mainPanelRect = this.uiRoot.GetComponent<RectTransform>();
-            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.uiRoot, true, true, true, true, 0, 2, 2, 2, 2, TextAnchor.UpperLeft);
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.uiRoot, false, false, true, true, 0, 2, 2, 2, 2, TextAnchor.UpperLeft);
 
             int id = this.uiRoot.transform.GetInstanceID();
             transformToPanelDict.Add(id, this);
 
             content = panelContent;
-            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.content, true, true, true, true, 2, 2, 2, 2, 2, TextAnchor.UpperLeft);
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.content, false, false, true, true, 2, 2, 2, 2, 2, TextAnchor.UpperLeft);
 
             // always apply default pos and anchors (save data may only be partial)
-            SetDefaultPosAndAnchors();
+            SetTransformDefaults();
 
             // Title bar
             var titleGroup = UIFactory.CreateHorizontalGroup(content, "TitleBar", false, true, true, true, 2,
@@ -165,11 +179,14 @@ namespace UnityExplorer.UI.Panels
             // Title text
 
             var titleTxt = UIFactory.CreateLabel(titleGroup, "TitleBar", Name, TextAnchor.MiddleLeft);
-            UIFactory.SetLayoutElement(titleTxt.gameObject, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
+            UIFactory.SetLayoutElement(titleTxt.gameObject, minWidth: 250, minHeight: 25, flexibleHeight: 0, flexibleWidth: 0);
 
             // close button
 
-            var closeBtn = UIFactory.CreateButton(titleGroup, "CloseButton", "—");
+            var closeHolder = UIFactory.CreateUIObject("CloseHolder", titleGroup);
+            UIFactory.SetLayoutElement(closeHolder, minHeight: 25, flexibleHeight: 0, minWidth: 30, flexibleWidth: 9999);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(closeHolder, false, false, true, true, 0, childAlignment: TextAnchor.MiddleRight);
+            var closeBtn = UIFactory.CreateButton(closeHolder, "CloseButton", "—");
             UIFactory.SetLayoutElement(closeBtn.Button.gameObject, minHeight: 25, minWidth: 25, flexibleWidth: 0);
             RuntimeProvider.Instance.SetColorBlock(closeBtn.Button, new Color(0.33f, 0.32f, 0.31f));
 
@@ -184,15 +201,15 @@ namespace UnityExplorer.UI.Panels
 
             // Panel dragger
 
-            Dragger = new PanelDragger(titleTxt.GetComponent<RectTransform>(), mainPanelRect);
+            Dragger = new PanelDragger(titleGroup.GetComponent<RectTransform>(), mainPanelRect, this);
             Dragger.OnFinishResize += OnFinishResize;
             Dragger.OnFinishDrag += OnFinishDrag;
-            Dragger.AllowDragAndResize = this.CanDragAndResize;
 
             // content (abstract)
 
             ConstructPanelContent();
 
+            UIManager.SetPanelActive(this.PanelType, true);
             UIManager.SetPanelActive(this.PanelType, false);
             UIManager.SetPanelActive(this.PanelType, ShowByDefault);
 
@@ -200,14 +217,15 @@ namespace UnityExplorer.UI.Panels
             // apply panel save data or revert to default
             try
             {
-                LoadSaveData();
-                Dragger.OnEndResize();
+                ApplySaveData(GetSaveData());
             }
             catch (Exception ex)
             {
                 ExplorerCore.Log($"Exception loading panel save data: {ex}");
-                SetDefaultPosAndAnchors();
+                SetTransformDefaults();
             }
+
+            Dragger.OnEndResize();
 
             // simple listener for saving enabled state
             this.OnToggleEnabled += (bool val) =>
@@ -221,6 +239,8 @@ namespace UnityExplorer.UI.Panels
 
         // SAVE DATA
 
+        public abstract void DoSaveToConfigElement();
+
         public void SaveToConfigManager()
         {
             if (UIManager.Initializing)
@@ -229,11 +249,7 @@ namespace UnityExplorer.UI.Panels
             DoSaveToConfigElement();
         }
 
-        public abstract void DoSaveToConfigElement();
-
-        public abstract void SetDefaultPosAndAnchors();
-
-        public abstract void LoadSaveData();
+        public abstract string GetSaveData();
 
         public bool ApplyingSaveData { get; set; }
 
@@ -268,7 +284,7 @@ namespace UnityExplorer.UI.Panels
             catch 
             {
                 ExplorerCore.LogWarning("Invalid or corrupt panel save data! Restoring to default.");
-                SetDefaultPosAndAnchors();
+                SetTransformDefaults();
             }
         }
     }

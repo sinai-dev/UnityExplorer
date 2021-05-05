@@ -197,7 +197,7 @@ namespace UnityExplorer.UI.Panels
             toggle.isOn = false;
             toggle.onValueChanged.AddListener((bool val) => AutoUpdate = val);
 
-            //refreshRow.SetActive(false);
+            refreshRow.SetActive(false);
 
             // Transform Tree
 

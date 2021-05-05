@@ -111,15 +111,12 @@ namespace UnityExplorer.UI.Widgets
 
             if (!writingLocked)
             {
-                if (prevContentHeight <= 1f && Content.rect.height > 1f)
+                bool viewChange = CheckRecycleViewBounds(true);
+
+                if (viewChange || Content.rect.height != prevContentHeight)
                 {
                     prevContentHeight = Content.rect.height;
-                }
-                else if (Content.rect.height != prevContentHeight)
-                {
-                    prevContentHeight = Content.rect.height;
-                    if (!writingLocked)
-                        OnValueChangedListener(Vector2.zero);
+                    OnValueChangedListener(Vector2.zero);
 
                     OnHeightChanged?.Invoke();
                 }
@@ -176,7 +173,7 @@ namespace UnityExplorer.UI.Widgets
 
             // set intial bounds
             prevAnchoredPos = Content.anchoredPosition;
-            SetRecycleViewBounds(false);
+            CheckRecycleViewBounds(false);
 
             // create initial cell pool and set cells
             CreateCellPool();
@@ -186,7 +183,7 @@ namespace UnityExplorer.UI.Widgets
                 SetCell(CellPool[enumerator.Current.cellIndex], enumerator.Current.dataIndex);
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
-
+            prevContentHeight = Content.rect.height;
             // update slider
             SetScrollBounds();
             UpdateSliderHandle();
@@ -203,14 +200,19 @@ namespace UnityExplorer.UI.Widgets
             NormalizedScrollBounds = new Vector2(Viewport.rect.height * 0.5f, TotalDataHeight - (Viewport.rect.height * 0.5f));
         }
 
-        private void SetRecycleViewBounds(bool extendPoolIfGrown)
+        /// <summary>
+        /// return value = viewport changed height
+        /// </summary>
+        private bool CheckRecycleViewBounds(bool extendPoolIfGrown)
         {
             RecycleViewBounds = new Vector2(Viewport.MinY() + HalfThreshold, Viewport.MaxY() - HalfThreshold);
 
             if (extendPoolIfGrown && prevViewportHeight < Viewport.rect.height && prevViewportHeight != 0.0f)
                 CheckExtendCellPool();
 
+            bool ret = prevViewportHeight == Viewport.rect.height;
             prevViewportHeight = Viewport.rect.height;
+            return ret;
         }
 
         // Cell pool
@@ -361,7 +363,7 @@ namespace UnityExplorer.UI.Widgets
         {
             if (!CellPool.Any()) return;
 
-            SetRecycleViewBounds(true);
+            CheckRecycleViewBounds(true);
 
             CheckDataSourceCountChange(out bool jumpToBottom);
 
@@ -432,7 +434,7 @@ namespace UnityExplorer.UI.Widgets
 
             RefreshCellHeightsFast();
 
-            SetRecycleViewBounds(true);
+            CheckRecycleViewBounds(true);
 
             float yChange = ((Vector2)ScrollRect.content.localPosition - prevAnchoredPos).y;
             float adjust = 0f;
@@ -544,7 +546,7 @@ namespace UnityExplorer.UI.Widgets
             // Prevent spam invokes unless value is 0 or 1 (so we dont skip over the start/end)
             if (DataSource == null || (WritingLocked && val != 0 && val != 1))
                 return;
-            this.WritingLocked = true;
+            //this.WritingLocked = true;
 
             ScrollRect.StopMovement();
             RefreshCellHeightsFast();
@@ -626,7 +628,7 @@ namespace UnityExplorer.UI.Widgets
                 }
             }
 
-            SetRecycleViewBounds(true);
+            CheckRecycleViewBounds(true);
 
             SetScrollBounds();
             ScrollRect.UpdatePrevData();

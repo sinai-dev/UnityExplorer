@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using UnityExplorer.UI.Inspectors;
 
-namespace UnityExplorer.UI.Inspectors.CacheObject
+namespace UnityExplorer.UI.CacheObject
 {
     public class CacheMethod : CacheMember
     {
         public MethodInfo MethodInfo { get; internal set; }
         public override Type DeclaringType => MethodInfo.DeclaringType;
         public override bool CanWrite => false;
+        public override bool IsStatic => MethodInfo.IsStatic;
 
         public override bool ShouldAutoEvaluate => false;
 

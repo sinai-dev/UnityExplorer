@@ -81,11 +81,17 @@ namespace UnityExplorer
                 }
             }
 
+            // long name object
+            new GameObject(new string('#', 500));
+
             // END
 
-            InspectorManager.Inspect(UIManager.CanvasRoot.gameObject.GetComponent<GraphicRaycaster>());
+            //InspectorManager.Inspect(UIManager.CanvasRoot.gameObject.GetComponent<GraphicRaycaster>());
             InspectorManager.Inspect(typeof(TestClass));
             //InspectorManager.InspectType(typeof(ReflectionUtility));
+
+            //var tex = Resources.FindObjectsOfTypeAll<Texture2D>()[0];
+            //InspectorManager.Inspect(tex);
         }
 
         /// <summary>

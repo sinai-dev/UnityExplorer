@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using UnityExplorer.UI.Inspectors;
 
-namespace UnityExplorer.UI.Inspectors.CacheObject
+namespace UnityExplorer.UI.CacheObject
 {
     public class CacheProperty : CacheMember
     {
         public PropertyInfo PropertyInfo { get; internal set; }
         public override Type DeclaringType => PropertyInfo.DeclaringType;
         public override bool CanWrite => PropertyInfo.CanWrite;
+        public override bool IsStatic => m_isStatic ?? (bool)(m_isStatic = PropertyInfo.GetAccessors(true)[0].IsStatic);
+        private bool? m_isStatic;
 
         public override bool ShouldAutoEvaluate => !HasArguments;
 
@@ -25,8 +28,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject
         {
             try
             {
-                bool _static = PropertyInfo.GetAccessors(true)[0].IsStatic;
-                var target = _static ? null : Owner.Target.TryCast(DeclaringType);
+                var target = IsStatic ? null : Owner.Target.TryCast(DeclaringType);
 
                 if (HasArguments)
                     return PropertyInfo.GetValue(target, this.Evaluator.TryParseArguments());

@@ -490,7 +490,7 @@ namespace UnityExplorer.UI
 
             Image mainImage = mainObj.AddComponent<Image>();
             mainImage.type = Image.Type.Sliced;
-            mainImage.color = new Color(0.12f, 0.12f, 0.12f);
+            mainImage.color = new Color(0.04f, 0.04f, 0.04f, 0.75f);
 
             inputField = mainObj.AddComponent<InputField>();
             Navigation nav = inputField.navigation;

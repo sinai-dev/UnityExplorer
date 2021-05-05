@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.UI.Inspectors.IValues;
+using UnityExplorer.UI.Inspectors;
+using UnityExplorer.UI.IValues;
 using UnityExplorer.UI.ObjectPool;
 using UnityExplorer.UI.Utility;
 using UnityExplorer.UI.Widgets;
 
-namespace UnityExplorer.UI.Inspectors.CacheObject.Views
+namespace UnityExplorer.UI.CacheObject.Views
 {
     public abstract class CacheObjectCell : ICell
     {
@@ -106,7 +107,7 @@ namespace UnityExplorer.UI.Inspectors.CacheObject.Views
 
             UIRoot = UIFactory.CreateUIObject(this.GetType().Name, parent, new Vector2(100, 30));
             Rect = UIRoot.GetComponent<RectTransform>();
-            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(UIRoot, false, false, true, true, 0, 0);
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(UIRoot, false, false, true, true, childAlignment: TextAnchor.UpperLeft);
             UIFactory.SetLayoutElement(UIRoot, minWidth: 100, flexibleWidth: 9999, minHeight: 30, flexibleHeight: 600);
             UIRoot.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 

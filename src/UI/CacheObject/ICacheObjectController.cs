@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using UnityExplorer.UI.Inspectors.CacheObject;
+using UnityExplorer.UI.CacheObject;
 
-namespace UnityExplorer.UI.Inspectors
+namespace UnityExplorer.UI.CacheObject
 {
     public interface ICacheObjectController
     {

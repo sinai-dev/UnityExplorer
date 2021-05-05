@@ -22,6 +22,8 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         public override string Name => "AutoCompleter";
         public override UIManager.Panels PanelType => UIManager.Panels.AutoCompleter;
+        public override int MinWidth => -1;
+        public override int MinHeight => -1;
 
         public override bool CanDragAndResize => false;
         public override bool ShouldSaveActiveState => false;
@@ -164,7 +166,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             this.Dragger.OnEndResize();
         }
 
-        public override void SetDefaultPosAndAnchors()
+        protected internal override void DoSetDefaultPosAndAnchors()
         {
             var mainRect = uiRoot.GetComponent<RectTransform>();
             mainRect.pivot = new Vector2(0f, 1f);
@@ -190,9 +192,6 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             // not savable
         }
 
-        public override void LoadSaveData()
-        {
-            // not savable
-        }
+        public override string GetSaveData() => null;
     }
 }

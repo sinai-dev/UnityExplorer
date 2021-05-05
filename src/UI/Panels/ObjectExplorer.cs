@@ -20,6 +20,8 @@ namespace UnityExplorer.UI.Panels
     {
         public override string Name => "Object Explorer";
         public override UIManager.Panels PanelType => UIManager.Panels.ObjectExplorer;
+        public override int MinWidth => 350;
+        public override int MinHeight => 200;
 
         public SceneExplorer SceneExplorer;
         public ObjectSearch ObjectSearch;
@@ -56,16 +58,15 @@ namespace UnityExplorer.UI.Panels
         {
             if (SelectedTab == 0)
                 SceneExplorer.Update();
+            else
+                ObjectSearch.Update();
         }
+
+        public override string GetSaveData() => ConfigManager.ObjectExplorerData.Value;
 
         public override void DoSaveToConfigElement()
         {
             ConfigManager.ObjectExplorerData.Value = this.ToSaveData();
-        }
-
-        public override void LoadSaveData()
-        {
-            ApplySaveData(ConfigManager.ObjectExplorerData.Value);
         }
 
         public override string ToSaveData()
@@ -95,21 +96,13 @@ namespace UnityExplorer.UI.Panels
             SetTab(SelectedTab);
         }
 
-        public override void SetDefaultPosAndAnchors()
+        protected internal override void DoSetDefaultPosAndAnchors()
         {
-            // todo proper default size
             mainPanelRect.localPosition = Vector2.zero;
             mainPanelRect.pivot = new Vector2(0f, 1f);
-            mainPanelRect.anchorMin = new Vector2(0.1f, 0.25f);
-            mainPanelRect.anchorMax = new Vector2(0.25f, 0.8f);
-
-
-            //mainPanelRect.anchorMin = Vector3.zero;
-            //mainPanelRect.anchorMax = new Vector2(0, 1);
-            //mainPanelRect.sizeDelta = new Vector2(320f, mainPanelRect.sizeDelta.y);
-            //mainPanelRect.anchoredPosition = new Vector2(200, 0);
-            //mainPanelRect.offsetMin = new Vector2(mainPanelRect.offsetMin.x, 100);  // bottom
-            //mainPanelRect.offsetMax = new Vector2(mainPanelRect.offsetMax.x, -50); // top
+            mainPanelRect.anchorMin = new Vector2(0.125f, 0.175f);
+            mainPanelRect.anchorMax = new Vector2(0.325f, 0.925f);
+            //mainPanelRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 350);
         }
 
         public override void ConstructPanelContent()
