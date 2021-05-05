@@ -38,7 +38,7 @@ namespace UnityExplorer.UI.CacheObject.Views
 
             Image = root.AddComponent<Image>();
 
-            this.NameLayout.minWidth = 40;
+            this.NameLayout.minWidth = 55;
             this.NameLayout.flexibleWidth = 50;
             this.NameLayout.minHeight = 30;
             this.NameLayout.flexibleHeight = 0;

@@ -34,12 +34,10 @@ namespace UnityExplorer.UI.CacheObject
                 if (methodInfo.IsGenericMethod)
                     methodInfo = MethodInfo.MakeGenericMethod(Evaluator.TryParseGenericArguments());
 
-                var target = MethodInfo.IsStatic ? null : Owner.Target.TryCast(DeclaringType);
-
                 if (Arguments.Length > 0)
-                    return methodInfo.Invoke(target, Evaluator.TryParseArguments());
+                    return methodInfo.Invoke(DeclaringInstance, Evaluator.TryParseArguments());
 
-                var ret = methodInfo.Invoke(target, new object[0]);
+                var ret = methodInfo.Invoke(DeclaringInstance, new object[0]);
 
                 HadException = false;
                 LastException = null;

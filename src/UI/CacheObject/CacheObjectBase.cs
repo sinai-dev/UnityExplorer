@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI.CacheObject.Views;
 using UnityExplorer.UI.IValues;
 using UnityExplorer.UI.ObjectPool;
@@ -94,6 +95,8 @@ namespace UnityExplorer.UI.CacheObject
 
         // Updating and applying values
 
+        public abstract void SetUserValue(object value);
+
         public virtual void SetValueFromSource(object value)
         {
             this.Value = value;
@@ -118,8 +121,6 @@ namespace UnityExplorer.UI.CacheObject
                 this.IValue.SetValue(Value);
         }
 
-        public abstract void SetUserValue(object value);
-
         /// <summary>
         /// Process the CacheMember state when the value has been evaluated (or re-evaluated)
         /// </summary>
@@ -137,7 +138,7 @@ namespace UnityExplorer.UI.CacheObject
                     State = ValueState.Boolean;
                 else if (type.IsPrimitive || type == typeof(decimal))
                     State = ValueState.Number;
-                else if (type == typeof(string))
+                else if (ReflectionProvider.Instance.IsString(Value))
                     State = ValueState.String;
                 else if (type.IsEnum)
                     State = ValueState.Enum;
@@ -162,14 +163,14 @@ namespace UnityExplorer.UI.CacheObject
             switch (State)
             {
                 case ValueState.NotEvaluated:
-                    label = $"<i>{NOT_YET_EVAL} ({SignatureHighlighter.ParseType(FallbackType, true)})</i>"; break;
+                    label = $"<i>{NOT_YET_EVAL} ({SignatureHighlighter.Parse(FallbackType, true)})</i>"; break;
                 case ValueState.Exception:
                     label = $"<i><color=red>{ReflectionUtility.ReflectionExToString(LastException)}</color></i>"; break;
                 case ValueState.Boolean:
                 case ValueState.Number:
                     label = null; break;
                 case ValueState.String:
-                    string s = Value as string;
+                    string s = ReflectionProvider.Instance.UnboxString(Value);
                     if (s.Length > 200)
                         s = $"{s.Substring(0, 200)}...";
                     label = $"\"{s}\""; break;
@@ -252,7 +253,7 @@ namespace UnityExplorer.UI.CacheObject
 
             cell.TypeLabel.gameObject.SetActive(args.typeLabelActive);
             if (args.typeLabelActive)
-                cell.TypeLabel.text = SignatureHighlighter.ParseType(Value.GetActualType(), false);
+                cell.TypeLabel.text = SignatureHighlighter.Parse(Value.GetActualType(), false);
 
             cell.Toggle.gameObject.SetActive(args.toggleActive);
             if (args.toggleActive)

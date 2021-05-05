@@ -18,6 +18,8 @@ namespace UnityExplorer.UI.CacheObject
         
         public abstract Type DeclaringType { get; }
         public string NameForFiltering { get; protected set; }
+        public object DeclaringInstance => IsStatic ? null : (m_declaringInstance ?? (m_declaringInstance = Owner.Target.TryCast(DeclaringType)));
+        private object m_declaringInstance;
 
         public abstract bool IsStatic { get; }
         public override bool HasArguments => Arguments?.Length > 0 || GenericArguments.Length > 0;
@@ -29,7 +31,7 @@ namespace UnityExplorer.UI.CacheObject
         public virtual void SetInspectorOwner(ReflectionInspector inspector, MemberInfo member)
         {
             this.Owner = inspector;
-            this.NameLabelText = SignatureHighlighter.ParseFullSyntax(member.DeclaringType, false, member);
+            this.NameLabelText = SignatureHighlighter.Parse(member.DeclaringType, false, member);
             this.NameForFiltering = $"{member.DeclaringType.Name}.{member.Name}";
         }
 

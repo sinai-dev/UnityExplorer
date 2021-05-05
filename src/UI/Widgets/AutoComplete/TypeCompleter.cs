@@ -8,17 +8,13 @@ using UnityEngine.UI;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI.Models;
 using UnityExplorer.UI.Panels;
+using UnityExplorer.UI.Utility;
 
 namespace UnityExplorer.UI.Widgets.AutoComplete
 {
     public class TypeCompleter : ISuggestionProvider
     {
-        public class CachedType
-        {
-            public Type Type;
-            public string FullNameValue;
-            public string DisplayName;
-        }
+        internal static readonly Dictionary<string, string> sharedTypeToLabel = new Dictionary<string, string>(4096);
 
         public event Action<Suggestion> SuggestionClicked;
 
@@ -31,10 +27,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         private readonly List<Suggestion> suggestions = new List<Suggestion>();
         private float timeOfLastCheck;
 
-        public Dictionary<string, CachedType> AllTypes = new Dictionary<string, CachedType>();
-
-        // cached type trees from all autocompleters
-        private static readonly Dictionary<string, Dictionary<string, CachedType>> typeCache = new Dictionary<string, Dictionary<string, CachedType>>();
+        private HashSet<Type> allowedTypes;
 
         public TypeCompleter(Type baseType, InputField inputField)
         {
@@ -45,6 +38,11 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
             if (BaseType != null)
                 CacheTypes();
+        }
+
+        public void CacheTypes()
+        {
+            allowedTypes = ReflectionUtility.GetImplementationsOf(BaseType, true, false);
         }
 
         public void OnSuggestionClicked(Suggestion suggestion)
@@ -84,61 +82,29 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         {
             suggestions.Clear();
 
-            var added = new HashSet<string>();
-
-            // Check for exact match first
-            if (AllTypes.TryGetValue(value, out CachedType cache))
-                AddSuggestion(cache);
-
-            foreach (var entry in AllTypes.Values)
-                AddSuggestion(entry);
-
-            void AddSuggestion(CachedType entry)
+            if (BaseType == null)
             {
-                if (entry.FullNameValue == null)
-                    entry.FullNameValue = ReflectionProvider.Instance.GetDeobfuscatedType(entry.Type).FullName;
-
-                if (added.Contains(entry.FullNameValue))
-                    return;
-                added.Add(entry.FullNameValue);
-
-                if (entry.DisplayName == null)
-                    entry.DisplayName = Utility.SignatureHighlighter.ParseFullSyntax(entry.Type, true);
-
-                suggestions.Add(new Suggestion(entry.DisplayName, entry.FullNameValue));
-            }
-        }
-
-        public void CacheTypes()
-        {
-            var key = BaseType.AssemblyQualifiedName;
-
-            if (typeCache.ContainsKey(key))
-            {
-                AllTypes = typeCache[key];
+                ExplorerCore.LogWarning("Autocompleter Base type is null!");
                 return;
             }
 
-            AllTypes = new Dictionary<string, CachedType>();
+            // Check for exact match first
+            if (ReflectionUtility.AllTypes.TryGetValue(value, out Type t) && allowedTypes.Contains(t))
+                AddSuggestion(t);
 
-            var list = ReflectionUtility.GetImplementationsOf(BaseType, true, false)
-                .Select(it => new CachedType() 
-                {
-                    Type = it, 
-                    FullNameValue = ReflectionProvider.Instance.GetDeobfuscatedType(it).FullName 
-                })
-                .ToList();
-
-            list.Sort((CachedType a, CachedType b) => a.FullNameValue.CompareTo(b.FullNameValue));
-
-            foreach (var cache in list)
+            foreach (var entry in allowedTypes)
             {
-                if (AllTypes.ContainsKey(cache.FullNameValue))
-                    continue;
-                AllTypes.Add(cache.FullNameValue, cache);
+                if (entry.FullName.ContainsIgnoreCase(value))
+                    AddSuggestion(entry);
             }
+        }
 
-            typeCache.Add(key, AllTypes);
+        void AddSuggestion(Type type)
+        {
+            if (!sharedTypeToLabel.ContainsKey(type.FullName))
+                sharedTypeToLabel.Add(type.FullName, SignatureHighlighter.Parse(type, true));
+
+            suggestions.Add(new Suggestion(sharedTypeToLabel[type.FullName], type.FullName));
         }
     }
 }

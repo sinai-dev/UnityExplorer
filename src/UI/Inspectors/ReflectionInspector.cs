@@ -128,8 +128,8 @@ namespace UnityExplorer.UI.Inspectors
             }
 
             // Setup main labels and tab text
-            Tab.TabText.text = $"{prefix} {SignatureHighlighter.ParseType(TargetType)}";
-            NameText.text = SignatureHighlighter.ParseFullSyntax(TargetType, true);
+            Tab.TabText.text = $"{prefix} {SignatureHighlighter.Parse(TargetType, false)}";
+            NameText.text = SignatureHighlighter.Parse(TargetType, true);
 
             string asmText;
             if (TargetType.Assembly != null && !string.IsNullOrEmpty(TargetType.Assembly.Location))
@@ -230,6 +230,7 @@ namespace UnityExplorer.UI.Inspectors
 
         private void UpdateDisplayedMembers()// bool onlyAutoUpdate)
         {
+            ExplorerCore.Log("Updating values...");
             bool shouldRefresh = false;
             foreach (var cell in MemberScrollPool.CellPool)
             {
@@ -238,6 +239,7 @@ namespace UnityExplorer.UI.Inspectors
                 var member = cell.MemberOccupant;
                 if (member.ShouldAutoEvaluate) // && (!onlyAutoUpdate || member.AutoUpdateWanted))
                 {
+                    ExplorerCore.Log("Evaluating cell " + cell.MemberOccupant.NameForFiltering);
                     shouldRefresh = true;
                     member.Evaluate();
                     member.SetDataToCell(member.CellView);

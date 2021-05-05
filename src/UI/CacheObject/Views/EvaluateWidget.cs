@@ -31,6 +31,7 @@ namespace UnityExplorer.UI.CacheObject.Views
         private GameObject genericArgHolder;
         private readonly List<GameObject> genericArgRows = new List<GameObject>();
         private readonly List<Text> genericArgLabels = new List<Text>();
+        private readonly List<TypeCompleter> genericAutocompleters = new List<TypeCompleter>();
 
         private readonly List<InputField> inputFieldCache = new List<InputField>();
 
@@ -153,9 +154,12 @@ namespace UnityExplorer.UI.CacheObject.Views
 
                 genericArgRows[i].SetActive(true);
 
-                var constraints = arg.GetGenericParameterConstraints();
+                var autoCompleter = genericAutocompleters[i];
+                autoCompleter.BaseType = arg;
+                autoCompleter.CacheTypes();
 
-                // TODO show "class" constraints as they dont show up, "struct" does effectively.
+                var constraints = arg.GetGenericParameterConstraints();
+                autoCompleter.GenericConstraints = constraints;
 
                 var sb = new StringBuilder($"<color={SignatureHighlighter.CONST}>{arg.Name}</color>");
 
@@ -164,7 +168,7 @@ namespace UnityExplorer.UI.CacheObject.Views
                     if (j == 0) sb.Append(' ').Append('(');
                     else sb.Append(',').Append(' ');
 
-                    sb.Append(SignatureHighlighter.ParseType(constraints[j]));
+                    sb.Append(SignatureHighlighter.Parse(constraints[j], false));
 
                     if (j + 1 == constraints.Length)
                         sb.Append(')');
@@ -194,19 +198,19 @@ namespace UnityExplorer.UI.CacheObject.Views
                     AddArgRow(i, false);
 
                 argRows[i].SetActive(true);
-                argLabels[i].text = $"{SignatureHighlighter.ParseType(arg.ParameterType)} <color={SignatureHighlighter.LOCAL_ARG}>{arg.Name}</color>";
+                argLabels[i].text = $"{SignatureHighlighter.Parse(arg.ParameterType, false)} <color={SignatureHighlighter.LOCAL_ARG}>{arg.Name}</color>";
             }
         }
 
         private void AddArgRow(int index, bool generic)
         {
             if (!generic)
-                AddArgRow(index, argHolder, argRows, argLabels, argumentInput);//, false);
+                AddArgRow(index, argHolder, argRows, argLabels, argumentInput, false);
             else
-                AddArgRow(index, genericArgHolder, genericArgRows, genericArgLabels, genericInput);//, true);
+                AddArgRow(index, genericArgHolder, genericArgRows, genericArgLabels, genericInput, true);
         }
 
-        private void AddArgRow(int index, GameObject parent, List<GameObject> objectList, List<Text> labelList, string[] inputArray)//, bool autocomplete)
+        private void AddArgRow(int index, GameObject parent, List<GameObject> objectList, List<Text> labelList, string[] inputArray, bool autocomplete)
         {
             var horiGroup = UIFactory.CreateUIObject("ArgRow_" + index, parent);
             UIFactory.SetLayoutElement(horiGroup, minHeight: 25, flexibleHeight: 50, minWidth: 50, flexibleWidth: 9999);
@@ -225,6 +229,9 @@ namespace UnityExplorer.UI.CacheObject.Views
             inputObj.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             inputField.onValueChanged.AddListener((string val) => { inputArray[index] = val; });
             inputFieldCache.Add(inputField);
+
+            if (autocomplete)
+                genericAutocompleters.Add(new TypeCompleter(null, inputField));
         }
 
         public GameObject CreateContent(GameObject parent)

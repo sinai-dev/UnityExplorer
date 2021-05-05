@@ -53,6 +53,11 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             }
         }
 
+        public override bool IsString(object obj)
+        {
+            return obj is string || obj is Il2CppSystem.String;
+        }
+
         public override void BoxStringToType(ref object value, Type castTo)
         {
             if (castTo == typeof(Il2CppSystem.String))
@@ -82,10 +87,12 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
         {
             try
             {
-                var cppType = Il2CppType.From(type);
-                var monoType = GetMonoType(cppType);
-                if (monoType != null)
-                    return monoType;
+                if (Il2CppToMonoType.ContainsKey(type.AssemblyQualifiedName))
+                    return Il2CppToMonoType[type.AssemblyQualifiedName];
+                //var cppType = Il2CppType.From(type);
+                //var monoType = GetMonoType(cppType);
+                //if (monoType != null)
+                //    return monoType;
             }
             catch { }
 
@@ -116,7 +123,7 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
 
             try
             {
-                if ((Il2CppSystem.Object)obj is Il2CppSystem.Object cppObject)
+                if (obj is Il2CppSystem.Object cppObject)
                 {
                     // weird specific case - if the object is an Il2CppSystem.Type, then return so manually.
                     if (cppObject is CppType)
@@ -131,6 +138,9 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
                     IntPtr classPtr = il2cpp_object_get_class(cppObject.Pointer);
                     if (RuntimeSpecificsStore.IsInjected(classPtr))
                     {
+                        // Note: This will fail on injected subclasses.
+                        // - {Namespace}.{Class}.{Subclass} would be {Namespace}.{Subclass} when injected.
+                        // Not sure on solution yet.
                         var typeByName = ReflectionUtility.GetTypeByName(cppType.FullName);
                         if (typeByName != null)
                             return typeByName;
@@ -142,9 +152,9 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
                         return getType;
                 }
             }
-            catch (Exception ex)
+            catch //(Exception ex)
             {
-                ExplorerCore.LogWarning("Exception in GetActualType: " + ex);
+                //ExplorerCore.LogWarning("Exception in GetActualType: " + ex);
             }
 
             return type;
@@ -176,7 +186,7 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
                 {
                     var cppType = Il2CppType.From(type);
 
-                    if (!Il2CppToMonoType.ContainsKey(cppType.FullName))
+                    if (!Il2CppToMonoType.ContainsKey(cppType.AssemblyQualifiedName))
                     {
                         Il2CppToMonoType.Add(cppType.AssemblyQualifiedName, type);
                         s_deobfuscatedTypeNames.Add(cppType.FullName, type.FullName);
@@ -234,12 +244,22 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
                 return null;
 
             if (RuntimeSpecificsStore.IsInjected(castToPtr))
-                return UnhollowerBaseLib.Runtime.ClassInjectorBase.GetMonoObjectFromIl2CppPointer(cppObj.Pointer);
+            {
+                var injectedObj = UnhollowerBaseLib.Runtime.ClassInjectorBase.GetMonoObjectFromIl2CppPointer(cppObj.Pointer);
+                return injectedObj ?? obj;
+            }
 
             if (castTo == typeof(string))
                 return cppObj.ToString();
 
-            return Activator.CreateInstance(castTo, cppObj.Pointer);
+            try
+            {
+                return Activator.CreateInstance(castTo, cppObj.Pointer);
+            }
+            catch
+            {
+                return obj;
+            }
         }
 
         /// <summary>

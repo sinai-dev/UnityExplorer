@@ -30,7 +30,7 @@ namespace UnityExplorer.UI.Utility
 
             Type type = value?.GetActualType() ?? fallbackType;
 
-            string richType = SignatureHighlighter.ParseFullSyntax(type, includeNamespace);
+            string richType = SignatureHighlighter.Parse(type, includeNamespace);
 
             _stringBuilder.Clear();
 

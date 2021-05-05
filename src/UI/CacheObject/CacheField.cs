@@ -26,7 +26,7 @@ namespace UnityExplorer.UI.CacheObject
         {
             try
             {
-                var ret = FieldInfo.GetValue(this.Owner.Target.TryCast(this.DeclaringType));
+                var ret = FieldInfo.GetValue(DeclaringInstance);
                 HadException = false;
                 LastException = null;
                 return ret;

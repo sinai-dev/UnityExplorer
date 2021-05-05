@@ -79,9 +79,9 @@ namespace UnityExplorer.UI.Panels
                 lastCheckedTypeInput = desiredTypeInput;
 
                 //var type = ReflectionUtility.GetTypeByName(desiredTypeInput);
-                if (typeAutocompleter.AllTypes.TryGetValue(desiredTypeInput, out var cachedType))
+                if (ReflectionUtility.AllTypes.TryGetValue(desiredTypeInput, out var cachedType))
                 {
-                    var type = cachedType.Type;
+                    var type = cachedType;
                     lastTypeCanHaveGO = typeof(Component).IsAssignableFrom(type) || type == typeof(GameObject);
                     sceneFilterRow.SetActive(lastTypeCanHaveGO);
                     childFilterRow.SetActive(lastTypeCanHaveGO);
@@ -134,7 +134,7 @@ namespace UnityExplorer.UI.Panels
             {
                 string text;
                 if (m_context == SearchContext.StaticClass)
-                    text = SignatureHighlighter.ParseType(currentResults[index] as Type, true, true);
+                    text = SignatureHighlighter.Parse(currentResults[index] as Type, true);
                 else
                     text = ToStringUtility.ToStringWithType(currentResults[index], currentResults[index]?.GetActualType());
 

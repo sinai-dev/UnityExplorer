@@ -17,36 +17,48 @@ namespace UnityExplorer
             foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
                 CacheTypes(asm);
 
+            allTypeNames.Sort();
+
             AppDomain.CurrentDomain.AssemblyLoad += AssemblyLoaded;
         }
 
-        private static readonly Dictionary<string, Type> allCachedTypes = new Dictionary<string, Type>();
-
-        private static void CacheTypes(Assembly asm)
-        {
-            foreach (var type in asm.TryGetTypes())
-            {
-                if (allCachedTypes.ContainsKey(type.FullName))
-                    continue;
-
-                if (type.FullName.ContainsIgnoreCase("PrivateImplementationDetails"))
-                    continue;
-
-                allCachedTypes.Add(type.FullName, type);
-            }
-        }
+        /// <summary>Key: Type.FullName</summary>
+        public static readonly SortedDictionary<string, Type> AllTypes = new SortedDictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+        private static readonly List<string> allTypeNames = new List<string>();
 
         private static void AssemblyLoaded(object sender, AssemblyLoadEventArgs args)
         {
             if (args.LoadedAssembly == null)
                 return;
 
-            s_cachedTypeInheritance.Clear();
-            s_cachedGenericParameterInheritance.Clear();
-
             CacheTypes(args.LoadedAssembly);
+            allTypeNames.Sort();
         }
 
+        private static void CacheTypes(Assembly asm)
+        {
+            foreach (var type in asm.TryGetTypes())
+            {
+                if (AllTypes.ContainsKey(type.FullName))
+                    AllTypes[type.FullName] = type;
+                else
+                { 
+                    AllTypes.Add(type.FullName, type);
+                    allTypeNames.Add(type.FullName);
+                }
+
+                foreach (var key in s_cachedTypeInheritance.Keys)
+                {
+                    try
+                    {
+                        var baseType = AllTypes[key];
+                        if (baseType.IsAssignableFrom(type) && !s_cachedTypeInheritance[key].Contains(type))
+                            s_cachedTypeInheritance[key].Add(type);
+                    }
+                    catch { }
+                }
+            }
+        }
 
         public const BF AllFlags = BF.Public | BF.Instance | BF.NonPublic | BF.Static;
 
@@ -156,7 +168,9 @@ namespace UnityExplorer
         /// <returns>The Type if found, otherwise null.</returns>
         public static Type GetTypeByName(string fullName)
         {
-            allCachedTypes.TryGetValue(fullName, out Type type);
+            
+
+            AllTypes.TryGetValue(fullName, out Type type);
             return type;
         }
 
@@ -200,6 +214,21 @@ namespace UnityExplorer
         internal static readonly Dictionary<string, HashSet<Type>> s_cachedTypeInheritance = new Dictionary<string, HashSet<Type>>();
         internal static readonly Dictionary<string, HashSet<Type>> s_cachedGenericParameterInheritance = new Dictionary<string, HashSet<Type>>();
 
+        public static string GetImplementationKey(Type type)
+        {
+            if (!type.IsGenericParameter)
+                return type.FullName;
+            else
+            {
+                var sb = new StringBuilder();
+                sb.Append(type.GenericParameterAttributes)
+                    .Append('|');
+                foreach (var c in type.GetGenericParameterConstraints())
+                    sb.Append(c.FullName).Append(',');
+                return sb.ToString();
+            }
+        }
+
         /// <summary>
         /// Get all non-abstract implementations of the provided type (include itself, if not abstract) in the current AppDomain.
         /// Also works for generic parameters by analyzing the constraints.
@@ -208,24 +237,34 @@ namespace UnityExplorer
         /// <returns>All implementations of the type in the current AppDomain.</returns>
         public static HashSet<Type> GetImplementationsOf(this Type baseType, bool allowAbstract, bool allowGeneric)
         {
-            var key = baseType.AssemblyQualifiedName;
+            var key = GetImplementationKey(baseType); //baseType.FullName;
 
+            if (!baseType.IsGenericParameter)
+                return GetImplementations(key, baseType, allowAbstract, allowGeneric);
+            else
+                return GetGenericParameterImplementations(key, baseType, allowAbstract, allowGeneric);
+        }
+
+        private static HashSet<Type> GetImplementations(string key, Type baseType, bool allowAbstract, bool allowGeneric)
+        {
             if (!s_cachedTypeInheritance.ContainsKey(key))
             {
                 var set = new HashSet<Type>();
-
-                if (!baseType.IsAbstract && !baseType.IsInterface)
-                    set.Add(baseType);
-
-                var keys = allCachedTypes.Keys.ToArray();
-                for (int i = 0; i < keys.Length; i++)
+                for (int i = 0; i < allTypeNames.Count; i++)
                 {
-                    var type = allCachedTypes[keys[i]];
+                    var type = AllTypes[allTypeNames[i]];
+                    //type = ReflectionProvider.Instance.GetDeobfuscatedType(type);
                     try
                     {
-                        if ((type.IsAbstract && type.IsSealed) // ignore static classes
+                        if (set.Contains(type)
+                        || (type.IsAbstract && type.IsSealed) // ignore static classes
                         || (!allowAbstract && type.IsAbstract)
                         || (!allowGeneric && (type.IsGenericType || type.IsGenericTypeDefinition)))
+                            continue;
+
+                        if (type.FullName.Contains("PrivateImplementationDetails")
+                            || type.FullName.Contains("DisplayClass")
+                            || type.FullName.Contains('<'))
                             continue;
 
                         if (baseType.IsAssignableFrom(type) && !set.Contains(type))
@@ -234,10 +273,56 @@ namespace UnityExplorer
                     catch { }
                 }
 
+                //set.
+
                 s_cachedTypeInheritance.Add(key, set);
             }
 
             return s_cachedTypeInheritance[key];
+        }
+
+        private static HashSet<Type> GetGenericParameterImplementations(string key, Type baseType, bool allowAbstract, bool allowGeneric)
+        {
+            if (!s_cachedGenericParameterInheritance.ContainsKey(key))
+            {
+                var set = new HashSet<Type>();
+
+                for (int i = 0; i < allTypeNames.Count; i++)
+                {
+                    var type = AllTypes[allTypeNames[i]];
+                    try
+                    {
+                        if (set.Contains(type)
+                        || (type.IsAbstract && type.IsSealed) // ignore static classes
+                        || (!allowAbstract && type.IsAbstract)
+                        || (!allowGeneric && (type.IsGenericType || type.IsGenericTypeDefinition)))
+                            continue;
+
+                        if (type.FullName.Contains("PrivateImplementationDetails")
+                            || type.FullName.Contains("DisplayClass")
+                            || type.FullName.Contains('<'))
+                            continue;
+
+                        if (baseType.GenericParameterAttributes.HasFlag(GenericParameterAttributes.NotNullableValueTypeConstraint)
+                            && type.IsClass)
+                            continue;
+
+                        if (baseType.GenericParameterAttributes.HasFlag(GenericParameterAttributes.ReferenceTypeConstraint)
+                            && type.IsValueType)
+                            continue;
+
+                        if (baseType.GetGenericParameterConstraints().Any(it => !it.IsAssignableFrom(type)))
+                            continue;
+
+                        set.Add(type);
+                    }
+                    catch { }
+                }
+
+                s_cachedGenericParameterInheritance.Add(key, set);
+            }
+
+            return s_cachedGenericParameterInheritance[key];
         }
 
         /// <summary>

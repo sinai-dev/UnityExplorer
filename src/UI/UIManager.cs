@@ -108,6 +108,8 @@ namespace UnityExplorer.UI
             if (!ShowMenu)
                 return;
 
+            gcLabel.text = "GC : " + (GC.GetTotalMemory(false) / 1024 / 1024) + "MB";
+
             if (InputManager.GetKeyDown(ConfigManager.Force_Unlock_Keybind.Value))
                 CursorUnlocker.Unlock = !CursorUnlocker.Unlock;
 
@@ -221,6 +223,8 @@ namespace UnityExplorer.UI
         //private static float lastTimeSpeed;
         //private static bool pausing;
 
+        private static Text gcLabel;
+
         private static void CreateTopNavBar()
         {
             var navbarPanel = UIFactory.CreateUIObject("MainNavbar", CanvasRoot);
@@ -237,6 +241,11 @@ namespace UnityExplorer.UI
             string titleTxt = $"{ExplorerCore.NAME} <i><color=grey>{ExplorerCore.VERSION}</color></i>";
             var title = UIFactory.CreateLabel(navbarPanel, "Title", titleTxt, TextAnchor.MiddleLeft, default, true, 18);
             UIFactory.SetLayoutElement(title.gameObject, minWidth: 240, flexibleWidth: 0);
+
+            // temp debug
+
+            gcLabel = UIFactory.CreateLabel(navbarPanel, "GCLabel", "GC: ", TextAnchor.MiddleLeft);
+            UIFactory.SetLayoutElement(gcLabel.gameObject, minWidth: 150, minHeight: 25, flexibleWidth: 0);
 
             // TODO something nicer for this, maybe a 'Tools' dropout below the main navbar with a few helpers like this.
 

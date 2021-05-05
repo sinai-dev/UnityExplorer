@@ -40,6 +40,19 @@ namespace UnityExplorer.UI.Widgets
         public float DefaultHeight => m_defaultHeight ?? (float)(m_defaultHeight = ScrollPool.PrototypeHeight);
         private float? m_defaultHeight;
 
+        /// <summary>
+        /// Lookup table for "which data index first appears at this position"<br/>
+        /// Index: DefaultHeight * index from top of data<br/>
+        /// Value: the first data index at this position<br/>
+        /// </summary>
+        private readonly List<int> rangeCache = new List<int>();
+
+        /// <summary>Same as GetRangeIndexOfPosition, except this rounds up to the next division if there was remainder from the previous cell.</summary>
+        private int GetRangeCeilingOfPosition(float position) => (int)Math.Ceiling((decimal)position / (decimal)DefaultHeight);
+
+        /// <summary>Get the first range (division of DefaultHeight) which the position appears in.</summary>
+        private int GetRangeFloorOfPosition(float position) => (int)Math.Floor((decimal)position / (decimal)DefaultHeight);
+
         /// <summary>Get the data index at the specified position of the total height cache.</summary>
         public int GetFirstDataIndexAtPosition(float desiredHeight) => GetFirstDataIndexAtPosition(desiredHeight, out _);
 
@@ -82,19 +95,6 @@ namespace UnityExplorer.UI.Widgets
         }
 
         /// <summary>
-        /// Lookup table for "which data index first appears at this position"<br/>
-        /// Index: DefaultHeight * index from top of data<br/>
-        /// Value: the first data index at this position<br/>
-        /// </summary>
-        private readonly List<int> rangeCache = new List<int>();
-
-        /// <summary>Get the first range (division of DefaultHeight) which the position appears in.</summary>
-        private int GetRangeFloorOfPosition(float position) => (int)Math.Floor((decimal)position / (decimal)DefaultHeight);
-
-        /// <summary>Same as GetRangeIndexOfPosition, except this rounds up to the next division if there was remainder from the previous cell.</summary>
-        private int GetRangeCeilingOfPosition(float position) => (int)Math.Ceiling((decimal)position / (decimal)DefaultHeight);
-
-        /// <summary>
         /// Get the spread of the height, starting from the start position.<br/><br/>
         /// The "spread" begins at the start of the next interval of the DefaultHeight, then increases for
         /// every interval beyond that.
@@ -116,6 +116,8 @@ namespace UnityExplorer.UI.Widgets
         /// <summary>Append a data index to the cache with the provided height value.</summary>
         public void Add(float value)
         {
+            value = (float)Math.Floor(value);
+
             int spread = GetRangeSpread(totalHeight, value);
 
             heightCache.Add(new DataViewInfo()
@@ -150,6 +152,8 @@ namespace UnityExplorer.UI.Widgets
         /// <summary>Set a given data index with the specified value.</summary>
         public void SetIndex(int dataIndex, float height)
         {
+            height = (float)Math.Floor(height);
+
             // If the index being set is beyond the DataSource item count, prune and return.
             if (dataIndex >= ScrollPool.DataSource.ItemCount)
             {
@@ -189,20 +193,17 @@ namespace UnityExplorer.UI.Widgets
             int spread = GetRangeSpread(cache.startPosition, height);
 
             // If the previous item in the range cache is not the previous data index, there is a gap.
-            if (dataIndex > 0 && rangeCache.Count > rangeIndex && rangeCache[rangeIndex - 1] != (dataIndex - 1))
+            if (dataIndex > 0 && rangeCache[rangeIndex - 1] != (dataIndex - 1))
             {
-                // Recalculate start positions up to this index. The gap could be anywhere.
-                RecalculateStartPositions(dataIndex);
+                // Recalculate start positions up to this index. The gap could be anywhere before here.
+                RecalculateStartPositions(dataIndex + 1);
                 // Get the range index and spread again after rebuilding
                 rangeIndex = GetRangeCeilingOfPosition(cache.startPosition);
                 spread = GetRangeSpread(cache.startPosition, height);
             }
 
-            // Should never happen
             if (rangeCache.Count <= rangeIndex || rangeCache[rangeIndex] != dataIndex)
-                throw new Exception($"Trying to set range index but cache is corrupt after rebuild!\r\n" +
-                    $"dataIndex: {dataIndex}, rangeIndex: {rangeIndex}, rangeCache.Count: {rangeCache.Count}, " +
-                    $"startPos: {cache.startPosition}/{TotalHeight}");
+                throw new Exception("ScrollPool data height cache is corrupt or invalid, rebuild failed!");
 
             if (spread != cache.normalizedSpread)
             {
@@ -217,13 +218,21 @@ namespace UnityExplorer.UI.Widgets
         {
             if (spreadDiff > 0)
             {
-                for (int i = 0; i < spreadDiff; i++)
+                while (rangeCache[rangeIndex] == dataIndex && spreadDiff > 0)
+                {
                     rangeCache.Insert(rangeIndex, dataIndex);
+                    spreadDiff--;
+                }
             }
             else
             {
-                for (int i = 0; i < -spreadDiff; i++)
+                while (rangeCache[rangeIndex] == dataIndex && spreadDiff < 0)
+                {
                     rangeCache.RemoveAt(rangeIndex);
+                    spreadDiff++;
+                }
+                //for (int i = 0; i < -spreadDiff; i++)
+                //    rangeCache.RemoveAt(rangeIndex);
             }
         }
 
@@ -233,20 +242,37 @@ namespace UnityExplorer.UI.Widgets
                 return;
 
             DataViewInfo cache;
-            DataViewInfo prev = heightCache[0];
-            for (int i = 1; i <= toIndex && i < heightCache.Count; i++)
+            DataViewInfo prev = null;
+            for (int i = 0; i <= toIndex && i < heightCache.Count; i++)
             {
                 cache = heightCache[i];
 
-                cache.startPosition = prev.startPosition + prev.height;
+                if (prev != null)
+                    cache.startPosition = prev.startPosition + prev.height;
+                else
+                    cache.startPosition = 0;
 
-                var prevSpread = cache.normalizedSpread;
+                var origSpread = cache.normalizedSpread;
                 cache.normalizedSpread = GetRangeSpread(cache.startPosition, cache.height);
-                if (cache.normalizedSpread != prevSpread)
-                    SetSpread(i, GetRangeCeilingOfPosition(cache.startPosition), cache.normalizedSpread - prevSpread);
+                if (cache.normalizedSpread != origSpread)
+                    SetSpread(i, GetRangeCeilingOfPosition(cache.startPosition), cache.normalizedSpread - origSpread);
 
                 prev = cache;
             }
         }
+
+        //private void HardRebuildRanges()
+        //{
+        //    var tempList = new List<float>();
+        //    for (int i = 0; i < heightCache.Count; i++)
+        //        tempList.Add(heightCache[i]);
+        //
+        //    heightCache.Clear();
+        //    rangeCache.Clear();
+        //    totalHeight = 0;
+        //
+        //    for (int i = 0; i < tempList.Count; i++)
+        //        SetIndex(i, tempList[i]);
+        //}
     }
 }

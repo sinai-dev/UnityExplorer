@@ -32,6 +32,8 @@ namespace UnityExplorer.Core.Runtime
 
         public abstract bool LoadModule(string module);
 
+        public virtual bool IsString(object obj) => obj is string;
+
         public abstract void BoxStringToType(ref object _string, Type castTo);
 
         public virtual string UnboxString(object value) => (string)value;

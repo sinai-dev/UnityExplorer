@@ -68,7 +68,7 @@ namespace UnityExplorer.UI.Utility
             return ret;
         }
 
-        public static string ParseFullSyntax(Type type, bool includeNamespace, MemberInfo memberInfo = null)
+        public static string Parse(Type type, bool includeNamespace, MemberInfo memberInfo = null)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
@@ -136,30 +136,30 @@ namespace UnityExplorer.UI.Utility
             return syntaxBuilder.ToString();
         }
 
-        public static string ParseType(Type type, bool includeNamespace = false, bool includeDllName = false)
-        {
-            var sb = new StringBuilder();
-
-            bool isGeneric = type.IsGenericParameter || (type.HasElementType && type.GetElementType().IsGenericParameter);
-
-            if (!isGeneric && includeNamespace && GetNamespace(type, out string ns))
-                //sb.Append($"<color={NAMESPACE}>{ns}{CLOSE_COLOR}.");
-                sb.Append(OPEN_COLOR).Append(NAMESPACE).Append('>').Append(ns).Append(CLOSE_COLOR).Append('.');
-
-            sb.Append(HighlightType(type));
-
-            if (includeDllName)
-            {
-                if (!string.IsNullOrEmpty(type.Assembly.Location))
-                    //sb.Append($" ({Path.GetFileName(type.Assembly.Location)})");
-                    sb.Append(' ').Append('(').Append(Path.GetFileName(type.Assembly.Location)).Append(')');
-                else
-                    //sb.Append($" ({type.Assembly.GetName().Name})");
-                    sb.Append(' ').Append('(').Append(type.Assembly.GetName().Name).Append(')');
-            }
-
-            return sb.ToString();
-        }
+        //public static string ParseType(Type type, bool includeNamespace = false, bool includeDllName = false)
+        //{
+        //    var sb = new StringBuilder();
+        //
+        //    bool isGeneric = type.IsGenericParameter || (type.HasElementType && type.GetElementType().IsGenericParameter);
+        //
+        //    if (!isGeneric && includeNamespace && GetNamespace(type, out string ns))
+        //        //sb.Append($"<color={NAMESPACE}>{ns}{CLOSE_COLOR}.");
+        //        sb.Append(OPEN_COLOR).Append(NAMESPACE).Append('>').Append(ns).Append(CLOSE_COLOR).Append('.');
+        //
+        //    sb.Append(HighlightType(type));
+        //
+        //    if (includeDllName)
+        //    {
+        //        if (!string.IsNullOrEmpty(type.Assembly.Location))
+        //            //sb.Append($" ({Path.GetFileName(type.Assembly.Location)})");
+        //            sb.Append(' ').Append('(').Append(Path.GetFileName(type.Assembly.Location)).Append(')');
+        //        else
+        //            //sb.Append($" ({type.Assembly.GetName().Name})");
+        //            sb.Append(' ').Append('(').Append(type.Assembly.GetName().Name).Append(')');
+        //    }
+        //
+        //    return sb.ToString();
+        //}
 
         private static readonly Dictionary<string, string> typeToRichType = new Dictionary<string, string>();
 
@@ -182,6 +182,7 @@ namespace UnityExplorer.UI.Utility
         private static string HighlightType(Type type)
         {
             string key = type.ToString();
+         
             if (typeToRichType.ContainsKey(key))
                 return typeToRichType[key];
             
@@ -265,7 +266,7 @@ namespace UnityExplorer.UI.Utility
                 }
 
                 //ret += ParseType(args[i]);
-                sb.Append(ParseType(args[i]));
+                sb.Append(HighlightType(args[i]));
             }
 
             return sb.ToString();

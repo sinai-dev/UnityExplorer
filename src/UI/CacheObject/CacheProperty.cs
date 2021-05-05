@@ -28,12 +28,10 @@ namespace UnityExplorer.UI.CacheObject
         {
             try
             {
-                var target = IsStatic ? null : Owner.Target.TryCast(DeclaringType);
-
                 if (HasArguments)
-                    return PropertyInfo.GetValue(target, this.Evaluator.TryParseArguments());
+                    return PropertyInfo.GetValue(DeclaringInstance, this.Evaluator.TryParseArguments());
 
-                var ret = PropertyInfo.GetValue(target, null);
+                var ret = PropertyInfo.GetValue(DeclaringInstance, null);
                 HadException = false;
                 LastException = null;
                 return ret;

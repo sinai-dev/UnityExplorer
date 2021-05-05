@@ -86,7 +86,7 @@ namespace UnityExplorer.UI.IValues
 
                 CacheEntries(value);
 
-                TopLabel.text = $"[{cachedEntries.Count}] {SignatureHighlighter.ParseType(type, false)}";
+                TopLabel.text = $"[{cachedEntries.Count}] {SignatureHighlighter.Parse(type, false)}";
             }
 
 
