@@ -155,6 +155,14 @@ namespace UnityExplorer.UI.IValues
         {
             try
             {
+                //key = key.TryCast(KeyType);
+             
+                if (!RefIDictionary.Contains(key))
+                {
+                    ExplorerCore.LogWarning("Unable to set key! Key may have been boxed to/from Il2Cpp Object.");
+                    return;
+                }
+
                 RefIDictionary[key] = value;
 
                 var entry = cachedEntries[keyIndex];
@@ -169,41 +177,22 @@ namespace UnityExplorer.UI.IValues
 
         // KVP entry scroll pool
 
-        public void OnCellBorrowed(CacheKeyValuePairCell cell)
-        {
-
-        }
+        public void OnCellBorrowed(CacheKeyValuePairCell cell) { }
 
         public void SetCell(CacheKeyValuePairCell cell, int index)
         {
-            if (index < 0 || index >= cachedEntries.Count)
-            {
-                if (cell.Occupant != null)
-                    cell.Occupant.UnlinkFromView();
-
-                cell.Disable();
-                return;
-            }
-
-            var entry = cachedEntries[index];
-
-            if (entry.CellView != null && entry.CellView != cell)
-                entry.UnlinkFromView();
-
-            if (cell.Occupant != null && cell.Occupant != entry)
-                cell.Occupant.UnlinkFromView();
-
-            if (entry.CellView != cell)
-                entry.SetView(cell);
-
-            entry.SetDataToCell(cell);
-
-            SetCellLayout(cell);
+            CacheObjectControllerHelper.SetCell(cell, index, cachedEntries, SetCellLayout);
         }
+
+        public int AdjustedWidth => (int)UIRect.rect.width - 80;
+        //public int AdjustedKeyWidth => HalfWidth - 50;
 
         public override void SetLayout()
         {
             var minHeight = 5f;
+
+            KeyTitleLayout.minWidth = AdjustedWidth * 0.44f;
+            ValueTitleLayout.minWidth = AdjustedWidth * 0.55f;
 
             foreach (var cell in DictScrollPool.CellPool)
             {
@@ -215,16 +204,18 @@ namespace UnityExplorer.UI.IValues
             this.scrollLayout.minHeight = Math.Min(InspectorPanel.CurrentPanelHeight - 400f, minHeight);
         }
 
-        private void SetCellLayout(CacheKeyValuePairCell cell)
+        private void SetCellLayout(CacheObjectCell objcell)
         {
-            cell.KeyGroupLayout.minWidth = cell.AdjustedKeyWidth;
-            cell.RightGroupLayout.minWidth = cell.HalfWidth;
+            var cell = objcell as CacheKeyValuePairCell;
+            cell.KeyGroupLayout.minWidth = cell.AdjustedWidth * 0.44f;
+            cell.RightGroupLayout.minWidth = cell.AdjustedWidth * 0.55f;
 
             if (cell.Occupant?.IValue != null)
                 cell.Occupant.IValue.SetLayout();
         }
 
         private LayoutElement scrollLayout;
+        private RectTransform UIRect;
 
         public override GameObject CreateContent(GameObject parent)
         {
@@ -232,6 +223,8 @@ namespace UnityExplorer.UI.IValues
                 new Color(0.05f, 0.05f, 0.05f));
             UIFactory.SetLayoutElement(UIRoot, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 475);
             UIRoot.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            UIRect = UIRoot.GetComponent<RectTransform>();
 
             // Entries label
 
@@ -242,14 +235,14 @@ namespace UnityExplorer.UI.IValues
 
             var titleGroup = UIFactory.CreateUIObject("TitleGroup", UIRoot);
             UIFactory.SetLayoutElement(titleGroup, minHeight: 25, flexibleWidth: 9999, flexibleHeight: 0);
-            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(titleGroup, true, true, true, true, padLeft: 50, padRight: 65);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(titleGroup, false, true, true, true, padLeft: 65, padRight: 0, childAlignment: TextAnchor.LowerLeft);
 
             var keyTitle = UIFactory.CreateLabel(titleGroup, "KeyTitle", "Keys", TextAnchor.MiddleLeft);
-            //UIFactory.SetLayoutElement(keyTitle.gameObject, minWidth: ReflectionInspector.LeftGroupWidth);
+            UIFactory.SetLayoutElement(keyTitle.gameObject, minWidth: 100, flexibleWidth: 0);
             KeyTitleLayout = keyTitle.GetComponent<LayoutElement>();
 
             var valueTitle = UIFactory.CreateLabel(titleGroup, "ValueTitle", "Values", TextAnchor.MiddleLeft);
-            //UIFactory.SetLayoutElement(valueTitle.gameObject, minWidth: ReflectionInspector.RightGroupWidth);
+            UIFactory.SetLayoutElement(valueTitle.gameObject, minWidth: 100, flexibleWidth: 0);
             ValueTitleLayout = valueTitle.GetComponent<LayoutElement>();
 
             // entry scroll pool

@@ -256,29 +256,7 @@ namespace UnityExplorer.UI.Inspectors
 
         public void SetCell(CacheMemberCell cell, int index)
         {
-            if (index < 0 || index >= filteredMembers.Count)
-            {
-                if (cell.Occupant != null)
-                    cell.Occupant.UnlinkFromView();
-
-                cell.Disable();
-                return;
-            }
-
-            var member = filteredMembers[index];
-
-            if (member.CellView != null && member.CellView != cell)
-                member.UnlinkFromView();
-
-            if (cell.Occupant != null && cell.Occupant != member)
-                cell.Occupant.UnlinkFromView();
-
-            if (member.CellView != cell)
-                member.SetView(cell);
-
-            member.SetDataToCell(cell);
-
-            SetCellLayout(cell);
+            CacheObjectControllerHelper.SetCell(cell, index, filteredMembers, SetCellLayout);
         }
 
         // Cell layout (fake table alignment)

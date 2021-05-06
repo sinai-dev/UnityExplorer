@@ -142,6 +142,7 @@ namespace UnityExplorer.UI.IValues
         {
             try
             {
+                //value = value.TryCast(this.EntryType);
                 RefIList[index] = value;
 
                 var entry = cachedEntries[index];
@@ -173,27 +174,7 @@ namespace UnityExplorer.UI.IValues
 
         public void SetCell(CacheListEntryCell cell, int index)
         {
-            if (index < 0 || index >= cachedEntries.Count)
-            {
-                if (cell.Occupant != null)
-                    cell.Occupant.UnlinkFromView();
-
-                cell.Disable();
-                return;
-            }
-
-            var entry = cachedEntries[index];
-
-            if (entry.CellView != null && entry.CellView != cell)
-                entry.UnlinkFromView();
-
-            if (cell.Occupant != null && cell.Occupant != entry)
-                cell.Occupant.UnlinkFromView();
-
-            if (entry.CellView != cell)
-                entry.SetView(cell);
-
-            entry.SetDataToCell(cell);
+            CacheObjectControllerHelper.SetCell(cell, index, cachedEntries, null);
         }
 
         private LayoutElement scrollLayout;
