@@ -4,6 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+#if CPP
+using UnhollowerRuntimeLib;
+using UnhollowerBaseLib;
+#endif
 
 namespace UnityExplorer.Tests
 {
@@ -126,10 +130,10 @@ namespace UnityExplorer.Tests
         public static Il2CppSystem.String testStringThree = "string boxed as cpp string";
         public static string nullString = null;
 
-        public static List<Il2CppSystem.Object> cppBoxedList;
-        public static UnhollowerBaseLib.Il2CppStructArray<int> CppIntStructArray;
-        public static UnhollowerBaseLib.Il2CppStringArray CppStringArray;
-        public static UnhollowerBaseLib.Il2CppReferenceArray<Il2CppSystem.Object> CppReferenceArray;
+        public static List<Il2CppSystem.Object> CppBoxedList;
+        public static Il2CppStructArray<int> CppIntStructArray;
+        public static Il2CppStringArray CppStringArray;
+        public static Il2CppReferenceArray<Il2CppSystem.Object> CppReferenceArray;
 
         public static Il2CppSystem.Object cppBoxedInt;
         public static Il2CppSystem.Int32 cppInt;
@@ -144,6 +148,29 @@ namespace UnityExplorer.Tests
                 BigList.Add(i.ToString());
 
 #if CPP
+
+            CppBoxedList = new List<Il2CppSystem.Object>();
+            CppBoxedList.Add((Il2CppSystem.String)"boxedString");
+            CppBoxedList.Add(new Il2CppSystem.Int32 { m_value = 5 }.BoxIl2CppObject());
+
+            try
+            {
+                var cppType = Il2CppType.Of<CameraClearFlags>();
+                if (cppType != null)
+                {
+                    var boxedEnum = Il2CppSystem.Enum.Parse(cppType, "Color");
+                    CppBoxedList.Add(boxedEnum);
+                }
+
+                var structBox = Vector3.one.BoxIl2CppObject();
+                CppBoxedList.Add(structBox);
+
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.LogWarning($"Test fail: {ex}");
+            }
+
             CppIntStructArray = new UnhollowerBaseLib.Il2CppStructArray<int>(5);
             CppIntStructArray[0] = 0;
             CppIntStructArray[1] = 1;
@@ -161,9 +188,6 @@ namespace UnityExplorer.Tests
             CppReferenceArray[2] = (Il2CppSystem.String)"whats up";
 
             cppBoxedInt = new Il2CppSystem.Int32() { m_value = 5 }.BoxIl2CppObject();
-            cppBoxedList = new List<Il2CppSystem.Object>();
-            cppBoxedList.Add((Il2CppSystem.String)"boxedString");
-            cppBoxedList.Add(new Il2CppSystem.Int32 { m_value = 5 }.BoxIl2CppObject());
             cppInt = new Il2CppSystem.Int32 { m_value = 420 };
 
             TestWritableBoxedList = new List<Il2CppSystem.Object>();

@@ -70,7 +70,7 @@ namespace UnityExplorer.UI.Utility
             {
                 var toString = ToString(value);
 
-                if (type.IsEnumerable())
+                if (typeof(IEnumerable).IsAssignableFrom(type))
                 {
                     if (value is IList iList)
                         _stringBuilder.Append($"[{iList.Count}] ");
@@ -80,7 +80,7 @@ namespace UnityExplorer.UI.Utility
                     else
                         _stringBuilder.Append("[?] ");
                 }
-                else if (type.IsDictionary())
+                else if (typeof(IDictionary).IsAssignableFrom(type))
                 {
                     if (value is IDictionary iDict)
                         _stringBuilder.Append($"[{iDict.Count}] ");
@@ -167,14 +167,14 @@ namespace UnityExplorer.UI.Utility
             }
 
             string _ = null;
-            toString = ReflectionProvider.Instance.ProcessTypeFullNameInString(type, toString, ref _);
+            toString = ReflectionUtility.ProcessTypeInString(type, toString, ref _);
 
 #if CPP
             if (value is Il2CppSystem.Type cppType)
             {
-                var monoType = Core.Runtime.Il2Cpp.Il2CppReflection.GetMonoType(cppType);
+                var monoType = Il2CppReflection.GetUnhollowedType(cppType);
                 if (monoType != null)
-                    toString = ReflectionProvider.Instance.ProcessTypeFullNameInString(monoType, toString, ref _);
+                    toString = ReflectionUtility.ProcessTypeInString(monoType, toString, ref _);
             }
 #endif
 

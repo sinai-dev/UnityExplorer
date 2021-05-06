@@ -22,7 +22,7 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
         public override void Initialize()
         {
             ExplorerCore.Context = RuntimeContext.IL2CPP;
-            Reflection = new Il2CppReflection();
+            //Reflection = new Il2CppReflection();
             TextureUtil = new Il2CppTextureUtil();
         }
 

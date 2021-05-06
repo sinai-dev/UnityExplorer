@@ -21,7 +21,7 @@ namespace UnityExplorer.Core.Runtime.Mono
         public override void Initialize()
         {
             ExplorerCore.Context = RuntimeContext.Mono;
-            Reflection = new MonoReflection();
+            //Reflection = new MonoReflection();
             TextureUtil = new MonoTextureUtil();
         }
 

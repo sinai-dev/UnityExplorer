@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -96,10 +97,7 @@ namespace UnityExplorer.UI.CacheObject
 
         public void SetUserValue(object value)
         {
-            if (State == ValueState.String)
-                ReflectionProvider.Instance.BoxStringToType(ref value, FallbackType);
-            else
-                value = value.TryCast(FallbackType);
+            value = value.TryCast(FallbackType);
 
             TrySetUserValue(value);
         }
@@ -147,16 +145,16 @@ namespace UnityExplorer.UI.CacheObject
                     State = ValueState.Boolean;
                 else if (type.IsPrimitive || type == typeof(decimal))
                     State = ValueState.Number;
-                else if (ReflectionProvider.Instance.IsString(Value))
+                else if (type == typeof(string))
                     State = ValueState.String;
                 else if (type.IsEnum)
                     State = ValueState.Enum;
 
                 // todo Color and ValueStruct
 
-                else if (type.IsDictionary())
+                else if (typeof(IDictionary).IsAssignableFrom(type))
                     State = ValueState.Dictionary;
-                else if (type.IsEnumerable())
+                else if (typeof(IEnumerable).IsAssignableFrom(type))
                     State = ValueState.Collection;
                 else
                     State = ValueState.Unsupported;
@@ -174,12 +172,12 @@ namespace UnityExplorer.UI.CacheObject
                 case ValueState.NotEvaluated:
                     label = $"<i>{NOT_YET_EVAL} ({SignatureHighlighter.Parse(FallbackType, true)})</i>"; break;
                 case ValueState.Exception:
-                    label = $"<i><color=red>{ReflectionUtility.ReflectionExToString(LastException)}</color></i>"; break;
+                    label = $"<i><color=red>{LastException.ReflectionExToString()}</color></i>"; break;
                 case ValueState.Boolean:
                 case ValueState.Number:
                     label = null; break;
                 case ValueState.String:
-                    string s = ReflectionProvider.Instance.UnboxString(Value);
+                    string s = Value as string;
                     if (s.Length > 200)
                         s = $"{s.Substring(0, 200)}...";
                     label = $"\"{s}\""; break;

@@ -222,6 +222,8 @@
     <Compile Include="Core\CSharp\ScriptEvaluator.cs" />
     <Compile Include="Core\CSharp\ScriptInteraction.cs" />
     <Compile Include="Core\ExplorerBehaviour.cs" />
+    <Compile Include="Core\Reflection\Extensions.cs" />
+    <Compile Include="Core\Reflection\Il2CppReflection.cs" />
     <Compile Include="Core\Utility\MiscUtility.cs" />
     <Compile Include="Inspectors_OLD\GameObjects\ChildList.cs" />
     <Compile Include="Inspectors_OLD\GameObjects\ComponentList.cs" />
@@ -271,17 +273,14 @@
     <Compile Include="Core\Input\InputSystem.cs" />
     <Compile Include="Core\Input\LegacyInput.cs" />
     <Compile Include="Core\Input\NoInput.cs" />
-    <Compile Include="Core\ReflectionUtility.cs" />
+    <Compile Include="Core\Reflection\ReflectionUtility.cs" />
     <Compile Include="Core\Runtime\Il2Cpp\AssetBundle.cs" />
     <Compile Include="Core\Runtime\Il2Cpp\ICallManager.cs" />
     <Compile Include="Core\Runtime\Il2Cpp\Il2CppCoroutine.cs" />
     <Compile Include="Core\Runtime\Il2Cpp\Il2CppProvider.cs" />
-    <Compile Include="Core\Runtime\Il2Cpp\Il2CppReflection.cs" />
     <Compile Include="Core\Runtime\Il2Cpp\Il2CppTextureUtil.cs" />
     <Compile Include="Core\Runtime\Mono\MonoProvider.cs" />
-    <Compile Include="Core\Runtime\Mono\MonoReflection.cs" />
     <Compile Include="Core\Runtime\Mono\MonoTextureUtil.cs" />
-    <Compile Include="Core\Runtime\ReflectionProvider.cs" />
     <Compile Include="Core\Runtime\RuntimeContext.cs" />
     <Compile Include="Core\Runtime\RuntimeProvider.cs" />
     <Compile Include="Core\Runtime\TextureUtilProvider.cs" />

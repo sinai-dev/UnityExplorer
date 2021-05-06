@@ -141,7 +141,7 @@ namespace UnityExplorer.Core.Search
             return list;
         }
 
-        internal static string[] s_instanceNames = new string[]
+        internal static string[] instanceNames = new string[]
         {
             "m_instance",
             "m_Instance",
@@ -175,7 +175,7 @@ namespace UnityExplorer.Core.Search
                         if (!string.IsNullOrEmpty(nameFilter) && !type.FullName.ContainsIgnoreCase(nameFilter))
                             continue;
 
-                        ReflectionProvider.Instance.FindSingleton(s_instanceNames, type, flags, instances);
+                        ReflectionUtility.FindSingleton(instanceNames, type, flags, instances);
                     }
                     catch { }
                 }

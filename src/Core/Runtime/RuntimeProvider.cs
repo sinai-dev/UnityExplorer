@@ -16,7 +16,6 @@ namespace UnityExplorer
     {
         public static RuntimeProvider Instance;
 
-        public ReflectionProvider Reflection;
         public TextureUtilProvider TextureUtil;
 
         public RuntimeProvider()
