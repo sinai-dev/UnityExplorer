@@ -124,17 +124,15 @@ namespace UnityExplorer
             if (obj == null)
                 return null;
 
-            return DoGetActualType(obj);
-        }
-
-        internal Type DoGetActualType(object obj)
-        {
             var type = obj.GetType();
 
             try
             {
                 if (IsString(obj))
                     return typeof(string);
+
+                if (IsIl2CppPrimitive(type))
+                    return il2cppPrimitivesToMono[type.FullName];
 
                 if (obj is Il2CppSystem.Object cppObject)
                 {
@@ -150,12 +148,15 @@ namespace UnityExplorer
                         return GetTypeByName(cppType.FullName) ?? type;
                     }
 
+                    if (AllTypes.TryGetValue(cppType.FullName, out Type primitive) && primitive.IsPrimitive)
+                        return primitive;
+
                     return GetUnhollowedType(cppType) ?? type;
                 }
             }
-            catch //(Exception ex)
+            catch (Exception ex)
             {
-                //ExplorerCore.LogWarning("Exception in GetActualType: " + ex);
+                ExplorerCore.LogWarning("Exception in IL2CPP GetActualType: " + ex);
             }
 
             return type;
@@ -175,9 +176,7 @@ namespace UnityExplorer
             return monoType;
         }
 
-
         #endregion
-
 
         #region Casting
 
@@ -190,33 +189,48 @@ namespace UnityExplorer
 
             var type = obj.GetType();
 
-            // If casting from ValueType or string to Il2CppSystem.Object...
-            if (typeof(Il2CppSystem.Object).IsAssignableFrom(castTo))
+            // from structs
+            if (type.IsValueType)
             {
-                if (type.IsValueType)
-                    return BoxIl2CppObject(obj);
-
-                if (obj is string)
+                // from il2cpp primitive to system primitive
+                if (IsIl2CppPrimitive(type) && castTo.IsPrimitive)
                 {
-                    BoxStringToType(ref obj, castTo);
-                    return obj;
+                    return MakeMonoPrimitive(obj);
                 }
+                // from system primitive to il2cpp primitive
+                else if (IsIl2CppPrimitive(castTo))
+                {
+                    return MakeIl2CppPrimitive(castTo, obj);
+                }
+                // from other structs to il2cpp object
+                else if (typeof(Il2CppSystem.Object).IsAssignableFrom(castTo))
+                {
+                    return BoxIl2CppObject(obj);
+                }
+                else
+                    return obj;
             }
+
+            // from string to il2cpp.Object / il2cpp.String
+            if (obj is string && typeof(Il2CppSystem.Object).IsAssignableFrom(castTo))
+            {
+                return BoxStringToType(obj, castTo);
+            }
+
+            // from il2cpp objects...
 
             if (!(obj is Il2CppSystem.Object cppObj))
                 return obj;
 
-            // If going from Il2CppSystem.Object to a ValueType or string...
+            // from Il2CppSystem.Object to a struct
             if (castTo.IsValueType)
-            {
-                if (castTo.FullName.StartsWith("Il2CppSystem."))
-                    AllTypes.TryGetValue(cppObj.GetIl2CppType().FullName, out castTo);
-                return Unbox(cppObj, castTo);
-            }
+                return UnboxCppObject(cppObj, castTo);
+            // or to system string
             else if (castTo == typeof(string))
                 return UnboxString(obj);
 
             // Casting from il2cpp object to il2cpp object...
+
             if (!Il2CppTypeNotNull(castTo, out IntPtr castToPtr))
                 return obj;
 
@@ -248,29 +262,30 @@ namespace UnityExplorer
         // cached il2cpp unbox methods
         internal static readonly Dictionary<string, MethodInfo> unboxMethods = new Dictionary<string, MethodInfo>();
 
-        public object Unbox(object obj, Type type)
+        // Unbox an il2cpp object to a struct or System primitive.
+        public object UnboxCppObject(Il2CppSystem.Object cppObj, Type toType)
         {
-            if (!type.IsValueType)
+            if (!toType.IsValueType)
                 return null;
-
-            if (!(obj is Il2CppSystem.Object cppObj))
-                return obj;
 
             try
             {
-                if (type.IsEnum)
-                    return Enum.ToObject(type, Il2CppSystem.Enum.ToUInt64(cppObj));
+                var x = new Il2CppSystem.Int32 { m_value = 5 };
+                x.BoxIl2CppObject().Unbox<int>();
 
-                var name = type.AssemblyQualifiedName;
+                if (toType.IsEnum)
+                    return Enum.ToObject(toType, Il2CppSystem.Enum.ToUInt64(cppObj));
 
-                if (!unboxMethods.ContainsKey(type.AssemblyQualifiedName))
+                var name = toType.AssemblyQualifiedName;
+
+                if (!unboxMethods.ContainsKey(toType.AssemblyQualifiedName))
                 {
                     unboxMethods.Add(name, typeof(Il2CppObjectBase)
                                                 .GetMethod("Unbox")
-                                                .MakeGenericMethod(type));
+                                                .MakeGenericMethod(toType));
                 }
 
-                return unboxMethods[name].Invoke(obj, new object[0]);
+                return unboxMethods[name].Invoke(cppObj, new object[0]);
             }
             catch (Exception ex)
             {
@@ -281,6 +296,13 @@ namespace UnityExplorer
 
         private static readonly Type[] emptyTypes = new Type[0];
         private static readonly object[] emptyArgs = new object[0];
+
+        private static Il2CppSystem.Object BoxIl2CppObject(object cppStruct, Type structType)
+        {
+            return GetMethodInfo(structType, "BoxIl2CppObject", emptyTypes)
+                   .Invoke(cppStruct, emptyArgs)
+                   as Il2CppSystem.Object;
+        }
 
         public Il2CppSystem.Object BoxIl2CppObject(object value)
         {
@@ -298,25 +320,52 @@ namespace UnityExplorer
 
                 if (type.IsPrimitive && AllTypes.TryGetValue($"Il2Cpp{type.FullName}", out Type cppType))
                 {
-                    // Create an Il2CppSystem representation of the value
-                    var cppStruct = Activator.CreateInstance(cppType);
-
-                    // set the 'm_value' field of the il2cpp struct to the system value
-                    GetFieldInfo(cppType, "m_value").SetValue(cppStruct, value);
-
-                    // set the cpp representations as our references
-                    value = cppStruct;
-                    type = cppType;
+                    return BoxIl2CppObject(MakeIl2CppPrimitive(cppType, value), cppType);
                 }
 
-                return (Il2CppSystem.Object)GetMethodInfo(type, "BoxIl2CppObject", emptyTypes)
-                                            .Invoke(value, emptyArgs);
+                return BoxIl2CppObject(value, type);
             }
             catch (Exception ex)
             {
                 ExplorerCore.LogWarning("Exception in BoxIl2CppObject: " + ex);
                 return null;
             }
+        }
+
+        // Helpers for Il2Cpp primitive <-> Mono
+
+        internal static readonly Dictionary<string, Type> il2cppPrimitivesToMono = new Dictionary<string, Type>
+        {
+            { "Il2CppSystem.Boolean", typeof(bool) },
+            { "Il2CppSystem.Byte",    typeof(byte) },
+            { "Il2CppSystem.SByte",   typeof(sbyte) },
+            { "Il2CppSystem.Char",    typeof(char) },
+            { "Il2CppSystem.Double",  typeof(double) },
+            { "Il2CppSystem.Single",  typeof(float) },
+            { "Il2CppSystem.Int32",   typeof(int) },
+            { "Il2CppSystem.UInt32",  typeof(uint) },
+            { "Il2CppSystem.Int64",   typeof(long) },
+            { "Il2CppSystem.UInt64",  typeof(ulong) },
+            { "Il2CppSystem.Int16",   typeof(short) },
+            { "Il2CppSystem.UInt16",  typeof(ushort) },
+            { "Il2CppSystem.IntPtr",  typeof(IntPtr) },
+            { "Il2CppSystem.UIntPtr", typeof(UIntPtr) }
+        };
+
+        public static bool IsIl2CppPrimitive(object obj) => IsIl2CppPrimitive(obj.GetType());
+
+        public static bool IsIl2CppPrimitive(Type type) => il2cppPrimitivesToMono.ContainsKey(type.FullName);
+
+        public object MakeMonoPrimitive(object cppPrimitive)
+        {
+            return GetFieldInfo(cppPrimitive.GetType(), "m_value").GetValue(cppPrimitive);
+        }
+
+        public object MakeIl2CppPrimitive(Type cppType, object monoValue)
+        {
+            var cppStruct = Activator.CreateInstance(cppType);
+            GetFieldInfo(cppType, "m_value").SetValue(cppStruct, monoValue);
+            return cppStruct;
         }
 
         #endregion
@@ -340,12 +389,12 @@ namespace UnityExplorer
             return false;
         }
 
-        public void BoxStringToType(ref object value, Type castTo)
+        public object BoxStringToType(object value, Type castTo)
         {
             if (castTo == typeof(Il2CppSystem.String))
-                value = (Il2CppSystem.String)(value as string);
+                return (Il2CppSystem.String)(value as string);
             else
-                value = (Il2CppSystem.Object)(value as string);
+                return (Il2CppSystem.Object)(value as string);
         }
 
         public string UnboxString(object value)

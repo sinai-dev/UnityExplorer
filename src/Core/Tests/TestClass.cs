@@ -137,8 +137,13 @@ namespace UnityExplorer.Tests
 
         public static Il2CppSystem.Object cppBoxedInt;
         public static Il2CppSystem.Int32 cppInt;
+        public static Il2CppSystem.Decimal cppDecimal;
+        public static Il2CppSystem.Object cppDecimalBoxed;
+        public static Il2CppSystem.Object cppVector3Boxed;
 
         public static Il2CppSystem.Collections.Hashtable cppHashset;
+
+        public static Dictionary<Il2CppSystem.String, Il2CppSystem.Object> CppBoxedDict;
 
 #endif
 
@@ -148,6 +153,16 @@ namespace UnityExplorer.Tests
                 BigList.Add(i.ToString());
 
 #if CPP
+            CppBoxedDict = new Dictionary<Il2CppSystem.String, Il2CppSystem.Object>();
+            CppBoxedDict.Add("1", new Il2CppSystem.Int32 { m_value = 1 }.BoxIl2CppObject());
+            CppBoxedDict.Add("2", new Il2CppSystem.Int32 { m_value = 2 }.BoxIl2CppObject());
+            CppBoxedDict.Add("3", new Il2CppSystem.Int32 { m_value = 3 }.BoxIl2CppObject());
+            CppBoxedDict.Add("4", new Il2CppSystem.Int32 { m_value = 4 }.BoxIl2CppObject());
+
+            cppDecimal = new Il2CppSystem.Decimal(1f);
+            cppDecimalBoxed = new Il2CppSystem.Decimal(1f).BoxIl2CppObject();
+            cppVector3Boxed = Vector3.down.BoxIl2CppObject();
+
 
             CppBoxedList = new List<Il2CppSystem.Object>();
             CppBoxedList.Add((Il2CppSystem.String)"boxedString");
