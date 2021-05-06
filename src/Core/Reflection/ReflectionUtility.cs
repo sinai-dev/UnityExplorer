@@ -98,7 +98,7 @@ namespace UnityExplorer
 
         // Getting the actual type of an object
         internal virtual Type Internal_GetActualType(object obj)
-            => obj.GetType();
+            => obj?.GetType();
 
         // Force-casting an object to a type
         internal virtual object Internal_TryCast(object obj, Type castTo)
