@@ -64,7 +64,7 @@ namespace UnityExplorer
         #region Deobfuscation cache
 
         private static readonly Dictionary<string, Type> DeobfuscatedTypes = new Dictionary<string, Type>();
-        //internal static Dictionary<string, string> s_deobfuscatedTypeNames = new Dictionary<string, string>();
+        private static readonly Dictionary<string, string> reverseDeobCache = new Dictionary<string, string>();
 
         private static void BuildDeobfuscationCache()
         {
@@ -83,7 +83,6 @@ namespace UnityExplorer
             try
             {
                 // Thanks to Slaynash for this
-
                 if (type.CustomAttributes.Any(it => it.AttributeType.Name == "ObfuscatedNameAttribute"))
                 {
                     var cppType = Il2CppType.From(type);
@@ -91,11 +90,19 @@ namespace UnityExplorer
                     if (!DeobfuscatedTypes.ContainsKey(cppType.FullName))
                     {
                         DeobfuscatedTypes.Add(cppType.FullName, type);
-                        //s_deobfuscatedTypeNames.Add(cppType.FullName, type.FullName);
+                        reverseDeobCache.Add(type.FullName, cppType.FullName);
                     }
                 }
             }
             catch { }
+        }
+
+        internal override string Internal_ProcessTypeInString(string theString, Type type)
+        {
+            if (reverseDeobCache.TryGetValue(type.FullName, out string obName))
+                return theString.Replace(obName, type.FullName);
+
+            return theString;
         }
 
         #endregion
@@ -287,10 +294,7 @@ namespace UnityExplorer
                     return null;
 
                 if (type.IsEnum)
-                {
-                    // TODO not tested
                     return Il2CppSystem.Enum.ToObject(Il2CppType.From(type), (ulong)value);
-                }
 
                 if (type.IsPrimitive && AllTypes.TryGetValue($"Il2Cpp{type.FullName}", out Type cppType))
                 {
@@ -357,22 +361,6 @@ namespace UnityExplorer
 
             return s;
         }
-
-        internal override string Internal_ProcessTypeInString(string theString, Type type, ref string typeName)
-        {
-            if (!Il2CppTypeNotNull(type))
-                return theString;
-
-            var cppType = Il2CppType.From(type);
-            if (cppType != null && DeobfuscatedTypes.ContainsKey(cppType.FullName))
-            {
-                typeName = DeobfuscatedTypes[cppType.FullName].FullName;
-                theString = theString.Replace(cppType.FullName, typeName);
-            }
-
-            return theString;
-        }
-
 
         #endregion
 

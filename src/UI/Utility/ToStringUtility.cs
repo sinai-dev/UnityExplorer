@@ -166,15 +166,14 @@ namespace UnityExplorer.UI.Utility
                 toString = ex.ReflectionExToString();
             }
 
-            string _ = null;
-            toString = ReflectionUtility.ProcessTypeInString(type, toString, ref _);
+            toString = ReflectionUtility.ProcessTypeInString(type, toString);
 
 #if CPP
             if (value is Il2CppSystem.Type cppType)
             {
                 var monoType = Il2CppReflection.GetUnhollowedType(cppType);
                 if (monoType != null)
-                    toString = ReflectionUtility.ProcessTypeInString(monoType, toString, ref _);
+                    toString = ReflectionUtility.ProcessTypeInString(monoType, toString);
             }
 #endif
 

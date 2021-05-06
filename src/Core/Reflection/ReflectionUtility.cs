@@ -105,10 +105,10 @@ namespace UnityExplorer
             => obj;
 
         // Processing deobfuscated type names in strings
-        public static string ProcessTypeInString(Type type, string theString, ref string typeName)
-            => Instance.Internal_ProcessTypeInString(theString, type, ref typeName);
+        public static string ProcessTypeInString(Type type, string theString)
+            => Instance.Internal_ProcessTypeInString(theString, type);
 
-        internal virtual string Internal_ProcessTypeInString(string theString, Type type, ref string typeName)
+        internal virtual string Internal_ProcessTypeInString(string theString, Type type)
             => theString;
 
         // Force loading modules
