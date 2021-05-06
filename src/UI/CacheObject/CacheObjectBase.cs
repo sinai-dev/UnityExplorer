@@ -18,7 +18,7 @@ namespace UnityExplorer.UI.CacheObject
     {
         NotEvaluated,
         Exception,
-        NullValue,
+        //NullValue,
         Boolean,
         Number,
         String,
@@ -38,6 +38,7 @@ namespace UnityExplorer.UI.CacheObject
 
         public object Value { get; protected set; }
         public Type FallbackType { get; protected set; }
+        public bool LastValueWasNull { get; private set; }
 
         public InteractiveValue IValue { get; private set; }
         public Type CurrentIValueType { get; private set; }
@@ -55,7 +56,7 @@ namespace UnityExplorer.UI.CacheObject
         public virtual void SetFallbackType(Type fallbackType)
         {
             this.FallbackType = fallbackType;
-            GetValueLabel();
+            this.ValueLabelText = GetValueLabel();
         }
 
         // internals
@@ -104,6 +105,7 @@ namespace UnityExplorer.UI.CacheObject
 
         public abstract void TrySetUserValue(object value);
 
+        // The only method which sets the CacheObjectBase.Value
         public virtual void SetValueFromSource(object value)
         {
             this.Value = value;
@@ -111,88 +113,122 @@ namespace UnityExplorer.UI.CacheObject
             if (!Value.IsNullOrDestroyed())
                 Value = Value.TryCast();
 
-            var prevState = State;
             ProcessOnEvaluate();
-
-            if (State != prevState)
-            {
-                if (this.IValue != null)
-                {
-                    // State has changed, need to return IValue
-                    ReleaseIValue();
-                    SubContentShowWanted = false;
-                }
-            }
 
             if (this.IValue != null)
                 this.IValue.SetValue(Value);
         }
 
-        /// <summary>
-        /// Process the CacheMember state when the value has been evaluated (or re-evaluated)
-        /// </summary>
         protected virtual void ProcessOnEvaluate()
         {
+            var prevState = State;
+
             if (HadException)
+            {
+                LastValueWasNull = true;
                 State = ValueState.Exception;
+            }
             else if (Value.IsNullOrDestroyed())
-                State = ValueState.NullValue;
+            {
+                LastValueWasNull = true;
+                State = GetStateForType(FallbackType);
+            }
             else
             {
-                var type = Value.GetActualType();
+                LastValueWasNull = false;
+                State = GetStateForType(Value.GetActualType());
+            }
 
-                if (type == typeof(bool))
-                    State = ValueState.Boolean;
-                else if (type.IsPrimitive || type == typeof(decimal))
-                    State = ValueState.Number;
-                else if (type == typeof(string))
-                    State = ValueState.String;
-                else if (type.IsEnum)
-                    State = ValueState.Enum;
-
-                // todo Color and ValueStruct
-
-                else if (typeof(IDictionary).IsAssignableFrom(type))
-                    State = ValueState.Dictionary;
-                else if (typeof(IEnumerable).IsAssignableFrom(type))
-                    State = ValueState.Collection;
-                else
-                    State = ValueState.Unsupported;
+            if (IValue != null)
+            {
+                // If we changed states (always needs IValue change)
+                // or if the value is null, and the fallback type isnt string (we always want to edit strings).
+                if (State != prevState || (State != ValueState.String && Value.IsNullOrDestroyed()))
+                {
+                    // need to return IValue
+                    ReleaseIValue();
+                    SubContentShowWanted = false;
+                }
             }
 
             // Set label text
-            GetValueLabel();
+            this.ValueLabelText = GetValueLabel();
         }
 
-        protected void GetValueLabel()
+        public ValueState GetStateForType(Type type)
         {
-            string label;
+            if (type == typeof(bool))
+                return ValueState.Boolean;
+            else if (type.IsPrimitive || type == typeof(decimal))
+                return ValueState.Number;
+            else if (type == typeof(string))
+                return ValueState.String;
+            else if (type.IsEnum)
+                return ValueState.Enum;
+
+            // todo Color and ValueStruct
+
+            else if (typeof(IDictionary).IsAssignableFrom(type))
+                return ValueState.Dictionary;
+            else if (typeof(IEnumerable).IsAssignableFrom(type))
+                return ValueState.Collection;
+            else
+                return ValueState.Unsupported;
+        }
+
+        protected string GetValueLabel()
+        {
+            string label = "";
+
             switch (State)
             {
-                case ValueState.NotEvaluated:
-                    label = $"<i>{NOT_YET_EVAL} ({SignatureHighlighter.Parse(FallbackType, true)})</i>"; break;
-                case ValueState.Exception:
-                    label = $"<i><color=red>{LastException.ReflectionExToString()}</color></i>"; break;
+                // bool and number dont want the label for the value at all
                 case ValueState.Boolean:
                 case ValueState.Number:
-                    label = null; break;
+                    return null;
+
+                case ValueState.NotEvaluated:
+                    return $"<i>{NOT_YET_EVAL} ({SignatureHighlighter.Parse(FallbackType, true)})</i>"; 
+
+                case ValueState.Exception:
+                    return $"<i><color=red>{LastException.ReflectionExToString()}</color></i>"; 
+
                 case ValueState.String:
-                    string s = Value as string;
-                    if (s.Length > 200)
-                        s = $"{s.Substring(0, 200)}...";
-                    label = $"\"{s}\""; break;
-                case ValueState.NullValue:
-                    label = $"<i>{ToStringUtility.ToStringWithType(Value, FallbackType, true)}</i>"; break;
-                case ValueState.Enum:
+                    if (!LastValueWasNull)
+                    {
+                        string s = Value as string;
+                        if (s.Length > 200)
+                            s = $"{s.Substring(0, 200)}...";
+                        return $"\"{s}\"";
+                    }
+                    break;
+
                 case ValueState.Collection:
+                    if (!LastValueWasNull)
+                    {
+                        if (Value is IList iList)
+                            label = $"[{iList.Count}] ";
+                        else if (Value is ICollection iCol)
+                            label = $"[{iCol.Count}] ";
+                        else
+                            label = "[?] ";
+                    }
+                    break;
+
                 case ValueState.Dictionary:
-                case ValueState.ValueStruct:
-                case ValueState.Color:
-                case ValueState.Unsupported:
-                default:
-                    label = ToStringUtility.ToStringWithType(Value, FallbackType, true); break;
+                    if (!LastValueWasNull)
+                    {
+                        if (Value is IDictionary iDict)
+                            label = $"[{iDict.Count}] ";
+                        else
+                            label = "[?] ";
+                    }
+                    break;
             }
-            this.ValueLabelText = label;
+
+            // Cases which dont return will append to ToStringWithType
+
+            return label += ToStringUtility.ToStringWithType(Value, FallbackType, true);
         }
 
         // Setting cell state from our model
@@ -218,17 +254,20 @@ namespace UnityExplorer.UI.CacheObject
             switch (State)
             {
                 case ValueState.Exception:
-                case ValueState.NullValue:
+                //case ValueState.NullValue:
                     SetValueState(cell, ValueStateArgs.Default);
                     break;
                 case ValueState.Boolean:
-                    SetValueState(cell, new ValueStateArgs(false, toggleActive:true, applyActive: CanWrite));
+                    SetValueState(cell, new ValueStateArgs(false, toggleActive: true, applyActive: CanWrite));
                     break;
                 case ValueState.Number:
                     SetValueState(cell, new ValueStateArgs(false, typeLabelActive: true, inputActive: true, applyActive: CanWrite));
                     break;
                 case ValueState.String:
-                    SetValueState(cell, new ValueStateArgs(true, false, SignatureHighlighter.StringOrange, subContentButtonActive: true));
+                    if (LastValueWasNull)
+                        SetValueState(cell, new ValueStateArgs(true, subContentButtonActive: true));
+                    else
+                        SetValueState(cell, new ValueStateArgs(true, false, SignatureHighlighter.StringOrange, subContentButtonActive: true));
                     break;
                 case ValueState.Enum:
                     SetValueState(cell, new ValueStateArgs(true, subContentButtonActive: CanWrite));
@@ -237,10 +276,10 @@ namespace UnityExplorer.UI.CacheObject
                 case ValueState.Dictionary:
                 case ValueState.ValueStruct:
                 case ValueState.Color:
-                    SetValueState(cell, new ValueStateArgs(true, inspectActive: true, subContentButtonActive: true));
+                    SetValueState(cell, new ValueStateArgs(true, inspectActive: !LastValueWasNull, subContentButtonActive: !LastValueWasNull));
                     break;
                 case ValueState.Unsupported:
-                    SetValueState(cell, new ValueStateArgs(true, inspectActive: true));
+                    SetValueState(cell, new ValueStateArgs(true, inspectActive: !LastValueWasNull));
                     break;
             }
 
@@ -249,6 +288,7 @@ namespace UnityExplorer.UI.CacheObject
 
         protected virtual void SetValueState(CacheObjectCell cell, ValueStateArgs args)
         {
+            // main value label
             if (args.valueActive)
             {
                 cell.ValueLabel.text = ValueLabelText;
@@ -258,10 +298,12 @@ namespace UnityExplorer.UI.CacheObject
             else
                 cell.ValueLabel.text = "";
 
+            // Type label (for primitives)
             cell.TypeLabel.gameObject.SetActive(args.typeLabelActive);
             if (args.typeLabelActive)
                 cell.TypeLabel.text = SignatureHighlighter.Parse(Value.GetActualType(), false);
 
+            // toggle for bools
             cell.Toggle.gameObject.SetActive(args.toggleActive);
             if (args.toggleActive)
             {
@@ -270,6 +312,7 @@ namespace UnityExplorer.UI.CacheObject
                 cell.ToggleText.text = Value.ToString();
             }
 
+            // inputfield for numbers
             cell.InputField.gameObject.SetActive(args.inputActive);
             if (args.inputActive)
             {
@@ -277,9 +320,13 @@ namespace UnityExplorer.UI.CacheObject
                 cell.InputField.readOnly = !CanWrite;
             }
 
+            // apply for bool and numbers
             cell.ApplyButton.Button.gameObject.SetActive(args.applyActive);
-            cell.InspectButton.Button.gameObject.SetActive(args.inspectActive);
-            cell.SubContentButton.Button.gameObject.SetActive(args.subContentButtonActive);
+
+            // Inspect and IValue (subcontent) buttons - only if last value not null.
+            cell.InspectButton.Button.gameObject.SetActive(args.inspectActive && !LastValueWasNull);
+            // allow IValue for null strings though.
+            cell.SubContentButton.Button.gameObject.SetActive(args.subContentButtonActive && (!LastValueWasNull || State == ValueState.String));
         }
 
         // CacheObjectCell Apply

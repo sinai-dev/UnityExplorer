@@ -16,8 +16,8 @@ namespace UnityExplorer.UI.Utility
         internal static Dictionary<string, MethodInfo> toStringFormattedMethods = new Dictionary<string, MethodInfo>();
 
         // string allocs
-        private static readonly StringBuilder _stringBuilder = new StringBuilder(16384);
         private const string nullString = "<color=grey>null</color>";
+        private const string nullUnknown = nullString + " (?)";
         private const string destroyedString = "<color=red>Destroyed</color>";
         private const string untitledString = "<i><color=grey>untitled</color></i>";
 
@@ -25,28 +25,28 @@ namespace UnityExplorer.UI.Utility
 
         public static string ToStringWithType(object value, Type fallbackType, bool includeNamespace = true)
         {
-            if (value == null && fallbackType == null)
-                return nullString;
+            if (value.IsNullOrDestroyed() && fallbackType == null)
+                return nullUnknown;
 
             Type type = value?.GetActualType() ?? fallbackType;
 
             string richType = SignatureHighlighter.Parse(type, includeNamespace);
 
-            _stringBuilder.Clear();
+            var sb = new StringBuilder();
 
             if (value.IsNullOrDestroyed())
             {
                 if (value == null)
                 {
-                    _stringBuilder.Append(nullString);
-                    AppendRichType(_stringBuilder, richType);
-                    return _stringBuilder.ToString();
+                    sb.Append(nullString);
+                    AppendRichType(sb, richType);
+                    return sb.ToString();
                 }
                 else // destroyed unity object
                 {
-                    _stringBuilder.Append(destroyedString);
-                    AppendRichType(_stringBuilder, richType);
-                    return _stringBuilder.ToString();
+                    sb.Append(destroyedString);
+                    AppendRichType(sb, richType);
+                    return sb.ToString();
                 }
             }
 
@@ -58,57 +58,39 @@ namespace UnityExplorer.UI.Utility
                 else if (name.Length > 50)
                     name = $"{name.Substring(0, 50)}...";
 
-                _stringBuilder.Append($"\"{name}\"");
-                AppendRichType(_stringBuilder, richType);
+                sb.Append($"\"{name}\"");
+                AppendRichType(sb, richType);
             }
             else if (type.FullName.StartsWith(eventSystemNamespace))
             {
                 // UnityEngine.EventSystem classes can have some obnoxious ToString results with rich text.
-                _stringBuilder.Append(richType);
+                sb.Append(richType);
             }
             else
             {
                 var toString = ToString(value);
-
-                if (typeof(IEnumerable).IsAssignableFrom(type))
-                {
-                    if (value is IList iList)
-                        _stringBuilder.Append($"[{iList.Count}] ");
-                    else
-                        if (value is ICollection iCol)
-                        _stringBuilder.Append($"[{iCol.Count}] ");
-                    else
-                        _stringBuilder.Append("[?] ");
-                }
-                else if (typeof(IDictionary).IsAssignableFrom(type))
-                {
-                    if (value is IDictionary iDict)
-                        _stringBuilder.Append($"[{iDict.Count}] ");
-                    else
-                        _stringBuilder.Append("[?] ");
-                }
 
                 if (type.IsGenericType 
                     || toString == type.FullName 
                     || toString == $"{type.FullName} {type.FullName}"
                     || toString == $"Il2Cpp{type.FullName}" || type.FullName == $"Il2Cpp{toString}")
                 {
-                    _stringBuilder.Append(richType);
+                    sb.Append(richType);
                 }
                 else // the ToString contains some actual implementation, use that value.
                 {
                     // prune long strings unless they're unity structs
                     // (Matrix4x4 and Rect can have some longs ones that we want to display fully)
                     if (toString.Length > 100 && !(type.IsValueType && type.FullName.StartsWith("UnityEngine")))
-                        _stringBuilder.Append(toString.Substring(0, 100));
+                        sb.Append(toString.Substring(0, 100));
                     else
-                        _stringBuilder.Append(toString);
+                        sb.Append(toString);
 
-                    AppendRichType(_stringBuilder, richType);
+                    AppendRichType(sb, richType);
                 }
             }
 
-            return _stringBuilder.ToString();
+            return sb.ToString();
         }
 
         private static void AppendRichType(StringBuilder sb, string richType)
