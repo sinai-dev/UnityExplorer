@@ -181,7 +181,7 @@ namespace UnityExplorer.UI.Inspectors
                 timeOfLastAutoUpdate = Time.realtimeSinceStartup;
 
                 if (AutoUpdateWanted)
-                    UpdateDisplayedMembers();// true);
+                    UpdateDisplayedMembers();
             }
         }
 
@@ -228,7 +228,7 @@ namespace UnityExplorer.UI.Inspectors
             }
         }
 
-        private void UpdateDisplayedMembers()// bool onlyAutoUpdate)
+        private void UpdateDisplayedMembers()
         {
             bool shouldRefresh = false;
             foreach (var cell in MemberScrollPool.CellPool)
@@ -236,7 +236,7 @@ namespace UnityExplorer.UI.Inspectors
                 if (!cell.Enabled || cell.Occupant == null)
                     continue;
                 var member = cell.MemberOccupant;
-                if (member.ShouldAutoEvaluate) // && (!onlyAutoUpdate || member.AutoUpdateWanted))
+                if (member.ShouldAutoEvaluate)
                 {
                     shouldRefresh = true;
                     member.Evaluate();
@@ -267,10 +267,15 @@ namespace UnityExplorer.UI.Inspectors
 
             var member = filteredMembers[index];
 
-            if (cell.Occupant != null && member != cell.Occupant)
+            if (member.CellView != null && member.CellView != cell)
+                member.UnlinkFromView();
+
+            if (cell.Occupant != null && cell.Occupant != member)
                 cell.Occupant.UnlinkFromView();
 
-            member.SetView(cell);
+            if (member.CellView != cell)
+                member.SetView(cell);
+
             member.SetDataToCell(cell);
 
             SetCellLayout(cell);

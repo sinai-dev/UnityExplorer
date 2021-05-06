@@ -57,7 +57,10 @@ namespace UnityExplorer.UI.IValues
             values.Clear();
 
             foreach (var entry in cachedEntries)
+            {
+                entry.UnlinkFromView();
                 entry.ReleasePooledObjects();
+            }
 
             cachedEntries.Clear();
         }
@@ -166,10 +169,15 @@ namespace UnityExplorer.UI.IValues
 
             var entry = cachedEntries[index];
 
-            if (cell.Occupant != null && entry != cell.Occupant)
+            if (entry.CellView != null && entry.CellView != cell)
+                entry.UnlinkFromView();
+
+            if (cell.Occupant != null && cell.Occupant != entry)
                 cell.Occupant.UnlinkFromView();
 
-            entry.SetView(cell);
+            if (entry.CellView != cell)
+                entry.SetView(cell);
+
             entry.SetDataToCell(cell);
 
             SetCellLayout(cell);

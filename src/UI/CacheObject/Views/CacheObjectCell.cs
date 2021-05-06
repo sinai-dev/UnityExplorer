@@ -97,9 +97,6 @@ namespace UnityExplorer.UI.CacheObject.Views
 
         protected abstract void ConstructEvaluateHolder(GameObject parent);
 
-        // protected abstract void ConstructUpdateToggle(GameObject parent);
-
-        // Todo could create these as needed maybe, just need to make sure the transform order is correct.
 
         public virtual GameObject CreateContent(GameObject parent)
         {
@@ -110,11 +107,6 @@ namespace UnityExplorer.UI.CacheObject.Views
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(UIRoot, false, false, true, true, childAlignment: TextAnchor.UpperLeft);
             UIFactory.SetLayoutElement(UIRoot, minWidth: 100, flexibleWidth: 9999, minHeight: 30, flexibleHeight: 600);
             UIRoot.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-            //var content = UIFactory.CreateUIObject("Content", UIRoot);
-            //UIFactory.SetLayoutGroup<VerticalLayoutGroup>(content, true, false, true, true, 2, 0);
-            //UIFactory.SetLayoutElement(content, minWidth: 100, flexibleWidth: 9999, minHeight: 30, flexibleHeight: 600);
-            //content.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             var horiRow = UIFactory.CreateUIObject("HoriGroup", UIRoot);
             UIFactory.SetLayoutElement(horiRow, minHeight: 29, flexibleHeight: 150, flexibleWidth: 9999);

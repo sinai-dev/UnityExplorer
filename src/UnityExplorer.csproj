@@ -255,7 +255,6 @@
     <Compile Include="UI\IValues\InteractiveDictionary.cs" />
     <Compile Include="UI\IValues\InteractiveList.cs" />
     <Compile Include="UI\IValues\InteractiveValue.cs" />
-    <Compile Include="UI\Inspectors\ListInspector.cs" />
     <Compile Include="UI\Inspectors\ReflectionInspector.cs" />
     <Compile Include="UI\ObjectPool\IPooledObject.cs" />
     <Compile Include="UI\ObjectPool\Pool.cs" />

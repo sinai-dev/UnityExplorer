@@ -77,9 +77,6 @@ namespace UnityExplorer.UI.CacheObject
 
         public override void TrySetUserValue(object value)
         {
-            if (State == ValueState.String)
-                ReflectionProvider.Instance.BoxStringToType(ref value, FallbackType);
-            
             TrySetValue(value);
 
             Evaluate();

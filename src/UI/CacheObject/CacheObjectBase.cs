@@ -65,7 +65,6 @@ namespace UnityExplorer.UI.CacheObject
 
         protected const string NOT_YET_EVAL = "<color=grey>Not yet evaluated</color>";
 
-
         public virtual void ReleasePooledObjects()
         {
             if (this.IValue != null)
@@ -97,7 +96,10 @@ namespace UnityExplorer.UI.CacheObject
 
         public void SetUserValue(object value)
         {
-            value = value.TryCast(FallbackType);
+            if (State == ValueState.String)
+                ReflectionProvider.Instance.BoxStringToType(ref value, FallbackType);
+            else
+                value = value.TryCast(FallbackType);
             TrySetUserValue(value);
         }
 
