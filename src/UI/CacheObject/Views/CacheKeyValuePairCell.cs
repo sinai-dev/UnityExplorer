@@ -24,8 +24,11 @@ namespace UnityExplorer.UI.CacheObject.Views
         public static Color EvenColor = new Color(0.07f, 0.07f, 0.07f);
         public static Color OddColor = new Color(0.063f, 0.063f, 0.063f);
 
-        public int HalfWidth => (int)(0.5f * Rect.rect.width) + 50;
-        public int AdjustedKeyWidth => HalfWidth - 100;
+        public int AdjustedWidth => (int)Rect.rect.width - 70;
+
+        //public int HalfWidth => (int)(0.5f * Rect.rect.width) - 75;
+        //public int AdjustedKeyWidth => HalfWidth - 50;
+        //public int AdjustedRightWidth => HalfWidth;
 
         private void KeyInspectClicked()
         {
@@ -38,18 +41,18 @@ namespace UnityExplorer.UI.CacheObject.Views
 
             Image = root.AddComponent<Image>();
 
-            this.NameLayout.minWidth = 55;
-            this.NameLayout.flexibleWidth = 50;
+            this.NameLayout.minWidth = 70;
+            this.NameLayout.flexibleWidth = 0;
             this.NameLayout.minHeight = 30;
             this.NameLayout.flexibleHeight = 0;
             this.NameLabel.alignment = TextAnchor.MiddleRight;
 
-            this.RightGroupLayout.minWidth = HalfWidth;
+            this.RightGroupLayout.minWidth = AdjustedWidth * 0.55f;
 
             // Key area
             var keyGroup = UIFactory.CreateUIObject("KeyHolder", root.transform.Find("HoriGroup").gameObject);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(keyGroup, false, false, true, true, 2, 0, 0, 4, 4, childAlignment: TextAnchor.MiddleLeft);
-            KeyGroupLayout = UIFactory.SetLayoutElement(keyGroup, minHeight: 30, minWidth: AdjustedKeyWidth, flexibleWidth: 0);
+            KeyGroupLayout = UIFactory.SetLayoutElement(keyGroup, minHeight: 30, minWidth: (int)(AdjustedWidth * 0.44f), flexibleWidth: 0);
 
             // set to be after the NameLabel (our index label), and before the main horizontal group.
             keyGroup.transform.SetSiblingIndex(1);
@@ -73,7 +76,7 @@ namespace UnityExplorer.UI.CacheObject.Views
             // input field
 
             var keyInputObj = UIFactory.CreateInputField(keyGroup, "KeyInput", "empty", out KeyInputField);
-            UIFactory.SetLayoutElement(keyInputObj, minHeight: 25, flexibleHeight: 0, flexibleWidth: 200);
+            UIFactory.SetLayoutElement(keyInputObj, minHeight: 25, flexibleHeight: 0, flexibleWidth: 0, preferredWidth: 200);
             //KeyInputField.lineType = InputField.LineType.MultiLineNewline;
             KeyInputField.readOnly = true;
 

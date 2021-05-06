@@ -14,6 +14,7 @@ namespace UnityExplorer.UI.CacheObject
 
         public int DictIndex;
         public object DictKey;
+        public object DisplayedKey;
 
         public bool KeyInputWanted;
         public bool InspectWanted;
@@ -37,18 +38,20 @@ namespace UnityExplorer.UI.CacheObject
         public void SetKey(object key)
         {
             this.DictKey = key;
-            var type = key.GetActualType();
-            if (type == typeof(string) || (type.IsPrimitive && !(type == typeof(bool))) || type == typeof(decimal))
+            this.DisplayedKey = key.TryCast();
+
+            var type = DisplayedKey.GetType();
+            if (type == typeof(string) || (type.IsPrimitive && !(type == typeof(bool))))
             {
                 KeyInputWanted = true;
-                KeyInputText = key.ToString();
+                KeyInputText = DisplayedKey.ToString();
                 KeyInputTypeText = SignatureHighlighter.Parse(type, false);
             }
             else
             {
                 KeyInputWanted = false;
                 InspectWanted = type != typeof(bool) && !type.IsEnum;
-                KeyLabelText = ToStringUtility.ToStringWithType(key, type, true);
+                KeyLabelText = ToStringUtility.ToStringWithType(DisplayedKey, type, true);
             }
         }
 
