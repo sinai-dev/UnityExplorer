@@ -19,7 +19,7 @@ namespace UnityExplorer.UI.IValues
         object ICacheObjectController.Target => this.CurrentOwner.Value;
         public Type TargetType { get; private set; }
 
-        public override bool CanWrite => false;// TODO RefIDictionary != null && !RefIDictionary.IsReadOnly;
+        public override bool CanWrite => base.CanWrite && RefIDictionary != null && !RefIDictionary.IsReadOnly;
 
         public Type KeyType;
         public Type ValueType;
@@ -146,6 +146,24 @@ namespace UnityExplorer.UI.IValues
                     cache.ReleasePooledObjects();
                     cachedEntries.RemoveAt(i);
                 }
+            }
+        }
+
+        // Setting value to dictionary
+
+        public void TrySetValueToKey(object key, object value, int keyIndex)
+        {
+            try
+            {
+                RefIDictionary[key] = value;
+
+                var entry = cachedEntries[keyIndex];
+                entry.SetValueFromSource(value);
+                entry.SetDataToCell(entry.CellView);
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.LogWarning($"Exception setting IDictionary key! {ex}");
             }
         }
 

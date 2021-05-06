@@ -26,7 +26,7 @@ namespace UnityExplorer.UI.CacheObject
 
         public override bool ShouldAutoEvaluate => true;
         public override bool HasArguments => false;
-        public override bool CanWrite => false; // TODO Parent.CanWrite;
+        public override bool CanWrite => Owner.CanWrite;
 
         public void SetDictOwner(InteractiveDictionary dict, int index)
         {
@@ -84,7 +84,7 @@ namespace UnityExplorer.UI.CacheObject
 
         public override void TrySetUserValue(object value)
         {
-            throw new NotImplementedException("TODO");
+            (Owner as InteractiveDictionary).TrySetValueToKey(DictKey, value, DictIndex);
         }
 
 

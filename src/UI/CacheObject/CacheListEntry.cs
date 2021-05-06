@@ -33,7 +33,7 @@ namespace UnityExplorer.UI.CacheObject
 
         public override void TrySetUserValue(object value)
         {
-            throw new NotImplementedException("TODO");
+            (Owner as InteractiveList).TrySetValueToIndex(value, this.ListIndex);
         }
 
 

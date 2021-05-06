@@ -19,7 +19,7 @@ namespace UnityExplorer.UI.IValues
         object ICacheObjectController.Target => this.CurrentOwner.Value;
         public Type TargetType { get; private set; }
 
-        public override bool CanWrite => RefIList != null && !RefIList.IsReadOnly;
+        public override bool CanWrite => base.CanWrite && RefIList != null && !RefIList.IsReadOnly;
 
         public Type EntryType;
         public IEnumerable RefIEnumerable;
@@ -60,6 +60,7 @@ namespace UnityExplorer.UI.IValues
             cachedEntries.Clear();
         }
 
+        // Setting the List value itself to this model
         public override void SetValue(object value)
         {
             if (value == null)
@@ -100,6 +101,8 @@ namespace UnityExplorer.UI.IValues
             int idx = 0;
             foreach (var entry in RefIEnumerable)
             {
+                // var entry = item.TryCast();
+
                 values.Add(entry);
 
                 // If list count increased, create new cache entries
@@ -132,6 +135,24 @@ namespace UnityExplorer.UI.IValues
                 }
             }
         }
+
+        // Setting the value of an index to the list
+
+        public void TrySetValueToIndex(object value, int index)
+        {
+            try
+            {
+                RefIList[index] = value;
+
+                var entry = cachedEntries[index];
+                entry.SetValueFromSource(value);
+                entry.SetDataToCell(entry.CellView);
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.LogWarning($"Exception setting IList value: {ex}");
+            }
+        } 
 
         // List entry scroll pool
 

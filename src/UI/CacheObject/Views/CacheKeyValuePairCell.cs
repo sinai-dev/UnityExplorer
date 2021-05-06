@@ -84,10 +84,5 @@ namespace UnityExplorer.UI.CacheObject.Views
         {
             // not used
         }
-
-        //protected override void ConstructUpdateToggle(GameObject parent)
-        //{
-        //    // not used
-        //}
     }
 }

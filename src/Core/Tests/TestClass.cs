@@ -9,6 +9,9 @@ namespace UnityExplorer.Tests
 {
     public static class TestClass
     {
+        public static List<int> AWritableList = new List<int> { 1, 2, 3, 4, 5 };
+        public static Dictionary<string, int> AWritableDict = new Dictionary<string, int> { { "one", 1 }, { "two", 2 } };
+
         public static IEnumerable ANestedList = new List<List<List<string>>>
         {
             new List<List<string>>
@@ -86,11 +89,6 @@ namespace UnityExplorer.Tests
             ExplorerCore.Log("Test2 " + typeof(T).FullName);
         }
         
-        //private static void TestGenericMultiInterface<T>() where T : IEnumerable, IList, ICollection
-        //{
-        //    ExplorerCore.Log("Test3 " + typeof(T).FullName);
-        //}
-        
         private static void TestComponent<T>() where T : Component
         {
             ExplorerCore.Log("Test3 " + typeof(T).FullName);
@@ -121,22 +119,23 @@ namespace UnityExplorer.Tests
         }
 
 #if CPP
+        public static List<Il2CppSystem.Object> TestWritableBoxedList;
+
         public static string testStringOne = "Test";
         public static Il2CppSystem.Object testStringTwo = "string boxed as cpp object";
         public static Il2CppSystem.String testStringThree = "string boxed as cpp string";
         public static string nullString = null;
 
-        public static List<Il2CppSystem.Object> boxedList;
+        public static List<Il2CppSystem.Object> cppBoxedList;
+        public static UnhollowerBaseLib.Il2CppStructArray<int> CppIntStructArray;
+        public static UnhollowerBaseLib.Il2CppStringArray CppStringArray;
+        public static UnhollowerBaseLib.Il2CppReferenceArray<Il2CppSystem.Object> CppReferenceArray;
 
-        public static Il2CppSystem.Object boxedInt;
-        public static Il2CppSystem.Int32 cppint;
+        public static Il2CppSystem.Object cppBoxedInt;
+        public static Il2CppSystem.Int32 cppInt;
 
-        public static Il2CppSystem.Collections.Hashtable testHashset;
-        public static Il2CppSystem.Collections.Generic.List<Il2CppSystem.Object> testList;
+        public static Il2CppSystem.Collections.Hashtable cppHashset;
 
-        //public static Il2CppSystem.Nullable<Quaternion> NullableQuaternion;
-        //public static Il2CppSystem.Nullable<int> NullableInt = new Il2CppSystem.Nullable<int>(5);
-        //public static Il2CppSystem.Nullable<bool> NullableBool = new Il2CppSystem.Nullable<bool>(false);
 #endif
 
         static TestClass()
@@ -145,24 +144,39 @@ namespace UnityExplorer.Tests
                 BigList.Add(i.ToString());
 
 #if CPP
-            //NullableQuaternion = new Il2CppSystem.Nullable<Quaternion>();
-            //NullableQuaternion.value = Quaternion.identity;
+            CppIntStructArray = new UnhollowerBaseLib.Il2CppStructArray<int>(5);
+            CppIntStructArray[0] = 0;
+            CppIntStructArray[1] = 1;
+            CppIntStructArray[2] = 2;
+            CppIntStructArray[3] = 3;
+            CppIntStructArray[4] = 4;
 
-            boxedInt = new Il2CppSystem.Int32() { m_value = 5 }.BoxIl2CppObject();
-            boxedList = new List<Il2CppSystem.Object>();
-            boxedList.Add((Il2CppSystem.String)"boxedString");
-            boxedList.Add(new Il2CppSystem.Int32 { m_value = 5 }.BoxIl2CppObject());
-            cppint = new Il2CppSystem.Int32 { m_value = 420 };
+            CppStringArray = new UnhollowerBaseLib.Il2CppStringArray(2);
+            CppStringArray[0] = "hello, ";
+            CppStringArray[1] = "world!";
 
-            testHashset = new Il2CppSystem.Collections.Hashtable();
-            testHashset.Add("key1", "itemOne");
-            testHashset.Add("key2", "itemTwo");
-            testHashset.Add("key3", "itemThree");
+            CppReferenceArray = new UnhollowerBaseLib.Il2CppReferenceArray<Il2CppSystem.Object>(3);
+            CppReferenceArray[0] = new Il2CppSystem.Int32 { m_value = 5 }.BoxIl2CppObject();
+            CppReferenceArray[1] = null;
+            CppReferenceArray[2] = (Il2CppSystem.String)"whats up";
 
-            testList = new Il2CppSystem.Collections.Generic.List<Il2CppSystem.Object>(3);
-            testList.Add("One");
-            testList.Add("Two");
-            testList.Add("Three");
+            cppBoxedInt = new Il2CppSystem.Int32() { m_value = 5 }.BoxIl2CppObject();
+            cppBoxedList = new List<Il2CppSystem.Object>();
+            cppBoxedList.Add((Il2CppSystem.String)"boxedString");
+            cppBoxedList.Add(new Il2CppSystem.Int32 { m_value = 5 }.BoxIl2CppObject());
+            cppInt = new Il2CppSystem.Int32 { m_value = 420 };
+
+            TestWritableBoxedList = new List<Il2CppSystem.Object>();
+            TestWritableBoxedList.Add(new Il2CppSystem.Int32 { m_value = 1 }.BoxIl2CppObject());
+            TestWritableBoxedList.Add(new Il2CppSystem.Int32 { m_value = 2 }.BoxIl2CppObject());
+            TestWritableBoxedList.Add(new Il2CppSystem.Int32 { m_value = 3 }.BoxIl2CppObject());
+            TestWritableBoxedList.Add(new Il2CppSystem.Int32 { m_value = 4 }.BoxIl2CppObject());
+
+            cppHashset = new Il2CppSystem.Collections.Hashtable();
+            cppHashset.Add("key1", "itemOne");
+            cppHashset.Add("key2", "itemTwo");
+            cppHashset.Add("key3", "itemThree");
+
 #endif
         }
     }

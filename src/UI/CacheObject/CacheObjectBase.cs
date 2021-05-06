@@ -100,6 +100,7 @@ namespace UnityExplorer.UI.CacheObject
                 ReflectionProvider.Instance.BoxStringToType(ref value, FallbackType);
             else
                 value = value.TryCast(FallbackType);
+
             TrySetUserValue(value);
         }
 
@@ -283,62 +284,6 @@ namespace UnityExplorer.UI.CacheObject
             cell.SubContentButton.Button.gameObject.SetActive(args.subContentButtonActive);
         }
 
-        // IValues
-
-        internal static GameObject InactiveIValueHolder
-        {
-            get
-            {
-                if (!inactiveIValueHolder)
-                {
-                    inactiveIValueHolder = new GameObject("Temp_IValue_Holder");
-                    GameObject.DontDestroyOnLoad(inactiveIValueHolder);
-                    inactiveIValueHolder.transform.parent = UIManager.PoolHolder.transform;
-                    inactiveIValueHolder.SetActive(false);
-                }
-                return inactiveIValueHolder;
-            }
-        }
-        private static GameObject inactiveIValueHolder;
-
-        public virtual void OnCellSubContentToggle()
-        {
-            if (this.IValue == null)
-            {
-                var ivalueType = InteractiveValue.GetIValueTypeForState(State);
-                IValue = (InteractiveValue)Pool.Borrow(ivalueType);
-                CurrentIValueType = ivalueType;
-
-                IValue.OnBorrowed(this);
-                IValue.SetValue(this.Value);
-                IValue.UIRoot.transform.SetParent(CellView.SubContentHolder.transform, false);
-                CellView.SubContentHolder.SetActive(true);
-                SubContentShowWanted = true;
-
-                // update our cell after creating the ivalue (the value may have updated, make sure its consistent)
-                this.ProcessOnEvaluate();
-                this.SetDataToCell(this.CellView);
-            }
-            else
-            {
-                SubContentShowWanted = !SubContentShowWanted;
-                CellView.SubContentHolder.SetActive(SubContentShowWanted); 
-            }
-
-            CellView.RefreshSubcontentButton();
-        }
-
-        public virtual void ReleaseIValue()
-        {
-            if (IValue == null)
-                return;
-
-            IValue.ReleaseFromOwner();
-            Pool.Return(CurrentIValueType, IValue);
-
-            IValue = null;
-        }
-
         // CacheObjectCell Apply
 
         public virtual void OnCellApplyClicked()
@@ -367,6 +312,76 @@ namespace UnityExplorer.UI.CacheObject
 
             SetDataToCell(this.CellView);
         }
+
+        // IValues
+
+        public virtual void OnCellSubContentToggle()
+        {
+            if (this.IValue == null)
+            {
+                var ivalueType = InteractiveValue.GetIValueTypeForState(State);
+                IValue = (InteractiveValue)Pool.Borrow(ivalueType);
+                CurrentIValueType = ivalueType;
+
+                IValue.OnBorrowed(this);
+                IValue.SetValue(this.Value);
+                IValue.UIRoot.transform.SetParent(CellView.SubContentHolder.transform, false);
+                CellView.SubContentHolder.SetActive(true);
+                SubContentShowWanted = true;
+
+                // update our cell after creating the ivalue (the value may have updated, make sure its consistent)
+                this.ProcessOnEvaluate();
+                this.SetDataToCell(this.CellView);
+            }
+            else
+            {
+                SubContentShowWanted = !SubContentShowWanted;
+                CellView.SubContentHolder.SetActive(SubContentShowWanted);
+            }
+
+            CellView.RefreshSubcontentButton();
+        }
+
+        public virtual void SetValueFromIValue(object value)
+        {
+            if (CellView == null)
+            {
+                ExplorerCore.LogWarning("Trying to set value from IValue but CellView is null!?");
+                return;
+            }
+
+            SetUserValue(value);
+            SetDataToCell(CellView);
+        }
+
+        public virtual void ReleaseIValue()
+        {
+            if (IValue == null)
+                return;
+
+            IValue.ReleaseFromOwner();
+            Pool.Return(CurrentIValueType, IValue);
+
+            IValue = null;
+        }
+
+        internal static GameObject InactiveIValueHolder
+        {
+            get
+            {
+                if (!inactiveIValueHolder)
+                {
+                    inactiveIValueHolder = new GameObject("Temp_IValue_Holder");
+                    GameObject.DontDestroyOnLoad(inactiveIValueHolder);
+                    inactiveIValueHolder.transform.parent = UIManager.PoolHolder.transform;
+                    inactiveIValueHolder.SetActive(false);
+                }
+                return inactiveIValueHolder;
+            }
+        }
+        private static GameObject inactiveIValueHolder;
+
+        // Value state args helper
 
         public struct ValueStateArgs
         {

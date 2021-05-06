@@ -311,6 +311,8 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             return il2cppPtr != IntPtr.Zero;
         }
 
+        #region EXTERN CAST METHODS
+
         // Extern C++ methods 
         [DllImport("GameAssembly", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern bool il2cpp_class_is_assignable_from(IntPtr klass, IntPtr oklass);
@@ -318,10 +320,13 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
         [DllImport("GameAssembly", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern IntPtr il2cpp_object_get_class(IntPtr obj);
 
-        public override bool IsString(object obj)
-        {
-            return obj is string || obj is Il2CppSystem.String;
-        }
+        #endregion
+
+        // Strings
+
+        private const string IL2CPP_STRING_FULLNAME = "Il2CppSystem.String";
+
+        public override bool IsString(object obj) => obj is string || obj.GetActualType().FullName == IL2CPP_STRING_FULLNAME;
 
         public override void BoxStringToType(ref object value, Type castTo)
         {

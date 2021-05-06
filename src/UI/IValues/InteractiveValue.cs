@@ -17,10 +17,10 @@ namespace UnityExplorer.UI.IValues
 
         public virtual bool CanWrite => this.CurrentOwner.CanWrite;
 
-        public CacheObjectBase CurrentOwner { get; }
+        public CacheObjectBase CurrentOwner => m_owner;
         private CacheObjectBase m_owner;
 
-        public object EditedValue { get; private set; }
+        //public object EditedValue { get; private set; }
 
         public virtual void SetLayout() { }
 
@@ -53,12 +53,6 @@ namespace UnityExplorer.UI.IValues
             }
 
             this.m_owner = owner;
-            // ...
-        }
-
-        public virtual void SetValue(object value)
-        {
-            this.EditedValue = value;
         }
 
         public virtual void ReleaseFromOwner()
@@ -68,6 +62,13 @@ namespace UnityExplorer.UI.IValues
 
             this.m_owner = null;
         }
+
+        public virtual void SetValue(object value) { }
+
+        //public virtual void SetValue(object value)
+        //{
+        //    this.EditedValue = value;
+        //}
 
         public virtual GameObject CreateContent(GameObject parent)
         {
