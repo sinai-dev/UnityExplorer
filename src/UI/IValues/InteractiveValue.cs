@@ -17,17 +17,17 @@ namespace UnityExplorer.UI.IValues
             {
                 case ValueState.String:
                     return typeof(InteractiveString);
-                //case ValueState.Enum:
-                //    return typeof(InteractiveEnum);
+                case ValueState.Enum:
+                    return typeof(InteractiveEnum);
                 case ValueState.Collection:
                     return typeof(InteractiveList);
                 case ValueState.Dictionary:
                     return typeof(InteractiveDictionary);
                 //case ValueState.ValueStruct:
                 //    return typeof(InteractiveValueStruct);
-                //case ValueState.Color:
-                //    return typeof(InteractiveColor);
-                default: return typeof(InteractiveValue);
+                case ValueState.Color:
+                    return typeof(InteractiveColor);
+                default: return null;
             }
         }
 
@@ -63,21 +63,5 @@ namespace UnityExplorer.UI.IValues
         public virtual void SetLayout() { }
 
         public abstract GameObject CreateContent(GameObject parent);
-
-        //
-        //public virtual GameObject CreateContent(GameObject parent)
-        //{
-        //    UIRoot = UIFactory.CreateUIObject(this.GetType().Name, parent);
-        //    UIRoot.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-        //    UIFactory.SetLayoutGroup<VerticalLayoutGroup>(UIRoot, true, true, true, true, 3, childAlignment: TextAnchor.MiddleLeft);
-        //
-        //    UIFactory.CreateLabel(UIRoot, "Label", "this is an ivalue", TextAnchor.MiddleLeft);
-        //    UIFactory.CreateInputField(UIRoot, "InputFIeld", "...", out var input);
-        //    UIFactory.SetLayoutElement(input.gameObject, minHeight: 25, flexibleHeight: 500);
-        //    input.lineType = InputField.LineType.MultiLineNewline;
-        //    input.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-        //
-        //    return UIRoot;
-        //}
     }
 }

@@ -270,11 +270,8 @@ namespace UnityExplorer
 
             try
             {
-                var x = new Il2CppSystem.Int32 { m_value = 5 };
-                x.BoxIl2CppObject().Unbox<int>();
-
                 if (toType.IsEnum)
-                    return Enum.ToObject(toType, Il2CppSystem.Enum.ToUInt64(cppObj));
+                    return Enum.Parse(toType, cppObj.ToString());
 
                 var name = toType.AssemblyQualifiedName;
 
@@ -316,12 +313,10 @@ namespace UnityExplorer
                     return null;
 
                 if (type.IsEnum)
-                    return Il2CppSystem.Enum.ToObject(Il2CppType.From(type), (ulong)value);
+                    return Il2CppSystem.Enum.Parse(Il2CppType.From(type), value.ToString());
 
                 if (type.IsPrimitive && AllTypes.TryGetValue($"Il2Cpp{type.FullName}", out Type cppType))
-                {
                     return BoxIl2CppObject(MakeIl2CppPrimitive(cppType, value), cppType);
-                }
 
                 return BoxIl2CppObject(value, type);
             }

@@ -60,7 +60,7 @@ namespace UnityExplorer.UI.IValues
 
         private void OnApplyClicked()
         {
-            CurrentOwner.SetValueFromIValue(EditedValue);
+            CurrentOwner.SetUserValue(EditedValue);
         }
 
         private void OnInputChanged(string input)
