@@ -139,7 +139,8 @@ namespace UnityExplorer.UI.Widgets
             if (displayedObjects.Contains(instanceID))
             {
                 cached = (CachedTransform)displayedObjects[(object)instanceID];
-                cached.Update(transform, depth);
+                if (cached.Update(transform, depth))
+                    needRefresh = true;
             }
             else
             {
