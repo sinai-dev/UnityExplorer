@@ -100,6 +100,8 @@ namespace UnityExplorer.UI.CacheObject
             value = value.TryCast(FallbackType);
 
             TrySetUserValue(value);
+
+            SetDataToCell(CellView);
         }
 
         public abstract void TrySetUserValue(object value);
@@ -345,16 +347,27 @@ namespace UnityExplorer.UI.CacheObject
                 SetUserValue(this.CellView.Toggle.isOn);
             else
             {
-                var type = Value.GetActualType();
-                if (!numberParseMethods.ContainsKey(type.AssemblyQualifiedName))
+                try
                 {
-                    var method = type.GetMethod("Parse", new Type[] { typeof(string) });
-                    numberParseMethods.Add(type.AssemblyQualifiedName, method);
-                }
+                    var type = Value.GetActualType();
+                    if (!numberParseMethods.ContainsKey(type.AssemblyQualifiedName))
+                    {
+                        var method = type.GetMethod("Parse", new Type[] { typeof(string) });
+                        numberParseMethods.Add(type.AssemblyQualifiedName, method);
+                    }
+                
+                    var val = numberParseMethods[type.AssemblyQualifiedName]
+                        .Invoke(null, new object[] { CellView.InputField.Text });
 
-                var val = numberParseMethods[type.AssemblyQualifiedName]
-                    .Invoke(null, new object[] { CellView.InputField.Text });
-                SetUserValue(val);
+                    SetUserValue(val);
+                }
+                catch (ArgumentException) { } // ignore bad user input
+                catch (FormatException) { }
+                catch (OverflowException) { }
+                catch (Exception ex)
+                {
+                    ExplorerCore.LogWarning("CacheObjectBase OnCellApplyClicked (number): " + ex.ToString());
+                }
             }
 
             SetDataToCell(this.CellView);
@@ -367,6 +380,10 @@ namespace UnityExplorer.UI.CacheObject
             if (this.IValue == null)
             {
                 var ivalueType = InteractiveValue.GetIValueTypeForState(State);
+
+                if (ivalueType == null)
+                    return;
+
                 IValue = (InteractiveValue)Pool.Borrow(ivalueType);
                 CurrentIValueType = ivalueType;
 
@@ -387,18 +404,6 @@ namespace UnityExplorer.UI.CacheObject
             }
 
             CellView.RefreshSubcontentButton();
-        }
-
-        public virtual void SetValueFromIValue(object value)
-        {
-            if (CellView == null)
-            {
-                ExplorerCore.LogWarning("Trying to set value from IValue but CellView is null!?");
-                return;
-            }
-
-            SetUserValue(value);
-            SetDataToCell(CellView);
         }
 
         public virtual void ReleaseIValue()
