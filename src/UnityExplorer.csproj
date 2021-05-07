@@ -256,11 +256,14 @@
     <Compile Include="UI\Inspectors\InspectorBase.cs" />
     <Compile Include="UI\IValues\InteractiveDictionary.cs" />
     <Compile Include="UI\IValues\InteractiveList.cs" />
+    <Compile Include="UI\IValues\InteractiveString.cs" />
     <Compile Include="UI\IValues\InteractiveValue.cs" />
     <Compile Include="UI\Inspectors\ReflectionInspector.cs" />
+    <Compile Include="UI\Models\InputFieldRef.cs" />
     <Compile Include="UI\ObjectPool\IPooledObject.cs" />
     <Compile Include="UI\ObjectPool\Pool.cs" />
     <Compile Include="UI\Panels\CSConsolePanel.cs" />
+    <Compile Include="Core\Utility\IOUtility.cs" />
     <Compile Include="UI\Widgets\AutoComplete\ISuggestionProvider.cs" />
     <Compile Include="UI\Widgets\AutoComplete\Suggestion.cs" />
     <Compile Include="Core\Config\ConfigElement.cs" />
@@ -330,7 +333,7 @@
     <Compile Include="Inspectors_OLD\InteractiveValues\InteractiveNumber.cs" />
     <Compile Include="Inspectors_OLD\InteractiveValues\InteractiveString.cs" />
     <Compile Include="Inspectors_OLD\InteractiveValues\InteractiveValue.cs" />
-    <Compile Include="UI\Widgets\ButtonRef.cs" />
+    <Compile Include="UI\Models\ButtonRef.cs" />
     <Compile Include="UI\ObjectExplorer\ObjectSearch.cs" />
     <Compile Include="UI\ObjectExplorer\SceneExplorer.cs" />
     <Compile Include="UI\Widgets\ScrollPool\DataHeightCache.cs" />

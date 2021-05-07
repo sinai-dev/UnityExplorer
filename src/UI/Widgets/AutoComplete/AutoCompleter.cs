@@ -76,11 +76,11 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
             if (suggestions.Any() && CurrentHandler != null)
             {
-                if (!CurrentHandler.InputField.gameObject.activeInHierarchy)
+                if (!CurrentHandler.InputField.UIRoot.activeInHierarchy)
                     ReleaseOwnership(CurrentHandler);
                 else
                 {
-                    lastCaretPos = CurrentHandler.InputField.caretPosition;
+                    lastCaretPos = CurrentHandler.InputField.InputField.caretPosition;
                     UpdatePosition();
                 }
             }
@@ -142,13 +142,13 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         private void UpdatePosition()
         {
-            if (CurrentHandler == null || !CurrentHandler.InputField.isFocused)
+            if (CurrentHandler == null || !CurrentHandler.InputField.InputField.isFocused)
                 return;
 
             Vector3 pos;
             var input = CurrentHandler.InputField;
 
-            var textGen = input.textComponent.cachedTextGenerator;
+            var textGen = input.InputField.textComponent.cachedTextGenerator;
             int caretPos = 0;
             if (CurrentHandler.AnchorToCaretPosition)
             {
@@ -159,7 +159,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             }
 
             pos = textGen.characters[caretPos].cursorPos;
-            pos = input.transform.TransformPoint(pos);
+            pos = input.UIRoot.transform.TransformPoint(pos);
 
             uiRoot.transform.position = new Vector3(pos.x + 10, pos.y - 20, 0);
 

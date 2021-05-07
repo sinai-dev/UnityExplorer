@@ -66,17 +66,17 @@ namespace UnityExplorer.UI.CacheObject
 
             if (KeyInputWanted)
             {
-                kvpCell.KeyInputField.gameObject.SetActive(true);
+                kvpCell.KeyInputField.UIRoot.SetActive(true);
                 kvpCell.KeyInputTypeLabel.gameObject.SetActive(true);
                 kvpCell.KeyLabel.gameObject.SetActive(false);
                 kvpCell.KeyInspectButton.Button.gameObject.SetActive(false);
 
-                kvpCell.KeyInputField.text = KeyInputText;
+                kvpCell.KeyInputField.Text = KeyInputText;
                 kvpCell.KeyInputTypeLabel.text = KeyInputTypeText;
             }
             else
             {
-                kvpCell.KeyInputField.gameObject.SetActive(false);
+                kvpCell.KeyInputField.UIRoot.SetActive(false);
                 kvpCell.KeyInputTypeLabel.gameObject.SetActive(false);
                 kvpCell.KeyLabel.gameObject.SetActive(true);
                 kvpCell.KeyInspectButton.Button.gameObject.SetActive(InspectWanted);

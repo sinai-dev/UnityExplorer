@@ -173,11 +173,12 @@ namespace UnityExplorer.UI.Panels
             UIFactory.SetLayoutElement(filterRow, minHeight: 25, flexibleHeight: 0);
 
             //Filter input field
-            var inputFieldObj = UIFactory.CreateInputField(filterRow, "FilterInput", "Search...", out InputField inputField, 13);
-            inputField.targetGraphic.color = new Color(0.2f, 0.2f, 0.2f);
-            RuntimeProvider.Instance.SetColorBlock(inputField, new Color(0.4f, 0.4f, 0.4f), new Color(0.2f, 0.2f, 0.2f), new Color(0.08f, 0.08f, 0.08f));
-            UIFactory.SetLayoutElement(inputFieldObj, minHeight: 25);
-            inputField.onValueChanged.AddListener(OnFilterInput);
+            var inputField = UIFactory.CreateInputField(filterRow, "FilterInput", "Search...");
+            inputField.InputField.targetGraphic.color = new Color(0.2f, 0.2f, 0.2f);
+            RuntimeProvider.Instance.SetColorBlock(inputField.InputField, new Color(0.4f, 0.4f, 0.4f), new Color(0.2f, 0.2f, 0.2f), 
+                new Color(0.08f, 0.08f, 0.08f));
+            UIFactory.SetLayoutElement(inputField.UIRoot, minHeight: 25);
+            inputField.OnValueChanged += OnFilterInput;
 
             // refresh row
 

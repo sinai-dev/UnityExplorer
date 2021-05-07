@@ -33,7 +33,7 @@ namespace UnityExplorer.UI.CacheObject.Views
         private readonly List<Text> genericArgLabels = new List<Text>();
         private readonly List<TypeCompleter> genericAutocompleters = new List<TypeCompleter>();
 
-        private readonly List<InputField> inputFieldCache = new List<InputField>();
+        private readonly List<InputFieldRef> inputFieldCache = new List<InputFieldRef>();
 
         public void OnBorrowedFromPool(CacheMember owner)
         {
@@ -53,7 +53,7 @@ namespace UnityExplorer.UI.CacheObject.Views
         public void OnReturnToPool()
         {
             foreach (var input in inputFieldCache)
-                input.text = "";
+                input.Text = "";
 
             this.Owner = null;
         }
@@ -223,11 +223,11 @@ namespace UnityExplorer.UI.CacheObject.Views
             labelList.Add(label);
             label.horizontalOverflow = HorizontalWrapMode.Wrap;
 
-            var inputObj = UIFactory.CreateInputField(horiGroup, "InputField", "...", out InputField inputField);
-            UIFactory.SetLayoutElement(inputObj, minHeight: 25, flexibleHeight: 50, minWidth: 100, flexibleWidth: 1000);
-            inputField.lineType = InputField.LineType.MultiLineNewline;
-            inputObj.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-            inputField.onValueChanged.AddListener((string val) => { inputArray[index] = val; });
+            var inputField = UIFactory.CreateInputField(horiGroup, "InputField", "...");
+            UIFactory.SetLayoutElement(inputField.UIRoot, minHeight: 25, flexibleHeight: 50, minWidth: 100, flexibleWidth: 1000);
+            inputField.InputField.lineType = InputField.LineType.MultiLineNewline;
+            inputField.UIRoot.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            inputField.OnValueChanged += (string val) => { inputArray[index] = val; };
             inputFieldCache.Add(inputField);
 
             if (autocomplete)

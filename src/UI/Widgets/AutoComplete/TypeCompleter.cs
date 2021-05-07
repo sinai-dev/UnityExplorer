@@ -21,20 +21,20 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         public Type BaseType { get; set; }
         public Type[] GenericConstraints { get; set; }
 
-        public InputField InputField { get; }
+        public InputFieldRef InputField { get; }
         public bool AnchorToCaretPosition => false;
 
         private readonly List<Suggestion> suggestions = new List<Suggestion>();
-        private float timeOfLastCheck;
+        //private float timeOfLastCheck;
 
         private HashSet<Type> allowedTypes;
 
-        public TypeCompleter(Type baseType, InputField inputField)
+        public TypeCompleter(Type baseType, InputFieldRef inputField)
         {
             BaseType = baseType;
             InputField = inputField;
 
-            inputField.onValueChanged.AddListener(OnInputFieldChanged);
+            inputField.OnValueChanged += OnInputFieldChanged;
 
             if (BaseType != null)
                 CacheTypes();
@@ -47,9 +47,9 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         public void OnSuggestionClicked(Suggestion suggestion)
         {
-            timeOfLastCheck = Time.realtimeSinceStartup;
+            //timeOfLastCheck = Time.realtimeSinceStartup;
 
-            InputField.text = suggestion.UnderlyingValue;
+            InputField.Text = suggestion.UnderlyingValue;
             SuggestionClicked?.Invoke(suggestion);
 
             suggestions.Clear();
@@ -58,10 +58,10 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         private void OnInputFieldChanged(string value)
         {
-            if (!timeOfLastCheck.OccuredEarlierThanDefault())
-                return;
-
-            timeOfLastCheck = Time.realtimeSinceStartup;
+            //if (!timeOfLastCheck.OccuredEarlierThanDefault())
+            //    return;
+            //
+            //timeOfLastCheck = Time.realtimeSinceStartup;
 
             value = value ?? "";
 

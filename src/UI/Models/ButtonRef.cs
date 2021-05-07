@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine.UI;
+using UnityExplorer.UI.Models;
 
-namespace UnityExplorer.UI.Widgets
+namespace UnityExplorer.UI
 {
     // A simple helper class to handle a button's OnClick more effectively.
 

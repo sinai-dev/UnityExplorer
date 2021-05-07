@@ -52,15 +52,15 @@ namespace UnityExplorer.UI.Inspectors
         private bool TextureViewerWanted;
         private GameObject unityObjectRow;
         private ButtonRef gameObjectButton;
-        private InputField nameInput;
-        private InputField instanceIdInput;
+        private InputFieldRef nameInput;
+        private InputFieldRef instanceIdInput;
         private ButtonRef textureButton;
         private GameObject textureViewer;
 
         private readonly Color disabledButtonColor = new Color(0.24f, 0.24f, 0.24f);
         private readonly Color enabledButtonColor = new Color(0.2f, 0.27f, 0.2f);
         private readonly Dictionary<BindingFlags, ButtonRef> scopeFilterButtons = new Dictionary<BindingFlags, ButtonRef>();
-        private InputField filterInputField;
+        private InputFieldRef filterInputField;
 
         //private LayoutElement memberTitleLayout;
 
@@ -143,7 +143,7 @@ namespace UnityExplorer.UI.Inspectors
 
             // Get cache members, and set filter to default 
             this.members = CacheMember.GetCacheMembers(Target, TargetType, this);
-            this.filterInputField.text = "";
+            this.filterInputField.Text = "";
             SetFilter("", StaticOnly ? BindingFlags.Static : BindingFlags.Instance);
             refreshWanted = true;
         }
@@ -345,9 +345,10 @@ namespace UnityExplorer.UI.Inspectors
 
             var nameLabel = UIFactory.CreateLabel(filterRow, "NameFilterLabel", "Filter names:", TextAnchor.MiddleLeft, Color.grey);
             UIFactory.SetLayoutElement(nameLabel.gameObject, minHeight: 25, minWidth: 90, flexibleWidth: 0);
-            var nameFilterObj = UIFactory.CreateInputField(filterRow, "NameFilterInput", "...", out filterInputField);
-            UIFactory.SetLayoutElement(nameFilterObj, minHeight: 25, flexibleWidth: 300);
-            filterInputField.onValueChanged.AddListener((string val) => { SetFilter(val); });
+
+            filterInputField = UIFactory.CreateInputField(filterRow, "NameFilterInput", "...");
+            UIFactory.SetLayoutElement(filterInputField.UIRoot, minHeight: 25, flexibleWidth: 300);
+            filterInputField.OnValueChanged += (string val) => { SetFilter(val); };
 
             var spacer = UIFactory.CreateUIObject("Spacer", filterRow);
             UIFactory.SetLayoutElement(spacer, minWidth: 25);
@@ -407,8 +408,8 @@ namespace UnityExplorer.UI.Inspectors
             ObjectRef = (UnityEngine.Object)Target.TryCast(typeof(UnityEngine.Object));
             unityObjectRow.SetActive(true);
 
-            nameInput.text = ObjectRef.name;
-            instanceIdInput.text = ObjectRef.GetInstanceID().ToString();
+            nameInput.Text = ObjectRef.name;
+            instanceIdInput.Text = ObjectRef.GetInstanceID().ToString();
 
             if (typeof(Component).IsAssignableFrom(TargetType))
             {
@@ -483,16 +484,16 @@ namespace UnityExplorer.UI.Inspectors
             var nameLabel = UIFactory.CreateLabel(unityObjectRow, "NameLabel", "Name:", TextAnchor.MiddleLeft, Color.grey);
             UIFactory.SetLayoutElement(nameLabel.gameObject, minHeight: 25, minWidth: 45, flexibleWidth: 0);
 
-            var nameInputObj = UIFactory.CreateInputField(unityObjectRow, "NameInput", "untitled", out nameInput);
-            UIFactory.SetLayoutElement(nameInputObj, minHeight: 25, minWidth: 100, flexibleWidth: 1000);
-            nameInput.readOnly = true;
+            nameInput = UIFactory.CreateInputField(unityObjectRow, "NameInput", "untitled");
+            UIFactory.SetLayoutElement(nameInput.UIRoot, minHeight: 25, minWidth: 100, flexibleWidth: 1000);
+            nameInput.InputField.readOnly = true;
 
             var instanceLabel = UIFactory.CreateLabel(unityObjectRow, "InstanceLabel", "Instance ID:", TextAnchor.MiddleRight, Color.grey);
             UIFactory.SetLayoutElement(instanceLabel.gameObject, minHeight: 25, minWidth: 100, flexibleWidth: 0);
 
-            var instanceInputObj = UIFactory.CreateInputField(unityObjectRow, "InstanceIDInput", "ERROR", out instanceIdInput);
-            UIFactory.SetLayoutElement(instanceInputObj, minHeight: 25, minWidth: 100, flexibleWidth: 0);
-            instanceIdInput.readOnly = true;
+            instanceIdInput = UIFactory.CreateInputField(unityObjectRow, "InstanceIDInput", "ERROR");
+            UIFactory.SetLayoutElement(instanceIdInput.UIRoot, minHeight: 25, minWidth: 100, flexibleWidth: 0);
+            instanceIdInput.InputField.readOnly = true;
 
             unityObjectRow.SetActive(false);
 
@@ -501,7 +502,7 @@ namespace UnityExplorer.UI.Inspectors
 
         // Texture viewer helper
 
-        private InputField textureSavePathInput;
+        private InputFieldRef textureSavePathInput;
         private Image textureImage;
         private LayoutElement textureImageLayout;
 
@@ -529,8 +530,8 @@ namespace UnityExplorer.UI.Inspectors
             UIFactory.SetLayoutElement(saveBtn.Button.gameObject, minHeight: 25, minWidth: 100, flexibleWidth: 0);
             saveBtn.OnClick += OnSaveTextureClicked;
 
-            var inputObj = UIFactory.CreateInputField(saveRowObj, "SaveInput", "...", out textureSavePathInput);
-            UIFactory.SetLayoutElement(inputObj, minHeight: 25, minWidth: 100, flexibleWidth: 9999);
+            textureSavePathInput = UIFactory.CreateInputField(saveRowObj, "SaveInput", "...");
+            UIFactory.SetLayoutElement(textureSavePathInput.UIRoot, minHeight: 25, minWidth: 100, flexibleWidth: 9999);
 
             // Actual texture viewer
 
@@ -553,7 +554,7 @@ namespace UnityExplorer.UI.Inspectors
             if (string.IsNullOrEmpty(name))
                 name = "untitled";
 
-            textureSavePathInput.text = Path.Combine(ConfigManager.Default_Output_Path.Value, $"{name}.png");
+            textureSavePathInput.Text = Path.Combine(ConfigManager.Default_Output_Path.Value, $"{name}.png");
 
             var sprite = TextureUtilProvider.Instance.CreateSprite(TextureRef);
             textureImage.sprite = sprite;
@@ -570,22 +571,20 @@ namespace UnityExplorer.UI.Inspectors
                 return;
             }
 
-            if (string.IsNullOrEmpty(textureSavePathInput.text))
+            if (string.IsNullOrEmpty(textureSavePathInput.Text))
             {
                 ExplorerCore.LogWarning("Save path cannot be empty!");
                 return;
             }
 
-            var path = textureSavePathInput.text;
+            var path = textureSavePathInput.Text;
             if (!path.EndsWith(".png", StringComparison.InvariantCultureIgnoreCase))
             {
                 ExplorerCore.LogWarning("Desired save path must end with '.png'!");
                 return;
             }
 
-            var dir = Path.GetDirectoryName(path);
-            if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
+            path = IOUtility.EnsureValid(path);
 
             if (File.Exists(path))
                 File.Delete(path);

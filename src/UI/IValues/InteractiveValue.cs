@@ -9,40 +9,35 @@ using UnityExplorer.UI.ObjectPool;
 
 namespace UnityExplorer.UI.IValues
 {
-    public class InteractiveValue : IPooledObject
+    public abstract class InteractiveValue : IPooledObject
     {
-        public GameObject UIRoot { get; set; }
+        public static Type GetIValueTypeForState(ValueState state)
+        {
+            switch (state)
+            {
+                case ValueState.String:
+                    return typeof(InteractiveString);
+                //case ValueState.Enum:
+                //    return typeof(InteractiveEnum);
+                case ValueState.Collection:
+                    return typeof(InteractiveList);
+                case ValueState.Dictionary:
+                    return typeof(InteractiveDictionary);
+                //case ValueState.ValueStruct:
+                //    return typeof(InteractiveValueStruct);
+                //case ValueState.Color:
+                //    return typeof(InteractiveColor);
+                default: return typeof(InteractiveValue);
+            }
+        }
 
+        public GameObject UIRoot { get; set; }
         public float DefaultHeight => -1f;
 
         public virtual bool CanWrite => this.CurrentOwner.CanWrite;
 
         public CacheObjectBase CurrentOwner => m_owner;
         private CacheObjectBase m_owner;
-
-        //public object EditedValue { get; private set; }
-
-        public virtual void SetLayout() { }
-
-        public static Type GetIValueTypeForState(ValueState state)
-        {
-            switch (state)
-            {
-                //case ValueState.String:
-                //    return null;
-                //case ValueState.Enum:
-                //    return null;
-                case ValueState.Collection:
-                    return typeof(InteractiveList);
-                case ValueState.Dictionary:
-                    return typeof(InteractiveDictionary);
-                //case ValueState.ValueStruct:
-                //    return null;
-                //case ValueState.Color:
-                //    return null;
-                default: return typeof(InteractiveValue);
-            }
-        }
 
         public virtual void OnBorrowed(CacheObjectBase owner)
         {
@@ -63,26 +58,26 @@ namespace UnityExplorer.UI.IValues
             this.m_owner = null;
         }
 
-        public virtual void SetValue(object value) { }
+        public abstract void SetValue(object value);
 
-        //public virtual void SetValue(object value)
+        public virtual void SetLayout() { }
+
+        public abstract GameObject CreateContent(GameObject parent);
+
+        //
+        //public virtual GameObject CreateContent(GameObject parent)
         //{
-        //    this.EditedValue = value;
+        //    UIRoot = UIFactory.CreateUIObject(this.GetType().Name, parent);
+        //    UIRoot.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        //    UIFactory.SetLayoutGroup<VerticalLayoutGroup>(UIRoot, true, true, true, true, 3, childAlignment: TextAnchor.MiddleLeft);
+        //
+        //    UIFactory.CreateLabel(UIRoot, "Label", "this is an ivalue", TextAnchor.MiddleLeft);
+        //    UIFactory.CreateInputField(UIRoot, "InputFIeld", "...", out var input);
+        //    UIFactory.SetLayoutElement(input.gameObject, minHeight: 25, flexibleHeight: 500);
+        //    input.lineType = InputField.LineType.MultiLineNewline;
+        //    input.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        //
+        //    return UIRoot;
         //}
-
-        public virtual GameObject CreateContent(GameObject parent)
-        {
-            UIRoot = UIFactory.CreateUIObject(this.GetType().Name, parent);
-            UIRoot.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(UIRoot, true, true, true, true, 3, childAlignment: TextAnchor.MiddleLeft);
-
-            UIFactory.CreateLabel(UIRoot, "Label", "this is an ivalue", TextAnchor.MiddleLeft);
-            UIFactory.CreateInputField(UIRoot, "InputFIeld", "...", out var input);
-            UIFactory.SetLayoutElement(input.gameObject, minHeight: 25, flexibleHeight: 500);
-            input.lineType = InputField.LineType.MultiLineNewline;
-            input.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-            return UIRoot;
-        }
     }
 }

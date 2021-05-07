@@ -20,12 +20,12 @@ namespace UnityExplorer.UI.Panels
 
         public static CSConsolePanel Instance { get; private set; }
 
-        public InputField InputField { get; private set; }
+        public InputFieldRef InputField { get; private set; }
         public Text InputText { get; private set; }
         public Text HighlightText { get; private set; }
 
         public Action<string> OnInputChanged;
-        private float m_timeOfLastInputInvoke;
+        //private float m_timeOfLastInputInvoke;
 
         public Action OnResetClicked;
         public Action OnCompileClicked;
@@ -40,15 +40,15 @@ namespace UnityExplorer.UI.Panels
 
         public void UseSuggestion(string suggestion)
         {
-            string input = InputField.text;
+            string input = InputField.Text;
             input = input.Insert(m_lastCaretPosition, suggestion);
-            InputField.text = input;
+            InputField.Text = input;
 
             m_desiredCaretFix = m_lastCaretPosition += suggestion.Length;
 
-            var color = InputField.selectionColor;
+            var color = InputField.InputField.selectionColor;
             color.a = 0f;
-            InputField.selectionColor = color;
+            InputField.InputField.selectionColor = color;
         }
 
         private void InvokeOnValueChanged(string value)
@@ -56,10 +56,10 @@ namespace UnityExplorer.UI.Panels
             if (value.Length == UIManager.MAX_INPUTFIELD_CHARS)
                 ExplorerCore.LogWarning($"Reached maximum InputField character length! ({UIManager.MAX_INPUTFIELD_CHARS})");
 
-            if (m_timeOfLastInputInvoke.OccuredEarlierThanDefault())
-                return;
-
-            m_timeOfLastInputInvoke = Time.realtimeSinceStartup;
+            //if (m_timeOfLastInputInvoke.OccuredEarlierThanDefault())
+            //    return;
+            //
+            //m_timeOfLastInputInvoke = Time.realtimeSinceStartup;
             OnInputChanged?.Invoke(value);
         }
 
@@ -71,23 +71,23 @@ namespace UnityExplorer.UI.Panels
             {
                 if (!m_fixWaiting)
                 {
-                    EventSystem.current.SetSelectedGameObject(InputField.gameObject, null);
+                    EventSystem.current.SetSelectedGameObject(InputField.UIRoot, null);
                     m_fixWaiting = true;
                 }
                 else
                 {
-                    InputField.caretPosition = m_desiredCaretFix;
-                    InputField.selectionFocusPosition = m_desiredCaretFix;
-                    var color = InputField.selectionColor;
+                    InputField.InputField.caretPosition = m_desiredCaretFix;
+                    InputField.InputField.selectionFocusPosition = m_desiredCaretFix;
+                    var color = InputField.InputField.selectionColor;
                     color.a = m_defaultInputFieldAlpha;
-                    InputField.selectionColor = color;
+                    InputField.InputField.selectionColor = color;
 
                     m_fixWaiting = false;
                     m_desiredCaretFix = -1;
                 }
             }
-            else if (InputField.caretPosition > 0)
-                m_lastCaretPosition = InputField.caretPosition;
+            else if (InputField.InputField.caretPosition > 0)
+                m_lastCaretPosition = InputField.InputField.caretPosition;
         }
 
         // Saving
@@ -160,15 +160,15 @@ namespace UnityExplorer.UI.Panels
             //var inputObj = UIFactory.CreateSrollInputField(this.content, "ConsoleInput", CSConsoleManager.STARTUP_TEXT, 
             //    out InputFieldScroller consoleScroll, fontSize);
 
-            var inputObj = UIFactory.CreateSrollInputField(this.content, "ConsoleInput", CSConsoleManager.STARTUP_TEXT, out var inputField, fontSize);
-            InputField = inputField.InputField;
-            m_defaultInputFieldAlpha = InputField.selectionColor.a;
-            InputField.onValueChanged.AddListener(InvokeOnValueChanged);
+            var inputObj = UIFactory.CreateSrollInputField(this.content, "ConsoleInput", CSConsoleManager.STARTUP_TEXT, out var inputScroller, fontSize);
+            InputField = inputScroller.InputField;
+            m_defaultInputFieldAlpha = InputField.InputField.selectionColor.a;
+            InputField.OnValueChanged += InvokeOnValueChanged;
 
-            var placeHolderText = InputField.placeholder.GetComponent<Text>();
+            var placeHolderText = InputField.PlaceholderText;
             placeHolderText.fontSize = fontSize;
 
-            InputText = InputField.textComponent;
+            InputText = InputField.InputField.textComponent;
             InputText.supportRichText = false;
             InputText.color = new Color(1, 1, 1, 0.5f);
 

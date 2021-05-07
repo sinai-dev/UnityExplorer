@@ -9,7 +9,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 {
     public interface ISuggestionProvider
     {
-        InputField InputField { get; }
+        InputFieldRef InputField { get; }
         bool AnchorToCaretPosition { get; }
 
         void OnSuggestionClicked(Suggestion suggestion);

@@ -19,28 +19,28 @@ namespace UnityExplorer.UI.Utility
         {
             get
             {
-                if (InputField)
-                    return InputField.gameObject;
+                if (InputField.UIRoot)
+                    return InputField.UIRoot;
                 return null;
             }
         }
 
         internal AutoSliderScrollbar Slider;
-        internal InputField InputField;
+        internal InputFieldRef InputField;
 
         internal RectTransform ContentRect;
         internal RectTransform ViewportRect;
 
         internal static CanvasScaler RootScaler;
 
-        public InputFieldScroller(AutoSliderScrollbar sliderScroller, InputField inputField)
+        public InputFieldScroller(AutoSliderScrollbar sliderScroller, InputFieldRef inputField)
         {
             this.Slider = sliderScroller;
             this.InputField = inputField;
 
-            inputField.onValueChanged.AddListener(OnTextChanged);
+            inputField.OnValueChanged += OnTextChanged;
 
-            ContentRect = inputField.GetComponent<RectTransform>();
+            ContentRect = inputField.UIRoot.GetComponent<RectTransform>();
             ViewportRect = ContentRect.transform.parent.GetComponent<RectTransform>();
 
             if (!RootScaler)
@@ -88,22 +88,22 @@ namespace UnityExplorer.UI.Utility
 
         internal void ProcessInputText()
         {
-            var curInputRect = InputField.textComponent.rectTransform.rect;
+            var curInputRect = InputField.InputField.textComponent.rectTransform.rect;
             var scaleFactor = RootScaler.scaleFactor;
 
             // Current text settings
-            var texGenSettings = InputField.textComponent.GetGenerationSettings(curInputRect.size);
+            var texGenSettings = InputField.InputField.textComponent.GetGenerationSettings(curInputRect.size);
             texGenSettings.generateOutOfBounds = false;
             texGenSettings.scaleFactor = scaleFactor;
 
             // Preferred text rect height
-            var textGen = InputField.textComponent.cachedTextGeneratorForLayout;
+            var textGen = InputField.InputField.textComponent.cachedTextGeneratorForLayout;
             m_desiredContentHeight = textGen.GetPreferredHeight(m_lastText, texGenSettings) + 10;
 
             // jump to bottom
-            if (InputField.caretPosition == InputField.text.Length
-                && InputField.text.Length > 0
-                && InputField.text[InputField.text.Length - 1] == '\n')
+            if (InputField.InputField.caretPosition == InputField.Text.Length
+                && InputField.Text.Length > 0
+                && InputField.Text[InputField.Text.Length - 1] == '\n')
             {
                 m_wantJumpToBottom = true;
             }

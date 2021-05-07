@@ -454,36 +454,10 @@ namespace UnityExplorer.UI
             return toggleObj;
         }
 
-        // Little helper class to force rebuild of an input field's layout on value change.
-        // This is limited to once per frame per input field, so its not too expensive.
-        private class InputFieldRefresher
-        {
-            private float timeOfLastRebuild;
-            private readonly RectTransform rectTransform;
-
-            public InputFieldRefresher(InputField inputField)
-            {
-                if (!inputField)
-                    return;
-
-                rectTransform = inputField.GetComponent<RectTransform>();
-
-                inputField.onValueChanged.AddListener((string val) =>
-                {
-                    if (timeOfLastRebuild.OccuredEarlierThanDefault())
-                    {
-                        timeOfLastRebuild = Time.realtimeSinceStartup;
-                        LayoutRebuilder.ForceRebuildLayoutImmediate(rectTransform);
-                    }
-                });
-            }
-        }
-
         /// <summary>
         /// Create a standard InputField control.
         /// </summary>
-        public static GameObject CreateInputField(GameObject parent, string name, string placeHolderText, out InputField inputField,
-            int fontSize = 14, int alignment = 3, int wrap = 0)
+        public static InputFieldRef CreateInputField(GameObject parent, string name, string placeHolderText)
         {
             GameObject mainObj = CreateUIObject(name, parent);
             //SetLayoutGroup<VerticalLayoutGroup>(mainObj, true, true, true, true);
@@ -492,7 +466,7 @@ namespace UnityExplorer.UI
             mainImage.type = Image.Type.Sliced;
             mainImage.color = new Color(0.04f, 0.04f, 0.04f, 0.75f);
 
-            inputField = mainObj.AddComponent<InputField>();
+            var inputField = mainObj.AddComponent<InputField>();
             Navigation nav = inputField.navigation;
             nav.mode = Navigation.Mode.None;
             inputField.navigation = nav;
@@ -521,9 +495,9 @@ namespace UnityExplorer.UI
             SetDefaultTextValues(placeholderText);
             placeholderText.text = placeHolderText ?? "...";
             placeholderText.color = new Color(0.5f, 0.5f, 0.5f, 1.0f);
-            placeholderText.horizontalOverflow = (HorizontalWrapMode)wrap;
-            placeholderText.alignment = (TextAnchor)alignment;
-            placeholderText.fontSize = fontSize;
+            placeholderText.horizontalOverflow = HorizontalWrapMode.Wrap;
+            placeholderText.alignment = TextAnchor.MiddleLeft;
+            placeholderText.fontSize = 14;
 
             RectTransform placeHolderRect = placeHolderObj.GetComponent<RectTransform>();
             placeHolderRect.anchorMin = Vector2.zero;
@@ -540,9 +514,9 @@ namespace UnityExplorer.UI
             SetDefaultTextValues(inputText);
             inputText.text = "";
             inputText.color = new Color(1f, 1f, 1f, 1f);
-            inputText.horizontalOverflow = (HorizontalWrapMode)wrap;
-            inputText.alignment = (TextAnchor)alignment;
-            inputText.fontSize = fontSize;
+            inputText.horizontalOverflow = HorizontalWrapMode.Wrap;
+            inputText.alignment = TextAnchor.MiddleLeft;
+            inputText.fontSize = 14;
 
             RectTransform inputTextRect = inputTextObj.GetComponent<RectTransform>();
             inputTextRect.anchorMin = Vector2.zero;
@@ -555,9 +529,7 @@ namespace UnityExplorer.UI
             inputField.textComponent = inputText;
             inputField.characterLimit = UIManager.MAX_INPUTFIELD_CHARS;
 
-            new InputFieldRefresher(inputField);
-
-            return mainObj;
+            return new InputFieldRef(inputField);
         }
 
         /// <summary>
@@ -919,7 +891,10 @@ namespace UnityExplorer.UI
 
             // Input Field
 
-            var content = CreateInputField(viewportObj, name, placeHolderText ?? "...", out InputField inputField, fontSize, 0);
+            var inputField = CreateInputField(viewportObj, "InputField", placeHolderText);
+            var content = inputField.UIRoot;
+
+            //var content = CreateInputField(viewportObj, name, placeHolderText ?? "...", out InputField inputField, fontSize, 0);
             SetLayoutElement(content, flexibleHeight: 9999, flexibleWidth: 9999);
             var contentRect = content.GetComponent<RectTransform>();
             contentRect.pivot = new Vector2(0, 1);
@@ -927,8 +902,8 @@ namespace UnityExplorer.UI
             contentRect.anchorMax = new Vector2(1, 1);
             contentRect.offsetMin = new Vector2(2, 0);
             contentRect.offsetMax = new Vector2(2, 0);
-            inputField.lineType = InputField.LineType.MultiLineNewline;
-            inputField.targetGraphic.color = color;
+            inputField.InputField.lineType = InputField.LineType.MultiLineNewline;
+            inputField.InputField.targetGraphic.color = color;
 
             // Slider
 

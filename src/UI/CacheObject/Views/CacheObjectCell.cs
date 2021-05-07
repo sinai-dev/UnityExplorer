@@ -50,7 +50,7 @@ namespace UnityExplorer.UI.CacheObject.Views
         public Text ValueLabel;
         public Toggle Toggle;
         public Text ToggleText;
-        public InputField InputField;
+        public InputFieldRef InputField;
 
         public ButtonRef InspectButton;
         public ButtonRef SubContentButton;
@@ -152,8 +152,8 @@ namespace UnityExplorer.UI.CacheObject.Views
             ToggleText.color = SignatureHighlighter.KeywordBlue;
             Toggle.onValueChanged.AddListener(ToggleClicked);
 
-            var inputObj = UIFactory.CreateInputField(rightHoriGroup, "InputField", "...", out InputField);
-            UIFactory.SetLayoutElement(inputObj, minWidth: 150, flexibleWidth: 0, minHeight: 25, flexibleHeight: 0);
+            InputField = UIFactory.CreateInputField(rightHoriGroup, "InputField", "...");
+            UIFactory.SetLayoutElement(InputField.UIRoot, minWidth: 150, flexibleWidth: 0, minHeight: 25, flexibleHeight: 0);
 
             // Inspect and apply buttons
 

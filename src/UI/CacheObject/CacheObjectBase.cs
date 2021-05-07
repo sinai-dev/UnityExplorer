@@ -18,7 +18,6 @@ namespace UnityExplorer.UI.CacheObject
     {
         NotEvaluated,
         Exception,
-        //NullValue,
         Boolean,
         Number,
         String,
@@ -159,17 +158,25 @@ namespace UnityExplorer.UI.CacheObject
         {
             if (type == typeof(bool))
                 return ValueState.Boolean;
+
             else if (type.IsPrimitive || type == typeof(decimal))
                 return ValueState.Number;
+
             else if (type == typeof(string))
                 return ValueState.String;
+
             else if (type.IsEnum)
                 return ValueState.Enum;
 
-            // todo Color and ValueStruct
+            else if (type == typeof(Color) || type == typeof(Color32))
+                return ValueState.Color;
+
+            // else if (InteractiveValueStruct.SupportsType(type))
+            //     return ValueState.ValueStruct;
 
             else if (typeof(IDictionary).IsAssignableFrom(type))
                 return ValueState.Dictionary;
+
             else if (typeof(IEnumerable).IsAssignableFrom(type))
                 return ValueState.Collection;
             else
@@ -313,19 +320,20 @@ namespace UnityExplorer.UI.CacheObject
             }
 
             // inputfield for numbers
-            cell.InputField.gameObject.SetActive(args.inputActive);
+            cell.InputField.UIRoot.SetActive(args.inputActive);
             if (args.inputActive)
             {
-                cell.InputField.text = Value.ToString();
-                cell.InputField.readOnly = !CanWrite;
+                cell.InputField.Text = Value.ToString();
+                cell.InputField.InputField.readOnly = !CanWrite;
             }
 
             // apply for bool and numbers
             cell.ApplyButton.Button.gameObject.SetActive(args.applyActive);
 
-            // Inspect and IValue (subcontent) buttons - only if last value not null.
+            // Inspect button only if last value not null.
             cell.InspectButton.Button.gameObject.SetActive(args.inspectActive && !LastValueWasNull);
-            // allow IValue for null strings though.
+
+            // allow IValue for null strings though
             cell.SubContentButton.Button.gameObject.SetActive(args.subContentButtonActive && (!LastValueWasNull || State == ValueState.String));
         }
 
@@ -333,12 +341,6 @@ namespace UnityExplorer.UI.CacheObject
 
         public virtual void OnCellApplyClicked()
         {
-            if (CellView == null)
-            {
-                ExplorerCore.LogWarning("Trying to apply CacheMember but current cell reference is null!");
-                return;
-            }
-
             if (State == ValueState.Boolean)
                 SetUserValue(this.CellView.Toggle.isOn);
             else
@@ -351,7 +353,7 @@ namespace UnityExplorer.UI.CacheObject
                 }
 
                 var val = numberParseMethods[type.AssemblyQualifiedName]
-                    .Invoke(null, new object[] { CellView.InputField.text });
+                    .Invoke(null, new object[] { CellView.InputField.Text });
                 SetUserValue(val);
             }
 

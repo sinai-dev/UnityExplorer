@@ -18,7 +18,7 @@ namespace UnityExplorer.UI.CacheObject.Views
         public LayoutElement KeyGroupLayout;
         public Text KeyLabel;
         public ButtonRef KeyInspectButton;
-        public InputField KeyInputField;
+        public InputFieldRef KeyInputField;
         public Text KeyInputTypeLabel;
 
         public static Color EvenColor = new Color(0.07f, 0.07f, 0.07f);
@@ -75,10 +75,10 @@ namespace UnityExplorer.UI.CacheObject.Views
 
             // input field
 
-            var keyInputObj = UIFactory.CreateInputField(keyGroup, "KeyInput", "empty", out KeyInputField);
-            UIFactory.SetLayoutElement(keyInputObj, minHeight: 25, flexibleHeight: 0, flexibleWidth: 0, preferredWidth: 200);
+            KeyInputField = UIFactory.CreateInputField(keyGroup, "KeyInput", "empty");
+            UIFactory.SetLayoutElement(KeyInputField.UIRoot, minHeight: 25, flexibleHeight: 0, flexibleWidth: 0, preferredWidth: 200);
             //KeyInputField.lineType = InputField.LineType.MultiLineNewline;
-            KeyInputField.readOnly = true;
+            KeyInputField.InputField.readOnly = true;
 
             return root;
         }

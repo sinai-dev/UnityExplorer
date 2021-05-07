@@ -43,7 +43,7 @@ namespace UnityExplorer.UI.Panels
         private GameObject sceneFilterRow;
         private GameObject childFilterRow;
         private GameObject unityObjectClassRow;
-        private InputField nameInputField;
+        private InputFieldRef nameInputField;
 
         private Text resultsLabel;
 
@@ -54,16 +54,16 @@ namespace UnityExplorer.UI.Panels
             cachedCellTexts.Clear();
 
             if (m_context == SearchContext.Singleton)
-                currentResults = SearchProvider.SingletonSearch(nameInputField.text);
+                currentResults = SearchProvider.SingletonSearch(nameInputField.Text);
             else if (m_context == SearchContext.StaticClass)
-                currentResults = SearchProvider.StaticClassSearch(nameInputField.text);
+                currentResults = SearchProvider.StaticClassSearch(nameInputField.Text);
             else
             {
                 string compType = "";
                 if (m_context == SearchContext.UnityObject)
                     compType = this.desiredTypeInput;
 
-                currentResults = SearchProvider.UnityObjectSearch(nameInputField.text, compType, m_context, m_childFilter, m_sceneFilter);
+                currentResults = SearchProvider.UnityObjectSearch(nameInputField.Text, compType, m_context, m_childFilter, m_sceneFilter);
             }
 
             dataHandler.RefreshData();
@@ -180,11 +180,11 @@ namespace UnityExplorer.UI.Panels
             var unityClassLbl = UIFactory.CreateLabel(unityObjectClassRow, "UnityClassLabel", "Custom Type:", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(unityClassLbl.gameObject, minWidth: 110, flexibleWidth: 0);
 
-            var classInputObj = UIFactory.CreateInputField(unityObjectClassRow, "ClassInput", "...", out var classInputField);
-            UIFactory.SetLayoutElement(classInputObj, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
+            var classInputField = UIFactory.CreateInputField(unityObjectClassRow, "ClassInput", "...");
+            UIFactory.SetLayoutElement(classInputField.UIRoot, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
 
             typeAutocompleter = new TypeCompleter(typeof(UnityEngine.Object), classInputField);
-            classInputField.onValueChanged.AddListener(OnTypeInputChanged);
+            classInputField.OnValueChanged += OnTypeInputChanged;
 
             //unityObjectClassRow.SetActive(false);
 
@@ -226,8 +226,8 @@ namespace UnityExplorer.UI.Panels
             var nameLbl = UIFactory.CreateLabel(nameRow, "NameFilterLabel", "Name contains:", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(nameLbl.gameObject, minWidth: 110, flexibleWidth: 0);
 
-            var nameInputObj = UIFactory.CreateInputField(nameRow, "NameFilterInput", "...", out this.nameInputField);
-            UIFactory.SetLayoutElement(nameInputObj, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
+            nameInputField = UIFactory.CreateInputField(nameRow, "NameFilterInput", "...");
+            UIFactory.SetLayoutElement(nameInputField.UIRoot, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
 
             // Search button
 
