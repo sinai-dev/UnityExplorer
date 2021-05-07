@@ -420,11 +420,11 @@ namespace UnityExplorer.UI
 
             Image bgImage = bgObj.AddComponent<Image>();
             bgImage.color = bgColor == default
-                ? new Color(0.2f, 0.2f, 0.2f, 1.0f)
+                ? new Color(0.04f, 0.04f, 0.04f, 0.75f)
                 : bgColor;
 
             Image checkImage = checkObj.AddComponent<Image>();
-            checkImage.color = new Color(0.3f, 0.5f, 0.3f, 1.0f);
+            checkImage.color = new Color(0.8f, 1, 0.8f, 0.3f);
 
             text = labelObj.AddComponent<Text>();
             text.text = "Toggle";
@@ -609,7 +609,7 @@ namespace UnityExplorer.UI
             labelText.alignment = TextAnchor.MiddleLeft;
 
             Image dropdownImage = dropdownObj.AddComponent<Image>();
-            dropdownImage.color = new Color(0.07f, 0.07f, 0.07f, 1);
+            dropdownImage.color = new Color(0.04f, 0.04f, 0.04f, 0.75f);
             dropdownImage.type = Image.Type.Sliced;
 
             dropdown = dropdownObj.AddComponent<Dropdown>();

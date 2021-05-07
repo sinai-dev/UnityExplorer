@@ -251,7 +251,7 @@ namespace UnityExplorer.UI.Panels
         };
 
         [Flags]
-        public enum ResizeTypes
+        public enum ResizeTypes : ulong
         {
             NONE = 0,
             Top = 1,

@@ -44,7 +44,7 @@ namespace UnityExplorer.UI.Panels
 
         public void Update()
         {
-            if ((AutoUpdate || !SceneHandler.InspectingAssetScene) && Time.realtimeSinceStartup - timeOfLastUpdate >= 1f)
+            if ((AutoUpdate || !SceneHandler.InspectingAssetScene) && timeOfLastUpdate.OccuredEarlierThan(1))
             {
                 timeOfLastUpdate = Time.realtimeSinceStartup;
                 UpdateTree();
