@@ -92,17 +92,23 @@ namespace UnityExplorer
         public static string ReflectionExToString(this Exception e, bool innerMost = true)
         {
             if (innerMost)
-            {
-                while (e.InnerException != null)
-                {
-                    if (e.InnerException is System.Runtime.CompilerServices.RuntimeWrappedException)
-                        break;
-
-                    e = e.InnerException;
-                }
-            }
+                e.GetInnerMostException();
 
             return $"{e.GetType()}: {e.Message}";
+        }
+
+        public static Exception GetInnerMostException(this Exception e)
+        {
+            while (e.InnerException != null)
+            {
+#if CPP
+                if (e.InnerException is System.Runtime.CompilerServices.RuntimeWrappedException)
+                    break;
+#endif
+                e = e.InnerException;
+            }
+
+            return e;
         }
     }
 }

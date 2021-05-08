@@ -275,7 +275,7 @@ namespace UnityExplorer
 
                 var name = toType.AssemblyQualifiedName;
 
-                if (!unboxMethods.ContainsKey(toType.AssemblyQualifiedName))
+                if (!unboxMethods.ContainsKey(name))
                 {
                     unboxMethods.Add(name, typeof(Il2CppObjectBase)
                                                 .GetMethod("Unbox")

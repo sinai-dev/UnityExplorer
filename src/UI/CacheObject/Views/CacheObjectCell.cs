@@ -155,15 +155,17 @@ namespace UnityExplorer.UI.CacheObject.Views
             InputField = UIFactory.CreateInputField(rightHoriGroup, "InputField", "...");
             UIFactory.SetLayoutElement(InputField.UIRoot, minWidth: 150, flexibleWidth: 0, minHeight: 25, flexibleHeight: 0);
 
-            // Inspect and apply buttons
+            // Apply
 
-            InspectButton = UIFactory.CreateButton(rightHoriGroup, "InspectButton", "Inspect", new Color(0.15f, 0.15f, 0.15f));
-            UIFactory.SetLayoutElement(InspectButton.Button.gameObject, minWidth: 60, flexibleWidth: 0, minHeight: 25);
-            InspectButton.OnClick += InspectClicked;
-
-            ApplyButton = UIFactory.CreateButton(rightHoriGroup, "ApplyButton", "Apply", new Color(0.15f, 0.15f, 0.15f));
+            ApplyButton = UIFactory.CreateButton(rightHoriGroup, "ApplyButton", "Apply", new Color(0.15f, 0.19f, 0.15f));
             UIFactory.SetLayoutElement(ApplyButton.Button.gameObject, minWidth: 70, minHeight: 25, flexibleWidth: 0, flexibleHeight: 0);
             ApplyButton.OnClick += ApplyClicked;
+
+            // Inspect 
+
+            InspectButton = UIFactory.CreateButton(rightHoriGroup, "InspectButton", "Inspect", new Color(0.15f, 0.15f, 0.15f));
+            UIFactory.SetLayoutElement(InspectButton.Button.gameObject, minWidth: 70, flexibleWidth: 0, minHeight: 25);
+            InspectButton.OnClick += InspectClicked;
 
             // Main value label
 

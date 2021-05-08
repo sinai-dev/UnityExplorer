@@ -33,7 +33,7 @@ namespace UnityExplorer.UI.CacheObject.Views
         private readonly List<Text> genericArgLabels = new List<Text>();
         private readonly List<TypeCompleter> genericAutocompleters = new List<TypeCompleter>();
 
-        private readonly List<InputFieldRef> inputFieldCache = new List<InputFieldRef>();
+        private readonly List<InputFieldRef> inputFields = new List<InputFieldRef>();
 
         public void OnBorrowedFromPool(CacheMember owner)
         {
@@ -52,7 +52,7 @@ namespace UnityExplorer.UI.CacheObject.Views
 
         public void OnReturnToPool()
         {
-            foreach (var input in inputFieldCache)
+            foreach (var input in inputFields)
                 input.Text = "";
 
             this.Owner = null;
@@ -99,15 +99,11 @@ namespace UnityExplorer.UI.CacheObject.Views
                     continue;
                 }
 
-                try
+                if (!ParseUtility.TryParse(input, type, out outArgs[i], out Exception ex))
                 {
-                    var parse = ReflectionUtility.GetMethodInfo(type, "Parse", ArgumentUtility.ParseArgs);
-                    outArgs[i] = parse.Invoke(null, new object[] { input });
-                }
-                catch (Exception ex)
-                {
-                    ExplorerCore.LogWarning($"Cannot parse argument '{arg.Name}' ({arg.ParameterType.Name}), {ex.GetType().Name}: {ex.Message}");
                     outArgs[i] = null;
+                    ExplorerCore.LogWarning($"Cannot parse argument '{arg.Name}' ({arg.ParameterType.Name})" +
+                        $"{(ex == null ? "" : $", {ex.GetType().Name}: {ex.Message}")}");
                 }
             }
 
@@ -199,6 +195,15 @@ namespace UnityExplorer.UI.CacheObject.Views
 
                 argRows[i].SetActive(true);
                 argLabels[i].text = $"{SignatureHighlighter.Parse(arg.ParameterType, false)} <color={SignatureHighlighter.LOCAL_ARG}>{arg.Name}</color>";
+                if (arg.ParameterType == typeof(string))
+                    inputFields[i].PlaceholderText.text = "";
+                else
+                {
+                    var elemType = arg.ParameterType;
+                    if (elemType.IsByRef)
+                        elemType = elemType.GetElementType();
+                    inputFields[i].PlaceholderText.text = $"eg. {ParseUtility.GetExampleInput(elemType)}"; 
+                }
             }
         }
 
@@ -228,7 +233,7 @@ namespace UnityExplorer.UI.CacheObject.Views
             inputField.InputField.lineType = InputField.LineType.MultiLineNewline;
             inputField.UIRoot.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             inputField.OnValueChanged += (string val) => { inputArray[index] = val; };
-            inputFieldCache.Add(inputField);
+            inputFields.Add(inputField);
 
             if (autocomplete)
                 genericAutocompleters.Add(new TypeCompleter(null, inputField));

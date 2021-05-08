@@ -171,7 +171,7 @@ namespace UnityExplorer.UI.CacheObject
 
         #region Cache Member Util
 
-        public static bool CanProcessArgs(ParameterInfo[] parameters)
+        public static bool CanParseArgs(ParameterInfo[] parameters)
         {
             foreach (var param in parameters)
             {
@@ -180,7 +180,7 @@ namespace UnityExplorer.UI.CacheObject
                 if (pType.IsByRef && pType.HasElementType)
                     pType = pType.GetElementType();
 
-                if (pType != null && (pType.IsPrimitive || pType == typeof(string)))
+                if (pType != null && ParseUtility.CanParse(pType))
                     continue;
                 else
                     return false;
@@ -260,7 +260,7 @@ namespace UnityExplorer.UI.CacheObject
                                 return;
 
                             var args = mi.GetParameters();
-                            if (!CanProcessArgs(args))
+                            if (!CanParseArgs(args))
                                 return;
 
                             sig += AppendArgsToSig(args);
@@ -277,7 +277,7 @@ namespace UnityExplorer.UI.CacheObject
                             var pi = member as PropertyInfo;
 
                             var args = pi.GetIndexParameters();
-                            if (!CanProcessArgs(args))
+                            if (!CanParseArgs(args))
                                 return;
 
                             if (!pi.CanRead && pi.CanWrite)

@@ -295,14 +295,12 @@ namespace UnityExplorer.UI.Panels
     {
         // Window Anchors helpers
 
-        internal static CultureInfo _enCulture = new CultureInfo("en-US");
-
         internal static string RectAnchorsToString(this RectTransform rect)
         {
             if (!rect)
                 throw new ArgumentNullException("rect");
 
-            return string.Format(_enCulture, "{0},{1},{2},{3}", new object[]
+            return string.Format(ParseUtility.en_US, "{0},{1},{2},{3}", new object[]
             {
                 rect.anchorMin.x,
                 rect.anchorMin.y,
@@ -322,10 +320,10 @@ namespace UnityExplorer.UI.Panels
                 throw new Exception($"stringAnchors split is unexpected length: {split.Length}");
 
             Vector4 anchors;
-            anchors.x = float.Parse(split[0], _enCulture);
-            anchors.y = float.Parse(split[1], _enCulture);
-            anchors.z = float.Parse(split[2], _enCulture);
-            anchors.w = float.Parse(split[3], _enCulture);
+            anchors.x = float.Parse(split[0], ParseUtility.en_US);
+            anchors.y = float.Parse(split[1], ParseUtility.en_US);
+            anchors.z = float.Parse(split[2], ParseUtility.en_US);
+            anchors.w = float.Parse(split[3], ParseUtility.en_US);
 
             panel.anchorMin = new Vector2(anchors.x, anchors.y);
             panel.anchorMax = new Vector2(anchors.z, anchors.w);
@@ -336,7 +334,7 @@ namespace UnityExplorer.UI.Panels
             if (!rect)
                 throw new ArgumentNullException("rect");
 
-            return string.Format(_enCulture, "{0},{1}", new object[]
+            return string.Format(ParseUtility.en_US, "{0},{1}", new object[]
             {
                 rect.localPosition.x, rect.localPosition.y
             });
@@ -350,8 +348,8 @@ namespace UnityExplorer.UI.Panels
                 throw new Exception($"stringPosition split is unexpected length: {split.Length}");
 
             Vector3 vector = rect.localPosition;
-            vector.x = float.Parse(split[0], _enCulture);
-            vector.y = float.Parse(split[1], _enCulture);
+            vector.x = float.Parse(split[0], ParseUtility.en_US);
+            vector.y = float.Parse(split[1], ParseUtility.en_US);
             rect.localPosition = vector;
         }
     }

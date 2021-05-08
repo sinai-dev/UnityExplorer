@@ -39,6 +39,9 @@ namespace UnityExplorer.UI.CacheObject
         public Type FallbackType { get; protected set; }
         public bool LastValueWasNull { get; private set; }
 
+        public ValueState State = ValueState.NotEvaluated;
+        public Type LastValueType;
+
         public InteractiveValue IValue { get; private set; }
         public Type CurrentIValueType { get; private set; }
         public bool SubContentShowWanted { get; private set; }
@@ -57,12 +60,6 @@ namespace UnityExplorer.UI.CacheObject
             this.FallbackType = fallbackType;
             this.ValueLabelText = GetValueLabel();
         }
-
-        // internals
-
-        // private static readonly Dictionary<string, MethodInfo> numberParseMethods = new Dictionary<string, MethodInfo>();
-
-        public ValueState State = ValueState.NotEvaluated;
 
         protected const string NOT_YET_EVAL = "<color=grey>Not yet evaluated</color>";
 
@@ -127,6 +124,7 @@ namespace UnityExplorer.UI.CacheObject
             if (HadException)
             {
                 LastValueWasNull = true;
+                LastValueType = FallbackType;
                 State = ValueState.Exception;
             }
             else if (Value.IsNullOrDestroyed())
@@ -158,6 +156,10 @@ namespace UnityExplorer.UI.CacheObject
 
         public ValueState GetStateForType(Type type)
         {
+            if (LastValueType == type)
+                return State;
+
+            LastValueType = type;
             if (type == typeof(bool))
                 return ValueState.Boolean;
             else if (type.IsPrimitive || type == typeof(decimal))
@@ -184,17 +186,24 @@ namespace UnityExplorer.UI.CacheObject
 
             switch (State)
             {
+                case ValueState.NotEvaluated:
+                    return $"<i>{NOT_YET_EVAL} ({SignatureHighlighter.Parse(FallbackType, true)})</i>"; 
+
+                case ValueState.Exception:
+                    return $"<i><color=red>{LastException.ReflectionExToString()}</color></i>";
+
                 // bool and number dont want the label for the value at all
                 case ValueState.Boolean:
                 case ValueState.Number:
                     return null;
 
-                case ValueState.NotEvaluated:
-                    return $"<i>{NOT_YET_EVAL} ({SignatureHighlighter.Parse(FallbackType, true)})</i>"; 
+                // and valuestruct also doesnt want it if we can parse it
+                case ValueState.ValueStruct:
+                    if (ParseUtility.CanParse(LastValueType))
+                        return null;
+                    break;
 
-                case ValueState.Exception:
-                    return $"<i><color=red>{LastException.ReflectionExToString()}</color></i>"; 
-
+                // string wants it trimmed to max 200 chars
                 case ValueState.String:
                     if (!LastValueWasNull)
                     {
@@ -204,7 +213,8 @@ namespace UnityExplorer.UI.CacheObject
                         return $"\"{s}\"";
                     }
                     break;
-
+                
+                // try to prefix the count of the collection for lists and dicts
                 case ValueState.Collection:
                     if (!LastValueWasNull)
                     {
@@ -256,7 +266,6 @@ namespace UnityExplorer.UI.CacheObject
             switch (State)
             {
                 case ValueState.Exception:
-                //case ValueState.NullValue:
                     SetValueState(cell, ValueStateArgs.Default);
                     break;
                 case ValueState.Boolean:
@@ -274,10 +283,15 @@ namespace UnityExplorer.UI.CacheObject
                 case ValueState.Enum:
                     SetValueState(cell, new ValueStateArgs(true, subContentButtonActive: CanWrite));
                     break;
+                case ValueState.Color:
+                case ValueState.ValueStruct:
+                    if (ParseUtility.CanParse(LastValueType))
+                        SetValueState(cell, new ValueStateArgs(false, false, null, true, false, true, CanWrite, true, true));
+                    else
+                        SetValueState(cell, new ValueStateArgs(true, inspectActive: true, subContentButtonActive: true));
+                    break;
                 case ValueState.Collection:
                 case ValueState.Dictionary:
-                case ValueState.ValueStruct:
-                case ValueState.Color:
                     SetValueState(cell, new ValueStateArgs(true, inspectActive: !LastValueWasNull, subContentButtonActive: !LastValueWasNull));
                     break;
                 case ValueState.Unsupported:
@@ -303,7 +317,7 @@ namespace UnityExplorer.UI.CacheObject
             // Type label (for primitives)
             cell.TypeLabel.gameObject.SetActive(args.typeLabelActive);
             if (args.typeLabelActive)
-                cell.TypeLabel.text = SignatureHighlighter.Parse(Value.GetActualType(), false);
+                cell.TypeLabel.text = SignatureHighlighter.Parse(LastValueType, false);
 
             // toggle for bools
             cell.Toggle.gameObject.SetActive(args.toggleActive);
@@ -318,7 +332,7 @@ namespace UnityExplorer.UI.CacheObject
             cell.InputField.UIRoot.SetActive(args.inputActive);
             if (args.inputActive)
             {
-                cell.InputField.Text = Value.ToString();
+                cell.InputField.Text = ParseUtility.ToStringForInput(Value, LastValueType);
                 cell.InputField.InputField.readOnly = !CanWrite;
             }
 
@@ -342,21 +356,15 @@ namespace UnityExplorer.UI.CacheObject
                 SetUserValue(this.CellView.Toggle.isOn);
             else
             {
-                try
+                if (ParseUtility.TryParse(CellView.InputField.Text, LastValueType, out object value, out Exception ex))
                 {
-                    var type = Value.GetType();
-
-                    var val = ReflectionUtility.GetMethodInfo(type, "Parse", ArgumentUtility.ParseArgs)
-                        .Invoke(null, new object[] { CellView.InputField.Text });
-
-                    SetUserValue(val);
+                    SetUserValue(value);
                 }
-                catch (ArgumentException) { } // ignore bad user input
-                catch (FormatException) { }
-                catch (OverflowException) { }
-                catch (Exception ex)
+                else
                 {
-                    ExplorerCore.LogWarning("CacheObjectBase OnCellApplyClicked (number): " + ex.ToString());
+                    ExplorerCore.LogWarning("Unable to parse input!");
+                    if (ex != null)
+                        ExplorerCore.Log(ex.ReflectionExToString());
                 }
             }
 

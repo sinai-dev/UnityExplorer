@@ -26,33 +26,31 @@ namespace UnityExplorer.UI.IValues
                 Fields = fields;
             }
 
-            public void SetValue(object instance, string value, int fieldIndex)
+            public void SetValue(object instance, string input, int fieldIndex)
             {
-                try
-                {
-                    var field = Fields[fieldIndex];
+                var field = Fields[fieldIndex];
 
-                    object val;
-                    if (field.FieldType == typeof(string))
-                        val = value;
-                    else
-                        val = ReflectionUtility.GetMethodInfo(field.FieldType, "Parse", ArgumentUtility.ParseArgs)
-                                .Invoke(null, new object[] { value });
-
-                    field.SetValue(instance, val);
-                }
-                catch (FormatException)   { ExplorerCore.LogWarning($"Invalid argument '{value}'!"); }
-                catch (ArgumentException) { ExplorerCore.LogWarning($"Invalid argument '{value}'!"); }
-                catch (OverflowException) { ExplorerCore.LogWarning($"Invalid argument '{value}'!"); }
-                catch (Exception ex)
+                object val;
+                if (field.FieldType == typeof(string))
+                    val = input;
+                else
                 {
-                    ExplorerCore.Log("Excepting setting value '" + value + "'! " + ex);
+                    if (!ParseUtility.TryParse(input, field.FieldType, out val, out Exception ex))
+                    {
+                        ExplorerCore.LogWarning("Unable to parse input!");
+                        if (ex != null) ExplorerCore.Log(ex.ReflectionExToString());
+                        return;
+                    }
                 }
+
+                field.SetValue(instance, val);
             }
 
             public string GetValue(object instance, int fieldIndex)
             {
-                return Fields[fieldIndex].GetValue(instance)?.ToString() ?? "";
+                var field = Fields[fieldIndex];
+                var value = field.GetValue(instance);
+                return ParseUtility.ToStringForInput(value, field.FieldType);
             }
         }
 
@@ -69,19 +67,21 @@ namespace UnityExplorer.UI.IValues
             if (typeSupportCache.TryGetValue(type.AssemblyQualifiedName, out var info))
                 return info.IsSupported;
 
-            var supported = true;
+            var supported = false;
 
             var fields = type.GetFields(INSTANCE_FLAGS);
-
-            if (fields.Any(it => !it.FieldType.IsPrimitive && it.FieldType != typeof(string)))
+            if (fields.Length > 0)
             {
-                supported = false;
-                info = new StructInfo(supported, null);
-            }
-            else
-            {
-                supported = true;
-                info = new StructInfo(supported, fields);
+                if (fields.Any(it => !ParseUtility.CanParse(it.FieldType)))
+                {
+                    supported = false;
+                    info = new StructInfo(supported, null);
+                }
+                else
+                {
+                    supported = true;
+                    info = new StructInfo(supported, fields);
+                }
             }
 
             typeSupportCache.Add(type.AssemblyQualifiedName, info);
@@ -182,12 +182,12 @@ namespace UnityExplorer.UI.IValues
             fieldRows.Add(row);
 
             var label = UIFactory.CreateLabel(row, "Label", "notset", TextAnchor.MiddleRight);
-            UIFactory.SetLayoutElement(label.gameObject, minHeight: 25, minWidth: 150, flexibleWidth: 0);
+            UIFactory.SetLayoutElement(label.gameObject, minHeight: 25, minWidth: 175, flexibleWidth: 0);
             label.horizontalOverflow = HorizontalWrapMode.Wrap;
             labels.Add(label);
 
             var input = UIFactory.CreateInputField(row, "InputField", "...");
-            UIFactory.SetLayoutElement(input.UIRoot, minHeight: 25, minWidth: 100);
+            UIFactory.SetLayoutElement(input.UIRoot, minHeight: 25, minWidth: 200);
             var fitter = input.UIRoot.AddComponent<ContentSizeFitter>();
             fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
@@ -204,7 +204,7 @@ namespace UnityExplorer.UI.IValues
             UIFactory.SetLayoutElement(UIRoot, minHeight: 25, flexibleWidth: 9999);
 
             applyButton = UIFactory.CreateButton(UIRoot, "ApplyButton", "Apply", new Color(0.2f, 0.27f, 0.2f));
-            UIFactory.SetLayoutElement(applyButton.Button.gameObject, minHeight: 25, minWidth: 100);
+            UIFactory.SetLayoutElement(applyButton.Button.gameObject, minHeight: 25, minWidth: 175);
             applyButton.OnClick += OnApplyClicked;
 
             return UIRoot;

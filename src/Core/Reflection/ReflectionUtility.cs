@@ -182,7 +182,6 @@ namespace UnityExplorer
 
 #endregion
 
-
         #region Type and Generic Parameter implementation cache
 
         // cache for GetImplementationsOf
@@ -301,7 +300,6 @@ namespace UnityExplorer
         }
 
 #endregion
-
 
         #region Internal MemberInfo Cache
 

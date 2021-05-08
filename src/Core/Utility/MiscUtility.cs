@@ -8,14 +8,12 @@ namespace UnityExplorer
 {
     public static class MiscUtility
     {
-        private static CultureInfo _enCulture = new CultureInfo("en-US");
-
         /// <summary>
         /// Check if a string contains another string, case-insensitive.
         /// </summary>
         public static bool ContainsIgnoreCase(this string _this, string s)
         {
-            return _enCulture.CompareInfo.IndexOf(_this, s, CompareOptions.IgnoreCase) >= 0;
+            return ParseUtility.en_US.CompareInfo.IndexOf(_this, s, CompareOptions.IgnoreCase) >= 0;
         }
 
         /// <summary>
