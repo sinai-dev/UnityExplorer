@@ -4,7 +4,6 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace UnityExplorer
@@ -264,7 +263,7 @@ namespace UnityExplorer
             if (!(obj is Quaternion quaternion))
                 return null;
 
-            Vector3 vector = Quaternion.ToEulerAngles(quaternion);
+            Vector3 vector = quaternion.eulerAngles;
 
             return string.Format(en_US, "{0}, {1}, {2}", new object[]
             {

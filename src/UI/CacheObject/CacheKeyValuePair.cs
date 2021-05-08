@@ -41,10 +41,10 @@ namespace UnityExplorer.UI.CacheObject
             this.DisplayedKey = key.TryCast();
 
             var type = DisplayedKey.GetType();
-            if (type == typeof(string) || (type.IsPrimitive && !(type == typeof(bool))))
+            if (ParseUtility.CanParse(type))
             {
                 KeyInputWanted = true;
-                KeyInputText = DisplayedKey.ToString();
+                KeyInputText = ParseUtility.ToStringForInput(DisplayedKey, type);
                 KeyInputTypeText = SignatureHighlighter.Parse(type, false);
             }
             else

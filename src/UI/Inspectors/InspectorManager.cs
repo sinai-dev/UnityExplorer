@@ -77,8 +77,12 @@ namespace UnityExplorer.UI.Inspectors
             Inspectors.Add(inspector);
             inspector.Target = target;
 
-            if (sourceCache != null && inspector is ReflectionInspector ri)
-                ri.ParentCacheObject = sourceCache;
+            if (sourceCache != null && sourceCache.CanWrite)
+            {
+                // only set parent cache object if we are inspecting a struct, otherwise there is no point.
+                if (target.GetType().IsValueType && inspector is ReflectionInspector ri)
+                    ri.ParentCacheObject = sourceCache;
+            }
 
             UIManager.SetPanelActive(UIManager.Panels.Inspector, true);
             inspector.UIRoot.transform.SetParent(InspectorPanel.Instance.ContentHolder.transform, false);

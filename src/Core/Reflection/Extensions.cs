@@ -92,7 +92,7 @@ namespace UnityExplorer
         public static string ReflectionExToString(this Exception e, bool innerMost = true)
         {
             if (innerMost)
-                e.GetInnerMostException();
+                e = e.GetInnerMostException();
 
             return $"{e.GetType()}: {e.Message}";
         }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.UI.CacheObject;
@@ -84,7 +83,7 @@ namespace UnityExplorer.UI.IValues
                         values.Add(ValueAtIdx(i).Name);
                 }
 
-                CurrentOwner.SetUserValue(Enum.Parse(EnumType, string.Join(", ", values)));
+                CurrentOwner.SetUserValue(Enum.Parse(EnumType, string.Join(", ", values.ToArray())));
             }
             catch (Exception ex)
             {

@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityExplorer.Core.Runtime;
 
-namespace UnityExplorer.UI.Utility
+namespace UnityExplorer
 {
     public static class ToStringUtility
     {

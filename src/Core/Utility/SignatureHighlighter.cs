@@ -7,7 +7,7 @@ using System.Text;
 using UnityEngine;
 using UnityExplorer.Core.Runtime;
 
-namespace UnityExplorer.UI.Utility
+namespace UnityExplorer
 {
     /// <summary>
     /// Syntax-highlights a member's signature, by either the Type name or a Type and Member together.

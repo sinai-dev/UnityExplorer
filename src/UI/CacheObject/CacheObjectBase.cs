@@ -98,7 +98,13 @@ namespace UnityExplorer.UI.CacheObject
 
             TrySetUserValue(value);
 
-            SetDataToCell(CellView);
+            if (CellView != null)
+                SetDataToCell(CellView);
+
+            // If the owner's parent CacheObject is set, we are setting the value of an inspected struct.
+            // Set the inspector target as the value back to that parent cacheobject.
+            if (Owner.ParentCacheObject != null)
+                Owner.ParentCacheObject.SetUserValue(Owner.Target);
         }
 
         public abstract void TrySetUserValue(object value);
@@ -114,7 +120,12 @@ namespace UnityExplorer.UI.CacheObject
             ProcessOnEvaluate();
 
             if (this.IValue != null)
-                this.IValue.SetValue(Value);
+            {
+                if (SubContentShowWanted)
+                    this.IValue.SetValue(Value);
+                else
+                    IValue.PendingValueWanted = true;
+            }
         }
 
         protected virtual void ProcessOnEvaluate()
@@ -348,8 +359,6 @@ namespace UnityExplorer.UI.CacheObject
 
         // CacheObjectCell Apply
 
-        // todo make this a reusable utility method
-
         public virtual void OnCellApplyClicked()
         {
             if (State == ValueState.Boolean)
@@ -399,6 +408,14 @@ namespace UnityExplorer.UI.CacheObject
             {
                 SubContentShowWanted = !SubContentShowWanted;
                 CellView.SubContentHolder.SetActive(SubContentShowWanted);
+
+                if (SubContentShowWanted && IValue.PendingValueWanted)
+                {
+                    IValue.PendingValueWanted = false;
+                    this.ProcessOnEvaluate();
+                    this.SetDataToCell(this.CellView);
+                    IValue.SetValue(this.Value);
+                }
             }
 
             CellView.RefreshSubcontentButton();

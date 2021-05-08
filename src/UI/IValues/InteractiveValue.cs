@@ -39,6 +39,8 @@ namespace UnityExplorer.UI.IValues
         public CacheObjectBase CurrentOwner => m_owner;
         private CacheObjectBase m_owner;
 
+        public bool PendingValueWanted;
+
         public virtual void OnBorrowed(CacheObjectBase owner)
         {
             if (this.m_owner != null)

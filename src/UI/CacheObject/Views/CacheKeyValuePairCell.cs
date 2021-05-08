@@ -61,7 +61,7 @@ namespace UnityExplorer.UI.CacheObject.Views
 
             KeyInspectButton = UIFactory.CreateButton(keyGroup, "KeyInspectButton", "Inspect", new Color(0.15f, 0.15f, 0.15f));
             UIFactory.SetLayoutElement(KeyInspectButton.Button.gameObject, minWidth: 60, flexibleWidth: 0, minHeight: 25, flexibleHeight: 0);
-            InspectButton.OnClick += KeyInspectClicked;
+            KeyInspectButton.OnClick += KeyInspectClicked;
 
             // label
 

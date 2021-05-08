@@ -167,7 +167,8 @@ namespace UnityExplorer.UI.IValues
 
                 var entry = cachedEntries[keyIndex];
                 entry.SetValueFromSource(value);
-                entry.SetDataToCell(entry.CellView);
+                if (entry.CellView != null)
+                    entry.SetDataToCell(entry.CellView);
             }
             catch (Exception ex)
             {
