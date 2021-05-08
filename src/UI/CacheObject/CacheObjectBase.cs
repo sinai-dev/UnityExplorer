@@ -60,7 +60,7 @@ namespace UnityExplorer.UI.CacheObject
 
         // internals
 
-        private static readonly Dictionary<string, MethodInfo> numberParseMethods = new Dictionary<string, MethodInfo>();
+        // private static readonly Dictionary<string, MethodInfo> numberParseMethods = new Dictionary<string, MethodInfo>();
 
         public ValueState State = ValueState.NotEvaluated;
 
@@ -160,25 +160,18 @@ namespace UnityExplorer.UI.CacheObject
         {
             if (type == typeof(bool))
                 return ValueState.Boolean;
-
             else if (type.IsPrimitive || type == typeof(decimal))
                 return ValueState.Number;
-
             else if (type == typeof(string))
                 return ValueState.String;
-
             else if (type.IsEnum)
                 return ValueState.Enum;
-
             else if (type == typeof(Color) || type == typeof(Color32))
                 return ValueState.Color;
-
-            // else if (InteractiveValueStruct.SupportsType(type))
-            //     return ValueState.ValueStruct;
-
+             else if (InteractiveValueStruct.SupportsType(type))
+                 return ValueState.ValueStruct;
             else if (typeof(IDictionary).IsAssignableFrom(type))
                 return ValueState.Dictionary;
-
             else if (typeof(IEnumerable).IsAssignableFrom(type))
                 return ValueState.Collection;
             else
@@ -341,6 +334,8 @@ namespace UnityExplorer.UI.CacheObject
 
         // CacheObjectCell Apply
 
+        // todo make this a reusable utility method
+
         public virtual void OnCellApplyClicked()
         {
             if (State == ValueState.Boolean)
@@ -349,14 +344,9 @@ namespace UnityExplorer.UI.CacheObject
             {
                 try
                 {
-                    var type = Value.GetActualType();
-                    if (!numberParseMethods.ContainsKey(type.AssemblyQualifiedName))
-                    {
-                        var method = type.GetMethod("Parse", new Type[] { typeof(string) });
-                        numberParseMethods.Add(type.AssemblyQualifiedName, method);
-                    }
-                
-                    var val = numberParseMethods[type.AssemblyQualifiedName]
+                    var type = Value.GetType();
+
+                    var val = ReflectionUtility.GetMethodInfo(type, "Parse", ArgumentUtility.ParseArgs)
                         .Invoke(null, new object[] { CellView.InputField.Text });
 
                     SetUserValue(val);

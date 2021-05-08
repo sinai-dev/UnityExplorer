@@ -74,6 +74,8 @@ namespace UnityExplorer.UI.IValues
                 var type = value.GetActualType();
                 if (type.IsGenericType)
                     EntryType = type.GetGenericArguments()[0];
+                else if (type.HasElementType)
+                    EntryType = type.GetElementType();
                 else
                     EntryType = typeof(object);
 

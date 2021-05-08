@@ -233,8 +233,8 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
                 ReflectionUtility.GetPropertyInfo(typeof(Selectable), "m_Colors")
                     .SetValue(selectable, _colorBlock, null);
 
-                ReflectionUtility.GetMethodInfo(typeof(Selectable), "OnSetProperty", new Type[0])
-                    .Invoke(selectable, new object[0]);
+                ReflectionUtility.GetMethodInfo(typeof(Selectable), "OnSetProperty")
+                    .Invoke(selectable, ArgumentUtility.EmptyArgs);
             }
             catch (Exception ex)
             {

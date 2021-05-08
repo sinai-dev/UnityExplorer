@@ -119,14 +119,14 @@ namespace UnityExplorer.UI.Utility
             {
                 try
                 {
-                    var formatMethod = type.GetMethod("ToString", new Type[] { typeof(string) });
+                    var formatMethod = type.GetMethod("ToString", ArgumentUtility.ParseArgs);
                     formatMethod.Invoke(value, new object[] { "F3" });
                     toStringFormattedMethods.Add(type.AssemblyQualifiedName, formatMethod);
                     toStringMethods.Add(type.AssemblyQualifiedName, null);
                 }
                 catch
                 {
-                    var toStringMethod = type.GetMethod("ToString", new Type[0]);
+                    var toStringMethod = type.GetMethod("ToString", ArgumentUtility.EmptyTypes);
                     toStringMethods.Add(type.AssemblyQualifiedName, toStringMethod);
                 }
             }
@@ -141,7 +141,7 @@ namespace UnityExplorer.UI.Utility
                 if (toStringFormattedMethods.TryGetValue(type.AssemblyQualifiedName, out MethodInfo f3method))
                     toString = (string)f3method.Invoke(value, new object[] { "F3" });
                 else
-                    toString = (string)toStringMethods[type.AssemblyQualifiedName].Invoke(value, new object[0]);
+                    toString = (string)toStringMethods[type.AssemblyQualifiedName].Invoke(value, ArgumentUtility.EmptyArgs);
             }
             catch (Exception ex)
             {

@@ -101,7 +101,7 @@ namespace UnityExplorer.UI.CacheObject.Views
 
                 try
                 {
-                    var parse = ReflectionUtility.GetMethodInfo(type, "Parse", new Type[] { typeof(string) });
+                    var parse = ReflectionUtility.GetMethodInfo(type, "Parse", ArgumentUtility.ParseArgs);
                     outArgs[i] = parse.Invoke(null, new object[] { input });
                 }
                 catch (Exception ex)

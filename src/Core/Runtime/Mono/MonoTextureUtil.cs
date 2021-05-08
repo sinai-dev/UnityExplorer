@@ -46,7 +46,7 @@ namespace UnityExplorer.Core.Runtime.Mono
             if (method.IsStatic)
                 return (byte[])method.Invoke(null, new object[] { tex });
             else
-                return (byte[])method.Invoke(tex, new object[0]);
+                return (byte[])method.Invoke(tex, ArgumentUtility.EmptyArgs);
         }
 
         private static MethodInfo GetEncodeToPNGMethod()

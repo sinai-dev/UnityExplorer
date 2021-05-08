@@ -37,7 +37,7 @@ namespace UnityExplorer.UI.CacheObject
                 if (Arguments.Length > 0)
                     return methodInfo.Invoke(DeclaringInstance, Evaluator.TryParseArguments());
 
-                var ret = methodInfo.Invoke(DeclaringInstance, new object[0]);
+                var ret = methodInfo.Invoke(DeclaringInstance, ArgumentUtility.EmptyArgs);
 
                 HadException = false;
                 LastException = null;

@@ -23,8 +23,8 @@ namespace UnityExplorer.UI.IValues
                     return typeof(InteractiveList);
                 case ValueState.Dictionary:
                     return typeof(InteractiveDictionary);
-                //case ValueState.ValueStruct:
-                //    return typeof(InteractiveValueStruct);
+                case ValueState.ValueStruct:
+                    return typeof(InteractiveValueStruct);
                 case ValueState.Color:
                     return typeof(InteractiveColor);
                 default: return null;

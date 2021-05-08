@@ -224,6 +224,7 @@
     <Compile Include="Core\ExplorerBehaviour.cs" />
     <Compile Include="Core\Reflection\Extensions.cs" />
     <Compile Include="Core\Reflection\Il2CppReflection.cs" />
+    <Compile Include="Core\Utility\ArgumentUtility.cs" />
     <Compile Include="Core\Utility\MiscUtility.cs" />
     <Compile Include="UI\Inspectors\TODO_InspectUnderMouse.cs" />
     <Compile Include="UI\CSConsole\CSConsoleManager.cs" />
@@ -251,6 +252,7 @@
     <Compile Include="UI\IValues\InteractiveString.cs" />
     <Compile Include="UI\IValues\InteractiveValue.cs" />
     <Compile Include="UI\Inspectors\ReflectionInspector.cs" />
+    <Compile Include="UI\IValues\InteractiveValueStruct.cs" />
     <Compile Include="UI\Models\InputFieldRef.cs" />
     <Compile Include="UI\ObjectPool\IPooledObject.cs" />
     <Compile Include="UI\ObjectPool\Pool.cs" />

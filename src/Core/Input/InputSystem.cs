@@ -81,7 +81,7 @@ namespace UnityExplorer.Core.Input
             {
                 try
                 {
-                    return (Vector2)ReadV2ControlMethod.Invoke(MousePositionInfo, new object[0]);
+                    return (Vector2)ReadV2ControlMethod.Invoke(MousePositionInfo, ArgumentUtility.EmptyArgs);
                 }
                 catch { return Vector2.zero; }
             }
@@ -93,7 +93,7 @@ namespace UnityExplorer.Core.Input
             {
                 try
                 {
-                    return (Vector2)ReadV2ControlMethod.Invoke(MouseScrollInfo, new object[0]);
+                    return (Vector2)ReadV2ControlMethod.Invoke(MouseScrollInfo, ArgumentUtility.EmptyArgs);
                 }
                 catch { return Vector2.zero; }
             }
@@ -193,7 +193,7 @@ namespace UnityExplorer.Core.Input
             CreateAction(map, "scrollWheel", new[] { "<Mouse>/scroll" }, "scrollWheel");
 
             UI_Enable = map.GetType().GetMethod("Enable");
-            UI_Enable.Invoke(map, new object[0]);
+            UI_Enable.Invoke(map, ArgumentUtility.EmptyArgs);
             UI_ActionMap = map;
         }
 
@@ -227,7 +227,7 @@ namespace UnityExplorer.Core.Input
         public void ActivateModule()
         {
             m_newInputModule.ActivateModule();
-            UI_Enable.Invoke(UI_ActionMap, new object[0]);
+            UI_Enable.Invoke(UI_ActionMap, ArgumentUtility.EmptyArgs);
         }
     }
 }

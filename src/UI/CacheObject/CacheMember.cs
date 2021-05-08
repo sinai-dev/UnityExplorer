@@ -25,7 +25,7 @@ namespace UnityExplorer.UI.CacheObject
         public abstract bool IsStatic { get; }
         public override bool HasArguments => Arguments?.Length > 0 || GenericArguments.Length > 0;
         public ParameterInfo[] Arguments { get; protected set; } = new ParameterInfo[0];
-        public Type[] GenericArguments { get; protected set; } = new Type[0];
+        public Type[] GenericArguments { get; protected set; } = ArgumentUtility.EmptyTypes;
         public EvaluateWidget Evaluator { get; protected set; }
         public bool Evaluating => Evaluator != null && Evaluator.UIRoot.activeSelf;
         

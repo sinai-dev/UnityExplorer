@@ -35,17 +35,10 @@ namespace UnityExplorer.UI.IValues
                 input.InputField.readOnly = !owner.CanWrite;
         }
 
+        // owner setting value to this
         public override void SetValue(object value)
         {
             OnOwnerSetValue(value);
-        }
-
-        public void SetValueToOwner()
-        {
-            if (IsValueColor32)
-                CurrentOwner.SetUserValue((Color32)EditedColor);
-            else
-                CurrentOwner.SetUserValue(EditedColor);
         }
 
         private void OnOwnerSetValue(object value)
@@ -75,6 +68,16 @@ namespace UnityExplorer.UI.IValues
 
             if (m_colorImage)
                 m_colorImage.color = EditedColor;
+        }
+
+        // setting value to owner
+
+        public void SetValueToOwner()
+        {
+            if (IsValueColor32)
+                CurrentOwner.SetUserValue((Color32)EditedColor);
+            else
+                CurrentOwner.SetUserValue(EditedColor);
         }
 
         private void SetColorField(float val, int fieldIndex)

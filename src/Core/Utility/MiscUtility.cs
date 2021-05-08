@@ -23,8 +23,8 @@ namespace UnityExplorer
         /// </summary>
         public static bool HasFlag(this Enum flags, Enum value)
         {
-            ulong num = Convert.ToUInt64(value);
-            return (Convert.ToUInt64(flags) & num) == num;
+            ulong flag = Convert.ToUInt64(value);
+            return (Convert.ToUInt64(flags) & flag) == flag;
         }
     }
 }

@@ -282,7 +282,7 @@ namespace UnityExplorer
                                                 .MakeGenericMethod(toType));
                 }
 
-                return unboxMethods[name].Invoke(cppObj, new object[0]);
+                return unboxMethods[name].Invoke(cppObj, ArgumentUtility.EmptyArgs);
             }
             catch (Exception ex)
             {
@@ -291,13 +291,10 @@ namespace UnityExplorer
             }
         }
 
-        private static readonly Type[] emptyTypes = new Type[0];
-        private static readonly object[] emptyArgs = new object[0];
-
         private static Il2CppSystem.Object BoxIl2CppObject(object cppStruct, Type structType)
         {
-            return GetMethodInfo(structType, "BoxIl2CppObject", emptyTypes)
-                   .Invoke(cppStruct, emptyArgs)
+            return GetMethodInfo(structType, "BoxIl2CppObject", ArgumentUtility.EmptyTypes)
+                   .Invoke(cppStruct, ArgumentUtility.EmptyArgs)
                    as Il2CppSystem.Object;
         }
 

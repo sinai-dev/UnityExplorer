@@ -67,13 +67,13 @@ namespace UnityExplorer
                     allTypeNames.Add(type.FullName);
                 }
 
-                foreach (var key in s_cachedTypeInheritance.Keys)
+                foreach (var key in typeInheritance.Keys)
                 {
                     try
                     {
                         var baseType = AllTypes[key];
-                        if (baseType.IsAssignableFrom(type) && !s_cachedTypeInheritance[key].Contains(type))
-                            s_cachedTypeInheritance[key].Add(type);
+                        if (baseType.IsAssignableFrom(type) && !typeInheritance[key].Contains(type))
+                            typeInheritance[key].Add(type);
                     }
                     catch { }
                 }
@@ -145,7 +145,7 @@ namespace UnityExplorer
         #region Type inheritance cache
 
         // cache for GetBaseTypes
-        internal static readonly Dictionary<string, Type[]> s_cachedBaseTypes = new Dictionary<string, Type[]>();
+        internal static readonly Dictionary<string, Type[]> baseTypes = new Dictionary<string, Type[]>();
 
         /// <summary>
         /// Get all base types of the provided Type, including itself.
@@ -162,7 +162,7 @@ namespace UnityExplorer
 
             var name = type.AssemblyQualifiedName;
 
-            if (s_cachedBaseTypes.TryGetValue(name, out Type[] ret))
+            if (baseTypes.TryGetValue(name, out Type[] ret))
                 return ret;
 
             List<Type> list = new List<Type>();
@@ -175,7 +175,7 @@ namespace UnityExplorer
 
             ret = list.ToArray();
 
-            s_cachedBaseTypes.Add(name, ret);
+            baseTypes.Add(name, ret);
 
             return ret;
         }
@@ -186,8 +186,8 @@ namespace UnityExplorer
         #region Type and Generic Parameter implementation cache
 
         // cache for GetImplementationsOf
-        internal static readonly Dictionary<string, HashSet<Type>> s_cachedTypeInheritance = new Dictionary<string, HashSet<Type>>();
-        internal static readonly Dictionary<string, HashSet<Type>> s_cachedGenericParameterInheritance = new Dictionary<string, HashSet<Type>>();
+        internal static readonly Dictionary<string, HashSet<Type>> typeInheritance = new Dictionary<string, HashSet<Type>>();
+        internal static readonly Dictionary<string, HashSet<Type>> genericParameterInheritance = new Dictionary<string, HashSet<Type>>();
 
         public static string GetImplementationKey(Type type)
         {
@@ -222,7 +222,7 @@ namespace UnityExplorer
 
         private static HashSet<Type> GetImplementations(string key, Type baseType, bool allowAbstract, bool allowGeneric)
         {
-            if (!s_cachedTypeInheritance.ContainsKey(key))
+            if (!typeInheritance.ContainsKey(key))
             {
                 var set = new HashSet<Type>();
                 for (int i = 0; i < allTypeNames.Count; i++)
@@ -250,15 +250,15 @@ namespace UnityExplorer
 
                 //set.
 
-                s_cachedTypeInheritance.Add(key, set);
+                typeInheritance.Add(key, set);
             }
 
-            return s_cachedTypeInheritance[key];
+            return typeInheritance[key];
         }
 
         private static HashSet<Type> GetGenericParameterImplementations(string key, Type baseType, bool allowAbstract, bool allowGeneric)
         {
-            if (!s_cachedGenericParameterInheritance.ContainsKey(key))
+            if (!genericParameterInheritance.ContainsKey(key))
             {
                 var set = new HashSet<Type>();
 
@@ -294,10 +294,10 @@ namespace UnityExplorer
                     catch { }
                 }
 
-                s_cachedGenericParameterInheritance.Add(key, set);
+                genericParameterInheritance.Add(key, set);
             }
 
-            return s_cachedGenericParameterInheritance[key];
+            return genericParameterInheritance[key];
         }
 
 #endregion
@@ -305,64 +305,65 @@ namespace UnityExplorer
 
         #region Internal MemberInfo Cache
 
-        internal static Dictionary<Type, Dictionary<string, FieldInfo>> s_cachedFieldInfos = new Dictionary<Type, Dictionary<string, FieldInfo>>();
+        internal static Dictionary<Type, Dictionary<string, FieldInfo>> fieldInfos = new Dictionary<Type, Dictionary<string, FieldInfo>>();
 
         public static FieldInfo GetFieldInfo(Type type, string fieldName)
         {
-            if (!s_cachedFieldInfos.ContainsKey(type))
-                s_cachedFieldInfos.Add(type, new Dictionary<string, FieldInfo>());
+            if (!fieldInfos.ContainsKey(type))
+                fieldInfos.Add(type, new Dictionary<string, FieldInfo>());
 
-            if (!s_cachedFieldInfos[type].ContainsKey(fieldName))
-                s_cachedFieldInfos[type].Add(fieldName, type.GetField(fieldName, FLAGS));
+            if (!fieldInfos[type].ContainsKey(fieldName))
+                fieldInfos[type].Add(fieldName, type.GetField(fieldName, FLAGS));
 
-            return s_cachedFieldInfos[type][fieldName];
+            return fieldInfos[type][fieldName];
         }
 
-        internal static Dictionary<Type, Dictionary<string, PropertyInfo>> s_cachedPropInfos = new Dictionary<Type, Dictionary<string, PropertyInfo>>();
+        internal static Dictionary<Type, Dictionary<string, PropertyInfo>> propertyInfos = new Dictionary<Type, Dictionary<string, PropertyInfo>>();
 
         public static PropertyInfo GetPropertyInfo(Type type, string propertyName)
         {
-            if (!s_cachedPropInfos.ContainsKey(type))
-                s_cachedPropInfos.Add(type, new Dictionary<string, PropertyInfo>());
+            if (!propertyInfos.ContainsKey(type))
+                propertyInfos.Add(type, new Dictionary<string, PropertyInfo>());
 
-            if (!s_cachedPropInfos[type].ContainsKey(propertyName))
-                s_cachedPropInfos[type].Add(propertyName, type.GetProperty(propertyName, FLAGS));
+            if (!propertyInfos[type].ContainsKey(propertyName))
+                propertyInfos[type].Add(propertyName, type.GetProperty(propertyName, FLAGS));
 
-            return s_cachedPropInfos[type][propertyName];
+            return propertyInfos[type][propertyName];
         }
 
-        internal static Dictionary<Type, Dictionary<string, MethodInfo>> s_cachedMethodInfos = new Dictionary<Type, Dictionary<string, MethodInfo>>();
+        internal static Dictionary<Type, Dictionary<string, MethodInfo>> methodInfos = new Dictionary<Type, Dictionary<string, MethodInfo>>();
 
-        public static MethodInfo GetMethodInfo(Type type, string methodName, Type[] argumentTypes)
+        public static MethodInfo GetMethodInfo(Type type, string methodName)
+            => GetMethodInfo(type, methodName, ArgumentUtility.EmptyTypes, false);
+
+        public static MethodInfo GetMethodInfo(Type type, string methodName, Type[] argumentTypes, bool cacheAmbiguous = false)
         {
-            if (!s_cachedMethodInfos.ContainsKey(type))
-                s_cachedMethodInfos.Add(type, new Dictionary<string, MethodInfo>());
+            if (!methodInfos.ContainsKey(type))
+                methodInfos.Add(type, new Dictionary<string, MethodInfo>());
 
             var sig = methodName;
 
-            if (argumentTypes != null)
+            // If the signature could be ambiguous (internally, within UnityExplorer's own use) 
+            // then append the arguments to the key.
+            // Currently not needed and not used, but just in case I need it one day.
+            if (cacheAmbiguous)
             {
-                sig += "(";
-                for (int i = 0; i < argumentTypes.Length; i++)
-                {
-                    if (i > 0)
-                        sig += ",";
-                    sig += argumentTypes[i].FullName;
-                }
-                sig += ")";
+                sig += "|";
+                foreach (var arg in argumentTypes)
+                    sig += arg.FullName + ",";
             }
 
             try
             {
-                if (!s_cachedMethodInfos[type].ContainsKey(sig))
+                if (!methodInfos[type].ContainsKey(sig))
                 {
                     if (argumentTypes != null)
-                        s_cachedMethodInfos[type].Add(sig, type.GetMethod(methodName, FLAGS, null, argumentTypes, null));
+                        methodInfos[type].Add(sig, type.GetMethod(methodName, FLAGS, null, argumentTypes, null));
                     else
-                        s_cachedMethodInfos[type].Add(sig, type.GetMethod(methodName, FLAGS));
+                        methodInfos[type].Add(sig, type.GetMethod(methodName, FLAGS));
                 }
 
-                return s_cachedMethodInfos[type][sig];
+                return methodInfos[type][sig];
             }
             catch (AmbiguousMatchException)
             {
