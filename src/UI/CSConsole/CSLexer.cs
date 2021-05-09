@@ -270,6 +270,9 @@ namespace UnityExplorer.UI.CSharpConsole
                 }
                 else
                 {
+                    if (c == indentClose)
+                        currentIndent--;
+
                     if (prevWasNewLine && curLineIndent < currentIndent)
                     {
                         ExplorerCore.Log("line is not indented enough");
@@ -281,28 +284,25 @@ namespace UnityExplorer.UI.CSharpConsole
                     }
 
                     // check for brackets
-                    if (c == indentClose || c == indentOpen)
+                    if ((c == indentClose || c == indentOpen) && !prevWasNewLine)
                     {
-                        ExplorerCore.Log("char is a bracket");
+                        ExplorerCore.Log("bracket needs new line");
 
-                        if (c == indentOpen)
-                            currentIndent++;
-                        else if (c == indentClose)
-                            currentIndent--;
-
-                        if (!prevWasNewLine)
-                        {
-                            ExplorerCore.Log("it wasnt on a new line, doing so...");
-                            // need to put it on a new line
-                            sb.Insert(i, $"\n{new string('\t', currentIndent - 1)}");
-                            caretPos += 1 + currentIndent;
-                            i += 1 + currentIndent;
-                        }
+                        // need to put it on a new line
+                        sb.Insert(i, $"\n{new string('\t', currentIndent)}");
+                        caretPos += 1 + currentIndent;
+                        i += 1 + currentIndent;
                     }
+
+                    if (c == indentOpen)
+                        currentIndent++;
 
                     prevWasNewLine = false;
                 }
             }
+            
+            // todo put caret on new line after previous bracket if needed
+            // indent caret to current indent
 
             // process after caret position, make sure there are equal opened/closed brackets
             ExplorerCore.Log("-- after caret --");
@@ -331,6 +331,7 @@ namespace UnityExplorer.UI.CSharpConsole
                 ExplorerCore.Log("there are not enough closing brackets, curIndent is " + currentIndent);
                 // There are not enough close brackets
 
+                // TODO this should append in reverse indent order (small indents inserted first, then biggest).
                 while (currentIndent > 0)
                 {
                     ExplorerCore.Log("Inserting closing bracket with " + currentIndent + " indent");
