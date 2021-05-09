@@ -4,17 +4,20 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityExplorer.UI;
 using UnityExplorer.UI.CacheObject;
+using UnityExplorer.UI.Inspectors;
 using UnityExplorer.UI.ObjectPool;
 using UnityExplorer.UI.Panels;
 
-namespace UnityExplorer.UI.Inspectors
+namespace UnityExplorer
 {
     public static class InspectorManager
     {
         public static readonly List<InspectorBase> Inspectors = new List<InspectorBase>();
 
         public static InspectorBase ActiveInspector { get; private set; }
+        private static InspectorBase lastActiveInspector;
 
         public static float PanelWidth;
 
@@ -28,10 +31,6 @@ namespace UnityExplorer.UI.Inspectors
             if (TryFocusActiveInspector(obj))
                 return;
 
-            // var type = obj.GetActualType();
-            //if (type.IsEnumerable())
-            //    CreateInspector<ListInspector>(obj, false, sourceCache);
-            //// todo dict
             if (obj is GameObject)
                 CreateInspector<GameObjectInspector>(obj);
             else
@@ -68,9 +67,12 @@ namespace UnityExplorer.UI.Inspectors
         public static void UnsetActiveInspector()
         {
             if (ActiveInspector != null)
+            {
+                lastActiveInspector = ActiveInspector;
                 ActiveInspector.OnSetInactive();
+                ActiveInspector = null;
+            }
         }
-
         private static void CreateInspector<T>(object target, bool staticReflection = false, CacheObjectBase sourceCache = null) where T : InspectorBase
         {
             var inspector = Pool<T>.Borrow();
@@ -96,10 +98,35 @@ namespace UnityExplorer.UI.Inspectors
 
         internal static void ReleaseInspector<T>(T inspector) where T : InspectorBase
         {
+            if (lastActiveInspector == inspector)
+                lastActiveInspector = null;
+
+            bool wasActive = ActiveInspector == inspector;
+            int wasIdx = Inspectors.IndexOf(inspector);
+
+            Inspectors.Remove(inspector);
             inspector.OnReturnToPool();
             Pool<T>.Return(inspector);
 
-            Inspectors.Remove(inspector);
+            if (wasActive)
+            {
+                ActiveInspector = null;
+                // Try focus another inspector, or close the window.
+                if (lastActiveInspector != null)
+                {
+                    SetInspectorActive(lastActiveInspector);
+                    lastActiveInspector = null;
+                }
+                else if (Inspectors.Any())
+                {
+                    int newIdx = Math.Min(Inspectors.Count - 1, Math.Max(0, wasIdx - 1));
+                    SetInspectorActive(Inspectors[newIdx]);
+                }
+                else
+                {
+                    UIManager.SetPanelActive(UIManager.Panels.Inspector, false);
+                }
+            }
         }
 
         internal static void Update()

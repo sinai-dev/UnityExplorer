@@ -5,10 +5,34 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityExplorer.Core;
 using UnityExplorer.Core.Runtime;
 
-namespace UnityExplorer.Core.Search
+namespace UnityExplorer.UI.ObjectExplorer
 {
+    public enum SearchContext
+    {
+        UnityObject,
+        GameObject,
+        Singleton,
+        StaticClass
+    }
+
+    public enum ChildFilter
+    {
+        Any,
+        RootObject,
+        HasParent
+    }
+
+    public enum SceneFilter
+    {
+        Any,
+        ActivelyLoaded,
+        DontDestroyOnLoad,
+        HideAndDontSave,
+    }
+
     public static class SearchProvider
     {
        

@@ -40,11 +40,6 @@ namespace UnityExplorer.UI.Models
             Instances.Add(this);
         }
 
-        public virtual void Init()
-        {
-
-        }
-
         /// <summary>
         /// Default empty method, override and implement if NeedsUpdateTick is true.
         /// </summary>

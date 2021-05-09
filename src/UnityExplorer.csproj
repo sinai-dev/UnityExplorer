@@ -219,8 +219,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Config\InternalConfigHandler.cs" />
-    <Compile Include="Core\CSharp\ScriptEvaluator.cs" />
-    <Compile Include="Core\CSharp\ScriptInteraction.cs" />
+    <Compile Include="UI\CSConsole\CSLexer.cs" />
+    <Compile Include="UI\CSConsole\Lexer\CommentMatch.cs" />
+    <Compile Include="UI\CSConsole\Lexer\KeywordMatch.cs" />
+    <Compile Include="UI\CSConsole\Lexer\Matcher.cs" />
+    <Compile Include="UI\CSConsole\Lexer\NumberMatch.cs" />
+    <Compile Include="UI\CSConsole\Lexer\StringMatch.cs" />
+    <Compile Include="UI\CSConsole\Lexer\SymbolMatch.cs" />
+    <Compile Include="UI\CSConsole\ScriptEvaluator.cs" />
+    <Compile Include="UI\CSConsole\ScriptInteraction.cs" />
     <Compile Include="Core\ExplorerBehaviour.cs" />
     <Compile Include="Core\Reflection\Extensions.cs" />
     <Compile Include="Core\Reflection\Il2CppReflection.cs" />
@@ -228,7 +235,7 @@
     <Compile Include="Core\Utility\MiscUtility.cs" />
     <Compile Include="Core\Utility\ParseUtility.cs" />
     <Compile Include="UI\Inspectors\TODO_InspectUnderMouse.cs" />
-    <Compile Include="UI\CSConsole\CSConsoleManager.cs" />
+    <Compile Include="UI\CSConsole\CSConsole.cs" />
     <Compile Include="UI\CacheObject\CacheField.cs" />
     <Compile Include="UI\CacheObject\CacheKeyValuePair.cs" />
     <Compile Include="UI\CacheObject\CacheListEntry.cs" />
@@ -243,7 +250,7 @@
     <Compile Include="UI\CacheObject\Views\EvaluateWidget.cs" />
     <Compile Include="UI\Inspectors\GameObjectInspector.cs" />
     <Compile Include="UI\CacheObject\ICacheObjectController.cs" />
-    <Compile Include="UI\Inspectors\InspectorManager.cs" />
+    <Compile Include="Core\InspectorManager.cs" />
     <Compile Include="UI\Inspectors\InspectorTab.cs" />
     <Compile Include="UI\Inspectors\InspectorBase.cs" />
     <Compile Include="UI\IValues\InteractiveColor.cs" />
@@ -283,10 +290,7 @@
     <Compile Include="Core\Runtime\RuntimeProvider.cs" />
     <Compile Include="Core\Runtime\TextureUtilProvider.cs" />
     <Compile Include="Core\SceneHandler.cs" />
-    <Compile Include="Core\Search\ChildFilter.cs" />
-    <Compile Include="Core\Search\SceneFilter.cs" />
-    <Compile Include="Core\Search\SearchContext.cs" />
-    <Compile Include="Core\Search\SearchProvider.cs" />
+    <Compile Include="UI\ObjectExplorer\SearchProvider.cs" />
     <Compile Include="Core\Tests\TestClass.cs" />
     <Compile Include="Core\Utility\UnityHelpers.cs" />
     <Compile Include="ExplorerCore.cs" />
@@ -302,7 +306,7 @@
     <Compile Include="UI\Models\UIModel.cs" />
     <Compile Include="UI\Panels\UIPanel.cs" />
     <Compile Include="UI\Panels\InspectorPanel.cs" />
-    <Compile Include="UI\Panels\ObjectExplorer.cs" />
+    <Compile Include="UI\Panels\ObjectExplorerPanel.cs" />
     <Compile Include="UI\UIFactory.cs" />
     <Compile Include="UI\UIManager.cs" />
     <Compile Include="UI\Panels\PanelDragger.cs" />

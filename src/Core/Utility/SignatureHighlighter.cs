@@ -231,6 +231,18 @@ namespace UnityExplorer
             return sb.ToString();
         }
 
+        public static string GetMemberInfoColor(MemberTypes type)
+        {
+            switch (type)
+            {
+                case MemberTypes.Method: return METHOD_INSTANCE;
+                case MemberTypes.Property: return PROP_INSTANCE;
+                case MemberTypes.Field: return FIELD_INSTANCE;
+                default: return null;
+            }
+        }
+
+
         public static string GetMemberInfoColor(MemberInfo memberInfo, out bool isStatic)
         {
             isStatic = false;

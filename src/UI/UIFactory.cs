@@ -893,6 +893,15 @@ namespace UnityExplorer.UI
 
             var inputField = CreateInputField(viewportObj, "InputField", placeHolderText);
             var content = inputField.UIRoot;
+            var textComp = inputField.InputField.textComponent;
+            textComp.alignment = TextAnchor.UpperLeft;
+            textComp.fontSize = fontSize;
+            textComp.horizontalOverflow = HorizontalWrapMode.Wrap;
+            inputField.InputField.lineType = InputField.LineType.MultiLineNewline;
+            inputField.InputField.targetGraphic.color = color;
+            inputField.PlaceholderText.alignment = TextAnchor.UpperLeft;
+            inputField.PlaceholderText.fontSize = fontSize;
+            inputField.PlaceholderText.horizontalOverflow = HorizontalWrapMode.Wrap;
 
             //var content = CreateInputField(viewportObj, name, placeHolderText ?? "...", out InputField inputField, fontSize, 0);
             SetLayoutElement(content, flexibleHeight: 9999, flexibleWidth: 9999);

@@ -9,15 +9,16 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityExplorer.Core;
 using UnityExplorer.UI.Models;
+using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets;
 
-namespace UnityExplorer.UI.Panels
+namespace UnityExplorer.UI.ObjectExplorer
 {
     public class SceneExplorer : UIModel
     {
-        public ObjectExplorer Parent { get; }
+        public ObjectExplorerPanel Parent { get; }
 
-        public SceneExplorer(ObjectExplorer parent)
+        public SceneExplorer(ObjectExplorerPanel parent)
         {
             Parent = parent;
 

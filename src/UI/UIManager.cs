@@ -8,6 +8,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Input;
+using UnityExplorer.UI.CSharpConsole;
 using UnityExplorer.UI.Models;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Utility;
@@ -39,9 +40,9 @@ namespace UnityExplorer.UI
         // panels
         internal static GameObject PanelHolder { get; private set; }
        
-        public static ObjectExplorer Explorer { get; private set; }
+        public static ObjectExplorerPanel Explorer { get; private set; }
         public static InspectorPanel Inspector { get; private set; }
-        public static CSConsolePanel CSConsole { get; private set; }
+        public static CSConsolePanel CSharpConsole { get; private set; }
 
         public static AutoCompleter AutoCompleter { get; private set; }
 
@@ -69,7 +70,7 @@ namespace UnityExplorer.UI
                 case Panels.AutoCompleter:
                     return AutoCompleter;
                 case Panels.CSConsole:
-                    return CSConsole;
+                    return CSharpConsole;
                 default:
                     throw new NotImplementedException($"TODO GetPanel: {panel}");
             }
@@ -170,14 +171,15 @@ namespace UnityExplorer.UI
             AutoCompleter = new AutoCompleter();
             AutoCompleter.ConstructUI();
 
-            Explorer = new ObjectExplorer();
+            Explorer = new ObjectExplorerPanel();
             Explorer.ConstructUI();
 
             Inspector = new InspectorPanel();
             Inspector.ConstructUI();
 
-            CSConsole = new CSConsolePanel();
-            CSConsole.ConstructUI();
+            CSharpConsole = new CSConsolePanel();
+            CSharpConsole.ConstructUI();
+            CSConsole.Init();
 
             ShowMenu = !ConfigManager.Hide_On_Startup.Value;
 

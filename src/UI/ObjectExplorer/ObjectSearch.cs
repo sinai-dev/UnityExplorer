@@ -4,21 +4,21 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.Core.Search;
 using UnityExplorer.UI.Inspectors;
 using UnityExplorer.UI.Models;
 using UnityExplorer.UI.ObjectPool;
+using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Utility;
 using UnityExplorer.UI.Widgets;
 using UnityExplorer.UI.Widgets.AutoComplete;
 
-namespace UnityExplorer.UI.Panels
+namespace UnityExplorer.UI.ObjectExplorer
 {
     public class ObjectSearch : UIModel
     {
-        public ObjectExplorer Parent { get; }
+        public ObjectExplorerPanel Parent { get; }
 
-        public ObjectSearch(ObjectExplorer parent)
+        public ObjectSearch(ObjectExplorerPanel parent)
         {
             Parent = parent;
         }

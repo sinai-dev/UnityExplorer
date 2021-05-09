@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityExplorer.UI.IValues;
+using System.Reflection;
 #if CPP
 using UnhollowerRuntimeLib;
 using UnhollowerBaseLib;
@@ -11,8 +13,69 @@ using UnhollowerBaseLib;
 
 namespace UnityExplorer.Tests
 {
+    public struct TestValueStruct
+    {
+        public const object TestIgnoreThis = null;
+        public const string TestIgnoreButValid = "";
+
+        public string aString;
+        public int anInt;
+        public float aFloat;
+        public bool aBool;
+        public Vector3 AVector3;
+        public Vector4 aVector4;
+        public DateTime aDateTime;
+        public Color32 aColor32;
+        public CameraClearFlags clearFlags;
+    }
+
+    public enum TestEnum : long
+    {
+        Neg50 = -50,
+        Neg1 = -1,
+        Zero = 0,
+        One = 1,
+        Pos49 = 49,
+        Implicit50,
+        Also50 = 50,
+        AlsoAlso50 = 50,
+    };
+    public enum TestEnum2 : ulong
+    {
+        Min = ulong.MinValue,
+        Max = ulong.MaxValue
+    }
+    [Flags]
+    public enum TestFlags : int
+    {
+        All = -1,
+        Zero = 0,
+        Ok = 1,
+        Two = 2,
+        Three = 4,
+        Four = 8,
+        Five = 16,
+        Six = 32,
+        Seven = 64,
+        Thirteen = Six | Seven,
+        Fifteen = Four | Five | Six,
+    }
+
     public static class TestClass
     {
+        public static void ATestMethod(string s, float f, Vector3 vector, DateTime date, Quaternion quater, bool b, CameraClearFlags enumvalue)
+        {
+            ExplorerCore.Log($"{s}, {f}, {vector.ToString()}, {date}, {quater.eulerAngles.ToString()}, {b}, {enumvalue}");
+        }
+
+        public static TestValueStruct AATestStruct;
+
+        public static TestEnum AATestEnumOne = TestEnum.Neg50;
+        public static TestEnum2 AATestEnumTwo = TestEnum2.Max;
+        public static TestFlags AATestFlags = TestFlags.Thirteen;
+        public static BindingFlags AATestbinding;
+        public static HideFlags AAHideFlags;
+
         public static List<int> AWritableList = new List<int> { 1, 2, 3, 4, 5 };
         public static Dictionary<string, int> AWritableDict = new Dictionary<string, int> { { "one", 1 }, { "two", 2 } };
 
@@ -66,6 +129,9 @@ namespace UnityExplorer.Tests
         };
 
         public const int ConstantInt = 5;
+
+        public static Color AColor = Color.magenta;
+        public static Color32 AColor32 = Color.red;
 
         public static byte[] ByteArray = new byte[16];
         public static string LongString = new string('#', 10000);
@@ -123,7 +189,6 @@ namespace UnityExplorer.Tests
         }
 
 #if CPP
-        public static List<Il2CppSystem.Object> TestWritableBoxedList;
 
         public static string testStringOne = "Test";
         public static Il2CppSystem.Object testStringTwo = "string boxed as cpp object";
@@ -140,6 +205,21 @@ namespace UnityExplorer.Tests
         public static Il2CppSystem.Decimal cppDecimal;
         public static Il2CppSystem.Object cppDecimalBoxed;
         public static Il2CppSystem.Object cppVector3Boxed;
+
+        public static Il2CppSystem.Object RandomBoxedColor
+        {
+            get
+            {
+                int ran = UnityEngine.Random.Range(0, 3);
+                switch (ran)
+                {
+                    case 1: return new Color32().BoxIl2CppObject();
+                    case 2: return Color.magenta.BoxIl2CppObject();
+                    default:
+                        return null;
+                }
+            }
+        }
 
         public static Il2CppSystem.Collections.Hashtable cppHashset;
 
@@ -167,6 +247,7 @@ namespace UnityExplorer.Tests
             CppBoxedList = new List<Il2CppSystem.Object>();
             CppBoxedList.Add((Il2CppSystem.String)"boxedString");
             CppBoxedList.Add(new Il2CppSystem.Int32 { m_value = 5 }.BoxIl2CppObject());
+            CppBoxedList.Add(Color.red.BoxIl2CppObject());
 
             try
             {
@@ -204,12 +285,6 @@ namespace UnityExplorer.Tests
 
             cppBoxedInt = new Il2CppSystem.Int32() { m_value = 5 }.BoxIl2CppObject();
             cppInt = new Il2CppSystem.Int32 { m_value = 420 };
-
-            TestWritableBoxedList = new List<Il2CppSystem.Object>();
-            TestWritableBoxedList.Add(new Il2CppSystem.Int32 { m_value = 1 }.BoxIl2CppObject());
-            TestWritableBoxedList.Add(new Il2CppSystem.Int32 { m_value = 2 }.BoxIl2CppObject());
-            TestWritableBoxedList.Add(new Il2CppSystem.Int32 { m_value = 3 }.BoxIl2CppObject());
-            TestWritableBoxedList.Add(new Il2CppSystem.Int32 { m_value = 4 }.BoxIl2CppObject());
 
             cppHashset = new Il2CppSystem.Collections.Hashtable();
             cppHashset.Add("key1", "itemOne");

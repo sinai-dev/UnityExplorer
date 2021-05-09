@@ -11,12 +11,13 @@ using UnityEngine.UI;
 using UnityExplorer.Core;
 using UnityExplorer.Core.Config;
 using UnityExplorer.UI.Models;
+using UnityExplorer.UI.ObjectExplorer;
 using UnityExplorer.UI.Utility;
 using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Panels
 {
-    public class ObjectExplorer : UIPanel
+    public class ObjectExplorerPanel : UIPanel
     {
         public override string Name => "Object Explorer";
         public override UIManager.Panels PanelType => UIManager.Panels.ObjectExplorer;

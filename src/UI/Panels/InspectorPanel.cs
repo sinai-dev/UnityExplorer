@@ -19,7 +19,7 @@ namespace UnityExplorer.UI.Panels
         public override string Name => "Inspector";
         public override UIManager.Panels PanelType => UIManager.Panels.Inspector;
         public override bool ShouldSaveActiveState => false;
-        public override int MinWidth => 550;
+        public override int MinWidth => 625;
         public override int MinHeight => 350;
 
         public GameObject NavbarHolder;

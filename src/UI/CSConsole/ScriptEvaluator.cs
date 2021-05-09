@@ -65,9 +65,7 @@ namespace UnityExplorer.Core.CSharp
             {
                 string name = assembly.GetName().Name;
                 if (StdLib.Contains(name))
-                {
                     continue;
-                }
 
                 import(assembly);
             }

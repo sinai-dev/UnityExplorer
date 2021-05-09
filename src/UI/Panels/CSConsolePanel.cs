@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityExplorer.Core.Config;
-using UnityExplorer.UI.CSConsole;
+using UnityExplorer.UI.CSharpConsole;
 using UnityExplorer.UI.Utility;
 
 namespace UnityExplorer.UI.Panels
@@ -18,14 +18,11 @@ namespace UnityExplorer.UI.Panels
         public override int MinWidth => 400;
         public override int MinHeight => 300;
 
-        public static CSConsolePanel Instance { get; private set; }
-
         public InputFieldRef InputField { get; private set; }
         public Text InputText { get; private set; }
         public Text HighlightText { get; private set; }
 
         public Action<string> OnInputChanged;
-        //private float m_timeOfLastInputInvoke;
 
         public Action OnResetClicked;
         public Action OnCompileClicked;
@@ -33,7 +30,7 @@ namespace UnityExplorer.UI.Panels
         public Action<bool> OnSuggestionsToggled;
         public Action<bool> OnAutoIndentToggled;
 
-        private int m_lastCaretPosition;
+        public int LastCaretPosition { get; private set; }
         private int m_desiredCaretFix;
         private bool m_fixWaiting;
         private float m_defaultInputFieldAlpha;
@@ -41,10 +38,10 @@ namespace UnityExplorer.UI.Panels
         public void UseSuggestion(string suggestion)
         {
             string input = InputField.Text;
-            input = input.Insert(m_lastCaretPosition, suggestion);
+            input = input.Insert(LastCaretPosition, suggestion);
             InputField.Text = input;
 
-            m_desiredCaretFix = m_lastCaretPosition += suggestion.Length;
+            m_desiredCaretFix = LastCaretPosition += suggestion.Length;
 
             var color = InputField.InputField.selectionColor;
             color.a = 0f;
@@ -56,16 +53,14 @@ namespace UnityExplorer.UI.Panels
             if (value.Length == UIManager.MAX_INPUTFIELD_CHARS)
                 ExplorerCore.LogWarning($"Reached maximum InputField character length! ({UIManager.MAX_INPUTFIELD_CHARS})");
 
-            //if (m_timeOfLastInputInvoke.OccuredEarlierThanDefault())
-            //    return;
-            //
-            //m_timeOfLastInputInvoke = Time.realtimeSinceStartup;
             OnInputChanged?.Invoke(value);
         }
 
         public override void Update()
         {
             base.Update();
+
+            CSConsole.Update();
 
             if (m_desiredCaretFix >= 0)
             {
@@ -87,7 +82,7 @@ namespace UnityExplorer.UI.Panels
                 }
             }
             else if (InputField.InputField.caretPosition > 0)
-                m_lastCaretPosition = InputField.InputField.caretPosition;
+                LastCaretPosition = InputField.InputField.caretPosition;
         }
 
         // Saving
@@ -111,9 +106,6 @@ namespace UnityExplorer.UI.Panels
 
         public override void ConstructPanelContent()
         {
-            //Content = UIFactory.CreateVerticalGroup(MainMenu.Instance.PageViewport, "CSharpConsole", true, true, true, true);
-            //UIFactory.SetLayoutElement(Content, preferredHeight: 500, flexibleHeight: 9000);
-
             #region TOP BAR 
 
             // Main group object
@@ -157,10 +149,7 @@ namespace UnityExplorer.UI.Panels
 
             int fontSize = 16;
 
-            //var inputObj = UIFactory.CreateSrollInputField(this.content, "ConsoleInput", CSConsoleManager.STARTUP_TEXT, 
-            //    out InputFieldScroller consoleScroll, fontSize);
-
-            var inputObj = UIFactory.CreateSrollInputField(this.content, "ConsoleInput", CSConsoleManager.STARTUP_TEXT, out var inputScroller, fontSize);
+            var inputObj = UIFactory.CreateSrollInputField(this.content, "ConsoleInput", CSConsole.STARTUP_TEXT, out var inputScroller, fontSize);
             InputField = inputScroller.InputField;
             m_defaultInputFieldAlpha = InputField.InputField.selectionColor.a;
             InputField.OnValueChanged += InvokeOnValueChanged;

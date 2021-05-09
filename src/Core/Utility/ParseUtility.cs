@@ -23,7 +23,7 @@ namespace UnityExplorer
         {
             if (string.IsNullOrEmpty(type.FullName))
                 return false;
-            return type.IsPrimitive || nonPrimitiveTypes.Contains(type) || customTypes.ContainsKey(type.FullName);
+            return type.IsPrimitive || type.IsEnum || nonPrimitiveTypes.Contains(type) || customTypes.ContainsKey(type.FullName);
         }
 
         public static bool TryParse(string input, Type type, out object obj, out Exception parseException)
@@ -38,6 +38,20 @@ namespace UnityExplorer
             {
                 obj = input;
                 return true;
+            }
+
+            if (type.IsEnum)
+            {
+                try
+                {
+                    obj = Enum.Parse(type, input);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    parseException = ex.GetInnerMostException();
+                    return false;
+                }
             }
 
             try
@@ -63,6 +77,12 @@ namespace UnityExplorer
             return false;
         }
 
+        private static readonly HashSet<Type> nonFormattedTypes = new HashSet<Type>
+        {
+            typeof(IntPtr),
+            typeof(UIntPtr),
+        };
+
         public static string ToStringForInput(object obj, Type type)
         {
             if (type == null || obj == null)
@@ -70,6 +90,13 @@ namespace UnityExplorer
 
             if (type == typeof(string))
                 return obj as string;
+
+            if (type.IsEnum)
+            {
+                return Enum.IsDefined(type, obj)
+                        ? Enum.GetName(type, obj)
+                        : obj.ToString();
+            }
 
             try
             {
@@ -79,10 +106,8 @@ namespace UnityExplorer
                 }
                 else
                 {
-                    if (obj is IntPtr ptr)
-                        return ptr.ToString();
-                    else if (obj is UIntPtr uPtr)
-                        return uPtr.ToString();
+                    if (nonFormattedTypes.Contains(type))
+                        return obj.ToString();
                     else
                         return ReflectionUtility.GetMethodInfo(type, "ToString", new Type[] { typeof(IFormatProvider) })
                                 .Invoke(obj, new object[] { en_US })
@@ -104,8 +129,15 @@ namespace UnityExplorer
             {
                 try
                 {
-                    var instance = Activator.CreateInstance(type);
-                    typeInputExamples.Add(type.AssemblyQualifiedName, ToStringForInput(instance, type));
+                    if (type.IsEnum)
+                    {
+                        typeInputExamples.Add(type.AssemblyQualifiedName, Enum.GetNames(type).First());
+                    }
+                    else
+                    {
+                        var instance = Activator.CreateInstance(type);
+                        typeInputExamples.Add(type.AssemblyQualifiedName, ToStringForInput(instance, type));
+                    }
                 }
                 catch (Exception ex)
                 {
