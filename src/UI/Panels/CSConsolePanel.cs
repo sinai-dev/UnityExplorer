@@ -31,24 +31,6 @@ namespace UnityExplorer.UI.Panels
         public Action<bool> OnSuggestionsToggled;
         public Action<bool> OnAutoIndentToggled;
 
-        public int LastCaretPosition { get; private set; }
-        private int m_desiredCaretFix;
-        private bool m_fixWaiting;
-        private float m_defaultInputFieldAlpha;
-
-        public void UseSuggestion(string suggestion)
-        {
-            string input = Input.Text;
-            input = input.Insert(LastCaretPosition, suggestion);
-            Input.Text = input;
-
-            m_desiredCaretFix = LastCaretPosition += suggestion.Length;
-
-            var color = Input.InputField.selectionColor;
-            color.a = 0f;
-            Input.InputField.selectionColor = color;
-        }
-
         private void InvokeOnValueChanged(string value)
         {
             // Todo show a label instead of just logging
@@ -63,28 +45,6 @@ namespace UnityExplorer.UI.Panels
             base.Update();
 
             CSConsole.Update();
-
-            if (m_desiredCaretFix >= 0)
-            {
-                if (!m_fixWaiting)
-                {
-                    EventSystem.current.SetSelectedGameObject(InputScroll.UIRoot, null);
-                    m_fixWaiting = true;
-                }
-                else
-                {
-                    Input.InputField.caretPosition = m_desiredCaretFix;
-                    Input.InputField.selectionFocusPosition = m_desiredCaretFix;
-                    var color = Input.InputField.selectionColor;
-                    color.a = m_defaultInputFieldAlpha;
-                    Input.InputField.selectionColor = color;
-
-                    m_fixWaiting = false;
-                    m_desiredCaretFix = -1;
-                }
-            }
-            else if (Input.InputField.caretPosition > 0)
-                LastCaretPosition = Input.InputField.caretPosition;
         }
 
         // Saving
@@ -153,29 +113,32 @@ namespace UnityExplorer.UI.Panels
 
             var inputObj = UIFactory.CreateSrollInputField(this.content, "ConsoleInput", CSConsole.STARTUP_TEXT, out var inputScroller, fontSize);
             InputScroll = inputScroller;
-            m_defaultInputFieldAlpha = Input.InputField.selectionColor.a;
+            CSConsole.defaultInputFieldAlpha = Input.InputField.selectionColor.a;
             Input.OnValueChanged += InvokeOnValueChanged;
-
-            var placeHolderText = Input.PlaceholderText;
-            placeHolderText.fontSize = fontSize;
 
             InputText = Input.InputField.textComponent;
             InputText.supportRichText = false;
             InputText.color = new Color(1, 1, 1, 0.65f);
+            Input.PlaceholderText.fontSize = fontSize;
 
-            var mainTextObj = InputText.gameObject;
-            var highlightTextObj = UIFactory.CreateUIObject("HighlightText", mainTextObj.gameObject);
+            // Lexer highlight text overlay
+            var highlightTextObj = UIFactory.CreateUIObject("HighlightText", InputText.gameObject);
             var highlightTextRect = highlightTextObj.GetComponent<RectTransform>();
             highlightTextRect.pivot = new Vector2(0, 1);
             highlightTextRect.anchorMin = Vector2.zero;
             highlightTextRect.anchorMax = Vector2.one;
-            highlightTextRect.offsetMin = new Vector2(20, 0);
-            highlightTextRect.offsetMax = new Vector2(14, 0);
+            highlightTextRect.offsetMin = Vector2.zero;
+            highlightTextRect.offsetMax = Vector2.zero;
 
             HighlightText = highlightTextObj.AddComponent<Text>();
             HighlightText.color = Color.clear;
             HighlightText.supportRichText = true;
             HighlightText.fontSize = fontSize;
+
+            // Set fonts
+            InputText.font = UIManager.ConsoleFont;
+            Input.PlaceholderText.font = UIManager.ConsoleFont;
+            HighlightText.font = UIManager.ConsoleFont;
 
             #endregion
 
@@ -196,15 +159,6 @@ namespace UnityExplorer.UI.Panels
 
             #endregion
 
-            InputText.font = UIManager.ConsoleFont;
-            placeHolderText.font = UIManager.ConsoleFont;
-            HighlightText.font = UIManager.ConsoleFont;
-
-            // reset this after formatting finalized
-            highlightTextRect.anchorMin = Vector2.zero;
-            highlightTextRect.anchorMax = Vector2.one;
-            highlightTextRect.offsetMin = Vector2.zero;
-            highlightTextRect.offsetMax = Vector2.zero;
         }
     }
 }

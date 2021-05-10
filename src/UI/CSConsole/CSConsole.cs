@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityExplorer.Core.CSharp;
 using UnityExplorer.Core.Input;
@@ -72,20 +74,20 @@ The following helper methods are available:
         {
             try
             {
-                Lexer = new LexerBuilder();
-
                 ResetConsole(false);
                 Evaluator.Compile("0 == 0");
-
-                Panel.OnInputChanged += OnConsoleInputChanged;
-                Panel.InputScroll.OnScroll += ForceOnContentChange;
-                // TODO other panel listeners (buttons, etc)
-
             }
-            catch (Exception ex)
+            catch
             {
-                ExplorerCore.LogWarning(ex);
+                ExplorerCore.LogWarning("C# Console probably not supported, todo");
+                return;
             }
+
+            Lexer = new LexerBuilder();
+
+            Panel.OnInputChanged += OnConsoleInputChanged;
+            Panel.InputScroll.OnScroll += ForceOnContentChange;
+            // TODO other panel listeners (buttons, etc)
         }
 
         // Updating and event listeners
@@ -98,6 +100,8 @@ The following helper methods are available:
 
         public static void Update()
         {
+            UpdateCaret();
+
             if (EnableCtrlRShortcut)
             {
                 if ((InputManager.GetKey(KeyCode.LeftControl) || InputManager.GetKey(KeyCode.RightControl))
@@ -131,79 +135,20 @@ The following helper methods are available:
         private static void OnConsoleInputChanged(string value)
         {
             // todo auto indent? or only on enter?
+            // todo update auto completes
+
 
             // syntax highlight
-            LexerHighlightAndSet(value);
-
-
-            // todo update auto completes
-            // ...
+            HighlightVisibleInput(value);
         }
 
-        private static void LexerHighlightAndSet(string value)
+        private static void UpdateCaret()
         {
-            int startLine = 0;
-            int endLine = Input.TextGenerator.lineCount - 1;
+            LastCaretPosition = Input.InputField.caretPosition;
 
-            if (Input.Rect.rect.height > Panel.InputScroll.ViewportRect.rect.height)
-            {
-                // Not all text is displayed.
-                // Only syntax highlight what we need to.
-
-                int topLine = -1;
-                int bottomLine = -1;
-                var half = Input.Rect.rect.height * 0.5f;
-
-                var top = Input.Rect.rect.height - Input.Rect.anchoredPosition.y;
-                var bottom = top - Panel.InputScroll.ViewportRect.rect.height;
-
-                for (int i = 0; i < Input.TextGenerator.lineCount; i++)
-                {
-                    var line = Input.TextGenerator.lines[i];
-                    var pos = line.topY + half;
-
-                    if (topLine == -1 && pos <= top)
-                        topLine = i;
-
-                    if ((pos - line.height) >= bottom)
-                        bottomLine = i;
-                }
-
-                startLine = Math.Max(0, topLine - 1);
-                endLine = Math.Min(Input.TextGenerator.lineCount - 1, bottomLine + 1);
-            }
-
-            int startIdx = Input.TextGenerator.lines[startLine].startCharIdx;
-            int endIdx;
-            if (endLine >= Input.TextGenerator.lineCount - 1)
-                endIdx = value.Length - 1;
-            else
-                endIdx = Math.Min(value.Length - 1, Input.TextGenerator.lines[endLine + 1].startCharIdx);
-
-            var sb = new StringBuilder();
-            for (int i = 0; i < startLine; i++)
-                sb.Append('\n');
-            for (int i = startIdx; i <= endIdx; i++)
-                sb.Append(value[i]);
-
-            Panel.HighlightText.text = Lexer.SyntaxHighlight(sb.ToString());
+            // todo check if out of bounds
         }
 
-
-        // TODO indenting 
-
-        //private static void DoAutoIndent()
-        //{
-        //    int caret = Panel.LastCaretPosition;
-        //    Panel.InputField.Text = Lexer.AutoIndentOnEnter(InputField.text, ref caret);
-        //    InputField.caretPosition = caret;
-        //    
-        //    Panel.InputText.Rebuild(CanvasUpdate.Prelayout);
-        //    InputField.ForceLabelUpdate();
-        //    InputField.Rebuild(CanvasUpdate.Prelayout);
-        //    
-        //    OnConsoleInputChanged(InputField.text);
-        //}
 
         #region Evaluating console input
 
@@ -264,6 +209,279 @@ The following helper methods are available:
                     ExplorerCore.LogWarning(ex);
             }
         }
+
+        #endregion
+
+
+        #region Lexer Highlighting
+
+        private static void HighlightVisibleInput(string value)
+        {
+            int startLine = 0;
+            int endLine = Input.TextGenerator.lineCount - 1;
+
+            // Calculate visible text if necessary
+            if (Input.Rect.rect.height > Panel.InputScroll.ViewportRect.rect.height)
+            {
+                // This was mostly done through trial and error, it probably depends on the anchoring.
+                int topLine = -1;
+                int bottomLine = -1;
+                var heightCorrection = Input.Rect.rect.height * 0.5f;
+
+                var viewportMin = Input.Rect.rect.height - Input.Rect.anchoredPosition.y;
+                var viewportMax = viewportMin - Panel.InputScroll.ViewportRect.rect.height;
+
+                for (int i = 0; i < Input.TextGenerator.lineCount; i++)
+                {
+                    var line = Input.TextGenerator.lines[i];
+                    var pos = line.topY + heightCorrection;
+
+                    // if top of line is below the viewport top
+                    if (topLine == -1 && pos <= viewportMin)
+                        topLine = i;
+
+                    // if bottom of line is below the viewport bottom
+                    if ((pos - line.height) >= viewportMax)
+                        bottomLine = i;
+                }
+
+                startLine = Math.Max(0, topLine - 1);
+                endLine = Math.Min(Input.TextGenerator.lineCount - 1, bottomLine + 1);
+            }
+
+            int startIdx = Input.TextGenerator.lines[startLine].startCharIdx;
+            int endIdx;
+            if (endLine >= Input.TextGenerator.lineCount - 1)
+                endIdx = value.Length - 1;
+            else
+                endIdx = Math.Min(value.Length - 1, Input.TextGenerator.lines[endLine + 1].startCharIdx);
+
+
+            // Highlight the visible text with the LexerBuilder
+            Panel.HighlightText.text = Lexer.BuildHighlightedString(value, startIdx, endIdx, startLine);
+        }
+
+        #endregion
+
+
+        #region Autocompletes
+
+        public static void UseSuggestion(string suggestion)
+        {
+            string input = Input.Text;
+            input = input.Insert(LastCaretPosition, suggestion);
+            Input.Text = input;
+
+            RuntimeProvider.Instance.StartCoroutine(SetAutocompleteCaret(LastCaretPosition += suggestion.Length));
+        }
+
+        public static int LastCaretPosition { get; private set; }
+        internal static float defaultInputFieldAlpha;
+
+        private static IEnumerator SetAutocompleteCaret(int caretPosition)
+        {
+            var color = Input.InputField.selectionColor;
+            color.a = 0f;
+            Input.InputField.selectionColor = color;
+            yield return null;
+
+            EventSystem.current.SetSelectedGameObject(Panel.Input.UIRoot, null);
+            yield return null;
+
+            Input.InputField.caretPosition = caretPosition;
+            Input.InputField.selectionFocusPosition = caretPosition;
+            color.a = defaultInputFieldAlpha;
+            Input.InputField.selectionColor = color;
+        }
+
+        #endregion
+
+
+        // TODO indenting 
+        #region AUTO INDENT TODO
+
+        //private static void DoAutoIndent()
+        //{
+        //    int caret = Panel.LastCaretPosition;
+        //    Panel.InputField.Text = Lexer.AutoIndentOnEnter(InputField.text, ref caret);
+        //    InputField.caretPosition = caret;
+        //    
+        //    Panel.InputText.Rebuild(CanvasUpdate.Prelayout);
+        //    InputField.ForceLabelUpdate();
+        //    InputField.Rebuild(CanvasUpdate.Prelayout);
+        //    
+        //    OnConsoleInputChanged(InputField.text);
+        //}
+
+
+        // Auto-indenting
+
+        //public int GetIndentLevel(string input, int toIndex)
+        //{
+        //    bool stringState = false;
+        //    int indent = 0;
+        //
+        //    for (int i = 0; i < toIndex && i < input.Length; i++)
+        //    {
+        //        char character = input[i];
+        //
+        //        if (character == '"')
+        //            stringState = !stringState;
+        //        else if (!stringState && character == INDENT_OPEN)
+        //            indent++;
+        //        else if (!stringState && character == INDENT_CLOSE)
+        //            indent--;
+        //    }
+        //
+        //    if (indent < 0)
+        //        indent = 0;
+        //
+        //    return indent;
+        //}
+
+        //// TODO not quite correct, but almost there.
+        //
+        //public string AutoIndentOnEnter(string input, ref int caretPos)
+        //{
+        //    var sb = new StringBuilder(input);
+        //
+        //    bool inString = false;
+        //    bool inChar = false;
+        //    int currentIndent = 0;
+        //    int curLineIndent = 0;
+        //    bool prevWasNewLine = true;
+        //
+        //    // process before caret position
+        //    for (int i = 0; i < caretPos; i++)
+        //    {
+        //        char c = sb[i];
+        //
+        //        ExplorerCore.Log(i + ": " + c);
+        //
+        //        // update string/char state
+        //        if (!inChar && c == '\"')
+        //            inString = !inString;
+        //        else if (!inString && c == '\'')
+        //            inChar = !inChar;
+        //
+        //        // continue if inside string or char
+        //        if (inString || inChar)
+        //            continue;
+        //
+        //        // check for new line
+        //        if (c == '\n')
+        //        {
+        //            ExplorerCore.Log("new line, resetting line counts");
+        //            curLineIndent = 0;
+        //            prevWasNewLine = true;
+        //        }
+        //        // check for indent
+        //        else if (c == '\t' && prevWasNewLine)
+        //        {
+        //            ExplorerCore.Log("its a tab");
+        //            if (curLineIndent > currentIndent)
+        //            {
+        //                ExplorerCore.Log("too many tabs, removing");
+        //                // already reached the indent we should have
+        //                sb.Remove(i, 1);
+        //                i--;
+        //                caretPos--;
+        //                curLineIndent--;
+        //            }
+        //            else
+        //                curLineIndent++;
+        //        }
+        //        // remove spaces on new lines
+        //        else if (c == ' ' && prevWasNewLine)
+        //        {
+        //            ExplorerCore.Log("removing newline-space");
+        //            sb.Remove(i, 1);
+        //            i--;
+        //            caretPos--;
+        //        }
+        //        else
+        //        {
+        //            if (c == INDENT_CLOSE)
+        //                currentIndent--;
+        //
+        //            if (prevWasNewLine && curLineIndent < currentIndent)
+        //            {
+        //                ExplorerCore.Log("line is not indented enough");
+        //                // line is not indented enough
+        //                int diff = currentIndent - curLineIndent;
+        //                sb.Insert(i, new string('\t', diff));
+        //                caretPos += diff;
+        //                i += diff;
+        //            }
+        //
+        //            // check for brackets
+        //            if ((c == INDENT_CLOSE || c == INDENT_OPEN) && !prevWasNewLine)
+        //            {
+        //                ExplorerCore.Log("bracket needs new line");
+        //
+        //                // need to put it on a new line
+        //                sb.Insert(i, $"\n{new string('\t', currentIndent)}");
+        //                caretPos += 1 + currentIndent;
+        //                i += 1 + currentIndent;
+        //            }
+        //
+        //            if (c == INDENT_OPEN)
+        //                currentIndent++;
+        //
+        //            prevWasNewLine = false;
+        //        }
+        //    }
+        //
+        //    // todo put caret on new line after previous bracket if needed
+        //    // indent caret to current indent
+        //
+        //    // process after caret position, make sure there are equal opened/closed brackets
+        //    ExplorerCore.Log("-- after caret --");
+        //    for (int i = caretPos; i < sb.Length; i++)
+        //    {
+        //        char c = sb[i];
+        //        ExplorerCore.Log(i + ": " + c);
+        //
+        //        // update string/char state
+        //        if (!inChar && c == '\"')
+        //            inString = !inString;
+        //        else if (!inString && c == '\'')
+        //            inChar = !inChar;
+        //
+        //        if (inString || inChar)
+        //            continue;
+        //
+        //        if (c == INDENT_OPEN)
+        //            currentIndent++;
+        //        else if (c == INDENT_CLOSE)
+        //            currentIndent--;
+        //    }
+        //
+        //    if (currentIndent > 0)
+        //    {
+        //        ExplorerCore.Log("there are not enough closing brackets, curIndent is " + currentIndent);
+        //        // There are not enough close brackets
+        //
+        //        // TODO this should append in reverse indent order (small indents inserted first, then biggest).
+        //        while (currentIndent > 0)
+        //        {
+        //            ExplorerCore.Log("Inserting closing bracket with " + currentIndent + " indent");
+        //            // append the indented '}' on a new line
+        //            sb.Insert(caretPos, $"\n{new string('\t', currentIndent - 1)}}}");
+        //
+        //            currentIndent--;
+        //        }
+        //
+        //    }
+        //    //else if (currentIndent < 0)
+        //    //{
+        //    //    // There are too many close brackets
+        //    //
+        //    //    // todo?
+        //    //}
+        //
+        //    return sb.ToString();
+        //}
 
         #endregion
 

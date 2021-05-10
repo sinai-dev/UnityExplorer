@@ -30,8 +30,8 @@ namespace UnityExplorer.UI
             set => InputField.text = value;
         }
 
-        public bool ReachedMaxVerts => TextGenerator.vertexCount >= UIManager.MAX_TEXT_VERTS;
         public TextGenerator TextGenerator => InputField.cachedInputTextGenerator;
+        public bool ReachedMaxVerts => TextGenerator.vertexCount >= UIManager.MAX_TEXT_VERTS;
 
         private bool updatedWanted;
 
@@ -44,7 +44,6 @@ namespace UnityExplorer.UI
         {
             if (updatedWanted)
             {
-                //LayoutRebuilder.ForceRebuildLayoutImmediate(Rect);
                 LayoutRebuilder.MarkLayoutForRebuild(Rect);
 
                 OnValueChanged?.Invoke(InputField.text);

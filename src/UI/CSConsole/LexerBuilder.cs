@@ -17,7 +17,7 @@ namespace UnityExplorer.UI.CSharpConsole
 
     public class LexerBuilder
     {
-        // Initialization and core
+        #region Core and initialization
 
         public const char WHITESPACE = ' ';
         public const char INDENT_OPEN = '{';
@@ -47,35 +47,45 @@ namespace UnityExplorer.UI.CSharpConsole
             }
         }
 
-        public bool IsDelimiter(char character, bool orWhitespace = false, bool orLetterOrDigit = false)
-        {
-            return delimiters.Contains(character)
-                || (orWhitespace && char.IsWhiteSpace(character))
-                || (orLetterOrDigit && char.IsLetterOrDigit(character));
-        }
-
-        // Lexer enumeration
-
-        public string InputString { get; private set; }
-        public int Length => InputString.Length;
+        #endregion
 
         public int LastCommittedIndex { get; private set; }
         public int LookaheadIndex { get; private set; }
 
-        public char Current => !EndOfInput ? InputString[LookaheadIndex] : WHITESPACE;
-        public char Previous => LookaheadIndex >= 1 ? InputString[LookaheadIndex - 1] : WHITESPACE;
+        public char Current => !EndOfInput ? currentInput[LookaheadIndex] : WHITESPACE;
+        public char Previous => LookaheadIndex >= 1 ? currentInput[LookaheadIndex - 1] : WHITESPACE;
 
-        public bool EndOfInput => LookaheadIndex >= Length;
+        public bool EndOfInput => LookaheadIndex > currentEndIdx;
         public bool EndOrNewLine => EndOfInput || Current == '\n' || Current == '\r';
 
-        public string SyntaxHighlight(string input)
+        private string currentInput;
+        private int currentStartIdx;
+        private int currentEndIdx;
+
+        /// <summary>
+        /// Parse the range of the string with the Lexer and build a RichText-highlighted representation of it.
+        /// </summary>
+        /// <param name="input">The entire input string which you want to parse a section (or all) of</param>
+        /// <param name="startIdx">The first character you want to highlight</param>
+        /// <param name="endIdx">The last character you want to highlight</param>
+        /// <param name="leadingLines">The amount of leading empty lines you want before the first character in the return string.</param>
+        /// <returns>A string which contains the amount of leading lines specified, as well as the rich-text highlighted section.</returns>
+        public string BuildHighlightedString(string input, int startIdx, int endIdx, int leadingLines)
         {
+            if (string.IsNullOrEmpty(input) || endIdx <= startIdx)
+                return input;
+
+            currentInput = input;
+            currentStartIdx = startIdx;
+            currentEndIdx = endIdx;
+
             var sb = new StringBuilder();
-            int lastUnhighlighted = 0;
 
-            // TODO auto indent as part of this parse
+            for (int i = 0; i < leadingLines; i++)
+                sb.Append('\n');
 
-            foreach (var match in GetMatches(input))
+            int lastUnhighlighted = startIdx;
+            foreach (var match in GetMatches())
             {
                 // append non-highlighted text between last match and this
                 for (int i = lastUnhighlighted; i < match.startIndex; i++)
@@ -84,7 +94,7 @@ namespace UnityExplorer.UI.CSharpConsole
                 // append the highlighted match
                 sb.Append(match.htmlColorTag);
 
-                for (int i = match.startIndex; i <= match.endIndex && i < input.Length; i++)
+                for (int i = match.startIndex; i <= match.endIndex && i <= currentEndIdx; i++)
                     sb.Append(input[i]);
 
                 sb.Append(SignatureHighlighter.CLOSE_COLOR);
@@ -96,13 +106,12 @@ namespace UnityExplorer.UI.CSharpConsole
             return sb.ToString();
         }
 
-        public IEnumerable<MatchInfo> GetMatches(string input)
-        {
-            if (string.IsNullOrEmpty(input))
-                yield break;
 
-            InputString = input;
-            LastCommittedIndex = -1;
+        // Match builder, iterates through each Lexer and returns all matches found.
+
+        private IEnumerable<MatchInfo> GetMatches()
+        {
+            LastCommittedIndex = currentStartIdx - 1;
             Rollback();
 
             while (!EndOfInput)
@@ -137,6 +146,8 @@ namespace UnityExplorer.UI.CSharpConsole
             }
         }
 
+        // Methods used by the Lexers for interfacing with the current parse process
+
         public char PeekNext(int amount = 1)
         {
             LookaheadIndex += amount;
@@ -145,7 +156,7 @@ namespace UnityExplorer.UI.CSharpConsole
 
         public void Commit()
         {
-            LastCommittedIndex = Math.Min(Length - 1, LookaheadIndex);
+            LastCommittedIndex = Math.Min(currentEndIdx, LookaheadIndex);
         }
 
         public void Rollback()
@@ -156,6 +167,13 @@ namespace UnityExplorer.UI.CSharpConsole
         public void RollbackBy(int amount)
         {
             LookaheadIndex = Math.Max(LastCommittedIndex + 1, LookaheadIndex - amount);
+        }
+
+        public bool IsDelimiter(char character, bool orWhitespace = false, bool orLetterOrDigit = false)
+        {
+            return delimiters.Contains(character)
+                || (orWhitespace && char.IsWhiteSpace(character))
+                || (orLetterOrDigit && char.IsLetterOrDigit(character));
         }
 
         private void SkipWhitespace()
@@ -170,178 +188,5 @@ namespace UnityExplorer.UI.CSharpConsole
             // revert the last PeekNext which would have returned false
             Rollback();
         }
-
-        #region AUTO INDENT TODO
-
-        // Auto-indenting
-
-        //public int GetIndentLevel(string input, int toIndex)
-        //{
-        //    bool stringState = false;
-        //    int indent = 0;
-        //
-        //    for (int i = 0; i < toIndex && i < input.Length; i++)
-        //    {
-        //        char character = input[i];
-        //
-        //        if (character == '"')
-        //            stringState = !stringState;
-        //        else if (!stringState && character == INDENT_OPEN)
-        //            indent++;
-        //        else if (!stringState && character == INDENT_CLOSE)
-        //            indent--;
-        //    }
-        //
-        //    if (indent < 0)
-        //        indent = 0;
-        //
-        //    return indent;
-        //}
-
-        //// TODO not quite correct, but almost there.
-        //
-        //public string AutoIndentOnEnter(string input, ref int caretPos)
-        //{
-        //    var sb = new StringBuilder(input);
-        //
-        //    bool inString = false;
-        //    bool inChar = false;
-        //    int currentIndent = 0;
-        //    int curLineIndent = 0;
-        //    bool prevWasNewLine = true;
-        //
-        //    // process before caret position
-        //    for (int i = 0; i < caretPos; i++)
-        //    {
-        //        char c = sb[i];
-        //
-        //        ExplorerCore.Log(i + ": " + c);
-        //
-        //        // update string/char state
-        //        if (!inChar && c == '\"')
-        //            inString = !inString;
-        //        else if (!inString && c == '\'')
-        //            inChar = !inChar;
-        //
-        //        // continue if inside string or char
-        //        if (inString || inChar)
-        //            continue;
-        //
-        //        // check for new line
-        //        if (c == '\n')
-        //        {
-        //            ExplorerCore.Log("new line, resetting line counts");
-        //            curLineIndent = 0;
-        //            prevWasNewLine = true;
-        //        }
-        //        // check for indent
-        //        else if (c == '\t' && prevWasNewLine)
-        //        {
-        //            ExplorerCore.Log("its a tab");
-        //            if (curLineIndent > currentIndent)
-        //            {
-        //                ExplorerCore.Log("too many tabs, removing");
-        //                // already reached the indent we should have
-        //                sb.Remove(i, 1);
-        //                i--;
-        //                caretPos--;
-        //                curLineIndent--;
-        //            }
-        //            else
-        //                curLineIndent++;
-        //        }
-        //        // remove spaces on new lines
-        //        else if (c == ' ' && prevWasNewLine)
-        //        {
-        //            ExplorerCore.Log("removing newline-space");
-        //            sb.Remove(i, 1);
-        //            i--;
-        //            caretPos--;
-        //        }
-        //        else
-        //        {
-        //            if (c == INDENT_CLOSE)
-        //                currentIndent--;
-        //
-        //            if (prevWasNewLine && curLineIndent < currentIndent)
-        //            {
-        //                ExplorerCore.Log("line is not indented enough");
-        //                // line is not indented enough
-        //                int diff = currentIndent - curLineIndent;
-        //                sb.Insert(i, new string('\t', diff));
-        //                caretPos += diff;
-        //                i += diff;
-        //            }
-        //
-        //            // check for brackets
-        //            if ((c == INDENT_CLOSE || c == INDENT_OPEN) && !prevWasNewLine)
-        //            {
-        //                ExplorerCore.Log("bracket needs new line");
-        //
-        //                // need to put it on a new line
-        //                sb.Insert(i, $"\n{new string('\t', currentIndent)}");
-        //                caretPos += 1 + currentIndent;
-        //                i += 1 + currentIndent;
-        //            }
-        //
-        //            if (c == INDENT_OPEN)
-        //                currentIndent++;
-        //
-        //            prevWasNewLine = false;
-        //        }
-        //    }
-        //
-        //    // todo put caret on new line after previous bracket if needed
-        //    // indent caret to current indent
-        //
-        //    // process after caret position, make sure there are equal opened/closed brackets
-        //    ExplorerCore.Log("-- after caret --");
-        //    for (int i = caretPos; i < sb.Length; i++)
-        //    {
-        //        char c = sb[i];
-        //        ExplorerCore.Log(i + ": " + c);
-        //
-        //        // update string/char state
-        //        if (!inChar && c == '\"')
-        //            inString = !inString;
-        //        else if (!inString && c == '\'')
-        //            inChar = !inChar;
-        //
-        //        if (inString || inChar)
-        //            continue;
-        //
-        //        if (c == INDENT_OPEN)
-        //            currentIndent++;
-        //        else if (c == INDENT_CLOSE)
-        //            currentIndent--;
-        //    }
-        //
-        //    if (currentIndent > 0)
-        //    {
-        //        ExplorerCore.Log("there are not enough closing brackets, curIndent is " + currentIndent);
-        //        // There are not enough close brackets
-        //
-        //        // TODO this should append in reverse indent order (small indents inserted first, then biggest).
-        //        while (currentIndent > 0)
-        //        {
-        //            ExplorerCore.Log("Inserting closing bracket with " + currentIndent + " indent");
-        //            // append the indented '}' on a new line
-        //            sb.Insert(caretPos, $"\n{new string('\t', currentIndent - 1)}}}");
-        //
-        //            currentIndent--;
-        //        }
-        //
-        //    }
-        //    //else if (currentIndent < 0)
-        //    //{
-        //    //    // There are too many close brackets
-        //    //
-        //    //    // todo?
-        //    //}
-        //
-        //    return sb.ToString();
-        //}
-
-        #endregion
     }
 }
