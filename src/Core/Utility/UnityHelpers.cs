@@ -90,7 +90,7 @@ namespace UnityExplorer
         }
 
         /// <summary>
-        /// Assumes the string is a 6-digit RGB Hex color code, which it will parse into a UnityEngine.Color.
+        /// Assumes the string is a 6-digit RGB Hex color code (with optional leading #) which it will parse into a UnityEngine.Color.
         /// Eg, FF0000 -> RGBA(1,0,0,1)
         /// </summary>
         public static Color ToColor(this string _string)

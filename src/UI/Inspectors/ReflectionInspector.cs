@@ -426,9 +426,10 @@ namespace UnityExplorer.UI.Inspectors
         {
             var toggleObj = UIFactory.CreateToggle(parent, "Toggle_" + type, out Toggle toggle, out Text toggleText);
             UIFactory.SetLayoutElement(toggleObj, minHeight: 25, minWidth: width);
-            toggleText.text = $"<color={SignatureHighlighter.GetMemberInfoColor(type)}>{type}</color>";
+            var color = SignatureHighlighter.GetMemberInfoColor(type);
+            toggleText.text = $"<color={color}>{type}</color>";
 
-            toggle.graphic.TryCast<Image>().color = new Color(0.25f, 0.25f, 0.25f);
+            toggle.graphic.TryCast<Image>().color = color.ToColor() * 0.65f;
 
             MemberFlags flag;
             switch (type)

@@ -250,7 +250,7 @@
     <Compile Include="UI\CacheObject\Views\EvaluateWidget.cs" />
     <Compile Include="UI\Inspectors\GameObjectInspector.cs" />
     <Compile Include="UI\CacheObject\ICacheObjectController.cs" />
-    <Compile Include="Core\InspectorManager.cs" />
+    <Compile Include="UI\Inspectors\InspectorManager.cs" />
     <Compile Include="UI\Inspectors\InspectorTab.cs" />
     <Compile Include="UI\Inspectors\InspectorBase.cs" />
     <Compile Include="UI\IValues\InteractiveColor.cs" />
