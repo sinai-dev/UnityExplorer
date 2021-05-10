@@ -6,6 +6,7 @@ using System.Text;
 using UnityEngine;
 using UnityExplorer.UI.IValues;
 using System.Reflection;
+using UnityExplorer.UI;
 #if CPP
 using UnhollowerRuntimeLib;
 using UnhollowerBaseLib;
@@ -69,6 +70,9 @@ namespace UnityExplorer.Tests
         }
 
         public static TestValueStruct AATestStruct;
+
+        public static string AAATooLongString = new string('#', UIManager.MAX_INPUTFIELD_CHARS + 2);
+        public static string AAAMaxString = new string('@', UIManager.MAX_INPUTFIELD_CHARS);
 
         public static TestEnum AATestEnumOne = TestEnum.Neg50;
         public static TestEnum2 AATestEnumTwo = TestEnum2.Max;

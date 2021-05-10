@@ -22,13 +22,16 @@ namespace UnityExplorer.UI
 
         public InputField InputField;
         public Text PlaceholderText;
-        private readonly RectTransform Rect;
+        public RectTransform Rect;
 
         public string Text
         {
             get => InputField.text;
             set => InputField.text = value;
         }
+
+        public bool ReachedMaxVerts => TextGenerator.vertexCount >= UIManager.MAX_TEXT_VERTS;
+        public TextGenerator TextGenerator => InputField.cachedInputTextGenerator;
 
         private bool updatedWanted;
 
@@ -41,7 +44,8 @@ namespace UnityExplorer.UI
         {
             if (updatedWanted)
             {
-                LayoutRebuilder.ForceRebuildLayoutImmediate(Rect);
+                //LayoutRebuilder.ForceRebuildLayoutImmediate(Rect);
+                LayoutRebuilder.MarkLayoutForRebuild(Rect);
 
                 OnValueChanged?.Invoke(InputField.text);
                 updatedWanted = false;

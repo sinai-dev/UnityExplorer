@@ -61,7 +61,7 @@ The following helper methods are available:
         private static HashSet<string> usingDirectives;
 
         private static CSConsolePanel Panel => UIManager.CSharpConsole;
-        private static InputField InputField => Panel.InputField.InputField;
+        private static InputFieldRef Input => Panel.Input;
 
         // Todo save as config?
         public static bool EnableCtrlRShortcut { get; private set; } = true;
@@ -78,7 +78,8 @@ The following helper methods are available:
                 Evaluator.Compile("0 == 0");
 
                 Panel.OnInputChanged += OnConsoleInputChanged;
-                // TODO other panel listeners
+                Panel.InputScroll.OnScroll += ForceOnContentChange;
+                // TODO other panel listeners (buttons, etc)
 
             }
             catch (Exception ex)
@@ -86,6 +87,123 @@ The following helper methods are available:
                 ExplorerCore.LogWarning(ex);
             }
         }
+
+        // Updating and event listeners
+
+        private static readonly KeyCode[] onFocusKeys =
+        {
+            KeyCode.Return, KeyCode.Backspace, KeyCode.UpArrow,
+            KeyCode.DownArrow, KeyCode.LeftArrow, KeyCode.RightArrow
+        };
+
+        public static void Update()
+        {
+            if (EnableCtrlRShortcut)
+            {
+                if ((InputManager.GetKey(KeyCode.LeftControl) || InputManager.GetKey(KeyCode.RightControl))
+                    && InputManager.GetKeyDown(KeyCode.R))
+                {
+                    var text = Panel.Input.Text.Trim();
+                    if (!string.IsNullOrEmpty(text))
+                    {
+                        Evaluate(text);
+                        return;
+                    }
+                }
+            }
+
+            //if (EnableAutoIndent && InputManager.GetKeyDown(KeyCode.Return))
+            //    DoAutoIndent();
+
+            //if (EnableAutocompletes && InputField.isFocused)
+            //{
+            //    if (InputManager.GetMouseButton(0) || onFocusKeys.Any(it => InputManager.GetKeyDown(it)))
+            //        UpdateAutocompletes();
+            //}
+        }
+
+        private static void ForceOnContentChange()
+        {
+            OnConsoleInputChanged(Input.Text);
+        }
+
+        // Invoked at most once per frame
+        private static void OnConsoleInputChanged(string value)
+        {
+            // todo auto indent? or only on enter?
+
+            // syntax highlight
+            LexerHighlightAndSet(value);
+
+
+            // todo update auto completes
+            // ...
+        }
+
+        private static void LexerHighlightAndSet(string value)
+        {
+            int startLine = 0;
+            int endLine = Input.TextGenerator.lineCount - 1;
+
+            if (Input.Rect.rect.height > Panel.InputScroll.ViewportRect.rect.height)
+            {
+                // Not all text is displayed.
+                // Only syntax highlight what we need to.
+
+                int topLine = -1;
+                int bottomLine = -1;
+                var half = Input.Rect.rect.height * 0.5f;
+
+                var top = Input.Rect.rect.height - Input.Rect.anchoredPosition.y;
+                var bottom = top - Panel.InputScroll.ViewportRect.rect.height;
+
+                for (int i = 0; i < Input.TextGenerator.lineCount; i++)
+                {
+                    var line = Input.TextGenerator.lines[i];
+                    var pos = line.topY + half;
+
+                    if (topLine == -1 && pos <= top)
+                        topLine = i;
+
+                    if ((pos - line.height) >= bottom)
+                        bottomLine = i;
+                }
+
+                startLine = Math.Max(0, topLine - 1);
+                endLine = Math.Min(Input.TextGenerator.lineCount - 1, bottomLine + 1);
+            }
+
+            int startIdx = Input.TextGenerator.lines[startLine].startCharIdx;
+            int endIdx;
+            if (endLine >= Input.TextGenerator.lineCount - 1)
+                endIdx = value.Length - 1;
+            else
+                endIdx = Math.Min(value.Length - 1, Input.TextGenerator.lines[endLine + 1].startCharIdx);
+
+            var sb = new StringBuilder();
+            for (int i = 0; i < startLine; i++)
+                sb.Append('\n');
+            for (int i = startIdx; i <= endIdx; i++)
+                sb.Append(value[i]);
+
+            Panel.HighlightText.text = Lexer.SyntaxHighlight(sb.ToString());
+        }
+
+
+        // TODO indenting 
+
+        //private static void DoAutoIndent()
+        //{
+        //    int caret = Panel.LastCaretPosition;
+        //    Panel.InputField.Text = Lexer.AutoIndentOnEnter(InputField.text, ref caret);
+        //    InputField.caretPosition = caret;
+        //    
+        //    Panel.InputText.Rebuild(CanvasUpdate.Prelayout);
+        //    InputField.ForceLabelUpdate();
+        //    InputField.Rebuild(CanvasUpdate.Prelayout);
+        //    
+        //    OnConsoleInputChanged(InputField.text);
+        //}
 
         #region Evaluating console input
 
@@ -148,66 +266,6 @@ The following helper methods are available:
         }
 
         #endregion
-
-        // Updating and event listeners
-
-        private static readonly KeyCode[] onFocusKeys =
-        {
-            KeyCode.Return, KeyCode.Backspace, KeyCode.UpArrow,
-            KeyCode.DownArrow, KeyCode.LeftArrow, KeyCode.RightArrow
-        };
-
-        public static void Update()
-        {
-            if (EnableCtrlRShortcut)
-            {
-                if ((InputManager.GetKey(KeyCode.LeftControl) || InputManager.GetKey(KeyCode.RightControl))
-                    && InputManager.GetKeyDown(KeyCode.R))
-                {
-                    var text = Panel.InputField.Text.Trim();
-                    if (!string.IsNullOrEmpty(text))
-                    {
-                        Evaluate(text);
-                        return;
-                    }
-                }
-            }
-
-            //if (EnableAutoIndent && InputManager.GetKeyDown(KeyCode.Return))
-            //    DoAutoIndent();
-
-            //if (EnableAutocompletes && InputField.isFocused)
-            //{
-            //    if (InputManager.GetMouseButton(0) || onFocusKeys.Any(it => InputManager.GetKeyDown(it)))
-            //        UpdateAutocompletes();
-            //}
-        }
-
-        // Invoked at most once per frame
-        private static void OnConsoleInputChanged(string input)
-        {
-            // todo update auto completes
-
-            // update syntax highlight
-            Panel.HighlightText.text = Lexer.SyntaxHighlight(input);
-
-        }
-
-        // TODO?
-        //private static void DoAutoIndent()
-        //{
-        //    int caret = Panel.LastCaretPosition;
-        //    Panel.InputField.Text = Lexer.AutoIndentOnEnter(InputField.text, ref caret);
-        //    InputField.caretPosition = caret;
-        //    
-        //    Panel.InputText.Rebuild(CanvasUpdate.Prelayout);
-        //    InputField.ForceLabelUpdate();
-        //    InputField.Rebuild(CanvasUpdate.Prelayout);
-        //    
-        //    OnConsoleInputChanged(InputField.text);
-        //}
-
-        // Autocompletes
 
     }
 }

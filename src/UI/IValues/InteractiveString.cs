@@ -36,7 +36,7 @@ namespace UnityExplorer.UI.IValues
         {
             if (s == null)
                 return false;
-
+        
             return s.Length >= UIManager.MAX_INPUTFIELD_CHARS;
         }
 

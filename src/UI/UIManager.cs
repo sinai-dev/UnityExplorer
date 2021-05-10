@@ -58,6 +58,7 @@ namespace UnityExplorer.UI
         internal static readonly Color disabledButtonColor = new Color(0.25f, 0.25f, 0.25f);
 
         public const int MAX_INPUTFIELD_CHARS = 16000;
+        public const int MAX_TEXT_VERTS = 65000;
 
         public static UIPanel GetPanel(Panels panel)
         {

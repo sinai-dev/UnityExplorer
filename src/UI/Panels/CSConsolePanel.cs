@@ -18,7 +18,8 @@ namespace UnityExplorer.UI.Panels
         public override int MinWidth => 400;
         public override int MinHeight => 300;
 
-        public InputFieldRef InputField { get; private set; }
+        public InputFieldScroller InputScroll { get; private set; }
+        public InputFieldRef Input => InputScroll.InputField;
         public Text InputText { get; private set; }
         public Text HighlightText { get; private set; }
 
@@ -37,19 +38,20 @@ namespace UnityExplorer.UI.Panels
 
         public void UseSuggestion(string suggestion)
         {
-            string input = InputField.Text;
+            string input = Input.Text;
             input = input.Insert(LastCaretPosition, suggestion);
-            InputField.Text = input;
+            Input.Text = input;
 
             m_desiredCaretFix = LastCaretPosition += suggestion.Length;
 
-            var color = InputField.InputField.selectionColor;
+            var color = Input.InputField.selectionColor;
             color.a = 0f;
-            InputField.InputField.selectionColor = color;
+            Input.InputField.selectionColor = color;
         }
 
         private void InvokeOnValueChanged(string value)
         {
+            // Todo show a label instead of just logging
             if (value.Length == UIManager.MAX_INPUTFIELD_CHARS)
                 ExplorerCore.LogWarning($"Reached maximum InputField character length! ({UIManager.MAX_INPUTFIELD_CHARS})");
 
@@ -66,23 +68,23 @@ namespace UnityExplorer.UI.Panels
             {
                 if (!m_fixWaiting)
                 {
-                    EventSystem.current.SetSelectedGameObject(InputField.UIRoot, null);
+                    EventSystem.current.SetSelectedGameObject(InputScroll.UIRoot, null);
                     m_fixWaiting = true;
                 }
                 else
                 {
-                    InputField.InputField.caretPosition = m_desiredCaretFix;
-                    InputField.InputField.selectionFocusPosition = m_desiredCaretFix;
-                    var color = InputField.InputField.selectionColor;
+                    Input.InputField.caretPosition = m_desiredCaretFix;
+                    Input.InputField.selectionFocusPosition = m_desiredCaretFix;
+                    var color = Input.InputField.selectionColor;
                     color.a = m_defaultInputFieldAlpha;
-                    InputField.InputField.selectionColor = color;
+                    Input.InputField.selectionColor = color;
 
                     m_fixWaiting = false;
                     m_desiredCaretFix = -1;
                 }
             }
-            else if (InputField.InputField.caretPosition > 0)
-                LastCaretPosition = InputField.InputField.caretPosition;
+            else if (Input.InputField.caretPosition > 0)
+                LastCaretPosition = Input.InputField.caretPosition;
         }
 
         // Saving
@@ -150,14 +152,14 @@ namespace UnityExplorer.UI.Panels
             int fontSize = 16;
 
             var inputObj = UIFactory.CreateSrollInputField(this.content, "ConsoleInput", CSConsole.STARTUP_TEXT, out var inputScroller, fontSize);
-            InputField = inputScroller.InputField;
-            m_defaultInputFieldAlpha = InputField.InputField.selectionColor.a;
-            InputField.OnValueChanged += InvokeOnValueChanged;
+            InputScroll = inputScroller;
+            m_defaultInputFieldAlpha = Input.InputField.selectionColor.a;
+            Input.OnValueChanged += InvokeOnValueChanged;
 
-            var placeHolderText = InputField.PlaceholderText;
+            var placeHolderText = Input.PlaceholderText;
             placeHolderText.fontSize = fontSize;
 
-            InputText = InputField.InputField.textComponent;
+            InputText = Input.InputField.textComponent;
             InputText.supportRichText = false;
             InputText.color = new Color(1, 1, 1, 0.65f);
 

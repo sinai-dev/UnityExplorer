@@ -25,6 +25,8 @@ namespace UnityExplorer.UI.Utility
             }
         }
 
+        public Action OnScroll;
+
         internal AutoSliderScrollbar Slider;
         internal InputFieldRef InputField;
 
@@ -52,25 +54,40 @@ namespace UnityExplorer.UI.Utility
         internal bool m_wantJumpToBottom;
         private float m_desiredContentHeight;
 
+        private float lastContentPosition;
+        private float lastViewportHeight;
+
         public override void Update()
         {
+            if (this.ContentRect.localPosition.y != lastContentPosition)
+            {
+                lastContentPosition = ContentRect.localPosition.y;
+                OnScroll?.Invoke();
+            }
+
+            if (ViewportRect.rect.height != lastViewportHeight)
+            {
+                lastViewportHeight = ViewportRect.rect.height;
+                m_updateWanted = true;
+            }
+
             if (m_updateWanted)
             {
                 m_updateWanted = false;
                 ProcessInputText();
-            }
 
-            float desiredHeight = Math.Max(m_desiredContentHeight, ViewportRect.rect.height);
+                float desiredHeight = Math.Max(m_desiredContentHeight, ViewportRect.rect.height);
 
-            if (ContentRect.rect.height < desiredHeight)
-            {
-                ContentRect.sizeDelta = new Vector2(0, desiredHeight);
-                this.Slider.UpdateSliderHandle();
-            }
-            else if (ContentRect.rect.height > desiredHeight)
-            {
-                ContentRect.sizeDelta = new Vector2(0, desiredHeight);
-                this.Slider.UpdateSliderHandle();
+                if (ContentRect.rect.height < desiredHeight)
+                {
+                    ContentRect.sizeDelta = new Vector2(0, desiredHeight);
+                    this.Slider.UpdateSliderHandle();
+                }
+                else if (ContentRect.rect.height > desiredHeight)
+                {
+                    ContentRect.sizeDelta = new Vector2(0, desiredHeight);
+                    this.Slider.UpdateSliderHandle();
+                }
             }
 
             if (m_wantJumpToBottom)
@@ -99,6 +116,9 @@ namespace UnityExplorer.UI.Utility
             // Preferred text rect height
             var textGen = InputField.InputField.textComponent.cachedTextGeneratorForLayout;
             m_desiredContentHeight = textGen.GetPreferredHeight(m_lastText, texGenSettings) + 10;
+
+            // TODO more intelligent jump.
+            // We can detect if the caret is outside the viewport area.
 
             // jump to bottom
             if (InputField.InputField.caretPosition == InputField.Text.Length
