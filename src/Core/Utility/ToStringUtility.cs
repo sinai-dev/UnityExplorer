@@ -23,6 +23,29 @@ namespace UnityExplorer
 
         private const string eventSystemNamespace = "UnityEngine.EventSystem";
 
+        public static string PruneString(string s, int chars = 200, int lines = 5)
+        {
+            if (string.IsNullOrEmpty(s))
+                return s;
+
+            var sb = new StringBuilder(Math.Max(chars, s.Length));
+            int newlines = 0;
+            for (int i = 0; i < s.Length; i++)
+            {
+                if (newlines >= lines || i >= chars)
+                {
+                    sb.Append("...");
+                    break;
+                }
+                char c = s[i];
+                if (c == '\r' || c == '\n')
+                    newlines++;
+                sb.Append(c);
+            }
+
+            return sb.ToString();
+        }
+
         public static string ToStringWithType(object value, Type fallbackType, bool includeNamespace = true)
         {
             if (value.IsNullOrDestroyed() && fallbackType == null)
@@ -52,13 +75,15 @@ namespace UnityExplorer
 
             if (value is UnityEngine.Object obj)
             {
-                var name = obj.name;
-                if (string.IsNullOrEmpty(name))
-                    name = untitledString;
-                else if (name.Length > 50)
-                    name = $"{name.Substring(0, 50)}...";
-
-                sb.Append($"\"{name}\"");
+                if (string.IsNullOrEmpty(obj.name))
+                    sb.Append(untitledString);
+                else
+                {
+                    sb.Append('"');
+                    sb.Append(PruneString(obj.name, 50, 1));
+                    sb.Append('"');
+                }
+                
                 AppendRichType(sb, richType);
             }
             else if (type.FullName.StartsWith(eventSystemNamespace))
@@ -79,12 +104,7 @@ namespace UnityExplorer
                 }
                 else // the ToString contains some actual implementation, use that value.
                 {
-                    // prune long strings unless they're unity structs
-                    // (Matrix4x4 and Rect can have some longs ones that we want to display fully)
-                    if (toString.Length > 100 && !(type.IsValueType && type.FullName.StartsWith("UnityEngine")))
-                        sb.Append(toString.Substring(0, 100));
-                    else
-                        sb.Append(toString);
+                    sb.Append(PruneString(toString, 200, 5));
 
                     AppendRichType(sb, richType);
                 }

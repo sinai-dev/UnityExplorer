@@ -219,9 +219,7 @@ namespace UnityExplorer.UI.CacheObject
                     if (!LastValueWasNull)
                     {
                         string s = Value as string;
-                        if (s.Length > 200)
-                            s = $"{s.Substring(0, 200)}...";
-                        return $"\"{s}\"";
+                        return $"\"{ToStringUtility.PruneString(s, 200, 5)}\"";
                     }
                     break;
                 
