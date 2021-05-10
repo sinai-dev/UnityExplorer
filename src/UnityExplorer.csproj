@@ -219,13 +219,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Config\InternalConfigHandler.cs" />
-    <Compile Include="UI\CSConsole\CSLexer.cs" />
-    <Compile Include="UI\CSConsole\Lexer\CommentMatch.cs" />
-    <Compile Include="UI\CSConsole\Lexer\KeywordMatch.cs" />
-    <Compile Include="UI\CSConsole\Lexer\Matcher.cs" />
-    <Compile Include="UI\CSConsole\Lexer\NumberMatch.cs" />
-    <Compile Include="UI\CSConsole\Lexer\StringMatch.cs" />
-    <Compile Include="UI\CSConsole\Lexer\SymbolMatch.cs" />
+    <Compile Include="UI\CSConsole\LexerBuilder.cs" />
+    <Compile Include="UI\CSConsole\Lexer\CommentLexer.cs" />
+    <Compile Include="UI\CSConsole\Lexer\KeywordLexer.cs" />
+    <Compile Include="UI\CSConsole\Lexer\Lexer.cs" />
+    <Compile Include="UI\CSConsole\Lexer\NumberLexer.cs" />
+    <Compile Include="UI\CSConsole\Lexer\StringLexer.cs" />
+    <Compile Include="UI\CSConsole\Lexer\SymbolLexer.cs" />
     <Compile Include="UI\CSConsole\ScriptEvaluator.cs" />
     <Compile Include="UI\CSConsole\ScriptInteraction.cs" />
     <Compile Include="Core\ExplorerBehaviour.cs" />

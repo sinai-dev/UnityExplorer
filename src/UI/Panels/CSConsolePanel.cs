@@ -159,7 +159,7 @@ namespace UnityExplorer.UI.Panels
 
             InputText = InputField.InputField.textComponent;
             InputText.supportRichText = false;
-            InputText.color = new Color(1, 1, 1, 0.5f);
+            InputText.color = new Color(1, 1, 1, 0.65f);
 
             var mainTextObj = InputText.gameObject;
             var highlightTextObj = UIFactory.CreateUIObject("HighlightText", mainTextObj.gameObject);
@@ -171,6 +171,7 @@ namespace UnityExplorer.UI.Panels
             highlightTextRect.offsetMax = new Vector2(14, 0);
 
             HighlightText = highlightTextObj.AddComponent<Text>();
+            HighlightText.color = Color.clear;
             HighlightText.supportRichText = true;
             HighlightText.fontSize = fontSize;
 

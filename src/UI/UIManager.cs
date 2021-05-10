@@ -119,9 +119,7 @@ namespace UnityExplorer.UI
 
             UIPanel.UpdateFocus();
             PanelDragger.UpdateInstances();
-
             UIBehaviourModel.UpdateInstances();
-            AutoCompleter.Update();
         }
 
         public static void TogglePanel(Panels panel)

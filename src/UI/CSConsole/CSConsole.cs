@@ -55,7 +55,7 @@ The following helper methods are available:
         #endregion
 
         public static ScriptEvaluator Evaluator;
-        public static CSLexer Lexer;
+        public static LexerBuilder Lexer;
 
         private static StringBuilder evaluatorOutput;
         private static HashSet<string> usingDirectives;
@@ -72,7 +72,7 @@ The following helper methods are available:
         {
             try
             {
-                Lexer = new CSLexer();
+                Lexer = new LexerBuilder();
 
                 ResetConsole(false);
                 Evaluator.Compile("0 == 0");
@@ -173,8 +173,8 @@ The following helper methods are available:
                 }
             }
 
-            if (EnableAutoIndent && InputManager.GetKeyDown(KeyCode.Return))
-                DoAutoIndent();
+            //if (EnableAutoIndent && InputManager.GetKeyDown(KeyCode.Return))
+            //    DoAutoIndent();
 
             //if (EnableAutocompletes && InputField.isFocused)
             //{
@@ -183,55 +183,31 @@ The following helper methods are available:
             //}
         }
 
+        // Invoked at most once per frame
         private static void OnConsoleInputChanged(string input)
         {
             // todo update auto completes
 
-            // todo update syntax highlight
+            // update syntax highlight
+            Panel.HighlightText.text = Lexer.SyntaxHighlight(input);
 
         }
+
+        // TODO?
+        //private static void DoAutoIndent()
+        //{
+        //    int caret = Panel.LastCaretPosition;
+        //    Panel.InputField.Text = Lexer.AutoIndentOnEnter(InputField.text, ref caret);
+        //    InputField.caretPosition = caret;
+        //    
+        //    Panel.InputText.Rebuild(CanvasUpdate.Prelayout);
+        //    InputField.ForceLabelUpdate();
+        //    InputField.Rebuild(CanvasUpdate.Prelayout);
+        //    
+        //    OnConsoleInputChanged(InputField.text);
+        //}
 
         // Autocompletes
-
-        private static string SyntaxHighlight(string input)
-        {
-            var sb = new StringBuilder();
-            int curIdx = 0;
-            foreach (var match in Lexer.GetMatches(input))
-            {
-                // append non-highlighted text between last match and this
-                for (int i = curIdx; i < match.startIndex; i++)
-                    sb.Append(input[i]);
-
-                // append the highlighted match
-                sb.Append(match.htmlColorTag);
-
-                for (int i = match.startIndex; i < match.endIndex; i++)
-                    sb.Append(input[i]);
-
-                sb.Append(SignatureHighlighter.CLOSE_COLOR);
-
-                // update the index
-                curIdx = match.endIndex;
-            }
-
-            return sb.ToString();
-        }
-
-        // Indent
-
-        private static void DoAutoIndent()
-        {
-            int caret = Panel.LastCaretPosition;
-            Panel.InputField.Text = Lexer.AutoIndentOnEnter(InputField.text, ref caret);
-            InputField.caretPosition = caret;
-
-            Panel.InputText.Rebuild(CanvasUpdate.Prelayout);
-            InputField.ForceLabelUpdate();
-            InputField.Rebuild(CanvasUpdate.Prelayout);
-
-            OnConsoleInputChanged(InputField.text);
-        }
 
     }
 }
