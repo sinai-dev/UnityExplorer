@@ -101,7 +101,7 @@ namespace UnityExplorer.UI.ObjectExplorer
         {
             m_context = (SearchContext)value;
 
-            bool shouldShowGoFilters = m_context == SearchContext.GameObject || m_context == SearchContext.UnityObject;
+            bool shouldShowGoFilters = m_context == SearchContext.UnityObject;
 
             sceneFilterRow.SetActive(shouldShowGoFilters);
             childFilterRow.SetActive(shouldShowGoFilters);
@@ -177,7 +177,7 @@ namespace UnityExplorer.UI.ObjectExplorer
             unityObjectClassRow = UIFactory.CreateHorizontalGroup(uiRoot, "UnityClassRow", false, true, true, true, 2, new Vector4(2, 2, 2, 2));
             UIFactory.SetLayoutElement(unityObjectClassRow, minHeight: 25, flexibleHeight: 0);
 
-            var unityClassLbl = UIFactory.CreateLabel(unityObjectClassRow, "UnityClassLabel", "Custom Type:", TextAnchor.MiddleLeft);
+            var unityClassLbl = UIFactory.CreateLabel(unityObjectClassRow, "UnityClassLabel", "Class filter:", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(unityClassLbl.gameObject, minWidth: 110, flexibleWidth: 0);
 
             var classInputField = UIFactory.CreateInputField(unityObjectClassRow, "ClassInput", "...");

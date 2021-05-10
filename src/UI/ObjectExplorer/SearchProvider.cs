@@ -13,7 +13,7 @@ namespace UnityExplorer.UI.ObjectExplorer
     public enum SearchContext
     {
         UnityObject,
-        GameObject,
+        // GameObject,
         Singleton,
         StaticClass
     }
@@ -61,9 +61,9 @@ namespace UnityExplorer.UI.ObjectExplorer
             Type searchType;
             switch (context)
             {
-                case SearchContext.GameObject:
-                    searchType = typeof(GameObject); 
-                    break;
+                //case SearchContext.GameObject:
+                //    searchType = typeof(GameObject); 
+                //    break;
 
                 case SearchContext.UnityObject:
                 default:
@@ -100,7 +100,7 @@ namespace UnityExplorer.UI.ObjectExplorer
             if (!string.IsNullOrEmpty(input))
                 nameFilter = input;
 
-            bool canGetGameObject = context == SearchContext.GameObject || typeof(Component).IsAssignableFrom(searchType);
+            bool canGetGameObject = searchType == typeof(GameObject) || typeof(Component).IsAssignableFrom(searchType);
 
             foreach (var obj in allObjects)
             {
@@ -110,7 +110,7 @@ namespace UnityExplorer.UI.ObjectExplorer
 
                 if (canGetGameObject)
                 {
-                    var go = context == SearchContext.GameObject
+                    var go = searchType == typeof(GameObject)
                             ? obj.TryCast<GameObject>()
                             : obj.TryCast<Component>().gameObject;
 
