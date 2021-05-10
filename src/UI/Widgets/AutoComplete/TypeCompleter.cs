@@ -29,6 +29,8 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         private HashSet<Type> allowedTypes;
 
+        private string chosenSuggestion;
+
         public TypeCompleter(Type baseType, InputFieldRef inputField)
         {
             BaseType = baseType;
@@ -52,14 +54,14 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
             suggestions.Clear();
             AutoCompleter.Instance.SetSuggestions(suggestions);
+            chosenSuggestion = suggestion.UnderlyingValue;
         }
 
         private void OnInputFieldChanged(string value)
         {
-            value = value ?? "";
-
-            if (string.IsNullOrEmpty(value))
+            if (string.IsNullOrEmpty(value) || value == chosenSuggestion)
             {
+                chosenSuggestion = null;
                 AutoCompleter.Instance.ReleaseOwnership(this);
             }
             else
