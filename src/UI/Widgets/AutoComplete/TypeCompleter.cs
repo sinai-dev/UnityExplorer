@@ -25,7 +25,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         public bool AnchorToCaretPosition => false;
 
         private readonly List<Suggestion> suggestions = new List<Suggestion>();
-        //private float timeOfLastCheck;
+        private readonly HashSet<string> suggestedNames = new HashSet<string>();
 
         private HashSet<Type> allowedTypes;
 
@@ -47,8 +47,6 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         public void OnSuggestionClicked(Suggestion suggestion)
         {
-            //timeOfLastCheck = Time.realtimeSinceStartup;
-
             InputField.Text = suggestion.UnderlyingValue;
             SuggestionClicked?.Invoke(suggestion);
 
@@ -58,11 +56,6 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         private void OnInputFieldChanged(string value)
         {
-            //if (!timeOfLastCheck.OccuredEarlierThanDefault())
-            //    return;
-            //
-            //timeOfLastCheck = Time.realtimeSinceStartup;
-
             value = value ?? "";
 
             if (string.IsNullOrEmpty(value))
@@ -81,6 +74,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         private void GetSuggestions(string value)
         {
             suggestions.Clear();
+            suggestedNames.Clear();
 
             if (BaseType == null)
             {
@@ -101,6 +95,10 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         void AddSuggestion(Type type)
         {
+            if (suggestedNames.Contains(type.FullName))
+                return;
+            suggestedNames.Add(type.FullName);
+
             if (!sharedTypeToLabel.ContainsKey(type.FullName))
                 sharedTypeToLabel.Add(type.FullName, SignatureHighlighter.Parse(type, true));
 

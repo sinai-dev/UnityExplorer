@@ -220,12 +220,12 @@
   <ItemGroup>
     <Compile Include="Core\Config\InternalConfigHandler.cs" />
     <Compile Include="UI\CSConsole\LexerBuilder.cs" />
-    <Compile Include="UI\CSConsole\Lexer\CommentLexer.cs" />
-    <Compile Include="UI\CSConsole\Lexer\KeywordLexer.cs" />
-    <Compile Include="UI\CSConsole\Lexer\Lexer.cs" />
-    <Compile Include="UI\CSConsole\Lexer\NumberLexer.cs" />
-    <Compile Include="UI\CSConsole\Lexer\StringLexer.cs" />
-    <Compile Include="UI\CSConsole\Lexer\SymbolLexer.cs" />
+    <Compile Include="UI\CSConsole\Lexers\CommentLexer.cs" />
+    <Compile Include="UI\CSConsole\Lexers\KeywordLexer.cs" />
+    <Compile Include="UI\CSConsole\Lexers\Lexer.cs" />
+    <Compile Include="UI\CSConsole\Lexers\NumberLexer.cs" />
+    <Compile Include="UI\CSConsole\Lexers\StringLexer.cs" />
+    <Compile Include="UI\CSConsole\Lexers\SymbolLexer.cs" />
     <Compile Include="UI\CSConsole\ScriptEvaluator.cs" />
     <Compile Include="UI\CSConsole\ScriptInteraction.cs" />
     <Compile Include="Core\ExplorerBehaviour.cs" />

@@ -118,7 +118,7 @@ namespace UnityExplorer.UI.Panels
 
             InputText = Input.InputField.textComponent;
             InputText.supportRichText = false;
-            InputText.color = new Color(1, 1, 1, 0.65f);
+            InputText.color = Color.white;
             Input.PlaceholderText.fontSize = fontSize;
 
             // Lexer highlight text overlay

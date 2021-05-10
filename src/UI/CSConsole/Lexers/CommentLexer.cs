@@ -12,6 +12,7 @@ namespace UnityExplorer.UI.CSharpConsole.Lexers
             Block
         }
 
+        // forest green
         protected override Color HighlightColor => new Color(0.34f, 0.65f, 0.29f, 1.0f);
 
         public override bool TryMatchCurrent(LexerBuilder lexer)
