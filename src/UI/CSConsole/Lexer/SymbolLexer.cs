@@ -20,14 +20,6 @@ namespace UnityExplorer.UI.CSharpConsole.Lexers
             '<', '>', '?', '!', '@'
         };
 
-//        // actual valid symbol combinations
-//        private readonly HashSet<string> actualSymbols = new HashSet<string>
-//        {
-//"[", "]", "(", ")", "{", "}", ".", ",", ";", ":", "+", "-", "*", "/", "%", "&", "|", "^", "~", "=",
-//"<", ">", "++", "--", "&&", "||", "<<", ">>", "==", "!=", "<=", ">=", "+=", "-=", "*=", "/=", "%=", 
-//"&=", "|=", "^=", "<<=", ">>=", "->", "!", "?", "??", "@", "=>",
-//        };
-
         public override bool TryMatchCurrent(LexerBuilder lexer)
         {
             // previous character must be delimiter, whitespace, or alphanumeric.
