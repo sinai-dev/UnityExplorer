@@ -24,13 +24,7 @@ namespace UnityExplorer
             TryLoadGameModules();
 
             BuildDeobfuscationCache();
-            AppDomain.CurrentDomain.AssemblyLoad += OnAssemblyLoaded;
-        }
-
-        private void OnAssemblyLoaded(object sender, AssemblyLoadEventArgs args)
-        {
-            foreach (var type in args.LoadedAssembly.TryGetTypes())
-                TryCacheDeobfuscatedType(type);
+            OnTypeLoaded += TryCacheDeobfuscatedType;
         }
 
         #region IL2CPP Extern and pointers

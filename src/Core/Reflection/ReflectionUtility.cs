@@ -7,6 +7,7 @@ using System.Reflection;
 using BF = System.Reflection.BindingFlags;
 using UnityExplorer.Core.Runtime;
 using System.Text;
+using UnityEngine;
 
 namespace UnityExplorer
 {
@@ -32,27 +33,26 @@ namespace UnityExplorer
 
         #region Type cache
 
+        public static Action<Type> OnTypeLoaded;
+
         /// <summary>Key: Type.FullName</summary>
         public static readonly SortedDictionary<string, Type> AllTypes = new SortedDictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
-        private static readonly List<string> allTypeNames = new List<string>();
+        private static readonly SortedSet<string> allTypeNames = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
 
         private static void SetupTypeCache()
         {
             foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
                 CacheTypes(asm);
 
-            allTypeNames.Sort();
-
             AppDomain.CurrentDomain.AssemblyLoad += AssemblyLoaded;
         }
 
         private static void AssemblyLoaded(object sender, AssemblyLoadEventArgs args)
         {
-            if (args.LoadedAssembly == null)
+            if (args.LoadedAssembly == null || args.LoadedAssembly.GetName().Name == "completions")
                 return;
 
             CacheTypes(args.LoadedAssembly);
-            allTypeNames.Sort();
         }
 
         private static void CacheTypes(Assembly asm)
@@ -66,6 +66,8 @@ namespace UnityExplorer
                     AllTypes.Add(type.FullName, type);
                     allTypeNames.Add(type.FullName);
                 }
+
+                OnTypeLoaded?.Invoke(type);
 
                 foreach (var key in typeInheritance.Keys)
                 {
@@ -224,12 +226,12 @@ namespace UnityExplorer
             if (!typeInheritance.ContainsKey(key))
             {
                 var set = new HashSet<Type>();
-                for (int i = 0; i < allTypeNames.Count; i++)
+                foreach (var name in allTypeNames)
                 {
-                    var type = AllTypes[allTypeNames[i]];
-                    //type = ReflectionProvider.Instance.GetDeobfuscatedType(type);
                     try
                     {
+                        var type = AllTypes[name];
+
                         if (set.Contains(type)
                         || (type.IsAbstract && type.IsSealed) // ignore static classes
                         || (!allowAbstract && type.IsAbstract)
@@ -261,11 +263,12 @@ namespace UnityExplorer
             {
                 var set = new HashSet<Type>();
 
-                for (int i = 0; i < allTypeNames.Count; i++)
+                foreach (var name in allTypeNames)
                 {
-                    var type = AllTypes[allTypeNames[i]];
                     try
                     {
+                        var type = AllTypes[name];
+
                         if (set.Contains(type)
                         || (type.IsAbstract && type.IsSealed) // ignore static classes
                         || (!allowAbstract && type.IsAbstract)
