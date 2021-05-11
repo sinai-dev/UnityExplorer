@@ -127,7 +127,7 @@
   <!-- BepInEx 5 Mono refs -->
   <ItemGroup Condition="'$(IsBepInEx)|$(IsCpp)|$(Configuration)'=='true|false|Release_BIE5_Mono'">
     <Reference Include="BepInEx">
-      <HintPath>..\lib\BepInEx.dll</HintPath>
+      <HintPath>..\lib\BepInEx.5\BepInEx.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

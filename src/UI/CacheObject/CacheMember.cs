@@ -340,7 +340,7 @@ namespace UnityExplorer.UI.CacheObject
         {
             // these cause a crash in IL2CPP
 #if CPP
-            "Type.DeclaringMethod",
+            //"Type.DeclaringMethod",
             "Rigidbody2D.Cast",
             "Collider2D.Cast",
             "Collider2D.Raycast",
