@@ -76,10 +76,10 @@ namespace UnityExplorer.UI.Panels
                 default, TextAnchor.LowerCenter);
             UIFactory.SetLayoutElement(topBarObj, minHeight: 50, flexibleHeight: 0);
 
-            // Top label
+            //// Top label
 
-            var topBarLabel = UIFactory.CreateLabel(topBarObj, "TopLabel", "C# Console", TextAnchor.MiddleLeft, default, true, 25);
-            UIFactory.SetLayoutElement(topBarLabel.gameObject, preferredWidth: 150, flexibleWidth: 5000);
+            //var topBarLabel = UIFactory.CreateLabel(topBarObj, "TopLabel", "C# Console", TextAnchor.MiddleLeft, default, true, 25);
+            //UIFactory.SetLayoutElement(topBarLabel.gameObject, preferredWidth: 150, flexibleWidth: 5000);
 
             // Enable Ctrl+R toggle
 
@@ -113,10 +113,10 @@ namespace UnityExplorer.UI.Panels
 
             var inputObj = UIFactory.CreateSrollInputField(this.content, "ConsoleInput", CSConsole.STARTUP_TEXT, out var inputScroller, fontSize);
             InputScroll = inputScroller;
-            CSConsole.defaultInputFieldAlpha = Input.InputField.selectionColor.a;
+            CSConsole.defaultInputFieldAlpha = Input.Component.selectionColor.a;
             Input.OnValueChanged += InvokeOnValueChanged;
 
-            InputText = Input.InputField.textComponent;
+            InputText = Input.Component.textComponent;
             InputText.supportRichText = false;
             InputText.color = Color.white;
             Input.PlaceholderText.fontSize = fontSize;
@@ -148,12 +148,12 @@ namespace UnityExplorer.UI.Panels
                 new Color(1, 1, 1, 0));
 
             var resetButton = UIFactory.CreateButton(horozGroupObj, "ResetButton", "Reset", new Color(0.33f, 0.33f, 0.33f));
-            UIFactory.SetLayoutElement(resetButton.Button.gameObject, minHeight: 45, minWidth: 80, flexibleHeight: 0);
+            UIFactory.SetLayoutElement(resetButton.Component.gameObject, minHeight: 45, minWidth: 80, flexibleHeight: 0);
             resetButton.ButtonText.fontSize = 18;
             resetButton.OnClick += OnResetClicked;
 
             var compileButton = UIFactory.CreateButton(horozGroupObj, "CompileButton", "Compile", new Color(0.33f, 0.5f, 0.33f));
-            UIFactory.SetLayoutElement(compileButton.Button.gameObject, minHeight: 45, minWidth: 80, flexibleHeight: 0);
+            UIFactory.SetLayoutElement(compileButton.Component.gameObject, minHeight: 45, minWidth: 80, flexibleHeight: 0);
             compileButton.ButtonText.fontSize = 18;
             compileButton.OnClick += OnCompileClicked;
 

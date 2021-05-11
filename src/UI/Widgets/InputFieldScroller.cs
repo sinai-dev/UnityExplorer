@@ -105,23 +105,23 @@ namespace UnityExplorer.UI.Utility
 
         internal void ProcessInputText()
         {
-            var curInputRect = InputField.InputField.textComponent.rectTransform.rect;
+            var curInputRect = InputField.Component.textComponent.rectTransform.rect;
             var scaleFactor = RootScaler.scaleFactor;
 
             // Current text settings
-            var texGenSettings = InputField.InputField.textComponent.GetGenerationSettings(curInputRect.size);
+            var texGenSettings = InputField.Component.textComponent.GetGenerationSettings(curInputRect.size);
             texGenSettings.generateOutOfBounds = false;
             texGenSettings.scaleFactor = scaleFactor;
 
             // Preferred text rect height
-            var textGen = InputField.InputField.textComponent.cachedTextGeneratorForLayout;
+            var textGen = InputField.Component.textComponent.cachedTextGeneratorForLayout;
             m_desiredContentHeight = textGen.GetPreferredHeight(m_lastText, texGenSettings) + 10;
 
             // TODO more intelligent jump.
             // We can detect if the caret is outside the viewport area.
 
             // jump to bottom
-            if (InputField.InputField.caretPosition == InputField.Text.Length
+            if (InputField.Component.caretPosition == InputField.Text.Length
                 && InputField.Text.Length > 0
                 && InputField.Text[InputField.Text.Length - 1] == '\n')
             {

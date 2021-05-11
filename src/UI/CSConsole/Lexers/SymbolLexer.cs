@@ -13,7 +13,9 @@ namespace UnityExplorer.UI.CSharpConsole.Lexers
         // all symbols are delimiters
         public override IEnumerable<char> Delimiters => symbols;
 
-        private readonly HashSet<char> symbols = new HashSet<char>
+        public static bool IsSymbol(char c) => symbols.Contains(c);
+
+        public static readonly HashSet<char> symbols = new HashSet<char>
         {
             '[', '{', '(',                  // open
             ']', '}', ')',                  // close
@@ -29,14 +31,14 @@ namespace UnityExplorer.UI.CSharpConsole.Lexers
             if (!lexer.IsDelimiter(lexer.Previous, true, true))
                 return false;
 
-            if (symbols.Contains(lexer.Current))
+            if (IsSymbol(lexer.Current))
             {
                 do
                 {
                     lexer.Commit();
                     lexer.PeekNext();
                 }
-                while (symbols.Contains(lexer.Current));
+                while (IsSymbol(lexer.Current));
 
                 return true;
             }

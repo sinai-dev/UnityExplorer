@@ -10,6 +10,7 @@ using UnityEngine.UI;
 using UnityExplorer.Core.CSharp;
 using UnityExplorer.Core.Input;
 using UnityExplorer.UI.Panels;
+using UnityExplorer.UI.Widgets.AutoComplete;
 
 namespace UnityExplorer.UI.CSharpConsole
 {
@@ -25,9 +26,9 @@ The following helper methods are available:
 
 * <color=#add490>StartCoroutine(IEnumerator routine)</color> start the IEnumerator as a UnityEngine.Coroutine
 
-* <color=#add490>CurrentTarget()</color> returns the currently inspected target on the Home page
+* <color=#add490>CurrentTarget()</color> returns the target of the active Inspector tab as System.Object
 
-* <color=#add490>AllTargets()</color> returns an object[] array containing all inspected instances
+* <color=#add490>AllTargets()</color> returns a System.Object[] array containing the targets of all active tabs
 
 * <color=#add490>Inspect(someObject)</color> to inspect an instance, eg. Inspect(Camera.main);
 
@@ -58,12 +59,16 @@ The following helper methods are available:
 
         public static ScriptEvaluator Evaluator;
         public static LexerBuilder Lexer;
+        public static CSAutoCompleter Completer;
 
-        private static StringBuilder evaluatorOutput;
         private static HashSet<string> usingDirectives;
+        private static StringBuilder evaluatorOutput;
 
-        private static CSConsolePanel Panel => UIManager.CSharpConsole;
-        private static InputFieldRef Input => Panel.Input;
+        public static CSConsolePanel Panel => UIManager.CSharpConsole;
+        public static InputFieldRef Input => Panel.Input;
+
+        public static int LastCaretPosition { get; private set; }
+        internal static float defaultInputFieldAlpha;
 
         // Todo save as config?
         public static bool EnableCtrlRShortcut { get; private set; } = true;
@@ -84,73 +89,66 @@ The following helper methods are available:
             }
 
             Lexer = new LexerBuilder();
+            Completer = new CSAutoCompleter();
 
             Panel.OnInputChanged += OnConsoleInputChanged;
-            Panel.InputScroll.OnScroll += ForceOnContentChange;
-            // TODO other panel listeners (buttons, etc)
+            Panel.InputScroll.OnScroll += OnInputScrolled;
+            Panel.OnCompileClicked += Evaluate;
+            Panel.OnResetClicked += ResetConsole;
+            Panel.OnAutoIndentToggled += OnToggleAutoIndent;
+            Panel.OnCtrlRToggled += OnToggleCtrlRShortcut;
+            Panel.OnSuggestionsToggled += OnToggleSuggestions;
+
         }
 
         // Updating and event listeners
 
-        private static readonly KeyCode[] onFocusKeys =
-        {
-            KeyCode.Return, KeyCode.Backspace, KeyCode.UpArrow,
-            KeyCode.DownArrow, KeyCode.LeftArrow, KeyCode.RightArrow
-        };
-
-        public static void Update()
-        {
-            UpdateCaret();
-
-            if (EnableCtrlRShortcut)
-            {
-                if ((InputManager.GetKey(KeyCode.LeftControl) || InputManager.GetKey(KeyCode.RightControl))
-                    && InputManager.GetKeyDown(KeyCode.R))
-                {
-                    var text = Panel.Input.Text.Trim();
-                    if (!string.IsNullOrEmpty(text))
-                    {
-                        Evaluate(text);
-                        return;
-                    }
-                }
-            }
-
-            //if (EnableAutoIndent && InputManager.GetKeyDown(KeyCode.Return))
-            //    DoAutoIndent();
-
-            //if (EnableAutocompletes && InputField.isFocused)
-            //{
-            //    if (InputManager.GetMouseButton(0) || onFocusKeys.Any(it => InputManager.GetKeyDown(it)))
-            //        UpdateAutocompletes();
-            //}
-        }
-
-        private static void ForceOnContentChange()
-        {
-            OnConsoleInputChanged(Input.Text);
-        }
+        private static void OnInputScrolled() => HighlightVisibleInput(Input.Text);
 
         // Invoked at most once per frame
         private static void OnConsoleInputChanged(string value)
         {
-            // todo auto indent? or only on enter?
-            // todo update auto completes
+            LastCaretPosition = Input.Component.caretPosition;
 
+            if (EnableSuggestions)
+                Completer.CheckAutocompletes();
 
-            // syntax highlight
             HighlightVisibleInput(value);
+        }
+
+        public static void Update()
+        {
+            int lastCaretPos = LastCaretPosition;
+            UpdateCaret();
+            bool caretMoved = lastCaretPos != LastCaretPosition;
+
+            if (EnableSuggestions && caretMoved)
+            {
+                Completer.CheckAutocompletes();
+            }
+
+            //if (EnableAutoIndent && caretMoved)
+            //    DoAutoIndent();
+
+            if (EnableCtrlRShortcut
+                && (InputManager.GetKey(KeyCode.LeftControl) || InputManager.GetKey(KeyCode.RightControl))
+                && InputManager.GetKeyDown(KeyCode.R))
+            {
+                Evaluate(Panel.Input.Text);
+            }
         }
 
         private static void UpdateCaret()
         {
-            LastCaretPosition = Input.InputField.caretPosition;
+            LastCaretPosition = Input.Component.caretPosition;
 
-            // todo check if out of bounds
+            // todo check if out of bounds, move content if so
         }
 
 
-        #region Evaluating console input
+        #region Evaluating
+
+        public static void ResetConsole() => ResetConsole(true);
 
         public static void ResetConsole(bool logSuccess = true)
         {
@@ -178,6 +176,11 @@ The following helper methods are available:
                 Evaluate($"using {assemblyName};", true);
                 usingDirectives.Add(assemblyName);
             }
+        }
+
+        public static void Evaluate()
+        {
+            Evaluate(Input.Text);
         }
 
         public static void Evaluate(string input, bool supressLog = false)
@@ -217,48 +220,44 @@ The following helper methods are available:
 
         private static void HighlightVisibleInput(string value)
         {
-            int startLine = 0;
-            int endLine = Input.TextGenerator.lineCount - 1;
+            int startIdx = 0;
+            int endIdx = value.Length - 1;
+            int topLine = 0;
 
             // Calculate visible text if necessary
             if (Input.Rect.rect.height > Panel.InputScroll.ViewportRect.rect.height)
             {
-                // This was mostly done through trial and error, it probably depends on the anchoring.
-                int topLine = -1;
+                topLine = -1;
                 int bottomLine = -1;
-                var heightCorrection = Input.Rect.rect.height * 0.5f;
 
-                var viewportMin = Input.Rect.rect.height - Input.Rect.anchoredPosition.y;
-                var viewportMax = viewportMin - Panel.InputScroll.ViewportRect.rect.height;
+                // the top and bottom position of the viewport in relation to the text height
+                // they need the half-height adjustment to normalize against the 'line.topY' value.
+                var viewportMin = Input.Rect.rect.height - Input.Rect.anchoredPosition.y - (Input.Rect.rect.height * 0.5f);
+                var viewportMax = viewportMin - Panel.InputScroll.ViewportRect.rect.height - (Input.Rect.rect.height * 0.5f);
 
                 for (int i = 0; i < Input.TextGenerator.lineCount; i++)
                 {
                     var line = Input.TextGenerator.lines[i];
-                    var pos = line.topY + heightCorrection;
-
-                    // if top of line is below the viewport top
-                    if (topLine == -1 && pos <= viewportMin)
+                    // if not set the top line yet, and top of line is below the viewport top
+                    if (topLine == -1 && line.topY <= viewportMin)
                         topLine = i;
-
                     // if bottom of line is below the viewport bottom
-                    if ((pos - line.height) >= viewportMax)
+                    if ((line.topY - line.height) >= viewportMax)
                         bottomLine = i;
                 }
+                // make sure lines are valid
+                topLine = Math.Max(0, topLine - 1);
+                bottomLine = Math.Min(Input.TextGenerator.lineCount - 1, bottomLine + 1);
 
-                startLine = Math.Max(0, topLine - 1);
-                endLine = Math.Min(Input.TextGenerator.lineCount - 1, bottomLine + 1);
+                startIdx = Input.TextGenerator.lines[topLine].startCharIdx;
+                endIdx = bottomLine == Input.TextGenerator.lineCount
+                    ? value.Length - 1
+                    : (Input.TextGenerator.lines[bottomLine + 1].startCharIdx - 1);
             }
-
-            int startIdx = Input.TextGenerator.lines[startLine].startCharIdx;
-            int endIdx;
-            if (endLine >= Input.TextGenerator.lineCount - 1)
-                endIdx = value.Length - 1;
-            else
-                endIdx = Math.Min(value.Length - 1, Input.TextGenerator.lines[endLine + 1].startCharIdx);
 
 
             // Highlight the visible text with the LexerBuilder
-            Panel.HighlightText.text = Lexer.BuildHighlightedString(value, startIdx, endIdx, startLine);
+            Panel.HighlightText.text = Lexer.BuildHighlightedString(value, startIdx, endIdx, topLine);
         }
 
         #endregion
@@ -266,7 +265,7 @@ The following helper methods are available:
 
         #region Autocompletes
 
-        public static void UseSuggestion(string suggestion)
+        public static void InsertSuggestionAtCaret(string suggestion)
         {
             string input = Input.Text;
             input = input.Insert(LastCaretPosition, suggestion);
@@ -275,24 +274,22 @@ The following helper methods are available:
             RuntimeProvider.Instance.StartCoroutine(SetAutocompleteCaret(LastCaretPosition += suggestion.Length));
         }
 
-        public static int LastCaretPosition { get; private set; }
-        internal static float defaultInputFieldAlpha;
-
         private static IEnumerator SetAutocompleteCaret(int caretPosition)
         {
-            var color = Input.InputField.selectionColor;
+            var color = Input.Component.selectionColor;
             color.a = 0f;
-            Input.InputField.selectionColor = color;
+            Input.Component.selectionColor = color;
             yield return null;
 
             EventSystem.current.SetSelectedGameObject(Panel.Input.UIRoot, null);
             yield return null;
 
-            Input.InputField.caretPosition = caretPosition;
-            Input.InputField.selectionFocusPosition = caretPosition;
+            Input.Component.caretPosition = caretPosition;
+            Input.Component.selectionFocusPosition = caretPosition;
             color.a = defaultInputFieldAlpha;
-            Input.InputField.selectionColor = color;
+            Input.Component.selectionColor = color;
         }
+
 
         #endregion
 
@@ -482,6 +479,26 @@ The following helper methods are available:
         //
         //    return sb.ToString();
         //}
+
+        #endregion
+
+
+        #region UI Listeners and options
+
+        private static void OnToggleAutoIndent(bool value)
+        {
+            // TODO
+        }
+
+        private static void OnToggleCtrlRShortcut(bool value)
+        {
+            // TODO
+        }
+
+        private static void OnToggleSuggestions(bool value)
+        {
+            // TODO
+        }
 
         #endregion
 

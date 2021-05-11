@@ -53,7 +53,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             SuggestionClicked?.Invoke(suggestion);
 
             suggestions.Clear();
-            AutoCompleter.Instance.SetSuggestions(suggestions);
+            AutoCompleteModal.Instance.SetSuggestions(suggestions);
             chosenSuggestion = suggestion.UnderlyingValue;
         }
 
@@ -62,14 +62,14 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             if (string.IsNullOrEmpty(value) || value == chosenSuggestion)
             {
                 chosenSuggestion = null;
-                AutoCompleter.Instance.ReleaseOwnership(this);
+                AutoCompleteModal.Instance.ReleaseOwnership(this);
             }
             else
             {
                 GetSuggestions(value);
 
-                AutoCompleter.Instance.TakeOwnership(this);
-                AutoCompleter.Instance.SetSuggestions(suggestions);
+                AutoCompleteModal.Instance.TakeOwnership(this);
+                AutoCompleteModal.Instance.SetSuggestions(suggestions);
             }
         }
 

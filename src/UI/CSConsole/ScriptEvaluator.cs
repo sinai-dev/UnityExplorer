@@ -4,7 +4,7 @@ using System.IO;
 using System.Reflection;
 using Mono.CSharp;
 
-// Thanks to ManlyMarco for most of this
+// Thanks to ManlyMarco for this
 
 namespace UnityExplorer.Core.CSharp
 {
@@ -22,7 +22,7 @@ namespace UnityExplorer.Core.CSharp
         {
             _textWriter = tw;
 
-            ImportAppdomainAssemblies(ReferenceAssembly);
+            ImportAppdomainAssemblies(Reference);
             AppDomain.CurrentDomain.AssemblyLoad += OnAssemblyLoad;
         }
 
@@ -39,7 +39,15 @@ namespace UnityExplorer.Core.CSharp
             if (StdLib.Contains(name))
                 return;
 
-            ReferenceAssembly(args.LoadedAssembly);
+            Reference(args.LoadedAssembly);
+        }
+
+        private void Reference(Assembly asm)
+        {
+            var name = asm.GetName().Name;
+            if (name == "completions")
+                return;
+            ReferenceAssembly(asm);
         }
 
         private static CompilerContext BuildContext(TextWriter tw)

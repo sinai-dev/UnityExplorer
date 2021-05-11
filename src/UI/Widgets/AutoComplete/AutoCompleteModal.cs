@@ -12,11 +12,11 @@ using UnityExplorer.UI.Panels;
 
 namespace UnityExplorer.UI.Widgets.AutoComplete
 {
-    public class AutoCompleter : UIPanel
+    public class AutoCompleteModal : UIPanel
     {
         // Static
 
-        public static AutoCompleter Instance => UIManager.AutoCompleter;
+        public static AutoCompleteModal Instance => UIManager.AutoCompleter;
 
         // Instance
 
@@ -36,9 +36,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         private List<Suggestion> suggestions = new List<Suggestion>();
 
-        private int lastCaretPos;
-
-        public AutoCompleter()
+        public AutoCompleteModal()
         {
             OnPanelsReordered += UIPanel_OnPanelsReordered;
             OnClickedOutsidePanels += AutoCompleter_OnClickedOutsidePanels;
@@ -80,7 +78,6 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
                     ReleaseOwnership(CurrentHandler);
                 else
                 {
-                    lastCaretPos = CurrentHandler.InputField.InputField.caretPosition;
                     UpdatePosition();
                 }
             }
@@ -107,9 +104,9 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         private bool ShouldDisplay(Suggestion data, string filter) => true;
 
-        public void SetSuggestions(List<Suggestion> collection)
+        public void SetSuggestions(IEnumerable<Suggestion> collection)
         {
-            suggestions = collection;
+            suggestions = collection as List<Suggestion> ?? collection.ToList();
 
             if (!suggestions.Any())
                 UIRoot.SetActive(false);
@@ -140,28 +137,40 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             cell.Button.ButtonText.text = suggestion.DisplayText;
         }
 
+        private int lastCaretPosition;
+        private Vector3 lastInputPosition;
+
         private void UpdatePosition()
         {
-            if (CurrentHandler == null || !CurrentHandler.InputField.InputField.isFocused)
+            if (CurrentHandler == null || !CurrentHandler.InputField.Component.isFocused)
                 return;
 
-            Vector3 pos;
             var input = CurrentHandler.InputField;
 
-            var textGen = input.InputField.textComponent.cachedTextGenerator;
-            int caretPos = 0;
+            if (input.Component.caretPosition == lastCaretPosition && input.UIRoot.transform.position == lastInputPosition)
+                return;
+            lastInputPosition = input.UIRoot.transform.position;
+            lastCaretPosition = input.Component.caretPosition;
+
             if (CurrentHandler.AnchorToCaretPosition)
             {
-                caretPos = lastCaretPos--;
+                var textGen = input.Component.textComponent.cachedTextGeneratorForLayout;
+                int caretIdx = Math.Max(0, Math.Min(textGen.characterCount - 1, input.Component.caretPosition));
 
-                caretPos = Math.Max(0, caretPos);
-                caretPos = Math.Min(textGen.characterCount - 1, caretPos);
+                // normalize the caret horizontal position
+                Vector3 caretPos = textGen.characters[caretIdx].cursorPos;
+                caretPos += new Vector3(input.Rect.rect.width * 0.5f, 0, 0);
+                // transform to world point
+                caretPos = input.UIRoot.transform.TransformPoint(caretPos);
+
+                uiRoot.transform.position = new Vector3(caretPos.x + 10, caretPos.y - 30, 0);
             }
-
-            pos = textGen.characters[caretPos].cursorPos;
-            pos = input.UIRoot.transform.TransformPoint(pos);
-
-            uiRoot.transform.position = new Vector3(pos.x + 10, pos.y - 20, 0);
+            else
+            {
+                var textGen = input.Component.textComponent.cachedTextGenerator;
+                var pos = input.UIRoot.transform.TransformPoint(textGen.characters[0].cursorPos);
+                uiRoot.transform.position = new Vector3(pos.x + 10, pos.y - 20, 0);
+            }
 
             this.Dragger.OnEndResize();
         }
