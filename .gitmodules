@@ -4,3 +4,6 @@
 [submodule "lib/HarmonyX"]
 	path = lib/HarmonyX
 	url = https://github.com/BepInEx/HarmonyX
+[submodule "lib/mcs-unity"]
+	path = lib/mcs-unity
+	url = https://github.com/sinai-dev/mcs-unity
