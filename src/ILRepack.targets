@@ -4,14 +4,20 @@
     <Target Name="ILRepacker" AfterTargets="Build">
         <ItemGroup>
             <InputAssemblies Include="$(OutputPath)$(AssemblyName).dll" />
-            <InputAssemblies Include="..\lib\mcs.dll" />
-            <InputAssemblies Include="..\lib\INIFileParser.dll" />
+            <InputAssemblies Include="..\lib\mcs-unity\mcs\bin\Release\mcs.dll" />
+            <InputAssemblies Include="packages\ini-parser.2.5.2\lib\net20\INIFileParser.dll" />
+        </ItemGroup>
+        <ItemGroup>
+            <ReferenceFolders Include="..\lib\" />
+            <ReferenceFolders Include="..\lib\HarmonyX\Harmony\bin\Release\net35\" />
+            <ReferenceFolders Include="..\lib\BepInEx.6.IL2CPP\" />
+            <ReferenceFolders Include="..\lib\BepInEx.6.Mono\" />
         </ItemGroup>
         <ILRepack
           Parallel="true"
           Internalize="true"
           DebugInfo="false"
-          LibraryPath="..\lib\"
+          LibraryPath="@(ReferenceFolders)"
           InputAssemblies="@(InputAssemblies)"
           TargetKind="Dll"
           OutputFile="$(OutputPath)$(AssemblyName).dll" />

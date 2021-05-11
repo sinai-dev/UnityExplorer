@@ -75,8 +75,6 @@
     <AssemblyName>UnityExplorer.BIE5.Mono</AssemblyName>
     <IsCpp>false</IsCpp>
     <IsBepInEx>true</IsBepInEx>
-    <DebugType>none</DebugType>
-    <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
   <!-- STANDALONE IL2CPP -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_STANDALONE_Mono|AnyCPU'">
@@ -105,7 +103,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="mcs">
-      <HintPath>..\lib\mcs.dll</HintPath>
+      <HintPath>..\lib\mcs-unity\mcs\bin\Release\mcs.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="INIFileParser, Version=2.5.2.0, Culture=neutral, PublicKeyToken=79af7b307b65cf3c, processorArchitecture=MSIL">
@@ -120,10 +118,10 @@
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-  <!-- BepInEx refs -->
+  <!-- BepInEx universal refs -->
   <ItemGroup Condition="'$(IsBepInEx)'=='true'">
     <Reference Include="0Harmony">
-      <HintPath>..\lib\0Harmony.dll</HintPath>
+      <HintPath>..\lib\HarmonyX\Harmony\bin\Release\net35\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -137,47 +135,47 @@
   <!-- BepInEx 6 Mono refs -->
   <ItemGroup Condition="'$(IsBepInEx)|$(IsCpp)|$(Configuration)'=='true|false|Release_BIE6_Mono'">
     <Reference Include="BepInEx">
-      <HintPath>..\lib\BepInEx.Core.dll</HintPath>
+      <HintPath>..\lib\BepInEx.6.Mono\BepInEx.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="BepInEx.Unity">
-      <HintPath>..\lib\BepInEx.Unity.dll</HintPath>
+      <HintPath>..\lib\BepInEx.6.Mono\BepInEx.Unity.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <!-- BepInEx Il2Cpp refs -->
   <ItemGroup Condition="'$(IsBepInEx)|$(IsCpp)'=='true|true'">
     <Reference Include="BepInEx">
-      <HintPath>..\lib\BepInEx.Core.dll</HintPath>
+      <HintPath>..\lib\BepInEx.6.IL2CPP\BepInEx.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="BepInEx.IL2CPP">
-      <HintPath>..\lib\BepInEx.IL2CPP.dll</HintPath>
+      <HintPath>..\lib\BepInEx.6.IL2CPP\BepInEx.IL2CPP.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <!-- Standalone refs -->
   <ItemGroup Condition="'$(IsStandalone)'=='true'">
     <Reference Include="0Harmony">
-      <HintPath>..\lib\0Harmony.dll</HintPath>
+      <HintPath>..\lib\HarmonyX\Harmony\bin\Release\net35\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <!-- Mono refs -->
   <ItemGroup Condition="'$(IsCpp)'=='false'">
     <Reference Include="UnityEngine">
-      <HintPath>..\lib\publicized_assemblies\UnityEngine.dll</HintPath>
+      <HintPath>..\lib\mono\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\lib\publicized_assemblies\UnityEngine.UI.dll</HintPath>
+      <HintPath>..\lib\mono\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <!-- Il2Cpp refs -->
   <ItemGroup Condition="'$(IsCpp)'=='true'">
     <Reference Include="UnhollowerBaseLib">
-      <HintPath>..\lib\UnhollowerBaseLib.dll</HintPath>
+      <HintPath>..\lib\Il2CppAssemblyUnhollower\UnhollowerBaseLib\bin\Release\net4.7.2\UnhollowerBaseLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Il2Cppmscorlib">
@@ -219,6 +217,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Config\InternalConfigHandler.cs" />
+    <Compile Include="Core\Runtime\Mono\SortedSet.cs" />
+    <Compile Include="UI\CSConsole\CSAutoCompleter.cs" />
     <Compile Include="UI\CSConsole\LexerBuilder.cs" />
     <Compile Include="UI\CSConsole\Lexers\CommentLexer.cs" />
     <Compile Include="UI\CSConsole\Lexers\KeywordLexer.cs" />
@@ -312,7 +312,7 @@
     <Compile Include="UI\Panels\PanelDragger.cs" />
     <Compile Include="Core\Utility\SignatureHighlighter.cs" />
     <Compile Include="Core\Utility\ToStringUtility.cs" />
-    <Compile Include="UI\Widgets\AutoComplete\AutoCompleter.cs" />
+    <Compile Include="UI\Widgets\AutoComplete\AutoCompleteModal.cs" />
     <Compile Include="UI\Widgets\AutoComplete\TypeCompleter.cs" />
     <Compile Include="UI\Models\ButtonRef.cs" />
     <Compile Include="UI\ObjectExplorer\ObjectSearch.cs" />
