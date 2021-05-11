@@ -230,7 +230,7 @@ namespace UnityExplorer.UI.CacheObject.Views
 
             var inputField = UIFactory.CreateInputField(horiGroup, "InputField", "...");
             UIFactory.SetLayoutElement(inputField.UIRoot, minHeight: 25, flexibleHeight: 50, minWidth: 100, flexibleWidth: 1000);
-            inputField.InputField.lineType = InputField.LineType.MultiLineNewline;
+            inputField.Component.lineType = InputField.LineType.MultiLineNewline;
             inputField.UIRoot.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             inputField.OnValueChanged += (string val) => { inputArray[index] = val; };
             inputFields.Add(inputField);
@@ -266,7 +266,7 @@ namespace UnityExplorer.UI.CacheObject.Views
 
             // evaluate button
             var evalButton = UIFactory.CreateButton(UIRoot, "EvaluateButton", "Evaluate", new Color(0.2f, 0.2f, 0.2f));
-            UIFactory.SetLayoutElement(evalButton.Button.gameObject, minHeight: 25, minWidth: 150, flexibleWidth: 0);
+            UIFactory.SetLayoutElement(evalButton.Component.gameObject, minHeight: 25, minWidth: 150, flexibleWidth: 0);
             evalButton.OnClick += () => 
             {
                 Owner.EvaluateAndSetCell();

@@ -86,12 +86,12 @@ namespace UnityExplorer.UI.CacheObject.Views
             if (!this.SubContentHolder.activeSelf)
             {
                 this.SubContentButton.ButtonText.text = "▲";
-                RuntimeProvider.Instance.SetColorBlock(SubContentButton.Button, subInactiveColor, subInactiveColor * 1.3f);
+                RuntimeProvider.Instance.SetColorBlock(SubContentButton.Component, subInactiveColor, subInactiveColor * 1.3f);
             }
             else
             {
                 this.SubContentButton.ButtonText.text = "▼";
-                RuntimeProvider.Instance.SetColorBlock(SubContentButton.Button, subActiveColor, subActiveColor * 1.3f);
+                RuntimeProvider.Instance.SetColorBlock(SubContentButton.Component, subActiveColor, subActiveColor * 1.3f);
             }
         }
 
@@ -136,7 +136,7 @@ namespace UnityExplorer.UI.CacheObject.Views
             UIFactory.SetLayoutElement(rightHoriGroup, minHeight: 25, minWidth: 200, flexibleWidth: 9999, flexibleHeight: 800);
 
             SubContentButton = UIFactory.CreateButton(rightHoriGroup, "SubContentButton", "▲", subInactiveColor);
-            UIFactory.SetLayoutElement(SubContentButton.Button.gameObject, minWidth: 25, minHeight: 25, flexibleWidth: 0, flexibleHeight: 0);
+            UIFactory.SetLayoutElement(SubContentButton.Component.gameObject, minWidth: 25, minHeight: 25, flexibleWidth: 0, flexibleHeight: 0);
             SubContentButton.OnClick += SubContentClicked;
 
             // Type label
@@ -158,13 +158,13 @@ namespace UnityExplorer.UI.CacheObject.Views
             // Apply
 
             ApplyButton = UIFactory.CreateButton(rightHoriGroup, "ApplyButton", "Apply", new Color(0.15f, 0.19f, 0.15f));
-            UIFactory.SetLayoutElement(ApplyButton.Button.gameObject, minWidth: 70, minHeight: 25, flexibleWidth: 0, flexibleHeight: 0);
+            UIFactory.SetLayoutElement(ApplyButton.Component.gameObject, minWidth: 70, minHeight: 25, flexibleWidth: 0, flexibleHeight: 0);
             ApplyButton.OnClick += ApplyClicked;
 
             // Inspect 
 
             InspectButton = UIFactory.CreateButton(rightHoriGroup, "InspectButton", "Inspect", new Color(0.15f, 0.15f, 0.15f));
-            UIFactory.SetLayoutElement(InspectButton.Button.gameObject, minWidth: 70, flexibleWidth: 0, minHeight: 25);
+            UIFactory.SetLayoutElement(InspectButton.Component.gameObject, minWidth: 70, flexibleWidth: 0, minHeight: 25);
             InspectButton.OnClick += InspectClicked;
 
             // Main value label

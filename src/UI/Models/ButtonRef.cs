@@ -13,12 +13,12 @@ namespace UnityExplorer.UI
     {
         public Action OnClick;
 
-        public Button Button { get; }
+        public Button Component { get; }
         public Text ButtonText { get; }
 
         public ButtonRef(Button button)
         {
-            this.Button = button;
+            this.Component = button;
             this.ButtonText = button.GetComponentInChildren<Text>();
 
             button.onClick.AddListener(() => { OnClick?.Invoke(); });

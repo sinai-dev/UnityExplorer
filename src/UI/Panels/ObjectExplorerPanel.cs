@@ -43,7 +43,7 @@ namespace UnityExplorer.UI.Panels
             content.SetActive(true);
 
             var button = tabButtons[tabIndex];
-            RuntimeProvider.Instance.SetColorBlock(button.Button, UIManager.enabledButtonColor, UIManager.enabledButtonColor * 1.2f);
+            RuntimeProvider.Instance.SetColorBlock(button.Component, UIManager.enabledButtonColor, UIManager.enabledButtonColor * 1.2f);
 
             SelectedTab = tabIndex;
             SaveToConfigManager();
@@ -52,7 +52,7 @@ namespace UnityExplorer.UI.Panels
         private void DisableTab(int tabIndex)
         {
             tabPages[tabIndex].SetActive(false);
-            RuntimeProvider.Instance.SetColorBlock(tabButtons[tabIndex].Button, UIManager.disabledButtonColor, UIManager.disabledButtonColor * 1.2f);
+            RuntimeProvider.Instance.SetColorBlock(tabButtons[tabIndex].Component, UIManager.disabledButtonColor, UIManager.disabledButtonColor * 1.2f);
         }
 
         public override void Update()

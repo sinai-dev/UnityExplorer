@@ -60,7 +60,7 @@ namespace UnityExplorer.UI.CacheObject.Views
             // key Inspect
 
             KeyInspectButton = UIFactory.CreateButton(keyGroup, "KeyInspectButton", "Inspect", new Color(0.15f, 0.15f, 0.15f));
-            UIFactory.SetLayoutElement(KeyInspectButton.Button.gameObject, minWidth: 60, flexibleWidth: 0, minHeight: 25, flexibleHeight: 0);
+            UIFactory.SetLayoutElement(KeyInspectButton.Component.gameObject, minWidth: 60, flexibleWidth: 0, minHeight: 25, flexibleHeight: 0);
             KeyInspectButton.OnClick += KeyInspectClicked;
 
             // label
@@ -78,7 +78,7 @@ namespace UnityExplorer.UI.CacheObject.Views
             KeyInputField = UIFactory.CreateInputField(keyGroup, "KeyInput", "empty");
             UIFactory.SetLayoutElement(KeyInputField.UIRoot, minHeight: 25, flexibleHeight: 0, flexibleWidth: 0, preferredWidth: 200);
             //KeyInputField.lineType = InputField.LineType.MultiLineNewline;
-            KeyInputField.InputField.readOnly = true;
+            KeyInputField.Component.readOnly = true;
 
             return root;
         }

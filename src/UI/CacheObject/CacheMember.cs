@@ -101,7 +101,7 @@ namespace UnityExplorer.UI.CacheObject
             if (!ShouldAutoEvaluate)
             {
                 //cell.UpdateToggle.gameObject.SetActive(false);
-                cell.EvaluateButton.Button.gameObject.SetActive(true);
+                cell.EvaluateButton.Component.gameObject.SetActive(true);
                 if (HasArguments)
                 {
                     if (!Evaluating)
@@ -110,14 +110,14 @@ namespace UnityExplorer.UI.CacheObject
                     {
                         cell.EvaluateButton.ButtonText.text = "Hide";
                         Evaluator.UIRoot.transform.SetParent(cell.EvaluateHolder.transform, false);
-                        RuntimeProvider.Instance.SetColorBlock(cell.EvaluateButton.Button, evalEnabledColor, evalEnabledColor * 1.3f);
+                        RuntimeProvider.Instance.SetColorBlock(cell.EvaluateButton.Component, evalEnabledColor, evalEnabledColor * 1.3f);
                     }
                 }
                 else
                     cell.EvaluateButton.ButtonText.text = "Evaluate";
 
                 if (!Evaluating)
-                    RuntimeProvider.Instance.SetColorBlock(cell.EvaluateButton.Button, evalDisabledColor, evalDisabledColor * 1.3f);
+                    RuntimeProvider.Instance.SetColorBlock(cell.EvaluateButton.Component, evalDisabledColor, evalDisabledColor * 1.3f);
             }
             //else
             //{

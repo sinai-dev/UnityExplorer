@@ -53,8 +53,8 @@ namespace UnityExplorer.UI.Widgets
             UIRoot.SetActive(false);
 
             this.Button = UIFactory.CreateButton(UIRoot, "NameButton", "Name");
-            UIFactory.SetLayoutElement(Button.Button.gameObject, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
-            var buttonText = Button.Button.GetComponentInChildren<Text>();
+            UIFactory.SetLayoutElement(Button.Component.gameObject, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
+            var buttonText = Button.Component.GetComponentInChildren<Text>();
             buttonText.horizontalOverflow = HorizontalWrapMode.Overflow;
             buttonText.alignment = TextAnchor.MiddleLeft;
 
@@ -62,7 +62,7 @@ namespace UnityExplorer.UI.Widgets
             Color highlight = new Color(0.25f, 0.25f, 0.25f);
             Color pressed = new Color(0.05f, 0.05f, 0.05f);
             Color disabled = new Color(1, 1, 1, 0);
-            RuntimeProvider.Instance.SetColorBlock(Button.Button, normal, highlight, pressed, disabled);
+            RuntimeProvider.Instance.SetColorBlock(Button.Component, normal, highlight, pressed, disabled);
 
             Button.OnClick += () => { OnClick?.Invoke(CurrentDataIndex); };
 

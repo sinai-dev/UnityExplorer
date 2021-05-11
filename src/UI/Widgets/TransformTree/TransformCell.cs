@@ -55,13 +55,13 @@ namespace UnityExplorer.UI.Widgets
                 {
                     NameButton.ButtonText.text = $"<color=grey>[{childCount}]</color> {NameButton.ButtonText.text}";
 
-                    ExpandButton.Button.interactable = true;
+                    ExpandButton.Component.interactable = true;
                     ExpandButton.ButtonText.text = cached.Expanded ? "▼" : "►";
                     ExpandButton.ButtonText.color = cached.Expanded ? new Color(0.5f, 0.5f, 0.5f) : new Color(0.3f, 0.3f, 0.3f);
                 }
                 else
                 {
-                    ExpandButton.Button.interactable = false;
+                    ExpandButton.Component.interactable = false;
                     ExpandButton.ButtonText.text = "▪";
                     ExpandButton.ButtonText.color = new Color(0.3f, 0.3f, 0.3f);
                 }
@@ -114,11 +114,11 @@ namespace UnityExplorer.UI.Widgets
             this.spacer = spacerObj.GetComponent<LayoutElement>();
 
             ExpandButton = UIFactory.CreateButton(this.UIRoot, "ExpandButton", "►");
-            UIFactory.SetLayoutElement(ExpandButton.Button.gameObject, minWidth: 15, flexibleWidth: 0, minHeight: 25, flexibleHeight: 0);
+            UIFactory.SetLayoutElement(ExpandButton.Component.gameObject, minWidth: 15, flexibleWidth: 0, minHeight: 25, flexibleHeight: 0);
 
             NameButton = UIFactory.CreateButton(this.UIRoot, "NameButton", "Name", null);
-            UIFactory.SetLayoutElement(NameButton.Button.gameObject, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
-            var nameLabel = NameButton.Button.GetComponentInChildren<Text>();
+            UIFactory.SetLayoutElement(NameButton.Component.gameObject, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
+            var nameLabel = NameButton.Component.GetComponentInChildren<Text>();
             nameLabel.horizontalOverflow = HorizontalWrapMode.Overflow;
             nameLabel.alignment = TextAnchor.MiddleLeft;
 
@@ -126,8 +126,8 @@ namespace UnityExplorer.UI.Widgets
             Color highlight = new Color(0.25f, 0.25f, 0.25f);
             Color pressed = new Color(0.05f, 0.05f, 0.05f);
             Color disabled = new Color(1, 1, 1, 0);
-            RuntimeProvider.Instance.SetColorBlock(ExpandButton.Button, normal, highlight, pressed, disabled);
-            RuntimeProvider.Instance.SetColorBlock(NameButton.Button, normal, highlight, pressed, disabled);
+            RuntimeProvider.Instance.SetColorBlock(ExpandButton.Component, normal, highlight, pressed, disabled);
+            RuntimeProvider.Instance.SetColorBlock(NameButton.Component, normal, highlight, pressed, disabled);
 
             NameButton.OnClick += OnMainButtonClicked;
             ExpandButton.OnClick += OnExpandClicked;

@@ -125,10 +125,16 @@ namespace UnityExplorer.UI.Inspectors
             NameText.text = SignatureHighlighter.Parse(TargetType, true);
 
             string asmText;
-            if (TargetType.Assembly != null && !string.IsNullOrEmpty(TargetType.Assembly.Location))
+
+            try
+            {
                 asmText = Path.GetFileName(TargetType.Assembly.Location);
-            else
+            }
+            catch
+            {
                 asmText = $"{TargetType.Assembly.GetName().Name} <color=grey><i>(in memory)</i></color>";
+            }
+                
             AssemblyText.text = $"<color=grey>Assembly:</color> {asmText}";
 
             // unity helpers
@@ -139,8 +145,8 @@ namespace UnityExplorer.UI.Inspectors
             this.filterInputField.Text = "";
             
             SetFilter("", StaticOnly ? BindingFlags.Static : BindingFlags.Instance);
-            scopeFilterButtons[BindingFlags.Default].Button.gameObject.SetActive(!StaticOnly);
-            scopeFilterButtons[BindingFlags.Instance].Button.gameObject.SetActive(!StaticOnly);
+            scopeFilterButtons[BindingFlags.Default].Component.gameObject.SetActive(!StaticOnly);
+            scopeFilterButtons[BindingFlags.Instance].Component.gameObject.SetActive(!StaticOnly);
 
             foreach (var toggle in memberTypeToggles)
                 toggle.isOn = true;
@@ -199,11 +205,11 @@ namespace UnityExplorer.UI.Inspectors
 
             if (flagsFilter != FlagsFilter)
             {
-                var btn = scopeFilterButtons[FlagsFilter].Button;
+                var btn = scopeFilterButtons[FlagsFilter].Component;
                 RuntimeProvider.Instance.SetColorBlock(btn, disabledButtonColor, disabledButtonColor * 1.3f);
 
                 this.FlagsFilter = flagsFilter;
-                btn = scopeFilterButtons[FlagsFilter].Button;
+                btn = scopeFilterButtons[FlagsFilter].Component;
                 RuntimeProvider.Instance.SetColorBlock(btn, enabledButtonColor, enabledButtonColor * 1.3f);
             }
         }
@@ -371,7 +377,7 @@ namespace UnityExplorer.UI.Inspectors
             // Update button and toggle
 
             var updateButton = UIFactory.CreateButton(rowObj, "UpdateButton", "Update displayed values", new Color(0.22f, 0.28f, 0.22f));
-            UIFactory.SetLayoutElement(updateButton.Button.gameObject, minHeight: 25, minWidth: 175, flexibleWidth: 0);
+            UIFactory.SetLayoutElement(updateButton.Component.gameObject, minHeight: 25, minWidth: 175, flexibleWidth: 0);
             updateButton.OnClick += UpdateDisplayedMembers;
 
             var toggleObj = UIFactory.CreateToggle(rowObj, "AutoUpdateToggle", out autoUpdateToggle, out Text toggleText);
@@ -416,7 +422,7 @@ namespace UnityExplorer.UI.Inspectors
             var color = setAsActive ? enabledButtonColor : disabledButtonColor;
 
             var button = UIFactory.CreateButton(parent, "Filter_" + flags, lbl, color);
-            UIFactory.SetLayoutElement(button.Button.gameObject, minHeight: 25, flexibleHeight: 0, minWidth: 70, flexibleWidth: 0);
+            UIFactory.SetLayoutElement(button.Component.gameObject, minHeight: 25, flexibleHeight: 0, minWidth: 70, flexibleWidth: 0);
             scopeFilterButtons.Add(flags, button);
 
             button.OnClick += () => { SetFilter(flags); };
@@ -478,18 +484,18 @@ namespace UnityExplorer.UI.Inspectors
             if (typeof(Component).IsAssignableFrom(TargetType))
             {
                 ComponentRef = (Component)Target.TryCast(typeof(Component));
-                gameObjectButton.Button.gameObject.SetActive(true);
+                gameObjectButton.Component.gameObject.SetActive(true);
             }
             else
-                gameObjectButton.Button.gameObject.SetActive(false);
+                gameObjectButton.Component.gameObject.SetActive(false);
 
             if (typeof(Texture2D).IsAssignableFrom(TargetType))
             {
                 TextureRef = (Texture2D)Target.TryCast(typeof(Texture2D));
-                textureButton.Button.gameObject.SetActive(true);
+                textureButton.Component.gameObject.SetActive(true);
             }
             else
-                textureButton.Button.gameObject.SetActive(false);
+                textureButton.Component.gameObject.SetActive(false);
         }
 
         private void OnGameObjectButtonClicked()
@@ -538,11 +544,11 @@ namespace UnityExplorer.UI.Inspectors
             UIFactory.SetLayoutElement(unityObjectRow, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
 
             textureButton = UIFactory.CreateButton(unityObjectRow, "TextureButton", "View Texture", new Color(0.2f, 0.2f, 0.2f));
-            UIFactory.SetLayoutElement(textureButton.Button.gameObject, minHeight: 25, minWidth: 150);
+            UIFactory.SetLayoutElement(textureButton.Component.gameObject, minHeight: 25, minWidth: 150);
             textureButton.OnClick += ToggleTextureViewer;
 
             gameObjectButton = UIFactory.CreateButton(unityObjectRow, "GameObjectButton", "Inspect GameObject", new Color(0.2f, 0.2f, 0.2f));
-            UIFactory.SetLayoutElement(gameObjectButton.Button.gameObject, minHeight: 25, minWidth: 170);
+            UIFactory.SetLayoutElement(gameObjectButton.Component.gameObject, minHeight: 25, minWidth: 170);
             gameObjectButton.OnClick += OnGameObjectButtonClicked;
 
             var nameLabel = UIFactory.CreateLabel(unityObjectRow, "NameLabel", "Name:", TextAnchor.MiddleLeft, Color.grey);
@@ -550,14 +556,14 @@ namespace UnityExplorer.UI.Inspectors
 
             nameInput = UIFactory.CreateInputField(unityObjectRow, "NameInput", "untitled");
             UIFactory.SetLayoutElement(nameInput.UIRoot, minHeight: 25, minWidth: 100, flexibleWidth: 1000);
-            nameInput.InputField.readOnly = true;
+            nameInput.Component.readOnly = true;
 
             var instanceLabel = UIFactory.CreateLabel(unityObjectRow, "InstanceLabel", "Instance ID:", TextAnchor.MiddleRight, Color.grey);
             UIFactory.SetLayoutElement(instanceLabel.gameObject, minHeight: 25, minWidth: 100, flexibleWidth: 0);
 
             instanceIdInput = UIFactory.CreateInputField(unityObjectRow, "InstanceIDInput", "ERROR");
             UIFactory.SetLayoutElement(instanceIdInput.UIRoot, minHeight: 25, minWidth: 100, flexibleWidth: 0);
-            instanceIdInput.InputField.readOnly = true;
+            instanceIdInput.Component.readOnly = true;
 
             unityObjectRow.SetActive(false);
 
@@ -591,7 +597,7 @@ namespace UnityExplorer.UI.Inspectors
                 new Color(0.1f, 0.1f, 0.1f));
 
             var saveBtn = UIFactory.CreateButton(saveRowObj, "SaveButton", "Save .PNG", new Color(0.2f, 0.25f, 0.2f));
-            UIFactory.SetLayoutElement(saveBtn.Button.gameObject, minHeight: 25, minWidth: 100, flexibleWidth: 0);
+            UIFactory.SetLayoutElement(saveBtn.Component.gameObject, minHeight: 25, minWidth: 100, flexibleWidth: 0);
             saveBtn.OnClick += OnSaveTextureClicked;
 
             textureSavePathInput = UIFactory.CreateInputField(saveRowObj, "SaveInput", "...");

@@ -116,9 +116,9 @@ namespace UnityExplorer.UI.Panels
             if (NavButtonWanted)
             {
                 if (active)
-                    RuntimeProvider.Instance.SetColorBlock(NavButton.Button, UIManager.enabledButtonColor, UIManager.enabledButtonColor * 1.2f);
+                    RuntimeProvider.Instance.SetColorBlock(NavButton.Component, UIManager.enabledButtonColor, UIManager.enabledButtonColor * 1.2f);
                 else
-                    RuntimeProvider.Instance.SetColorBlock(NavButton.Button, UIManager.disabledButtonColor, UIManager.disabledButtonColor * 1.2f);
+                    RuntimeProvider.Instance.SetColorBlock(NavButton.Component, UIManager.disabledButtonColor, UIManager.disabledButtonColor * 1.2f);
             }
         }
 
@@ -149,8 +149,8 @@ namespace UnityExplorer.UI.Panels
                 // create navbar button
 
                 NavButton = UIFactory.CreateButton(UIManager.NavbarButtonHolder, $"Button_{PanelType}", Name);
-                UIFactory.SetLayoutElement(NavButton.Button.gameObject, minWidth: 118, flexibleWidth: 0);
-                RuntimeProvider.Instance.SetColorBlock(NavButton.Button, UIManager.disabledButtonColor, UIManager.disabledButtonColor * 1.2f);
+                UIFactory.SetLayoutElement(NavButton.Component.gameObject, minWidth: 118, flexibleWidth: 0);
+                RuntimeProvider.Instance.SetColorBlock(NavButton.Component, UIManager.disabledButtonColor, UIManager.disabledButtonColor * 1.2f);
                 NavButton.OnClick += () =>
                 {
                     UIManager.TogglePanel(PanelType);
@@ -187,8 +187,8 @@ namespace UnityExplorer.UI.Panels
             UIFactory.SetLayoutElement(closeHolder, minHeight: 25, flexibleHeight: 0, minWidth: 30, flexibleWidth: 9999);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(closeHolder, false, false, true, true, 0, childAlignment: TextAnchor.MiddleRight);
             var closeBtn = UIFactory.CreateButton(closeHolder, "CloseButton", "—");
-            UIFactory.SetLayoutElement(closeBtn.Button.gameObject, minHeight: 25, minWidth: 25, flexibleWidth: 0);
-            RuntimeProvider.Instance.SetColorBlock(closeBtn.Button, new Color(0.33f, 0.32f, 0.31f));
+            UIFactory.SetLayoutElement(closeBtn.Component.gameObject, minHeight: 25, minWidth: 25, flexibleWidth: 0);
+            RuntimeProvider.Instance.SetColorBlock(closeBtn.Component, new Color(0.33f, 0.32f, 0.31f));
 
             closeBtn.OnClick += () =>
             {

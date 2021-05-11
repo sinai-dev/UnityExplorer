@@ -104,7 +104,7 @@ namespace UnityExplorer.UI.IValues
         {
             base.OnBorrowed(owner);
 
-            applyButton.Button.gameObject.SetActive(owner.CanWrite);
+            applyButton.Component.gameObject.SetActive(owner.CanWrite);
         }
 
         // Setting value from owner to this
@@ -190,7 +190,7 @@ namespace UnityExplorer.UI.IValues
             var fitter = input.UIRoot.AddComponent<ContentSizeFitter>();
             fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
-            input.InputField.lineType = InputField.LineType.MultiLineNewline;
+            input.Component.lineType = InputField.LineType.MultiLineNewline;
             inputFields.Add(input);
         }
 
@@ -203,7 +203,7 @@ namespace UnityExplorer.UI.IValues
             UIFactory.SetLayoutElement(UIRoot, minHeight: 25, flexibleWidth: 9999);
 
             applyButton = UIFactory.CreateButton(UIRoot, "ApplyButton", "Apply", new Color(0.2f, 0.27f, 0.2f));
-            UIFactory.SetLayoutElement(applyButton.Button.gameObject, minHeight: 25, minWidth: 175);
+            UIFactory.SetLayoutElement(applyButton.Component.gameObject, minHeight: 25, minWidth: 175);
             applyButton.OnClick += OnApplyClicked;
 
             return UIRoot;

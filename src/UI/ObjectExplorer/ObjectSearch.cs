@@ -232,7 +232,7 @@ namespace UnityExplorer.UI.ObjectExplorer
             // Search button
 
             var searchButton = UIFactory.CreateButton(uiRoot, "SearchButton", "Search");
-            UIFactory.SetLayoutElement(searchButton.Button.gameObject, minHeight: 25, flexibleHeight: 0);
+            UIFactory.SetLayoutElement(searchButton.Component.gameObject, minHeight: 25, flexibleHeight: 0);
             searchButton.OnClick += DoSearch;
 
             // Results count label

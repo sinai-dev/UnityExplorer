@@ -12,7 +12,7 @@ namespace UnityExplorer.UI
     {
         public InputFieldRef(InputField InputField) 
         { 
-            this.InputField = InputField;
+            this.Component = InputField;
             Rect = InputField.GetComponent<RectTransform>();
             PlaceholderText = InputField.placeholder.TryCast<Text>();
             InputField.onValueChanged.AddListener(OnInputChanged);
@@ -20,17 +20,17 @@ namespace UnityExplorer.UI
 
         public event Action<string> OnValueChanged;
 
-        public InputField InputField;
+        public InputField Component;
         public Text PlaceholderText;
         public RectTransform Rect;
 
         public string Text
         {
-            get => InputField.text;
-            set => InputField.text = value;
+            get => Component.text;
+            set => Component.text = value;
         }
 
-        public TextGenerator TextGenerator => InputField.cachedInputTextGenerator;
+        public TextGenerator TextGenerator => Component.cachedInputTextGenerator;
         public bool ReachedMaxVerts => TextGenerator.vertexCount >= UIManager.MAX_TEXT_VERTS;
 
         private bool updatedWanted;
@@ -46,12 +46,12 @@ namespace UnityExplorer.UI
             {
                 LayoutRebuilder.MarkLayoutForRebuild(Rect);
 
-                OnValueChanged?.Invoke(InputField.text);
+                OnValueChanged?.Invoke(Component.text);
                 updatedWanted = false;
             }
         }
 
-        public override GameObject UIRoot => InputField.gameObject;
+        public override GameObject UIRoot => Component.gameObject;
 
         public override void ConstructUI(GameObject parent)
         {

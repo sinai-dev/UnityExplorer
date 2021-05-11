@@ -44,7 +44,7 @@ namespace UnityExplorer.UI
         public static InspectorPanel Inspector { get; private set; }
         public static CSConsolePanel CSharpConsole { get; private set; }
 
-        public static AutoCompleter AutoCompleter { get; private set; }
+        public static AutoCompleteModal AutoCompleter { get; private set; }
 
         // assets
         internal static Font ConsoleFont { get; private set; }
@@ -167,7 +167,7 @@ namespace UnityExplorer.UI
 
             //InspectUnderMouse.ConstructUI();
 
-            AutoCompleter = new AutoCompleter();
+            AutoCompleter = new AutoCompleteModal();
             AutoCompleter.ConstructUI();
 
             Explorer = new ObjectExplorerPanel();
@@ -278,8 +278,8 @@ namespace UnityExplorer.UI
             // Hide menu button
 
             var closeBtn = UIFactory.CreateButton(navbarPanel, "CloseButton", ConfigManager.Main_Menu_Toggle.Value.ToString());
-            UIFactory.SetLayoutElement(closeBtn.Button.gameObject, minHeight: 25, minWidth: 80, flexibleWidth: 0);
-            RuntimeProvider.Instance.SetColorBlock(closeBtn.Button, new Color(0.63f, 0.32f, 0.31f),
+            UIFactory.SetLayoutElement(closeBtn.Component.gameObject, minHeight: 25, minWidth: 80, flexibleWidth: 0);
+            RuntimeProvider.Instance.SetColorBlock(closeBtn.Component, new Color(0.63f, 0.32f, 0.31f),
                 new Color(0.81f, 0.25f, 0.2f), new Color(0.6f, 0.18f, 0.16f));
 
             ConfigManager.Main_Menu_Toggle.OnValueChanged += (KeyCode val) => { closeBtn.ButtonText.text = val.ToString(); };

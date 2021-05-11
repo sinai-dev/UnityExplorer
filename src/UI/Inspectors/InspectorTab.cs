@@ -26,9 +26,9 @@ namespace UnityExplorer.UI.Inspectors
         public void SetTabColor(bool active)
         {
             if (active)
-                RuntimeProvider.Instance.SetColorBlock(TabButton.Button, _enabledTabColor, _enabledTabColor * 1.2f);
+                RuntimeProvider.Instance.SetColorBlock(TabButton.Component, _enabledTabColor, _enabledTabColor * 1.2f);
             else
-                RuntimeProvider.Instance.SetColorBlock(TabButton.Button, _disabledTabColor, _disabledTabColor * 1.2f);
+                RuntimeProvider.Instance.SetColorBlock(TabButton.Component, _disabledTabColor, _disabledTabColor * 1.2f);
         }
 
         public GameObject CreateContent(GameObject parent)
@@ -40,15 +40,15 @@ namespace UnityExplorer.UI.Inspectors
 
             TabButton = UIFactory.CreateButton(UIRoot, "TabButton", "");
 
-            UIFactory.SetLayoutElement(TabButton.Button.gameObject, minWidth: 165, flexibleWidth: 0);
+            UIFactory.SetLayoutElement(TabButton.Component.gameObject, minWidth: 165, flexibleWidth: 0);
 
-            TabText = TabButton.Button.GetComponentInChildren<Text>();
+            TabText = TabButton.Component.GetComponentInChildren<Text>();
             TabText.horizontalOverflow = HorizontalWrapMode.Overflow;
             TabText.alignment = TextAnchor.MiddleLeft;
 
             CloseButton = UIFactory.CreateButton(UIRoot, "CloseButton", "X", new Color(0.2f, 0.2f, 0.2f, 1));
-            UIFactory.SetLayoutElement(CloseButton.Button.gameObject, minWidth: 20, flexibleWidth: 0);
-            var closeBtnText = CloseButton.Button.GetComponentInChildren<Text>();
+            UIFactory.SetLayoutElement(CloseButton.Component.gameObject, minWidth: 20, flexibleWidth: 0);
+            var closeBtnText = CloseButton.Component.GetComponentInChildren<Text>();
             closeBtnText.color = Color.red;
 
             return UIRoot;

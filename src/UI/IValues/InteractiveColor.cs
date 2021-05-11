@@ -26,12 +26,12 @@ namespace UnityExplorer.UI.IValues
         {
             base.OnBorrowed(owner);
 
-            m_applyButton.Button.gameObject.SetActive(owner.CanWrite);
+            m_applyButton.Component.gameObject.SetActive(owner.CanWrite);
 
             foreach (var slider in m_sliders)
                 slider.interactable = owner.CanWrite;
             foreach (var input in m_inputs)
-                input.InputField.readOnly = !owner.CanWrite;
+                input.Component.readOnly = !owner.CanWrite;
         }
 
         // owner setting value to this
@@ -158,7 +158,7 @@ namespace UnityExplorer.UI.IValues
             // apply button
 
             m_applyButton = UIFactory.CreateButton(horiGroup, "ApplyButton", "Apply", new Color(0.2f, 0.26f, 0.2f));
-            UIFactory.SetLayoutElement(m_applyButton.Button.gameObject, minHeight: 25, minWidth: 90);
+            UIFactory.SetLayoutElement(m_applyButton.Component.gameObject, minHeight: 25, minWidth: 90);
             m_applyButton.OnClick += SetValueToOwner;
 
             // sliders / inputs

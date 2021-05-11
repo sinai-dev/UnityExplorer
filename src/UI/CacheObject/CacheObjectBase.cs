@@ -342,17 +342,17 @@ namespace UnityExplorer.UI.CacheObject
             if (args.inputActive)
             {
                 cell.InputField.Text = ParseUtility.ToStringForInput(Value, LastValueType);
-                cell.InputField.InputField.readOnly = !CanWrite;
+                cell.InputField.Component.readOnly = !CanWrite;
             }
 
             // apply for bool and numbers
-            cell.ApplyButton.Button.gameObject.SetActive(args.applyActive);
+            cell.ApplyButton.Component.gameObject.SetActive(args.applyActive);
 
             // Inspect button only if last value not null.
-            cell.InspectButton.Button.gameObject.SetActive(args.inspectActive && !LastValueWasNull);
+            cell.InspectButton.Component.gameObject.SetActive(args.inspectActive && !LastValueWasNull);
 
             // allow IValue for null strings though
-            cell.SubContentButton.Button.gameObject.SetActive(args.subContentButtonActive && (!LastValueWasNull || State == ValueState.String));
+            cell.SubContentButton.Component.gameObject.SetActive(args.subContentButtonActive && (!LastValueWasNull || State == ValueState.String));
         }
 
         // CacheObjectCell Apply

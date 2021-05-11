@@ -262,7 +262,7 @@ namespace UnityExplorer.UI
 
             var btn = CreateButton(parent, name, text, colors);
 
-            RuntimeProvider.Instance.SetColorBlock(btn.Button, normalColor, normalColor * 1.2f, normalColor * 0.7f);
+            RuntimeProvider.Instance.SetColorBlock(btn.Component, normalColor, normalColor * 1.2f, normalColor * 0.7f);
 
             return btn;
         }
@@ -893,12 +893,12 @@ namespace UnityExplorer.UI
 
             var inputField = CreateInputField(viewportObj, "InputField", placeHolderText);
             var content = inputField.UIRoot;
-            var textComp = inputField.InputField.textComponent;
+            var textComp = inputField.Component.textComponent;
             textComp.alignment = TextAnchor.UpperLeft;
             textComp.fontSize = fontSize;
             textComp.horizontalOverflow = HorizontalWrapMode.Wrap;
-            inputField.InputField.lineType = InputField.LineType.MultiLineNewline;
-            inputField.InputField.targetGraphic.color = color;
+            inputField.Component.lineType = InputField.LineType.MultiLineNewline;
+            inputField.Component.targetGraphic.color = color;
             inputField.PlaceholderText.alignment = TextAnchor.UpperLeft;
             inputField.PlaceholderText.fontSize = fontSize;
             inputField.PlaceholderText.horizontalOverflow = HorizontalWrapMode.Wrap;
@@ -911,8 +911,8 @@ namespace UnityExplorer.UI
             contentRect.anchorMax = new Vector2(1, 1);
             contentRect.offsetMin = new Vector2(2, 0);
             contentRect.offsetMax = new Vector2(2, 0);
-            inputField.InputField.lineType = InputField.LineType.MultiLineNewline;
-            inputField.InputField.targetGraphic.color = color;
+            inputField.Component.lineType = InputField.LineType.MultiLineNewline;
+            inputField.Component.targetGraphic.color = color;
 
             // Slider
 

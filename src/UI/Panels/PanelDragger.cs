@@ -29,11 +29,11 @@ namespace UnityExplorer.UI.Panels
             Instances.Sort((a, b) => b.Panel.GetSiblingIndex().CompareTo(a.Panel.GetSiblingIndex()));
 
             // move AutoCompleter to bottom
-            if (AutoCompleter.Instance != null)
+            if (AutoCompleteModal.Instance != null)
             {
-                var idx = Instances.IndexOf(AutoCompleter.Instance.Dragger);
+                var idx = Instances.IndexOf(AutoCompleteModal.Instance.Dragger);
                 Instances.RemoveAt(idx);
-                Instances.Insert(0, AutoCompleter.Instance.Dragger);
+                Instances.Insert(0, AutoCompleteModal.Instance.Dragger);
             }
         }
 

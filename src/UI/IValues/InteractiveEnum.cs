@@ -191,7 +191,7 @@ namespace UnityExplorer.UI.IValues
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(hori, false, false, true, true, 2);
 
             var applyButton = UIFactory.CreateButton(hori, "ApplyButton", "Apply", new Color(0.2f, 0.27f, 0.2f));
-            UIFactory.SetLayoutElement(applyButton.Button.gameObject, minHeight: 25, minWidth: 100);
+            UIFactory.SetLayoutElement(applyButton.Component.gameObject, minHeight: 25, minWidth: 100);
             applyButton.OnClick += OnApplyClicked;
 
             var dropdownObj = UIFactory.CreateDropdown(hori, out enumDropdown, "not set", 14, null);

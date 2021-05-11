@@ -26,8 +26,8 @@ namespace UnityExplorer.UI.IValues
         {
             base.OnBorrowed(owner);
 
-            inputField.InputField.readOnly = !owner.CanWrite;
-            ApplyButton.Button.gameObject.SetActive(owner.CanWrite);
+            inputField.Component.readOnly = !owner.CanWrite;
+            ApplyButton.Component.gameObject.SetActive(owner.CanWrite);
 
             SaveFilePath.Text = Path.Combine(ConfigManager.Default_Output_Path.Value, "untitled.txt");
         }
@@ -65,11 +65,7 @@ namespace UnityExplorer.UI.IValues
         private void OnInputChanged(string input)
         {
             EditedValue = input;
-            
-            if (IsStringTooLong(EditedValue))
-            {
-                ExplorerCore.LogWarning("InputField length has reached maximum character count!");
-            }
+            SaveFileRow.SetActive(IsStringTooLong(EditedValue));
         }
 
         private void OnSaveFileClicked()
@@ -109,7 +105,7 @@ namespace UnityExplorer.UI.IValues
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(horizRow, false, false, true, true, 4);
 
             var saveButton = UIFactory.CreateButton(horizRow, "SaveButton", "Save file");
-            UIFactory.SetLayoutElement(saveButton.Button.gameObject, minHeight: 25, minWidth: 100, flexibleWidth: 0);
+            UIFactory.SetLayoutElement(saveButton.Component.gameObject, minHeight: 25, minWidth: 100, flexibleWidth: 0);
             saveButton.OnClick += OnSaveFileClicked;
 
             SaveFilePath = UIFactory.CreateInputField(horizRow, "SaveInput", "...");
@@ -118,13 +114,13 @@ namespace UnityExplorer.UI.IValues
             // Main Input / apply
 
             ApplyButton = UIFactory.CreateButton(UIRoot, "ApplyButton", "Apply", new Color(0.2f, 0.27f, 0.2f));
-            UIFactory.SetLayoutElement(ApplyButton.Button.gameObject, minHeight: 25, minWidth: 100, flexibleWidth: 0);
+            UIFactory.SetLayoutElement(ApplyButton.Component.gameObject, minHeight: 25, minWidth: 100, flexibleWidth: 0);
             ApplyButton.OnClick += OnApplyClicked;
 
             inputField = UIFactory.CreateInputField(UIRoot, "InputField", "empty");
             inputField.UIRoot.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             UIFactory.SetLayoutElement(inputField.UIRoot, minHeight: 25, flexibleHeight: 500, flexibleWidth: 9999);
-            inputField.InputField.lineType = InputField.LineType.MultiLineNewline;
+            inputField.Component.lineType = InputField.LineType.MultiLineNewline;
             inputField.OnValueChanged += OnInputChanged;
 
             return UIRoot;
