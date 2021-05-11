@@ -1,9 +1,9 @@
-[submodule "lib/HarmonyX"]
-	path = lib/HarmonyX
-	url = https://github.com/BepInEx/HarmonyX
-[submodule "lib/Il2CppAssemblyUnhollower"]
-	path = lib/Il2CppAssemblyUnhollower
-	url = https://github.com/BepInEx/Il2CppAssemblyUnhollower
 [submodule "lib/mcs-unity"]
 	path = lib/mcs-unity
 	url = https://github.com/sinai-dev/mcs-unity
+[submodule "Il2CppAssemblyUnhollower"]
+	path = Il2CppAssemblyUnhollower
+	url = https://github.com/knah/Il2CppAssemblyUnhollower
+[submodule "HarmonyX"]
+	path = lib/HarmonyX
+	url = https://github.com/BepInEx/HarmonyX
