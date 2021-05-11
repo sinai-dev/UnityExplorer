@@ -4,6 +4,6 @@
 [submodule "lib/Il2CppAssemblyUnhollower"]
 	path = lib/Il2CppAssemblyUnhollower
 	url = git@github.com:BepInEx/Il2CppAssemblyUnhollower.git
-[submodule "lib/mcs"]
-	path = lib/mcs
-	url = git@github.com:sinai-dev/mcs-unity.git
+[submodule "lib/mcs-unity"]
+	path = lib/mcs-unity
+	url = https://github.com/sinai-dev/mcs-unity
