@@ -9,16 +9,12 @@ using UnityExplorer.Core;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Input;
 using UnityExplorer.Loader.ML;
-
-// TEMPORARY - JUST REQUIRED UNTIL ML 0.3.1 RELEASED
-using Harmony;
-
-// ML 0.3.1 SUPPORT
-//using HarmonyLib;
+using HarmonyLib;
 
 [assembly: MelonInfo(typeof(ExplorerMelonMod), ExplorerCore.NAME, ExplorerCore.VERSION, ExplorerCore.AUTHOR)]
 [assembly: MelonGame(null, null)]
-//[assembly: MelonPlatformDomain(MelonPlatformDomainAttribute.CompatibleDomains.UNIVERSAL)]
+[assembly: MelonPlatformDomain(MelonPlatformDomainAttribute.CompatibleDomains.UNIVERSAL)]
+[assembly: MelonColor(ConsoleColor.DarkCyan)]
 
 namespace UnityExplorer
 {
@@ -36,9 +32,6 @@ namespace UnityExplorer
         public Action<object> OnLogWarning => MelonLogger.Warning;
         public Action<object> OnLogError   => MelonLogger.Error;
 
-        // TEMPORARY - JUST REQUIRED UNTIL ML 0.3.1 RELEASED
-        public Harmony.HarmonyInstance HarmonyInstance => Instance.Harmony;
-
         public override void OnApplicationStart()
         {
             Instance = this;
@@ -46,11 +39,6 @@ namespace UnityExplorer
 
             ExplorerCore.Init(this);
         }
-
-        //public override void OnUpdate()
-        //{
-        //    ExplorerCore.Update();
-        //}
 
         public void SetupCursorPatches()
         {

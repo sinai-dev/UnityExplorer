@@ -10,7 +10,6 @@
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
-    <OutputPath>..\Release\UnityExplorer.MelonLoader.Il2Cpp\</OutputPath>
     <DefineConstants>
     </DefineConstants>
     <IsCpp>false</IsCpp>
@@ -114,7 +113,7 @@
   <!-- MelonLoader refs -->
   <ItemGroup Condition="'$(IsMelonLoader)'=='true'">
     <Reference Include="MelonLoader">
-      <HintPath>..\lib\MelonLoader.dll</HintPath>
+      <HintPath>..\lib\MelonLoader\MelonLoader.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

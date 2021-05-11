@@ -59,40 +59,25 @@ namespace UnityExplorer
         // Default delay is 1 second which is usually enough.
         private static IEnumerator SetupCoroutine()
         {
-            float f = Time.realtimeSinceStartup;
-            float delay = ConfigManager.Startup_Delay_Time.Value;
-            while (Time.realtimeSinceStartup - f < delay)
-                yield return null;
+            yield return null;
 
-            Log($"Creating UI, after delay of {delay} second(s).");
+            float start = Time.realtimeSinceStartup;
+            float delay = ConfigManager.Startup_Delay_Time.Value;
+
+            while (delay > 0)
+            {
+                float diff = Math.Max(Time.deltaTime, Time.realtimeSinceStartup - start);
+                delay -= diff;
+                yield return null;
+            }
+
+            Log($"Creating UI, after delay of {ConfigManager.Startup_Delay_Time.Value} second(s).");
 
             UIManager.InitUI();
 
-            // TEMP DEBUG TEST FOR TRANSFORM TREE
-
-            var stressTest = new GameObject("StressTest");
-            for (int i = 0; i < 100; i++)
-            {
-                var obj = new GameObject($"Parent_{i}");
-                obj.transform.parent = stressTest.transform;
-                for (int j = 0; j < 100; j++)
-                {
-                    var obj2 = new GameObject($"Child_{j}");
-                    obj2.transform.parent = obj.transform;
-                }
-            }
-
-            // long name object
-            new GameObject(new string('#', 500));
-
             // END
 
-            //InspectorManager.Inspect(UIManager.CanvasRoot.gameObject.GetComponent<GraphicRaycaster>());
-            InspectorManager.Inspect(typeof(TestClass));
-            //InspectorManager.InspectType(typeof(ReflectionUtility));
-
-            //var tex = Resources.FindObjectsOfTypeAll<Texture2D>()[0];
-            //InspectorManager.Inspect(tex);
+            //InspectorManager.Inspect(typeof(TestClass));
         }
 
         /// <summary>

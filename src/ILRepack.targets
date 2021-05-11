@@ -12,6 +12,8 @@
             <ReferenceFolders Include="..\lib\HarmonyX\Harmony\bin\Release\net35\" />
             <ReferenceFolders Include="..\lib\BepInEx.6.IL2CPP\" />
             <ReferenceFolders Include="..\lib\BepInEx.6.Mono\" />
+            <ReferenceFolders Include="..\lib\BepInEx.5\" />
+            <ReferenceFolders Include="..\lib\MelonLoader\" />
         </ItemGroup>
         <ILRepack
           Parallel="true"
