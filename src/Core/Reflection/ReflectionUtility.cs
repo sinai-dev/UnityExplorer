@@ -372,39 +372,33 @@ namespace UnityExplorer
             if (!methodInfos.ContainsKey(type))
                 methodInfos.Add(type, new Dictionary<string, MethodInfo>());
 
-            var sig = methodName;
-
             if (cacheAmbiguous)
             {
-                sig += "|";
+                methodName += "|";
                 foreach (var arg in argumentTypes)
-                    sig += arg.FullName + ",";
-            }
-            else
-            {
-                sig += "|" + (argumentTypes?.Length.ToString() ?? "null");
+                    methodName += arg.FullName + ",";
             }
 
             try
             {
-                if (!methodInfos[type].ContainsKey(sig))
+                if (!methodInfos[type].ContainsKey(methodName))
                 {
                     if (argumentTypes != null)
-                        methodInfos[type].Add(sig, type.GetMethod(methodName, FLAGS, null, argumentTypes, null));
+                        methodInfos[type].Add(methodName, type.GetMethod(methodName, FLAGS, null, argumentTypes, null));
                     else
-                        methodInfos[type].Add(sig, type.GetMethod(methodName, FLAGS));
+                        methodInfos[type].Add(methodName, type.GetMethod(methodName, FLAGS));
                 }
 
-                return methodInfos[type][sig];
+                return methodInfos[type][methodName];
             }
             catch (AmbiguousMatchException)
             {
-                ExplorerCore.LogWarning($"AmbiguousMatchException trying to get method '{sig}'");
+                ExplorerCore.LogWarning($"AmbiguousMatchException trying to get method '{methodName}'");
                 return null;
             }
             catch (Exception e)
             {
-                ExplorerCore.LogWarning($"{e.GetType()} trying to get method '{sig}': {e.Message}\r\n{e.StackTrace}");
+                ExplorerCore.LogWarning($"{e.GetType()} trying to get method '{methodName}': {e.Message}\r\n{e.StackTrace}");
                 return null;
             }
         }
