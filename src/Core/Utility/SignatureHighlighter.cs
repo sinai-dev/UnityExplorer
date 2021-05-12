@@ -44,6 +44,7 @@ namespace UnityExplorer
         public static readonly Color StringOrange = new Color(0.83f, 0.61f, 0.52f);
         public static readonly Color EnumGreen = new Color(0.57f, 0.76f, 0.43f);
         public static readonly Color KeywordBlue = new Color(0.3f, 0.61f, 0.83f);
+        public static readonly string keywordBlueHex = KeywordBlue.ToHex();
         public static readonly Color NumberGreen = new Color(0.71f, 0.8f, 0.65f);
 
         internal static string GetClassColor(Type type)

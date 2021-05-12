@@ -338,9 +338,9 @@ namespace UnityExplorer.UI.CacheObject
         // Blacklists
         private static readonly HashSet<string> bl_typeAndMember = new HashSet<string>
         {
-            // these cause a crash in IL2CPP
+            // these can cause a crash in IL2CPP
 #if CPP
-            //"Type.DeclaringMethod",
+            "Type.DeclaringMethod",
             "Rigidbody2D.Cast",
             "Collider2D.Cast",
             "Collider2D.Raycast",
@@ -363,6 +363,7 @@ namespace UnityExplorer.UI.CacheObject
             "Component.renderer",
             "Component.rigidbody",
             "Component.rigidbody2D",
+            "Light.flare",
         };
         private static readonly HashSet<string> bl_methodNameStartsWith = new HashSet<string>
         {

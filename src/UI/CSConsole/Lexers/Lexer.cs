@@ -2,7 +2,7 @@
 using UnityEngine;
 using System.Linq;
 
-namespace UnityExplorer.UI.CSharpConsole.Lexers
+namespace UnityExplorer.UI.CSConsole.Lexers
 {
     public abstract class Lexer
     {

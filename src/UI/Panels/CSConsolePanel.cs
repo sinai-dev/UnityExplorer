@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityExplorer.Core.Config;
-using UnityExplorer.UI.CSharpConsole;
+using UnityExplorer.UI.CSConsole;
 using UnityExplorer.UI.Utility;
 
 namespace UnityExplorer.UI.Panels
@@ -44,7 +44,7 @@ namespace UnityExplorer.UI.Panels
         {
             base.Update();
 
-            CSConsole.Update();
+            ConsoleController.Update();
         }
 
         // Saving
@@ -111,9 +111,9 @@ namespace UnityExplorer.UI.Panels
 
             int fontSize = 16;
 
-            var inputObj = UIFactory.CreateSrollInputField(this.content, "ConsoleInput", CSConsole.STARTUP_TEXT, out var inputScroller, fontSize);
+            var inputObj = UIFactory.CreateSrollInputField(this.content, "ConsoleInput", ConsoleController.STARTUP_TEXT, out var inputScroller, fontSize);
             InputScroll = inputScroller;
-            CSConsole.defaultInputFieldAlpha = Input.Component.selectionColor.a;
+            ConsoleController.defaultInputFieldAlpha = Input.Component.selectionColor.a;
             Input.OnValueChanged += InvokeOnValueChanged;
 
             InputText = Input.Component.textComponent;

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace UnityExplorer.UI.CSharpConsole.Lexers
+namespace UnityExplorer.UI.CSConsole.Lexers
 {
     public class NumberLexer : Lexer
     {

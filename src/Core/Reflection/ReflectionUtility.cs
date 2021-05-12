@@ -37,7 +37,23 @@ namespace UnityExplorer
 
         /// <summary>Key: Type.FullName</summary>
         public static readonly SortedDictionary<string, Type> AllTypes = new SortedDictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
-        private static readonly SortedSet<string> allTypeNames = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+        //private static readonly SortedSet<string> allTypeNames = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        private static string[] allTypesArray;
+        private static string[] GetTypeNameArray()
+        {
+            if (allTypesArray == null || allTypesArray.Length != AllTypes.Count)
+            {
+                allTypesArray = new string[AllTypes.Count];
+                int i = 0;
+                foreach (var name in AllTypes.Keys)
+                {
+                    allTypesArray[i] = name;
+                    i++;
+                }
+            }
+            return allTypesArray;
+        }
 
         private static void SetupTypeCache()
         {
@@ -64,7 +80,7 @@ namespace UnityExplorer
                 else
                 {
                     AllTypes.Add(type.FullName, type);
-                    allTypeNames.Add(type.FullName);
+                    //allTypeNames.Add(type.FullName);
                 }
 
                 OnTypeLoaded?.Invoke(type);
@@ -211,14 +227,24 @@ namespace UnityExplorer
         /// </summary>
         /// <param name="baseType">The base type, which can optionally be abstract / interface.</param>
         /// <returns>All implementations of the type in the current AppDomain.</returns>
-        public static HashSet<Type> GetImplementationsOf(Type baseType, bool allowAbstract, bool allowGeneric)
+        public static HashSet<Type> GetImplementationsOf(Type baseType, bool allowAbstract, bool allowGeneric, bool allowRecursive = true)
         {
-            var key = GetImplementationKey(baseType); //baseType.FullName;
+            var key = GetImplementationKey(baseType);
 
+            int count = AllTypes.Count;
+            HashSet<Type> ret;
             if (!baseType.IsGenericParameter)
-                return GetImplementations(key, baseType, allowAbstract, allowGeneric);
+                ret = GetImplementations(key, baseType, allowAbstract, allowGeneric);
             else
-                return GetGenericParameterImplementations(key, baseType, allowAbstract, allowGeneric);
+                ret = GetGenericParameterImplementations(key, baseType, allowAbstract, allowGeneric);
+
+            // types were resolved during the parse, do it again if we're not already rebuilding.
+            if (allowRecursive && AllTypes.Count != count)
+            {
+                ret = GetImplementationsOf(baseType, allowAbstract, allowGeneric, false);
+            }
+
+            return ret;
         }
 
         private static HashSet<Type> GetImplementations(string key, Type baseType, bool allowAbstract, bool allowGeneric)
@@ -226,8 +252,10 @@ namespace UnityExplorer
             if (!typeInheritance.ContainsKey(key))
             {
                 var set = new HashSet<Type>();
-                foreach (var name in allTypeNames)
+                var names = GetTypeNameArray();
+                for (int i = 0; i < names.Length; i++)
                 {
+                    var name = names[i];
                     try
                     {
                         var type = AllTypes[name];
@@ -263,8 +291,10 @@ namespace UnityExplorer
             {
                 var set = new HashSet<Type>();
 
-                foreach (var name in allTypeNames)
+                var names = GetTypeNameArray();
+                for (int i = 0; i < names.Length; i++)
                 {
+                    var name = names[i];
                     try
                     {
                         var type = AllTypes[name];

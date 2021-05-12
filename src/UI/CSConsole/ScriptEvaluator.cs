@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using Mono.CSharp;
 
 // Thanks to ManlyMarco for this
 
-namespace UnityExplorer.Core.CSharp
+namespace UnityExplorer.UI.CSConsole
 {
     public class ScriptEvaluator : Evaluator, IDisposable
     {

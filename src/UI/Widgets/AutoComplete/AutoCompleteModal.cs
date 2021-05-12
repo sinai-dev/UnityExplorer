@@ -12,13 +12,13 @@ using UnityExplorer.UI.Panels;
 
 namespace UnityExplorer.UI.Widgets.AutoComplete
 {
+    // Shared modal panel for "AutoComplete" suggestions.
+    // A data source implements ISuggestionProvider and uses TakeOwnership and ReleaseOwnership
+    // for control, and SetSuggestions to set the actual suggestion data.
+
     public class AutoCompleteModal : UIPanel
     {
-        // Static
-
         public static AutoCompleteModal Instance => UIManager.AutoCompleter;
-
-        // Instance
 
         public override string Name => "AutoCompleter";
         public override UIManager.Panels PanelType => UIManager.Panels.AutoCompleter;
@@ -154,14 +154,14 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
             if (CurrentHandler.AnchorToCaretPosition)
             {
-                var textGen = input.Component.textComponent.cachedTextGeneratorForLayout;
+                var textGen = input.Component.cachedInputTextGenerator;
                 int caretIdx = Math.Max(0, Math.Min(textGen.characterCount - 1, input.Component.caretPosition));
 
                 // normalize the caret horizontal position
                 Vector3 caretPos = textGen.characters[caretIdx].cursorPos;
-                caretPos += new Vector3(input.Rect.rect.width * 0.5f, 0, 0);
                 // transform to world point
                 caretPos = input.UIRoot.transform.TransformPoint(caretPos);
+                caretPos += new Vector3(input.Rect.rect.width * 0.5f, -(input.Rect.rect.height * 0.5f), 0);
 
                 uiRoot.transform.position = new Vector3(caretPos.x + 10, caretPos.y - 30, 0);
             }

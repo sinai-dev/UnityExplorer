@@ -216,7 +216,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Config\InternalConfigHandler.cs" />
-    <Compile Include="Core\Runtime\Mono\SortedSet.cs" />
     <Compile Include="UI\CSConsole\CSAutoCompleter.cs" />
     <Compile Include="UI\CSConsole\LexerBuilder.cs" />
     <Compile Include="UI\CSConsole\Lexers\CommentLexer.cs" />
@@ -234,7 +233,7 @@
     <Compile Include="Core\Utility\MiscUtility.cs" />
     <Compile Include="Core\Utility\ParseUtility.cs" />
     <Compile Include="UI\Inspectors\TODO_InspectUnderMouse.cs" />
-    <Compile Include="UI\CSConsole\CSConsole.cs" />
+    <Compile Include="UI\CSConsole\ConsoleController.cs" />
     <Compile Include="UI\CacheObject\CacheField.cs" />
     <Compile Include="UI\CacheObject\CacheKeyValuePair.cs" />
     <Compile Include="UI\CacheObject\CacheListEntry.cs" />

@@ -1,12 +1,13 @@
-﻿using System;
+﻿using Mono.CSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.UI.CSharpConsole.Lexers;
+using UnityExplorer.UI.CSConsole.Lexers;
 
-namespace UnityExplorer.UI.CSharpConsole
+namespace UnityExplorer.UI.CSConsole
 {
     public struct MatchInfo
     {
@@ -20,19 +21,22 @@ namespace UnityExplorer.UI.CSharpConsole
         #region Core and initialization
 
         public const char WHITESPACE = ' ';
-        public const char INDENT_OPEN = '{';
-        public const char INDENT_CLOSE = '}';
+        public readonly HashSet<char> IndentOpenChars = new HashSet<char> { '{', '(' };
+        public readonly HashSet<char> IndentCloseChars = new HashSet<char> { '}', ')' };
 
         private readonly Lexer[] lexers;
         private readonly HashSet<char> delimiters = new HashSet<char>();
+
+        private readonly StringLexer stringLexer = new StringLexer();
+        private readonly CommentLexer commentLexer = new CommentLexer();
 
         public LexerBuilder()
         {
             lexers = new Lexer[]
             {
-                new CommentLexer(),
+                commentLexer,
+                stringLexer,
                 new SymbolLexer(),
-                new StringLexer(),
                 new NumberLexer(),
                 new KeywordLexer(),
             };
@@ -49,14 +53,22 @@ namespace UnityExplorer.UI.CSharpConsole
 
         #endregion
 
-        public int LastCommittedIndex { get; private set; }
-        public int LookaheadIndex { get; private set; }
+        /// <summary>The last committed index for a match or no-match. Starts at -1 for a new parse.</summary>
+        public int CommittedIndex { get; private set; }
+        /// <summary>The index of the character we are currently parsing, at minimum it will be CommittedIndex + 1.</summary>
+        public int CurrentIndex { get; private set; }
 
-        public char Current => !EndOfInput ? currentInput[LookaheadIndex] : WHITESPACE;
-        public char Previous => LookaheadIndex >= 1 ? currentInput[LookaheadIndex - 1] : WHITESPACE;
+        /// <summary>The current character we are parsing, determined by CurrentIndex.</summary>
+        public char Current => !EndOfInput ? currentInput[CurrentIndex] : WHITESPACE;
+        /// <summary>The previous character (CurrentIndex - 1), or whitespace if no previous character.</summary>
+        public char Previous => CurrentIndex >= 1 ? currentInput[CurrentIndex - 1] : WHITESPACE;
 
-        public bool EndOfInput => LookaheadIndex > currentEndIdx;
-        public bool EndOrNewLine => EndOfInput || Current == '\n' || Current == '\r';
+        /// <summary>Returns true if CurrentIndex is >= the current input length.</summary>
+        public bool EndOfInput => CurrentIndex > currentEndIdx;
+        /// <summary>Returns true if EndOfInput or current character is a new line.</summary>
+        public bool EndOrNewLine => EndOfInput || IsNewLine(Current);
+
+        public static bool IsNewLine(char c) => c == '\n' || c == '\r';
 
         private string currentInput;
         private int currentStartIdx;
@@ -72,6 +84,9 @@ namespace UnityExplorer.UI.CSharpConsole
         /// <returns>A string which contains the amount of leading lines specified, as well as the rich-text highlighted section.</returns>
         public string BuildHighlightedString(string input, int startIdx, int endIdx, int leadingLines)
         {
+            
+
+
             if (string.IsNullOrEmpty(input) || endIdx <= startIdx)
                 return input;
 
@@ -109,16 +124,16 @@ namespace UnityExplorer.UI.CSharpConsole
 
         // Match builder, iterates through each Lexer and returns all matches found.
 
-        private IEnumerable<MatchInfo> GetMatches()
+        public IEnumerable<MatchInfo> GetMatches()
         {
-            LastCommittedIndex = currentStartIdx - 1;
+            CommittedIndex = currentStartIdx - 1;
             Rollback();
 
             while (!EndOfInput)
             {
                 SkipWhitespace();
                 bool anyMatch = false;
-                int startIndex = LastCommittedIndex + 1;
+                int startIndex = CommittedIndex + 1;
 
                 foreach (var lexer in lexers)
                 {
@@ -129,7 +144,7 @@ namespace UnityExplorer.UI.CSharpConsole
                         yield return new MatchInfo
                         {
                             startIndex = startIndex,
-                            endIndex = LastCommittedIndex,
+                            endIndex = CommittedIndex,
                             htmlColorTag = lexer.ColorTag,
                         };
                         break;
@@ -140,7 +155,7 @@ namespace UnityExplorer.UI.CSharpConsole
 
                 if (!anyMatch)
                 {
-                    LookaheadIndex = LastCommittedIndex + 1;
+                    CurrentIndex = CommittedIndex + 1;
                     Commit();
                 }
             }
@@ -150,23 +165,23 @@ namespace UnityExplorer.UI.CSharpConsole
 
         public char PeekNext(int amount = 1)
         {
-            LookaheadIndex += amount;
+            CurrentIndex += amount;
             return Current;
         }
 
         public void Commit()
         {
-            LastCommittedIndex = Math.Min(currentEndIdx, LookaheadIndex);
+            CommittedIndex = Math.Min(currentEndIdx, CurrentIndex);
         }
 
         public void Rollback()
         {
-            LookaheadIndex = LastCommittedIndex + 1;
+            CurrentIndex = CommittedIndex + 1;
         }
 
         public void RollbackBy(int amount)
         {
-            LookaheadIndex = Math.Max(LastCommittedIndex + 1, LookaheadIndex - amount);
+            CurrentIndex = Math.Max(CommittedIndex + 1, CurrentIndex - amount);
         }
 
         public bool IsDelimiter(char character, bool orWhitespace = false, bool orLetterOrDigit = false)
@@ -185,8 +200,139 @@ namespace UnityExplorer.UI.CSharpConsole
                 PeekNext();
             }
 
-            // revert the last PeekNext which would have returned false
-            Rollback();
+            if (!char.IsWhiteSpace(Current))
+                Rollback();
         }
+
+        #region Auto Indenting
+
+        // Using the Lexer for indenting as it already has what we need to tokenize strings and comments.
+        // At the moment this only handles when a single newline or close-delimiter is composed.
+        // Does not handle copy+paste or any other characters yet.
+
+        public string IndentCharacter(string input, ref int caretIndex)
+        {
+            int lastCharIndex = caretIndex - 1;
+            char c = input[lastCharIndex];
+
+            // we only want to indent for new lines and close indents
+            if (!IsNewLine(c) && !IndentCloseChars.Contains(c))
+                return input;
+
+            // perform a light parse up to the caret to determine indent level
+            currentInput = input;
+            currentStartIdx = 0;
+            currentEndIdx = lastCharIndex;
+            CommittedIndex = -1;
+            Rollback();
+
+            int indent = 0;
+
+            while (!EndOfInput)
+            {
+                if (CurrentIndex >= lastCharIndex)
+                {
+                    // reached the caret index
+                    if (indent <= 0)
+                        break;
+
+                    if (IsNewLine(c))
+                        input = IndentNewLine(input, indent, ref caretIndex);
+                    else // closing indent
+                        input = IndentCloseDelimiter(input, indent, lastCharIndex, ref caretIndex);
+
+                    break;
+                }
+
+                // Try match strings and comments (Lexer will commit to the end of the match)
+                if (stringLexer.TryMatchCurrent(this) || commentLexer.TryMatchCurrent(this))
+                {
+                    PeekNext();
+                    continue;
+                }
+
+                // Still parsing, check indent
+
+                if (IndentOpenChars.Contains(Current))
+                    indent++;
+                else if (IndentCloseChars.Contains(Current))
+                    indent--;
+
+                Commit();
+                PeekNext();
+            }
+
+            return input;
+        }
+
+        private string IndentNewLine(string input, int indent, ref int caretIndex)
+        {
+            // continue until the end of line or next non-whitespace character.
+            // if there's a close-indent on this line, reduce the indent level.
+            while (CurrentIndex < input.Length - 1)
+            {
+                CurrentIndex++;
+                char next = input[CurrentIndex];
+                if (IsNewLine(next))
+                    break;
+                if (char.IsWhiteSpace(next))
+                    continue;
+                else if (IndentCloseChars.Contains(next))
+                    indent--;
+
+                break;
+            }
+
+            if (indent > 0)
+            {
+                input = input.Insert(caretIndex, new string('\t', indent));
+                caretIndex += indent;
+            }
+
+            return input;
+        }
+
+        private string IndentCloseDelimiter(string input, int indent, int lastCharIndex, ref int caretIndex)
+        {
+            if (CurrentIndex > lastCharIndex)
+            {
+                return input;
+            }
+
+            // lower the indent level by one as we would not have accounted for this closing symbol
+            indent--;
+
+            while (CurrentIndex > 0)
+            {
+                CurrentIndex--;
+                char prev = input[CurrentIndex];
+                if (IsNewLine(prev))
+                    break;
+                if (!char.IsWhiteSpace(prev))
+                {
+                    // the line containing the closing bracket has non-whitespace characters before it. do not indent.
+                    indent = 0;
+                    break;
+                }
+                else if (prev == '\t')
+                    indent--;
+            }
+
+            if (indent > 0)
+            {
+                input = input.Insert(caretIndex, new string('\t', indent));
+                caretIndex += indent;
+            }
+            else if (indent < 0)
+            {
+                // line is overly indented
+                input = input.Remove(lastCharIndex - 1, -indent);
+                caretIndex += indent;
+            }
+
+            return input;
+        }
+
+        #endregion
     }
 }

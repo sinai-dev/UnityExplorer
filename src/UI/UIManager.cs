@@ -8,7 +8,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Input;
-using UnityExplorer.UI.CSharpConsole;
+using UnityExplorer.UI.CSConsole;
 using UnityExplorer.UI.Models;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Utility;
@@ -178,7 +178,7 @@ namespace UnityExplorer.UI
 
             CSharpConsole = new CSConsolePanel();
             CSharpConsole.ConstructUI();
-            CSConsole.Init();
+            ConsoleController.Init();
 
             ShowMenu = !ConfigManager.Hide_On_Startup.Value;
 

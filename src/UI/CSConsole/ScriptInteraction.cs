@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityExplorer.Core.Runtime;
 
-namespace UnityExplorer.UI.CSharpConsole
+namespace UnityExplorer.UI.CSConsole
 {
     public class ScriptInteraction : InteractiveBase
     {
@@ -22,17 +22,17 @@ namespace UnityExplorer.UI.CSharpConsole
 
         public static void AddUsing(string directive)
         {
-            CSConsole.AddUsing(directive);
+            ConsoleController.AddUsing(directive);
         }
 
         public static void GetUsing()
         {
-            ExplorerCore.Log(CSConsole.Evaluator.GetUsing());
+            ExplorerCore.Log(ConsoleController.Evaluator.GetUsing());
         }
 
         public static void Reset()
         {
-            CSConsole.ResetConsole();
+            ConsoleController.ResetConsole();
         }
 
         public static object CurrentTarget()

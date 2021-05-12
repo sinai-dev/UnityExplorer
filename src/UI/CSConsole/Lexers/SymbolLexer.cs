@@ -3,7 +3,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace UnityExplorer.UI.CSharpConsole.Lexers
+namespace UnityExplorer.UI.CSConsole.Lexers
 {
     public class SymbolLexer : Lexer
     {

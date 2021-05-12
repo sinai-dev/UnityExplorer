@@ -2,14 +2,14 @@
 using System.Text;
 using UnityEngine;
 
-namespace UnityExplorer.UI.CSharpConsole.Lexers
+namespace UnityExplorer.UI.CSConsole.Lexers
 {
     public class KeywordLexer : Lexer
     {
         // system blue
         protected override Color HighlightColor => new Color(0.33f, 0.61f, 0.83f, 1.0f);
 
-        private readonly HashSet<string> keywords = new HashSet<string>
+        public static readonly HashSet<string> keywords = new HashSet<string>
         {
 // reserved keywords
 "abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked", "class", "const", "continue", 
