@@ -52,14 +52,6 @@ namespace UnityExplorer
         }
 
         /// <summary>
-        /// Print a nice {X, Y, Z} output of the Vector3, formatted to 3 decimal places.
-        /// </summary>
-        public static string ToStringPretty(this Vector3 vec)
-        {
-            return $"{vec.x:F3}, {vec.y:F3}, {vec.z:F3}";
-        }
-        
-        /// <summary>
         /// Get the full Transform heirarchy path for this provided Transform.
         /// </summary>
         public static string GetTransformPath(this Transform transform, bool includeSelf = false)

@@ -185,7 +185,7 @@ namespace UnityExplorer.UI.CacheObject
                  return ValueState.ValueStruct;
             else if (typeof(IDictionary).IsAssignableFrom(type))
                 return ValueState.Dictionary;
-            else if (typeof(IEnumerable).IsAssignableFrom(type))
+            else if (!typeof(Transform).IsAssignableFrom(type) && typeof(IEnumerable).IsAssignableFrom(type))
                 return ValueState.Collection;
             else
                 return ValueState.Unsupported;

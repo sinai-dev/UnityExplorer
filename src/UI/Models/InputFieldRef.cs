@@ -10,12 +10,12 @@ namespace UnityExplorer.UI
 {
     public class InputFieldRef : UIBehaviourModel
     {
-        public InputFieldRef(InputField InputField) 
+        public InputFieldRef(InputField component) 
         { 
-            this.Component = InputField;
-            Rect = InputField.GetComponent<RectTransform>();
-            PlaceholderText = InputField.placeholder.TryCast<Text>();
-            InputField.onValueChanged.AddListener(OnInputChanged);
+            this.Component = component;
+            Rect = component.GetComponent<RectTransform>();
+            PlaceholderText = component.placeholder.TryCast<Text>();
+            component.onValueChanged.AddListener(OnInputChanged);
         }
 
         public event Action<string> OnValueChanged;

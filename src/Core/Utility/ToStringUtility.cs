@@ -15,7 +15,6 @@ namespace UnityExplorer
         internal static Dictionary<string, MethodInfo> toStringMethods = new Dictionary<string, MethodInfo>();
         internal static Dictionary<string, MethodInfo> toStringFormattedMethods = new Dictionary<string, MethodInfo>();
 
-        // string allocs
         private const string nullString = "<color=grey>null</color>";
         private const string nullUnknown = nullString + " (?)";
         private const string destroyedString = "<color=red>Destroyed</color>";
@@ -140,7 +139,7 @@ namespace UnityExplorer
                 try
                 {
                     var formatMethod = type.GetMethod("ToString", ArgumentUtility.ParseArgs);
-                    formatMethod.Invoke(value, new object[] { "F3" });
+                    formatMethod.Invoke(value, new object[] { ParseUtility.NUMBER_FORMAT });
                     toStringFormattedMethods.Add(type.AssemblyQualifiedName, formatMethod);
                     toStringMethods.Add(type.AssemblyQualifiedName, null);
                 }
@@ -158,8 +157,8 @@ namespace UnityExplorer
             string toString;
             try
             {
-                if (toStringFormattedMethods.TryGetValue(type.AssemblyQualifiedName, out MethodInfo f3method))
-                    toString = (string)f3method.Invoke(value, new object[] { "F3" });
+                if (toStringFormattedMethods.TryGetValue(type.AssemblyQualifiedName, out MethodInfo formatMethod))
+                    toString = (string)formatMethod.Invoke(value, new object[] { ParseUtility.NUMBER_FORMAT });
                 else
                     toString = (string)toStringMethods[type.AssemblyQualifiedName].Invoke(value, ArgumentUtility.EmptyArgs);
             }

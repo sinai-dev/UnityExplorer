@@ -120,6 +120,9 @@ namespace UnityExplorer.UI.Panels
                 else
                     RuntimeProvider.Instance.SetColorBlock(NavButton.Component, UIManager.disabledButtonColor, UIManager.disabledButtonColor * 1.2f);
             }
+
+            if (!active)
+                this.Dragger.WasDragging = false;
         }
 
         public override void Destroy()

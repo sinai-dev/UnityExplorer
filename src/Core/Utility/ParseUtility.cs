@@ -19,6 +19,41 @@ namespace UnityExplorer
             typeof(DateTime),
         };
 
+        public const string NUMBER_FORMAT = "0.####";
+
+        private static readonly Dictionary<int, string> numSequenceStrings = new Dictionary<int, string>();
+        
+        // Helper for formatting float/double/decimal numbers to maximum of 4 decimal points.
+        public static string FormatDecimalSequence(params object[] numbers)
+        {
+            if (numbers.Length <= 0)
+                return null;
+
+            int count = numbers.Length;
+            var formatString = GetSequenceFormatString(count);
+
+            return string.Format(en_US, formatString, numbers);
+        }
+
+        public static string GetSequenceFormatString(int count)
+        {
+            if (count <= 0)
+                return null;
+
+            if (numSequenceStrings.ContainsKey(count))
+                return numSequenceStrings[count];
+
+            string[] strings = new string[count];
+
+            for (int i = 0; i < count; i++)
+                strings[i] = $"{{{i}:{NUMBER_FORMAT}}}";
+
+            string s = string.Join(", ", strings);
+
+            numSequenceStrings.Add(count, s);
+            return s;
+        }
+
         public static bool CanParse(Type type)
         {
             if (string.IsNullOrEmpty(type.FullName))
@@ -77,10 +112,11 @@ namespace UnityExplorer
             return false;
         }
 
-        private static readonly HashSet<Type> nonFormattedTypes = new HashSet<Type>
+        private static readonly HashSet<Type> formattedTypes = new HashSet<Type>
         {
-            typeof(IntPtr),
-            typeof(UIntPtr),
+            typeof(float),
+            typeof(double),
+            typeof(decimal)
         };
 
         public static string ToStringForInput(object obj, Type type)
@@ -104,15 +140,15 @@ namespace UnityExplorer
                 {
                     return customTypesToString[type.FullName].Invoke(obj);
                 }
-                else
+                else if (formattedTypes.Contains(type))
                 {
-                    if (nonFormattedTypes.Contains(type))
-                        return obj.ToString();
-                    else
-                        return ReflectionUtility.GetMethodInfo(type, "ToString", new Type[] { typeof(IFormatProvider) })
-                                .Invoke(obj, new object[] { en_US })
-                                as string;
+                    return ReflectionUtility.GetMethodInfo(type, "ToString", new Type[] { typeof(string), typeof(IFormatProvider) })
+                            .Invoke(obj, new object[] { NUMBER_FORMAT, en_US })
+                            as string;
                 }
+                else
+                    return obj.ToString();
+                
             }
             catch (Exception ex)
             {
@@ -199,11 +235,7 @@ namespace UnityExplorer
             if (!(obj is Vector2 vector))
                 return null;
 
-            return string.Format(en_US, "{0}, {1}", new object[]
-            {
-                vector.x,
-                vector.y
-            });
+            return FormatDecimalSequence(vector.x, vector.y);
         }
 
         // Vector3
@@ -226,12 +258,7 @@ namespace UnityExplorer
             if (!(obj is Vector3 vector))
                 return null;
 
-            return string.Format(en_US, "{0}, {1}, {2}", new object[]
-            {
-                vector.x,
-                vector.y,
-                vector.z
-            });
+            return FormatDecimalSequence(vector.x, vector.y, vector.z);
         }
 
         // Vector4
@@ -255,13 +282,7 @@ namespace UnityExplorer
             if (!(obj is Vector4 vector))
                 return null;
 
-            return string.Format(en_US, "{0}, {1}, {2}, {3}", new object[]
-            {
-                vector.x,
-                vector.y,
-                vector.z,
-                vector.w
-            });
+            return FormatDecimalSequence(vector.x, vector.y, vector.z, vector.w);
         }
 
         // Quaternion
@@ -297,12 +318,7 @@ namespace UnityExplorer
 
             Vector3 vector = quaternion.eulerAngles;
 
-            return string.Format(en_US, "{0}, {1}, {2}", new object[]
-            {
-                vector.x,
-                vector.y,
-                vector.z,
-            });
+            return FormatDecimalSequence(vector.x, vector.y, vector.z);
         }
 
         // Rect
@@ -326,13 +342,7 @@ namespace UnityExplorer
             if (!(obj is Rect rect))
                 return null;
 
-            return string.Format(en_US, "{0}, {1}, {2}, {3}", new object[]
-            {
-                rect.x,
-                rect.y,
-                rect.width,
-                rect.height
-            });
+            return FormatDecimalSequence(rect.x, rect.y, rect.width, rect.height);
         }
 
         // Color
@@ -359,13 +369,7 @@ namespace UnityExplorer
             if (!(obj is Color color))
                 return null;
 
-            return string.Format(en_US, "{0}, {1}, {2}, {3}", new object[]
-            {
-                color.r,
-                color.g,
-                color.b,
-                color.a
-            });
+            return FormatDecimalSequence(color.r, color.g, color.b, color.a);
         }
 
         // Color32
@@ -392,13 +396,8 @@ namespace UnityExplorer
             if (!(obj is Color32 color))
                 return null;
 
-            return string.Format(en_US, "{0}, {1}, {2}, {3}", new object[]
-            {
-                color.r,
-                color.g,
-                color.b,
-                color.a
-            });
+            // ints, this is fine
+            return $"{color.r}, {color.g}, {color.b}, {color.a}";
         }
 
         // Layermask (Int32)

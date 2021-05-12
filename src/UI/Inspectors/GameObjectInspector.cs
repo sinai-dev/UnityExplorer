@@ -14,18 +14,16 @@ namespace UnityExplorer.UI.Inspectors
 {
     public class GameObjectInspector : InspectorBase
     {
-        //public GameObject Target;
         public GameObject GOTarget => Target as GameObject;
 
         private Text NameText;
 
         public TransformTree TransformTree;
         private ScrollPool<TransformCell> transformScroll;
+        private readonly List<GameObject> cachedChildren = new List<GameObject>();
 
         public ButtonListSource<Component> ComponentList;
         private ScrollPool<ButtonCell> componentScroll;
-
-        private readonly List<GameObject> _rootEntries = new List<GameObject>();
 
         public override void OnBorrowedFromPool(object target)
         {
@@ -54,13 +52,10 @@ namespace UnityExplorer.UI.Inspectors
         public override void OnReturnToPool()
         {
             base.OnReturnToPool();
-
-            //// release component and transform lists
-            //this.TransformTree.ScrollPool.ReleaseCells();
-            //this.TransformTree.ScrollPool.SetUninitialized();
-            //
-            //this.ComponentList.ScrollPool.ReleaseCells();
-            //this.ComponentList.ScrollPool.SetUninitialized();
+        }
+        protected override void OnCloseClicked()
+        {
+            InspectorManager.ReleaseInspector(this);
         }
 
         private float timeOfLastUpdate;
@@ -89,12 +84,20 @@ namespace UnityExplorer.UI.Inspectors
             }
         }
 
+        private void RefreshTopInfo()
+        {
+
+        }
+
+
+        #region Transform and Component Lists 
+
         private IEnumerable<GameObject> GetTransformEntries()
         {
-            _rootEntries.Clear();
+            cachedChildren.Clear();
             for (int i = 0; i < GOTarget.transform.childCount; i++)
-                _rootEntries.Add(GOTarget.transform.GetChild(i).gameObject);
-            return _rootEntries;
+                cachedChildren.Add(GOTarget.transform.GetChild(i).gameObject);
+            return cachedChildren;
         }
 
         private readonly List<Component> _componentEntries = new List<Component>();
@@ -178,10 +181,10 @@ namespace UnityExplorer.UI.Inspectors
                 InspectorManager.Inspect(comp);
         }
 
-        protected override void OnCloseClicked()
-        {
-            InspectorManager.ReleaseInspector(this);
-        }
+        #endregion
+
+
+        #region UI Construction
 
         public override GameObject CreateContent(GameObject parent)
         {
@@ -212,5 +215,7 @@ namespace UnityExplorer.UI.Inspectors
 
             return UIRoot;
         }
+
+        #endregion
     }
 }

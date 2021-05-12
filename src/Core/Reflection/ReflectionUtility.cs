@@ -374,14 +374,15 @@ namespace UnityExplorer
 
             var sig = methodName;
 
-            // If the signature could be ambiguous (internally, within UnityExplorer's own use) 
-            // then append the arguments to the key.
-            // Currently not needed and not used, but just in case I need it one day.
             if (cacheAmbiguous)
             {
                 sig += "|";
                 foreach (var arg in argumentTypes)
                     sig += arg.FullName + ",";
+            }
+            else
+            {
+                sig += "|" + (argumentTypes?.Length.ToString() ?? "null");
             }
 
             try
