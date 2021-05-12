@@ -39,10 +39,12 @@ namespace UnityExplorer.UI
 
         // panels
         internal static GameObject PanelHolder { get; private set; }
-       
+
         public static ObjectExplorerPanel Explorer { get; private set; }
         public static InspectorPanel Inspector { get; private set; }
         public static CSConsolePanel CSharpConsole { get; private set; }
+        public static OptionsPanel Options { get; private set; }
+        public static ConsoleLogPanel ConsoleLog { get; private set; }
 
         public static AutoCompleteModal AutoCompleter { get; private set; }
 
@@ -179,6 +181,12 @@ namespace UnityExplorer.UI
             CSharpConsole = new CSConsolePanel();
             CSharpConsole.ConstructUI();
             ConsoleController.Init();
+
+            Options = new OptionsPanel();
+            Options.ConstructUI();
+
+            ConsoleLog = new ConsoleLogPanel();
+            ConsoleLog.ConstructUI();
 
             ShowMenu = !ConfigManager.Hide_On_Startup.Value;
 

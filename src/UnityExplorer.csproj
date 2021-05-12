@@ -262,8 +262,10 @@
     <Compile Include="UI\Models\InputFieldRef.cs" />
     <Compile Include="UI\ObjectPool\IPooledObject.cs" />
     <Compile Include="UI\ObjectPool\Pool.cs" />
+    <Compile Include="UI\Panels\ConsoleLogPanel.cs" />
     <Compile Include="UI\Panels\CSConsolePanel.cs" />
     <Compile Include="Core\Utility\IOUtility.cs" />
+    <Compile Include="UI\Panels\OptionsPanel.cs" />
     <Compile Include="UI\Widgets\AutoComplete\ISuggestionProvider.cs" />
     <Compile Include="UI\Widgets\AutoComplete\Suggestion.cs" />
     <Compile Include="Core\Config\ConfigElement.cs" />

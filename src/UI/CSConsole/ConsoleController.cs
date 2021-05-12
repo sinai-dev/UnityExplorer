@@ -276,45 +276,36 @@ The following helper methods are available:
             int endIdx = Input.Text.Length - 1;
             int topLine = 0;
 
-            try
+            // Calculate visible text if necessary
+            if (Input.Rect.rect.height > Panel.InputScroll.ViewportRect.rect.height)
             {
-                // Calculate visible text if necessary
-                if (Input.Rect.rect.height > Panel.InputScroll.ViewportRect.rect.height)
+                topLine = -1;
+                int bottomLine = -1;
+
+                // the top and bottom position of the viewport in relation to the text height
+                // they need the half-height adjustment to normalize against the 'line.topY' value.
+                var viewportMin = Input.Rect.rect.height - Input.Rect.anchoredPosition.y - (Input.Rect.rect.height * 0.5f);
+                var viewportMax = viewportMin - Panel.InputScroll.ViewportRect.rect.height;
+
+                for (int i = 0; i < Input.TextGenerator.lineCount; i++)
                 {
-                    topLine = -1;
-                    int bottomLine = -1;
-
-                    // the top and bottom position of the viewport in relation to the text height
-                    // they need the half-height adjustment to normalize against the 'line.topY' value.
-                    var viewportMin = Input.Rect.rect.height - Input.Rect.anchoredPosition.y - (Input.Rect.rect.height * 0.5f);
-                    var viewportMax = viewportMin - Panel.InputScroll.ViewportRect.rect.height;
-
-                    for (int i = 0; i < Input.TextGenerator.lineCount; i++)
-                    {
-                        var line = Input.TextGenerator.lines[i];
-                        // if not set the top line yet, and top of line is below the viewport top
-                        if (topLine == -1 && line.topY <= viewportMin)
-                            topLine = i;
-                        // if bottom of line is below the viewport bottom
-                        if ((line.topY - line.height) >= viewportMax)
-                            bottomLine = i;
-                    }
-
-                    topLine = Math.Max(0, topLine - 1);
-                    bottomLine = Math.Min(Input.TextGenerator.lineCount - 1, bottomLine + 1);
-
-                    startIdx = Input.TextGenerator.lines[topLine].startCharIdx;
-                    endIdx = (bottomLine >= Input.TextGenerator.lineCount - 1)
-                        ? Input.Text.Length - 1
-                        : (Input.TextGenerator.lines[bottomLine + 1].startCharIdx - 1);
+                    var line = Input.TextGenerator.lines[i];
+                    // if not set the top line yet, and top of line is below the viewport top
+                    if (topLine == -1 && line.topY <= viewportMin)
+                        topLine = i;
+                    // if bottom of line is below the viewport bottom
+                    if ((line.topY - line.height) >= viewportMax)
+                        bottomLine = i;
                 }
-            }
-            catch (Exception ex)
-            {
-                ExplorerCore.Log("Exception on HighlightVisibleText: " + ex.GetType().Name + ", " + ex.Message);
 
-            }
+                topLine = Math.Max(0, topLine - 1);
+                bottomLine = Math.Min(Input.TextGenerator.lineCount - 1, bottomLine + 1);
 
+                startIdx = Input.TextGenerator.lines[topLine].startCharIdx;
+                endIdx = (bottomLine >= Input.TextGenerator.lineCount - 1)
+                    ? Input.Text.Length - 1
+                    : (Input.TextGenerator.lines[bottomLine + 1].startCharIdx - 1);
+            }
 
             // Highlight the visible text with the LexerBuilder
             Panel.HighlightText.text = Lexer.BuildHighlightedString(Input.Text, startIdx, endIdx, topLine);
