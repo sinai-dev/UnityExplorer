@@ -84,9 +84,6 @@ namespace UnityExplorer.UI.CSConsole
         /// <returns>A string which contains the amount of leading lines specified, as well as the rich-text highlighted section.</returns>
         public string BuildHighlightedString(string input, int startIdx, int endIdx, int leadingLines)
         {
-            
-
-
             if (string.IsNullOrEmpty(input) || endIdx <= startIdx)
                 return input;
 

@@ -68,7 +68,6 @@ The following helper methods are available:
         public static InputFieldRef Input => Panel.Input;
 
         public static int LastCaretPosition { get; private set; }
-        public static int PreviousCaretPosition { get; private set; }
         internal static float defaultInputFieldAlpha;
 
         // Todo save as config?
@@ -143,9 +142,7 @@ The following helper methods are available:
 
         public static void Update()
         {
-            int lastCaretPos = LastCaretPosition;
-            UpdateCaret();
-            bool caretMoved = lastCaretPos != LastCaretPosition;
+            UpdateCaret(out bool caretMoved);
 
             if (!settingAutoCompletion && EnableSuggestions && caretMoved)
             {
@@ -162,34 +159,41 @@ The following helper methods are available:
 
         private const int CSCONSOLE_LINEHEIGHT = 18;
 
-        private static void UpdateCaret()
+        private static void UpdateCaret(out bool caretMoved)
         {
+            int prevCaret = LastCaretPosition;
+            caretMoved = false;
+
             if (Input.Component.isFocused)
             {
-                PreviousCaretPosition = LastCaretPosition;
-                LastCaretPosition = Input.Component.caretPosition; 
+                LastCaretPosition = Input.Component.caretPosition;
+                caretMoved = LastCaretPosition != prevCaret;
             }
 
             if (Input.Text.Length == 0)
                 return;
 
-            var charInfo = Input.TextGenerator.characters[LastCaretPosition];
-            var charTop = charInfo.cursorPos.y;
-            var charBot = charTop - CSCONSOLE_LINEHEIGHT;
-
-            var viewportMin = Input.Rect.rect.height - Input.Rect.anchoredPosition.y - (Input.Rect.rect.height * 0.5f);
-            var viewportMax = viewportMin - Panel.InputScroll.ViewportRect.rect.height;
-
-            float diff = 0f;
-            if (charTop > viewportMin)
-                diff = charTop - viewportMin;
-            else if (charBot < viewportMax)
-                diff = charBot - viewportMax;
-
-            if (Math.Abs(diff) > 1)
+            // If caret moved, ensure caret is visible in the viewport
+            if (caretMoved)
             {
-                var rect = Input.Rect;
-                rect.anchoredPosition = new Vector2(rect.anchoredPosition.x, rect.anchoredPosition.y - diff);
+                var charInfo = Input.TextGenerator.characters[LastCaretPosition];
+                var charTop = charInfo.cursorPos.y;
+                var charBot = charTop - CSCONSOLE_LINEHEIGHT;
+
+                var viewportMin = Input.Rect.rect.height - Input.Rect.anchoredPosition.y - (Input.Rect.rect.height * 0.5f);
+                var viewportMax = viewportMin - Panel.InputScroll.ViewportRect.rect.height;
+
+                float diff = 0f;
+                if (charTop > viewportMin)
+                    diff = charTop - viewportMin;
+                else if (charBot < viewportMax)
+                    diff = charBot - viewportMax;
+
+                if (Math.Abs(diff) > 1)
+                {
+                    var rect = Input.Rect;
+                    rect.anchoredPosition = new Vector2(rect.anchoredPosition.x, rect.anchoredPosition.y - diff);
+                }
             }
         }
 
