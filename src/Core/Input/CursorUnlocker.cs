@@ -45,7 +45,7 @@ namespace UnityExplorer.Core.Input
             Unlock = ConfigManager.Force_Unlock_Mouse.Value;
             ConfigManager.Force_Unlock_Mouse.OnValueChanged += (bool val) => { Unlock = val; };
 
-            if (ConfigManager.Aggressive_Force_Unlock.Value)
+            if (ConfigManager.Aggressive_Mouse_Unlock.Value)
                 SetupAggressiveUnlock();
         }
 

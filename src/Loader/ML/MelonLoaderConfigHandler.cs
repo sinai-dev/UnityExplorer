@@ -18,7 +18,7 @@ namespace UnityExplorer.Loader.ML
 
         public override void Init()
         {
-            prefCategory = MelonPreferences.CreateCategory(CTG_NAME, $"{CTG_NAME} Settings");
+            prefCategory = MelonPreferences.CreateCategory(CTG_NAME, $"{CTG_NAME} Settings", false, true);
         }
 
         public override void LoadConfig()
@@ -36,7 +36,7 @@ namespace UnityExplorer.Loader.ML
 
         public override void RegisterConfigElement<T>(ConfigElement<T> config)
         {
-            var entry = prefCategory.CreateEntry(config.Name, config.Value, null, config.IsInternal) as MelonPreferences_Entry<T>;
+            var entry = prefCategory.CreateEntry(config.Name, config.Value, null, config.Description, config.IsInternal, false);
             
             entry.OnValueChangedUntyped += () => 
             {

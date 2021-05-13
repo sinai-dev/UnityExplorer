@@ -8,15 +8,13 @@ using BF = System.Reflection.BindingFlags;
 using UnityExplorer.Core.Runtime;
 using System.Text;
 using UnityEngine;
+using UnityExplorer.Core.Config;
 
 namespace UnityExplorer
 {
 
     public class ReflectionUtility
     {
-        // The Instance and instance methods are not for public use, they're only so IL2CPP can override.
-        // This class and the Extensions class expose static methods to use instead.
-
         public const BF FLAGS = BF.Public | BF.Instance | BF.NonPublic | BF.Static;
 
         internal static readonly ReflectionUtility Instance =
@@ -37,10 +35,9 @@ namespace UnityExplorer
 
         /// <summary>Key: Type.FullName</summary>
         public static readonly SortedDictionary<string, Type> AllTypes = new SortedDictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
-        //private static readonly SortedSet<string> allTypeNames = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
 
         private static string[] allTypesArray;
-        private static string[] GetTypeNameArray()
+        public static string[] GetTypeNameArray()
         {
             if (allTypesArray == null || allTypesArray.Length != AllTypes.Count)
             {
@@ -403,7 +400,45 @@ namespace UnityExplorer
             }
         }
 
-#endregion
+        #endregion
+
+        #region Reflection Blacklist
+
+        public virtual string DefaultReflectionBlacklist => string.Empty;
+
+        public static void LoadBlacklistString(string blacklist)
+        {
+            if (string.Equals(blacklist, "DEFAULT", StringComparison.InvariantCultureIgnoreCase))
+                blacklist = Instance.DefaultReflectionBlacklist;
+
+            if (string.IsNullOrEmpty(blacklist))
+                return;
+
+            var sigs = blacklist.Split(';');
+            foreach (var sig in sigs)
+            {
+                var s = sig.Trim();
+                if (string.IsNullOrEmpty(s))
+                    continue;
+                if (!currentBlacklist.Contains(s))
+                    currentBlacklist.Add(s);
+            }
+
+            Mono.CSharp.IL2CPP.Blacklist.SignatureBlacklist = currentBlacklist;
+        }
+
+        public static bool IsBlacklisted(MemberInfo member)
+        {
+            if (string.IsNullOrEmpty(member.DeclaringType?.Namespace))
+                return false;
+
+            var sig = $"{member.DeclaringType.FullName}.{member.Name}";
+            return currentBlacklist.Contains(sig);
+        }
+
+        private static readonly HashSet<string> currentBlacklist = new HashSet<string>();
+
+        #endregion
 
     }
 }

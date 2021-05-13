@@ -237,14 +237,14 @@ namespace UnityExplorer.UI.CacheObject
         }
 
         private static void TryCacheMember(MemberInfo member, List<CacheMember> list, HashSet<string> cachedSigs, 
-            Type declaringType, ReflectionInspector _inspector, bool ignoreMethodBlacklist = false)
+            Type declaringType, ReflectionInspector _inspector, bool ignorePropertyMethodInfos = true)
         {
             try
             {
-                var sig = GetSig(member);
-
-                if (IsBlacklisted(sig))
+                if (ReflectionUtility.IsBlacklisted(member))
                     return;
+
+                var sig = GetSig(member);
 
                 //ExplorerCore.Log($"Trying to cache member {sig}...");
                 //ExplorerCore.Log(member.DeclaringType.FullName + "." + member.Name);
@@ -256,14 +256,15 @@ namespace UnityExplorer.UI.CacheObject
                     case MemberTypes.Method:
                         {
                             var mi = member as MethodInfo;
-                            if (!ignoreMethodBlacklist && IsBlacklisted(mi))
+                            if (!ignorePropertyMethodInfos 
+                                && (mi.Name.StartsWith("get_") || mi.Name.StartsWith("set_")))
                                 return;
 
                             var args = mi.GetParameters();
                             if (!CanParseArgs(args))
                                 return;
 
-                            sig += AppendArgsToSig(args);
+                            sig += GetArgumentString(args);
                             if (cachedSigs.Contains(sig))
                                 return;
 
@@ -285,11 +286,11 @@ namespace UnityExplorer.UI.CacheObject
                                 // write-only property, cache the set method instead.
                                 var setMethod = pi.GetSetMethod(true);
                                 if (setMethod != null)
-                                    TryCacheMember(setMethod, list, cachedSigs, declaringType, _inspector, true);
+                                    TryCacheMember(setMethod, list, cachedSigs, declaringType, _inspector, false);
                                 return;
                             }
 
-                            sig += AppendArgsToSig(args);
+                            sig += GetArgumentString(args);
                             if (cachedSigs.Contains(sig))
                                 return;
 
@@ -326,54 +327,22 @@ namespace UnityExplorer.UI.CacheObject
 
         internal static string GetSig(MemberInfo member) => $"{member.DeclaringType.Name}.{member.Name}";
 
-        internal static string AppendArgsToSig(ParameterInfo[] args)
+        internal static string GetArgumentString(ParameterInfo[] args)
         {
-            string ret = " (";
+            var sb = new StringBuilder();
+            sb.Append(' ');
+            sb.Append('(');
             foreach (var param in args)
-                ret += $"{param.ParameterType.Name} {param.Name}, ";
-            ret += ")";
-            return ret;
+            {
+                sb.Append(param.ParameterType.Name);
+                sb.Append(' ');
+                sb.Append(param.Name);
+                sb.Append(',');
+                sb.Append(' ');
+            }
+            sb.Append(')');
+            return sb.ToString();
         }
-
-        // Blacklists
-        private static readonly HashSet<string> bl_typeAndMember = new HashSet<string>
-        {
-            // these can cause a crash in IL2CPP
-#if CPP
-            "Type.DeclaringMethod",
-            "Rigidbody2D.Cast",
-            "Collider2D.Cast",
-            "Collider2D.Raycast",
-            "Texture2D.SetPixelDataImpl",
-            "Camera.CalculateProjectionMatrixFromPhysicalProperties",
-#endif
-            // These were deprecated a long time ago, still show up in some games for some reason
-            "MonoBehaviour.allowPrefabModeInPlayMode",
-            "MonoBehaviour.runInEditMode",
-            "Component.animation",
-            "Component.audio",
-            "Component.camera",
-            "Component.collider",
-            "Component.collider2D",
-            "Component.constantForce",
-            "Component.hingeJoint",
-            "Component.light",
-            "Component.networkView",
-            "Component.particleSystem",
-            "Component.renderer",
-            "Component.rigidbody",
-            "Component.rigidbody2D",
-            "Light.flare",
-        };
-        private static readonly HashSet<string> bl_methodNameStartsWith = new HashSet<string>
-        {
-            // these are redundant
-            "get_",
-            "set_",
-        };
-
-        internal static bool IsBlacklisted(string sig) => bl_typeAndMember.Any(it => sig.Contains(it));
-        internal static bool IsBlacklisted(MethodInfo method) => bl_methodNameStartsWith.Any(it => method.Name.StartsWith(it));
 
         #endregion
 
