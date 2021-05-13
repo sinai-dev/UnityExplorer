@@ -39,14 +39,7 @@ namespace UnityExplorer.UI
 
         // panels
         internal static GameObject PanelHolder { get; private set; }
-
-        public static ObjectExplorerPanel Explorer { get; private set; }
-        public static InspectorPanel Inspector { get; private set; }
-        public static CSConsolePanel CSharpConsole { get; private set; }
-        public static OptionsPanel Options { get; private set; }
-        public static ConsoleLogPanel ConsoleLog { get; private set; }
-
-        public static AutoCompleteModal AutoCompleter { get; private set; }
+        private static readonly Dictionary<Panels, UIPanel> UIPanels = new Dictionary<Panels, UIPanel>();
 
         // assets
         internal static Font ConsoleFont { get; private set; }
@@ -62,24 +55,6 @@ namespace UnityExplorer.UI
         public const int MAX_INPUTFIELD_CHARS = 16000;
         public const int MAX_TEXT_VERTS = 65000;
 
-        public static UIPanel GetPanel(Panels panel)
-        {
-            switch (panel)
-            {
-                case Panels.ObjectExplorer:
-                    return Explorer;
-                case Panels.Inspector:
-                    return Inspector;
-                case Panels.AutoCompleter:
-                    return AutoCompleter;
-                case Panels.CSConsole:
-                    return CSharpConsole;
-                default:
-                    throw new NotImplementedException($"TODO GetPanel: {panel}");
-            }
-        }
-
-        // main menu toggle
         public static bool ShowMenu
         {
             get => s_showMenu;
@@ -95,34 +70,16 @@ namespace UnityExplorer.UI
         }
         public static bool s_showMenu = true;
 
-        public static void Update()
+        // Panels
+
+        public static UIPanel GetPanel(Panels panel)
         {
-            if (!CanvasRoot || Initializing)
-                return;
+            return UIPanels[panel];
+        }
 
-            //if (InspectUnderMouse.Inspecting)
-            //{
-            //    InspectUnderMouse.UpdateInspect();
-            //    return;
-            //}
-
-            if (InputManager.GetKeyDown(ConfigManager.Main_Menu_Toggle.Value))
-                ShowMenu = !ShowMenu;
-
-            if (!ShowMenu)
-                return;
-
-            gcLabel.text = "GC : " + (GC.GetTotalMemory(false) / 1024 / 1024) + "MB";
-
-            if (InputManager.GetKeyDown(ConfigManager.Force_Unlock_Keybind.Value))
-                CursorUnlocker.Unlock = !CursorUnlocker.Unlock;
-
-            if (EventSystem.current != EventSys)
-                CursorUnlocker.SetEventSystem();
-
-            UIPanel.UpdateFocus();
-            PanelDragger.UpdateInstances();
-            UIBehaviourModel.UpdateInstances();
+        public static T GetPanel<T>(Panels panel) where T : UIPanel
+        {
+            return (T)UIPanels[panel];
         }
 
         public static void TogglePanel(Panels panel)
@@ -153,6 +110,38 @@ namespace UnityExplorer.UI
                 SetPanelActive(panel, value);
         }
 
+        // Main UI Update loop
+
+        public static void Update()
+        {
+            if (!CanvasRoot || Initializing)
+                return;
+
+            //if (InspectUnderMouse.Inspecting)
+            //{
+            //    InspectUnderMouse.UpdateInspect();
+            //    return;
+            //}
+
+            if (InputManager.GetKeyDown(ConfigManager.Main_Menu_Toggle.Value))
+                ShowMenu = !ShowMenu;
+
+            if (!ShowMenu)
+                return;
+
+            if (InputManager.GetKeyDown(ConfigManager.Force_Unlock_Toggle.Value))
+                CursorUnlocker.Unlock = !CursorUnlocker.Unlock;
+
+            if (EventSystem.current != EventSys)
+                CursorUnlocker.SetEventSystem();
+
+            UIPanel.UpdateFocus();
+            PanelDragger.UpdateInstances();
+            UIBehaviourModel.UpdateInstances();
+        }
+
+        // Initialization and UI Construction
+
         internal static void InitUI()
         {
             LoadBundle();
@@ -161,32 +150,27 @@ namespace UnityExplorer.UI
 
             CreateRootCanvas();
 
+            // Global UI Pool Holder
             PoolHolder = new GameObject("PoolHolder");
             PoolHolder.transform.parent = CanvasRoot.transform;
             PoolHolder.SetActive(false);
 
             CreateTopNavBar();
 
+            // TODO (or probably just do this when showing it for first time)
             //InspectUnderMouse.ConstructUI();
 
-            AutoCompleter = new AutoCompleteModal();
-            AutoCompleter.ConstructUI();
+            UIPanels.Add(Panels.AutoCompleter, new AutoCompleteModal());
+            UIPanels.Add(Panels.ObjectExplorer, new ObjectExplorerPanel());
+            UIPanels.Add(Panels.Inspector, new InspectorPanel());
+            UIPanels.Add(Panels.CSConsole, new CSConsolePanel());
+            UIPanels.Add(Panels.Options, new OptionsPanel());
+            UIPanels.Add(Panels.ConsoleLog, new ConsoleLogPanel());
 
-            Explorer = new ObjectExplorerPanel();
-            Explorer.ConstructUI();
+            foreach (var panel in UIPanels.Values)
+                panel.ConstructUI();
 
-            Inspector = new InspectorPanel();
-            Inspector.ConstructUI();
-
-            CSharpConsole = new CSConsolePanel();
-            CSharpConsole.ConstructUI();
             ConsoleController.Init();
-
-            Options = new OptionsPanel();
-            Options.ConstructUI();
-
-            ConsoleLog = new ConsoleLogPanel();
-            ConsoleLog.ConstructUI();
 
             ShowMenu = !ConfigManager.Hide_On_Startup.Value;
 
@@ -228,12 +212,6 @@ namespace UnityExplorer.UI
             PanelHolder.transform.SetAsFirstSibling();
         }
 
-        //// temp
-        //private static float lastTimeSpeed;
-        //private static bool pausing;
-
-        private static Text gcLabel;
-
         private static void CreateTopNavBar()
         {
             var navbarPanel = UIFactory.CreateUIObject("MainNavbar", CanvasRoot);
@@ -243,39 +221,13 @@ namespace UnityExplorer.UI
             NavBarRect.pivot = new Vector2(0.5f, 1f);
             NavBarRect.anchorMin = new Vector2(0.5f, 1f);
             NavBarRect.anchorMax = new Vector2(0.5f, 1f);
-            NavBarRect.sizeDelta = new Vector2(900f, 35f);
+            NavBarRect.sizeDelta = new Vector2(1000f, 35f);
 
             // UnityExplorer title
 
             string titleTxt = $"{ExplorerCore.NAME} <i><color=grey>{ExplorerCore.VERSION}</color></i>";
             var title = UIFactory.CreateLabel(navbarPanel, "Title", titleTxt, TextAnchor.MiddleLeft, default, true, 18);
             UIFactory.SetLayoutElement(title.gameObject, minWidth: 240, flexibleWidth: 0);
-
-            // temp debug
-
-            gcLabel = UIFactory.CreateLabel(navbarPanel, "GCLabel", "GC: ", TextAnchor.MiddleLeft);
-            UIFactory.SetLayoutElement(gcLabel.gameObject, minWidth: 150, minHeight: 25, flexibleWidth: 0);
-
-            // TODO something nicer for this, maybe a 'Tools' dropout below the main navbar with a few helpers like this.
-
-            //var btn = UIFactory.CreateButton(navbarPanel, "Button", "pause", new Color(0.2f, 0.2f, 0.2f));
-            //UIFactory.SetLayoutElement(btn.Button.gameObject, minWidth: 30, flexibleWidth: 0, minHeight: 25);
-            //btn.OnClick += () =>
-            //{
-            //    if (!pausing)
-            //    {
-            //        lastTimeSpeed = Time.timeScale;
-            //        Time.timeScale = 0;
-            //        pausing = true;
-            //        btn.ButtonText.text = "resume";
-            //    }
-            //    else
-            //    {
-            //        Time.timeScale = lastTimeSpeed;
-            //        pausing = false;
-            //        btn.ButtonText.text = "pause";
-            //    }
-            //};
 
             // Navbar
 

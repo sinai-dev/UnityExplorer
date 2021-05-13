@@ -63,7 +63,7 @@ namespace UnityExplorer.UI.Panels
                 ObjectSearch.Update();
         }
 
-        public override string GetSaveData() => ConfigManager.ObjectExplorerData.Value;
+        public override string GetSaveDataFromConfigManager() => ConfigManager.ObjectExplorerData.Value;
 
         public override void DoSaveToConfigElement()
         {

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace UnityExplorer.UI.Widgets
 {
-    public interface IPoolDataSource<T> where T : ICell
+    public interface ICellPoolDataSource<T> where T : ICell
     {
         int ItemCount { get; }
 

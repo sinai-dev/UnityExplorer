@@ -216,6 +216,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Config\InternalConfigHandler.cs" />
+    <Compile Include="UI\CacheObject\CacheConfigEntry.cs" />
+    <Compile Include="UI\CacheObject\Views\CacheConfigCell.cs" />
     <Compile Include="UI\CSConsole\CSAutoCompleter.cs" />
     <Compile Include="UI\CSConsole\LexerBuilder.cs" />
     <Compile Include="UI\CSConsole\Lexers\CommentLexer.cs" />
@@ -319,7 +321,7 @@
     <Compile Include="UI\ObjectExplorer\SceneExplorer.cs" />
     <Compile Include="UI\Widgets\ScrollPool\DataHeightCache.cs" />
     <Compile Include="UI\Widgets\ScrollPool\ICell.cs" />
-    <Compile Include="UI\Widgets\ScrollPool\IPoolDataSource.cs" />
+    <Compile Include="UI\Widgets\ScrollPool\ICellPoolDataSource.cs" />
     <Compile Include="UI\Widgets\ScrollPool\ScrollPool.cs" />
     <Compile Include="UI\Widgets\ScrollPool\UIExtensions.cs" />
     <Compile Include="UI\Widgets\InputFieldScroller.cs" />

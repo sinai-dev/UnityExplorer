@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
+using UnityExplorer.Core.Config;
 
 namespace UnityExplorer.UI.Panels
 {
@@ -13,24 +15,27 @@ namespace UnityExplorer.UI.Panels
         public override int MinWidth => 300;
         public override int MinHeight => 75;
 
-        public override void ConstructPanelContent()
+        public override string GetSaveDataFromConfigManager()
         {
-            throw new NotImplementedException();
+            return ConfigManager.ConsoleLogData.Value;
         }
 
         public override void DoSaveToConfigElement()
         {
-            throw new NotImplementedException();
-        }
-
-        public override string GetSaveData()
-        {
-            throw new NotImplementedException();
+            ConfigManager.ConsoleLogData.Value = this.ToSaveData();
         }
 
         protected internal override void DoSetDefaultPosAndAnchors()
         {
-            throw new NotImplementedException();
+            mainPanelRect.localPosition = Vector2.zero;
+            mainPanelRect.pivot = new Vector2(0f, 1f);
+            mainPanelRect.anchorMin = new Vector2(0.5f, 0.1f);
+            mainPanelRect.anchorMax = new Vector2(0.9f, 0.25f);
+        }
+
+        public override void ConstructPanelContent()
+        {
+            
         }
     }
 }

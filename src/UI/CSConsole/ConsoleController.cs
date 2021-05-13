@@ -64,7 +64,7 @@ The following helper methods are available:
         private static HashSet<string> usingDirectives;
         private static StringBuilder evaluatorOutput;
 
-        public static CSConsolePanel Panel => UIManager.CSharpConsole;
+        public static CSConsolePanel Panel => UIManager.GetPanel<CSConsolePanel>(UIManager.Panels.CSConsole);
         public static InputFieldRef Input => Panel.Input;
 
         public static int LastCaretPosition { get; private set; }

@@ -10,7 +10,7 @@ using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Widgets
 {
-    public class ButtonListSource<T> : IPoolDataSource<ButtonCell>
+    public class ButtonListSource<T> : ICellPoolDataSource<ButtonCell>
     {
         internal ScrollPool<ButtonCell> ScrollPool;
 

@@ -27,7 +27,7 @@ namespace UnityExplorer.UI.Widgets
             this.ScrollRect = scrollRect;
         }
 
-        public IPoolDataSource<T> DataSource { get; set; }
+        public ICellPoolDataSource<T> DataSource { get; set; }
 
         public readonly List<T> CellPool = new List<T>();
 
@@ -143,7 +143,7 @@ namespace UnityExplorer.UI.Widgets
         //private bool Initialized;
 
         /// <summary>Should be called only once, when the scroll pool is created.</summary>
-        public void Initialize(IPoolDataSource<T> dataSource, Action onHeightChangedListener = null)
+        public void Initialize(ICellPoolDataSource<T> dataSource, Action onHeightChangedListener = null)
         {
             this.DataSource = dataSource;
             HeightCache = new DataHeightCache<T>(this);

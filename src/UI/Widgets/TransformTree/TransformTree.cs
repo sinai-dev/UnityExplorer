@@ -11,7 +11,7 @@ using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Widgets
 {
-    public class TransformTree : IPoolDataSource<TransformCell>
+    public class TransformTree : ICellPoolDataSource<TransformCell>
     {
         public Func<IEnumerable<GameObject>> GetRootEntriesMethod;
 

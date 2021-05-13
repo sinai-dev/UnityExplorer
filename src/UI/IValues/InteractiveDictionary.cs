@@ -13,7 +13,7 @@ using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.IValues
 {
-    public class InteractiveDictionary : InteractiveValue, IPoolDataSource<CacheKeyValuePairCell>, ICacheObjectController
+    public class InteractiveDictionary : InteractiveValue, ICellPoolDataSource<CacheKeyValuePairCell>, ICacheObjectController
     {
         CacheObjectBase ICacheObjectController.ParentCacheObject => this.CurrentOwner;
         object ICacheObjectController.Target => this.CurrentOwner.Value;

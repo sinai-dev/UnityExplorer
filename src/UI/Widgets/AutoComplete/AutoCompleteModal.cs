@@ -18,7 +18,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
     public class AutoCompleteModal : UIPanel
     {
-        public static AutoCompleteModal Instance => UIManager.AutoCompleter;
+        public static AutoCompleteModal Instance => UIManager.GetPanel<AutoCompleteModal>(UIManager.Panels.AutoCompleter);
 
         public override string Name => "AutoCompleter";
         public override UIManager.Panels PanelType => UIManager.Panels.AutoCompleter;
@@ -201,6 +201,6 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             // not savable
         }
 
-        public override string GetSaveData() => null;
+        public override string GetSaveDataFromConfigManager() => null;
     }
 }

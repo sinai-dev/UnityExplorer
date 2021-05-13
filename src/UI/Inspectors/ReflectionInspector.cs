@@ -18,7 +18,7 @@ using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Inspectors
 {
-    public class ReflectionInspector : InspectorBase, IPoolDataSource<CacheMemberCell>, ICacheObjectController
+    public class ReflectionInspector : InspectorBase, ICellPoolDataSource<CacheMemberCell>, ICacheObjectController
     {
         public CacheObjectBase ParentCacheObject { get; set; }
         public Type TargetType { get; private set; }
@@ -95,7 +95,7 @@ namespace UnityExplorer.UI.Inspectors
             autoUpdateToggle.isOn = false;
             AutoUpdateWanted = false;
 
-            ObjectRef = null;
+            UnityObjectRef = null;
             ComponentRef = null;
             TextureRef = null;
             CleanupTextureViewer();
@@ -190,6 +190,17 @@ namespace UnityExplorer.UI.Inspectors
 
                 if (AutoUpdateWanted)
                     UpdateDisplayedMembers();
+            }
+        }
+
+        public void UpdateClicked()
+        {
+            UpdateDisplayedMembers();
+            
+            if (this.UnityObjectRef)
+            {
+                nameInput.Text = UnityObjectRef.name;
+                instanceIdInput.Text = UnityObjectRef.GetInstanceID().ToString();
             }
         }
 
@@ -378,7 +389,7 @@ namespace UnityExplorer.UI.Inspectors
 
             var updateButton = UIFactory.CreateButton(rowObj, "UpdateButton", "Update displayed values", new Color(0.22f, 0.28f, 0.22f));
             UIFactory.SetLayoutElement(updateButton.Component.gameObject, minHeight: 25, minWidth: 175, flexibleWidth: 0);
-            updateButton.OnClick += UpdateDisplayedMembers;
+            updateButton.OnClick += UpdateClicked;
 
             var toggleObj = UIFactory.CreateToggle(rowObj, "AutoUpdateToggle", out autoUpdateToggle, out Text toggleText);
             //GameObject.DestroyImmediate(toggleText);
@@ -455,7 +466,7 @@ namespace UnityExplorer.UI.Inspectors
 
         // Unity object helpers
 
-        private UnityEngine.Object ObjectRef;
+        private UnityEngine.Object UnityObjectRef;
         private Component ComponentRef;
         private Texture2D TextureRef;
         private bool TextureViewerWanted;
@@ -475,11 +486,11 @@ namespace UnityExplorer.UI.Inspectors
                 return;
             }
 
-            ObjectRef = (UnityEngine.Object)Target.TryCast(typeof(UnityEngine.Object));
+            UnityObjectRef = (UnityEngine.Object)Target.TryCast(typeof(UnityEngine.Object));
             unityObjectRow.SetActive(true);
 
-            nameInput.Text = ObjectRef.name;
-            instanceIdInput.Text = ObjectRef.GetInstanceID().ToString();
+            nameInput.Text = UnityObjectRef.name;
+            instanceIdInput.Text = UnityObjectRef.GetInstanceID().ToString();
 
             if (typeof(Component).IsAssignableFrom(TargetType))
             {
@@ -515,7 +526,7 @@ namespace UnityExplorer.UI.Inspectors
             {
                 // disable
                 TextureViewerWanted = false;
-                textureViewer.gameObject.SetActive(false);
+                textureViewer.SetActive(false);
                 mainContentHolder.SetActive(true);
                 textureButton.ButtonText.text = "View Texture";
             }
@@ -529,7 +540,7 @@ namespace UnityExplorer.UI.Inspectors
 
                 // enable
                 TextureViewerWanted = true;
-                textureViewer.gameObject.SetActive(true);
+                textureViewer.SetActive(true);
                 mainContentHolder.gameObject.SetActive(false);
                 textureButton.ButtonText.text = "Hide Texture";
             }

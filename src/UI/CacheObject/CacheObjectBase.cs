@@ -349,7 +349,8 @@ namespace UnityExplorer.UI.CacheObject
             cell.ApplyButton.Component.gameObject.SetActive(args.applyActive);
 
             // Inspect button only if last value not null.
-            cell.InspectButton.Component.gameObject.SetActive(args.inspectActive && !LastValueWasNull);
+            if (cell.InspectButton != null)
+                cell.InspectButton.Component.gameObject.SetActive(args.inspectActive && !LastValueWasNull);
 
             // allow IValue for null strings though
             cell.SubContentButton.Component.gameObject.SetActive(args.subContentButtonActive && (!LastValueWasNull || State == ValueState.String));

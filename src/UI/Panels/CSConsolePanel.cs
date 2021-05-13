@@ -54,7 +54,7 @@ namespace UnityExplorer.UI.Panels
             ConfigManager.CSConsoleData.Value = this.ToSaveData();
         }
 
-        public override string GetSaveData() => ConfigManager.CSConsoleData.Value;
+        public override string GetSaveDataFromConfigManager() => ConfigManager.CSConsoleData.Value;
 
         // UI Construction
 

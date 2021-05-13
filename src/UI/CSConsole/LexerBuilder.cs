@@ -299,6 +299,7 @@ namespace UnityExplorer.UI.CSConsole
             // lower the indent level by one as we would not have accounted for this closing symbol
             indent--;
 
+            // go back from the caret to the start of the line, calculate how much indent we need to adjust.
             while (CurrentIndex > 0)
             {
                 CurrentIndex--;

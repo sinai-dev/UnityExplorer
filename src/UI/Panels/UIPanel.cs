@@ -220,7 +220,7 @@ namespace UnityExplorer.UI.Panels
             // apply panel save data or revert to default
             try
             {
-                ApplySaveData(GetSaveData());
+                ApplySaveData(GetSaveDataFromConfigManager());
             }
             catch (Exception ex)
             {
@@ -252,7 +252,7 @@ namespace UnityExplorer.UI.Panels
             DoSaveToConfigElement();
         }
 
-        public abstract string GetSaveData();
+        public abstract string GetSaveDataFromConfigManager();
 
         public bool ApplyingSaveData { get; set; }
 

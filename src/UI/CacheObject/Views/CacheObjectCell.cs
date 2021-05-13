@@ -78,8 +78,8 @@ namespace UnityExplorer.UI.CacheObject.Views
             this.Occupant.OnCellSubContentToggle();
         }
 
-        private readonly Color subInactiveColor = new Color(0.23f, 0.23f, 0.23f);
-        private readonly Color subActiveColor = new Color(0.23f, 0.33f, 0.23f);
+        public readonly Color subInactiveColor = new Color(0.23f, 0.23f, 0.23f);
+        public readonly Color subActiveColor = new Color(0.23f, 0.33f, 0.23f);
 
         public void RefreshSubcontentButton()
         {
@@ -113,9 +113,9 @@ namespace UnityExplorer.UI.CacheObject.Views
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(horiRow, false, false, true, true, 5, 2, childAlignment: TextAnchor.UpperLeft);
             horiRow.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-            // Left member label
+            // Left name label
 
-            NameLabel = UIFactory.CreateLabel(horiRow, "MemberLabel", "<notset>", TextAnchor.MiddleLeft);
+            NameLabel = UIFactory.CreateLabel(horiRow, "NameLabel", "<notset>", TextAnchor.MiddleLeft);
             NameLabel.horizontalOverflow = HorizontalWrapMode.Wrap;
             UIFactory.SetLayoutElement(NameLabel.gameObject, minHeight: 25, minWidth: 20, flexibleHeight: 300, flexibleWidth: 0);
             NameLayout = NameLabel.GetComponent<LayoutElement>();

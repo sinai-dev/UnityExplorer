@@ -42,7 +42,7 @@ namespace UnityExplorer.UI.Panels
             InspectorManager.OnPanelResized(panel.rect.width);
         }
 
-        public override string GetSaveData() => ConfigManager.InspectorData.Value;
+        public override string GetSaveDataFromConfigManager() => ConfigManager.InspectorData.Value;
 
         //public override void LoadSaveData()
         //{
