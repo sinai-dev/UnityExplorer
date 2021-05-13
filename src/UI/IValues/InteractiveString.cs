@@ -79,7 +79,7 @@ namespace UnityExplorer.UI.IValues
                 return;
             }
 
-            var path = IOUtility.EnsureValid(SaveFilePath.Text);
+            var path = IOUtility.EnsureValidDirectory(SaveFilePath.Text);
 
             if (File.Exists(path))
                 File.Delete(path);

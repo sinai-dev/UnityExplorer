@@ -17,16 +17,25 @@ namespace UnityExplorer
     {
         public const BF FLAGS = BF.Public | BF.Instance | BF.NonPublic | BF.Static;
 
-        internal static readonly ReflectionUtility Instance =
+        internal static ReflectionUtility Instance;
+
+        public static void Init()
+        {
+            Instance =
 #if CPP
                 new Il2CppReflection();
 #else
                 new ReflectionUtility();
 #endif
+            Instance.Initialize();
+        }
 
-        static ReflectionUtility()
+        protected virtual void Initialize()
         {
             SetupTypeCache();
+
+            LoadBlacklistString(ConfigManager.Reflection_Signature_Blacklist.Value);
+            ConfigManager.Reflection_Signature_Blacklist.OnValueChanged += LoadBlacklistString;
         }
 
         #region Type cache
@@ -409,7 +418,12 @@ namespace UnityExplorer
         public static void LoadBlacklistString(string blacklist)
         {
             if (string.Equals(blacklist, "DEFAULT", StringComparison.InvariantCultureIgnoreCase))
+            {
                 blacklist = Instance.DefaultReflectionBlacklist;
+                ConfigManager.Reflection_Signature_Blacklist.Value = blacklist;
+                ConfigManager.Handler.SaveConfig();
+                return;
+            }
 
             if (string.IsNullOrEmpty(blacklist))
                 return;

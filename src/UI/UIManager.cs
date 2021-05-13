@@ -165,7 +165,7 @@ namespace UnityExplorer.UI
             UIPanels.Add(Panels.Inspector, new InspectorPanel());
             UIPanels.Add(Panels.CSConsole, new CSConsolePanel());
             UIPanels.Add(Panels.Options, new OptionsPanel());
-            UIPanels.Add(Panels.ConsoleLog, new ConsoleLogPanel());
+            UIPanels.Add(Panels.ConsoleLog, new LogPanel());
 
             foreach (var panel in UIPanels.Values)
                 panel.ConstructUI();
@@ -174,7 +174,6 @@ namespace UnityExplorer.UI
 
             ShowMenu = !ConfigManager.Hide_On_Startup.Value;
 
-            ExplorerCore.Log("UI initialized.");
             Initializing = false;
         }
 
@@ -279,8 +278,6 @@ namespace UnityExplorer.UI
                 BackupShader = Graphic.defaultGraphicMaterial.shader;
 
             ConsoleFont = bundle.LoadAsset<Font>("CONSOLA");
-
-            ExplorerCore.Log("Loaded UI AssetBundle");
         }
 
         private static AssetBundle LoadBundle(string id)

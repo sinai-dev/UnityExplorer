@@ -665,7 +665,7 @@ namespace UnityExplorer.UI.Inspectors
                 return;
             }
 
-            path = IOUtility.EnsureValid(path);
+            path = IOUtility.EnsureValidDirectory(path);
 
             if (File.Exists(path))
                 File.Delete(path);

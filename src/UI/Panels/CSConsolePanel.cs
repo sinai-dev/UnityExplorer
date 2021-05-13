@@ -102,7 +102,7 @@ namespace UnityExplorer.UI.Panels
             var autoIndentToggleObj = UIFactory.CreateToggle(topBarObj, "IndentToggle", out var AutoIndentToggle, out Text autoIndentToggleText);
             UIFactory.SetLayoutElement(autoIndentToggleObj, minWidth: 180, flexibleWidth: 0, minHeight: 25);
             autoIndentToggleText.alignment = TextAnchor.UpperLeft;
-            autoIndentToggleText.text = "Auto-indent on Enter";
+            autoIndentToggleText.text = "Auto-indent";
             AutoIndentToggle.onValueChanged.AddListener((bool val) => { OnAutoIndentToggled?.Invoke(val); });
 
             #endregion
@@ -111,7 +111,7 @@ namespace UnityExplorer.UI.Panels
 
             int fontSize = 16;
 
-            var inputObj = UIFactory.CreateSrollInputField(this.content, "ConsoleInput", ConsoleController.STARTUP_TEXT, out var inputScroller, fontSize);
+            var inputObj = UIFactory.CreateSrollInputField(this.content, "ConsoleInput", ScriptInteraction.STARTUP_TEXT, out var inputScroller, fontSize);
             InputScroll = inputScroller;
             ConsoleController.defaultInputFieldAlpha = Input.Component.selectionColor.a;
             Input.OnValueChanged += InvokeOnValueChanged;

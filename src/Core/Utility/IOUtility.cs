@@ -8,21 +8,17 @@ namespace UnityExplorer
 {
     public static class IOUtility
     {
-        public static string EnsureValid(string path)
+        private static readonly char[] invalidDirectoryCharacters = Path.GetInvalidPathChars();
+        private static readonly char[] invalidFilenameCharacters = Path.GetInvalidFileNameChars();
+
+        public static string EnsureValidDirectory(string path)
         {
-            path = RemoveInvalidChars(path);
-
-            var dir = Path.GetDirectoryName(path);
-
-            if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
-
-            return path;
+            return string.Concat(path.Split(invalidDirectoryCharacters));
         }
 
-        public static string RemoveInvalidChars(string path)
+        public static string EnsureValidFilename(string filename)
         {
-            return string.Concat(path.Split(Path.GetInvalidPathChars()));
+            return string.Concat(filename.Split(invalidFilenameCharacters));
         }
     }
 }

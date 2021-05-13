@@ -14,13 +14,16 @@ using System.Diagnostics.CodeAnalysis;
 using UnityExplorer.Core;
 using CppType = Il2CppSystem.Type;
 using BF = System.Reflection.BindingFlags;
+using UnityExplorer.Core.Config;
 
 namespace UnityExplorer
 {
     public class Il2CppReflection : ReflectionUtility
     {
-        public Il2CppReflection()
+        protected override void Initialize()
         {
+            base.Initialize();
+
             TryLoadGameModules();
 
             BuildDeobfuscationCache();
@@ -70,7 +73,7 @@ namespace UnityExplorer
             }
 
             if (DeobfuscatedTypes.Count > 0)
-                ExplorerCore.Log($"Built deobfuscation cache, count: {DeobfuscatedTypes.Count}");
+                ExplorerCore.Log($"Built IL2CPP deobfuscation cache, initial count: {DeobfuscatedTypes.Count}");
         }
 
         private static void TryCacheDeobfuscatedType(Type type)

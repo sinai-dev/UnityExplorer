@@ -264,7 +264,7 @@
     <Compile Include="UI\Models\InputFieldRef.cs" />
     <Compile Include="UI\ObjectPool\IPooledObject.cs" />
     <Compile Include="UI\ObjectPool\Pool.cs" />
-    <Compile Include="UI\Panels\ConsoleLogPanel.cs" />
+    <Compile Include="UI\Panels\LogPanel.cs" />
     <Compile Include="UI\Panels\CSConsolePanel.cs" />
     <Compile Include="Core\Utility\IOUtility.cs" />
     <Compile Include="UI\Panels\OptionsPanel.cs" />

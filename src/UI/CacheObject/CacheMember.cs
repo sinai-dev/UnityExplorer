@@ -256,7 +256,7 @@ namespace UnityExplorer.UI.CacheObject
                     case MemberTypes.Method:
                         {
                             var mi = member as MethodInfo;
-                            if (!ignorePropertyMethodInfos 
+                            if (ignorePropertyMethodInfos 
                                 && (mi.Name.StartsWith("get_") || mi.Name.StartsWith("set_")))
                                 return;
 

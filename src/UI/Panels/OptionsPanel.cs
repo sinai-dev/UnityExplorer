@@ -80,7 +80,7 @@ namespace UnityExplorer.UI.Panels
         {
             // Save button
 
-            var saveBtn = UIFactory.CreateButton(this.content, "Save", "Save Options", new Color(0.25f, 0.3f, 0.25f));
+            var saveBtn = UIFactory.CreateButton(this.content, "Save", "Save Options", new Color(0.2f, 0.3f, 0.2f));
             UIFactory.SetLayoutElement(saveBtn.Component.gameObject, flexibleWidth: 9999, minHeight: 30, flexibleHeight: 0);
             saveBtn.OnClick += ConfigManager.Handler.SaveConfig;
 

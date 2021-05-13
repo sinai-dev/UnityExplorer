@@ -38,6 +38,8 @@ namespace UnityExplorer
             }
             Loader = loader;
 
+            Log($"{NAME} {VERSION} initializing...");
+
             ExplorerBehaviour.Setup();
 
             if (!Directory.Exists(Loader.ExplorerFolder))
@@ -45,13 +47,15 @@ namespace UnityExplorer
 
             ConfigManager.Init(Loader.ConfigHandler);
 
+            ReflectionUtility.Init();
+
             RuntimeProvider.Init();
             SceneHandler.Init();
             InputManager.Init();
 
-            Log($"{NAME} {VERSION} initialized.");
-
             RuntimeProvider.Instance.StartCoroutine(SetupCoroutine());
+
+            Log($"Finished core setup, waiting for UI setup...");
         }
 
         // Do a delayed setup so that objects aren't destroyed instantly.
@@ -71,11 +75,11 @@ namespace UnityExplorer
                 yield return null;
             }
 
-            Log($"Creating UI, after delay of {ConfigManager.Startup_Delay_Time.Value} second(s).");
+            Log($"Creating UI...");
 
             UIManager.InitUI();
 
-            // END
+            Log($"{NAME} {VERSION} initialized.");
 
             //InspectorManager.Inspect(typeof(TestClass));
         }
@@ -123,23 +127,22 @@ namespace UnityExplorer
         {
             string log = message?.ToString() ?? "";
 
+            LogPanel.Log(log, logType);
+
             switch (logType)
             {
                 case LogType.Assert:
                 case LogType.Log:
                     Loader.OnLogMessage(log);
-                    //DebugConsole.Log(log, Color.white);
                     break;
 
                 case LogType.Warning:
                     Loader.OnLogWarning(log);
-                    //DebugConsole.Log(log, Color.yellow);
                     break;
 
                 case LogType.Error:
                 case LogType.Exception:
                     Loader.OnLogError(log);
-                    //DebugConsole.Log(log, Color.red);
                     break;
             }
         }

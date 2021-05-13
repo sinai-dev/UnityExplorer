@@ -33,6 +33,9 @@ namespace UnityExplorer.UI.CacheObject
                 return;
 
             SetValueFromSource(RefConfigElement.BoxedValue);
+
+            if (this.CellView != null)
+                this.SetDataToCell(CellView);
         }
 
         public override void TrySetUserValue(object value)

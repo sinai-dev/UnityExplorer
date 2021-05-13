@@ -16,47 +16,6 @@ namespace UnityExplorer.UI.CSConsole
 {
     public static class ConsoleController
     {
-        #region Strings / defaults
-
-        internal const string STARTUP_TEXT = @"Welcome to the UnityExplorer C# Console.
-
-The following helper methods are available:
-
-* <color=#add490>Log(""message"")</color> logs a message to the debug console
-
-* <color=#add490>StartCoroutine(IEnumerator routine)</color> start the IEnumerator as a UnityEngine.Coroutine
-
-* <color=#add490>CurrentTarget()</color> returns the target of the active Inspector tab as System.Object
-
-* <color=#add490>AllTargets()</color> returns a System.Object[] array containing the targets of all active tabs
-
-* <color=#add490>Inspect(someObject)</color> to inspect an instance, eg. Inspect(Camera.main);
-
-* <color=#add490>Inspect(typeof(SomeClass))</color> to inspect a Class with static reflection
-
-* <color=#add490>AddUsing(""SomeNamespace"")</color> adds a using directive to the C# console
-
-* <color=#add490>GetUsing()</color> logs the current using directives to the debug console
-
-* <color=#add490>Reset()</color> resets all using directives and variables
-";
-
-        internal static readonly string[] DefaultUsing = new string[]
-        {
-            "System",
-            "System.Linq",
-            "System.Collections",
-            "System.Collections.Generic",
-            "System.Reflection",
-            "UnityEngine",
-#if CPP
-            "UnhollowerBaseLib",
-            "UnhollowerRuntimeLib",
-#endif
-        };
-
-        #endregion
-
         public static ScriptEvaluator Evaluator;
         public static LexerBuilder Lexer;
         public static CSAutoCompleter Completer;
@@ -75,16 +34,34 @@ The following helper methods are available:
         public static bool EnableAutoIndent { get; private set; } = true;
         public static bool EnableSuggestions { get; private set; } = true;
 
+        internal static readonly string[] DefaultUsing = new string[]
+        {
+            "System",
+            "System.Linq",
+            "System.Collections",
+            "System.Collections.Generic",
+            "System.Reflection",
+            "UnityEngine",
+#if CPP
+            "UnhollowerBaseLib",
+            "UnhollowerRuntimeLib",
+#endif
+        };
+
         public static void Init()
         {
             try
             {
                 ResetConsole(false);
+                // ensure the compiler is supported (if this fails then SRE is probably stubbed)
                 Evaluator.Compile("0 == 0");
             }
             catch
             {
-                ExplorerCore.LogWarning("C# Console probably not supported, todo");
+                ExplorerCore.LogWarning("C# Console is not supported, System.Reflection.Emit was probably stubbed! You can use UnityDoorstop to patch this.");
+                var navButton = Panel.NavButton;
+                navButton.Component.interactable = false;
+                navButton.ButtonText.text += "(disabled)";
                 return;
             }
 

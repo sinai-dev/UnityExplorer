@@ -108,9 +108,6 @@ namespace UnityExplorer.Core.Config
                 "\r\nSeperate signatures with a semicolon ';'.",
                 "DEFAULT");
 
-            Reflection_Signature_Blacklist.OnValueChanged += ReflectionUtility.LoadBlacklistString;
-            ReflectionUtility.LoadBlacklistString(Reflection_Signature_Blacklist.Value);
-
             // Internal configs (panel save data)
 
             ObjectExplorerData = new ConfigElement<string>("ObjectExplorer", "", "", true);
