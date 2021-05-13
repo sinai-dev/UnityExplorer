@@ -13,7 +13,12 @@ namespace UnityExplorer
 
         public static string EnsureValidDirectory(string path)
         {
-            return string.Concat(path.Split(invalidDirectoryCharacters));
+            path = string.Concat(path.Split(invalidDirectoryCharacters));
+
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+
+            return path;
         }
 
         public static string EnsureValidFilename(string filename)

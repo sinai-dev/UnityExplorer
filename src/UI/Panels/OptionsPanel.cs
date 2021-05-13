@@ -11,12 +11,14 @@ using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Panels
 {
+    // TODO move the logic out of this class into ConfigManager
+
     public class OptionsPanel : UIPanel, ICacheObjectController, ICellPoolDataSource<ConfigEntryCell>
     {
         public override string Name => "Options";
         public override UIManager.Panels PanelType => UIManager.Panels.Options;
 
-        public override int MinWidth => 550;
+        public override int MinWidth => 600;
         public override int MinHeight => 200;
 
         public override bool ShouldSaveActiveState => false;

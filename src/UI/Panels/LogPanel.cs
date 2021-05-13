@@ -11,6 +11,8 @@ using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Panels
 {
+    // TODO move the logic out of this class into a LogUtil class (also move ExplorerCore.Log into that)
+
     public class LogPanel : UIPanel, ICellPoolDataSource<ConsoleLogCell>
     {
         public struct LogInfo
@@ -29,6 +31,8 @@ namespace UnityExplorer.UI.Panels
 
         public override int MinWidth => 300;
         public override int MinHeight => 75;
+        public override bool ShouldSaveActiveState => true;
+        public override bool ShowByDefault => true;
 
         public int ItemCount => Logs.Count;
 
@@ -156,8 +160,8 @@ namespace UnityExplorer.UI.Panels
         {
             mainPanelRect.localPosition = Vector2.zero;
             mainPanelRect.pivot = new Vector2(0f, 1f);
-            mainPanelRect.anchorMin = new Vector2(0.5f, 0.1f);
-            mainPanelRect.anchorMax = new Vector2(0.9f, 0.25f);
+            mainPanelRect.anchorMin = new Vector2(0.5f, 0.03f);
+            mainPanelRect.anchorMax = new Vector2(0.9f, 0.2f);
         }
 
         // UI Construction

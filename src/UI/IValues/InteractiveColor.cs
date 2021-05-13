@@ -155,12 +155,6 @@ namespace UnityExplorer.UI.IValues
             var horiGroup = UIFactory.CreateHorizontalGroup(UIRoot, "ColorEditor", false, false, true, true, 5,
                 default, new Color(1, 1, 1, 0), TextAnchor.MiddleLeft);
 
-            // apply button
-
-            m_applyButton = UIFactory.CreateButton(horiGroup, "ApplyButton", "Apply", new Color(0.2f, 0.26f, 0.2f));
-            UIFactory.SetLayoutElement(m_applyButton.Component.gameObject, minHeight: 25, minWidth: 90);
-            m_applyButton.OnClick += SetValueToOwner;
-
             // sliders / inputs
 
             var grid = UIFactory.CreateGridGroup(horiGroup, "Grid", new Vector2(140, 25), new Vector2(2, 2), new Color(1, 1, 1, 0));
@@ -168,6 +162,12 @@ namespace UnityExplorer.UI.IValues
 
             for (int i = 0; i < 4; i++)
                 AddEditorRow(i, grid);
+
+            // apply button
+
+            m_applyButton = UIFactory.CreateButton(horiGroup, "ApplyButton", "Apply", new Color(0.2f, 0.26f, 0.2f));
+            UIFactory.SetLayoutElement(m_applyButton.Component.gameObject, minHeight: 25, minWidth: 90);
+            m_applyButton.OnClick += SetValueToOwner;
 
             // image of color
 

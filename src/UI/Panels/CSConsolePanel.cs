@@ -15,7 +15,7 @@ namespace UnityExplorer.UI.Panels
     {
         public override string Name => "C# Console";
         public override UIManager.Panels PanelType => UIManager.Panels.CSConsole;
-        public override int MinWidth => 400;
+        public override int MinWidth => 750;
         public override int MinHeight => 300;
 
         public InputFieldScroller InputScroll { get; private set; }
@@ -62,36 +62,29 @@ namespace UnityExplorer.UI.Panels
         {
             mainPanelRect.localPosition = Vector2.zero;
             mainPanelRect.pivot = new Vector2(0f, 1f);
-            mainPanelRect.anchorMin = new Vector2(0.4f, 0.1f);
-            mainPanelRect.anchorMax = new Vector2(0.9f, 0.85f);
+            mainPanelRect.anchorMin = new Vector2(0.4f, 0.175f);
+            mainPanelRect.anchorMax = new Vector2(0.85f, 0.925f);
         }
 
         public override void ConstructPanelContent()
         {
-            #region TOP BAR 
+            // Tools Row
 
-            // Main group object
-
-            var topBarObj = UIFactory.CreateHorizontalGroup(this.content, "TopBar", true, true, true, true, 10, new Vector4(8, 8, 30, 30),
-                default, TextAnchor.LowerCenter);
-            UIFactory.SetLayoutElement(topBarObj, minHeight: 50, flexibleHeight: 0);
-
-            //// Top label
-
-            //var topBarLabel = UIFactory.CreateLabel(topBarObj, "TopLabel", "C# Console", TextAnchor.MiddleLeft, default, true, 25);
-            //UIFactory.SetLayoutElement(topBarLabel.gameObject, preferredWidth: 150, flexibleWidth: 5000);
+            var toolsRow = UIFactory.CreateHorizontalGroup(this.content, "ToggleRow", false, false, true, true, 5, new Vector4(8, 8, 10, 5),
+                default, TextAnchor.MiddleLeft);
+            UIFactory.SetLayoutElement(toolsRow, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
 
             // Enable Ctrl+R toggle
 
-            var ctrlRToggleObj = UIFactory.CreateToggle(topBarObj, "CtrlRToggle", out var CtrlRToggle, out Text ctrlRToggleText);
-            UIFactory.SetLayoutElement(ctrlRToggleObj, minWidth: 140, flexibleWidth: 0, minHeight: 25);
+            var ctrlRToggleObj = UIFactory.CreateToggle(toolsRow, "CtrlRToggle", out var CtrlRToggle, out Text ctrlRToggleText);
+            UIFactory.SetLayoutElement(ctrlRToggleObj, minWidth: 150, flexibleWidth: 0, minHeight: 25);
             ctrlRToggleText.alignment = TextAnchor.UpperLeft;
-            ctrlRToggleText.text = "Run on Ctrl+R";
+            ctrlRToggleText.text = "Compile on Ctrl+R";
             CtrlRToggle.onValueChanged.AddListener((bool val) => { OnCtrlRToggled?.Invoke(val); });
 
             // Enable Suggestions toggle
 
-            var suggestToggleObj = UIFactory.CreateToggle(topBarObj, "SuggestionToggle", out var SuggestionsToggle, out Text suggestToggleText);
+            var suggestToggleObj = UIFactory.CreateToggle(toolsRow, "SuggestionToggle", out var SuggestionsToggle, out Text suggestToggleText);
             UIFactory.SetLayoutElement(suggestToggleObj, minWidth: 120, flexibleWidth: 0, minHeight: 25);
             suggestToggleText.alignment = TextAnchor.UpperLeft;
             suggestToggleText.text = "Suggestions";
@@ -99,15 +92,25 @@ namespace UnityExplorer.UI.Panels
 
             // Enable Auto-indent toggle
 
-            var autoIndentToggleObj = UIFactory.CreateToggle(topBarObj, "IndentToggle", out var AutoIndentToggle, out Text autoIndentToggleText);
+            var autoIndentToggleObj = UIFactory.CreateToggle(toolsRow, "IndentToggle", out var AutoIndentToggle, out Text autoIndentToggleText);
             UIFactory.SetLayoutElement(autoIndentToggleObj, minWidth: 180, flexibleWidth: 0, minHeight: 25);
             autoIndentToggleText.alignment = TextAnchor.UpperLeft;
             autoIndentToggleText.text = "Auto-indent";
             AutoIndentToggle.onValueChanged.AddListener((bool val) => { OnAutoIndentToggled?.Invoke(val); });
 
-            #endregion
+            // Buttons
 
-            #region CONSOLE INPUT
+            var resetButton = UIFactory.CreateButton(toolsRow, "ResetButton", "Reset", new Color(0.33f, 0.33f, 0.33f));
+            UIFactory.SetLayoutElement(resetButton.Component.gameObject, minHeight: 28, minWidth: 80, flexibleHeight: 0);
+            resetButton.ButtonText.fontSize = 15;
+            resetButton.OnClick += OnResetClicked;
+
+            var compileButton = UIFactory.CreateButton(toolsRow, "CompileButton", "Compile", new Color(0.33f, 0.5f, 0.33f));
+            UIFactory.SetLayoutElement(compileButton.Component.gameObject, minHeight: 28, minWidth: 130, flexibleHeight: 0);
+            compileButton.ButtonText.fontSize = 15;
+            compileButton.OnClick += OnCompileClicked;
+
+            // Console Input
 
             int fontSize = 16;
 
@@ -140,24 +143,6 @@ namespace UnityExplorer.UI.Panels
             Input.PlaceholderText.font = UIManager.ConsoleFont;
             HighlightText.font = UIManager.ConsoleFont;
 
-            #endregion
-
-            #region COMPILE BUTTON BAR
-
-            var horozGroupObj = UIFactory.CreateHorizontalGroup(this.content, "BigButtons", true, true, true, true, 0, new Vector4(2, 2, 2, 2),
-                new Color(1, 1, 1, 0));
-
-            var resetButton = UIFactory.CreateButton(horozGroupObj, "ResetButton", "Reset", new Color(0.33f, 0.33f, 0.33f));
-            UIFactory.SetLayoutElement(resetButton.Component.gameObject, minHeight: 45, minWidth: 80, flexibleHeight: 0);
-            resetButton.ButtonText.fontSize = 18;
-            resetButton.OnClick += OnResetClicked;
-
-            var compileButton = UIFactory.CreateButton(horozGroupObj, "CompileButton", "Compile", new Color(0.33f, 0.5f, 0.33f));
-            UIFactory.SetLayoutElement(compileButton.Component.gameObject, minHeight: 45, minWidth: 80, flexibleHeight: 0);
-            compileButton.ButtonText.fontSize = 18;
-            compileButton.OnClick += OnCompileClicked;
-
-            #endregion
 
         }
     }

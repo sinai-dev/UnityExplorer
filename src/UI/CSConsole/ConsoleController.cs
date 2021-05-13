@@ -227,8 +227,8 @@ namespace UnityExplorer.UI.CSConsole
                 if (ScriptEvaluator._reportPrinter.ErrorsCount > 0)
                     throw new FormatException($"Unable to compile the code. Evaluator's last output was:\r\n{output}");
 
-                if (!supressLog)
-                    ExplorerCore.Log("Code executed successfully.");
+                //if (!supressLog)
+                //    ExplorerCore.Log("Code executed successfully.");
             }
             catch (FormatException fex)
             {
