@@ -143,6 +143,8 @@ namespace UnityExplorer.UI.Panels
                 mainPanelRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, MinHeight);
         }
 
+        public GameObject titleBar;
+
         public void ConstructUI()
         {
             //this.Enabled = true;
@@ -152,12 +154,16 @@ namespace UnityExplorer.UI.Panels
                 // create navbar button
 
                 NavButton = UIFactory.CreateButton(UIManager.NavbarButtonHolder, $"Button_{PanelType}", Name);
-                UIFactory.SetLayoutElement(NavButton.Component.gameObject, minWidth: 118, flexibleWidth: 0);
+                var navBtn = NavButton.Component.gameObject;
+                navBtn.AddComponent<ContentSizeFitter>().horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+                UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(navBtn, false, true, true, true, 0, 0, 0, 5, 5, TextAnchor.MiddleCenter);
+                UIFactory.SetLayoutElement(navBtn, minWidth: 80);
+
                 RuntimeProvider.Instance.SetColorBlock(NavButton.Component, UIManager.disabledButtonColor, UIManager.disabledButtonColor * 1.2f);
-                NavButton.OnClick += () =>
-                {
-                    UIManager.TogglePanel(PanelType);
-                };
+                NavButton.OnClick += () => { UIManager.TogglePanel(PanelType); };
+
+                var txtObj = navBtn.transform.Find("Text").gameObject;
+                txtObj.AddComponent<ContentSizeFitter>().horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
             }
 
             // create core canvas 
@@ -175,18 +181,18 @@ namespace UnityExplorer.UI.Panels
             SetTransformDefaults();
 
             // Title bar
-            var titleGroup = UIFactory.CreateHorizontalGroup(content, "TitleBar", false, true, true, true, 2,
+            titleBar = UIFactory.CreateHorizontalGroup(content, "TitleBar", false, true, true, true, 2,
                 new Vector4(2, 2, 2, 2), new Color(0.06f, 0.06f, 0.06f));
-            UIFactory.SetLayoutElement(titleGroup, minHeight: 25, flexibleHeight: 0);
+            UIFactory.SetLayoutElement(titleBar, minHeight: 25, flexibleHeight: 0);
 
             // Title text
 
-            var titleTxt = UIFactory.CreateLabel(titleGroup, "TitleBar", Name, TextAnchor.MiddleLeft);
+            var titleTxt = UIFactory.CreateLabel(titleBar, "TitleBar", Name, TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(titleTxt.gameObject, minWidth: 250, minHeight: 25, flexibleHeight: 0, flexibleWidth: 0);
 
             // close button
 
-            var closeHolder = UIFactory.CreateUIObject("CloseHolder", titleGroup);
+            var closeHolder = UIFactory.CreateUIObject("CloseHolder", titleBar);
             UIFactory.SetLayoutElement(closeHolder, minHeight: 25, flexibleHeight: 0, minWidth: 30, flexibleWidth: 9999);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(closeHolder, false, false, true, true, 0, childAlignment: TextAnchor.MiddleRight);
             var closeBtn = UIFactory.CreateButton(closeHolder, "CloseButton", "—");
@@ -200,11 +206,11 @@ namespace UnityExplorer.UI.Panels
             };
 
             if (!CanDragAndResize)
-                titleGroup.SetActive(false);
+                titleBar.SetActive(false);
 
             // Panel dragger
 
-            Dragger = new PanelDragger(titleGroup.GetComponent<RectTransform>(), mainPanelRect, this);
+            Dragger = new PanelDragger(titleBar.GetComponent<RectTransform>(), mainPanelRect, this);
             Dragger.OnFinishResize += OnFinishResize;
             Dragger.OnFinishDrag += OnFinishDrag;
 
