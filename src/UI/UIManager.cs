@@ -9,6 +9,7 @@ using UnityEngine.UI;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Input;
 using UnityExplorer.UI.CSConsole;
+using UnityExplorer.UI.Inspectors;
 using UnityExplorer.UI.Models;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Utility;
@@ -26,7 +27,8 @@ namespace UnityExplorer.UI
             CSConsole,
             Options,
             ConsoleLog,
-            AutoCompleter
+            AutoCompleter,
+            MouseInspector
         }
 
         public static bool Initializing { get; private set; } = true;
@@ -48,6 +50,7 @@ namespace UnityExplorer.UI
         // Main Navbar UI
         public static RectTransform NavBarRect;
         public static GameObject NavbarButtonHolder;
+        public static Dropdown MouseInspectDropdown;
 
         internal static readonly Color enabledButtonColor = new Color(0.2f, 0.4f, 0.28f);
         internal static readonly Color disabledButtonColor = new Color(0.25f, 0.25f, 0.25f);
@@ -117,13 +120,13 @@ namespace UnityExplorer.UI
             if (!CanvasRoot || Initializing)
                 return;
 
-            //if (InspectUnderMouse.Inspecting)
-            //{
-            //    InspectUnderMouse.UpdateInspect();
-            //    return;
-            //}
+            if (InspectUnderMouse.Inspecting)
+            {
+                InspectUnderMouse.Instance.UpdateInspect();
+                return;
+            }
 
-            if (InputManager.GetKeyDown(ConfigManager.Main_Menu_Toggle.Value))
+            if (InputManager.GetKeyDown(ConfigManager.Master_Toggle.Value))
                 ShowMenu = !ShowMenu;
 
             if (!ShowMenu)
@@ -157,15 +160,13 @@ namespace UnityExplorer.UI
 
             CreateTopNavBar();
 
-            // TODO (or probably just do this when showing it for first time)
-            //InspectUnderMouse.ConstructUI();
-
             UIPanels.Add(Panels.AutoCompleter, new AutoCompleteModal());
             UIPanels.Add(Panels.ObjectExplorer, new ObjectExplorerPanel());
             UIPanels.Add(Panels.Inspector, new InspectorPanel());
             UIPanels.Add(Panels.CSConsole, new CSConsolePanel());
-            UIPanels.Add(Panels.Options, new OptionsPanel());
             UIPanels.Add(Panels.ConsoleLog, new LogPanel());
+            UIPanels.Add(Panels.Options, new OptionsPanel());
+            UIPanels.Add(Panels.MouseInspector, new InspectUnderMouse());
 
             foreach (var panel in UIPanels.Values)
                 panel.ConstructUI();
@@ -220,28 +221,37 @@ namespace UnityExplorer.UI
             NavBarRect.pivot = new Vector2(0.5f, 1f);
             NavBarRect.anchorMin = new Vector2(0.5f, 1f);
             NavBarRect.anchorMax = new Vector2(0.5f, 1f);
-            NavBarRect.sizeDelta = new Vector2(1000f, 35f);
+            NavBarRect.sizeDelta = new Vector2(900f, 35f);
 
             // UnityExplorer title
 
             string titleTxt = $"{ExplorerCore.NAME} <i><color=grey>{ExplorerCore.VERSION}</color></i>";
             var title = UIFactory.CreateLabel(navbarPanel, "Title", titleTxt, TextAnchor.MiddleLeft, default, true, 18);
-            UIFactory.SetLayoutElement(title.gameObject, minWidth: 240, flexibleWidth: 0);
+            UIFactory.SetLayoutElement(title.gameObject, minWidth: 180, flexibleWidth: 0);
 
             // Navbar
 
             NavbarButtonHolder = UIFactory.CreateUIObject("NavButtonHolder", navbarPanel);
             UIFactory.SetLayoutElement(NavbarButtonHolder, flexibleHeight: 999, flexibleWidth: 999);
-            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(NavbarButtonHolder, true, true, true, true, 4, 2, 2, 2, 2);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(NavbarButtonHolder, false, true, true, true, 4, 2, 2, 2, 2);
+
+            // Inspect under mouse dropdown
+
+            var mouseDropdown = UIFactory.CreateDropdown(navbarPanel, out MouseInspectDropdown, "Mouse Inspect", 14,
+                InspectUnderMouse.OnDropdownSelect);
+            UIFactory.SetLayoutElement(mouseDropdown, minHeight: 25, minWidth: 140);
+            MouseInspectDropdown.options.Add(new Dropdown.OptionData("Mouse Inspect"));
+            MouseInspectDropdown.options.Add(new Dropdown.OptionData("World"));
+            MouseInspectDropdown.options.Add(new Dropdown.OptionData("UI"));
 
             // Hide menu button
 
-            var closeBtn = UIFactory.CreateButton(navbarPanel, "CloseButton", ConfigManager.Main_Menu_Toggle.Value.ToString());
+            var closeBtn = UIFactory.CreateButton(navbarPanel, "CloseButton", ConfigManager.Master_Toggle.Value.ToString());
             UIFactory.SetLayoutElement(closeBtn.Component.gameObject, minHeight: 25, minWidth: 80, flexibleWidth: 0);
             RuntimeProvider.Instance.SetColorBlock(closeBtn.Component, new Color(0.63f, 0.32f, 0.31f),
                 new Color(0.81f, 0.25f, 0.2f), new Color(0.6f, 0.18f, 0.16f));
 
-            ConfigManager.Main_Menu_Toggle.OnValueChanged += (KeyCode val) => { closeBtn.ButtonText.text = val.ToString(); };
+            ConfigManager.Master_Toggle.OnValueChanged += (KeyCode val) => { closeBtn.ButtonText.text = val.ToString(); };
 
             closeBtn.OnClick += () => { ShowMenu = false; };
         }
