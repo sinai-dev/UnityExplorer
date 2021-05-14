@@ -33,6 +33,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         public static ButtonListSource<Suggestion> dataHandler;
         public static ScrollPool<ButtonCell> scrollPool;
+        private static GameObject navigationTipRow;
 
         private static List<Suggestion> Suggestions = new List<Suggestion>();
         private static int SelectedIndex = 0;
@@ -50,6 +51,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         public void TakeOwnership(ISuggestionProvider provider)
         {
             CurrentHandler = provider;
+            navigationTipRow.SetActive(provider.AllowNavigation);
         }
 
         public void ReleaseOwnership(ISuggestionProvider provider)
@@ -199,20 +201,18 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             var suggestion = Suggestions[index];
             cell.Button.ButtonText.text = suggestion.DisplayText;
 
-            if (index == SelectedIndex && setFirstCell)
+            if (CurrentHandler.AllowNavigation && index == SelectedIndex && setFirstCell)
             {
+                float diff = 0f;
+                // if cell is too far down
                 if (cell.Rect.MinY() > scrollPool.Viewport.MinY())
-                {
-                    // cell is too far down
-                    var diff = cell.Rect.MinY() - scrollPool.Viewport.MinY();
-                    var pos = scrollPool.Content.anchoredPosition;
-                    pos.y -= diff;
-                    scrollPool.Content.anchoredPosition = pos;
-                }
+                    diff = cell.Rect.MinY() - scrollPool.Viewport.MinY();
+                // if cell is too far up
                 else if (cell.Rect.MaxY() < scrollPool.Viewport.MaxY())
+                    diff = cell.Rect.MaxY() - scrollPool.Viewport.MaxY();
+
+                if (diff != 0.0f)
                 {
-                    // cell is too far up
-                    var diff = cell.Rect.MaxY() - scrollPool.Viewport.MaxY();
                     var pos = scrollPool.Content.anchoredPosition;
                     pos.y -= diff;
                     scrollPool.Content.anchoredPosition = pos;
@@ -312,9 +312,9 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(scrollContent, true, false, true, false);
 
-            var bottomRow = UIFactory.CreateHorizontalGroup(this.content, "BottomRow", true, true, true, true, 0, new Vector4(2, 2, 2, 2));
-            UIFactory.SetLayoutElement(bottomRow, minHeight: 20, flexibleWidth: 9999);
-            UIFactory.CreateLabel(bottomRow, "HelpText", "Control+Up/Down to select, Enter to use, Esc to hide", 
+            navigationTipRow = UIFactory.CreateHorizontalGroup(this.content, "BottomRow", true, true, true, true, 0, new Vector4(2, 2, 2, 2));
+            UIFactory.SetLayoutElement(navigationTipRow, minHeight: 20, flexibleWidth: 9999);
+            UIFactory.CreateLabel(navigationTipRow, "HelpText", "Control+Up/Down to select, Enter to use", 
                 TextAnchor.MiddleLeft, Color.grey, false, 13);
 
             UIRoot.SetActive(false);

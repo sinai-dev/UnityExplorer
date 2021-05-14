@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityExplorer.Core.Input;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI.Models;
 using UnityExplorer.UI.Panels;
@@ -30,6 +31,8 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         private HashSet<Type> allowedTypes;
 
         private string chosenSuggestion;
+
+        bool ISuggestionProvider.AllowNavigation => false;
 
         public TypeCompleter(Type baseType, InputFieldRef inputField)
         {

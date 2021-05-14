@@ -12,6 +12,8 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         InputFieldRef InputField { get; }
         bool AnchorToCaretPosition { get; }
 
+        bool AllowNavigation { get; }
+
         void OnSuggestionClicked(Suggestion suggestion);
     }
 }

@@ -14,6 +14,8 @@ namespace UnityExplorer.UI.CSConsole
 
         public bool AnchorToCaretPosition => true;
 
+        bool ISuggestionProvider.AllowNavigation => true;
+
         public void OnSuggestionClicked(Suggestion suggestion)
         {
             ConsoleController.InsertSuggestionAtCaret(suggestion.UnderlyingValue);
