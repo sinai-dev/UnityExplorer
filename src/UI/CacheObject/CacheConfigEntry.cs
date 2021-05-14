@@ -29,8 +29,8 @@ namespace UnityExplorer.UI.CacheObject
 
         public void UpdateValueFromSource()
         {
-            if (RefConfigElement.BoxedValue.Equals(this.Value))
-                return;
+            //if (RefConfigElement.BoxedValue.Equals(this.Value))
+            //    return;
 
             SetValueFromSource(RefConfigElement.BoxedValue);
 

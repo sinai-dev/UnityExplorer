@@ -16,7 +16,7 @@ namespace UnityExplorer.Core.Config
         // See the UnityExplorer.Loader namespace for the implementations.
         public static ConfigHandler Handler { get; private set; }
 
-        public static ConfigElement<KeyCode>    Main_Menu_Toggle;
+        public static ConfigElement<KeyCode>    Master_Toggle;
         public static ConfigElement<bool>       Force_Unlock_Mouse;
         public static ConfigElement<KeyCode>    Force_Unlock_Toggle;
         public static ConfigElement<bool>       Aggressive_Mouse_Unlock;
@@ -71,8 +71,8 @@ namespace UnityExplorer.Core.Config
 
         private static void CreateConfigElements()
         {
-            Main_Menu_Toggle = new ConfigElement<KeyCode>("Main Menu Toggle",
-                "The UnityEngine.KeyCode to toggle the UnityExplorer Menu.",
+            Master_Toggle = new ConfigElement<KeyCode>("UnityExplorer Toggle",
+                "The key to enable or disable UnityExplorer's menu and features.",
                 KeyCode.F7);
 
             Hide_On_Startup = new ConfigElement<bool>("Hide On Startup",
