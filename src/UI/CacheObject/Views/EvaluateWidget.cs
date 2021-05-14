@@ -33,7 +33,9 @@ namespace UnityExplorer.UI.CacheObject.Views
         private readonly List<Text> genericArgLabels = new List<Text>();
         private readonly List<TypeCompleter> genericAutocompleters = new List<TypeCompleter>();
 
-        private readonly List<InputFieldRef> inputFields = new List<InputFieldRef>();
+        //private readonly List<InputFieldRef> inputFields = new List<InputFieldRef>();
+        private readonly List<InputFieldRef> argInputFields = new List<InputFieldRef>();
+        private readonly List<InputFieldRef> genericInputFields = new List<InputFieldRef>();
 
         public void OnBorrowedFromPool(CacheMember owner)
         {
@@ -52,7 +54,9 @@ namespace UnityExplorer.UI.CacheObject.Views
 
         public void OnReturnToPool()
         {
-            foreach (var input in inputFields)
+            foreach (var input in argInputFields)
+                input.Text = "";
+            foreach (var input in genericInputFields)
                 input.Text = "";
 
             this.Owner = null;
@@ -190,19 +194,20 @@ namespace UnityExplorer.UI.CacheObject.Views
 
                 var arg = arguments[i];
 
+
                 if (i >= argRows.Count)
                     AddArgRow(i, false);
 
                 argRows[i].SetActive(true);
                 argLabels[i].text = $"{SignatureHighlighter.Parse(arg.ParameterType, false)} <color={SignatureHighlighter.LOCAL_ARG}>{arg.Name}</color>";
                 if (arg.ParameterType == typeof(string))
-                    inputFields[i].PlaceholderText.text = "";
+                    argInputFields[i].PlaceholderText.text = "";
                 else
                 {
                     var elemType = arg.ParameterType;
                     if (elemType.IsByRef)
                         elemType = elemType.GetElementType();
-                    inputFields[i].PlaceholderText.text = $"eg. {ParseUtility.GetExampleInput(elemType)}"; 
+                    argInputFields[i].PlaceholderText.text = $"eg. {ParseUtility.GetExampleInput(elemType)}"; 
                 }
             }
         }
@@ -215,7 +220,7 @@ namespace UnityExplorer.UI.CacheObject.Views
                 AddArgRow(index, genericArgHolder, genericArgRows, genericArgLabels, genericInput, true);
         }
 
-        private void AddArgRow(int index, GameObject parent, List<GameObject> objectList, List<Text> labelList, string[] inputArray, bool autocomplete)
+        private void AddArgRow(int index, GameObject parent, List<GameObject> objectList, List<Text> labelList, string[] inputArray, bool generic)
         {
             var horiGroup = UIFactory.CreateUIObject("ArgRow_" + index, parent);
             UIFactory.SetLayoutElement(horiGroup, minHeight: 25, flexibleHeight: 50, minWidth: 50, flexibleWidth: 9999);
@@ -233,9 +238,13 @@ namespace UnityExplorer.UI.CacheObject.Views
             inputField.Component.lineType = InputField.LineType.MultiLineNewline;
             inputField.UIRoot.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             inputField.OnValueChanged += (string val) => { inputArray[index] = val; };
-            inputFields.Add(inputField);
 
-            if (autocomplete)
+            if (!generic)
+                argInputFields.Add(inputField);
+            else
+                genericInputFields.Add(inputField);
+
+            if (generic)
                 genericAutocompleters.Add(new TypeCompleter(null, inputField));
         }
 
