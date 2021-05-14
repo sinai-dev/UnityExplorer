@@ -71,9 +71,21 @@ namespace UnityExplorer.UI.Panels
                 if (handledInstanceThisFrame)
                     break;
             }
+
+            if (wasAnyDragging && state == MouseState.NotPressed)
+            {
+                foreach (var instance in Instances)
+                    instance.WasDragging = false;
+                wasAnyDragging = false;
+            }
         }
 
         #endregion
+
+        public static bool ResizePrompting => s_resizeCursorObj && s_resizeCursorObj.activeSelf;
+        public static GameObject s_resizeCursorObj;
+
+        internal static bool wasAnyDragging;
 
         // Instance
 
@@ -94,8 +106,6 @@ namespace UnityExplorer.UI.Panels
         // Resizing
         private const int RESIZE_THICKNESS = 10;
 
-        public static GameObject s_resizeCursorObj;
-
         //internal readonly Vector2 minResize = new Vector2(200, 50);
 
         private bool WasResizing { get; set; }
@@ -103,8 +113,6 @@ namespace UnityExplorer.UI.Panels
         private Vector2 m_lastResizePos;
 
         private bool WasHoveringResize => s_resizeCursorObj.activeInHierarchy;
-
-        public static bool ResizePrompting => s_resizeCursorObj && s_resizeCursorObj.activeSelf;
 
         private ResizeTypes m_lastResizeHoverType;
 
@@ -217,17 +225,26 @@ namespace UnityExplorer.UI.Panels
 
         public void OnBeginDrag()
         {
+            wasAnyDragging = true;
             WasDragging = true;
             m_lastDragPosition = InputManager.MousePosition;
         }
 
         public void OnDrag()
         {
-            Vector2 diff = (Vector2)InputManager.MousePosition - m_lastDragPosition;
-            m_lastDragPosition = InputManager.MousePosition;
+            var mousePos = InputManager.MousePosition;
 
-            Vector3 pos = Panel.localPosition;
-            pos += (Vector3)diff;
+            Vector2 diff = (Vector2)mousePos - m_lastDragPosition;
+            m_lastDragPosition = mousePos;
+
+            var pos = Panel.localPosition + (Vector3)diff;
+
+            // Prevent panel going oustide screen bounds
+            var halfW = Screen.width * 0.5f;
+            var halfH = Screen.height * 0.5f;
+            pos.x = Math.Max(-halfW, Math.Min(pos.x, halfW - Panel.rect.width));
+            pos.y = Math.Max(-halfH + Panel.rect.height, Math.Min(pos.y, halfH));
+
             Panel.localPosition = pos;
         }
 
