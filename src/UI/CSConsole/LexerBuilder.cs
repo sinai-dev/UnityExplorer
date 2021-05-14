@@ -115,6 +115,13 @@ namespace UnityExplorer.UI.CSConsole
                 lastUnhighlighted = match.endIndex + 1;
             }
 
+            // Append trailing unhighlighted input
+            while (lastUnhighlighted <= endIdx)
+            {
+                sb.Append(input[lastUnhighlighted]);
+                lastUnhighlighted++;
+            }
+
             return sb.ToString();
         }
 

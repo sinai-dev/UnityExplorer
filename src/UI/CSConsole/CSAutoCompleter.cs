@@ -52,12 +52,12 @@ namespace UnityExplorer.UI.CSConsole
                 return;
             }
 
-            // get the current composition string (from caret back to last delimiter or whitespace)
+            // get the current composition string (from caret back to last delimiter)
             while (start > 0)
             {
                 start--;
                 char c = InputField.Text[start];
-                if (char.IsWhiteSpace(c) || delimiters.Contains(c))
+                if (delimiters.Contains(c))
                 {
                     start++;
                     break;
@@ -68,25 +68,25 @@ namespace UnityExplorer.UI.CSConsole
             // Get MCS completions
 
             string[] evaluatorCompletions = ConsoleController.Evaluator.GetCompletions(input, out string prefix);
-
-            if (!string.IsNullOrEmpty(prefix) && evaluatorCompletions != null && evaluatorCompletions.Any())
+            
+            if (evaluatorCompletions != null && evaluatorCompletions.Any())
             {
                 suggestions.AddRange(from completion in evaluatorCompletions
-                                     select new Suggestion($"<color=cyan>{prefix}</color>{completion}", completion));
+                                     select new Suggestion(GetHighlightString(prefix, completion), completion));
             }
 
             // Get manual keyword completions
 
             foreach (var kw in KeywordLexer.keywords)
             {
-                if (kw.StartsWith(input))
+                if (kw.StartsWith(input) && kw.Length > input.Length)
                 {
+                    if (!keywordHighlights.ContainsKey(kw))
+                        keywordHighlights.Add(kw, $"<color=#{SignatureHighlighter.keywordBlueHex}>{kw}</color>");
+            
                     string completion = kw.Substring(input.Length, kw.Length - input.Length);
-
-                    suggestions.Add(new Suggestion(
-                        $"<color=cyan>{input}</color>" +
-                        $"<color=#{SignatureHighlighter.keywordBlueHex}>{completion}</color>",
-                        completion));
+            
+                    suggestions.Add(new Suggestion(keywordHighlights[kw], completion));
                 }
             }
 
@@ -99,6 +99,21 @@ namespace UnityExplorer.UI.CSConsole
             {
                 AutoCompleteModal.Instance.ReleaseOwnership(this);
             }
+        }
+
+        private readonly Dictionary<string, string> keywordHighlights = new Dictionary<string, string>();
+
+        private readonly StringBuilder highlightBuilder = new StringBuilder();
+        private const string OPEN_HIGHLIGHT = "<color=cyan>";
+        
+        private string GetHighlightString(string prefix, string completion)
+        {
+            highlightBuilder.Clear();
+            highlightBuilder.Append(OPEN_HIGHLIGHT);
+            highlightBuilder.Append(prefix);
+            highlightBuilder.Append(SignatureHighlighter.CLOSE_COLOR);
+            highlightBuilder.Append(completion);
+            return highlightBuilder.ToString();
         }
     }
 }

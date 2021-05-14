@@ -80,7 +80,7 @@ namespace UnityExplorer.UI.Panels
 
             CurrentStreamPath = Path.Combine(path, fileName);
 
-            File.WriteAllLines(CurrentStreamPath, Logs.Select(it => it.message));
+            File.WriteAllLines(CurrentStreamPath, Logs.Select(it => it.message).ToArray());
         }
 
         // Logging

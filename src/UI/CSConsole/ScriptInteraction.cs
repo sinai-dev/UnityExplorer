@@ -7,33 +7,16 @@ using System.Linq;
 using UnityExplorer.Core.Runtime;
 using System.Text;
 
+/*
+    Welcome to the UnityExplorer C# Console!
+    Use the Help dropdown to see detailed examples of how to use this console.
+    To see your output, use the Log panel or a Console Log window.
+*/
+
 namespace UnityExplorer.UI.CSConsole
 {
     public class ScriptInteraction : InteractiveBase
     {
-        internal const string STARTUP_TEXT = @"<color=#5d8556>// Compile a using directive to add it to the console (until Reset)</color>
-using SomeNamespace;
-
-<color=#5d8556>// Compile a C# class and it will exist until Reset</color>
-<color=#5a728c>public class</color> SomeClass {
-    <color=#5a728c>public static void</color> SomeMethod() {
-    }
-}
-
-<color=#5d8556>// If not compiling any usings or classes, the code will run immediately (REPL).
-// Variables you define in REPL mode will also exist until Reset.
-// In REPL context, the following helpers are available:</color>
-
-* System.Object <color=#add490>CurrentTarget</color> - the target of the active Inspector tab
-* System.Object[] <color=#add490>AllTargets</color> - an array containing the targets of all Inspector tabs
-* void <color=#add490>Log(""message"")</color> - prints a message to the console log
-* void <color=#add490>Inspect(someObject)</color> - inspect an instance, eg. Inspect(Camera.main);
-* void <color=#add490>Inspect(typeof(SomeClass))</color> - inspect a Class with static reflection
-* void <color=#add490>StartCoroutine(ienumerator)</color> - start the IEnumerator as a Coroutine
-* void <color=#add490>GetUsing()</color> - prints the current using directives to the console log
-* void <color=#add490>GetVars()</color> - prints the variables you have defined and their current values
-* void <color=#add490>GetClasses()</color> - prints the names of the classes you have defined, and their members";
-
         public static void Log(object message)
         {
             ExplorerCore.Log(message);
@@ -41,7 +24,7 @@ using SomeNamespace;
 
         public static object CurrentTarget => InspectorManager.ActiveInspector?.Target;
 
-        public static object[] AllTargets() => InspectorManager.Inspectors.Select(it => it.Target).ToArray();
+        public static object[] AllTargets => InspectorManager.Inspectors.Select(it => it.Target).ToArray();
 
         public static void Inspect(object obj)
         {
@@ -53,7 +36,7 @@ using SomeNamespace;
             InspectorManager.Inspect(type);
         }
 
-        public static void StartCoroutine(IEnumerator ienumerator)
+        public static void Start(IEnumerator ienumerator)
         {
             RuntimeProvider.Instance.StartCoroutine(ienumerator);
         }
@@ -65,7 +48,11 @@ using SomeNamespace;
 
         public static void GetVars()
         {
-            Log(Evaluator.GetVars());
+            var vars = Evaluator.GetVars()?.Trim();
+            if (string.IsNullOrEmpty(vars))
+                ExplorerCore.LogWarning("No variables seem to be defined!");
+            else
+                Log(vars);
         }
 
         public static void GetClasses()

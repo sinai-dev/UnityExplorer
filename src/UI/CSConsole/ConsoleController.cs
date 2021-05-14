@@ -38,9 +38,8 @@ namespace UnityExplorer.UI.CSConsole
         {
             "System",
             "System.Linq",
-            "System.Collections",
+            "System.Text",
             "System.Collections.Generic",
-            "System.Reflection",
             "UnityEngine",
 #if CPP
             "UnhollowerBaseLib",
@@ -68,15 +67,18 @@ namespace UnityExplorer.UI.CSConsole
             Lexer = new LexerBuilder();
             Completer = new CSAutoCompleter();
 
+            SetupHelpInteraction();
+
             Panel.OnInputChanged += OnInputChanged;
             Panel.InputScroll.OnScroll += OnInputScrolled;
             Panel.OnCompileClicked += Evaluate;
             Panel.OnResetClicked += ResetConsole;
+            Panel.OnHelpDropdownChanged += HelpSelected;
             Panel.OnAutoIndentToggled += OnToggleAutoIndent;
             Panel.OnCtrlRToggled += OnToggleCtrlRShortcut;
             Panel.OnSuggestionsToggled += OnToggleSuggestions;
-
         }
+
 
         #region UI Listeners and options
 
@@ -98,81 +100,6 @@ namespace UnityExplorer.UI.CSConsole
         }
 
         #endregion
-
-        // Updating and event listeners
-
-        private static bool settingAutoCompletion;
-
-        private static void OnInputScrolled() => HighlightVisibleInput();
-
-        // Invoked at most once per frame
-        private static void OnInputChanged(string value)
-        {
-            if (!settingAutoCompletion && EnableSuggestions)
-                Completer.CheckAutocompletes();
-
-            if (!settingAutoCompletion && EnableAutoIndent)
-                DoAutoIndent();
-
-            HighlightVisibleInput();
-        }
-
-        public static void Update()
-        {
-            UpdateCaret(out bool caretMoved);
-
-            if (!settingAutoCompletion && EnableSuggestions && caretMoved)
-            {
-                Completer.CheckAutocompletes();
-            }
-
-            if (EnableCtrlRShortcut
-                && (InputManager.GetKey(KeyCode.LeftControl) || InputManager.GetKey(KeyCode.RightControl))
-                && InputManager.GetKeyDown(KeyCode.R))
-            {
-                Evaluate(Panel.Input.Text);
-            }
-        }
-
-        private const int CSCONSOLE_LINEHEIGHT = 18;
-
-        private static void UpdateCaret(out bool caretMoved)
-        {
-            int prevCaret = LastCaretPosition;
-            caretMoved = false;
-
-            if (Input.Component.isFocused)
-            {
-                LastCaretPosition = Input.Component.caretPosition;
-                caretMoved = LastCaretPosition != prevCaret;
-            }
-
-            if (Input.Text.Length == 0)
-                return;
-
-            // If caret moved, ensure caret is visible in the viewport
-            if (caretMoved)
-            {
-                var charInfo = Input.TextGenerator.characters[LastCaretPosition];
-                var charTop = charInfo.cursorPos.y;
-                var charBot = charTop - CSCONSOLE_LINEHEIGHT;
-
-                var viewportMin = Input.Rect.rect.height - Input.Rect.anchoredPosition.y - (Input.Rect.rect.height * 0.5f);
-                var viewportMax = viewportMin - Panel.InputScroll.ViewportRect.rect.height;
-
-                float diff = 0f;
-                if (charTop > viewportMin)
-                    diff = charTop - viewportMin;
-                else if (charBot < viewportMax)
-                    diff = charBot - viewportMax;
-
-                if (Math.Abs(diff) > 1)
-                {
-                    var rect = Input.Rect;
-                    rect.anchoredPosition = new Vector2(rect.anchoredPosition.x, rect.anchoredPosition.y - diff);
-                }
-            }
-        }
 
 
         #region Evaluating
@@ -216,19 +143,43 @@ namespace UnityExplorer.UI.CSConsole
         {
             try
             {
-                Evaluator.Run(input);
+                // Try to "Compile" the code (tries to interpret it as REPL)
+                var evaluation = Evaluator.Compile(input);
+                if (evaluation != null)
+                {
+                    // Valid REPL, we have a delegate to the evaluation.
+                    try
+                    {
+                        object ret = null;
+                        evaluation.Invoke(ref ret);
+                        var result = ret?.ToString();
+                        if (!string.IsNullOrEmpty(result))
+                            ExplorerCore.Log($"Invoked REPL, result: {ret}");
+                        else
+                            ExplorerCore.Log($"Invoked REPL (no return value)");
+                    }
+                    catch (Exception ex)
+                    {
+                        ExplorerCore.LogWarning($"Exception invoking REPL: {ex}");
+                    }
+                }
+                else
+                {
+                    // The input was not recognized as an evaluation. Compile the code.
 
-                string output = ScriptEvaluator._textWriter.ToString();
-                var outputSplit = output.Split('\n');
-                if (outputSplit.Length >= 2)
-                    output = outputSplit[outputSplit.Length - 2];
-                evaluatorOutput.Clear();
+                    Evaluator.Run(input);
 
-                if (ScriptEvaluator._reportPrinter.ErrorsCount > 0)
-                    throw new FormatException($"Unable to compile the code. Evaluator's last output was:\r\n{output}");
+                    string output = ScriptEvaluator._textWriter.ToString();
+                    var outputSplit = output.Split('\n');
+                    if (outputSplit.Length >= 2)
+                        output = outputSplit[outputSplit.Length - 2];
+                    evaluatorOutput.Clear();
 
-                //if (!supressLog)
-                //    ExplorerCore.Log("Code executed successfully.");
+                    if (ScriptEvaluator._reportPrinter.ErrorsCount > 0)
+                        throw new FormatException($"Unable to compile the code. Evaluator's last output was:\r\n{output}");
+                    else if (!supressLog)
+                        ExplorerCore.Log($"Code compiled without errors.");
+                }
             }
             catch (FormatException fex)
             {
@@ -243,6 +194,145 @@ namespace UnityExplorer.UI.CSConsole
         }
 
         #endregion
+
+
+        // Updating and event listeners
+
+        private static bool settingCaretCoroutine;
+
+        private static void OnInputScrolled() => HighlightVisibleInput();
+
+        private static string previousInput;
+
+        // Invoked at most once per frame
+        private static void OnInputChanged(string value)
+        {
+            // prevent escape wiping input
+            if (InputManager.GetKeyDown(KeyCode.Escape))
+            {
+                Input.Text = previousInput;
+                
+                if (EnableSuggestions && AutoCompleteModal.CheckEscape(Completer))
+                    OnAutocompleteEscaped();
+
+                return;
+            }
+
+            previousInput = value;
+
+            if (EnableSuggestions && AutoCompleteModal.CheckEnter(Completer))
+            {
+                OnAutocompleteEnter();
+            }
+            else if (!settingCaretCoroutine)
+            {
+                if (EnableSuggestions)
+                    Completer.CheckAutocompletes();
+
+                if (EnableAutoIndent)
+                    DoAutoIndent();
+            }
+
+            HighlightVisibleInput();
+        }
+
+        public static void Update()
+        {
+            UpdateCaret(out bool caretMoved);
+
+            if (!settingCaretCoroutine && EnableSuggestions && AutoCompleteModal.CheckEscape(Completer))
+            {
+                OnAutocompleteEscaped();
+                return;
+            }
+
+            if (!settingCaretCoroutine && EnableSuggestions && caretMoved)
+            {
+                Completer.CheckAutocompletes();
+            }
+
+            if (EnableCtrlRShortcut
+                && (InputManager.GetKey(KeyCode.LeftControl) || InputManager.GetKey(KeyCode.RightControl))
+                && InputManager.GetKeyDown(KeyCode.R))
+            {
+                Evaluate(Panel.Input.Text);
+            }
+        }
+
+        private const int CSCONSOLE_LINEHEIGHT = 18;
+
+        private static void UpdateCaret(out bool caretMoved)
+        {
+            int prevCaret = LastCaretPosition;
+            caretMoved = false;
+
+            // Override up/down arrow movement when autocompleting
+            if (EnableSuggestions && AutoCompleteModal.CheckNavigation(Completer))
+            {
+                Input.Component.caretPosition = LastCaretPosition;
+                return;
+            }
+
+            if (Input.Component.isFocused)
+            {
+                LastCaretPosition = Input.Component.caretPosition;
+                caretMoved = LastCaretPosition != prevCaret;
+            }
+
+            if (Input.Text.Length == 0)
+                return;
+
+            // If caret moved, ensure caret is visible in the viewport
+            if (caretMoved)
+            {
+                var charInfo = Input.TextGenerator.characters[LastCaretPosition];
+                var charTop = charInfo.cursorPos.y;
+                var charBot = charTop - CSCONSOLE_LINEHEIGHT;
+
+                var viewportMin = Input.Rect.rect.height - Input.Rect.anchoredPosition.y - (Input.Rect.rect.height * 0.5f);
+                var viewportMax = viewportMin - Panel.InputScroll.ViewportRect.rect.height;
+
+                float diff = 0f;
+                if (charTop > viewportMin)
+                    diff = charTop - viewportMin;
+                else if (charBot < viewportMax)
+                    diff = charBot - viewportMax;
+
+                if (Math.Abs(diff) > 1)
+                {
+                    var rect = Input.Rect;
+                    rect.anchoredPosition = new Vector2(rect.anchoredPosition.x, rect.anchoredPosition.y - diff);
+                }
+            }
+        }
+
+        private static void SetCaretPosition(int caretPosition)
+        {
+            settingCaretCoroutine = true;
+            RuntimeProvider.Instance.StartCoroutine(SetAutocompleteCaretCoro(caretPosition));
+        }
+
+        private static IEnumerator SetAutocompleteCaretCoro(int caretPosition)
+        {
+            var color = Input.Component.selectionColor;
+            color.a = 0f;
+            Input.Component.selectionColor = color;
+            EventSystem.current.SetSelectedGameObject(null, null);
+            yield return null;
+
+            EventSystem.current.SetSelectedGameObject(Input.UIRoot, null);
+            Input.Component.Select();
+            yield return null;
+
+            Input.Component.caretPosition = caretPosition;
+            Input.Component.selectionFocusPosition = caretPosition;
+            LastCaretPosition = Input.Component.caretPosition;
+
+            color.a = defaultInputFieldAlpha;
+            Input.Component.selectionColor = color;
+
+            settingCaretCoroutine = false;
+        }
 
 
         #region Lexer Highlighting
@@ -295,31 +385,28 @@ namespace UnityExplorer.UI.CSConsole
 
         public static void InsertSuggestionAtCaret(string suggestion)
         {
-            settingAutoCompletion = true;
+            settingCaretCoroutine = true;
             Input.Text = Input.Text.Insert(LastCaretPosition, suggestion);
 
-            RuntimeProvider.Instance.StartCoroutine(SetAutocompleteCaret(LastCaretPosition + suggestion.Length));
+            SetCaretPosition(LastCaretPosition + suggestion.Length);
             LastCaretPosition = Input.Component.caretPosition;
         }
 
-        private static IEnumerator SetAutocompleteCaret(int caretPosition)
+        private static void OnAutocompleteEnter()
         {
-            var color = Input.Component.selectionColor;
-            color.a = 0f;
-            Input.Component.selectionColor = color;
-            yield return null;
+            // Remove the new line
+            int lastIdx = Input.Component.caretPosition - 1;
+            Input.Text = Input.Text.Remove(lastIdx, 1);
 
-            EventSystem.current.SetSelectedGameObject(Panel.Input.UIRoot, null);
-            yield return null;
+            // Use the selected suggestion
+            Input.Component.caretPosition = LastCaretPosition;
+            Completer.OnSuggestionClicked(AutoCompleteModal.SelectedSuggestion);
+        }
 
-            Input.Component.caretPosition = caretPosition;
-            Input.Component.selectionFocusPosition = caretPosition;
-            LastCaretPosition = Input.Component.caretPosition;
-
-            color.a = defaultInputFieldAlpha;
-            Input.Component.selectionColor = color;
-
-            settingAutoCompletion = false;
+        private static void OnAutocompleteEscaped()
+        {
+            AutoCompleteModal.Instance.ReleaseOwnership(Completer);
+            SetCaretPosition(LastCaretPosition);
         }
 
 
@@ -359,6 +446,104 @@ namespace UnityExplorer.UI.CSConsole
         #endregion
 
 
+        #region "Help" interaction
 
+        private static readonly Dictionary<string, string> helpDict = new Dictionary<string, string>();
+
+        public static void SetupHelpInteraction()
+        {
+            var drop = Panel.HelpDropdown;
+
+            helpDict.Add("Help", "");
+            helpDict.Add("Usings", HELP_USINGS);
+            helpDict.Add("REPL", HELP_REPL);
+            helpDict.Add("Classes", HELP_CLASSES);
+            helpDict.Add("Coroutines", HELP_COROUTINES);
+
+            foreach (var opt in helpDict)
+                drop.options.Add(new Dropdown.OptionData(opt.Key));
+        }
+
+        public static void HelpSelected(int index)
+        {
+            if (index == 0)
+                return;
+
+            var helpText = helpDict.ElementAt(index);
+
+            Input.Text = helpText.Value;
+
+            Panel.HelpDropdown.value = 0;
+        }
+
+
+        internal const string STARTUP_TEXT = @"<color=#5d8556>// Welcome to the UnityExplorer C# Console!
+// It is recommended to use the Log panel (or a console log window) while using this tool.
+// Use the Help dropdown to see detailed examples of how to use the console.</color>";
+
+        internal const string HELP_USINGS = @"// To add a using directive, simply compile it like you would in your IDE:
+using UnityEngine.UI;
+
+// To see your current usings, evaluate ""GetUsing();"" as REPL. You cannot do this while adding usings.
+
+// To reset usings to default, press the Reset button.";
+
+        internal const string HELP_REPL = @"/* REPL (Read-Evaluate-Print-Loop) is a way to execute code immediately.
+ * REPL code cannot contain any using directives or classes.
+ * The return value of the last line of your REPL will be printed to the log.
+ * Variables defined in REPL will exist until you Reset the console.
+*/
+
+// eg: This code would print 'Hello, World!', and then print 6 as the return value.
+Log(""Hello, world!"");
+var x = 5;
+++x;
+
+/* The following helpers are available in REPL mode:
+ * CurrentTarget;     - System.Object, the target of the active Inspector tab
+ * AllTargets;        - System.Object[], the targets of all Inspector tabs
+ * Log(obj);          - prints a message to the console log
+ * Inspect(obj);      - inspect the object with the Inspector
+ * Inspect(someType); - inspect a Type with static reflection
+ * Start(enumerator); - starts the IEnumerator as a Coroutine
+ * GetUsing();        - prints the current using directives to the console log
+ * GetVars();         - prints the names and values of the REPL variables you have defined
+ * GetClasses();      - prints the names and members of the classes you have defined
+*/";
+
+        internal const string HELP_CLASSES = @"// Classes you compile will exist until the application closes.
+// You can soft-overwrite a class by compiling it again with the same name. The old class will still technically exist in memory.
+
+// Compiled classes can be accessed from both inside and outside this console.
+// Note: in IL2CPP, injecting these classes with ClassInjector may crash the game!
+
+public class HelloWorld
+{
+    public static void Main()
+    {
+        UnityExplorer.ExplorerCore.Log(""Hello, world!"");
+    }
+}
+
+// In REPL, you could call the example method above with ""HelloWorld.Main();""
+// Note: The compiler does not allow you to run REPL code and define classes at the same time.";
+
+        internal const string HELP_COROUTINES = @"// To start a Coroutine, you can use an existing IEnumerator or define one yourself.
+// You can start Coroutines from REPL by using ""Start(enumerator);""
+
+// To define a coroutine, for example:
+public class MyCoros
+{
+    public static IEnumerator Coro()
+    {
+        yield return null;
+        UnityExplorer.ExplorerCore.Log(""Hello, world after one frame!"");
+    }
+}
+// To run this Coroutine in REPL, it would look like ""Start(MyCoros.Coro());""
+// Note: You cannot define classes and run REPL code at the same time!
+";
+
+        #endregion
     }
 }

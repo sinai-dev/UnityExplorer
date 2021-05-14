@@ -15,7 +15,7 @@ namespace UnityExplorer.UI.Panels
     {
         public override string Name => "C# Console";
         public override UIManager.Panels PanelType => UIManager.Panels.CSConsole;
-        public override int MinWidth => 750;
+        public override int MinWidth => 740;
         public override int MinHeight => 300;
 
         public InputFieldScroller InputScroll { get; private set; }
@@ -23,10 +23,13 @@ namespace UnityExplorer.UI.Panels
         public Text InputText { get; private set; }
         public Text HighlightText { get; private set; }
 
-        public Action<string> OnInputChanged;
+        public Dropdown HelpDropdown { get; private set; }
 
+        // events
+        public Action<string> OnInputChanged;
         public Action OnResetClicked;
         public Action OnCompileClicked;
+        public Action<int> OnHelpDropdownChanged;
         public Action<bool> OnCtrlRToggled;
         public Action<bool> OnSuggestionsToggled;
         public Action<bool> OnAutoIndentToggled;
@@ -74,6 +77,25 @@ namespace UnityExplorer.UI.Panels
                 default, TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(toolsRow, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
 
+            // Buttons
+
+            var compileButton = UIFactory.CreateButton(toolsRow, "CompileButton", "Compile", new Color(0.33f, 0.5f, 0.33f));
+            UIFactory.SetLayoutElement(compileButton.Component.gameObject, minHeight: 28, minWidth: 130, flexibleHeight: 0);
+            compileButton.ButtonText.fontSize = 15;
+            compileButton.OnClick += () => { OnCompileClicked?.Invoke(); };
+
+            var resetButton = UIFactory.CreateButton(toolsRow, "ResetButton", "Reset", new Color(0.33f, 0.33f, 0.33f));
+            UIFactory.SetLayoutElement(resetButton.Component.gameObject, minHeight: 28, minWidth: 80, flexibleHeight: 0);
+            resetButton.ButtonText.fontSize = 15;
+            resetButton.OnClick += () => { OnResetClicked?.Invoke(); };
+
+            // Help dropdown
+
+            var helpDrop = UIFactory.CreateDropdown(toolsRow, out var dropdown, "Help", 14, null);
+            UIFactory.SetLayoutElement(helpDrop, minHeight: 25, minWidth: 100);
+            HelpDropdown = dropdown;
+            HelpDropdown.onValueChanged.AddListener((int val) => { this.OnHelpDropdownChanged?.Invoke(val); });
+
             // Enable Ctrl+R toggle
 
             var ctrlRToggleObj = UIFactory.CreateToggle(toolsRow, "CtrlRToggle", out var CtrlRToggle, out Text ctrlRToggleText);
@@ -93,36 +115,26 @@ namespace UnityExplorer.UI.Panels
             // Enable Auto-indent toggle
 
             var autoIndentToggleObj = UIFactory.CreateToggle(toolsRow, "IndentToggle", out var AutoIndentToggle, out Text autoIndentToggleText);
-            UIFactory.SetLayoutElement(autoIndentToggleObj, minWidth: 180, flexibleWidth: 0, minHeight: 25);
+            UIFactory.SetLayoutElement(autoIndentToggleObj, minWidth: 120, flexibleWidth: 0, minHeight: 25);
             autoIndentToggleText.alignment = TextAnchor.UpperLeft;
             autoIndentToggleText.text = "Auto-indent";
             AutoIndentToggle.onValueChanged.AddListener((bool val) => { OnAutoIndentToggled?.Invoke(val); });
-
-            // Buttons
-
-            var resetButton = UIFactory.CreateButton(toolsRow, "ResetButton", "Reset", new Color(0.33f, 0.33f, 0.33f));
-            UIFactory.SetLayoutElement(resetButton.Component.gameObject, minHeight: 28, minWidth: 80, flexibleHeight: 0);
-            resetButton.ButtonText.fontSize = 15;
-            resetButton.OnClick += OnResetClicked;
-
-            var compileButton = UIFactory.CreateButton(toolsRow, "CompileButton", "Compile", new Color(0.33f, 0.5f, 0.33f));
-            UIFactory.SetLayoutElement(compileButton.Component.gameObject, minHeight: 28, minWidth: 130, flexibleHeight: 0);
-            compileButton.ButtonText.fontSize = 15;
-            compileButton.OnClick += OnCompileClicked;
 
             // Console Input
 
             int fontSize = 16;
 
-            var inputObj = UIFactory.CreateSrollInputField(this.content, "ConsoleInput", ScriptInteraction.STARTUP_TEXT, out var inputScroller, fontSize);
+            var inputObj = UIFactory.CreateSrollInputField(this.content, "ConsoleInput", ConsoleController.STARTUP_TEXT, out var inputScroller, fontSize);
             InputScroll = inputScroller;
             ConsoleController.defaultInputFieldAlpha = Input.Component.selectionColor.a;
             Input.OnValueChanged += InvokeOnValueChanged;
 
             InputText = Input.Component.textComponent;
             InputText.supportRichText = false;
-            InputText.color = Color.white;
             Input.PlaceholderText.fontSize = fontSize;
+            InputText.color = Color.clear;
+            Input.Component.customCaretColor = true;
+            Input.Component.caretColor = Color.white;
 
             // Lexer highlight text overlay
             var highlightTextObj = UIFactory.CreateUIObject("HighlightText", InputText.gameObject);
@@ -134,7 +146,7 @@ namespace UnityExplorer.UI.Panels
             highlightTextRect.offsetMax = Vector2.zero;
 
             HighlightText = highlightTextObj.AddComponent<Text>();
-            HighlightText.color = Color.clear;
+            HighlightText.color = Color.white;
             HighlightText.supportRichText = true;
             HighlightText.fontSize = fontSize;
 

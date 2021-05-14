@@ -11,17 +11,12 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
     {
         public readonly string DisplayText;
         public readonly string UnderlyingValue;
-        //public int InsertIndex;
-        //public readonly string Prefix;
-        //public readonly string Addition;
 
-        //public string Full => Prefix + Addition;
+        public string Combined => DisplayText + UnderlyingValue;
 
-        public Suggestion(string displayText, /* string prefix, string addition, */ string underlyingValue)
+        public Suggestion(string displayText, string underlyingValue)
         {
             DisplayText = displayText;
-            //Addition = addition;
-            //Prefix = prefix;
             UnderlyingValue = underlyingValue;
         }
     }

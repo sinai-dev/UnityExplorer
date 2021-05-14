@@ -29,58 +29,22 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         public override bool ShouldSaveActiveState => false;
         public override bool NavButtonWanted => false;
 
-        public ISuggestionProvider CurrentHandler { get; private set; }
+        public static ISuggestionProvider CurrentHandler { get; private set; }
 
-        public ButtonListSource<Suggestion> dataHandler;
-        public ScrollPool<ButtonCell> scrollPool;
+        public static ButtonListSource<Suggestion> dataHandler;
+        public static ScrollPool<ButtonCell> scrollPool;
 
-        private List<Suggestion> suggestions = new List<Suggestion>();
+        private static List<Suggestion> Suggestions = new List<Suggestion>();
+        private static int SelectedIndex = 0;
+
+        public static Suggestion SelectedSuggestion => Suggestions[SelectedIndex];
+
+        public static bool Suggesting(ISuggestionProvider handler) => CurrentHandler == handler && Instance.UIRoot.activeSelf;
 
         public AutoCompleteModal()
         {
             OnPanelsReordered += UIPanel_OnPanelsReordered;
             OnClickedOutsidePanels += AutoCompleter_OnClickedOutsidePanels;
-        }
-
-        private void AutoCompleter_OnClickedOutsidePanels()
-        {
-            if (!this.UIRoot || !this.UIRoot.activeInHierarchy)
-                return;
-
-            if (CurrentHandler != null)
-                ReleaseOwnership(CurrentHandler);
-            else
-                UIRoot.SetActive(false);
-        }
-
-        private void UIPanel_OnPanelsReordered()
-        {
-            if (!this.UIRoot || !this.UIRoot.activeInHierarchy)
-                return;
-
-            if (this.UIRoot.transform.GetSiblingIndex() != UIManager.PanelHolder.transform.childCount - 1)
-            {
-                if (CurrentHandler != null)
-                    ReleaseOwnership(CurrentHandler);
-                else
-                    UIRoot.SetActive(false);
-            }
-        }
-
-        public override void Update()
-        {
-            if (!UIRoot || !UIRoot.activeSelf)
-                return;
-
-            if (suggestions.Any() && CurrentHandler != null)
-            {
-                if (!CurrentHandler.InputField.UIRoot.activeInHierarchy)
-                    ReleaseOwnership(CurrentHandler);
-                else
-                {
-                    UpdatePosition();
-                }
-            }
         }
 
         public void TakeOwnership(ISuggestionProvider provider)
@@ -100,42 +64,169 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             }
         }
 
-        private List<Suggestion> GetEntries() => suggestions;
-
-        private bool ShouldDisplay(Suggestion data, string filter) => true;
-
-        public void SetSuggestions(IEnumerable<Suggestion> collection)
+        public void SetSuggestions(IEnumerable<Suggestion> suggestions)
         {
-            suggestions = collection as List<Suggestion> ?? collection.ToList();
+            Suggestions = suggestions as List<Suggestion> ?? suggestions.ToList();
+            SelectedIndex = 0;
 
-            if (!suggestions.Any())
-                UIRoot.SetActive(false);
+            if (!Suggestions.Any())
+                base.UIRoot.SetActive(false);
             else
             {
-                UIRoot.SetActive(true);
-                UIRoot.transform.SetAsLastSibling();
+                base.UIRoot.SetActive(true);
+                base.UIRoot.transform.SetAsLastSibling();
                 dataHandler.RefreshData();
                 scrollPool.Refresh(true, true);
             }
         }
 
+        private static float timeOfLastNavHold = -1f;
+
+        /// <summary>
+        /// Returns true if the AutoCompleteModal used the navigation input, false if not.
+        /// The navigation inputs are Control+Up/Down, and Control+Enter.
+        /// </summary>
+        public static bool CheckNavigation(ISuggestionProvider handler)
+        {
+            if (!Suggesting(handler))
+                return false;
+
+            if (InputManager.GetKey(KeyCode.LeftControl) || InputManager.GetKey(KeyCode.RightControl))
+            {
+                bool up = InputManager.GetKey(KeyCode.UpArrow);
+                bool down = InputManager.GetKey(KeyCode.DownArrow);
+
+                if (up || down)
+                {
+                    if (up)
+                    {
+                        if (InputManager.GetKeyDown(KeyCode.UpArrow))
+                        {
+                            SetSelectedSuggestion(SelectedIndex - 1);
+                            timeOfLastNavHold = Time.realtimeSinceStartup + 0.3f;
+                        }
+                        else if (timeOfLastNavHold.OccuredEarlierThan(0.05f))
+                        {
+                            SetSelectedSuggestion(SelectedIndex - 1);
+                            timeOfLastNavHold = Time.realtimeSinceStartup;
+                        }
+                    }
+                    else
+                    {
+                        if (InputManager.GetKeyDown(KeyCode.DownArrow))
+                        {
+                            SetSelectedSuggestion(SelectedIndex + 1);
+                            timeOfLastNavHold = Time.realtimeSinceStartup + 0.3f;
+                        }
+                        else if (timeOfLastNavHold.OccuredEarlierThan(0.05f))
+                        {
+                            SetSelectedSuggestion(SelectedIndex + 1);
+                            timeOfLastNavHold = Time.realtimeSinceStartup;
+                        }
+                    }
+
+                    return true;
+                }
+
+                return false;
+            }
+
+            return !timeOfLastNavHold.OccuredEarlierThan(0.2f);
+        }
+
+        public static bool CheckEnter(ISuggestionProvider handler)
+        {
+            return Suggesting(handler) && InputManager.GetKeyDown(KeyCode.Return);
+        }
+
+        public static bool CheckEscape(ISuggestionProvider handler)
+        {
+            return Suggesting(handler) && InputManager.GetKeyDown(KeyCode.Escape);
+        }
+
+        private static void SetSelectedSuggestion(int index)
+        {
+            if (index < 0 || index >= Suggestions.Count)
+                return;
+
+            SelectedIndex = index;
+            scrollPool.Refresh(true, false);
+        }
+
+        // Internal update
+
+        public override void Update()
+        {
+            if (!UIRoot || !UIRoot.activeSelf)
+                return;
+
+            if (Suggestions.Any() && CurrentHandler != null)
+            {
+                if (!CurrentHandler.InputField.UIRoot.activeInHierarchy)
+                    ReleaseOwnership(CurrentHandler);
+                else
+                {
+                    UpdatePosition();
+                }
+            }
+        }
+
+        // Setting autocomplete cell buttons
+
+        private readonly Color selectedSuggestionColor = new Color(46/255f, 54/255f, 53/255f);
+        private readonly Color inactiveSuggestionColor = new Color(0.11f, 0.11f, 0.11f);
+
+        private List<Suggestion> GetEntries() => Suggestions;
+
+        private bool ShouldDisplay(Suggestion data, string filter) => true;
+
         private void OnCellClicked(int dataIndex)
         {
-            var suggestion = suggestions[dataIndex];
+            var suggestion = Suggestions[dataIndex];
             CurrentHandler.OnSuggestionClicked(suggestion);
         }
 
+        private bool setFirstCell;
+
         private void SetCell(ButtonCell cell, int index)
         {
-            if (index < 0 || index >= suggestions.Count)
+            if (index < 0 || index >= Suggestions.Count)
             {
                 cell.Disable();
                 return;
             }
 
-            var suggestion = suggestions[index];
+            var suggestion = Suggestions[index];
             cell.Button.ButtonText.text = suggestion.DisplayText;
+
+            if (index == SelectedIndex && setFirstCell)
+            {
+                if (cell.Rect.MinY() > scrollPool.Viewport.MinY())
+                {
+                    // cell is too far down
+                    var diff = cell.Rect.MinY() - scrollPool.Viewport.MinY();
+                    var pos = scrollPool.Content.anchoredPosition;
+                    pos.y -= diff;
+                    scrollPool.Content.anchoredPosition = pos;
+                }
+                else if (cell.Rect.MaxY() < scrollPool.Viewport.MaxY())
+                {
+                    // cell is too far up
+                    var diff = cell.Rect.MaxY() - scrollPool.Viewport.MaxY();
+                    var pos = scrollPool.Content.anchoredPosition;
+                    pos.y -= diff;
+                    scrollPool.Content.anchoredPosition = pos;
+                }
+
+                RuntimeProvider.Instance.SetColorBlock(cell.Button.Component, selectedSuggestionColor);
+            }
+            else
+                RuntimeProvider.Instance.SetColorBlock(cell.Button.Component, inactiveSuggestionColor);
+
+            setFirstCell = true;
         }
+
+        // Updating panel position
 
         private int lastCaretPosition;
         private Vector3 lastInputPosition;
@@ -175,6 +266,35 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             this.Dragger.OnEndResize();
         }
 
+        // Event listeners for panel
+
+        private void AutoCompleter_OnClickedOutsidePanels()
+        {
+            if (!this.UIRoot || !this.UIRoot.activeInHierarchy)
+                return;
+
+            if (CurrentHandler != null)
+                ReleaseOwnership(CurrentHandler);
+            else
+                UIRoot.SetActive(false);
+        }
+
+        private void UIPanel_OnPanelsReordered()
+        {
+            if (!this.UIRoot || !this.UIRoot.activeInHierarchy)
+                return;
+
+            if (this.UIRoot.transform.GetSiblingIndex() != UIManager.PanelHolder.transform.childCount - 1)
+            {
+                if (CurrentHandler != null)
+                    ReleaseOwnership(CurrentHandler);
+                else
+                    UIRoot.SetActive(false);
+            }
+        }
+
+        // UI Construction
+
         protected internal override void DoSetDefaultPosAndAnchors()
         {
             var mainRect = uiRoot.GetComponent<RectTransform>();
@@ -190,8 +310,12 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             scrollPool = UIFactory.CreateScrollPool<ButtonCell>(this.content, "AutoCompleter", out GameObject scrollObj, out GameObject scrollContent);
             scrollPool.Initialize(dataHandler);
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
-
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(scrollContent, true, false, true, false);
+
+            var bottomRow = UIFactory.CreateHorizontalGroup(this.content, "BottomRow", true, true, true, true, 0, new Vector4(2, 2, 2, 2));
+            UIFactory.SetLayoutElement(bottomRow, minHeight: 20, flexibleWidth: 9999);
+            UIFactory.CreateLabel(bottomRow, "HelpText", "Control+Up/Down to select, Enter to use, Esc to hide", 
+                TextAnchor.MiddleLeft, Color.grey, false, 13);
 
             UIRoot.SetActive(false);
         }
