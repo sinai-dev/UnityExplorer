@@ -234,7 +234,7 @@
     <Compile Include="Core\Utility\ArgumentUtility.cs" />
     <Compile Include="Core\Utility\MiscUtility.cs" />
     <Compile Include="Core\Utility\ParseUtility.cs" />
-    <Compile Include="UI\Inspectors\TODO_InspectUnderMouse.cs" />
+    <Compile Include="UI\Inspectors\InspectUnderMouse.cs" />
     <Compile Include="UI\CSConsole\ConsoleController.cs" />
     <Compile Include="UI\CacheObject\CacheField.cs" />
     <Compile Include="UI\CacheObject\CacheKeyValuePair.cs" />
