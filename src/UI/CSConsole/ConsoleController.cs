@@ -55,12 +55,9 @@ namespace UnityExplorer.UI.CSConsole
                 // ensure the compiler is supported (if this fails then SRE is probably stubbed)
                 Evaluator.Compile("0 == 0");
             }
-            catch
+            catch (Exception ex)
             {
-                ExplorerCore.LogWarning("C# Console is not supported, System.Reflection.Emit was probably stubbed! You can use UnityDoorstop to patch this.");
-                var navButton = Panel.NavButton;
-                navButton.Component.interactable = false;
-                navButton.ButtonText.text += "(disabled)";
+                DisableConsole(ex);
                 return;
             }
 
@@ -108,6 +105,9 @@ namespace UnityExplorer.UI.CSConsole
 
         public static void ResetConsole(bool logSuccess = true)
         {
+            if (SRENotSupported)
+                return;
+
             if (Evaluator != null)
                 Evaluator.Dispose();
 
@@ -136,11 +136,17 @@ namespace UnityExplorer.UI.CSConsole
 
         public static void Evaluate()
         {
+            if (SRENotSupported)
+                return;
+
             Evaluate(Input.Text);
         }
 
         public static void Evaluate(string input, bool supressLog = false)
         {
+            if (SRENotSupported)
+                return;
+
             try
             {
                 // Try to "Compile" the code (tries to interpret it as REPL)
@@ -207,6 +213,9 @@ namespace UnityExplorer.UI.CSConsole
         // Invoked at most once per frame
         private static void OnInputChanged(string value)
         {
+            if (SRENotSupported)
+                return;
+
             // prevent escape wiping input
             if (InputManager.GetKeyDown(KeyCode.Escape))
             {
@@ -238,6 +247,9 @@ namespace UnityExplorer.UI.CSConsole
 
         public static void Update()
         {
+            if (SRENotSupported)
+                return;
+
             UpdateCaret(out bool caretMoved);
 
             if (!settingCaretCoroutine && EnableSuggestions && AutoCompleteModal.CheckEscape(Completer))
@@ -448,6 +460,35 @@ namespace UnityExplorer.UI.CSConsole
 
         #region "Help" interaction
 
+        private static bool SRENotSupported;
+
+        private static void DisableConsole(Exception ex)
+        {
+            SRENotSupported = true;
+            Input.Component.readOnly = true;
+            Input.Component.textComponent.color = "5d8556".ToColor();
+
+            if (ex is NotSupportedException)
+            {
+                Input.Text = $@"The C# Console has been disabled because System.Reflection.Emit threw an exception: {ex.ReflectionExToString()}
+
+If the game was built with Unity's stubbed netstandard 2.0 runtime, you can fix this with UnityDoorstop:
+    * Download the Unity Editor version that the game uses
+    * Navigate to the folder:
+      - Editor\Data\PlaybackEngines\windowsstandalonesupport\Variations\mono\Managed
+      - or, Editor\Data\MonoBleedingEdge\lib\mono\4.5
+    * Copy the mscorlib.dll and System.Reflection.Emit DLLs from the folder
+    * Make a subfolder in the folder that contains doorstop_config.ini
+    * Put the DLLs inside the subfolder
+    * Set the 'dllSearchPathOverride' in doorstop_config.ini to the subfolder name";
+            }
+            else
+            {
+                Input.Text = $@"The C# Console has been disabled because of an unknown error.
+{ex}";
+            }
+        }
+
         private static readonly Dictionary<string, string> helpDict = new Dictionary<string, string>();
 
         public static void SetupHelpInteraction()
@@ -478,15 +519,16 @@ namespace UnityExplorer.UI.CSConsole
 
 
         internal const string STARTUP_TEXT = @"<color=#5d8556>// Welcome to the UnityExplorer C# Console!
+
 // It is recommended to use the Log panel (or a console log window) while using this tool.
 // Use the Help dropdown to see detailed examples of how to use the console.</color>";
 
-        internal const string HELP_USINGS = @"// To add a using directive, simply compile it like you would in your IDE:
+        internal const string HELP_USINGS = @"// You can add a using directive to any namespace, but you must compile for it to take effect.
+// It will remain in effect until you Reset the console.
 using UnityEngine.UI;
 
-// To see your current usings, evaluate ""GetUsing();"" as REPL. You cannot do this while adding usings.
-
-// To reset usings to default, press the Reset button.";
+// To see your current usings, use the ""GetUsing();"" helper.
+// Note: You cannot add usings and evaluate REPL at the same time.";
 
         internal const string HELP_REPL = @"/* REPL (Read-Evaluate-Print-Loop) is a way to execute code immediately.
  * REPL code cannot contain any using directives or classes.
@@ -500,15 +542,16 @@ var x = 5;
 ++x;
 
 /* The following helpers are available in REPL mode:
- * CurrentTarget;     - System.Object, the target of the active Inspector tab
- * AllTargets;        - System.Object[], the targets of all Inspector tabs
- * Log(obj);          - prints a message to the console log
- * Inspect(obj);      - inspect the object with the Inspector
- * Inspect(someType); - inspect a Type with static reflection
- * Start(enumerator); - starts the IEnumerator as a Coroutine
  * GetUsing();        - prints the current using directives to the console log
  * GetVars();         - prints the names and values of the REPL variables you have defined
  * GetClasses();      - prints the names and members of the classes you have defined
+ * Log(obj);          - prints a message to the console log
+ * CurrentTarget;     - System.Object, the target of the active Inspector tab
+ * AllTargets;        - System.Object[], the targets of all Inspector tabs
+ * Inspect(obj);      - inspect the object with the Inspector
+ * Inspect(someType); - inspect a Type with static reflection
+ * Start(enumerator); - starts the IEnumerator as a Coroutine
+ * help;              - the default REPL help command, contains additional helpers.
 */";
 
         internal const string HELP_CLASSES = @"// Classes you compile will exist until the application closes.
@@ -526,23 +569,22 @@ public class HelloWorld
 }
 
 // In REPL, you could call the example method above with ""HelloWorld.Main();""
-// Note: The compiler does not allow you to run REPL code and define classes at the same time.";
+// Note: The compiler does not allow you to run REPL code and define classes at the same time.
 
-        internal const string HELP_COROUTINES = @"// To start a Coroutine, you can use an existing IEnumerator or define one yourself.
-// You can start Coroutines from REPL by using ""Start(enumerator);""
+// In REPL, use the ""GetClasses();"" helper to see the classes you have defined since the last Reset.";
 
-// To define a coroutine, for example:
-public class MyCoros
+        internal const string HELP_COROUTINES = @"// To start a Coroutine directly, use ""Start(SomeCoroutine());"" in REPL mode.
+
+// To define a coroutine, you will need to compile it seperately. For example:
+public class MyCoro
 {
-    public static IEnumerator Coro()
+    public static IEnumerator Main()
     {
         yield return null;
         UnityExplorer.ExplorerCore.Log(""Hello, world after one frame!"");
     }
 }
-// To run this Coroutine in REPL, it would look like ""Start(MyCoros.Coro());""
-// Note: You cannot define classes and run REPL code at the same time!
-";
+// To run this Coroutine in REPL, it would look like ""Start(MyCoro.Main());""";
 
         #endregion
     }
