@@ -93,44 +93,39 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             if (!Suggesting(handler))
                 return false;
 
-            if (InputManager.GetKey(KeyCode.LeftControl) || InputManager.GetKey(KeyCode.RightControl))
+            bool up = InputManager.GetKey(KeyCode.UpArrow);
+            bool down = InputManager.GetKey(KeyCode.DownArrow);
+
+            if (up || down)
             {
-                bool up = InputManager.GetKey(KeyCode.UpArrow);
-                bool down = InputManager.GetKey(KeyCode.DownArrow);
-
-                if (up || down)
+                if (up)
                 {
-                    if (up)
+                    if (InputManager.GetKeyDown(KeyCode.UpArrow))
                     {
-                        if (InputManager.GetKeyDown(KeyCode.UpArrow))
-                        {
-                            SetSelectedSuggestion(SelectedIndex - 1);
-                            timeOfLastNavHold = Time.realtimeSinceStartup + 0.3f;
-                        }
-                        else if (timeOfLastNavHold.OccuredEarlierThan(0.05f))
-                        {
-                            SetSelectedSuggestion(SelectedIndex - 1);
-                            timeOfLastNavHold = Time.realtimeSinceStartup;
-                        }
+                        SetSelectedSuggestion(SelectedIndex - 1);
+                        timeOfLastNavHold = Time.realtimeSinceStartup + 0.3f;
                     }
-                    else
+                    else if (timeOfLastNavHold.OccuredEarlierThan(0.05f))
                     {
-                        if (InputManager.GetKeyDown(KeyCode.DownArrow))
-                        {
-                            SetSelectedSuggestion(SelectedIndex + 1);
-                            timeOfLastNavHold = Time.realtimeSinceStartup + 0.3f;
-                        }
-                        else if (timeOfLastNavHold.OccuredEarlierThan(0.05f))
-                        {
-                            SetSelectedSuggestion(SelectedIndex + 1);
-                            timeOfLastNavHold = Time.realtimeSinceStartup;
-                        }
+                        SetSelectedSuggestion(SelectedIndex - 1);
+                        timeOfLastNavHold = Time.realtimeSinceStartup;
                     }
-
-                    return true;
+                }
+                else
+                {
+                    if (InputManager.GetKeyDown(KeyCode.DownArrow))
+                    {
+                        SetSelectedSuggestion(SelectedIndex + 1);
+                        timeOfLastNavHold = Time.realtimeSinceStartup + 0.3f;
+                    }
+                    else if (timeOfLastNavHold.OccuredEarlierThan(0.05f))
+                    {
+                        SetSelectedSuggestion(SelectedIndex + 1);
+                        timeOfLastNavHold = Time.realtimeSinceStartup;
+                    }
                 }
 
-                return false;
+                return true;
             }
 
             return !timeOfLastNavHold.OccuredEarlierThan(0.2f);
@@ -297,10 +292,9 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         protected internal override void DoSetDefaultPosAndAnchors()
         {
-            var mainRect = uiRoot.GetComponent<RectTransform>();
-            mainRect.pivot = new Vector2(0f, 1f);
-            mainRect.anchorMin = new Vector2(0.42f, 0.4f);
-            mainRect.anchorMax = new Vector2(0.68f, 0.6f);
+            mainPanelRect.pivot = new Vector2(0f, 1f);
+            mainPanelRect.anchorMin = new Vector2(0.42f, 0.4f);
+            mainPanelRect.anchorMax = new Vector2(0.68f, 0.6f);
         }
 
         public override void ConstructPanelContent()
@@ -314,7 +308,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
             navigationTipRow = UIFactory.CreateHorizontalGroup(this.content, "BottomRow", true, true, true, true, 0, new Vector4(2, 2, 2, 2));
             UIFactory.SetLayoutElement(navigationTipRow, minHeight: 20, flexibleWidth: 9999);
-            UIFactory.CreateLabel(navigationTipRow, "HelpText", "Control+Up/Down to select, Enter to use", 
+            UIFactory.CreateLabel(navigationTipRow, "HelpText", "Up/Down to select, Enter to use, Esc to close", 
                 TextAnchor.MiddleLeft, Color.grey, false, 13);
 
             UIRoot.SetActive(false);
