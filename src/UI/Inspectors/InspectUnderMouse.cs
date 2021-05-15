@@ -71,6 +71,8 @@ namespace UnityExplorer.UI.Inspectors
             if (!MainCamera)
                 return;
 
+            PanelDragger.ForceEnd();
+
             Mode = mode;
             Inspecting = true;
             UIManager.NavBarRect.gameObject.SetActive(false);

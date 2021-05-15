@@ -17,6 +17,20 @@ namespace UnityExplorer.UI.Panels
 
         public static bool Resizing { get; private set; }
 
+        public static bool ResizePrompting => s_resizeCursorObj && s_resizeCursorObj.activeSelf;
+
+        internal static void ForceEnd()
+        {
+            s_resizeCursorObj.SetActive(false);
+            wasAnyDragging = false;
+
+            foreach (var instance in Instances)
+            {
+                instance.WasDragging = false;
+                instance.WasResizing = false;
+            }
+        }
+
         internal static List<PanelDragger> Instances = new List<PanelDragger>();
 
         static PanelDragger()
@@ -82,7 +96,6 @@ namespace UnityExplorer.UI.Panels
 
         #endregion
 
-        public static bool ResizePrompting => s_resizeCursorObj && s_resizeCursorObj.activeSelf;
         public static GameObject s_resizeCursorObj;
 
         internal static bool wasAnyDragging;
