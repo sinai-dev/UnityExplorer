@@ -59,7 +59,7 @@ namespace UnityExplorer.UI.Widgets
             buttonText.alignment = TextAnchor.MiddleLeft;
 
             Color normal = new Color(0.11f, 0.11f, 0.11f);
-            Color highlight = new Color(0.25f, 0.25f, 0.25f);
+            Color highlight = new Color(0.16f, 0.16f, 0.16f);
             Color pressed = new Color(0.05f, 0.05f, 0.05f);
             Color disabled = new Color(1, 1, 1, 0);
             RuntimeProvider.Instance.SetColorBlock(Button.Component, normal, highlight, pressed, disabled);

@@ -170,7 +170,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         // Setting autocomplete cell buttons
 
-        private readonly Color selectedSuggestionColor = new Color(46/255f, 54/255f, 53/255f);
+        private readonly Color selectedSuggestionColor = new Color(45/255f, 75/255f, 80/255f);
         private readonly Color inactiveSuggestionColor = new Color(0.11f, 0.11f, 0.11f);
 
         private List<Suggestion> GetEntries() => Suggestions;
