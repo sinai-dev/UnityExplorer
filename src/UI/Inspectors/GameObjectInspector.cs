@@ -16,7 +16,13 @@ namespace UnityExplorer.UI.Inspectors
     {
         public GameObject GOTarget => Target as GameObject;
 
-        private Text NameText;
+        // Top info
+
+        private InputFieldRef NameInput;
+        private GameObject PathRow;
+        private InputFieldRef PathInput;
+
+        // Child and comp lists
 
         public TransformTree TransformTree;
         private ScrollPool<TransformCell> transformScroll;
@@ -30,8 +36,6 @@ namespace UnityExplorer.UI.Inspectors
             base.OnBorrowedFromPool(target);
 
             Target = target as GameObject;
-
-            NameText.text = GOTarget.name;
             Tab.TabText.text = $"[G] {GOTarget.name}";
 
             RuntimeProvider.Instance.StartCoroutine(InitCoroutine());
@@ -191,9 +195,44 @@ namespace UnityExplorer.UI.Inspectors
             UIRoot = UIFactory.CreateVerticalGroup(Pool<GameObjectInspector>.Instance.InactiveHolder,
                 "GameObjectInspector", true, true, true, true, 5, new Vector4(4, 4, 4, 4), new Color(0.12f, 0.12f, 0.12f));
 
-            NameText = UIFactory.CreateLabel(UIRoot, "Title", "not set", TextAnchor.MiddleLeft, fontSize: 20);
-            UIFactory.SetLayoutElement(NameText.gameObject, minHeight: 30, flexibleHeight: 0);
+            // Title row
 
+            var titleRow = UIFactory.CreateUIObject("TitleRow", UIRoot);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(titleRow, false, false, true, true, 5);
+
+            var titleLabel = UIFactory.CreateLabel(titleRow, "Title", SignatureHighlighter.Parse(typeof(GameObject), true), 
+                TextAnchor.MiddleLeft, fontSize: 17);
+            UIFactory.SetLayoutElement(titleLabel.gameObject, minHeight: 30, flexibleHeight: 0, flexibleWidth: 9999);
+
+            // Update button
+            var updateBtn = UIFactory.CreateButton(titleRow, "UpdateButton", "Update Info", new Color(0.2f, 0.3f, 0.2f));
+            UIFactory.SetLayoutElement(updateBtn.Component.gameObject, minHeight: 25, minWidth: 200);
+            updateBtn.OnClick += () => { ExplorerCore.Log("TODO!"); };
+
+            // ~~~~~~ Top info ~~~~~~
+
+            // parent / path row
+
+            this.PathRow = UIFactory.CreateUIObject("ParentRow", UIRoot);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(this.PathRow, false, false, true, true, 5, 2, 2, 2, 2);
+            UIFactory.SetLayoutElement(this.PathRow, minHeight: 25, flexibleHeight: 100, flexibleWidth: 9999);
+
+            var viewParentButton = UIFactory.CreateButton(PathRow, "ViewParentButton", "View Parent", new Color(0.3f, 0.3f, 0.3f));
+            UIFactory.SetLayoutElement(viewParentButton.Component.gameObject, minHeight: 25, minWidth: 80);
+            viewParentButton.OnClick += () => { ExplorerCore.LogWarning("TODO!"); };
+
+            this.PathInput = UIFactory.CreateInputField(PathRow, "PathInput", "No parent (root object)");
+            UIFactory.SetLayoutElement(PathInput.UIRoot, minHeight: 25, minWidth: 100, flexibleWidth: 9999);
+
+
+            // ~~~~~~ Child and comp lists ~~~~~~
+
+            var listTitles = UIFactory.CreateUIObject("ListTitles", UIRoot);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(listTitles, true, true, true, true, 5, 2, 2, 2, 2);
+            UIFactory.SetLayoutElement(listTitles, flexibleWidth: 9999, flexibleHeight: 30);
+            UIFactory.CreateLabel(listTitles, "ChildListTitle", "Children", TextAnchor.MiddleCenter, default, false, 15);
+            UIFactory.CreateLabel(listTitles, "CompListTitle", "Components", TextAnchor.MiddleCenter, default, false, 15);
+            
             var listHolder = UIFactory.CreateHorizontalGroup(UIRoot, "ListHolder", true, true, true, true, 5, new Vector4(2, 2, 2, 2));
             UIFactory.SetLayoutElement(listHolder, flexibleWidth: 9999, flexibleHeight: 9999);
 
