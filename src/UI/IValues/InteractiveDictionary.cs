@@ -53,6 +53,7 @@ namespace UnityExplorer.UI.IValues
 
         private void ClearAndRelease()
         {
+            RefIDictionary = null;
             keys.Clear();
             values.Clear();
 

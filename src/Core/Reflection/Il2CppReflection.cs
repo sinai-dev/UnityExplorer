@@ -222,7 +222,7 @@ namespace UnityExplorer
 
             // from il2cpp objects...
 
-            if (!(obj is Il2CppSystem.Object cppObj))
+            if (!(obj is Il2CppObjectBase cppObj))
                 return obj;
 
             // from Il2CppSystem.Object to a struct
@@ -267,7 +267,7 @@ namespace UnityExplorer
         internal static readonly Dictionary<string, MethodInfo> unboxMethods = new Dictionary<string, MethodInfo>();
 
         // Unbox an il2cpp object to a struct or System primitive.
-        public object UnboxCppObject(Il2CppSystem.Object cppObj, Type toType)
+        public object UnboxCppObject(Il2CppObjectBase cppObj, Type toType)
         {
             if (!toType.IsValueType)
                 return null;
@@ -411,7 +411,6 @@ namespace UnityExplorer
         #endregion
 
 
-
         #region Singleton finder
 
         internal override void Internal_FindSingleton(string[] possibleNames, Type type, BF flags, List<object> instances)
@@ -478,8 +477,6 @@ namespace UnityExplorer
         }
 
         #endregion
-
-
 
 
         #region Il2cpp reflection blacklist
@@ -629,6 +626,191 @@ namespace UnityExplorer
         };
 
         #endregion
+
+
+        // (Disabled)
+        #region Temp il2cpp list/dictionary fixes
+
+        //// Temp fix until Unhollower interface support improves
+        //
+        //internal static IntPtr s_cppEnumerableClassPtr;
+        //internal static IntPtr s_cppDictionaryClassPtr;
+        //
+        //public override bool Internal_IsEnumerable(Type type)
+        //{
+        //    if (base.Internal_IsEnumerable(type))
+        //        return true;
+        //
+        //    try
+        //    {
+        //        if (s_cppEnumerableClassPtr == IntPtr.Zero)
+        //            Il2CppTypeNotNull(typeof(Il2CppSystem.Collections.IEnumerable), out s_cppEnumerableClassPtr);
+        //
+        //        if (s_cppEnumerableClassPtr != IntPtr.Zero
+        //            && Il2CppTypeNotNull(type, out IntPtr assignFromPtr)
+        //            && il2cpp_class_is_assignable_from(s_cppEnumerableClassPtr, assignFromPtr))
+        //        {
+        //            return true;
+        //        }
+        //    }
+        //    catch { }
+        //
+        //    return false;
+        //}
+        //
+        //// Lists
+        //
+        //internal static readonly Dictionary<Type, MethodInfo> s_getEnumeratorMethods = new Dictionary<Type, MethodInfo>();
+        //
+        //internal static readonly Dictionary<Type, EnumeratorInfo> s_enumeratorInfos = new Dictionary<Type, EnumeratorInfo>();
+        //
+        //internal class EnumeratorInfo
+        //{
+        //    internal MethodInfo moveNext;
+        //    internal PropertyInfo current;
+        //}
+        //
+        //internal static IEnumerator EnumerateCppList(object list)
+        //{
+        //    if (list == null)
+        //        yield break;
+        //
+        //    var cppEnumerable = list.TryCast<Il2CppSystem.Collections.IEnumerable>();
+        //    if (cppEnumerable == null)
+        //    {
+        //        ExplorerCore.LogWarning("Failed to cast an IEnumerable to the interface!");
+        //        yield break;
+        //    }
+        //
+        //    // Some ugly reflection to use the il2cpp interface for the instance type
+        //
+        //    var type = cppEnumerable.GetActualType();
+        //    if (!s_getEnumeratorMethods.ContainsKey(type))
+        //        s_getEnumeratorMethods.Add(type, type.GetMethod("GetEnumerator"));
+        //
+        //    var enumerator = s_getEnumeratorMethods[type].Invoke(cppEnumerable.TryCast(type), null);
+        //    var enumeratorType = enumerator.GetType();
+        //
+        //    if (!s_enumeratorInfos.ContainsKey(enumeratorType))
+        //    {
+        //        s_enumeratorInfos.Add(enumeratorType, new EnumeratorInfo
+        //        {
+        //            current = enumeratorType.GetProperty("Current"),
+        //            moveNext = enumeratorType.GetMethod("MoveNext"),
+        //        });
+        //    }
+        //    var info = s_enumeratorInfos[enumeratorType];
+        //
+        //    // Yield and return the actual entries
+        //    while ((bool)info.moveNext.Invoke(enumerator, null))
+        //        yield return info.current.GetValue(enumerator);
+        //}
+        //
+        //// Dicts todo
+        //
+        //public override bool Internal_IsDictionary(Type type)
+        //{
+        //    if (base.Internal_IsDictionary(type))
+        //        return true;
+        //
+        //    try
+        //    {
+        //        if (s_cppDictionaryClassPtr == IntPtr.Zero)
+        //            if (!Il2CppTypeNotNull(typeof(Il2CppSystem.Collections.IDictionary), out s_cppDictionaryClassPtr))
+        //                return false;
+        //
+        //        if (Il2CppTypeNotNull(type, out IntPtr classPtr))
+        //        {
+        //            if (il2cpp_class_is_assignable_from(s_cppDictionaryClassPtr, classPtr))
+        //                return true;
+        //        }
+        //    }
+        //    catch { }
+        //
+        //    return false;
+        //}
+        //
+        //internal static IEnumerator<KeyValuePair<object, object>> EnumerateCppDictionary(object dictionary)
+        //{
+        //    var cppDict = dictionary?.TryCast<Il2CppSystem.Collections.IDictionary>();
+        //    if (cppDict == null)
+        //        yield break;
+        //
+        //}
+        //
+        //
+        //
+        ////public IDictionary EnumerateDictionary(object value)
+        ////{
+        ////    var valueType = value.GetActualType();
+        ////
+        ////    Type typeOfKeys, typeOfValues;
+        ////    if (valueType.IsGenericType && valueType.GetGenericArguments() is var args && args.Length == 2)
+        ////    {
+        ////        typeOfKeys = args[0];
+        ////        typeOfValues = args[1];
+        ////    }
+        ////    else
+        ////        typeOfKeys = typeOfValues = typeof(object);
+        ////
+        ////    var keyList = new List<object>();
+        ////    var valueList = new List<object>();
+        ////
+        ////    var hashtable = value.TryCast<Il2CppSystem.Collections.Hashtable>();
+        ////
+        ////    if (hashtable != null)
+        ////    {
+        ////        EnumerateCppHashtable(hashtable, keyList, valueList);
+        ////    }
+        ////    else
+        ////    {
+        ////        var keys = valueType.GetProperty("Keys").GetValue(value, null);
+        ////        EnumerateCppCollection(keys, keyList);
+        ////
+        ////        var values = valueType.GetProperty("Values").GetValue(value, null);
+        ////        EnumerateCppCollection(values, valueList);
+        ////    }
+        ////
+        ////    var dict = Activator.CreateInstance(typeof(Dictionary<,>)
+        ////                        .MakeGenericType(typeOfKeys, typeOfValues))
+        ////                        as IDictionary;
+        ////
+        ////    for (int i = 0; i < keyList.Count; i++)
+        ////        dict.Add(keyList[i], valueList[i]);
+        ////
+        ////    return dict;
+        ////}
+        ////
+        ////private void EnumerateCppCollection(object collection, List<object> list)
+        ////{
+        ////    // invoke GetEnumerator
+        ////    var enumerator = collection.GetType().GetMethod("GetEnumerator").Invoke(collection, null);
+        ////    // get the type of it
+        ////    var enumeratorType = enumerator.GetType();
+        ////    // reflect MoveNext and Current
+        ////    var moveNext = enumeratorType.GetMethod("MoveNext");
+        ////    var current = enumeratorType.GetProperty("Current");
+        ////    // iterate
+        ////    while ((bool)moveNext.Invoke(enumerator, null))
+        ////    {
+        ////        list.Add(current.GetValue(enumerator, null));
+        ////    }
+        ////}
+        ////
+        ////private void EnumerateCppHashtable(Il2CppSystem.Collections.Hashtable hashtable, List<object> keys, List<object> values)
+        ////{
+        ////    for (int i = 0; i < hashtable.buckets.Count; i++)
+        ////    {
+        ////        var bucket = hashtable.buckets[i];
+        ////        if (bucket == null || bucket.key == null)
+        ////            continue;
+        ////        keys.Add(bucket.key);
+        ////        values.Add(bucket.val);
+        ////    }
+        ////}
+
+        #endregion
+
     }
 }
 

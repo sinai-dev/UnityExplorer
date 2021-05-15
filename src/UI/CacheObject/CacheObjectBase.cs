@@ -183,9 +183,9 @@ namespace UnityExplorer.UI.CacheObject
                 return ValueState.Color;
              else if (InteractiveValueStruct.SupportsType(type))
                  return ValueState.ValueStruct;
-            else if (typeof(IDictionary).IsAssignableFrom(type))
+            else if (typeof(IDictionary).IsAssignableFrom(type)) //(ReflectionUtility.IsDictionary(type))
                 return ValueState.Dictionary;
-            else if (!typeof(Transform).IsAssignableFrom(type) && typeof(IEnumerable).IsAssignableFrom(type))
+            else if (!typeof(Transform).IsAssignableFrom(type) && typeof(IEnumerable).IsAssignableFrom(type)) //ReflectionUtility.IsEnumerable(type))
                 return ValueState.Collection;
             else
                 return ValueState.Unsupported;

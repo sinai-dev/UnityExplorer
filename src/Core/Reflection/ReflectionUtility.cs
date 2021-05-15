@@ -206,6 +206,7 @@ namespace UnityExplorer
 
 #endregion
 
+
         #region Type and Generic Parameter implementation cache
 
         // cache for GetImplementationsOf
@@ -340,6 +341,7 @@ namespace UnityExplorer
 
 #endregion
 
+
         #region Internal MemberInfo Cache
 
         internal static Dictionary<Type, Dictionary<string, FieldInfo>> fieldInfos = new Dictionary<Type, Dictionary<string, FieldInfo>>();
@@ -411,6 +413,7 @@ namespace UnityExplorer
 
         #endregion
 
+
         #region Reflection Blacklist
 
         public virtual string DefaultReflectionBlacklist => string.Empty;
@@ -454,5 +457,29 @@ namespace UnityExplorer
 
         #endregion
 
+
+        // This is NOT working properly. Fails on IL2CPP IList, probably more stuff too.
+
+        //// Temp fix for IL2CPP until interface support improves
+        //
+        //public static bool IsEnumerable(Type type)
+        //{
+        //    return Instance.Internal_IsEnumerable(type);
+        //}
+        //
+        //public virtual bool Internal_IsEnumerable(Type type)
+        //{
+        //    return typeof(IEnumerable).IsAssignableFrom(type);
+        //}
+        //
+        //public static bool IsDictionary(Type type)
+        //{
+        //    return Instance.Internal_IsDictionary(type);
+        //}
+        //
+        //public virtual bool Internal_IsDictionary(Type type)
+        //{
+        //    return typeof(IDictionary).IsAssignableFrom(type);
+        //}
     }
 }

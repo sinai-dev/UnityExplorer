@@ -22,7 +22,7 @@ namespace UnityExplorer.UI.IValues
         public override bool CanWrite => base.CanWrite && RefIList != null && !RefIList.IsReadOnly;
 
         public Type EntryType;
-        public IEnumerable RefIEnumerable;
+        //public IEnumerable RefIEnumerable;
         public IList RefIList;
 
         public int ItemCount => values.Count;
@@ -49,6 +49,8 @@ namespace UnityExplorer.UI.IValues
 
         private void ClearAndRelease()
         {
+            //RefIEnumerable = null;
+            RefIList = null;
             values.Clear();
 
             foreach (var entry in cachedEntries)
@@ -90,20 +92,20 @@ namespace UnityExplorer.UI.IValues
 
         private void CacheEntries(object value)
         {
-            RefIEnumerable = value as IEnumerable;
             RefIList = value as IList;
 
-            if (RefIEnumerable == null)
-            {
-                // todo il2cpp
-                return;
-            }
+            IEnumerator enumerator = (value as IEnumerable).GetEnumerator();
+
+            //if (value is IEnumerable enumerable)
+            //    enumerator = enumerable.GetEnumerator();
+            //else
+            //    enumerator = Il2CppReflection.EnumerateCppList(value);
 
             values.Clear();
             int idx = 0;
-            foreach (var entry in RefIEnumerable)
+            while (enumerator.MoveNext())
             {
-                // var entry = item.TryCast();
+                var entry = enumerator.Current;
 
                 values.Add(entry);
 
