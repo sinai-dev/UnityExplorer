@@ -117,6 +117,7 @@ namespace UnityExplorer.UI.Widgets
         public void Add(float value)
         {
             value = (float)Math.Floor(value);
+            value = Math.Max(DefaultHeight, value);
 
             int spread = GetRangeSpread(totalHeight, value);
 
@@ -153,6 +154,7 @@ namespace UnityExplorer.UI.Widgets
         public void SetIndex(int dataIndex, float height)
         {
             height = (float)Math.Floor(height);
+            height = Math.Max(DefaultHeight, height);
 
             // If the index being set is beyond the DataSource item count, prune and return.
             if (dataIndex >= ScrollPool.DataSource.ItemCount)
