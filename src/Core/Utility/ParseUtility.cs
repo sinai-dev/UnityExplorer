@@ -412,7 +412,7 @@ namespace UnityExplorer
             if (!(obj is LayerMask mask))
                 return null;
 
-            return mask.ToString();
+            return mask.value.ToString();
         }
 
         #endregion
