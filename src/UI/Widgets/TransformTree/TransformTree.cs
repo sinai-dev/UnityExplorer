@@ -14,15 +14,15 @@ namespace UnityExplorer.UI.Widgets
     public class TransformTree : ICellPoolDataSource<TransformCell>
     {
         public Func<IEnumerable<GameObject>> GetRootEntriesMethod;
+        public Action<GameObject> OnClickOverrideHandler;
 
-        internal ScrollPool<TransformCell> ScrollPool;
+        public ScrollPool<TransformCell> ScrollPool;
 
-        // Using an OrderedDictionary because we need constant-time lookup of both key and index.
         /// <summary>
         /// Key: UnityEngine.Transform instance ID<br/>
         /// Value: CachedTransform
         /// </summary>
-        private readonly OrderedDictionary displayedObjects = new OrderedDictionary();
+        internal readonly OrderedDictionary displayedObjects = new OrderedDictionary();
 
         // for keeping track of which actual transforms are expanded or not, outside of the cache data.
         private readonly HashSet<int> expandedInstanceIDs = new HashSet<int>();
@@ -50,17 +50,28 @@ namespace UnityExplorer.UI.Widgets
         }
         private string currentFilter;
 
-        public TransformTree(ScrollPool<TransformCell> scrollPool)
+        public void OnGameObjectClicked(GameObject obj)
+        {
+            if (OnClickOverrideHandler != null)
+            {
+                OnClickOverrideHandler.Invoke(obj);
+            }
+            else
+            {
+                InspectorManager.Inspect(obj);
+            }
+        }
+
+        public TransformTree(ScrollPool<TransformCell> scrollPool, Func<IEnumerable<GameObject>> getRootEntriesMethod)
         {
             ScrollPool = scrollPool;
+            GetRootEntriesMethod = getRootEntriesMethod;
         }
 
         public void Init()
         {
             ScrollPool.Initialize(this);
         }
-
-        //public void DisableCell(TransformCell cell, int index) => cell.Disable();
 
 
         public bool IsCellExpanded(int instanceID)
@@ -124,16 +135,19 @@ namespace UnityExplorer.UI.Widgets
 
             if (visited.Contains(instanceID))
                 return;
-            visited.Add(instanceID);
 
             if (Filtering)
             {
                 if (!FilterHierarchy(transform))
                     return;
 
+                visited.Add(instanceID);
+
                 if (!autoExpandedIDs.Contains(instanceID))
                     autoExpandedIDs.Add(instanceID);
             }
+            else
+                visited.Add(instanceID);
 
             CachedTransform cached;
             if (displayedObjects.Contains(instanceID))
@@ -179,7 +193,16 @@ namespace UnityExplorer.UI.Widgets
         public void SetCell(TransformCell cell, int index)
         {
             if (index < displayedObjects.Count)
+            {
                 cell.ConfigureCell((CachedTransform)displayedObjects[index], index);
+                if (Filtering)
+                {
+                    if (cell.cachedTransform.Name.ContainsIgnoreCase(currentFilter))
+                    {
+                        cell.NameButton.ButtonText.color = Color.green;
+                    }
+                }
+            }
             else
                 cell.Disable();
         }
@@ -198,11 +221,12 @@ namespace UnityExplorer.UI.Widgets
         public void OnCellBorrowed(TransformCell cell)
         {
             cell.OnExpandToggled += ToggleExpandCell;
+            cell.OnGameObjectClicked += OnGameObjectClicked;
         }
 
-        public void ReleaseCell(TransformCell cell)
-        {
-            cell.OnExpandToggled -= ToggleExpandCell;
-        }
+        //public void ReleaseCell(TransformCell cell)
+        //{
+        //    cell.OnExpandToggled -= ToggleExpandCell;
+        //}
     }
 }

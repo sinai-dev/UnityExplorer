@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
@@ -28,7 +29,7 @@ namespace UnityExplorer.UI.Inspectors
         private List<CacheMember> members = new List<CacheMember>();
         private readonly List<CacheMember> filteredMembers = new List<CacheMember>();
 
-        public bool AutoUpdateWanted { get; set; }
+        public bool AutoUpdateWanted => autoUpdateToggle.isOn;
 
         private BindingFlags FlagsFilter;
         private string NameFilter;
@@ -50,6 +51,8 @@ namespace UnityExplorer.UI.Inspectors
         public Text NameText;
         public Text AssemblyText;
         private Toggle autoUpdateToggle;
+
+        private string currentBaseTabText;
 
         private readonly Color disabledButtonColor = new Color(0.24f, 0.24f, 0.24f);
         private readonly Color enabledButtonColor = new Color(0.2f, 0.27f, 0.2f);
@@ -76,7 +79,7 @@ namespace UnityExplorer.UI.Inspectors
             LayoutRebuilder.ForceRebuildLayoutImmediate(InspectorPanel.Instance.ContentRect);
         }
 
-        protected override void OnCloseClicked()
+        public override void CloseInspector()
         {
             InspectorManager.ReleaseInspector(this);
         }
@@ -93,7 +96,6 @@ namespace UnityExplorer.UI.Inspectors
             filteredMembers.Clear();
 
             autoUpdateToggle.isOn = false;
-            AutoUpdateWanted = false;
 
             UnityObjectRef = null;
             ComponentRef = null;
@@ -121,27 +123,26 @@ namespace UnityExplorer.UI.Inspectors
             }
 
             // Setup main labels and tab text
-            Tab.TabText.text = $"{prefix} {SignatureHighlighter.Parse(TargetType, false)}";
+            currentBaseTabText = $"{prefix} {SignatureHighlighter.Parse(TargetType, false)}";
+            Tab.TabText.text = currentBaseTabText;
             NameText.text = SignatureHighlighter.Parse(TargetType, true);
 
             string asmText;
-
-            try
-            {
-                asmText = Path.GetFileName(TargetType.Assembly.Location);
-            }
-            catch
-            {
+            if (TargetType.Assembly is AssemblyBuilder || string.IsNullOrEmpty(TargetType.Assembly.Location))
                 asmText = $"{TargetType.Assembly.GetName().Name} <color=grey><i>(in memory)</i></color>";
-            }
-                
+            else
+                asmText = Path.GetFileName(TargetType.Assembly.Location);
             AssemblyText.text = $"<color=grey>Assembly:</color> {asmText}";
 
             // unity helpers
             SetUnityTargets();
 
-            // Get cache members, and set filter to default 
+            // Get cache members
+
             this.members = CacheMember.GetCacheMembers(Target, TargetType, this);
+
+            // reset filters
+
             this.filterInputField.Text = "";
             
             SetFilter("", StaticOnly ? BindingFlags.Static : BindingFlags.Instance);
@@ -173,6 +174,7 @@ namespace UnityExplorer.UI.Inspectors
                 return;
             }
 
+            // check filter changes or force-refresh
             if (refreshWanted || NameFilter != lastNameFilter || FlagsFilter != lastFlagsFilter || lastMemberFilter != MemberFilter)
             {
                 lastNameFilter = NameFilter;
@@ -184,9 +186,16 @@ namespace UnityExplorer.UI.Inspectors
                 refreshWanted = false;
             }
 
+            // once-per-second updates
             if (timeOfLastAutoUpdate.OccuredEarlierThan(1))
             {
                 timeOfLastAutoUpdate = Time.realtimeSinceStartup;
+
+                if (this.UnityObjectRef)
+                {
+                    nameInput.Text = UnityObjectRef.name;
+                    this.Tab.TabText.text = $"{currentBaseTabText} \"{UnityObjectRef.name}\"";
+                }
 
                 if (AutoUpdateWanted)
                     UpdateDisplayedMembers();
@@ -196,12 +205,6 @@ namespace UnityExplorer.UI.Inspectors
         public void UpdateClicked()
         {
             UpdateDisplayedMembers();
-            
-            if (this.UnityObjectRef)
-            {
-                nameInput.Text = UnityObjectRef.name;
-                instanceIdInput.Text = UnityObjectRef.GetInstanceID().ToString();
-            }
         }
 
         // Filtering
@@ -360,6 +363,7 @@ namespace UnityExplorer.UI.Inspectors
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
             MemberScrollPool.Initialize(this);
 
+            // For debugging scroll pool
             //InspectorPanel.Instance.UIRoot.GetComponent<Mask>().enabled = false;
             //MemberScrollPool.Viewport.GetComponent<Mask>().enabled = false;
             //MemberScrollPool.Viewport.GetComponent<Image>().color = new Color(0.12f, 0.12f, 0.12f);
@@ -392,10 +396,8 @@ namespace UnityExplorer.UI.Inspectors
             updateButton.OnClick += UpdateClicked;
 
             var toggleObj = UIFactory.CreateToggle(rowObj, "AutoUpdateToggle", out autoUpdateToggle, out Text toggleText);
-            //GameObject.DestroyImmediate(toggleText);
             UIFactory.SetLayoutElement(toggleObj, minWidth: 125, minHeight: 25);
             autoUpdateToggle.isOn = false;
-            autoUpdateToggle.onValueChanged.AddListener((bool val) => { AutoUpdateWanted = val; });
             toggleText.text = "Auto-update";
         }
 
@@ -420,8 +422,6 @@ namespace UnityExplorer.UI.Inspectors
 
             // Member type toggles
 
-            //var typeLabel = UIFactory.CreateLabel(rowObj, "MemberTypeLabel", "Show:", TextAnchor.MiddleLeft, Color.grey);
-            //UIFactory.SetLayoutElement(typeLabel.gameObject, minHeight: 25, minWidth: 40);
             AddMemberTypeToggle(rowObj, MemberTypes.Property, 90);
             AddMemberTypeToggle(rowObj, MemberTypes.Field, 70);
             AddMemberTypeToggle(rowObj, MemberTypes.Method, 90);
@@ -461,6 +461,9 @@ namespace UnityExplorer.UI.Inspectors
 
             memberTypeToggles.Add(toggle);
         }
+
+
+        // Todo should probably put this in a separate class or maybe as a widget
 
         #region UNITY OBJECT SPECIFIC
 
@@ -558,16 +561,16 @@ namespace UnityExplorer.UI.Inspectors
             UIFactory.SetLayoutElement(textureButton.Component.gameObject, minHeight: 25, minWidth: 150);
             textureButton.OnClick += ToggleTextureViewer;
 
-            gameObjectButton = UIFactory.CreateButton(unityObjectRow, "GameObjectButton", "Inspect GameObject", new Color(0.2f, 0.2f, 0.2f));
-            UIFactory.SetLayoutElement(gameObjectButton.Component.gameObject, minHeight: 25, minWidth: 170);
-            gameObjectButton.OnClick += OnGameObjectButtonClicked;
-
             var nameLabel = UIFactory.CreateLabel(unityObjectRow, "NameLabel", "Name:", TextAnchor.MiddleLeft, Color.grey);
             UIFactory.SetLayoutElement(nameLabel.gameObject, minHeight: 25, minWidth: 45, flexibleWidth: 0);
 
             nameInput = UIFactory.CreateInputField(unityObjectRow, "NameInput", "untitled");
             UIFactory.SetLayoutElement(nameInput.UIRoot, minHeight: 25, minWidth: 100, flexibleWidth: 1000);
             nameInput.Component.readOnly = true;
+
+            gameObjectButton = UIFactory.CreateButton(unityObjectRow, "GameObjectButton", "Inspect GameObject", new Color(0.2f, 0.2f, 0.2f));
+            UIFactory.SetLayoutElement(gameObjectButton.Component.gameObject, minHeight: 25, minWidth: 160);
+            gameObjectButton.OnClick += OnGameObjectButtonClicked;
 
             var instanceLabel = UIFactory.CreateLabel(unityObjectRow, "InstanceLabel", "Instance ID:", TextAnchor.MiddleRight, Color.grey);
             UIFactory.SetLayoutElement(instanceLabel.gameObject, minHeight: 25, minWidth: 100, flexibleWidth: 0);

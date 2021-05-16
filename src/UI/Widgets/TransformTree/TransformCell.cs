@@ -17,6 +17,7 @@ namespace UnityExplorer.UI.Widgets
         private bool m_enabled;
 
         public Action<CachedTransform> OnExpandToggled;
+        public Action<GameObject> OnGameObjectClicked;
 
         public CachedTransform cachedTransform;
         public int _cellIndex;
@@ -28,6 +29,14 @@ namespace UnityExplorer.UI.Widgets
         public ButtonRef NameButton;
 
         public LayoutElement spacer;
+
+        public void OnMainButtonClicked()
+        {
+            if (cachedTransform.Value)
+                OnGameObjectClicked?.Invoke(cachedTransform.Value.gameObject);
+            else
+                ExplorerCore.LogWarning("The object was destroyed!");
+        }
 
         public void ConfigureCell(CachedTransform cached, int cellIndex)
         {
@@ -88,14 +97,6 @@ namespace UnityExplorer.UI.Widgets
         public void OnExpandClicked()
         {
             OnExpandToggled?.Invoke(cachedTransform);
-        }
-
-        public void OnMainButtonClicked()
-        {
-            if (cachedTransform.Value)
-                InspectorManager.Inspect(cachedTransform.Value.gameObject);
-            else
-                ExplorerCore.LogWarning("The object was destroyed!");
         }
 
         public GameObject CreateContent(GameObject parent)

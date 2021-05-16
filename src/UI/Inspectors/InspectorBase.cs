@@ -23,6 +23,8 @@ namespace UnityExplorer.UI.Inspectors
 
         public abstract void Update();
 
+        public abstract void CloseInspector();
+
         public virtual void OnBorrowedFromPool(object target)
         {
             this.Target = target;
@@ -30,7 +32,7 @@ namespace UnityExplorer.UI.Inspectors
             Tab.UIRoot.transform.SetParent(InspectorPanel.Instance.NavbarHolder.transform, false);
 
             Tab.TabButton.OnClick += OnTabButtonClicked;
-            Tab.CloseButton.OnClick += OnCloseClicked;
+            Tab.CloseButton.OnClick += CloseInspector;
         }
 
         public virtual void OnReturnToPool()
@@ -40,7 +42,7 @@ namespace UnityExplorer.UI.Inspectors
             this.Target = null;
 
             Tab.TabButton.OnClick -= OnTabButtonClicked;
-            Tab.CloseButton.OnClick -= OnCloseClicked;
+            Tab.CloseButton.OnClick -= CloseInspector;
         }
 
         public virtual void OnSetActive()
@@ -62,7 +64,5 @@ namespace UnityExplorer.UI.Inspectors
         {
             InspectorManager.SetInspectorActive(this);
         }
-
-        protected abstract void OnCloseClicked();
     }
 }

@@ -5,10 +5,12 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityExplorer.Core.Input;
 using UnityExplorer.UI.ObjectPool;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Utility;
 using UnityExplorer.UI.Widgets;
+using UnityExplorer.UI.Widgets.AutoComplete;
 
 namespace UnityExplorer.UI.Inspectors
 {
@@ -16,27 +18,26 @@ namespace UnityExplorer.UI.Inspectors
     {
         public GameObject GOTarget => Target as GameObject;
 
-        // Top info
-
-        private InputFieldRef NameInput;
-        private GameObject PathRow;
-        private InputFieldRef PathInput;
-
-        // Child and comp lists
+        public GameObjectControls GOControls;
 
         public TransformTree TransformTree;
         private ScrollPool<TransformCell> transformScroll;
         private readonly List<GameObject> cachedChildren = new List<GameObject>();
 
-        public ButtonListSource<Component> ComponentList;
-        private ScrollPool<ButtonCell> componentScroll;
+        public ComponentList ComponentList;
+        private ScrollPool<ComponentCell> componentScroll;
+
+        private InputFieldRef addChildInput;
+        private InputFieldRef addCompInput;
 
         public override void OnBorrowedFromPool(object target)
         {
             base.OnBorrowedFromPool(target);
 
             Target = target as GameObject;
-            Tab.TabText.text = $"[G] {GOTarget.name}";
+
+            GOControls.UpdateGameObjectInfo(true, true);
+            GOControls.UpdateTransformControlValues(true);
 
             RuntimeProvider.Instance.StartCoroutine(InitCoroutine());
         }
@@ -56,10 +57,23 @@ namespace UnityExplorer.UI.Inspectors
         public override void OnReturnToPool()
         {
             base.OnReturnToPool();
+
+            addChildInput.Text = "";
+            addCompInput.Text = "";
         }
-        protected override void OnCloseClicked()
+
+        public override void CloseInspector()
         {
             InspectorManager.ReleaseInspector(this);
+        }
+
+        public void ChangeTarget(GameObject newTarget)
+        {
+            this.Target = newTarget;
+            GOControls.UpdateGameObjectInfo(true, true);
+            GOControls.UpdateTransformControlValues(true);
+            TransformTree.RefreshData(true, false);
+            UpdateComponents();
         }
 
         private float timeOfLastUpdate;
@@ -75,26 +89,22 @@ namespace UnityExplorer.UI.Inspectors
                 return;
             }
 
+            GOControls.UpdateVectorSlider();
+            GOControls.UpdateTransformControlValues(false);
+
+            // Slow update
             if (timeOfLastUpdate.OccuredEarlierThan(1))
             {
                 timeOfLastUpdate = Time.realtimeSinceStartup;
 
-                // Refresh children and components
+                GOControls.UpdateGameObjectInfo(false, false);
+
                 TransformTree.RefreshData(true, false);
-
                 UpdateComponents();
-
-                Tab.TabText.text = $"[G] {GOTarget.name}";
             }
         }
 
-        private void RefreshTopInfo()
-        {
-
-        }
-
-
-        #region Transform and Component Lists 
+        // Child and Component Lists
 
         private IEnumerable<GameObject> GetTransformEntries()
         {
@@ -104,32 +114,46 @@ namespace UnityExplorer.UI.Inspectors
             return cachedChildren;
         }
 
-        private readonly List<Component> _componentEntries = new List<Component>();
-        private readonly HashSet<int> _compInstanceIDs = new HashSet<int>();
+        private readonly List<Component> componentEntries = new List<Component>();
+        private readonly HashSet<int> compInstanceIDs = new HashSet<int>();
+        private readonly List<Behaviour> behaviourEntries = new List<Behaviour>();
+        private readonly List<bool> behaviourEnabledStates = new List<bool>();
 
-        private List<Component> GetComponentEntries()
-        {
-            return _componentEntries;
-        }
+        // ComponentList.GetRootEntriesMethod
+        private List<Component> GetComponentEntries() => componentEntries;
 
-        private void UpdateComponents()
+        public void UpdateComponents()
         {
             // Check if we actually need to refresh the component cells or not.
-            // Doing this check is far more efficient than blindly setting cells.
-
             var comps = GOTarget.GetComponents<Component>();
+            var behaviours = GOTarget.GetComponents<Behaviour>();
 
             bool needRefresh = false;
-            if (comps.Length != _componentEntries.Count)
+            if (comps.Length != componentEntries.Count || behaviours.Length != behaviourEntries.Count)
+            {
                 needRefresh = true;
+            }
             else
             {
                 foreach (var comp in comps)
                 {
-                    if (!_compInstanceIDs.Contains(comp.GetInstanceID()))
+                    if (!compInstanceIDs.Contains(comp.GetInstanceID()))
                     {
                         needRefresh = true;
                         break;
+                    }
+                }
+
+                if (!needRefresh)
+                {
+                    for (int i = 0; i < behaviours.Length; i++)
+                    {
+                        var behaviour = behaviours[i];
+                        if (behaviour.enabled != behaviourEnabledStates[i])
+                        {
+                            needRefresh = true;
+                            break;
+                        }
                     }
                 }
             }
@@ -137,55 +161,55 @@ namespace UnityExplorer.UI.Inspectors
             if (!needRefresh)
                 return;
 
-            _componentEntries.Clear();
-            _compInstanceIDs.Clear();
+            componentEntries.Clear();
+            compInstanceIDs.Clear();
 
             foreach (var comp in comps)
             {
-                _componentEntries.Add(comp);
-                _compInstanceIDs.Add(comp.GetInstanceID());
+                componentEntries.Add(comp);
+                compInstanceIDs.Add(comp.GetInstanceID());
+            }
+
+            behaviourEntries.Clear();
+            behaviourEnabledStates.Clear();
+            foreach (var behaviour in behaviours)
+            {
+                behaviourEntries.Add(behaviour);
+                behaviourEnabledStates.Add(behaviour.enabled);
             }
 
             ComponentList.RefreshData();
             ComponentList.ScrollPool.Refresh(true);
         }
 
-        private static readonly Dictionary<string, string> compToStringCache = new Dictionary<string, string>();
 
-        private void SetComponentCell(ButtonCell cell, int index)
+        private void OnAddChildClicked(string input)
         {
-            if (index < 0 || index >= _componentEntries.Count)
-            {
-                cell.Disable();
-                return;
-            }
+            var newObject = new GameObject(input);
+            newObject.transform.parent = GOTarget.transform;
 
-            cell.Enable();
-
-            var comp = _componentEntries[index];
-            var type = comp.GetActualType();
-
-            if (!compToStringCache.ContainsKey(type.AssemblyQualifiedName))
-            {
-                compToStringCache.Add(type.AssemblyQualifiedName, SignatureHighlighter.Parse(type, true));
-            }
-
-            cell.Button.ButtonText.text = compToStringCache[type.AssemblyQualifiedName];
+            TransformTree.RefreshData(true, false);
         }
-
-        private bool ShouldDisplay(Component comp, string filter) => true;
-
-        private void OnComponentClicked(int index)
+        
+        private void OnAddComponentClicked(string input)
         {
-            if (index < 0 || index >= _componentEntries.Count)
-                return;
-
-            var comp = _componentEntries[index];
-            if (comp)
-                InspectorManager.Inspect(comp);
+            if (ReflectionUtility.AllTypes.TryGetValue(input, out Type type))
+            {
+                try
+                {
+                    RuntimeProvider.Instance.AddComponent<Component>(GOTarget, type);
+                    UpdateComponents();
+                }
+                catch (Exception ex)
+                {
+                    ExplorerCore.LogWarning($"Exception adding component: {ex.ReflectionExToString()}");
+                }
+            }
+            else
+            {
+                ExplorerCore.LogWarning($"Could not find any Type by the name '{input}'!");
+            }
         }
-
-        #endregion
 
 
         #region UI Construction
@@ -193,67 +217,90 @@ namespace UnityExplorer.UI.Inspectors
         public override GameObject CreateContent(GameObject parent)
         {
             UIRoot = UIFactory.CreateVerticalGroup(Pool<GameObjectInspector>.Instance.InactiveHolder,
-                "GameObjectInspector", true, true, true, true, 5, new Vector4(4, 4, 4, 4), new Color(0.12f, 0.12f, 0.12f));
+                "GameObjectInspector", true, true, true, true, 5, new Vector4(4, 4, 4, 4), new Color(0.065f, 0.065f, 0.065f));
 
-            // Title row
+            // Construct GO Controls
+            GOControls = new GameObjectControls(this);
 
-            var titleRow = UIFactory.CreateUIObject("TitleRow", UIRoot);
-            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(titleRow, false, false, true, true, 5);
+            ConstructLists();
 
-            var titleLabel = UIFactory.CreateLabel(titleRow, "Title", SignatureHighlighter.Parse(typeof(GameObject), true), 
-                TextAnchor.MiddleLeft, fontSize: 17);
-            UIFactory.SetLayoutElement(titleLabel.gameObject, minHeight: 30, flexibleHeight: 0, flexibleWidth: 9999);
+            return UIRoot;
+        }
 
-            // Update button
-            var updateBtn = UIFactory.CreateButton(titleRow, "UpdateButton", "Update Info", new Color(0.2f, 0.3f, 0.2f));
-            UIFactory.SetLayoutElement(updateBtn.Component.gameObject, minHeight: 25, minWidth: 200);
-            updateBtn.OnClick += () => { ExplorerCore.Log("TODO!"); };
+        // Child and Comp Lists
 
-            // ~~~~~~ Top info ~~~~~~
-
-            // parent / path row
-
-            this.PathRow = UIFactory.CreateUIObject("ParentRow", UIRoot);
-            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(this.PathRow, false, false, true, true, 5, 2, 2, 2, 2);
-            UIFactory.SetLayoutElement(this.PathRow, minHeight: 25, flexibleHeight: 100, flexibleWidth: 9999);
-
-            var viewParentButton = UIFactory.CreateButton(PathRow, "ViewParentButton", "View Parent", new Color(0.3f, 0.3f, 0.3f));
-            UIFactory.SetLayoutElement(viewParentButton.Component.gameObject, minHeight: 25, minWidth: 80);
-            viewParentButton.OnClick += () => { ExplorerCore.LogWarning("TODO!"); };
-
-            this.PathInput = UIFactory.CreateInputField(PathRow, "PathInput", "No parent (root object)");
-            UIFactory.SetLayoutElement(PathInput.UIRoot, minHeight: 25, minWidth: 100, flexibleWidth: 9999);
-
-
-            // ~~~~~~ Child and comp lists ~~~~~~
-
-            var listTitles = UIFactory.CreateUIObject("ListTitles", UIRoot);
-            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(listTitles, true, true, true, true, 5, 2, 2, 2, 2);
-            UIFactory.SetLayoutElement(listTitles, flexibleWidth: 9999, flexibleHeight: 30);
-            UIFactory.CreateLabel(listTitles, "ChildListTitle", "Children", TextAnchor.MiddleCenter, default, false, 15);
-            UIFactory.CreateLabel(listTitles, "CompListTitle", "Components", TextAnchor.MiddleCenter, default, false, 15);
-            
-            var listHolder = UIFactory.CreateHorizontalGroup(UIRoot, "ListHolder", true, true, true, true, 5, new Vector4(2, 2, 2, 2));
+        private void ConstructLists()
+        {
+            var listHolder = UIFactory.CreateUIObject("ListTitles", UIRoot);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(listHolder, false, true, true, true, 8, 2, 2, 2, 2);
             UIFactory.SetLayoutElement(listHolder, flexibleWidth: 9999, flexibleHeight: 9999);
 
-            transformScroll = UIFactory.CreateScrollPool<TransformCell>(listHolder, "TransformTree", out GameObject transformObj,
+            // Left group (Children)
+
+            var leftGroup = UIFactory.CreateUIObject("ChildrenGroup", listHolder);
+            UIFactory.SetLayoutElement(leftGroup, flexibleWidth: 9999, flexibleHeight: 9999);
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(leftGroup, false, false, true, true, 2);
+
+            var childrenLabel = UIFactory.CreateLabel(leftGroup, "ChildListTitle", "Children", TextAnchor.MiddleCenter, default, false, 16);
+            UIFactory.SetLayoutElement(childrenLabel.gameObject, flexibleWidth: 9999);
+
+            // Add Child
+            var addChildRow = UIFactory.CreateUIObject("AddChildRow", leftGroup);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(addChildRow, false, false, true, true, 2);
+
+            addChildInput = UIFactory.CreateInputField(addChildRow, "AddChildInput", "Enter a name...");
+            UIFactory.SetLayoutElement(addChildInput.Component.gameObject, minHeight: 25, preferredWidth: 9999);
+
+            var addChildButton = UIFactory.CreateButton(addChildRow, "AddChildButton", "Add Child");
+            UIFactory.SetLayoutElement(addChildButton.Component.gameObject, minHeight: 25, minWidth: 80);
+            addChildButton.OnClick += () => { OnAddChildClicked(addChildInput.Text); };
+
+            // TransformTree
+
+            transformScroll = UIFactory.CreateScrollPool<TransformCell>(leftGroup, "TransformTree", out GameObject transformObj,
                 out GameObject transformContent, new Color(0.11f, 0.11f, 0.11f));
             UIFactory.SetLayoutElement(transformObj, flexibleHeight: 9999);
             UIFactory.SetLayoutElement(transformContent, flexibleHeight: 9999);
 
-            componentScroll = UIFactory.CreateScrollPool<ButtonCell>(listHolder, "ComponentList", out GameObject compObj,
+            TransformTree = new TransformTree(transformScroll, GetTransformEntries);
+            TransformTree.Init();
+            TransformTree.OnClickOverrideHandler = ChangeTarget;
+
+            // Right group (Components)
+
+            var rightGroup = UIFactory.CreateUIObject("ChildrenGroup", listHolder);
+            UIFactory.SetLayoutElement(rightGroup, flexibleWidth: 9999, flexibleHeight: 9999);
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(rightGroup, false, false, true, true, 2);
+
+            var compLabel = UIFactory.CreateLabel(rightGroup, "CompListTitle", "Components", TextAnchor.MiddleCenter, default, false, 16);
+            UIFactory.SetLayoutElement(compLabel.gameObject, flexibleWidth: 9999);
+
+            // Add Comp
+            var addCompRow = UIFactory.CreateUIObject("AddCompRow", rightGroup);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(addCompRow, false, false, true, true, 2);
+
+            addCompInput = UIFactory.CreateInputField(addCompRow, "AddCompInput", "Enter a Component type...");
+            UIFactory.SetLayoutElement(addCompInput.Component.gameObject, minHeight: 25, preferredWidth: 9999);
+
+            var addCompButton = UIFactory.CreateButton(addCompRow, "AddCompButton", "Add Comp");
+            UIFactory.SetLayoutElement(addCompButton.Component.gameObject, minHeight: 25, minWidth: 80);
+            addCompButton.OnClick += () => { OnAddComponentClicked(addCompInput.Text); };
+
+            // comp autocompleter
+            new TypeCompleter(typeof(Component), addCompInput);
+
+            // Component List
+
+            componentScroll = UIFactory.CreateScrollPool<ComponentCell>(rightGroup, "ComponentList", out GameObject compObj,
                 out GameObject compContent, new Color(0.11f, 0.11f, 0.11f));
             UIFactory.SetLayoutElement(compObj, flexibleHeight: 9999);
             UIFactory.SetLayoutElement(compContent, flexibleHeight: 9999);
 
-            TransformTree = new TransformTree(transformScroll) { GetRootEntriesMethod = GetTransformEntries };
-            TransformTree.Init();
-
-            ComponentList = new ButtonListSource<Component>(componentScroll, GetComponentEntries, SetComponentCell, ShouldDisplay, OnComponentClicked);
+            ComponentList = new ComponentList(componentScroll, GetComponentEntries);
+            ComponentList.Parent = this;
             componentScroll.Initialize(ComponentList);
-
-            return UIRoot;
         }
+
 
         #endregion
     }

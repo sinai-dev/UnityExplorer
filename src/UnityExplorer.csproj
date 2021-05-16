@@ -234,6 +234,9 @@
     <Compile Include="Core\Utility\ArgumentUtility.cs" />
     <Compile Include="Core\Utility\MiscUtility.cs" />
     <Compile Include="Core\Utility\ParseUtility.cs" />
+    <Compile Include="UI\Inspectors\GameObjectWidgets\ComponentCell.cs" />
+    <Compile Include="UI\Inspectors\GameObjectWidgets\ComponentList.cs" />
+    <Compile Include="UI\Inspectors\GameObjectWidgets\GameObjectControls.cs" />
     <Compile Include="UI\Inspectors\InspectUnderMouse.cs" />
     <Compile Include="UI\CSConsole\ConsoleController.cs" />
     <Compile Include="UI\CacheObject\CacheField.cs" />
@@ -326,7 +329,7 @@
     <Compile Include="UI\Widgets\ScrollPool\UIExtensions.cs" />
     <Compile Include="UI\Widgets\InputFieldScroller.cs" />
     <Compile Include="UI\Widgets\ButtonList\ButtonCell.cs" />
-    <Compile Include="UI\Widgets\ButtonList\ButtonListSource.cs" />
+    <Compile Include="UI\Widgets\ButtonList\ButtonListHandler.cs" />
     <Compile Include="UI\Widgets\AutoSliderScrollbar.cs" />
     <Compile Include="UI\Widgets\TransformTree\CachedTransform.cs" />
     <Compile Include="UI\Widgets\TransformTree\TransformCell.cs" />

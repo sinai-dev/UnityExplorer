@@ -21,6 +21,19 @@ namespace UnityExplorer
 
         public static float PanelWidth;
 
+        internal static void CloseAllTabs()
+        {
+            if (Inspectors.Any())
+            {
+                for (int i = Inspectors.Count - 1; i >= 0; i--)
+                    Inspectors[i].CloseInspector();
+
+                Inspectors.Clear();
+            }
+
+            UIManager.SetPanelActive(UIManager.Panels.Inspector, false);
+        }
+
         public static void Inspect(object obj, CacheObjectBase sourceCache = null)
         {
             if (obj.IsNullOrDestroyed())
@@ -73,7 +86,9 @@ namespace UnityExplorer
                 ActiveInspector = null;
             }
         }
-        private static void CreateInspector<T>(object target, bool staticReflection = false, CacheObjectBase sourceCache = null) where T : InspectorBase
+
+        private static void CreateInspector<T>(object target, bool staticReflection = false, 
+            CacheObjectBase sourceCache = null) where T : InspectorBase
         {
             var inspector = Pool<T>.Borrow();
             Inspectors.Add(inspector);
