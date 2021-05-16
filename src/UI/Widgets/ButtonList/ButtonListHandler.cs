@@ -10,16 +10,16 @@ using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Widgets
 {
-    public class ButtonListSource<T> : ICellPoolDataSource<ButtonCell>
+    public class ButtonListHandler<TData, TCell> : ICellPoolDataSource<TCell> where TCell : ButtonCell
     {
-        internal ScrollPool<ButtonCell> ScrollPool;
+        internal ScrollPool<TCell> ScrollPool;
 
         public int ItemCount => currentEntries.Count;
-        public readonly List<T> currentEntries = new List<T>();
+        public readonly List<TData> currentEntries = new List<TData>();
 
-        public Func<List<T>> GetEntries;
-        public Action<ButtonCell, int> SetICell;
-        public Func<T, string, bool> ShouldDisplay;
+        public Func<List<TData>> GetEntries;
+        public Action<TCell, int> SetICell;
+        public Func<TData, string, bool> ShouldDisplay;
         public Action<int> OnCellClicked;
 
         public string CurrentFilter
@@ -29,8 +29,8 @@ namespace UnityExplorer.UI.Widgets
         }
         private string currentFilter;
 
-        public ButtonListSource(ScrollPool<ButtonCell> scrollPool, Func<List<T>> getEntriesMethod, 
-            Action<ButtonCell, int> setICellMethod, Func<T, string, bool> shouldDisplayMethod,
+        public ButtonListHandler(ScrollPool<TCell> scrollPool, Func<List<TData>> getEntriesMethod, 
+            Action<TCell, int> setICellMethod, Func<TData, string, bool> shouldDisplayMethod,
             Action<int> onCellClickedMethod)
         {
             ScrollPool = scrollPool;
@@ -43,14 +43,14 @@ namespace UnityExplorer.UI.Widgets
 
         public void RefreshData()
         {
-            var allEntries = GetEntries.Invoke();
+            var allEntries = GetEntries();
             currentEntries.Clear();
 
             foreach (var entry in allEntries)
             {
                 if (!string.IsNullOrEmpty(currentFilter))
                 {
-                    if (!ShouldDisplay.Invoke(entry, currentFilter))
+                    if (!ShouldDisplay(entry, currentFilter))
                         continue;
 
                     currentEntries.Add(entry);
@@ -60,17 +60,12 @@ namespace UnityExplorer.UI.Widgets
             }
         }
 
-        public void OnCellBorrowed(ButtonCell cell)
+        public virtual void OnCellBorrowed(TCell cell)
         {
             cell.OnClick += OnCellClicked;
         }
 
-        public void ReleaseCell(ButtonCell cell)
-        {
-            cell.OnClick -= OnCellClicked;
-        }
-
-        public void SetCell(ButtonCell cell, int index)
+        public virtual void SetCell(TCell cell, int index)
         {
             if (currentEntries == null)
                 RefreshData();
@@ -81,10 +76,8 @@ namespace UnityExplorer.UI.Widgets
             {
                 cell.Enable();
                 cell.CurrentDataIndex = index;
-                SetICell.Invoke(cell, index);
+                SetICell(cell, index);
             }
         }
-
-        //public void DisableCell(ButtonCell cell, int index) => cell.Disable();
     }
 }
