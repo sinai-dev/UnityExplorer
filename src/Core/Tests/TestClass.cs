@@ -194,6 +194,8 @@ namespace UnityExplorer.Tests
 
 #if CPP
 
+        public static Il2CppSystem.Collections.IList AAAAAAACppList;
+
         public static string testStringOne = "Test";
         public static Il2CppSystem.Object testStringTwo = "string boxed as cpp object";
         public static Il2CppSystem.String testStringThree = "string boxed as cpp string";
@@ -237,6 +239,11 @@ namespace UnityExplorer.Tests
                 BigList.Add(i.ToString());
 
 #if CPP
+            var list = new Il2CppSystem.Collections.Generic.List<Il2CppSystem.Object>(5);
+            list.Add("one");
+            list.Add("two");
+            AAAAAAACppList = list.TryCast<Il2CppSystem.Collections.IList>();
+
             CppBoxedDict = new Dictionary<Il2CppSystem.String, Il2CppSystem.Object>();
             CppBoxedDict.Add("1", new Il2CppSystem.Int32 { m_value = 1 }.BoxIl2CppObject());
             CppBoxedDict.Add("2", new Il2CppSystem.Int32 { m_value = 2 }.BoxIl2CppObject());

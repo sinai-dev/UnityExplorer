@@ -321,6 +321,7 @@ namespace UnityExplorer.UI.CSConsole
         private static void SetCaretPosition(int caretPosition)
         {
             settingCaretCoroutine = true;
+            Input.Component.readOnly = true;
             RuntimeProvider.Instance.StartCoroutine(SetAutocompleteCaretCoro(caretPosition));
         }
 
@@ -343,6 +344,7 @@ namespace UnityExplorer.UI.CSConsole
             color.a = defaultInputFieldAlpha;
             Input.Component.selectionColor = color;
 
+            Input.Component.readOnly = false;
             settingCaretCoroutine = false;
         }
 
@@ -575,7 +577,7 @@ public class HelloWorld
 
         internal const string HELP_COROUTINES = @"// To start a Coroutine directly, use ""Start(SomeCoroutine());"" in REPL mode.
 
-// To define a coroutine, you will need to compile it seperately. For example:
+// To declare a coroutine, you will need to compile it separately. For example:
 public class MyCoro
 {
     public static IEnumerator Main()

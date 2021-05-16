@@ -39,9 +39,9 @@ namespace UnityExplorer.UI.Widgets
 
         #endregion
 
-        public GameObject CreateContent(GameObject parent)
+        public virtual GameObject CreateContent(GameObject parent)
         {
-            UIRoot = UIFactory.CreateHorizontalGroup(parent, "ButtonCell", true, true, true, true, 2, default,
+            UIRoot = UIFactory.CreateHorizontalGroup(parent, "ButtonCell", true, false, true, true, 2, default,
                 new Color(0.11f, 0.11f, 0.11f), TextAnchor.MiddleCenter);
             Rect = UIRoot.GetComponent<RectTransform>();
             Rect.anchorMin = new Vector2(0, 1);

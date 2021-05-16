@@ -15,7 +15,7 @@ namespace UnityExplorer.UI.Panels
     {
         public override string Name => "C# Console";
         public override UIManager.Panels PanelType => UIManager.Panels.CSConsole;
-        public override int MinWidth => 740;
+        public override int MinWidth => 750;
         public override int MinHeight => 300;
 
         public InputFieldScroller InputScroll { get; private set; }

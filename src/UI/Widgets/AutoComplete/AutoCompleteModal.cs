@@ -31,7 +31,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         public static ISuggestionProvider CurrentHandler { get; private set; }
 
-        public static ButtonListSource<Suggestion> dataHandler;
+        public static ButtonListHandler<Suggestion, ButtonCell> dataHandler;
         public static ScrollPool<ButtonCell> scrollPool;
         private static GameObject navigationTipRow;
 
@@ -299,9 +299,10 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         public override void ConstructPanelContent()
         {
-            dataHandler = new ButtonListSource<Suggestion>(scrollPool, GetEntries, SetCell, ShouldDisplay, OnCellClicked);
+            dataHandler = new ButtonListHandler<Suggestion, ButtonCell>(scrollPool, GetEntries, SetCell, ShouldDisplay, OnCellClicked);
 
-            scrollPool = UIFactory.CreateScrollPool<ButtonCell>(this.content, "AutoCompleter", out GameObject scrollObj, out GameObject scrollContent);
+            scrollPool = UIFactory.CreateScrollPool<ButtonCell>(this.content, "AutoCompleter", out GameObject scrollObj, 
+                out GameObject scrollContent);
             scrollPool.Initialize(dataHandler);
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(scrollContent, true, false, true, false);

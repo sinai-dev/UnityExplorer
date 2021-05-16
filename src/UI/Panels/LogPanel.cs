@@ -29,7 +29,7 @@ namespace UnityExplorer.UI.Panels
         public override string Name => "Log";
         public override UIManager.Panels PanelType => UIManager.Panels.ConsoleLog;
 
-        public override int MinWidth => 300;
+        public override int MinWidth => 350;
         public override int MinHeight => 75;
         public override bool ShouldSaveActiveState => true;
         public override bool ShowByDefault => true;

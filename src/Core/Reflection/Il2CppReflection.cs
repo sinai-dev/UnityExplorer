@@ -745,7 +745,7 @@ namespace UnityExplorer
         ////    var valueType = value.GetActualType();
         ////
         ////    Type typeOfKeys, typeOfValues;
-        ////    if (valueType.IsGenericType && valueType.GetGenericArguments() is var args && args.Length == 2)
+        ////    if (valueType.IsGenericType && valueType.GetGenericArguments() is ParameterInfo[] args && args.Length == 2)
         ////    {
         ////        typeOfKeys = args[0];
         ////        typeOfValues = args[1];

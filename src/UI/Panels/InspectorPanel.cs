@@ -44,13 +44,6 @@ namespace UnityExplorer.UI.Panels
 
         public override string GetSaveDataFromConfigManager() => ConfigManager.InspectorData.Value;
 
-        //public override void LoadSaveData()
-        //{
-        //    ApplySaveData(ConfigManager.InspectorData.Value);
-        //
-        //    InspectorManager.PanelWidth = this.mainPanelRect.rect.width;
-        //}
-
         public override void DoSaveToConfigElement()
         {
             ConfigManager.InspectorData.Value = this.ToSaveData();
@@ -66,6 +59,14 @@ namespace UnityExplorer.UI.Panels
 
         public override void ConstructPanelContent()
         {
+            // add close all button to titlebar
+
+            var closeAllBtn = UIFactory.CreateButton(this.titleBar.transform.Find("CloseHolder").gameObject, "CloseAllBtn", "Close All", 
+                new Color(0.3f, 0.2f, 0.2f));
+            UIFactory.SetLayoutElement(closeAllBtn.Component.gameObject, minHeight: 25, minWidth: 80);
+            closeAllBtn.Component.transform.SetSiblingIndex(closeAllBtn.Component.transform.GetSiblingIndex() - 1);
+            closeAllBtn.OnClick += InspectorManager.CloseAllTabs;
+
             // this.UIRoot.GetComponent<Mask>().enabled = false;
 
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.content, true, true, true, true, 4, padLeft: 5, padRight: 5);

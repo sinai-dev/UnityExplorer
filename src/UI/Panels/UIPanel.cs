@@ -188,13 +188,13 @@ namespace UnityExplorer.UI.Panels
             // Title text
 
             var titleTxt = UIFactory.CreateLabel(titleBar, "TitleBar", Name, TextAnchor.MiddleLeft);
-            UIFactory.SetLayoutElement(titleTxt.gameObject, minWidth: 250, minHeight: 25, flexibleHeight: 0, flexibleWidth: 0);
+            UIFactory.SetLayoutElement(titleTxt.gameObject, minWidth: 250, minHeight: 25, flexibleHeight: 0);
 
             // close button
 
             var closeHolder = UIFactory.CreateUIObject("CloseHolder", titleBar);
             UIFactory.SetLayoutElement(closeHolder, minHeight: 25, flexibleHeight: 0, minWidth: 30, flexibleWidth: 9999);
-            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(closeHolder, false, false, true, true, 0, childAlignment: TextAnchor.MiddleRight);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(closeHolder, false, false, true, true, 3, childAlignment: TextAnchor.MiddleRight);
             var closeBtn = UIFactory.CreateButton(closeHolder, "CloseButton", "—");
             UIFactory.SetLayoutElement(closeBtn.Component.gameObject, minHeight: 25, minWidth: 25, flexibleWidth: 0);
             RuntimeProvider.Instance.SetColorBlock(closeBtn.Component, new Color(0.33f, 0.32f, 0.31f));

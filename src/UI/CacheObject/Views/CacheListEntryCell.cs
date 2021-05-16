@@ -13,8 +13,8 @@ namespace UnityExplorer.UI.CacheObject.Views
         public Image Image { get; private set; }
         public InteractiveList ListOwner => Occupant.Owner as InteractiveList;
 
-        public static Color EvenColor = new Color(0.07f, 0.07f, 0.07f);
-        public static Color OddColor = new Color(0.063f, 0.063f, 0.063f);
+        public static Color EvenColor = new Color(0.12f, 0.12f, 0.12f);
+        public static Color OddColor = new Color(0.1f, 0.1f, 0.1f);
 
         public override GameObject CreateContent(GameObject parent)
         {

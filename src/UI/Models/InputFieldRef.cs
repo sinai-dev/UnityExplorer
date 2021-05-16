@@ -8,8 +8,24 @@ using UnityExplorer.UI.Models;
 
 namespace UnityExplorer.UI
 {
-    public class InputFieldRef : UIBehaviourModel
+    public class InputFieldRef : UIModel
     {
+        public static readonly HashSet<InputFieldRef> inputsPendingUpdate = new HashSet<InputFieldRef>();
+
+        public static void UpdateInstances()
+        {
+            if (inputsPendingUpdate.Any())
+            {
+                foreach (var entry in inputsPendingUpdate)
+                {
+                    LayoutRebuilder.MarkLayoutForRebuild(entry.Rect);
+                    entry.OnValueChanged?.Invoke(entry.Component.text);
+                }
+
+                inputsPendingUpdate.Clear();
+            }
+        }
+
         public InputFieldRef(InputField component) 
         { 
             this.Component = component;
@@ -33,22 +49,11 @@ namespace UnityExplorer.UI
         public TextGenerator TextGenerator => Component.cachedInputTextGenerator;
         public bool ReachedMaxVerts => TextGenerator.vertexCount >= UIManager.MAX_TEXT_VERTS;
 
-        private bool updatedWanted;
 
         private void OnInputChanged(string value)
         {
-            updatedWanted = true;
-        }
-
-        public override void Update()
-        {
-            if (updatedWanted)
-            {
-                LayoutRebuilder.MarkLayoutForRebuild(Rect);
-
-                OnValueChanged?.Invoke(Component.text);
-                updatedWanted = false;
-            }
+            if (!inputsPendingUpdate.Contains(this))
+                inputsPendingUpdate.Add(this);
         }
 
         public override GameObject UIRoot => Component.gameObject;

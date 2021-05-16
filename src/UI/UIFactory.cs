@@ -460,11 +460,10 @@ namespace UnityExplorer.UI
         public static InputFieldRef CreateInputField(GameObject parent, string name, string placeHolderText)
         {
             GameObject mainObj = CreateUIObject(name, parent);
-            //SetLayoutGroup<VerticalLayoutGroup>(mainObj, true, true, true, true);
 
             Image mainImage = mainObj.AddComponent<Image>();
             mainImage.type = Image.Type.Sliced;
-            mainImage.color = new Color(0.04f, 0.04f, 0.04f, 0.75f);
+            mainImage.color = new Color(0, 0, 0, 0.5f);
 
             var inputField = mainObj.AddComponent<InputField>();
             Navigation nav = inputField.navigation;
@@ -480,15 +479,12 @@ namespace UnityExplorer.UI
 
             GameObject textArea = CreateUIObject("TextArea", mainObj);
             textArea.AddComponent<RectMask2D>();
-            //textArea.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             RectTransform textAreaRect = textArea.GetComponent<RectTransform>();
             textAreaRect.anchorMin = Vector2.zero;
             textAreaRect.anchorMax = Vector2.one;
             textAreaRect.offsetMin = Vector2.zero;
             textAreaRect.offsetMax = Vector2.zero;
-
-            // mainInput.textViewport = textArea.GetComponent<RectTransform>();
 
             GameObject placeHolderObj = CreateUIObject("Placeholder", textArea);
             Text placeholderText = placeHolderObj.AddComponent<Text>();
@@ -504,8 +500,6 @@ namespace UnityExplorer.UI
             placeHolderRect.anchorMax = Vector2.one;
             placeHolderRect.offsetMin = Vector2.zero;
             placeHolderRect.offsetMax = Vector2.zero;
-
-            //SetLayoutElement(placeHolderObj, minWidth: 20, flexibleWidth: 5000);
 
             inputField.placeholder = placeholderText;
 

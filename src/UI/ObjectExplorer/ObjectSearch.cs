@@ -30,7 +30,7 @@ namespace UnityExplorer.UI.ObjectExplorer
         private string lastCheckedTypeInput;
         private bool lastTypeCanHaveGO; 
 
-        public ButtonListSource<object> dataHandler;
+        public ButtonListHandler<object, ButtonCell> dataHandler;
 
         private ScrollPool<ButtonCell> resultsScrollPool;
         private List<object> currentResults = new List<object>();
@@ -74,7 +74,7 @@ namespace UnityExplorer.UI.ObjectExplorer
 
         public void Update()
         {
-            if (lastCheckedTypeInput != desiredTypeInput)
+            if (m_context == SearchContext.UnityObject && lastCheckedTypeInput != desiredTypeInput)
             {
                 lastCheckedTypeInput = desiredTypeInput;
 
@@ -101,10 +101,9 @@ namespace UnityExplorer.UI.ObjectExplorer
         {
             m_context = (SearchContext)value;
 
-            bool shouldShowGoFilters = m_context == SearchContext.UnityObject;
-
-            sceneFilterRow.SetActive(shouldShowGoFilters);
-            childFilterRow.SetActive(shouldShowGoFilters);
+            lastCheckedTypeInput = null;
+            sceneFilterRow.SetActive(false);
+            childFilterRow.SetActive(false);
 
             unityObjectClassRow.SetActive(m_context == SearchContext.UnityObject);
         }
@@ -244,11 +243,9 @@ namespace UnityExplorer.UI.ObjectExplorer
 
             // RESULTS SCROLL POOL
 
-            dataHandler = new ButtonListSource<object>(resultsScrollPool, GetEntries, SetCell, ShouldDisplayCell, OnCellClicked);
-            resultsScrollPool = UIFactory.CreateScrollPool<ButtonCell>(uiRoot, "ResultsList", out GameObject scrollObj, out GameObject scrollContent);
-
-            //if (!Pool<ButtonCell>.PrototypeObject)
-            //    Pool<ButtonCell>.PrototypeObject = ButtonCell.CreatePrototypeCell(Pool<ButtonCell>.InactiveHolder).gameObject;
+            dataHandler = new ButtonListHandler<object, ButtonCell>(resultsScrollPool, GetEntries, SetCell, ShouldDisplayCell, OnCellClicked);
+            resultsScrollPool = UIFactory.CreateScrollPool<ButtonCell>(uiRoot, "ResultsList", out GameObject scrollObj, 
+                out GameObject scrollContent);
 
             resultsScrollPool.Initialize(dataHandler);
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);

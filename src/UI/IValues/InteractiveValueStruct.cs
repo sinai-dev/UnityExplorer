@@ -180,8 +180,8 @@ namespace UnityExplorer.UI.IValues
 
             fieldRows.Add(row);
 
-            var label = UIFactory.CreateLabel(row, "Label", "notset", TextAnchor.MiddleRight);
-            UIFactory.SetLayoutElement(label.gameObject, minHeight: 25, minWidth: 175, flexibleWidth: 0);
+            var label = UIFactory.CreateLabel(row, "Label", "notset", TextAnchor.MiddleLeft);
+            UIFactory.SetLayoutElement(label.gameObject, minHeight: 25, minWidth: 50, flexibleWidth: 0);
             label.horizontalOverflow = HorizontalWrapMode.Wrap;
             labels.Add(label);
 

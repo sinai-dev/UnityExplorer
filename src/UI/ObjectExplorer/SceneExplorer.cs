@@ -120,6 +120,11 @@ namespace UnityExplorer.UI.ObjectExplorer
 
         private void OnFilterInput(string input)
         {
+            if ((!string.IsNullOrEmpty(input) && !Tree.Filtering) || (string.IsNullOrEmpty(input) && Tree.Filtering))
+            {
+                Tree.displayedObjects.Clear();
+            }
+
             Tree.CurrentFilter = input;
             Tree.RefreshData(true, true);
         }
@@ -208,7 +213,7 @@ namespace UnityExplorer.UI.ObjectExplorer
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
             UIFactory.SetLayoutElement(scrollContent, flexibleHeight: 9999);
 
-            Tree = new TransformTree(scrollPool) { GetRootEntriesMethod = GetRootEntries };
+            Tree = new TransformTree(scrollPool, GetRootEntries);
             Tree.Init();
             Tree.RefreshData(true, true);
             //scrollPool.Viewport.GetComponent<Mask>().enabled = false;
