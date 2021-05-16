@@ -31,27 +31,35 @@ namespace UnityExplorer.UI
             MouseInspector
         }
 
+        public enum VerticalAnchor
+        {
+            Top,
+            Bottom
+        }
+
         public static bool Initializing { get; private set; } = true;
 
+        private static readonly Dictionary<Panels, UIPanel> UIPanels = new Dictionary<Panels, UIPanel>();
+
+        public static VerticalAnchor NavbarAnchor = VerticalAnchor.Top;
+
+        // References
         public static GameObject CanvasRoot { get; private set; }
         public static Canvas Canvas { get; private set; }
         public static EventSystem EventSys { get; private set; }
 
         internal static GameObject PoolHolder { get; private set; }
 
-        // panels
         internal static GameObject PanelHolder { get; private set; }
-        private static readonly Dictionary<Panels, UIPanel> UIPanels = new Dictionary<Panels, UIPanel>();
 
-        // assets
         internal static Font ConsoleFont { get; private set; }
         internal static Shader BackupShader { get; private set; }
 
-        // Main Navbar UI
         public static RectTransform NavBarRect;
         public static GameObject NavbarButtonHolder;
         public static Dropdown MouseInspectDropdown;
 
+        // defaults
         internal static readonly Color enabledButtonColor = new Color(0.2f, 0.4f, 0.28f);
         internal static readonly Color disabledButtonColor = new Color(0.25f, 0.25f, 0.25f);
 
@@ -140,6 +148,7 @@ namespace UnityExplorer.UI
 
             UIPanel.UpdateFocus();
             PanelDragger.UpdateInstances();
+            InputFieldRef.UpdateInstances();
             UIBehaviourModel.UpdateInstances();
         }
 
@@ -212,6 +221,26 @@ namespace UnityExplorer.UI
             PanelHolder.transform.SetAsFirstSibling();
         }
 
+        public static void SetNavBarAnchor()
+        {
+            switch (NavbarAnchor)
+            {
+                case VerticalAnchor.Top:
+                    NavBarRect.anchorMin = new Vector2(0.5f, 1f);
+                    NavBarRect.anchorMax = new Vector2(0.5f, 1f);
+                    NavBarRect.anchoredPosition = new Vector2(NavBarRect.anchoredPosition.x, 0);
+                    NavBarRect.sizeDelta = new Vector2(900f, 35f);
+                    break;
+
+                case VerticalAnchor.Bottom:
+                    NavBarRect.anchorMin = new Vector2(0.5f, 0f);
+                    NavBarRect.anchorMax = new Vector2(0.5f, 0f);
+                    NavBarRect.anchoredPosition = new Vector2(NavBarRect.anchoredPosition.x, 35);
+                    NavBarRect.sizeDelta = new Vector2(900f, 35f);
+                    break;
+            }
+        }
+
         private static void CreateTopNavBar()
         {
             var navbarPanel = UIFactory.CreateUIObject("MainNavbar", CanvasRoot);
@@ -219,9 +248,14 @@ namespace UnityExplorer.UI
             navbarPanel.AddComponent<Image>().color = new Color(0.1f, 0.1f, 0.1f);
             NavBarRect = navbarPanel.GetComponent<RectTransform>();
             NavBarRect.pivot = new Vector2(0.5f, 1f);
-            NavBarRect.anchorMin = new Vector2(0.5f, 1f);
-            NavBarRect.anchorMax = new Vector2(0.5f, 1f);
-            NavBarRect.sizeDelta = new Vector2(900f, 35f);
+
+            NavbarAnchor = ConfigManager.Main_Navbar_Anchor.Value;
+            SetNavBarAnchor();
+            ConfigManager.Main_Navbar_Anchor.OnValueChanged += (VerticalAnchor val) => 
+            {
+                NavbarAnchor = val;
+                SetNavBarAnchor();
+            };
 
             // UnityExplorer title
 
