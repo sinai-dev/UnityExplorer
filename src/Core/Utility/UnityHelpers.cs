@@ -56,17 +56,18 @@ namespace UnityExplorer
         /// </summary>
         public static string GetTransformPath(this Transform transform, bool includeSelf = false)
         {
-            string path = includeSelf 
-                ? transform.transform.name 
-                : "";
+            var sb = new StringBuilder();
+            if (includeSelf)
+                sb.Append(transform.name);
 
             while (transform.parent)
             {
                 transform = transform.parent;
-                path = $"{transform.name}/{path}";
+                sb.Insert(0, '/');
+                sb.Insert(0, transform.name);
             }
 
-            return path;
+            return sb.ToString();
         }
 
         /// <summary>
