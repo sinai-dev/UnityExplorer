@@ -243,6 +243,8 @@ namespace UnityExplorer.UI.CSConsole
             }
 
             HighlightVisibleInput();
+
+            UpdateCaret(out _);
         }
 
         public static void Update()
@@ -260,7 +262,8 @@ namespace UnityExplorer.UI.CSConsole
 
             if (!settingCaretCoroutine && EnableSuggestions && caretMoved)
             {
-                Completer.CheckAutocompletes();
+                AutoCompleteModal.Instance.ReleaseOwnership(Completer);
+                //Completer.CheckAutocompletes();
             }
 
             if (EnableCtrlRShortcut

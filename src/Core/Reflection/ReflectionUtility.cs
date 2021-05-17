@@ -45,6 +45,9 @@ namespace UnityExplorer
         /// <summary>Key: Type.FullName</summary>
         public static readonly SortedDictionary<string, Type> AllTypes = new SortedDictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
 
+        public static readonly List<string> AllNamespaces = new List<string>();
+        private static readonly HashSet<string> uniqueNamespaces = new HashSet<string>();
+
         private static string[] allTypesArray;
         public static string[] GetTypeNameArray()
         {
@@ -81,6 +84,19 @@ namespace UnityExplorer
         {
             foreach (var type in asm.TryGetTypes())
             {
+                if (!string.IsNullOrEmpty(type.Namespace) && !uniqueNamespaces.Contains(type.Namespace))
+                {
+                    uniqueNamespaces.Add(type.Namespace);
+                    int i = 0;
+                    while (i < AllNamespaces.Count)
+                    {
+                        if (type.Namespace.CompareTo(AllNamespaces[i]) < 0)
+                            break;
+                        i++;
+                    }
+                    AllNamespaces.Insert(i, type.Namespace);
+                }
+
                 if (AllTypes.ContainsKey(type.FullName))
                     AllTypes[type.FullName] = type;
                 else

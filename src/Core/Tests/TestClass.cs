@@ -14,71 +14,12 @@ using UnhollowerBaseLib;
 
 namespace UnityExplorer.Tests
 {
-    public struct TestValueStruct
-    {
-        public const object TestIgnoreThis = null;
-        public const string TestIgnoreButValid = "";
-
-        public string aString;
-        public int anInt;
-        public float aFloat;
-        public bool aBool;
-        public Vector3 AVector3;
-        public Vector4 aVector4;
-        public DateTime aDateTime;
-        public Color32 aColor32;
-        public CameraClearFlags clearFlags;
-    }
-
-    public enum TestEnum : long
-    {
-        Neg50 = -50,
-        Neg1 = -1,
-        Zero = 0,
-        One = 1,
-        Pos49 = 49,
-        Implicit50,
-        Also50 = 50,
-        AlsoAlso50 = 50,
-    };
-    public enum TestEnum2 : ulong
-    {
-        Min = ulong.MinValue,
-        Max = ulong.MaxValue
-    }
-    [Flags]
-    public enum TestFlags : int
-    {
-        All = -1,
-        Zero = 0,
-        Ok = 1,
-        Two = 2,
-        Three = 4,
-        Four = 8,
-        Five = 16,
-        Six = 32,
-        Seven = 64,
-        Thirteen = Six | Seven,
-        Fifteen = Four | Five | Six,
-    }
-
     public static class TestClass
     {
         public static void ATestMethod(string s, float f, Vector3 vector, DateTime date, Quaternion quater, bool b, CameraClearFlags enumvalue)
         {
             ExplorerCore.Log($"{s}, {f}, {vector.ToString()}, {date}, {quater.eulerAngles.ToString()}, {b}, {enumvalue}");
         }
-
-        public static TestValueStruct AATestStruct;
-
-        public static string AAATooLongString = new string('#', UIManager.MAX_INPUTFIELD_CHARS + 2);
-        public static string AAAMaxString = new string('@', UIManager.MAX_INPUTFIELD_CHARS);
-
-        public static TestEnum AATestEnumOne = TestEnum.Neg50;
-        public static TestEnum2 AATestEnumTwo = TestEnum2.Max;
-        public static TestFlags AATestFlags = TestFlags.Thirteen;
-        public static BindingFlags AATestbinding;
-        public static HideFlags AAHideFlags;
 
         public static List<int> AWritableList = new List<int> { 1, 2, 3, 4, 5 };
         public static Dictionary<string, int> AWritableDict = new Dictionary<string, int> { { "one", 1 }, { "two", 2 } };
@@ -121,7 +62,7 @@ namespace UnityExplorer.Tests
             }
         };
 
-        public static IDictionary DictTest = new Dictionary<object, object>
+        public static IDictionary ARandomDictionary = new Dictionary<object, object>
         {
             { 1, 2 },
             { "one", "two" },
@@ -130,6 +71,13 @@ namespace UnityExplorer.Tests
             { CameraClearFlags.Depth, CameraClearFlags.Color },
             { "################################################\r\n##########", null },
             { "subdict", new Dictionary<object,object> { { "key", "value" } } }
+        };
+
+        public static Hashtable TestHashtable = new Hashtable
+        {
+            { "one", "value" },
+            { "two", "value" },
+            { "three", "value" },
         };
 
         public const int ConstantInt = 5;
@@ -194,17 +142,23 @@ namespace UnityExplorer.Tests
 
 #if CPP
 
-        public static Il2CppSystem.Collections.IList AAAAAAACppList;
+        public static Il2CppSystem.Collections.IList IL2CPP_IList;
+        public static Il2CppSystem.Collections.Generic.List<string> IL2CPP_ListString;
+        public static Il2CppSystem.Collections.Generic.HashSet<string> IL2CPP_HashSet;
 
-        public static string testStringOne = "Test";
-        public static Il2CppSystem.Object testStringTwo = "string boxed as cpp object";
-        public static Il2CppSystem.String testStringThree = "string boxed as cpp string";
+        public static Il2CppSystem.Collections.Generic.Dictionary<string, string> IL2CPP_Dict;
+        public static Il2CppSystem.Collections.Hashtable IL2CPP_HashTable;
+        public static Il2CppSystem.Collections.IDictionary IL2CPP_IDict;
+
+        public static string IL2CPP_systemString = "Test";
+        public static Il2CppSystem.Object IL2CPP_objectString = "string boxed as cpp object";
+        public static Il2CppSystem.String IL2CPP_il2cppString = "string boxed as cpp string";
         public static string nullString = null;
 
-        public static List<Il2CppSystem.Object> CppBoxedList;
-        public static Il2CppStructArray<int> CppIntStructArray;
-        public static Il2CppStringArray CppStringArray;
-        public static Il2CppReferenceArray<Il2CppSystem.Object> CppReferenceArray;
+        public static List<Il2CppSystem.Object> IL2CPP_listOfBoxedObjects;
+        public static Il2CppStructArray<int> IL2CPP_structArray;
+        public static Il2CppStringArray IL2CPP_stringArray;
+        public static Il2CppReferenceArray<Il2CppSystem.Object> IL2CPP_ReferenceArray;
 
         public static Il2CppSystem.Object cppBoxedInt;
         public static Il2CppSystem.Int32 cppInt;
@@ -239,10 +193,32 @@ namespace UnityExplorer.Tests
                 BigList.Add(i.ToString());
 
 #if CPP
+            IL2CPP_Dict = new Il2CppSystem.Collections.Generic.Dictionary<string, string>();
+            IL2CPP_Dict.Add("key1", "value1");
+            IL2CPP_Dict.Add("key2", "value2");
+            IL2CPP_Dict.Add("key3", "value3");
+
+            IL2CPP_HashTable = new Il2CppSystem.Collections.Hashtable();
+            IL2CPP_HashTable.Add("key1", "value1");
+            IL2CPP_HashTable.Add("key2", "value2");
+            IL2CPP_HashTable.Add("key3", "value3");
+
+            var dict2 = new Il2CppSystem.Collections.Generic.Dictionary<string, string>();
+            dict2.Add("key1", "value1");
+            IL2CPP_IDict = dict2.TryCast<Il2CppSystem.Collections.IDictionary>();
+
             var list = new Il2CppSystem.Collections.Generic.List<Il2CppSystem.Object>(5);
             list.Add("one");
             list.Add("two");
-            AAAAAAACppList = list.TryCast<Il2CppSystem.Collections.IList>();
+            IL2CPP_IList = list.TryCast<Il2CppSystem.Collections.IList>();
+
+            IL2CPP_ListString = new Il2CppSystem.Collections.Generic.List<string>();
+            IL2CPP_ListString.Add("hello,");
+            IL2CPP_ListString.Add("world!");
+
+            IL2CPP_HashSet = new Il2CppSystem.Collections.Generic.HashSet<string>();
+            IL2CPP_HashSet.Add("one");
+            IL2CPP_HashSet.Add("two");
 
             CppBoxedDict = new Dictionary<Il2CppSystem.String, Il2CppSystem.Object>();
             CppBoxedDict.Add("1", new Il2CppSystem.Int32 { m_value = 1 }.BoxIl2CppObject());
@@ -255,10 +231,10 @@ namespace UnityExplorer.Tests
             cppVector3Boxed = Vector3.down.BoxIl2CppObject();
 
 
-            CppBoxedList = new List<Il2CppSystem.Object>();
-            CppBoxedList.Add((Il2CppSystem.String)"boxedString");
-            CppBoxedList.Add(new Il2CppSystem.Int32 { m_value = 5 }.BoxIl2CppObject());
-            CppBoxedList.Add(Color.red.BoxIl2CppObject());
+            IL2CPP_listOfBoxedObjects = new List<Il2CppSystem.Object>();
+            IL2CPP_listOfBoxedObjects.Add((Il2CppSystem.String)"boxedString");
+            IL2CPP_listOfBoxedObjects.Add(new Il2CppSystem.Int32 { m_value = 5 }.BoxIl2CppObject());
+            IL2CPP_listOfBoxedObjects.Add(Color.red.BoxIl2CppObject());
 
             try
             {
@@ -266,11 +242,11 @@ namespace UnityExplorer.Tests
                 if (cppType != null)
                 {
                     var boxedEnum = Il2CppSystem.Enum.Parse(cppType, "Color");
-                    CppBoxedList.Add(boxedEnum);
+                    IL2CPP_listOfBoxedObjects.Add(boxedEnum);
                 }
 
                 var structBox = Vector3.one.BoxIl2CppObject();
-                CppBoxedList.Add(structBox);
+                IL2CPP_listOfBoxedObjects.Add(structBox);
 
             }
             catch (Exception ex)
@@ -278,21 +254,21 @@ namespace UnityExplorer.Tests
                 ExplorerCore.LogWarning($"Test fail: {ex}");
             }
 
-            CppIntStructArray = new UnhollowerBaseLib.Il2CppStructArray<int>(5);
-            CppIntStructArray[0] = 0;
-            CppIntStructArray[1] = 1;
-            CppIntStructArray[2] = 2;
-            CppIntStructArray[3] = 3;
-            CppIntStructArray[4] = 4;
+            IL2CPP_structArray = new UnhollowerBaseLib.Il2CppStructArray<int>(5);
+            IL2CPP_structArray[0] = 0;
+            IL2CPP_structArray[1] = 1;
+            IL2CPP_structArray[2] = 2;
+            IL2CPP_structArray[3] = 3;
+            IL2CPP_structArray[4] = 4;
 
-            CppStringArray = new UnhollowerBaseLib.Il2CppStringArray(2);
-            CppStringArray[0] = "hello, ";
-            CppStringArray[1] = "world!";
+            IL2CPP_stringArray = new UnhollowerBaseLib.Il2CppStringArray(2);
+            IL2CPP_stringArray[0] = "hello, ";
+            IL2CPP_stringArray[1] = "world!";
 
-            CppReferenceArray = new UnhollowerBaseLib.Il2CppReferenceArray<Il2CppSystem.Object>(3);
-            CppReferenceArray[0] = new Il2CppSystem.Int32 { m_value = 5 }.BoxIl2CppObject();
-            CppReferenceArray[1] = null;
-            CppReferenceArray[2] = (Il2CppSystem.String)"whats up";
+            IL2CPP_ReferenceArray = new UnhollowerBaseLib.Il2CppReferenceArray<Il2CppSystem.Object>(3);
+            IL2CPP_ReferenceArray[0] = new Il2CppSystem.Int32 { m_value = 5 }.BoxIl2CppObject();
+            IL2CPP_ReferenceArray[1] = null;
+            IL2CPP_ReferenceArray[2] = (Il2CppSystem.String)"whats up";
 
             cppBoxedInt = new Il2CppSystem.Int32() { m_value = 5 }.BoxIl2CppObject();
             cppInt = new Il2CppSystem.Int32 { m_value = 420 };

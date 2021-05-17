@@ -77,17 +77,30 @@ namespace UnityExplorer.UI.CSConsole
                                      select new Suggestion(GetHighlightString(prefix, completion), completion));
             }
 
+            // Get manual namespace completions
+
+            foreach (var ns in ReflectionUtility.AllNamespaces)
+            {
+                if (ns.StartsWith(input))
+                {
+                    if (!namespaceHighlights.ContainsKey(ns))
+                        namespaceHighlights.Add(ns, $"<color=#CCCCCC>{ns}</color>");
+
+                    string completion = ns.Substring(input.Length, ns.Length - input.Length);
+                    suggestions.Add(new Suggestion(namespaceHighlights[ns], completion));
+                }
+            }
+
             // Get manual keyword completions
 
             foreach (var kw in KeywordLexer.keywords)
             {
-                if (kw.StartsWith(input) && kw.Length > input.Length)
+                if (kw.StartsWith(input))// && kw.Length > input.Length)
                 {
                     if (!keywordHighlights.ContainsKey(kw))
                         keywordHighlights.Add(kw, $"<color=#{SignatureHighlighter.keywordBlueHex}>{kw}</color>");
             
                     string completion = kw.Substring(input.Length, kw.Length - input.Length);
-            
                     suggestions.Add(new Suggestion(keywordHighlights[kw], completion));
                 }
             }
@@ -102,6 +115,9 @@ namespace UnityExplorer.UI.CSConsole
                 AutoCompleteModal.Instance.ReleaseOwnership(this);
             }
         }
+
+
+        private readonly Dictionary<string, string> namespaceHighlights = new Dictionary<string, string>();
 
         private readonly Dictionary<string, string> keywordHighlights = new Dictionary<string, string>();
 
