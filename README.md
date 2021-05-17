@@ -79,7 +79,7 @@ See the "Help" dropdown in the C# console menu for more detailed information.
 
 ### Mouse-Inspect
 
-The "Mouse Inspect" dropdown on the main UnityExplorer nav-bar allows you to inspect objects under the mouse.
+The "Mouse Inspect" dropdown on the main UnityExplorer navbar allows you to inspect objects under the mouse.
 
 * <b>World</b>: uses Physics.Raycast to look for Colliders
 * <b>UI</b>: uses GraphicRaycasters to find UI objects
