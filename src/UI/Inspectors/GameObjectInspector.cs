@@ -62,6 +62,9 @@ namespace UnityExplorer.UI.Inspectors
 
             addChildInput.Text = "";
             addCompInput.Text = "";
+
+            TransformTree.Clear();
+            ComponentList.Clear();
         }
 
         public override void CloseInspector()

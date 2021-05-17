@@ -22,7 +22,6 @@ namespace UnityExplorer.UI.IValues
         public override bool CanWrite => base.CanWrite && RefIList != null && !RefIList.IsReadOnly;
 
         public Type EntryType;
-        //public IEnumerable RefIEnumerable;
         public IList RefIList;
 
         public int ItemCount => values.Count;
@@ -49,7 +48,6 @@ namespace UnityExplorer.UI.IValues
 
         private void ClearAndRelease()
         {
-            //RefIEnumerable = null;
             RefIList = null;
             values.Clear();
 
@@ -94,49 +92,52 @@ namespace UnityExplorer.UI.IValues
         {
             RefIList = value as IList;
 
-            IEnumerator enumerator = (value as IEnumerable).GetEnumerator();
-
-            //if (value is IEnumerable enumerable)
-            //    enumerator = enumerable.GetEnumerator();
-            //else
-            //    enumerator = Il2CppReflection.EnumerateCppList(value);
-
             values.Clear();
             int idx = 0;
-            while (enumerator.MoveNext())
+
+            if (ReflectionUtility.TryGetEnumerator(value, out IEnumerator enumerator))
             {
-                var entry = enumerator.Current;
+                NotSupportedLabel.gameObject.SetActive(false);
 
-                values.Add(entry);
-
-                // If list count increased, create new cache entries
-                CacheListEntry cache;
-                if (idx >= cachedEntries.Count)
+                while (enumerator.MoveNext())
                 {
-                    cache = new CacheListEntry();
-                    cache.SetListOwner(this, idx);
-                    cachedEntries.Add(cache);
-                }
-                else
-                    cache = cachedEntries[idx];
+                    var entry = enumerator.Current;
 
-                cache.SetFallbackType(this.EntryType);
-                cache.SetValueFromSource(entry);
-                idx++;
+                    values.Add(entry);
+
+                    // If list count increased, create new cache entries
+                    CacheListEntry cache;
+                    if (idx >= cachedEntries.Count)
+                    {
+                        cache = new CacheListEntry();
+                        cache.SetListOwner(this, idx);
+                        cachedEntries.Add(cache);
+                    }
+                    else
+                        cache = cachedEntries[idx];
+
+                    cache.SetFallbackType(this.EntryType);
+                    cache.SetValueFromSource(entry);
+                    idx++;
+                }
+
+                // Remove excess cached entries if list count decreased
+                if (cachedEntries.Count > values.Count)
+                {
+                    for (int i = cachedEntries.Count - 1; i >= values.Count; i--)
+                    {
+                        var cache = cachedEntries[i];
+                        if (cache.CellView != null)
+                            cache.UnlinkFromView();
+
+                        cache.ReleasePooledObjects();
+                        cachedEntries.RemoveAt(i);
+                    }
+                }
             }
-
-            // Remove excess cached entries if list count decreased
-            if (cachedEntries.Count > values.Count)
+            else
             {
-                for (int i = cachedEntries.Count - 1; i >= values.Count; i--)
-                {
-                    var cache = cachedEntries[i];
-                    if (cache.CellView != null)
-                        cache.UnlinkFromView();
-
-                    cache.ReleasePooledObjects();
-                    cachedEntries.RemoveAt(i);
-                }
+                NotSupportedLabel.gameObject.SetActive(true);
             }
         }
 
@@ -185,6 +186,8 @@ namespace UnityExplorer.UI.IValues
 
         private LayoutElement scrollLayout;
 
+        private Text NotSupportedLabel;
+
         public override GameObject CreateContent(GameObject parent)
         {
             UIRoot = UIFactory.CreateVerticalGroup(parent, "InteractiveList", true, true, true, true, 6, new Vector4(10, 3, 15, 4),
@@ -204,6 +207,13 @@ namespace UnityExplorer.UI.IValues
             UIFactory.SetLayoutElement(scrollObj, minHeight: 400, flexibleHeight: 0);
             ListScrollPool.Initialize(this, SetLayout);
             scrollLayout = scrollObj.GetComponent<LayoutElement>();
+
+            NotSupportedLabel = UIFactory.CreateLabel(ListScrollPool.Content.gameObject, "NotSupportedMessage", 
+                "The IEnumerable failed to enumerate. This is likely due to an issue with Unhollowed interfaces.", 
+                TextAnchor.MiddleLeft, Color.red);
+
+            UIFactory.SetLayoutElement(NotSupportedLabel.gameObject, minHeight: 25, flexibleWidth: 9999);
+            NotSupportedLabel.gameObject.SetActive(false);
 
             return UIRoot;
         }

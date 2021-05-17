@@ -19,6 +19,11 @@ namespace UnityExplorer.UI.Inspectors
             base.OnCellClicked = OnComponentClicked;
         }
 
+        public void Clear()
+        {
+            this.currentEntries.Clear();
+        }
+
         private bool CheckShouldDisplay(Component _, string __) => true;
 
         public override void OnCellBorrowed(ComponentCell cell)

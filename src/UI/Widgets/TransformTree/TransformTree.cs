@@ -50,6 +50,21 @@ namespace UnityExplorer.UI.Widgets
         }
         private string currentFilter;
 
+
+        public void Init()
+        {
+            ScrollPool.Initialize(this);
+        }
+
+        public void Clear()
+        {
+            this.displayedObjects.Clear();
+            displayIndex = 0;
+            autoExpandedIDs.Clear();
+            expandedInstanceIDs.Clear();
+        }
+
+
         public void OnGameObjectClicked(GameObject obj)
         {
             if (OnClickOverrideHandler != null)
@@ -67,12 +82,6 @@ namespace UnityExplorer.UI.Widgets
             ScrollPool = scrollPool;
             GetRootEntriesMethod = getRootEntriesMethod;
         }
-
-        public void Init()
-        {
-            ScrollPool.Initialize(this);
-        }
-
 
         public bool IsCellExpanded(int instanceID)
         {

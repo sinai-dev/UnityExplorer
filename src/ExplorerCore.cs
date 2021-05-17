@@ -80,9 +80,6 @@ namespace UnityExplorer
             UIManager.InitUI();
 
             Log($"{NAME} {VERSION} initialized.");
-
-            //InspectorManager.Inspect(typeof(TestClass));
-            InspectorManager.Inspect(Camera.main.gameObject);
         }
 
         /// <summary>

@@ -25,12 +25,12 @@ namespace UnityExplorer.UI.IValues
         public Type ValueType;
         public IDictionary RefIDictionary;
 
-        public int ItemCount => values.Count;
-        private readonly List<object> keys = new List<object>();
-        private readonly List<object> values = new List<object>();
+        public int ItemCount => cachedEntries.Count;
         private readonly List<CacheKeyValuePair> cachedEntries = new List<CacheKeyValuePair>();
 
         public ScrollPool<CacheKeyValuePairCell> DictScrollPool { get; private set; }
+
+        private Text NotSupportedLabel;
 
         public Text TopLabel;
 
@@ -54,8 +54,6 @@ namespace UnityExplorer.UI.IValues
         private void ClearAndRelease()
         {
             RefIDictionary = null;
-            keys.Clear();
-            values.Clear();
 
             foreach (var entry in cachedEntries)
             {
@@ -71,8 +69,8 @@ namespace UnityExplorer.UI.IValues
             if (value == null)
             {
                 // should never be null
-                if (keys.Any())
-                    ClearAndRelease();
+                ClearAndRelease();
+                return;
             }
             else
             {
@@ -101,52 +99,47 @@ namespace UnityExplorer.UI.IValues
         {
             RefIDictionary = value as IDictionary;
 
-            if (RefIDictionary == null)
+            if (ReflectionUtility.TryGetDictEnumerator(value, out IEnumerator<DictionaryEntry> dictEnumerator))
             {
-                // todo il2cpp
-                return;
-            }
+                NotSupportedLabel.gameObject.SetActive(false);
 
-            keys.Clear();
-            foreach (var k in RefIDictionary.Keys)
-                keys.Add(k);
-
-            values.Clear();
-            foreach (var v in RefIDictionary.Values)
-                values.Add(v);
-
-            int idx = 0;
-            for (int i = 0; i < keys.Count; i++)
-            {
-                CacheKeyValuePair cache;
-                if (idx >= cachedEntries.Count)
+                int idx = 0;
+                while (dictEnumerator.MoveNext())
                 {
-                    cache = new CacheKeyValuePair();
-                    cache.SetDictOwner(this, i);
-                    cachedEntries.Add(cache);
+                    CacheKeyValuePair cache;
+                    if (idx >= cachedEntries.Count)
+                    {
+                        cache = new CacheKeyValuePair();
+                        cache.SetDictOwner(this, idx);
+                        cachedEntries.Add(cache);
+                    }
+                    else
+                        cache = cachedEntries[idx];
+
+                    cache.SetFallbackType(ValueType);
+                    cache.SetKey(dictEnumerator.Current.Key);
+                    cache.SetValueFromSource(dictEnumerator.Current.Value);
+
+                    idx++;
                 }
-                else
-                    cache = cachedEntries[i];
 
-                cache.SetFallbackType(ValueType);
-                cache.SetKey(keys[i]);
-                cache.SetValueFromSource(values[i]);
-
-                idx++;
-            }
-
-            // Remove excess cached entries if dict count decreased
-            if (cachedEntries.Count > values.Count)
-            {
-                for (int i = cachedEntries.Count - 1; i >= values.Count; i--)
+                // Remove excess cached entries if dict count decreased
+                if (cachedEntries.Count > idx)
                 {
-                    var cache = cachedEntries[i];
-                    if (cache.CellView != null)
-                        cache.UnlinkFromView();
+                    for (int i = cachedEntries.Count - 1; i >= idx; i--)
+                    {
+                        var cache = cachedEntries[i];
+                        if (cache.CellView != null)
+                            cache.UnlinkFromView();
 
-                    cache.ReleasePooledObjects();
-                    cachedEntries.RemoveAt(i);
+                        cache.ReleasePooledObjects();
+                        cachedEntries.RemoveAt(i);
+                    }
                 }
+            }
+            else
+            {
+                NotSupportedLabel.gameObject.SetActive(true);
             }
         }
 
@@ -156,8 +149,6 @@ namespace UnityExplorer.UI.IValues
         {
             try
             {
-                //key = key.TryCast(KeyType);
-             
                 if (!RefIDictionary.Contains(key))
                 {
                     ExplorerCore.LogWarning("Unable to set key! Key may have been boxed to/from Il2Cpp Object.");
@@ -254,6 +245,13 @@ namespace UnityExplorer.UI.IValues
             UIFactory.SetLayoutElement(scrollObj, minHeight: 150, flexibleHeight: 0);
             DictScrollPool.Initialize(this, SetLayout);
             scrollLayout = scrollObj.GetComponent<LayoutElement>();
+
+            NotSupportedLabel = UIFactory.CreateLabel(DictScrollPool.Content.gameObject, "NotSupportedMessage",
+                "The IDictionary failed to enumerate. This is likely due to an issue with Unhollowed interfaces.",
+                TextAnchor.MiddleLeft, Color.red);
+
+            UIFactory.SetLayoutElement(NotSupportedLabel.gameObject, minHeight: 25, flexibleWidth: 9999);
+            NotSupportedLabel.gameObject.SetActive(false);
 
             return UIRoot;
         }
