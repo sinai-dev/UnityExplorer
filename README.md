@@ -95,8 +95,7 @@ Depending on the release you are using, the config file will be found at:
 
 ## Building
 
-Building the project should be straight-forward, the references are all inside the `lib\` folder.
-
+0. Clone the repository and run `git submodule update --init --recursive` to get the submodules.
 1. Open the `src\UnityExplorer.sln` project in Visual Studio.
 2. Select `Solution 'UnityExplorer' (1 of 1 project)` in the Solution Explorer panel, and set the <b>Active config</b> property to the version you want to build, then build it. Alternatively, use "Batch Build" and select all releases.
 3. The DLLs are built to the `Release\` folder in the root of the repository.
