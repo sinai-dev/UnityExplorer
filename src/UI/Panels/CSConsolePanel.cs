@@ -124,7 +124,7 @@ namespace UnityExplorer.UI.Panels
 
             int fontSize = 16;
 
-            var inputObj = UIFactory.CreateSrollInputField(this.content, "ConsoleInput", ConsoleController.STARTUP_TEXT, out var inputScroller, fontSize);
+            var inputObj = UIFactory.CreateScrollInputField(this.content, "ConsoleInput", ConsoleController.STARTUP_TEXT, out var inputScroller, fontSize);
             InputScroll = inputScroller;
             ConsoleController.defaultInputFieldAlpha = Input.Component.selectionColor.a;
             Input.OnValueChanged += InvokeOnValueChanged;

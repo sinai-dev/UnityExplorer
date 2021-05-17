@@ -12,8 +12,10 @@ namespace UnityExplorer.UI
 {
     public static class UIFactory
     {
-        internal static Vector2 _largeElementSize = new Vector2(160f, 30f);
-        internal static Vector2 _smallElementSize = new Vector2(160f, 20f);
+        #region Init, Core
+
+        internal static Vector2 _largeElementSize = new Vector2(100, 30);
+        internal static Vector2 _smallElementSize = new Vector2(25, 25);
         internal static Color _defaultTextColor = Color.white;
         internal static Font _defaultFont;
 
@@ -22,13 +24,12 @@ namespace UnityExplorer.UI
             _defaultFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
         }
 
-        public static GameObject CreateUIObject(string name, GameObject parent = null, Vector2 size = default)
+        public static GameObject CreateUIObject(string name, GameObject parent, Vector2 size = default)
         {
             if (!parent)
             {
-                ExplorerCore.LogWarning("Cannot create UI object as the parent is null or destroyed! (" + name + ")");
+                ExplorerCore.LogWarning($"Warning: Creating {name} but parent is null");
                 ExplorerCore.Log(Environment.StackTrace);
-                return null;
             }
 
             var obj = new GameObject(name)
@@ -37,12 +38,11 @@ namespace UnityExplorer.UI
                 hideFlags = HideFlags.HideAndDontSave,
             };
 
-            obj.transform.SetParent(parent.transform, false);
+            if (parent)
+                obj.transform.SetParent(parent.transform, false);
 
             RectTransform rect = obj.AddComponent<RectTransform>();
-            rect.sizeDelta = size == default
-                                ? _smallElementSize
-                                : size;
+            rect.sizeDelta = size;
             return obj;
         }
 
@@ -58,6 +58,11 @@ namespace UnityExplorer.UI
             RuntimeProvider.Instance.SetColorBlock(selectable, new Color(0.2f, 0.2f, 0.2f),
                 new Color(0.3f, 0.3f, 0.3f), new Color(0.15f, 0.15f, 0.15f));
         }
+
+        #endregion
+
+
+        #region Default Layout Components
 
         /// <summary>
         /// Get and/or Add a LayoutElement component to the GameObject, and set any of the values on it.
@@ -235,6 +240,11 @@ namespace UnityExplorer.UI
             return groupObj;
         }
 
+        #endregion
+
+
+        #region Default Control Elements
+
         /// <summary>
         /// Create a Label object.
         /// </summary>
@@ -410,8 +420,9 @@ namespace UnityExplorer.UI
 
             toggle = toggleObj.AddComponent<Toggle>();
             toggle.isOn = true;
+            
+            // second reference so we can use it inside the lambda, 'toggle' is an out var.
             Toggle toggleComp = toggle;
-
             toggle.onValueChanged.AddListener(Deselect);
             void Deselect(bool _)
             {
@@ -419,9 +430,7 @@ namespace UnityExplorer.UI
             }
 
             Image bgImage = bgObj.AddComponent<Image>();
-            bgImage.color = bgColor == default
-                ? new Color(0.04f, 0.04f, 0.04f, 0.75f)
-                : bgColor;
+            bgImage.color = bgColor == default ? new Color(0.04f, 0.04f, 0.04f, 0.75f) : bgColor;
 
             Image checkImage = checkObj.AddComponent<Image>();
             checkImage.color = new Color(0.8f, 1, 0.8f, 0.3f);
@@ -517,8 +526,6 @@ namespace UnityExplorer.UI
             inputTextRect.anchorMax = Vector2.one;
             inputTextRect.offsetMin = Vector2.zero;
             inputTextRect.offsetMax = Vector2.zero;
-
-            //SetLayoutElement(inputTextObj, minWidth: 200, flexibleWidth: 5000);
 
             inputField.textComponent = inputText;
             inputField.characterLimit = UIManager.MAX_INPUTFIELD_CHARS;
@@ -670,6 +677,15 @@ namespace UnityExplorer.UI
             return dropdownObj;
         }
 
+
+        #endregion
+
+
+        #region Custom Scroll Components
+
+        /// <summary>
+        /// Create a ScrollPool for the <typeparamref name="T"/> ICell.
+        /// </summary>
         public static ScrollPool<T> CreateScrollPool<T>(GameObject parent, string name, out GameObject uiRoot,
             out GameObject content, Color? bgColor = null) where T : ICell
         {
@@ -729,9 +745,14 @@ namespace UnityExplorer.UI
             return scrollPool;
         }
 
+        /// <summary>
+        /// Create a SliderScrollbar, using a Slider to mimic a scrollbar.
+        /// </summary>
         public static GameObject CreateSliderScrollbar(GameObject parent, out Slider slider)
         {
             GameObject mainObj = CreateUIObject("SliderScrollbar", parent, _smallElementSize);
+            mainObj.AddComponent<Mask>();
+            mainObj.AddComponent<Image>().color = Color.white;
 
             GameObject bgImageObj = CreateUIObject("Background", mainObj);
             GameObject handleSlideAreaObj = CreateUIObject("Handle Slide Area", mainObj);
@@ -740,6 +761,8 @@ namespace UnityExplorer.UI
             Image bgImage = bgImageObj.AddComponent<Image>();
             bgImage.type = Image.Type.Sliced;
             bgImage.color = new Color(0.05f, 0.05f, 0.05f, 1.0f);
+
+            bgImageObj.AddComponent<Mask>();
 
             RectTransform bgRect = bgImageObj.GetComponent<RectTransform>();
             bgRect.pivot = new Vector2(0, 1);
@@ -758,13 +781,13 @@ namespace UnityExplorer.UI
 
             var handleRect = handleObj.GetComponent<RectTransform>();
             handleRect.pivot = new Vector2(0.5f, 0.5f);
-            UIFactory.SetLayoutElement(handleObj, minWidth: 21, flexibleWidth: 0);
+            SetLayoutElement(handleObj, minWidth: 21, flexibleWidth: 0);
 
             var sliderBarLayout = mainObj.AddComponent<LayoutElement>();
             sliderBarLayout.minWidth = 25;
             sliderBarLayout.flexibleWidth = 0;
             sliderBarLayout.minHeight = 30;
-            sliderBarLayout.flexibleHeight = 5000;
+            sliderBarLayout.flexibleHeight = 9999;
 
             slider = mainObj.AddComponent<Slider>();
             slider.handleRect = handleObj.GetComponent<RectTransform>();
@@ -783,65 +806,63 @@ namespace UnityExplorer.UI
         }
 
         /// <summary>
-        /// Create a ScrollView element.
+        /// Create a ScrollView and a SliderScrollbar for non-pooled content.
         /// </summary>
-        public static GameObject CreateAutoScrollView(GameObject parent, string name, out GameObject content, out AutoSliderScrollbar autoScrollbar,
+        public static GameObject CreateScrollView(GameObject parent, string name, out GameObject content, out AutoSliderScrollbar autoScrollbar,
             Color color = default)
         {
             GameObject mainObj = CreateUIObject(name, parent);
-            SetLayoutElement(mainObj, minWidth: 100, minHeight: 30, flexibleWidth: 5000, flexibleHeight: 5000);
-            SetLayoutGroup<HorizontalLayoutGroup>(mainObj, false, true, true, true, 2);
+            var mainRect = mainObj.GetComponent<RectTransform>();
+            mainRect.anchorMin = Vector2.zero;
+            mainRect.anchorMax = Vector2.one;
             Image mainImage = mainObj.AddComponent<Image>();
             mainImage.type = Image.Type.Filled;
             mainImage.color = (color == default) ? new Color(0.3f, 0.3f, 0.3f, 1f) : color;
 
             GameObject viewportObj = CreateUIObject("Viewport", mainObj);
-            UIFactory.SetLayoutElement(viewportObj, minWidth: 1, flexibleWidth: 9999, flexibleHeight: 9999);
             var viewportRect = viewportObj.GetComponent<RectTransform>();
             viewportRect.anchorMin = Vector2.zero;
             viewportRect.anchorMax = Vector2.one;
             viewportRect.pivot = new Vector2(0.0f, 1.0f);
-            //viewportRect.sizeDelta = new Vector2(-15.0f, 0.0f);
-            //viewportRect.offsetMax = new Vector2(-25.0f, 0.0f);
+            viewportRect.offsetMax = new Vector2(-28, 0);
             viewportObj.AddComponent<Image>().color = Color.white;
             viewportObj.AddComponent<Mask>().showMaskGraphic = false;
 
             content = CreateUIObject("Content", viewportObj);
+            SetLayoutGroup<VerticalLayoutGroup>(content, true, false, true, true, childAlignment: TextAnchor.UpperLeft);
+            SetLayoutElement(content, flexibleHeight: 9999);
             var contentRect = content.GetComponent<RectTransform>();
-            SetLayoutGroup<VerticalLayoutGroup>(content, true, true, true, true);//, 5, 5, 5, 5, 5);
-            contentRect.anchorMin = new Vector2(0.0f, 1.0f);
-            contentRect.anchorMax = new Vector2(1.0f, 1.0f);
+            contentRect.anchorMin = Vector2.zero;
+            contentRect.anchorMax = Vector2.one;
             contentRect.pivot = new Vector2(0.0f, 1.0f);
-            //contentRect.sizeDelta = new Vector2(5f, 0f);
-            //contentRect.offsetMax = new Vector2(0f, 0f);
+            content.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             // Slider
-
+        
             GameObject scrollBarObj = CreateUIObject("AutoSliderScrollbar", mainObj);
-            SetLayoutGroup<VerticalLayoutGroup>(scrollBarObj, true, true, true, true);
-            SetLayoutElement(scrollBarObj, minWidth: 25, flexibleWidth: 0, flexibleHeight: 9999);
+            var scrollBarRect = scrollBarObj.GetComponent<RectTransform>();
+            scrollBarRect.anchorMin = new Vector2(1, 0);
+            scrollBarRect.anchorMax = Vector2.one;
+            scrollBarRect.offsetMin = new Vector2(-25, 0);
+            SetLayoutGroup<VerticalLayoutGroup>(scrollBarObj, false, true, true, true);
             scrollBarObj.AddComponent<Image>().color = Color.white;
             scrollBarObj.AddComponent<Mask>().showMaskGraphic = false;
             
             GameObject hiddenBar = CreateScrollbar(scrollBarObj, "HiddenScrollviewScroller", out var hiddenScrollbar);
             hiddenScrollbar.SetDirection(Scrollbar.Direction.BottomToTop, true);
-
+        
             for (int i = 0; i < hiddenBar.transform.childCount; i++)
             {
                 var child = hiddenBar.transform.GetChild(i);
                 child.gameObject.SetActive(false);
             }
-
+        
             CreateSliderScrollbar(scrollBarObj, out Slider scrollSlider);
-
+        
             autoScrollbar = new AutoSliderScrollbar(hiddenScrollbar, scrollSlider, contentRect, viewportRect);
-
-            //var sliderContainer = autoScrollbar.Slider.m_HandleContainerRect.gameObject;
-            //SetLayoutElement(sliderContainer, minWidth: 25, flexibleWidth: 0, flexibleHeight: 9999);
-            //sliderContainer.AddComponent<Mask>();
-
+        
             // Set up the ScrollRect component
-
+        
             var scrollRect = mainObj.AddComponent<ScrollRect>();
             scrollRect.horizontal = false;
             scrollRect.vertical = true;
@@ -850,18 +871,18 @@ namespace UnityExplorer.UI
             scrollRect.scrollSensitivity = 35;
             scrollRect.horizontalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
             scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
-
+        
             scrollRect.viewport = viewportRect;
             scrollRect.content = contentRect;
-
+        
             return mainObj;
         }
 
 
         /// <summary>
-        /// Create a Scrollable Input Field control (custom InputFieldScroller).
+        /// Create a Scrollable Input Field control
         /// </summary>
-        public static GameObject CreateSrollInputField(GameObject parent, string name, string placeHolderText, out InputFieldScroller inputScroll,
+        public static GameObject CreateScrollInputField(GameObject parent, string name, string placeHolderText, out InputFieldScroller inputScroll,
             int fontSize = 14, Color color = default)
         {
             if (color == default)
@@ -957,5 +978,7 @@ namespace UnityExplorer.UI
 
             return mainObj;
         }
+
+        #endregion
     }
 }

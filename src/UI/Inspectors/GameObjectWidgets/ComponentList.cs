@@ -99,11 +99,14 @@ namespace UnityExplorer.UI.Inspectors
             {
                 cell.BehaviourToggle.interactable = true;
                 cell.BehaviourToggle.Set(comp.TryCast<Behaviour>().enabled, false);
+                cell.BehaviourToggle.graphic.color = new Color(0.8f, 1, 0.8f, 0.3f);
             }
             else
             {
                 cell.BehaviourToggle.interactable = false;
-                cell.BehaviourToggle.Set(false, false);
+                cell.BehaviourToggle.Set(true, false);
+                //RuntimeProvider.Instance.SetColorBlock(cell.BehaviourToggle,)
+                cell.BehaviourToggle.graphic.color = new Color(0.2f, 0.2f, 0.2f); 
             }
 
             // if component is the first index it must be the transform, dont show Destroy button for it.

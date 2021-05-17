@@ -12,9 +12,6 @@ using UnityExplorer.UI.Models;
 
 namespace UnityExplorer.UI.Utility
 {
-    // A Slider Scrollbar which automatically resizes for the content size (no pooling).
-    // Currently just used for the C# Console input field.
-
     public class AutoSliderScrollbar : UIBehaviourModel
     {
         public override GameObject UIRoot

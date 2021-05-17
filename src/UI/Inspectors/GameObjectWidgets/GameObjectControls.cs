@@ -196,6 +196,8 @@ namespace UnityExplorer.UI.Inspectors
 
         private void DoSetParent(Transform transform)
         {
+            ExplorerCore.Log($"Setting target's transform parent to: {(transform == null ? "null" : $"'{transform.name}'")}");
+
             if (GOTarget.GetComponent<RectTransform>())
                 GOTarget.transform.SetParent(transform, false);
             else
@@ -434,9 +436,10 @@ namespace UnityExplorer.UI.Inspectors
 
         private void ConstructTopInfo()
         {
-            var topInfoHolder = UIFactory.CreateVerticalGroup(Parent.UIRoot, "TopInfoHolder", false, false, true, true, 3, 
+            var topInfoHolder = UIFactory.CreateVerticalGroup(Parent.Content, "TopInfoHolder", false, false, true, true, 3, 
                 new Vector4(3, 3, 3, 3), new Color(0.1f, 0.1f, 0.1f), TextAnchor.MiddleLeft);
-            UIFactory.SetLayoutElement(topInfoHolder, minHeight: 25, flexibleWidth: 9999);
+            UIFactory.SetLayoutElement(topInfoHolder, minHeight: 100, flexibleWidth: 9999);
+            topInfoHolder.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             // first row (parent, path)
 
@@ -449,10 +452,15 @@ namespace UnityExplorer.UI.Inspectors
             UIFactory.SetLayoutElement(ViewParentButton.Component.gameObject, minHeight: 25, minWidth: 100);
             ViewParentButton.OnClick += OnViewParentClicked;
 
-            this.PathInput = UIFactory.CreateInputField(firstRow, "PathInput", "Enter a GameObject name or path...");
+            this.PathInput = UIFactory.CreateInputField(firstRow, "PathInput", "...");
             PathInput.Component.textComponent.color = Color.grey;
+            PathInput.Component.textComponent.fontSize = 14;
             UIFactory.SetLayoutElement(PathInput.UIRoot, minHeight: 25, minWidth: 100, flexibleWidth: 9999);
             PathInput.Component.lineType = InputField.LineType.MultiLineSubmit;
+
+            //var pathApplyBtn = UIFactory.CreateButton(firstRow, "PathButton", "Set Parent Path", new Color(0.2f, 0.2f, 0.2f));
+            //UIFactory.SetLayoutElement(pathApplyBtn.Component.gameObject, minHeight: 25, minWidth: 120);
+            //pathApplyBtn.OnClick += () => { OnPathEndEdit(PathInput.Text); };
 
             PathInput.Component.onEndEdit.AddListener((string val) => { OnPathEndEdit(val); });
 
@@ -597,11 +605,14 @@ namespace UnityExplorer.UI.Inspectors
 
         private void ConstructTransformControls()
         {
-            //var transformGroup = UIFactory.CreateUIObject("TransformGroup", UIRoot);
-            //UIFactory.SetLayoutGroup<VerticalLayoutGroup>(transformGroup, false, false, true, true, 2, 2, 2);
-            var transformGroup = UIFactory.CreateVerticalGroup(Parent.UIRoot, "TransformControls", false, false, true, true, 2,
+            var transformGroup = UIFactory.CreateVerticalGroup(Parent.Content, "TransformControls", false, false, true, true, 2,
                 new Vector4(2, 2, 0, 0), new Color(0.1f, 0.1f, 0.1f));
-            UIFactory.SetLayoutElement(transformGroup, minHeight: 25, flexibleWidth: 9999);
+            UIFactory.SetLayoutElement(transformGroup, minHeight: 100, flexibleWidth: 9999);
+            //transformGroup.SetActive(false);
+            //var groupRect = transformGroup.GetComponent<RectTransform>();
+            //groupRect.anchorMin = new Vector2(0, 1);
+            //groupRect.anchorMax = new Vector2(1, 1);
+            //groupRect.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Top, 0, 100);
 
             PositionControl = AddTransformRow(transformGroup, "Position:", TransformType.Position);
             LocalPositionControl = AddTransformRow(transformGroup, "Local Position:", TransformType.LocalPosition);
