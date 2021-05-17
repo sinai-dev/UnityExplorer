@@ -116,17 +116,6 @@ namespace UnityExplorer.UI.Utility
             // Preferred text rect height
             var textGen = InputField.Component.textComponent.cachedTextGeneratorForLayout;
             m_desiredContentHeight = textGen.GetPreferredHeight(m_lastText, texGenSettings) + 10;
-
-            // TODO more intelligent jump.
-            // We can detect if the caret is outside the viewport area.
-
-            // jump to bottom
-            if (InputField.Component.caretPosition == InputField.Text.Length
-                && InputField.Text.Length > 0
-                && InputField.Text[InputField.Text.Length - 1] == '\n')
-            {
-                m_wantJumpToBottom = true;
-            }
         }
 
         public override void ConstructUI(GameObject parent)

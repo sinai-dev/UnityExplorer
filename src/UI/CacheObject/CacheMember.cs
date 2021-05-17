@@ -127,7 +127,6 @@ namespace UnityExplorer.UI.CacheObject
 
             if (State == ValueState.NotEvaluated && !ShouldAutoEvaluate)
             {
-                // todo evaluate buttons etc
                 SetValueState(cell, ValueStateArgs.Default);
                 cell.RefreshSubcontentButton();
 
