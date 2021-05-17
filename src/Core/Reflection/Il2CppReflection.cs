@@ -440,12 +440,6 @@ namespace UnityExplorer
 
         // Helper for IL2CPP to try to make sure the Unhollowed game assemblies are actually loaded.
 
-        internal void TryLoadGameModules()
-        {
-            Internal_LoadModule("Assembly-CSharp");
-            Internal_LoadModule("Assembly-CSharp-firstpass");
-        }
-
         internal override bool Internal_LoadModule(string moduleName)
         {
             if (!moduleName.EndsWith(".dll", StringComparison.InvariantCultureIgnoreCase))
@@ -458,7 +452,41 @@ namespace UnityExplorer
             return DoLoadModule(path);
         }
 
-        internal bool DoLoadModule(string fullPath)
+        // Force loading all il2cpp modules
+
+        internal void TryLoadGameModules()
+        {
+            string dirpath =
+            #if ML
+                    Path.Combine("MelonLoader", "Managed");
+            #elif BIE
+                    Path.Combine("BepInEx", "unhollowed");
+            #else
+                    Path.Combine(ExplorerCore.Loader.ExplorerFolder, "Modules");
+            #endif
+                ;
+
+            if (Directory.Exists(dirpath))
+            {
+                var files = Directory.GetFiles(dirpath);
+                foreach (var filePath in files)
+                {
+                    var name = Path.GetFileName(filePath);
+                    if (!name.StartsWith("Unity") && !name.StartsWith("Assembly-CSharp"))
+                        continue;
+                    try
+                    {
+                        DoLoadModule(filePath, true);
+                    }
+                    catch //(Exception ex)
+                    {
+                        //ExplorerCore.LogWarning($"Failed to force-load module '{name}': {ex.ReflectionExToString()}");
+                    }
+                }
+            }
+        }
+
+        internal bool DoLoadModule(string fullPath, bool suppressWarning = false)
         {
             if (!File.Exists(fullPath))
                 return false;
@@ -470,16 +498,17 @@ namespace UnityExplorer
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.GetType() + ", " + e.Message);
+                if (!suppressWarning)
+                    Console.WriteLine($"Failed loading module '{Path.GetFileName(fullPath)}'! {e.ReflectionExToString()}");
             }
 
             return false;
         }
 
-        #endregion
+#endregion
 
 
-        #region Il2cpp reflection blacklist
+#region Il2cpp reflection blacklist
 
         public override string DefaultReflectionBlacklist => string.Join(";", defaultIl2CppBlacklist);
 
@@ -625,191 +654,238 @@ namespace UnityExplorer
             "UnityEngine.XR.InputDevice.SendHapticImpulse",
         };
 
-        #endregion
+#endregion
 
 
-        // (Disabled)
-        #region Temp il2cpp list/dictionary fixes
+#region Temp il2cpp list/dictionary fixes
 
-        //// Temp fix until Unhollower interface support improves
-        //
-        //internal static IntPtr s_cppEnumerableClassPtr;
-        //internal static IntPtr s_cppDictionaryClassPtr;
-        //
-        //public override bool Internal_IsEnumerable(Type type)
-        //{
-        //    if (base.Internal_IsEnumerable(type))
-        //        return true;
-        //
-        //    try
-        //    {
-        //        if (s_cppEnumerableClassPtr == IntPtr.Zero)
-        //            Il2CppTypeNotNull(typeof(Il2CppSystem.Collections.IEnumerable), out s_cppEnumerableClassPtr);
-        //
-        //        if (s_cppEnumerableClassPtr != IntPtr.Zero
-        //            && Il2CppTypeNotNull(type, out IntPtr assignFromPtr)
-        //            && il2cpp_class_is_assignable_from(s_cppEnumerableClassPtr, assignFromPtr))
-        //        {
-        //            return true;
-        //        }
-        //    }
-        //    catch { }
-        //
-        //    return false;
-        //}
-        //
-        //// Lists
-        //
-        //internal static readonly Dictionary<Type, MethodInfo> s_getEnumeratorMethods = new Dictionary<Type, MethodInfo>();
-        //
-        //internal static readonly Dictionary<Type, EnumeratorInfo> s_enumeratorInfos = new Dictionary<Type, EnumeratorInfo>();
-        //
-        //internal class EnumeratorInfo
-        //{
-        //    internal MethodInfo moveNext;
-        //    internal PropertyInfo current;
-        //}
-        //
-        //internal static IEnumerator EnumerateCppList(object list)
-        //{
-        //    if (list == null)
-        //        yield break;
-        //
-        //    var cppEnumerable = list.TryCast<Il2CppSystem.Collections.IEnumerable>();
-        //    if (cppEnumerable == null)
-        //    {
-        //        ExplorerCore.LogWarning("Failed to cast an IEnumerable to the interface!");
-        //        yield break;
-        //    }
-        //
-        //    // Some ugly reflection to use the il2cpp interface for the instance type
-        //
-        //    var type = cppEnumerable.GetActualType();
-        //    if (!s_getEnumeratorMethods.ContainsKey(type))
-        //        s_getEnumeratorMethods.Add(type, type.GetMethod("GetEnumerator"));
-        //
-        //    var enumerator = s_getEnumeratorMethods[type].Invoke(cppEnumerable.TryCast(type), null);
-        //    var enumeratorType = enumerator.GetType();
-        //
-        //    if (!s_enumeratorInfos.ContainsKey(enumeratorType))
-        //    {
-        //        s_enumeratorInfos.Add(enumeratorType, new EnumeratorInfo
-        //        {
-        //            current = enumeratorType.GetProperty("Current"),
-        //            moveNext = enumeratorType.GetMethod("MoveNext"),
-        //        });
-        //    }
-        //    var info = s_enumeratorInfos[enumeratorType];
-        //
-        //    // Yield and return the actual entries
-        //    while ((bool)info.moveNext.Invoke(enumerator, null))
-        //        yield return info.current.GetValue(enumerator);
-        //}
-        //
-        //// Dicts todo
-        //
-        //public override bool Internal_IsDictionary(Type type)
-        //{
-        //    if (base.Internal_IsDictionary(type))
-        //        return true;
-        //
-        //    try
-        //    {
-        //        if (s_cppDictionaryClassPtr == IntPtr.Zero)
-        //            if (!Il2CppTypeNotNull(typeof(Il2CppSystem.Collections.IDictionary), out s_cppDictionaryClassPtr))
-        //                return false;
-        //
-        //        if (Il2CppTypeNotNull(type, out IntPtr classPtr))
-        //        {
-        //            if (il2cpp_class_is_assignable_from(s_cppDictionaryClassPtr, classPtr))
-        //                return true;
-        //        }
-        //    }
-        //    catch { }
-        //
-        //    return false;
-        //}
-        //
-        //internal static IEnumerator<KeyValuePair<object, object>> EnumerateCppDictionary(object dictionary)
-        //{
-        //    var cppDict = dictionary?.TryCast<Il2CppSystem.Collections.IDictionary>();
-        //    if (cppDict == null)
-        //        yield break;
-        //
-        //}
-        //
-        //
-        //
-        ////public IDictionary EnumerateDictionary(object value)
-        ////{
-        ////    var valueType = value.GetActualType();
-        ////
-        ////    Type typeOfKeys, typeOfValues;
-        ////    if (valueType.IsGenericType && valueType.GetGenericArguments() is ParameterInfo[] args && args.Length == 2)
-        ////    {
-        ////        typeOfKeys = args[0];
-        ////        typeOfValues = args[1];
-        ////    }
-        ////    else
-        ////        typeOfKeys = typeOfValues = typeof(object);
-        ////
-        ////    var keyList = new List<object>();
-        ////    var valueList = new List<object>();
-        ////
-        ////    var hashtable = value.TryCast<Il2CppSystem.Collections.Hashtable>();
-        ////
-        ////    if (hashtable != null)
-        ////    {
-        ////        EnumerateCppHashtable(hashtable, keyList, valueList);
-        ////    }
-        ////    else
-        ////    {
-        ////        var keys = valueType.GetProperty("Keys").GetValue(value, null);
-        ////        EnumerateCppCollection(keys, keyList);
-        ////
-        ////        var values = valueType.GetProperty("Values").GetValue(value, null);
-        ////        EnumerateCppCollection(values, valueList);
-        ////    }
-        ////
-        ////    var dict = Activator.CreateInstance(typeof(Dictionary<,>)
-        ////                        .MakeGenericType(typeOfKeys, typeOfValues))
-        ////                        as IDictionary;
-        ////
-        ////    for (int i = 0; i < keyList.Count; i++)
-        ////        dict.Add(keyList[i], valueList[i]);
-        ////
-        ////    return dict;
-        ////}
-        ////
-        ////private void EnumerateCppCollection(object collection, List<object> list)
-        ////{
-        ////    // invoke GetEnumerator
-        ////    var enumerator = collection.GetType().GetMethod("GetEnumerator").Invoke(collection, null);
-        ////    // get the type of it
-        ////    var enumeratorType = enumerator.GetType();
-        ////    // reflect MoveNext and Current
-        ////    var moveNext = enumeratorType.GetMethod("MoveNext");
-        ////    var current = enumeratorType.GetProperty("Current");
-        ////    // iterate
-        ////    while ((bool)moveNext.Invoke(enumerator, null))
-        ////    {
-        ////        list.Add(current.GetValue(enumerator, null));
-        ////    }
-        ////}
-        ////
-        ////private void EnumerateCppHashtable(Il2CppSystem.Collections.Hashtable hashtable, List<object> keys, List<object> values)
-        ////{
-        ////    for (int i = 0; i < hashtable.buckets.Count; i++)
-        ////    {
-        ////        var bucket = hashtable.buckets[i];
-        ////        if (bucket == null || bucket.key == null)
-        ////            continue;
-        ////        keys.Add(bucket.key);
-        ////        values.Add(bucket.val);
-        ////    }
-        ////}
+        // Temp fix until Unhollower interface support improves
 
-        #endregion
+        internal static readonly Dictionary<string, MethodInfo> getEnumeratorMethods = new Dictionary<string, MethodInfo>();
+        internal static readonly Dictionary<string, EnumeratorInfo> enumeratorInfos = new Dictionary<string, EnumeratorInfo>();
+        internal static readonly HashSet<string> notSupportedTypes = new HashSet<string>();
+
+        // IEnumerables
+
+        internal static IntPtr cppIEnumerablePointer;
+
+        protected override bool Internal_IsEnumerable(Type type)
+        {
+            if (base.Internal_IsEnumerable(type))
+                return true;
+
+            try
+            {
+                if (cppIEnumerablePointer == IntPtr.Zero)
+                    Il2CppTypeNotNull(typeof(Il2CppSystem.Collections.IEnumerable), out cppIEnumerablePointer);
+
+                if (cppIEnumerablePointer != IntPtr.Zero
+                    && Il2CppTypeNotNull(type, out IntPtr assignFromPtr)
+                    && il2cpp_class_is_assignable_from(cppIEnumerablePointer, assignFromPtr))
+                {
+                    return true;
+                }
+            }
+            catch { }
+
+            return false;
+        }
+
+        internal class EnumeratorInfo
+        {
+            internal MethodInfo moveNext;
+            internal PropertyInfo current;
+        }
+
+        protected override bool Internal_TryGetEnumerator(object list, out IEnumerator enumerator)
+        {
+            if (list is IEnumerable)
+                return base.Internal_TryGetEnumerator(list, out enumerator);
+
+            try
+            {
+                PrepareCppEnumerator(list, out object cppEnumerator, out EnumeratorInfo info);
+                enumerator = EnumerateCppList(info, cppEnumerator);
+                return true;
+            }
+            catch //(Exception ex)
+            {
+                //ExplorerCore.LogWarning($"Exception enumerating IEnumerable: {ex.ReflectionExToString()}");
+                enumerator = null;
+                return false;
+            }
+        }
+
+        private static void PrepareCppEnumerator(object list, out object cppEnumerator, out EnumeratorInfo info)
+        {
+            info = null;
+            cppEnumerator = null;
+            if (list == null)
+                throw new ArgumentNullException("list");
+
+            // Some ugly reflection to use the il2cpp interface for the instance type
+
+            var type = list.GetType();
+            var key = type.AssemblyQualifiedName;
+
+            if (!getEnumeratorMethods.ContainsKey(key))
+            {
+                getEnumeratorMethods.Add(key, type.GetMethod("GetEnumerator"));
+
+                // ensure the enumerator type is supported
+                try
+                {
+                    var test = getEnumeratorMethods[key].Invoke(list, null);
+                    test.GetType().GetMethod("MoveNext").Invoke(test, null);
+                }
+                catch
+                {
+                    notSupportedTypes.Add(key);
+                }
+            }
+
+            if (notSupportedTypes.Contains(key))
+                throw new NotSupportedException($"The IEnumerable type '{type.FullName}' does not support MoveNext.");
+
+            cppEnumerator = getEnumeratorMethods[key].Invoke(list, null);
+            var enumeratorType = cppEnumerator.GetType();
+
+            var enumInfoKey = enumeratorType.AssemblyQualifiedName;
+
+            if (!enumeratorInfos.ContainsKey(enumInfoKey))
+            {
+                enumeratorInfos.Add(enumInfoKey, new EnumeratorInfo
+                {
+                    current = enumeratorType.GetProperty("Current"),
+                    moveNext = enumeratorType.GetMethod("MoveNext"),
+                });
+            }
+
+            info = enumeratorInfos[enumInfoKey];
+        }
+
+        internal static IEnumerator EnumerateCppList(EnumeratorInfo info, object enumerator)
+        {
+            // Yield and return the actual entries
+            while ((bool)info.moveNext.Invoke(enumerator, null))
+                yield return info.current.GetValue(enumerator);
+        }
+
+        // IDictionary
+
+        internal static IntPtr cppIDictionaryPointer;
+
+        protected override bool Internal_IsDictionary(Type type)
+        {
+            if (base.Internal_IsDictionary(type))
+                return true;
+        
+            try
+            {
+                if (cppIDictionaryPointer == IntPtr.Zero)
+                    if (!Il2CppTypeNotNull(typeof(Il2CppSystem.Collections.IDictionary), out cppIDictionaryPointer))
+                        return false;
+
+                if (Il2CppTypeNotNull(type, out IntPtr classPtr)
+                    && il2cpp_class_is_assignable_from(cppIDictionaryPointer, classPtr))
+                    return true;
+            }
+            catch { }
+        
+            return false;
+        }
+
+        protected override bool Internal_TryGetDictEnumerator(object dictionary, out IEnumerator<DictionaryEntry> dictEnumerator)
+        {
+            if (dictionary is IDictionary)
+                return base.Internal_TryGetDictEnumerator(dictionary, out dictEnumerator);
+
+            try
+            {
+                var type = dictionary.GetType();
+
+                if (typeof(Il2CppSystem.Collections.Hashtable).IsAssignableFrom(type))
+                {
+                    dictEnumerator = EnumerateCppHashTable(dictionary.TryCast<Il2CppSystem.Collections.Hashtable>());
+                    return true;
+                }
+
+                var keys = type.GetProperty("Keys").GetValue(dictionary, null);
+
+                var keyCollType = keys.GetType();
+                var cacheKey = keys.GetType().AssemblyQualifiedName;
+                if (!getEnumeratorMethods.ContainsKey(cacheKey))
+                {
+                    getEnumeratorMethods.Add(cacheKey, keyCollType.GetMethod("GetEnumerator"));
+
+                    // test support
+                    try
+                    {
+                        var test = getEnumeratorMethods[cacheKey].Invoke(keys, null);
+                        test.GetType().GetMethod("MoveNext").Invoke(test, null);
+                    }
+                    catch
+                    {
+                        notSupportedTypes.Add(cacheKey);
+                    }
+                }
+
+                if (notSupportedTypes.Contains(cacheKey))
+                    throw new Exception($"The IDictionary type '{type.FullName}' does not support MoveNext.");
+
+                var keyEnumerator = getEnumeratorMethods[cacheKey].Invoke(keys, null);
+                var keyInfo = new EnumeratorInfo
+                {
+                    current = keyEnumerator.GetType().GetProperty("Current"),
+                    moveNext = keyEnumerator.GetType().GetMethod("MoveNext"),
+                };
+
+                var values = type.GetProperty("Values").GetValue(dictionary, null);
+                var valueEnumerator = values.GetType().GetMethod("GetEnumerator").Invoke(values, null);
+                var valueInfo = new EnumeratorInfo
+                {
+                    current = valueEnumerator.GetType().GetProperty("Current"),
+                    moveNext = valueEnumerator.GetType().GetMethod("MoveNext"),
+                };
+
+                dictEnumerator = EnumerateCppDict(keyInfo, keyEnumerator, valueInfo, valueEnumerator);
+                return true;
+            }
+            catch //(Exception ex)
+            {
+                //ExplorerCore.LogWarning($"Exception enumerating IDictionary: {ex.ReflectionExToString()}");
+                dictEnumerator = null;
+                return false;
+            }
+        }
+
+        internal static IEnumerator<DictionaryEntry> EnumerateCppDict(EnumeratorInfo keyInfo, object keyEnumerator, 
+            EnumeratorInfo valueInfo, object valueEnumerator)
+        {
+            while ((bool)keyInfo.moveNext.Invoke(keyEnumerator, null))
+            {
+                valueInfo.moveNext.Invoke(valueEnumerator, null);
+
+                var key = keyInfo.current.GetValue(keyEnumerator, null);
+                var value = valueInfo.current.GetValue(valueEnumerator, null);
+
+                yield return new DictionaryEntry(key, value);
+            }
+        }
+
+        internal static IEnumerator<DictionaryEntry> EnumerateCppHashTable(Il2CppSystem.Collections.Hashtable hashtable)
+        {
+            for (int i = 0; i < hashtable.buckets.Count; i++)
+            {
+                var bucket = hashtable.buckets[i];
+                if (bucket == null || bucket.key == null)
+                    continue;
+
+                yield return new DictionaryEntry(bucket.key, bucket.val);
+            }
+        }
+
+#endregion
 
     }
 }
