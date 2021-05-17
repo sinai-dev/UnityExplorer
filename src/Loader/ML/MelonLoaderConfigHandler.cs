@@ -1,6 +1,5 @@
 ﻿#if ML
 using MelonLoader;
-using MelonLoader.Tomlyn.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,11 +18,7 @@ namespace UnityExplorer.Loader.ML
 
         public override void Init()
         {
-            prefCategory = MelonPreferences.CreateCategory(CTG_NAME, $"{CTG_NAME} Settings");
-
-            // temporary until melonloader 0.3.1 released
-            try { MelonPreferences.Mapper.RegisterMapper(KeycodeReader, KeycodeWriter); } catch { }
-            try { MelonPreferences.Mapper.RegisterMapper(MenuPagesReader, MenuPagesWriter); } catch { }
+            prefCategory = MelonPreferences.CreateCategory(CTG_NAME, $"{CTG_NAME} Settings", false, true);
         }
 
         public override void LoadConfig()
@@ -41,7 +36,7 @@ namespace UnityExplorer.Loader.ML
 
         public override void RegisterConfigElement<T>(ConfigElement<T> config)
         {
-            var entry = prefCategory.CreateEntry(config.Name, config.Value, null, config.IsInternal) as MelonPreferences_Entry<T>;
+            var entry = prefCategory.CreateEntry(config.Name, config.Value, null, config.Description, config.IsInternal, false);
             
             entry.OnValueChangedUntyped += () => 
             {
@@ -57,7 +52,7 @@ namespace UnityExplorer.Loader.ML
             if (prefCategory.GetEntry<T>(config.Name) is MelonPreferences_Entry<T> entry)
             { 
                 entry.Value = value;
-                entry.Save();
+                //entry.Save();
             }
         }
 
@@ -76,52 +71,6 @@ namespace UnityExplorer.Loader.ML
         public override void SaveConfig()
         {
             MelonPreferences.Save();
-        }
-
-        // TEMPORARY - JUST REQUIRED UNTIL ML 0.3.1 RELEASED
-
-        public static KeyCode KeycodeReader(TomlObject value)
-        {
-            try
-            {
-                KeyCode kc = (KeyCode)Enum.Parse(typeof(KeyCode), (value as TomlString).Value);
-
-                if (kc == default)
-                    throw new Exception();
-
-                return kc;
-            }
-            catch
-            {
-                return KeyCode.F7;
-            }
-        }
-
-        public static TomlObject KeycodeWriter(KeyCode value)
-        {
-            return MelonPreferences.Mapper.ToToml(value.ToString());
-        }
-
-        public static UI.Main.MenuPages MenuPagesReader(TomlObject value)
-        {
-            try
-            {
-                var kc = (UI.Main.MenuPages)Enum.Parse(typeof(UI.Main.MenuPages), (value as TomlString).Value);
-
-                if (kc == default)
-                    throw new Exception();
-
-                return kc;
-            }
-            catch
-            {
-                return UI.Main.MenuPages.Home;
-            }
-        }
-
-        public static TomlObject MenuPagesWriter(UI.Main.MenuPages value)
-        {
-            return MelonPreferences.Mapper.ToToml(value.ToString());
         }
     }
 }

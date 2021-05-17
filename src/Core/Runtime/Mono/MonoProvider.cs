@@ -10,8 +10,6 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using UnityExplorer.Core;
-using UnityExplorer.Core.CSharp;
 
 namespace UnityExplorer.Core.Runtime.Mono
 {
@@ -19,10 +17,9 @@ namespace UnityExplorer.Core.Runtime.Mono
     {
         public override void Initialize()
         {
-            Reflection = new MonoReflection();
+            ExplorerCore.Context = RuntimeContext.Mono;
+            //Reflection = new MonoReflection();
             TextureUtil = new MonoTextureUtil();
-
-            DummyBehaviour.Setup();
         }
 
         public override void SetupEvents()
@@ -32,12 +29,12 @@ namespace UnityExplorer.Core.Runtime.Mono
 
         private void Application_logMessageReceived(string condition, string stackTrace, LogType type)
         {
-            ExplorerCore.Log(condition, type, true);
+            ExplorerCore.LogUnity(condition, type);
         }
 
         public override void StartCoroutine(IEnumerator routine)
         {
-            DummyBehaviour.Instance.StartCoroutine(routine);
+            ExplorerBehaviour.Instance.StartCoroutine(routine);
         }
 
         public override void Update()
@@ -66,12 +63,12 @@ namespace UnityExplorer.Core.Runtime.Mono
         public override UnityEngine.Object[] FindObjectsOfTypeAll(Type type)
             => Resources.FindObjectsOfTypeAll(type);
 
-        private static readonly FieldInfo fi_Scene_handle = typeof(Scene).GetField("m_Handle", ReflectionUtility.AllFlags);
+        //private static readonly FieldInfo fi_Scene_handle = typeof(Scene).GetField("m_Handle", ReflectionUtility.AllFlags);
 
-        public override int GetSceneHandle(Scene scene)
-        {
-            return (int)fi_Scene_handle.GetValue(scene);
-        }
+        //public override int GetSceneHandle(Scene scene)
+        //{
+        //    return (int)fi_Scene_handle.GetValue(scene);
+        //}
 
         public override GameObject[] GetRootGameObjects(Scene scene)
         {
@@ -123,6 +120,16 @@ public static class MonoExtensions
     public static void AddListener<T>(this UnityEvent<T> _event, Action<T> listener)
     {
         _event.AddListener(new UnityAction<T>(listener));
+    }
+
+    public static void RemoveListener(this UnityEvent _event, Action listener)
+    {
+        _event.RemoveListener(new UnityAction(listener));
+    }
+
+    public static void RemoveListener<T>(this UnityEvent<T> _event, Action<T> listener)
+    {
+        _event.RemoveListener(new UnityAction<T>(listener));
     }
 
     public static void Clear(this StringBuilder sb)

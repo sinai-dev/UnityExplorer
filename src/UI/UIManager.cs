@@ -8,25 +8,68 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Input;
-using UnityExplorer.Core.Runtime;
-using UnityExplorer.UI.Main;
-using UnityExplorer.UI.Main.Home;
+using UnityExplorer.UI.CSConsole;
+using UnityExplorer.UI.Inspectors;
+using UnityExplorer.UI.Models;
+using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Utility;
+using UnityExplorer.UI.Widgets;
+using UnityExplorer.UI.Widgets.AutoComplete;
 
 namespace UnityExplorer.UI
 {
     public static class UIManager
     {
+        public enum Panels
+        {
+            ObjectExplorer,
+            Inspector,
+            CSConsole,
+            Options,
+            ConsoleLog,
+            AutoCompleter,
+            MouseInspector
+        }
+
+        public enum VerticalAnchor
+        {
+            Top,
+            Bottom
+        }
+
+        public static bool Initializing { get; private set; } = true;
+
+        private static readonly Dictionary<Panels, UIPanel> UIPanels = new Dictionary<Panels, UIPanel>();
+
+        public static VerticalAnchor NavbarAnchor = VerticalAnchor.Top;
+
+        // References
         public static GameObject CanvasRoot { get; private set; }
+        public static Canvas Canvas { get; private set; }
         public static EventSystem EventSys { get; private set; }
+
+        internal static GameObject PoolHolder { get; private set; }
+
+        internal static GameObject PanelHolder { get; private set; }
 
         internal static Font ConsoleFont { get; private set; }
         internal static Shader BackupShader { get; private set; }
 
+        public static RectTransform NavBarRect;
+        public static GameObject NavbarButtonHolder;
+        public static Dropdown MouseInspectDropdown;
+
+        // defaults
+        internal static readonly Color enabledButtonColor = new Color(0.2f, 0.4f, 0.28f);
+        internal static readonly Color disabledButtonColor = new Color(0.25f, 0.25f, 0.25f);
+
+        public const int MAX_INPUTFIELD_CHARS = 16000;
+        public const int MAX_TEXT_VERTS = 65000;
+
         public static bool ShowMenu
         {
             get => s_showMenu;
-            set 
+            set
             {
                 if (s_showMenu == value || !CanvasRoot)
                     return;
@@ -38,52 +81,110 @@ namespace UnityExplorer.UI
         }
         public static bool s_showMenu = true;
 
-        internal static void Init()
+        // Panels
+
+        public static UIPanel GetPanel(Panels panel)
         {
-            CreateRootCanvas();
-
-            LoadBundle();
-
-            UIFactory.Init();
-
-            MainMenu.Create();
-            InspectUnderMouse.ConstructUI();
-            PanelDragger.CreateCursorUI();
-
-            // Force refresh of anchors etc
-            Canvas.ForceUpdateCanvases();
-
-            ShowMenu = !ConfigManager.Hide_On_Startup.Value;
-
-            ExplorerCore.Log("UI initialized.");
+            return UIPanels[panel];
         }
 
-        internal static void Update()
+        public static T GetPanel<T>(Panels panel) where T : UIPanel
         {
-            if (!CanvasRoot)
+            return (T)UIPanels[panel];
+        }
+
+        public static void TogglePanel(Panels panel)
+        {
+            var uiPanel = GetPanel(panel);
+            SetPanelActive(panel, !uiPanel.Enabled);
+        }
+
+        public static void SetPanelActive(Panels panel, bool active)
+        {
+            var obj = GetPanel(panel);
+            SetPanelActive(obj, active);
+        }
+
+        public static void SetPanelActive(UIPanel panel, bool active)
+        {
+            panel.SetActive(active);
+            if (active)
+            {
+                panel.UIRoot.transform.SetAsLastSibling();
+                UIPanel.InvokeOnPanelsReordered();
+            }
+        }
+
+        internal static void SetPanelActive(Transform transform, bool value)
+        {
+            if (UIPanel.transformToPanelDict.TryGetValue(transform.GetInstanceID(), out UIPanel panel))
+                SetPanelActive(panel, value);
+        }
+
+        // Main UI Update loop
+
+        public static void Update()
+        {
+            if (!CanvasRoot || Initializing)
                 return;
 
             if (InspectUnderMouse.Inspecting)
             {
-                InspectUnderMouse.UpdateInspect();
+                InspectUnderMouse.Instance.UpdateInspect();
                 return;
             }
 
-            if (InputManager.GetKeyDown(ConfigManager.Main_Menu_Toggle.Value))
+            if (InputManager.GetKeyDown(ConfigManager.Master_Toggle.Value))
                 ShowMenu = !ShowMenu;
 
             if (!ShowMenu)
                 return;
 
-            MainMenu.Instance.Update();
+            if (InputManager.GetKeyDown(ConfigManager.Force_Unlock_Toggle.Value))
+                CursorUnlocker.Unlock = !CursorUnlocker.Unlock;
 
             if (EventSystem.current != EventSys)
                 CursorUnlocker.SetEventSystem();
 
-            PanelDragger.Instance.Update();
+            UIPanel.UpdateFocus();
+            PanelDragger.UpdateInstances();
+            InputFieldRef.UpdateInstances();
+            UIBehaviourModel.UpdateInstances();
+        }
 
-            SliderScrollbar.UpdateInstances();
-            InputFieldScroller.UpdateInstances();
+        // Initialization and UI Construction
+
+        internal static void InitUI()
+        {
+            LoadBundle();
+
+            UIFactory.Init();
+
+            CreateRootCanvas();
+
+            // Global UI Pool Holder
+            PoolHolder = new GameObject("PoolHolder");
+            PoolHolder.transform.parent = CanvasRoot.transform;
+            PoolHolder.SetActive(false);
+
+            CreateTopNavBar();
+
+            UIPanels.Add(Panels.AutoCompleter, new AutoCompleteModal());
+            UIPanels.Add(Panels.ObjectExplorer, new ObjectExplorerPanel());
+            UIPanels.Add(Panels.Inspector, new InspectorPanel());
+            UIPanels.Add(Panels.CSConsole, new CSConsolePanel());
+            UIPanels.Add(Panels.ConsoleLog, new LogPanel());
+            UIPanels.Add(Panels.Options, new OptionsPanel());
+            UIPanels.Add(Panels.MouseInspector, new InspectUnderMouse());
+
+            foreach (var panel in UIPanels.Values)
+                panel.ConstructUI();
+
+            ConsoleController.Init();
+
+            ShowMenu = !ConfigManager.Hide_On_Startup.Value;
+
+            Initializing = false;
         }
 
         private static void CreateRootCanvas()
@@ -97,33 +198,110 @@ namespace UnityExplorer.UI
             EventSys = CanvasRoot.AddComponent<EventSystem>();
             InputManager.AddUIModule();
 
-            Canvas canvas = CanvasRoot.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceCamera;
-            canvas.referencePixelsPerUnit = 100;
-            canvas.sortingOrder = 999;
+            Canvas = CanvasRoot.AddComponent<Canvas>();
+            Canvas.renderMode = RenderMode.ScreenSpaceCamera;
+            Canvas.referencePixelsPerUnit = 100;
+            Canvas.sortingOrder = 999;
 
             CanvasScaler scaler = CanvasRoot.AddComponent<CanvasScaler>();
             scaler.referenceResolution = new Vector2(1920, 1080);
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
 
             CanvasRoot.AddComponent<GraphicRaycaster>();
+
+            PanelHolder = new GameObject("PanelHolder");
+            PanelHolder.transform.SetParent(CanvasRoot.transform, false);
+            PanelHolder.layer = 5;
+            var rect = PanelHolder.AddComponent<RectTransform>();
+            rect.sizeDelta = Vector2.zero;
+            rect.anchoredPosition = Vector2.zero;
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            PanelHolder.transform.SetAsFirstSibling();
         }
+
+        public static void SetNavBarAnchor()
+        {
+            switch (NavbarAnchor)
+            {
+                case VerticalAnchor.Top:
+                    NavBarRect.anchorMin = new Vector2(0.5f, 1f);
+                    NavBarRect.anchorMax = new Vector2(0.5f, 1f);
+                    NavBarRect.anchoredPosition = new Vector2(NavBarRect.anchoredPosition.x, 0);
+                    NavBarRect.sizeDelta = new Vector2(900f, 35f);
+                    break;
+
+                case VerticalAnchor.Bottom:
+                    NavBarRect.anchorMin = new Vector2(0.5f, 0f);
+                    NavBarRect.anchorMax = new Vector2(0.5f, 0f);
+                    NavBarRect.anchoredPosition = new Vector2(NavBarRect.anchoredPosition.x, 35);
+                    NavBarRect.sizeDelta = new Vector2(900f, 35f);
+                    break;
+            }
+        }
+
+        private static void CreateTopNavBar()
+        {
+            var navbarPanel = UIFactory.CreateUIObject("MainNavbar", CanvasRoot);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(navbarPanel, false, true, true, true, 5, 4, 4, 4, 4, TextAnchor.MiddleCenter);
+            navbarPanel.AddComponent<Image>().color = new Color(0.1f, 0.1f, 0.1f);
+            NavBarRect = navbarPanel.GetComponent<RectTransform>();
+            NavBarRect.pivot = new Vector2(0.5f, 1f);
+
+            NavbarAnchor = ConfigManager.Main_Navbar_Anchor.Value;
+            SetNavBarAnchor();
+            ConfigManager.Main_Navbar_Anchor.OnValueChanged += (VerticalAnchor val) => 
+            {
+                NavbarAnchor = val;
+                SetNavBarAnchor();
+            };
+
+            // UnityExplorer title
+
+            string titleTxt = $"{ExplorerCore.NAME} <i><color=grey>{ExplorerCore.VERSION}</color></i>";
+            var title = UIFactory.CreateLabel(navbarPanel, "Title", titleTxt, TextAnchor.MiddleLeft, default, true, 18);
+            UIFactory.SetLayoutElement(title.gameObject, minWidth: 180, flexibleWidth: 0);
+
+            // Navbar
+
+            NavbarButtonHolder = UIFactory.CreateUIObject("NavButtonHolder", navbarPanel);
+            UIFactory.SetLayoutElement(NavbarButtonHolder, flexibleHeight: 999, flexibleWidth: 999);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(NavbarButtonHolder, false, true, true, true, 4, 2, 2, 2, 2);
+
+            // Inspect under mouse dropdown
+
+            var mouseDropdown = UIFactory.CreateDropdown(navbarPanel, out MouseInspectDropdown, "Mouse Inspect", 14,
+                InspectUnderMouse.OnDropdownSelect);
+            UIFactory.SetLayoutElement(mouseDropdown, minHeight: 25, minWidth: 140);
+            MouseInspectDropdown.options.Add(new Dropdown.OptionData("Mouse Inspect"));
+            MouseInspectDropdown.options.Add(new Dropdown.OptionData("World"));
+            MouseInspectDropdown.options.Add(new Dropdown.OptionData("UI"));
+
+            // Hide menu button
+
+            var closeBtn = UIFactory.CreateButton(navbarPanel, "CloseButton", ConfigManager.Master_Toggle.Value.ToString());
+            UIFactory.SetLayoutElement(closeBtn.Component.gameObject, minHeight: 25, minWidth: 80, flexibleWidth: 0);
+            RuntimeProvider.Instance.SetColorBlock(closeBtn.Component, new Color(0.63f, 0.32f, 0.31f),
+                new Color(0.81f, 0.25f, 0.2f), new Color(0.6f, 0.18f, 0.16f));
+
+            ConfigManager.Master_Toggle.OnValueChanged += (KeyCode val) => { closeBtn.ButtonText.text = val.ToString(); };
+
+            closeBtn.OnClick += () => { ShowMenu = false; };
+        }
+
+        #region UI AssetBundle
 
         private static void LoadBundle()
         {
             AssetBundle bundle = null;
-
             try
             {
-                bundle = LoadExplorerUi("modern");
-
+                bundle = LoadBundle("modern");
                 if (bundle == null)
-                    bundle = LoadExplorerUi("legacy");
+                    bundle = LoadBundle("legacy");
             }
-            catch
-            {
-                // ignored
-            }
+            catch { }
 
             if (bundle == null)
             {
@@ -144,19 +322,14 @@ namespace UnityExplorer.UI
                 BackupShader = Graphic.defaultGraphicMaterial.shader;
 
             ConsoleFont = bundle.LoadAsset<Font>("CONSOLA");
-
-            ExplorerCore.Log("Loaded UI AssetBundle");
         }
 
-        private static AssetBundle LoadExplorerUi(string id)
+        private static AssetBundle LoadBundle(string id)
         {
-            var stream = typeof(ExplorerCore)
-                .Assembly
+            var stream = typeof(ExplorerCore).Assembly
                 .GetManifestResourceStream($"UnityExplorer.Resources.explorerui.{id}.bundle");
 
-            var data = ReadFully(stream);
-
-            return AssetBundle.LoadFromMemory(data);
+            return AssetBundle.LoadFromMemory(ReadFully(stream));
         }
 
         private static byte[] ReadFully(Stream input)
@@ -170,5 +343,7 @@ namespace UnityExplorer.UI
                 return ms.ToArray();
             }
         }
+
+        #endregion
     }
 }

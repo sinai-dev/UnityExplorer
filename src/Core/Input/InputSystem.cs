@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Reflection;
-using UnityExplorer.Core.Unity;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityExplorer.UI;
 using System.Collections.Generic;
-using UnityExplorer.UI.Inspectors;
 using System.Linq;
 
 namespace UnityExplorer.Core.Input
@@ -14,8 +12,6 @@ namespace UnityExplorer.Core.Input
     {
         public InputSystem()
         {
-            ExplorerCore.Log("Initializing new InputSystem support...");
-
             m_kbCurrentProp = TKeyboard.GetProperty("current");
             m_kbIndexer = TKeyboard.GetProperty("Item", new Type[] { TKey });
 
@@ -26,14 +22,17 @@ namespace UnityExplorer.Core.Input
             m_mouseCurrentProp = TMouse.GetProperty("current");
             m_leftButtonProp = TMouse.GetProperty("leftButton");
             m_rightButtonProp = TMouse.GetProperty("rightButton");
+            m_scrollDeltaProp = TMouse.GetProperty("scroll");
 
             m_positionProp = ReflectionUtility.GetTypeByName("UnityEngine.InputSystem.Pointer")
                             .GetProperty("position");
 
-            m_readVector2InputMethod = ReflectionUtility.GetTypeByName("UnityEngine.InputSystem.InputControl`1")
+            ReadV2ControlMethod = ReflectionUtility.GetTypeByName("UnityEngine.InputSystem.InputControl`1")
                                       .MakeGenericType(typeof(Vector2))
                                       .GetMethod("ReadValue");
         }
+
+        #region reflection cache
 
         public static Type TKeyboard => m_tKeyboard ?? (m_tKeyboard = ReflectionUtility.GetTypeByName("UnityEngine.InputSystem.Keyboard"));
         private static Type m_tKeyboard;
@@ -64,10 +63,17 @@ namespace UnityExplorer.Core.Input
         private static object m_rmb;
         private static PropertyInfo m_rightButtonProp;
 
+        private static MethodInfo ReadV2ControlMethod;
+
         private static object MousePositionInfo => m_pos ?? (m_pos = m_positionProp.GetValue(CurrentMouse, null));
         private static object m_pos;
         private static PropertyInfo m_positionProp;
-        private static MethodInfo m_readVector2InputMethod;
+
+        private static object MouseScrollInfo => m_scrollInfo ?? (m_scrollInfo = m_scrollDeltaProp.GetValue(CurrentMouse, null));
+        private static object m_scrollInfo;
+        private static PropertyInfo m_scrollDeltaProp;
+
+        #endregion
 
         public Vector2 MousePosition
         {
@@ -75,12 +81,21 @@ namespace UnityExplorer.Core.Input
             {
                 try
                 {
-                    return (Vector2)m_readVector2InputMethod.Invoke(MousePositionInfo, new object[0]);
+                    return (Vector2)ReadV2ControlMethod.Invoke(MousePositionInfo, ArgumentUtility.EmptyArgs);
                 }
-                catch
+                catch { return Vector2.zero; }
+            }
+        }
+
+        public Vector2 MouseScrollDelta
+        {
+            get
+            {
+                try
                 {
-                    return Vector2.zero;
+                    return (Vector2)ReadV2ControlMethod.Invoke(MouseScrollInfo, ArgumentUtility.EmptyArgs);
                 }
+                catch { return Vector2.zero; }
             }
         }
 
@@ -164,13 +179,13 @@ namespace UnityExplorer.Core.Input
             var assetType = ReflectionUtility.GetTypeByName("UnityEngine.InputSystem.InputActionAsset");
             m_newInputModule = RuntimeProvider.Instance.AddComponent<BaseInputModule>(UIManager.CanvasRoot, TInputSystemUIInputModule);
             var asset = RuntimeProvider.Instance.CreateScriptable(assetType)
-                .Cast(assetType);
+                .TryCast(assetType);
 
             inputExtensions = ReflectionUtility.GetTypeByName("UnityEngine.InputSystem.InputActionSetupExtensions");
 
             var addMap = inputExtensions.GetMethod("AddActionMap", new Type[] { assetType, typeof(string) });
             var map = addMap.Invoke(null, new object[] { asset, "UI" })
-                .Cast(ReflectionUtility.GetTypeByName("UnityEngine.InputSystem.InputActionMap"));
+                .TryCast(ReflectionUtility.GetTypeByName("UnityEngine.InputSystem.InputActionMap"));
 
             CreateAction(map, "point", new[] { "<Mouse>/position" }, "point");
             CreateAction(map, "click", new[] { "<Mouse>/leftButton" }, "leftClick");
@@ -178,7 +193,7 @@ namespace UnityExplorer.Core.Input
             CreateAction(map, "scrollWheel", new[] { "<Mouse>/scroll" }, "scrollWheel");
 
             UI_Enable = map.GetType().GetMethod("Enable");
-            UI_Enable.Invoke(map, new object[0]);
+            UI_Enable.Invoke(map, ArgumentUtility.EmptyArgs);
             UI_ActionMap = map;
         }
 
@@ -191,28 +206,28 @@ namespace UnityExplorer.Core.Input
             var inputActionType = ReflectionUtility.GetTypeByName("UnityEngine.InputSystem.InputAction");
             var addAction = inputExtensions.GetMethod("AddAction");
             var action = addAction.Invoke(null, new object[] { map, actionName, default, null, null, null, null, null })
-                .Cast(inputActionType);
+                .TryCast(inputActionType);
 
             var addBinding = inputExtensions.GetMethod("AddBinding",
                 new Type[] { inputActionType, typeof(string), typeof(string), typeof(string), typeof(string) });
 
             foreach (string binding in bindings)
-                addBinding.Invoke(null, new object[] { action.Cast(inputActionType), binding, null, null, null });
+                addBinding.Invoke(null, new object[] { action.TryCast(inputActionType), binding, null, null, null });
 
             var refType = ReflectionUtility.GetTypeByName("UnityEngine.InputSystem.InputActionReference");
             var inputRef = refType.GetMethod("Create")
                             .Invoke(null, new object[] { action })
-                            .Cast(refType);
+                            .TryCast(refType);
 
             TInputSystemUIInputModule
                 .GetProperty(propertyName)
-                .SetValue(m_newInputModule.Cast(TInputSystemUIInputModule), inputRef, null);
+                .SetValue(m_newInputModule.TryCast(TInputSystemUIInputModule), inputRef, null);
         }
 
         public void ActivateModule()
         {
             m_newInputModule.ActivateModule();
-            UI_Enable.Invoke(UI_ActionMap, new object[0]);
+            UI_Enable.Invoke(UI_ActionMap, ArgumentUtility.EmptyArgs);
         }
     }
 }

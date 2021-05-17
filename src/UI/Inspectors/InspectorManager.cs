@@ -1,204 +1,166 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityExplorer.Core.Unity;
-using UnityExplorer.UI;
-using UnityExplorer.UI.Main;
+using System.Text;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using UnityExplorer.Core.Runtime;
-using UnityExplorer.UI.Main.Home;
+using UnityExplorer.UI;
 using UnityExplorer.UI.CacheObject;
-using UnityExplorer.UI.Inspectors.GameObjects;
-using UnityExplorer.UI.Inspectors.Reflection;
+using UnityExplorer.UI.Inspectors;
+using UnityExplorer.UI.ObjectPool;
+using UnityExplorer.UI.Panels;
 
-namespace UnityExplorer.UI.Inspectors
+namespace UnityExplorer
 {
-    public class InspectorManager
+    public static class InspectorManager
     {
-        public static InspectorManager Instance { get; private set; }
+        public static readonly List<InspectorBase> Inspectors = new List<InspectorBase>();
 
-        public InspectorManager()
+        public static InspectorBase ActiveInspector { get; private set; }
+        private static InspectorBase lastActiveInspector;
+
+        public static float PanelWidth;
+
+        internal static void CloseAllTabs()
         {
-            Instance = this;
-
-            ConstructInspectorPane();
-        }
-
-        public InspectorBase m_activeInspector;
-        public readonly List<InspectorBase> m_currentInspectors = new List<InspectorBase>();
-
-        public void Update()
-        {
-            for (int i = 0; i < m_currentInspectors.Count; i++)
+            if (Inspectors.Any())
             {
-                if (i >= m_currentInspectors.Count)
-                    break;
+                for (int i = Inspectors.Count - 1; i >= 0; i--)
+                    Inspectors[i].CloseInspector();
 
-                m_currentInspectors[i].Update();
+                Inspectors.Clear();
             }
+
+            UIManager.SetPanelActive(UIManager.Panels.Inspector, false);
         }
 
-        public void Inspect(object obj, CacheObjectBase parentMember = null)
+        public static void Inspect(object obj, CacheObjectBase sourceCache = null)
         {
-            obj = ReflectionProvider.Instance.Cast(obj, ReflectionProvider.Instance.GetActualType(obj));
-
-            UnityEngine.Object unityObj = obj as UnityEngine.Object;
-
-            if (obj.IsNullOrDestroyed(false))
-            {
+            if (obj.IsNullOrDestroyed())
                 return;
-            }
 
-            // check if currently inspecting this object
-            foreach (InspectorBase tab in m_currentInspectors)
-            {
-                if (RuntimeProvider.Instance.IsReferenceEqual(obj, tab.Target))
-                {
-                    SetInspectorTab(tab);
-                    return;
-                }
-            }
+            obj = obj.TryCast();
 
-            InspectorBase inspector;
-            if (obj is GameObject go)
-                inspector = new GameObjectInspector(go);
+            if (TryFocusActiveInspector(obj))
+                return;
+
+            if (obj is GameObject)
+                CreateInspector<GameObjectInspector>(obj);
             else
-                inspector = new InstanceInspector(obj);
-
-            if (inspector is ReflectionInspector ri)
-                ri.ParentMember = parentMember;
-
-            m_currentInspectors.Add(inspector);
-            SetInspectorTab(inspector);
+                CreateInspector<ReflectionInspector>(obj, false, sourceCache);
         }
 
-        public void Inspect(Type type)
+        private static bool TryFocusActiveInspector(object target)
         {
-            if (type == null)
+            foreach (var inspector in Inspectors)
             {
-                ExplorerCore.LogWarning("The provided type was null!");
-                return;
-            }
-
-            foreach (var tab in m_currentInspectors.Where(x => x is StaticInspector))
-            {
-                if (ReferenceEquals(tab.Target as Type, type))
+                if (inspector.Target.ReferenceEqual(target))
                 {
-                    SetInspectorTab(tab);
-                    return;
+                    UIManager.SetPanelActive(UIManager.Panels.Inspector, true);
+                    SetInspectorActive(inspector);
+                    return true;
                 }
             }
-
-            var inspector = new StaticInspector(type);
-
-            m_currentInspectors.Add(inspector);
-            SetInspectorTab(inspector);
+            return false;
         }
 
-        public void SetInspectorTab(InspectorBase inspector)
+        public static void Inspect(Type type)
         {
-            MainMenu.Instance.SetPage(HomePage.Instance);
-
-            if (m_activeInspector == inspector)
-                return;
-
-            UnsetInspectorTab();
-
-            m_activeInspector = inspector;
-            inspector.SetActive();
-
-            OnSetInspectorTab(inspector);
+            CreateInspector<ReflectionInspector>(type, true);
         }
 
-        public void UnsetInspectorTab()
+        public static void SetInspectorActive(InspectorBase inspector)
         {
-            if (m_activeInspector == null)
-                return;
+            UnsetActiveInspector();
 
-            m_activeInspector.SetInactive();
-
-            OnUnsetInspectorTab();
-
-            m_activeInspector = null;
+            ActiveInspector = inspector;
+            inspector.OnSetActive();
         }
 
-        public static GameObject m_tabBarContent;
-        public static GameObject m_inspectorContent;
-
-        public void OnSetInspectorTab(InspectorBase inspector)
+        public static void UnsetActiveInspector()
         {
-            Color activeColor = new Color(0, 0.25f, 0, 1);
-            RuntimeProvider.Instance.SetColorBlock(inspector.m_tabButton, activeColor, activeColor);
+            if (ActiveInspector != null)
+            {
+                lastActiveInspector = ActiveInspector;
+                ActiveInspector.OnSetInactive();
+                ActiveInspector = null;
+            }
         }
 
-        public void OnUnsetInspectorTab()
+        private static void CreateInspector<T>(object target, bool staticReflection = false, 
+            CacheObjectBase sourceCache = null) where T : InspectorBase
         {
-            RuntimeProvider.Instance.SetColorBlock(m_activeInspector.m_tabButton, 
-                new Color(0.2f, 0.2f, 0.2f, 1), new Color(0.1f, 0.3f, 0.1f, 1));
+            var inspector = Pool<T>.Borrow();
+            Inspectors.Add(inspector);
+            inspector.Target = target;
+
+            if (sourceCache != null && sourceCache.CanWrite)
+            {
+                // only set parent cache object if we are inspecting a struct, otherwise there is no point.
+                if (target.GetType().IsValueType && inspector is ReflectionInspector ri)
+                    ri.ParentCacheObject = sourceCache;
+            }
+
+            UIManager.SetPanelActive(UIManager.Panels.Inspector, true);
+            inspector.UIRoot.transform.SetParent(InspectorPanel.Instance.ContentHolder.transform, false);
+
+            if (inspector is ReflectionInspector reflectInspector)
+                reflectInspector.StaticOnly = staticReflection;
+
+            inspector.OnBorrowedFromPool(target);
+            SetInspectorActive(inspector);
         }
 
-        public void ConstructInspectorPane()
+        internal static void ReleaseInspector<T>(T inspector) where T : InspectorBase
         {
-            var mainObj = UIFactory.CreateVerticalGroup(HomePage.Instance.Content, 
-                "InspectorManager_Root", 
-                true, true, true, true, 
-                4, 
-                new Vector4(4,4,4,4));
+            if (lastActiveInspector == inspector)
+                lastActiveInspector = null;
 
-            UIFactory.SetLayoutElement(mainObj, preferredHeight: 400, flexibleHeight: 9000, preferredWidth: 620, flexibleWidth: 9000);
+            bool wasActive = ActiveInspector == inspector;
+            int wasIdx = Inspectors.IndexOf(inspector);
 
-            var topRowObj = UIFactory.CreateHorizontalGroup(mainObj, "TopRow", false, true, true, true, 15);
-            
-            var inspectorTitle = UIFactory.CreateLabel(topRowObj, "Title", "Inspector", TextAnchor.MiddleLeft, default, true, 25);
+            Inspectors.Remove(inspector);
+            inspector.OnReturnToPool();
+            Pool<T>.Return(inspector);
 
-            UIFactory.SetLayoutElement(inspectorTitle.gameObject, minHeight: 30, flexibleHeight: 0, minWidth: 90, flexibleWidth: 20000);
-
-            ConstructToolbar(topRowObj);
-
-            // inspector tab bar
-
-            m_tabBarContent = UIFactory.CreateGridGroup(mainObj, "TabHolder", new Vector2(185, 20), new Vector2(5, 2), new Color(0.1f, 0.1f, 0.1f, 1));
-
-            var gridGroup = m_tabBarContent.GetComponent<GridLayoutGroup>();
-            gridGroup.padding.top = 3;
-            gridGroup.padding.left = 3;
-            gridGroup.padding.right = 3;
-            gridGroup.padding.bottom = 3;
-
-            // inspector content area
-
-            m_inspectorContent = UIFactory.CreateVerticalGroup(mainObj, "InspectorContent", 
-                true, true, true, true, 
-                0, 
-                new Vector4(2,2,2,2), 
-                new Color(0.1f, 0.1f, 0.1f));
-
-            UIFactory.SetLayoutElement(m_inspectorContent, preferredHeight: 900, flexibleHeight: 10000, preferredWidth: 600, flexibleWidth: 10000);
+            if (wasActive)
+            {
+                ActiveInspector = null;
+                // Try focus another inspector, or close the window.
+                if (lastActiveInspector != null)
+                {
+                    SetInspectorActive(lastActiveInspector);
+                    lastActiveInspector = null;
+                }
+                else if (Inspectors.Any())
+                {
+                    int newIdx = Math.Min(Inspectors.Count - 1, Math.Max(0, wasIdx - 1));
+                    SetInspectorActive(Inspectors[newIdx]);
+                }
+                else
+                {
+                    UIManager.SetPanelActive(UIManager.Panels.Inspector, false);
+                }
+            }
         }
 
-        private static void ConstructToolbar(GameObject topRowObj)
+        internal static void Update()
         {
-            // invisible group
-            UIFactory.CreateHorizontalGroup(topRowObj, "Toolbar", false, false, true, true, 10, new Vector4(2, 2, 2, 2), new Color(1,1,1,0));
-
-            // inspect under mouse button
-            AddMouseInspectButton(topRowObj, "UI", InspectUnderMouse.MouseInspectMode.UI);
-            AddMouseInspectButton(topRowObj, "3D", InspectUnderMouse.MouseInspectMode.World);
+            for (int i = Inspectors.Count - 1; i >= 0; i--)
+                Inspectors[i].Update();
         }
 
-        private static void AddMouseInspectButton(GameObject topRowObj, string suffix, InspectUnderMouse.MouseInspectMode mode)
+        internal static void OnPanelResized(float width)
         {
-            string lbl = $"Mouse Inspect ({suffix})";
+            PanelWidth = width;
 
-            var inspectObj = UIFactory.CreateButton(topRowObj, 
-                lbl, 
-                lbl, 
-                () => { InspectUnderMouse.StartInspect(mode); }, 
-                new Color(0.2f, 0.2f, 0.2f));
-
-            UIFactory.SetLayoutElement(inspectObj.gameObject, minWidth: 150, flexibleWidth: 0);
+            foreach (var obj in Inspectors)
+            {
+                if (obj is ReflectionInspector inspector)
+                {
+                    inspector.SetLayouts();
+                }
+            }
         }
     }
 }

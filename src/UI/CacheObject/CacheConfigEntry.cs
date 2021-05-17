@@ -2,101 +2,48 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using UnityEngine;
-using UnityEngine.UI;
 using UnityExplorer.Core.Config;
-using UnityExplorer.UI.InteractiveValues;
+using UnityExplorer.UI.CacheObject.Views;
 
 namespace UnityExplorer.UI.CacheObject
 {
     public class CacheConfigEntry : CacheObjectBase
     {
-        public IConfigElement RefConfig { get; }
+        public CacheConfigEntry(IConfigElement configElement)
+        {
+            this.RefConfigElement = configElement;
 
-        public override Type FallbackType => RefConfig.ElementType;
+            this.NameLabelText = $"<color=cyan>{configElement.Name}</color>" +
+                $"\r\n<color=grey><i>{configElement.Description}</i></color>";
 
-        public override bool HasEvaluated => true;
-        public override bool HasParameters => false;
-        public override bool IsMember => false;
+            this.FallbackType = configElement.ElementType;
+
+            configElement.OnValueChangedNotify += UpdateValueFromSource;
+        }
+
+        public IConfigElement RefConfigElement;
+
+        public override bool ShouldAutoEvaluate => true;
+        public override bool HasArguments => false;
         public override bool CanWrite => true;
 
-        public CacheConfigEntry(IConfigElement config, GameObject parent)
+        public void UpdateValueFromSource()
         {
-            RefConfig = config;
+            //if (RefConfigElement.BoxedValue.Equals(this.Value))
+            //    return;
 
-            m_parentContent = parent;
+            SetValueFromSource(RefConfigElement.BoxedValue);
 
-            config.OnValueChangedNotify += () => { UpdateValue(); };
-
-            CreateIValue(config.BoxedValue, config.ElementType);
+            if (this.CellView != null)
+                this.SetDataToCell(CellView);
         }
 
-        public override void CreateIValue(object value, Type fallbackType)
+        public override void TrySetUserValue(object value)
         {
-            IValue = InteractiveValue.Create(value, fallbackType);
-            IValue.Owner = this;
-            IValue.m_mainContentParent = m_mainGroup;
-            IValue.m_subContentParent = this.m_subContent;
+            this.Value = value;
+            RefConfigElement.BoxedValue = value;
         }
 
-        public override void UpdateValue()
-        {
-            IValue.Value = RefConfig.BoxedValue;
-
-            base.UpdateValue();
-        }
-
-        public override void SetValue()
-        {
-            RefConfig.BoxedValue = IValue.Value;
-        }
-
-        internal GameObject m_mainGroup;
-
-        internal override void ConstructUI()
-        {
-            base.ConstructUI();
-
-            m_mainGroup = UIFactory.CreateVerticalGroup(m_mainContent, "ConfigHolder", true, false, true, true, 5, new Vector4(2, 2, 2, 2));
-
-            var horiGroup = UIFactory.CreateHorizontalGroup(m_mainGroup, "ConfigEntryHolder", false, false, true, true, childAlignment: TextAnchor.MiddleLeft);
-            UIFactory.SetLayoutElement(horiGroup, minHeight: 30, flexibleHeight: 0);
-
-            // config entry label
-
-            var configLabel = UIFactory.CreateLabel(horiGroup, "ConfigLabel", this.RefConfig.Name, TextAnchor.MiddleLeft);
-            var leftRect = configLabel.GetComponent<RectTransform>();
-            leftRect.anchorMin = Vector2.zero;
-            leftRect.anchorMax = Vector2.one;
-            leftRect.offsetMin = Vector2.zero;
-            leftRect.offsetMax = Vector2.zero;
-            leftRect.sizeDelta = Vector2.zero;
-            UIFactory.SetLayoutElement(configLabel.gameObject, minWidth: 250, minHeight: 25, flexibleWidth: 0, flexibleHeight: 0);
-
-            // Default button
-
-            var defaultButton = UIFactory.CreateButton(horiGroup,
-                "RevertDefaultButton",
-                "Default",
-                () => { RefConfig.RevertToDefaultValue(); },
-                new Color(0.3f, 0.3f, 0.3f));
-            UIFactory.SetLayoutElement(defaultButton.gameObject, minWidth: 80, minHeight: 22, flexibleWidth: 0);
-
-            // Description label
-
-            var desc = UIFactory.CreateLabel(m_mainGroup, "Description", $"<i>{RefConfig.Description}</i>", TextAnchor.MiddleLeft, Color.grey);
-            UIFactory.SetLayoutElement(desc.gameObject, minWidth: 250, minHeight: 20, flexibleWidth: 9999, flexibleHeight: 0);
-
-            // IValue
-
-            if (IValue != null)
-            {
-                IValue.m_mainContentParent = m_mainGroup;
-                IValue.m_subContentParent = this.m_subContent;
-            }
-
-            // makes the subcontent look nicer
-            m_subContent.transform.SetParent(m_mainGroup.transform, false);
-        }
+        protected override bool SetCellEvaluateState(CacheObjectCell cell) => false;
     }
 }

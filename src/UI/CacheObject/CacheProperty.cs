@@ -1,71 +1,67 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Reflection;
-using UnityExplorer.UI;
-using UnityExplorer.Core.Unity;
-using UnityEngine;
+using System.Text;
+using UnityExplorer.UI.Inspectors;
 
 namespace UnityExplorer.UI.CacheObject
 {
     public class CacheProperty : CacheMember
     {
-        public override Type FallbackType => (MemInfo as PropertyInfo).PropertyType;
+        public PropertyInfo PropertyInfo { get; internal set; }
+        public override Type DeclaringType => PropertyInfo.DeclaringType;
+        public override bool CanWrite => PropertyInfo.CanWrite;
+        public override bool IsStatic => m_isStatic ?? (bool)(m_isStatic = PropertyInfo.GetAccessors(true)[0].IsStatic);
+        private bool? m_isStatic;
 
-        public override bool IsStatic => (MemInfo as PropertyInfo).GetAccessors(true)[0].IsStatic;
+        public override bool ShouldAutoEvaluate => !HasArguments;
 
-        public CacheProperty(PropertyInfo propertyInfo, object declaringInstance, GameObject parent) : base(propertyInfo, declaringInstance, parent)
+        public override void SetInspectorOwner(ReflectionInspector inspector, MemberInfo member)
         {
-            this.m_arguments = propertyInfo.GetIndexParameters();
-            this.m_argumentInput = new string[m_arguments.Length];
+            base.SetInspectorOwner(inspector, member);
 
-            CreateIValue(null, propertyInfo.PropertyType);
+            Arguments = PropertyInfo.GetIndexParameters();
         }
 
-        public override void UpdateReflection()
+        protected override object TryEvaluate()
         {
-            if (HasParameters && !m_isEvaluating)
+            try
             {
-                // Need to enter parameters first.
+                if (HasArguments)
+                    return PropertyInfo.GetValue(DeclaringInstance, this.Evaluator.TryParseArguments());
+
+                var ret = PropertyInfo.GetValue(DeclaringInstance, null);
+                HadException = false;
+                LastException = null;
+                return ret;
+            }
+            catch (Exception ex)
+            {
+                HadException = true;
+                LastException = ex;
+                return null;
+            }
+        }
+
+        protected override void TrySetValue(object value)
+        {
+            if (!CanWrite)
                 return;
-            }
 
-            var pi = MemInfo as PropertyInfo;
-
-            if (pi.CanRead)
+            try
             {
-                var target = pi.GetAccessors(true)[0].IsStatic ? null : DeclaringInstance;
+                bool _static = PropertyInfo.GetAccessors(true)[0].IsStatic;
 
-                IValue.Value = pi.GetValue(target, ParseArguments());
-
-                m_evaluated = true;
-                ReflectionException = null;
+                if (HasArguments)
+                    PropertyInfo.SetValue(DeclaringInstance, value, Evaluator.TryParseArguments());
+                else
+                    PropertyInfo.SetValue(DeclaringInstance, value, null);
             }
-            else 
+            catch (Exception ex)
             {
-                if (FallbackType == typeof(string))
-                {
-                    IValue.Value = "";
-                }
-                else if (FallbackType.IsPrimitive)
-                {
-                    IValue.Value = Activator.CreateInstance(FallbackType);
-                }
-                m_evaluated = true;
-                ReflectionException = null;
+                ExplorerCore.LogWarning(ex);
             }
-        }
-
-        public override void SetValue()
-        {
-            var pi = MemInfo as PropertyInfo;
-            var target = pi.GetAccessors()[0].IsStatic ? null : DeclaringInstance;
-
-            pi.SetValue(target, IValue.Value, ParseArguments());
-
-            if (this.ParentInspector?.ParentMember != null)
-                this.ParentInspector.ParentMember.SetValue();
         }
     }
 }

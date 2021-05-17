@@ -21,7 +21,8 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
     {
         public override void Initialize()
         {
-            Reflection = new Il2CppReflection();
+            ExplorerCore.Context = RuntimeContext.IL2CPP;
+            //Reflection = new Il2CppReflection();
             TextureUtil = new Il2CppTextureUtil();
         }
 
@@ -47,12 +48,17 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
 
         private void Application_logMessageReceived(string condition, string stackTrace, LogType type)
         {
-            ExplorerCore.Log(condition, type, true);
+            ExplorerCore.LogUnity(condition, type);
         }
 
         public override void StartCoroutine(IEnumerator routine)
         {
             Il2CppCoroutine.Start(routine);
+        }
+
+        internal override void ProcessOnPostRender()
+        {
+            Il2CppCoroutine.ProcessWaitForEndOfFrame();
         }
 
         public override void Update()
@@ -80,18 +86,6 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
                 list.AddRange(il2cppList.ToArray());
         }
 
-        public override bool IsReferenceEqual(object a, object b)
-        {
-            if (a.TryCast<UnityEngine.Object>() is UnityEngine.Object ua)
-            {
-                var ub = b.TryCast<UnityEngine.Object>();
-                if (ub && ua.m_CachedPtr == ub.m_CachedPtr)
-                    return true;
-            }
-
-            return base.IsReferenceEqual(a, b);
-        }
-
         // LayerMask.LayerToName
 
         internal delegate IntPtr d_LayerToName(int layer);
@@ -116,9 +110,6 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
 
             return new Il2CppReferenceArray<UnityEngine.Object>(iCall.Invoke(Il2CppType.From(type).Pointer));
         }
-
-        public override int GetSceneHandle(Scene scene)
-            => scene.handle;
 
         // Scene.GetRootGameObjects();
 
@@ -242,33 +233,13 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
                 ReflectionUtility.GetPropertyInfo(typeof(Selectable), "m_Colors")
                     .SetValue(selectable, _colorBlock, null);
 
-                ReflectionUtility.GetMethodInfo(typeof(Selectable), "OnSetProperty", new Type[0])
-                    .Invoke(selectable, new object[0]);
+                ReflectionUtility.GetMethodInfo(typeof(Selectable), "OnSetProperty")
+                    .Invoke(selectable, ArgumentUtility.EmptyArgs);
             }
             catch (Exception ex)
             {
                 ExplorerCore.Log(ex);
             }
-        }
-
-        public override void FindSingleton(string[] possibleNames, Type type, BF flags, List<object> instances)
-        {
-            PropertyInfo pi;
-            foreach (var name in possibleNames)
-            {
-                pi = type.GetProperty(name, flags);
-                if (pi != null)
-                {
-                    var instance = pi.GetValue(null, null);
-                    if (instance != null)
-                    {
-                        instances.Add(instance);
-                        return;
-                    }
-                }
-            }
-
-            base.FindSingleton(possibleNames, type, flags, instances);
         }
     }
 }
@@ -283,6 +254,16 @@ public static class Il2CppExtensions
     public static void AddListener<T>(this UnityEvent<T> action, Action<T> listener)
     {
         action.AddListener(listener);
+    }
+
+    public static void RemoveListener(this UnityEvent action, Action listener)
+    {
+        action.RemoveListener(listener);
+    }
+
+    public static void RemoveListener<T>(this UnityEvent<T> action, Action<T> listener)
+    {
+        action.RemoveListener(listener);
     }
 
     public static void SetChildControlHeight(this HorizontalOrVerticalLayoutGroup group, bool value) => group.childControlHeight = value;

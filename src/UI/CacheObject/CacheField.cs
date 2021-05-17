@@ -1,40 +1,54 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Reflection;
-using UnityExplorer.UI;
-using UnityEngine;
+using System.Text;
+using UnityExplorer.UI.Inspectors;
 
 namespace UnityExplorer.UI.CacheObject
 {
     public class CacheField : CacheMember
     {
-        public override bool IsStatic => (MemInfo as FieldInfo).IsStatic;
+        public FieldInfo FieldInfo { get; internal set; }
+        public override Type DeclaringType => FieldInfo.DeclaringType;
+        public override bool IsStatic => FieldInfo.IsStatic;
+        public override bool CanWrite => m_canWrite ?? (bool)(m_canWrite = !(FieldInfo.IsLiteral && !FieldInfo.IsInitOnly));
+        private bool? m_canWrite;
 
-        public override Type FallbackType => (MemInfo as FieldInfo).FieldType;
+        public override bool ShouldAutoEvaluate => true;
 
-        public CacheField(FieldInfo fieldInfo, object declaringInstance, GameObject parent) : base(fieldInfo, declaringInstance, parent)
+        public override void SetInspectorOwner(ReflectionInspector inspector, MemberInfo member)
         {
-            CreateIValue(null, fieldInfo.FieldType);
+            base.SetInspectorOwner(inspector, member);
         }
 
-        public override void UpdateReflection()
+        protected override object TryEvaluate()
         {
-            var fi = MemInfo as FieldInfo;
-            IValue.Value = fi.GetValue(fi.IsStatic ? null : DeclaringInstance);
-
-            m_evaluated = true;
-            ReflectionException = null;
+            try
+            {
+                var ret = FieldInfo.GetValue(DeclaringInstance);
+                HadException = false;
+                LastException = null;
+                return ret;
+            }
+            catch (Exception ex)
+            {
+                HadException = true;
+                LastException = ex;
+                return null;
+            }
         }
 
-        public override void SetValue()
+        protected override void TrySetValue(object value)
         {
-            var fi = MemInfo as FieldInfo;
-            fi.SetValue(fi.IsStatic ? null : DeclaringInstance, IValue.Value);
-
-            if (this.ParentInspector?.ParentMember != null)
-                this.ParentInspector.ParentMember.SetValue();
+            try
+            {
+                FieldInfo.SetValue(DeclaringInstance, value);
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.LogWarning(ex);
+            }
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using UnityExplorer.Core.Unity;
 using UnityEngine.EventSystems;
 using UnityExplorer.Core.Input;
 using BF = System.Reflection.BindingFlags;
@@ -8,11 +7,7 @@ using UnityExplorer.Core.Config;
 using UnityExplorer.Core;
 using UnityExplorer.UI;
 using System.Collections;
-#if ML
-using Harmony;
-#else
 using HarmonyLib;
-#endif
 
 namespace UnityExplorer.Core.Input
 {
@@ -50,7 +45,7 @@ namespace UnityExplorer.Core.Input
             Unlock = ConfigManager.Force_Unlock_Mouse.Value;
             ConfigManager.Force_Unlock_Mouse.OnValueChanged += (bool val) => { Unlock = val; };
 
-            if (ConfigManager.Aggressive_Force_Unlock.Value)
+            if (ConfigManager.Aggressive_Mouse_Unlock.Value)
                 SetupAggressiveUnlock();
         }
 
@@ -167,7 +162,7 @@ namespace UnityExplorer.Core.Input
                 m_lastVisibleState = (bool?)CursorType.GetProperty("visible", BF.Public | BF.Static)?.GetValue(null, null)
                                      ?? false;
 
-                ExplorerCore.Loader.SetupPatches();
+                ExplorerCore.Loader.SetupCursorPatches();
             }
             catch (Exception e)
             {

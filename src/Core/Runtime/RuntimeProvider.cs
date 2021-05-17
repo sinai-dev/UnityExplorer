@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -17,7 +16,6 @@ namespace UnityExplorer
     {
         public static RuntimeProvider Instance;
 
-        public ReflectionProvider Reflection;
         public TextureUtilProvider TextureUtil;
 
         public RuntimeProvider()
@@ -42,7 +40,7 @@ namespace UnityExplorer
 
         public abstract void Update();
 
-        public virtual bool IsReferenceEqual(object a, object b) => ReferenceEquals(a, b);
+        //public virtual bool IsReferenceEqual(object a, object b) => ReferenceEquals(a, b);
 
         // Unity API handlers
 
@@ -56,7 +54,7 @@ namespace UnityExplorer
 
         public abstract void GraphicRaycast(GraphicRaycaster raycaster, PointerEventData data, List<RaycastResult> list);
 
-        public abstract int GetSceneHandle(Scene scene);
+        //public abstract int GetSceneHandle(Scene scene);
 
         public abstract GameObject[] GetRootGameObjects(Scene scene);
 
@@ -67,23 +65,12 @@ namespace UnityExplorer
         public abstract void SetColorBlock(Selectable selectable, Color? normal = null, Color? highlighted = null, Color? pressed = null,
             Color? disabled = null);
 
-        public virtual void FindSingleton(string[] s_instanceNames, Type type, BindingFlags flags, List<object> instances)
+        internal virtual void ProcessOnPostRender()
         {
-            // Look for a typical Instance backing field.
-            FieldInfo fi;
-            foreach (var name in s_instanceNames)
-            {
-                fi = type.GetField(name, flags);
-                if (fi != null)
-                {
-                    var instance = fi.GetValue(null);
-                    if (instance != null)
-                    {
-                        instances.Add(instance);
-                        return;
-                    }
-                }
-            }
+        }
+
+        internal virtual void ProcessFixedUpdate()
+        {
         }
     }
 }

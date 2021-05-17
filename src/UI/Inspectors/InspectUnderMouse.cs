@@ -6,70 +6,97 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityExplorer.Core;
-using UnityExplorer.Core.Unity;
 using UnityExplorer.Core.Input;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI;
-using UnityExplorer.UI.Main;
-using UnityExplorer.UI.Inspectors;
+using UnityExplorer.UI.Panels;
 
-namespace UnityExplorer.UI.Main.Home
+namespace UnityExplorer.UI.Inspectors
 {
-    public class InspectUnderMouse
+    public enum MouseInspectMode
     {
-        public enum MouseInspectMode
+        World,
+        UI
+    }
+
+    public class InspectUnderMouse : UIPanel
+    {
+        public static InspectUnderMouse Instance { get; private set; }
+
+        public InspectUnderMouse() { Instance = this; }
+
+        public static void OnDropdownSelect(int index)
         {
-            World,
-            UI
+            switch (index)
+            {
+                case 0: return;
+                case 1: Instance.StartInspect(MouseInspectMode.World); break;
+                case 2: Instance.StartInspect(MouseInspectMode.UI); break;
+            }
+            UIManager.MouseInspectDropdown.value = 0;
         }
 
-        public static bool Inspecting { get; set; }
+        // UIPanel
+        public override string Name => "Inspect Under Mouse";
+        public override UIManager.Panels PanelType => UIManager.Panels.MouseInspector;
+        public override int MinWidth => -1;
+        public override int MinHeight => -1;
+        public override bool CanDragAndResize => false;
+        public override bool NavButtonWanted => false;
+        public override bool ShouldSaveActiveState => false;
+        public override bool ShowByDefault => false;
 
+        internal static Text objNameLabel;
+        internal static Text objPathLabel;
+        internal static Text mousePosLabel;
+
+        // Mouse Inspector
+        public static bool Inspecting { get; set; }
         public static MouseInspectMode Mode { get; set; }
 
-        private static GameObject s_lastHit;
-        private static Vector3 s_lastMousePos;
+        private static GameObject lastHitObject;
+        private static Vector3 lastMousePos;
 
-        private static readonly List<Graphic> _wasDisabledGraphics = new List<Graphic>();
-        private static readonly List<CanvasGroup> _wasDisabledCanvasGroups = new List<CanvasGroup>();
-        private static readonly List<GameObject> _objectsAddedCastersTo = new List<GameObject>();
+        private static readonly List<Graphic> wasDisabledGraphics = new List<Graphic>();
+        private static readonly List<CanvasGroup> wasDisabledCanvasGroups = new List<CanvasGroup>();
+        private static readonly List<GameObject> objectsAddedCastersTo = new List<GameObject>();
 
         internal static Camera MainCamera;
         internal static GraphicRaycaster[] graphicRaycasters;
 
-        public static void Init()
-        {
-            ConstructUI();
-        }
 
-        public static void StartInspect(MouseInspectMode mode)
+        public void StartInspect(MouseInspectMode mode)
         {
             MainCamera = Camera.main;
             if (!MainCamera)
                 return;
 
+            PanelDragger.ForceEnd();
+
             Mode = mode;
             Inspecting = true;
-            MainMenu.Instance.MainPanel.SetActive(false);
+            UIManager.NavBarRect.gameObject.SetActive(false);
+            UIManager.PanelHolder.SetActive(false);
 
-            s_UIContent.SetActive(true);
+            UIRoot.SetActive(true);
 
             if (mode == MouseInspectMode.UI)
                 SetupUIRaycast();
         }
 
-        internal static void ClearHitData()
+        internal void ClearHitData()
         {
-            s_lastHit = null;
-            s_objNameLabel.text = "No hits...";
-            s_objPathLabel.text = "";
+            lastHitObject = null;
+            objNameLabel.text = "No hits...";
+            objPathLabel.text = "";
         }
 
-        public static void StopInspect()
+        public void StopInspect()
         {
             Inspecting = false;
-            MainMenu.Instance.MainPanel.SetActive(true);
-            s_UIContent.SetActive(false);
+            UIManager.NavBarRect.gameObject.SetActive(true);
+            UIManager.PanelHolder.SetActive(true);
+            UIRoot.SetActive(false);
 
             if (Mode == MouseInspectMode.UI)
                 StopUIInspect();
@@ -77,7 +104,9 @@ namespace UnityExplorer.UI.Main.Home
             ClearHitData();
         }
 
-        public static void UpdateInspect()
+        private static float timeOfLastRaycast;
+
+        public void UpdateInspect()
         {
             if (InputManager.GetKeyDown(KeyCode.Escape))
             {
@@ -85,10 +114,23 @@ namespace UnityExplorer.UI.Main.Home
                 return;
             }
 
+            if (lastHitObject && InputManager.GetMouseButtonDown(0))
+            {
+                var target = lastHitObject;
+                StopInspect();
+                InspectorManager.Inspect(target);
+                return;
+            }
+
             var mousePos = InputManager.MousePosition;
 
-            if (mousePos != s_lastMousePos)
+            if (mousePos != lastMousePos)
                 UpdatePosition(mousePos);
+
+            if (!timeOfLastRaycast.OccuredEarlierThan(0.1f))
+                return;
+
+            timeOfLastRaycast = Time.realtimeSinceStartup;
 
             // actual inspect raycast 
 
@@ -101,37 +143,42 @@ namespace UnityExplorer.UI.Main.Home
             }
         }
 
-        internal static void UpdatePosition(Vector2 mousePos)
+        internal void UpdatePosition(Vector2 mousePos)
         {
-            s_lastMousePos = mousePos;
+            lastMousePos = mousePos;
 
+            // use the raw mouse pos for the label
+            mousePosLabel.text = $"<color=grey>Mouse Position:</color> {mousePos.ToString()}";
+
+            // constrain the mouse pos we use within certain bounds
+            if (mousePos.x < 350)
+                mousePos.x = 350;
+            if (mousePos.x > Screen.width - 350)
+                mousePos.x = Screen.width - 350;
+            if (mousePos.y < mainPanelRect.rect.height)
+                mousePos.y += mainPanelRect.rect.height + 10;
+            else
+                mousePos.y -= 10;
+
+            // calculate and set our UI position
             var inversePos = UIManager.CanvasRoot.transform.InverseTransformPoint(mousePos);
 
-            s_mousePosLabel.text = $"<color=grey>Mouse Position:</color> {mousePos.ToString()}";
-
-            float yFix = mousePos.y < 120 ? 80 : -80;
-            s_UIContent.transform.localPosition = new Vector3(inversePos.x, inversePos.y + yFix, 0);
+            UIRoot.transform.localPosition = new Vector3(inversePos.x, inversePos.y, 0);
         }
 
-        internal static void OnHitGameObject(GameObject obj)
+        internal void OnHitGameObject(GameObject obj)
         {
-            if (obj != s_lastHit)
+            if (obj != lastHitObject)
             {
-                s_lastHit = obj;
-                s_objNameLabel.text = $"<b>Click to Inspect:</b> <color=cyan>{obj.name}</color>";
-                s_objPathLabel.text = $"Path: {obj.transform.GetTransformPath(true)}";
-            }
-
-            if (InputManager.GetMouseButtonDown(0))
-            {
-                StopInspect();
-                InspectorManager.Instance.Inspect(obj);
+                lastHitObject = obj;
+                objNameLabel.text = $"<b>Click to Inspect:</b> <color=cyan>{obj.name}</color>";
+                objPathLabel.text = $"Path: {obj.transform.GetTransformPath(true)}";
             }
         }
 
         // Collider raycasting
 
-        internal static void RaycastWorld(Vector2 mousePos)
+        internal void RaycastWorld(Vector2 mousePos)
         {
             var ray = MainCamera.ScreenPointToRay(mousePos);
             Physics.Raycast(ray, out RaycastHit hit, 1000f);
@@ -143,7 +190,7 @@ namespace UnityExplorer.UI.Main.Home
             }
             else
             {
-                if (s_lastHit)
+                if (lastHitObject)
                     ClearHitData();
             }
         }
@@ -154,14 +201,14 @@ namespace UnityExplorer.UI.Main.Home
         {
             foreach (var obj in RuntimeProvider.Instance.FindObjectsOfTypeAll(typeof(Canvas)))
             {
-                var canvas = obj.Cast(typeof(Canvas)) as Canvas;
+                var canvas = obj.TryCast<Canvas>();
                 if (!canvas || !canvas.enabled || !canvas.gameObject.activeInHierarchy)
                     continue;
                 if (!canvas.GetComponent<GraphicRaycaster>())
                 {
                     canvas.gameObject.AddComponent<GraphicRaycaster>();
                     //ExplorerCore.Log("Added raycaster to " + canvas.name);
-                    _objectsAddedCastersTo.Add(canvas.gameObject);
+                    objectsAddedCastersTo.Add(canvas.gameObject);
                 }
             }
 
@@ -170,33 +217,33 @@ namespace UnityExplorer.UI.Main.Home
             graphicRaycasters = new GraphicRaycaster[casters.Length];
             for (int i = 0; i < casters.Length; i++)
             {
-                graphicRaycasters[i] = casters[i].Cast(typeof(GraphicRaycaster)) as GraphicRaycaster;
+                graphicRaycasters[i] = casters[i].TryCast<GraphicRaycaster>();
             }
 
             // enable raycastTarget on Graphics
             foreach (var obj in RuntimeProvider.Instance.FindObjectsOfTypeAll(typeof(Graphic)))
             {
-                var graphic = obj.Cast(typeof(Graphic)) as Graphic;
+                var graphic = obj.TryCast<Graphic>();
                 if (!graphic || !graphic.enabled || graphic.raycastTarget || !graphic.gameObject.activeInHierarchy)
                     continue;
                 graphic.raycastTarget = true;
                 //ExplorerCore.Log("Enabled raycastTarget on " + graphic.name);
-                _wasDisabledGraphics.Add(graphic);
+                wasDisabledGraphics.Add(graphic);
             }
 
             // enable blocksRaycasts on CanvasGroups
             foreach (var obj in RuntimeProvider.Instance.FindObjectsOfTypeAll(typeof(CanvasGroup)))
             {
-                var canvas = obj.Cast(typeof(CanvasGroup)) as CanvasGroup;
+                var canvas = obj.TryCast<CanvasGroup>();
                 if (!canvas || !canvas.gameObject.activeInHierarchy || canvas.blocksRaycasts)
                     continue;
                 canvas.blocksRaycasts = true;
                 //ExplorerCore.Log("Enabled raycasts on " + canvas.name);
-                _wasDisabledCanvasGroups.Add(canvas);
+                wasDisabledCanvasGroups.Add(canvas);
             }
         }
 
-        internal static void RaycastUI(Vector2 mousePos)
+        internal void RaycastUI(Vector2 mousePos)
         {
             var ped = new PointerEventData(null)
             {
@@ -210,17 +257,18 @@ namespace UnityExplorer.UI.Main.Home
             int highestDepth = int.MinValue;
             foreach (var gr in graphicRaycasters)
             {
+                if (!gr || !gr.canvas)
+                    continue;
+
                 var list = new List<RaycastResult>();
                 RuntimeProvider.Instance.GraphicRaycast(gr, ped, list);
-
-                //gr.Raycast(ped, list);
 
                 if (list.Count > 0)
                 {
                     foreach (var hit in list)
                     {
-                        // Manual trying to determine which object is "on top".
-                        // Not perfect, but not terrible.
+                        // Manualy trying to determine which object is "on top".
+                        // Could be improved, but seems to work pretty well and isn't as laggy as you would expect.
 
                         if (!hit.gameObject)
                             continue;
@@ -258,7 +306,7 @@ namespace UnityExplorer.UI.Main.Home
                 }
                 else
                 {
-                    if (s_lastHit)
+                    if (lastHitObject)
                         ClearHitData();
                 }
             }
@@ -271,58 +319,64 @@ namespace UnityExplorer.UI.Main.Home
 
         private static void StopUIInspect()
         {
-            foreach (var obj in _objectsAddedCastersTo)
+            foreach (var obj in objectsAddedCastersTo)
             {
                 if (obj.GetComponent<GraphicRaycaster>() is GraphicRaycaster raycaster)
                     GameObject.Destroy(raycaster);
             }
 
-            foreach (var graphic in _wasDisabledGraphics)
+            foreach (var graphic in wasDisabledGraphics)
                 graphic.raycastTarget = false;
 
-            foreach (var canvas in _wasDisabledCanvasGroups)
+            foreach (var canvas in wasDisabledCanvasGroups)
                 canvas.blocksRaycasts = false;
 
-            _objectsAddedCastersTo.Clear();
-            _wasDisabledCanvasGroups.Clear();
-            _wasDisabledGraphics.Clear();
+            objectsAddedCastersTo.Clear();
+            wasDisabledCanvasGroups.Clear();
+            wasDisabledGraphics.Clear();
         }
 
-        internal static Text s_objNameLabel;
-        internal static Text s_objPathLabel;
-        internal static Text s_mousePosLabel;
-        internal static GameObject s_UIContent;
 
-        internal static void ConstructUI()
+        // UI Construction
+
+        protected internal override void DoSetDefaultPosAndAnchors()
         {
-            s_UIContent = UIFactory.CreatePanel("InspectUnderMouse_UI", out GameObject content);
+            mainPanelRect.anchorMin = Vector2.zero;
+            mainPanelRect.anchorMax = Vector2.zero;
+            mainPanelRect.pivot = new Vector2(0.5f, 1);
+            mainPanelRect.sizeDelta = new Vector2(700, 150);
+        }
 
-            var baseRect = s_UIContent.GetComponent<RectTransform>();
-            var half = new Vector2(0.5f, 0.5f);
-            baseRect.anchorMin = half;
-            baseRect.anchorMax = half;
-            baseRect.pivot = half;
-            baseRect.sizeDelta = new Vector2(700, 150);
+        public override void ConstructPanelContent()
+        {
+            // hide title bar
+            this.titleBar.SetActive(false);
+            this.UIRoot.transform.SetParent(UIManager.CanvasRoot.transform, false);
 
-            var group = content.GetComponent<VerticalLayoutGroup>();
-            group.childForceExpandHeight = true;
+            var inspectContent = UIFactory.CreateVerticalGroup(this.content, "InspectContent", true, true, true, true, 3, new Vector4(2, 2, 2, 2));
+            UIFactory.SetLayoutElement(inspectContent, flexibleWidth: 9999, flexibleHeight: 9999);
 
             // Title text
 
-            UIFactory.CreateLabel(content, "InspectLabel", "<b>Mouse Inspector</b> (press <b>ESC</b> to cancel)", TextAnchor.MiddleCenter);
+            var title = UIFactory.CreateLabel(inspectContent, "InspectLabel", "<b>Mouse Inspector</b> (press <b>ESC</b> to cancel)", TextAnchor.MiddleCenter);
+            UIFactory.SetLayoutElement(title.gameObject, flexibleWidth: 9999);
 
-            s_mousePosLabel = UIFactory.CreateLabel(content, "MousePosLabel", "Mouse Position:", TextAnchor.MiddleCenter);
+            mousePosLabel = UIFactory.CreateLabel(inspectContent, "MousePosLabel", "Mouse Position:", TextAnchor.MiddleCenter);
 
-            s_objNameLabel = UIFactory.CreateLabel(content, "HitLabelObj", "No hits...", TextAnchor.MiddleLeft);
-            s_objNameLabel.horizontalOverflow = HorizontalWrapMode.Overflow;
+            objNameLabel = UIFactory.CreateLabel(inspectContent, "HitLabelObj", "No hits...", TextAnchor.MiddleLeft);
+            objNameLabel.horizontalOverflow = HorizontalWrapMode.Overflow;
 
-            s_objPathLabel = UIFactory.CreateLabel(content, "PathLabel", "", TextAnchor.MiddleLeft);
-            s_objPathLabel.fontStyle = FontStyle.Italic;
-            s_objPathLabel.horizontalOverflow = HorizontalWrapMode.Wrap;
+            objPathLabel = UIFactory.CreateLabel(inspectContent, "PathLabel", "", TextAnchor.MiddleLeft);
+            objPathLabel.fontStyle = FontStyle.Italic;
+            objPathLabel.horizontalOverflow = HorizontalWrapMode.Wrap;
 
-            UIFactory.SetLayoutElement(s_objPathLabel.gameObject, minHeight: 75);
+            UIFactory.SetLayoutElement(objPathLabel.gameObject, minHeight: 75);
 
-            s_UIContent.SetActive(false);
+            UIRoot.SetActive(false);
         }
+
+        public override void DoSaveToConfigElement() { }
+
+        public override string GetSaveDataFromConfigManager() => null;
     }
 }

@@ -2,60 +2,175 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityExplorer.UI;
-using UnityExplorer.Core.Unity;
 using UnityExplorer.Core.Runtime;
-using UnityExplorer.Core;
+using UnityExplorer.UI.CacheObject.Views;
+using UnityExplorer.UI.Inspectors;
+using UnityExplorer.UI.ObjectPool;
 using UnityExplorer.UI.Utility;
-using UnityExplorer.UI.InteractiveValues;
-using UnityExplorer.UI.Inspectors.Reflection;
 
 namespace UnityExplorer.UI.CacheObject
 {
     public abstract class CacheMember : CacheObjectBase
     {
-        public override bool IsMember => true;
+        //public ReflectionInspector ParentInspector { get; internal set; }
+        //public bool AutoUpdateWanted { get; internal set; }
+        
+        public abstract Type DeclaringType { get; }
+        public string NameForFiltering { get; protected set; }
+        public object DeclaringInstance => IsStatic ? null : (m_declaringInstance ?? (m_declaringInstance = Owner.Target.TryCast(DeclaringType)));
+        private object m_declaringInstance;
 
-        public override Type FallbackType { get; }
-
-        public ReflectionInspector ParentInspector { get; set; }
-        public MemberInfo MemInfo { get; set; }
-        public Type DeclaringType { get; set; }
-        public object DeclaringInstance { get; set; }
-        public virtual bool IsStatic { get; private set; }
-
-        public string ReflectionException { get; set; }
-
-        public override bool CanWrite => m_canWrite ?? GetCanWrite();
-        private bool? m_canWrite;
-
-        public override bool HasParameters => ParamCount > 0;
-        public virtual int ParamCount => m_arguments.Length;
-        public override bool HasEvaluated => m_evaluated;
-        public bool m_evaluated = false;
-        public bool m_isEvaluating;
-        public ParameterInfo[] m_arguments = new ParameterInfo[0];
-        public string[] m_argumentInput = new string[0];
-
-        public string NameForFiltering => m_nameForFilter ?? (m_nameForFilter = $"{MemInfo.DeclaringType.Name}.{MemInfo.Name}".ToLower());
-        private string m_nameForFilter;
-
-        public string RichTextName => m_richTextName ?? GetRichTextName();
-        private string m_richTextName;
-
-        public CacheMember(MemberInfo memberInfo, object declaringInstance, GameObject parentContent)
+        public abstract bool IsStatic { get; }
+        public override bool HasArguments => Arguments?.Length > 0 || GenericArguments.Length > 0;
+        public ParameterInfo[] Arguments { get; protected set; } = new ParameterInfo[0];
+        public Type[] GenericArguments { get; protected set; } = ArgumentUtility.EmptyTypes;
+        public EvaluateWidget Evaluator { get; protected set; }
+        public bool Evaluating => Evaluator != null && Evaluator.UIRoot.activeSelf;
+        
+        public virtual void SetInspectorOwner(ReflectionInspector inspector, MemberInfo member)
         {
-            MemInfo = memberInfo;
-            DeclaringType = memberInfo.DeclaringType;
-            DeclaringInstance = declaringInstance;
-            this.m_parentContent = parentContent;
-
-            DeclaringInstance = ReflectionProvider.Instance.Cast(declaringInstance, DeclaringType);
+            this.Owner = inspector;
+            this.NameLabelText = SignatureHighlighter.Parse(member.DeclaringType, false, member);
+            this.NameForFiltering = $"{member.DeclaringType.Name}.{member.Name}";
         }
 
-        public static bool CanProcessArgs(ParameterInfo[] parameters)
+        public override void ReleasePooledObjects()
+        {
+            base.ReleasePooledObjects();
+
+            if (this.Evaluator != null)
+            {
+                this.Evaluator.OnReturnToPool();
+                Pool<EvaluateWidget>.Return(this.Evaluator);
+                this.Evaluator = null;
+            }
+        }
+
+        public override void UnlinkFromView()
+        {
+            if (this.Evaluator != null)
+                this.Evaluator.UIRoot.transform.SetParent(Pool<EvaluateWidget>.Instance.InactiveHolder.transform, false);
+
+            base.UnlinkFromView();
+        }
+
+        protected abstract object TryEvaluate();
+
+        protected abstract void TrySetValue(object value);
+
+        public void EvaluateAndSetCell()
+        {
+            Evaluate();
+            if (CellView != null)
+                SetDataToCell(CellView);
+        }
+
+        /// <summary>
+        /// Evaluate when first shown (if ShouldAutoEvaluate), or else when Evaluate button is clicked, or auto-updated.
+        /// </summary>
+        public void Evaluate()
+        {
+            SetValueFromSource(TryEvaluate());
+        }
+
+        public override void TrySetUserValue(object value)
+        {
+            TrySetValue(value);
+
+            Evaluate();
+        }
+
+        protected override void SetValueState(CacheObjectCell cell, ValueStateArgs args)
+        {
+            base.SetValueState(cell, args);
+
+            //var memCell = cell as CacheMemberCell;
+            //memCell.UpdateToggle.gameObject.SetActive(ShouldAutoEvaluate);
+        }
+
+        private static readonly Color evalEnabledColor = new Color(0.15f, 0.25f, 0.15f);
+        private static readonly Color evalDisabledColor = new Color(0.15f, 0.15f, 0.15f);
+
+        protected override bool SetCellEvaluateState(CacheObjectCell objectcell)
+        {
+            var cell = objectcell as CacheMemberCell;
+
+            cell.EvaluateHolder.SetActive(!ShouldAutoEvaluate);
+            if (!ShouldAutoEvaluate)
+            {
+                //cell.UpdateToggle.gameObject.SetActive(false);
+                cell.EvaluateButton.Component.gameObject.SetActive(true);
+                if (HasArguments)
+                {
+                    if (!Evaluating)
+                        cell.EvaluateButton.ButtonText.text = $"Evaluate ({Arguments.Length + GenericArguments.Length})";
+                    else
+                    {
+                        cell.EvaluateButton.ButtonText.text = "Hide";
+                        Evaluator.UIRoot.transform.SetParent(cell.EvaluateHolder.transform, false);
+                        RuntimeProvider.Instance.SetColorBlock(cell.EvaluateButton.Component, evalEnabledColor, evalEnabledColor * 1.3f);
+                    }
+                }
+                else
+                    cell.EvaluateButton.ButtonText.text = "Evaluate";
+
+                if (!Evaluating)
+                    RuntimeProvider.Instance.SetColorBlock(cell.EvaluateButton.Component, evalDisabledColor, evalDisabledColor * 1.3f);
+            }
+            //else
+            //{
+            //    cell.UpdateToggle.gameObject.SetActive(true);
+            //    cell.UpdateToggle.isOn = AutoUpdateWanted;
+            //}
+
+            if (State == ValueState.NotEvaluated && !ShouldAutoEvaluate)
+            {
+                SetValueState(cell, ValueStateArgs.Default);
+                cell.RefreshSubcontentButton();
+
+                return true;
+            }
+
+            if (State == ValueState.NotEvaluated)
+                Evaluate();
+
+            return false;
+        }
+
+
+        public void OnEvaluateClicked()
+        {
+            if (!HasArguments)
+            {
+                EvaluateAndSetCell();
+            }
+            else
+            {
+                if (Evaluator == null)
+                {
+                    this.Evaluator = Pool<EvaluateWidget>.Borrow();
+                    Evaluator.OnBorrowedFromPool(this);
+                    Evaluator.UIRoot.transform.SetParent((CellView as CacheMemberCell).EvaluateHolder.transform, false);
+                    SetCellEvaluateState(CellView);
+                }
+                else
+                {
+                    if (Evaluator.UIRoot.activeSelf)
+                        Evaluator.UIRoot.SetActive(false);
+                    else
+                        Evaluator.UIRoot.SetActive(true);
+
+                    SetCellEvaluateState(CellView);
+                }
+            }
+        }
+
+
+        #region Cache Member Util
+
+        public static bool CanParseArgs(ParameterInfo[] parameters)
         {
             foreach (var param in parameters)
             {
@@ -64,7 +179,7 @@ namespace UnityExplorer.UI.CacheObject
                 if (pType.IsByRef && pType.HasElementType)
                     pType = pType.GetElementType();
 
-                if (pType != null && (pType.IsPrimitive || pType == typeof(string)))
+                if (pType != null && ParseUtility.CanParse(pType))
                     continue;
                 else
                     return false;
@@ -72,312 +187,164 @@ namespace UnityExplorer.UI.CacheObject
             return true;
         }
 
-        public override void CreateIValue(object value, Type fallbackType)
+        public static List<CacheMember> GetCacheMembers(object inspectorTarget, Type _type, ReflectionInspector _inspector)
         {
-            IValue = InteractiveValue.Create(value, fallbackType);
-            IValue.Owner = this;
-            IValue.m_mainContentParent = this.m_rightGroup;
-            IValue.m_subContentParent = this.m_subContent;
-        }
+            var list = new List<CacheMember>();
+            var cachedSigs = new HashSet<string>();
 
-        public override void UpdateValue()
-        {
-            if (!HasParameters || m_isEvaluating)
+            var types = ReflectionUtility.GetAllBaseTypes(_type);
+
+            var flags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
+            if (!_inspector.StaticOnly)
+                flags |= BindingFlags.Instance;
+
+            var infos = new List<MemberInfo>();
+
+            foreach (var declaringType in types)
             {
-                try
+                var target = inspectorTarget;
+                if (!_inspector.StaticOnly)
+                    target = target.TryCast(declaringType);
+
+                infos.Clear();
+                infos.AddRange(declaringType.GetProperties(flags));
+                infos.AddRange(declaringType.GetFields(flags));
+                infos.AddRange(declaringType.GetMethods(flags));
+
+                foreach (var member in infos)
                 {
-                    Type baseType = ReflectionUtility.GetActualType(IValue.Value) ?? FallbackType;
-
-                    if (!ReflectionProvider.Instance.IsReflectionSupported(baseType))
-                        throw new Exception("Type not supported with reflection");
-
-                    UpdateReflection();
-
-                    if (IValue.Value != null)
-                        IValue.Value = IValue.Value.Cast(ReflectionUtility.GetActualType(IValue.Value));
-                }
-                catch (Exception e)
-                {
-                    ReflectionException = e.ReflectionExToString(true);
-                }
-            }
-
-            base.UpdateValue();
-        }
-
-        public abstract void UpdateReflection();
-
-        public override void SetValue()
-        {
-            // no implementation for base class
-        }
-
-        public object[] ParseArguments()
-        {
-            if (m_arguments.Length < 1)
-                return new object[0];
-
-            var parsedArgs = new List<object>();
-            for (int i = 0; i < m_arguments.Length; i++)
-            {
-                var input = m_argumentInput[i];
-                var type = m_arguments[i].ParameterType;
-
-                if (type.IsByRef)
-                    type = type.GetElementType();
-
-                if (!string.IsNullOrEmpty(input))
-                {
-                    if (type == typeof(string))
-                    {
-                        parsedArgs.Add(input);
+                    if (member.DeclaringType != declaringType)
                         continue;
-                    }
-                    else
-                    {
-                        try
+                    TryCacheMember(member, list, cachedSigs, declaringType, _inspector);
+                }
+            }
+
+            var typeList = types.ToList();
+
+            var sorted = new List<CacheMember>();
+            sorted.AddRange(list.Where(it => it is CacheProperty)
+                             .OrderBy(it => typeList.IndexOf(it.DeclaringType))
+                             .ThenBy(it => it.NameForFiltering));
+            sorted.AddRange(list.Where(it => it is CacheField)
+                             .OrderBy(it => typeList.IndexOf(it.DeclaringType))
+                             .ThenBy(it => it.NameForFiltering));
+            sorted.AddRange(list.Where(it => it is CacheMethod)
+                             .OrderBy(it => typeList.IndexOf(it.DeclaringType))
+                             .ThenBy(it => it.NameForFiltering));
+
+            return sorted;
+        }
+
+        private static void TryCacheMember(MemberInfo member, List<CacheMember> list, HashSet<string> cachedSigs, 
+            Type declaringType, ReflectionInspector _inspector, bool ignorePropertyMethodInfos = true)
+        {
+            try
+            {
+                if (ReflectionUtility.IsBlacklisted(member))
+                    return;
+
+                var sig = GetSig(member);
+
+                //ExplorerCore.Log($"Trying to cache member {sig}...");
+                //ExplorerCore.Log(member.DeclaringType.FullName + "." + member.Name);
+
+                CacheMember cached;
+                Type returnType;
+                switch (member.MemberType)
+                {
+                    case MemberTypes.Method:
                         {
-                            var arg = type.GetMethod("Parse", new Type[] { typeof(string) })
-                                          .Invoke(null, new object[] { input });
+                            var mi = member as MethodInfo;
+                            if (ignorePropertyMethodInfos 
+                                && (mi.Name.StartsWith("get_") || mi.Name.StartsWith("set_")))
+                                return;
 
-                            parsedArgs.Add(arg);
-                            continue;
+                            var args = mi.GetParameters();
+                            if (!CanParseArgs(args))
+                                return;
+
+                            sig += GetArgumentString(args);
+                            if (cachedSigs.Contains(sig))
+                                return;
+
+                            cached = new CacheMethod() { MethodInfo = mi };
+                            returnType = mi.ReturnType;
+                            break;
                         }
-                        catch
+
+                    case MemberTypes.Property:
                         {
-                            ExplorerCore.Log($"Could not parse input '{input}' for argument #{i} '{m_arguments[i].Name}' ({type.FullName})");
+                            var pi = member as PropertyInfo;
+
+                            var args = pi.GetIndexParameters();
+                            if (!CanParseArgs(args))
+                                return;
+
+                            if (!pi.CanRead && pi.CanWrite)
+                            {
+                                // write-only property, cache the set method instead.
+                                var setMethod = pi.GetSetMethod(true);
+                                if (setMethod != null)
+                                    TryCacheMember(setMethod, list, cachedSigs, declaringType, _inspector, false);
+                                return;
+                            }
+
+                            sig += GetArgumentString(args);
+                            if (cachedSigs.Contains(sig))
+                                return;
+
+                            cached = new CacheProperty() { PropertyInfo = pi };
+                            returnType = pi.PropertyType;
+                            break;
                         }
-                    }
+
+                    case MemberTypes.Field:
+                        {
+                            var fi = member as FieldInfo;
+                            cached = new CacheField() { FieldInfo = fi };
+                            returnType = fi.FieldType;
+                            break;
+                        }
+
+                    default: return;
                 }
 
-                // No input, see if there is a default value.
-                if (m_arguments[i].IsOptional)
-                {
-                    parsedArgs.Add(m_arguments[i].DefaultValue);
-                    continue;
-                }
+                cachedSigs.Add(sig);
 
-                // Try add a null arg I guess
-                parsedArgs.Add(null);
+                //cached.Initialize(_inspector, declaringType, member, returnType);
+                cached.SetFallbackType(returnType);
+                cached.SetInspectorOwner(_inspector, member);
+
+                list.Add(cached);
             }
-
-            return parsedArgs.ToArray();
-        }
-
-        private bool GetCanWrite()
-        {
-            if (MemInfo is FieldInfo fi)
-                m_canWrite = !(fi.IsLiteral && !fi.IsInitOnly);
-            else if (MemInfo is PropertyInfo pi)
-                m_canWrite = pi.CanWrite;
-            else
-                m_canWrite = false;
-
-            return (bool)m_canWrite;
-        }
-
-        private string GetRichTextName()
-        {
-            return m_richTextName = SignatureHighlighter.ParseFullSyntax(MemInfo.DeclaringType, false, MemInfo);
-        }
-
-        #region UI 
-
-        internal float GetMemberLabelWidth(RectTransform scrollRect)
-        {
-            var textGenSettings = m_memLabelText.GetGenerationSettings(m_topRowRect.rect.size);
-            textGenSettings.scaleFactor = InputFieldScroller.canvasScaler.scaleFactor;
-
-            var textGen = m_memLabelText.cachedTextGeneratorForLayout;
-            float preferredWidth = textGen.GetPreferredWidth(RichTextName, textGenSettings);
-
-            float max = scrollRect.rect.width * 0.4f;
-
-            if (preferredWidth > max) preferredWidth = max;
-
-            return preferredWidth < 125f ? 125f : preferredWidth;
-        }
-
-        internal void SetWidths(float labelWidth, float valueWidth)
-        {
-            m_leftLayout.preferredWidth = labelWidth;
-            m_rightLayout.preferredWidth = valueWidth;
-        }
-
-        internal RectTransform m_topRowRect;
-        internal Text m_memLabelText;
-        internal GameObject m_leftGroup;
-        internal LayoutElement m_leftLayout;
-        internal GameObject m_rightGroup;
-        internal LayoutElement m_rightLayout;
-
-        internal override void ConstructUI()
-        {
-            base.ConstructUI();
-
-            var topGroupObj = UIFactory.CreateHorizontalGroup(m_mainContent, "CacheMemberGroup", false, false, true, true, 10, new Vector4(0, 0, 3, 3),
-                new Color(1, 1, 1, 0));
-
-            m_topRowRect = topGroupObj.GetComponent<RectTransform>();
-
-            UIFactory.SetLayoutElement(topGroupObj, minHeight: 25, flexibleHeight: 0, minWidth: 300, flexibleWidth: 5000);
-
-            // left group
-
-            m_leftGroup = UIFactory.CreateHorizontalGroup(topGroupObj, "LeftGroup", false, true, true, true, 4, default, new Color(1, 1, 1, 0));
-            UIFactory.SetLayoutElement(m_leftGroup, minHeight: 25, flexibleHeight: 0, minWidth: 125, flexibleWidth: 200);
-
-            // member label
-
-            m_memLabelText = UIFactory.CreateLabel(m_leftGroup, "MemLabelText", RichTextName, TextAnchor.MiddleLeft);
-            m_memLabelText.horizontalOverflow = HorizontalWrapMode.Wrap;
-            var leftRect = m_memLabelText.GetComponent<RectTransform>();
-            leftRect.anchorMin = Vector2.zero;
-            leftRect.anchorMax = Vector2.one;
-            leftRect.offsetMin = Vector2.zero;
-            leftRect.offsetMax = Vector2.zero;
-            leftRect.sizeDelta = Vector2.zero;
-            m_leftLayout = m_memLabelText.gameObject.AddComponent<LayoutElement>();
-            m_leftLayout.preferredWidth = 125;
-            m_leftLayout.minHeight = 25;
-            m_leftLayout.flexibleHeight = 100;
-            var labelFitter = m_memLabelText.gameObject.AddComponent<ContentSizeFitter>();
-            labelFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-            labelFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-            // right group
-
-            m_rightGroup = UIFactory.CreateVerticalGroup(topGroupObj, "RightGroup", false, true, true, true, 2, new Vector4(4,2,0,0),
-                new Color(1, 1, 1, 0));
-
-            m_rightLayout = m_rightGroup.AddComponent<LayoutElement>();
-            m_rightLayout.minHeight = 25;
-            m_rightLayout.flexibleHeight = 480;
-            m_rightLayout.minWidth = 125;
-            m_rightLayout.flexibleWidth = 5000;
-
-            ConstructArgInput(out GameObject argsHolder);
-
-            ConstructEvaluateButtons(argsHolder);
-
-            IValue.m_mainContentParent = m_rightGroup;
-        }
-
-        internal void ConstructArgInput(out GameObject argsHolder)
-        {
-            argsHolder = null;
-
-            if (HasParameters)
+            catch (Exception e)
             {
-                argsHolder = UIFactory.CreateVerticalGroup(m_rightGroup, "ArgsHolder", true, false, true, true, 4, new Color(1, 1, 1, 0));
-
-                if (this is CacheMethod cm && cm.GenericArgs.Length > 0)
-                    cm.ConstructGenericArgInput(argsHolder);
-
-                if (m_arguments.Length > 0)
-                {
-                    UIFactory.CreateLabel(argsHolder, "ArgumentsLabel", "Arguments:", TextAnchor.MiddleLeft);
-
-                    for (int i = 0; i < m_arguments.Length; i++)
-                        AddArgRow(i, argsHolder);
-                }
-
-                argsHolder.SetActive(false);
+                ExplorerCore.LogWarning($"Exception caching member {member.DeclaringType.FullName}.{member.Name}!");
+                ExplorerCore.Log(e.ToString());
             }
         }
 
-        internal void AddArgRow(int i, GameObject parent)
+        internal static string GetSig(MemberInfo member) => $"{member.DeclaringType.Name}.{member.Name}";
+
+        internal static string GetArgumentString(ParameterInfo[] args)
         {
-            var arg = m_arguments[i];
-
-            var rowObj = UIFactory.CreateHorizontalGroup(parent, "ArgRow", true, false, true, true, 4, default, new Color(1, 1, 1, 0));
-            UIFactory.SetLayoutElement(rowObj, minHeight: 25, flexibleWidth: 5000);
-
-            var argTypeTxt = SignatureHighlighter.ParseFullSyntax(arg.ParameterType, false);
-            var argLabel = UIFactory.CreateLabel(rowObj, "ArgLabel", $"{argTypeTxt} <color={SignatureHighlighter.LOCAL_ARG}>{arg.Name}</color>",
-                TextAnchor.MiddleLeft);
-            UIFactory.SetLayoutElement(argLabel.gameObject, minHeight: 25);
-
-            var argInputObj = UIFactory.CreateInputField(rowObj, "ArgInput", "...", 14, (int)TextAnchor.MiddleLeft, 1);
-            UIFactory.SetLayoutElement(argInputObj, flexibleWidth: 1200, preferredWidth: 150, minWidth: 20, minHeight: 25, flexibleHeight: 0);
-
-            var argInput = argInputObj.GetComponent<InputField>();
-            argInput.onValueChanged.AddListener((string val) => { m_argumentInput[i] = val; });
-
-            if (arg.IsOptional)
+            var sb = new StringBuilder();
+            sb.Append(' ');
+            sb.Append('(');
+            foreach (var param in args)
             {
-                var phInput = argInput.placeholder.GetComponent<Text>();
-                phInput.text = " = " + arg.DefaultValue?.ToString() ?? "null";
+                sb.Append(param.ParameterType.Name);
+                sb.Append(' ');
+                sb.Append(param.Name);
+                sb.Append(',');
+                sb.Append(' ');
             }
-        }
-
-        internal void ConstructEvaluateButtons(GameObject argsHolder)
-        {
-            if (HasParameters)
-            {
-                var evalGroupObj = UIFactory.CreateHorizontalGroup(m_rightGroup, "EvalGroup", false, false, true, true, 5, 
-                    default, new Color(1, 1, 1, 0));
-                UIFactory.SetLayoutElement(evalGroupObj, minHeight: 25, flexibleHeight: 0, flexibleWidth: 5000);
-
-                var evalButton = UIFactory.CreateButton(evalGroupObj, 
-                    "EvalButton", 
-                    $"Evaluate ({ParamCount})",
-                    null);
-
-                RuntimeProvider.Instance.SetColorBlock(evalButton, new Color(0.4f, 0.4f, 0.4f),
-                    new Color(0.4f, 0.7f, 0.4f), new Color(0.3f, 0.3f, 0.3f));
-
-                UIFactory.SetLayoutElement(evalButton.gameObject, minWidth: 100, minHeight: 22, flexibleWidth: 0);
-
-                var evalText = evalButton.GetComponentInChildren<Text>();
-
-                var cancelButton = UIFactory.CreateButton(evalGroupObj, "CancelButton", "Close", null, new Color(0.3f, 0.3f, 0.3f));
-                UIFactory.SetLayoutElement(cancelButton.gameObject, minWidth: 100, minHeight: 22, flexibleWidth: 0);
-
-                cancelButton.gameObject.SetActive(false);
-
-                evalButton.onClick.AddListener(() =>
-                {
-                    if (!m_isEvaluating)
-                    {
-                        argsHolder.SetActive(true);
-                        m_isEvaluating = true;
-                        evalText.text = "Evaluate";
-                        RuntimeProvider.Instance.SetColorBlock(evalButton, new Color(0.3f, 0.6f, 0.3f));
-
-                        cancelButton.gameObject.SetActive(true);
-                    }
-                    else
-                    {
-                        if (this is CacheMethod cm)
-                            cm.Evaluate();
-                        else
-                            UpdateValue();
-                    }
-                });
-
-                cancelButton.onClick.AddListener(() =>
-                {
-                    cancelButton.gameObject.SetActive(false);
-                    argsHolder.SetActive(false);
-                    m_isEvaluating = false;
-
-                    evalText.text = $"Evaluate ({ParamCount})";
-                    RuntimeProvider.Instance.SetColorBlock(evalButton, new Color(0.4f, 0.4f, 0.4f));
-                });
-            }
-            else if (this is CacheMethod)
-            {
-                // simple method evaluate button
-
-                var evalButton = UIFactory.CreateButton(m_rightGroup, "EvalButton", "Evaluate", () => { (this as CacheMethod).Evaluate(); });
-                RuntimeProvider.Instance.SetColorBlock(evalButton, new Color(0.4f, 0.4f, 0.4f),
-                    new Color(0.4f, 0.7f, 0.4f), new Color(0.3f, 0.3f, 0.3f));
-
-                UIFactory.SetLayoutElement(evalButton.gameObject, minWidth: 100, minHeight: 22, flexibleWidth: 0);
-            }
+            sb.Append(')');
+            return sb.ToString();
         }
 
         #endregion
+
+
     }
 }

@@ -1,7 +1,6 @@
 ﻿#if ML
 using System;
 using System.IO;
-using Harmony;
 using MelonLoader;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -10,10 +9,12 @@ using UnityExplorer.Core;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Input;
 using UnityExplorer.Loader.ML;
+using HarmonyLib;
 
 [assembly: MelonInfo(typeof(ExplorerMelonMod), ExplorerCore.NAME, ExplorerCore.VERSION, ExplorerCore.AUTHOR)]
 [assembly: MelonGame(null, null)]
-//[assembly: MelonPlatformDomain(MelonPlatformDomainAttribute.CompatibleDomains.UNIVERSAL)]
+[assembly: MelonPlatformDomain(MelonPlatformDomainAttribute.CompatibleDomains.UNIVERSAL)]
+[assembly: MelonColor(ConsoleColor.DarkCyan)]
 
 namespace UnityExplorer
 {
@@ -31,8 +32,6 @@ namespace UnityExplorer
         public Action<object> OnLogWarning => MelonLogger.Warning;
         public Action<object> OnLogError   => MelonLogger.Error;
 
-        public Harmony.HarmonyInstance HarmonyInstance => Instance.Harmony;
-
         public override void OnApplicationStart()
         {
             Instance = this;
@@ -41,12 +40,7 @@ namespace UnityExplorer
             ExplorerCore.Init(this);
         }
 
-        public override void OnUpdate()
-        {
-            ExplorerCore.Update();
-        }
-
-        public void SetupPatches()
+        public void SetupCursorPatches()
         {
             try
             {
@@ -73,7 +67,7 @@ namespace UnityExplorer
             try
             {
                 var prop = type.GetProperty(property);
-                this.Harmony.Patch(prop.GetSetMethod(), prefix: prefix);
+                HarmonyInstance.Patch(prop.GetSetMethod(), prefix: prefix);
             }
             catch (Exception e)
             {
