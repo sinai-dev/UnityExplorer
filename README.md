@@ -20,7 +20,6 @@
 | Standalone | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.Standalone.Il2Cpp.zip) | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.Standalone.Mono.zip) | 
 
 ### Known issues
-* UI layouts broken/unusable after changing resolutions: delete the file `data.ini` in the UnityExplorer folder (same place as where you put the DLL). Better fix being worked on.
 * Any `MissingMethodException` or `NotSupportedException`: please report the issue and provide a copy of your mod loader log and/or Unity log.
 * The C# console may unexpectedly produce a GC Mark Overflow crash when calling certain outside methods. Not clear yet what is causing this, but it's being looked into.
 * In IL2CPP, some IEnumerable and IDictionary types may fail enumeration. Waiting for the Unhollower rewrite to address this any further.
