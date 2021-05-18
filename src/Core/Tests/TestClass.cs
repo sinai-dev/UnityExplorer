@@ -14,8 +14,40 @@ using UnhollowerBaseLib;
 
 namespace UnityExplorer.Tests
 {
+    public class TestIndexer : IList<int>
+    {
+        private readonly List<int> list = new List<int>() { 1,2,3,4,5 };
+
+        public int Count => list.Count;
+        public bool IsReadOnly => false;
+
+        int IList<int>.this[int index]
+        {
+            get => list[index];
+            set => list[index] = value;
+        }
+
+        public int IndexOf(int item) => list.IndexOf(item);
+        public bool Contains(int item) => list.Contains(item);
+
+        public void Add(int item) => list.Add(item);
+        public void Insert(int index, int item) => list.Insert(index, item);
+
+        public bool Remove(int item) => list.Remove(item);
+        public void RemoveAt(int index) => list.RemoveAt(index);
+
+        public void Clear() => list.Clear();
+
+        public void CopyTo(int[] array, int arrayIndex) => list.CopyTo(array, arrayIndex);
+
+        public IEnumerator<int> GetEnumerator() => list.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => list.GetEnumerator();
+    }
+
     public static class TestClass
     {
+        public static readonly TestIndexer AAAAATest = new TestIndexer();
+
         public static void ATestMethod(string s, float f, Vector3 vector, DateTime date, Quaternion quater, bool b, CameraClearFlags enumvalue)
         {
             ExplorerCore.Log($"{s}, {f}, {vector.ToString()}, {date}, {quater.eulerAngles.ToString()}, {b}, {enumvalue}");
