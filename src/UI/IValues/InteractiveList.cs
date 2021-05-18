@@ -28,8 +28,7 @@ namespace UnityExplorer.UI.IValues
         private bool IsWritableGenericIList;
         private PropertyInfo genericIndexer;
 
-        public int ItemCount => values.Count;
-        private readonly List<object> values = new List<object>();
+        public int ItemCount => cachedEntries.Count;
         private readonly List<CacheListEntry> cachedEntries = new List<CacheListEntry>();
 
         public ScrollPool<CacheListEntryCell> ListScrollPool { get; private set; }
@@ -53,7 +52,6 @@ namespace UnityExplorer.UI.IValues
         private void ClearAndRelease()
         {
             RefIList = null;
-            values.Clear();
 
             foreach (var entry in cachedEntries)
             {
@@ -70,14 +68,14 @@ namespace UnityExplorer.UI.IValues
             if (value == null)
             {
                 // should never be null
-                if (values.Any())
+                if (cachedEntries.Any())
                     ClearAndRelease();
             }
             else
             {
                 var type = value.GetActualType();
-                if (type.IsGenericType)
-                    EntryType = type.GetGenericArguments()[0];
+                if (type.TryGetGenericArguments(out var args))
+                    EntryType = args[0];
                 else if (type.HasElementType)
                     EntryType = type.GetElementType();
                 else
@@ -102,7 +100,6 @@ namespace UnityExplorer.UI.IValues
             else
                 IsWritableGenericIList = false;
 
-            values.Clear();
             int idx = 0;
 
             if (ReflectionUtility.TryGetEnumerator(value, out IEnumerator enumerator))
@@ -112,8 +109,6 @@ namespace UnityExplorer.UI.IValues
                 while (enumerator.MoveNext())
                 {
                     var entry = enumerator.Current;
-
-                    values.Add(entry);
 
                     // If list count increased, create new cache entries
                     CacheListEntry cache;
@@ -132,9 +127,9 @@ namespace UnityExplorer.UI.IValues
                 }
 
                 // Remove excess cached entries if list count decreased
-                if (cachedEntries.Count > values.Count)
+                if (cachedEntries.Count > idx)
                 {
-                    for (int i = cachedEntries.Count - 1; i >= values.Count; i--)
+                    for (int i = cachedEntries.Count - 1; i >= idx; i--)
                     {
                         var cache = cachedEntries[i];
                         if (cache.CellView != null)
