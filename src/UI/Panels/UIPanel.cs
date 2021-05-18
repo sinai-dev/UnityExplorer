@@ -44,8 +44,8 @@ namespace UnityExplorer.UI.Panels
                         continue;
 
                     // check if our mouse is clicking inside the panel
-                    var pos = panel.mainPanelRect.InverseTransformPoint(mousePos);
-                    if (!panel.Enabled || !panel.mainPanelRect.rect.Contains(pos))
+                    var pos = panel.Rect.InverseTransformPoint(mousePos);
+                    if (!panel.Enabled || !panel.Rect.rect.Contains(pos))
                         continue;
 
                     // if this is not the top panel, reorder and invoke the onchanged event
@@ -88,8 +88,10 @@ namespace UnityExplorer.UI.Panels
 
         public override GameObject UIRoot => uiRoot;
         protected GameObject uiRoot;
-        protected RectTransform mainPanelRect;
+        public RectTransform Rect;
         public GameObject content;
+
+        public GameObject titleBar;
 
         public abstract void ConstructPanelContent();
 
@@ -136,14 +138,85 @@ namespace UnityExplorer.UI.Panels
         public void SetTransformDefaults()
         {
             DoSetDefaultPosAndAnchors();
-
-            if (mainPanelRect.rect.width < MinWidth)
-                mainPanelRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, MinWidth);
-            if (mainPanelRect.rect.height < MinHeight)
-                mainPanelRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, MinHeight);
         }
 
-        public GameObject titleBar;
+        public void EnsureValidSize()
+        {
+            if (Rect.rect.width < MinWidth)
+                Rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, MinWidth);
+            if (Rect.rect.height < MinHeight)
+                Rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, MinHeight);
+        }
+        
+        public static void EnsureValidPosition(RectTransform panel)
+        {
+            var pos = panel.localPosition;
+        
+            // Prevent panel going oustide screen bounds
+            var halfW = Screen.width * 0.5f;
+            var halfH = Screen.height * 0.5f;
+            pos.x = Math.Max(-halfW, Math.Min(pos.x, halfW - panel.rect.width));
+            pos.y = Math.Max(-halfH + panel.rect.height, Math.Min(pos.y, halfH));
+        
+            panel.localPosition = pos;
+        }
+
+
+
+        #region Save Data
+
+        public abstract void DoSaveToConfigElement();
+
+        public void SaveToConfigManager()
+        {
+            if (UIManager.Initializing)
+                return;
+
+            DoSaveToConfigElement();
+        }
+
+        public abstract string GetSaveDataFromConfigManager();
+
+        public bool ApplyingSaveData { get; set; }
+
+        public virtual string ToSaveData()
+        {
+            try
+            {
+                return $"{ShouldSaveActiveState && Enabled}" +
+                $"|{Rect.RectAnchorsToString()}" +
+                $"|{Rect.RectPositionToString()}";
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.LogWarning($"Exception generating Panel save data: {ex}");
+                return "";
+            }
+        }
+
+        public virtual void ApplySaveData(string data)
+        {
+            if (string.IsNullOrEmpty(data))
+                return;
+
+            var split = data.Split('|');
+
+            try
+            {
+                Rect.SetAnchorsFromString(split[1]);
+                Rect.SetPositionFromString(split[2]);
+                UIManager.SetPanelActive(this.PanelType, bool.Parse(split[0]));
+            }
+            catch
+            {
+                ExplorerCore.LogWarning("Invalid or corrupt panel save data! Restoring to default.");
+                SetTransformDefaults();
+            }
+        }
+
+        #endregion
+
+        // UI Construction
 
         public void ConstructUI()
         {
@@ -168,7 +241,7 @@ namespace UnityExplorer.UI.Panels
 
             // create core canvas 
             uiRoot = UIFactory.CreatePanel(Name, out GameObject panelContent);
-            mainPanelRect = this.uiRoot.GetComponent<RectTransform>();
+            Rect = this.uiRoot.GetComponent<RectTransform>();
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.uiRoot, false, false, true, true, 0, 2, 2, 2, 2, TextAnchor.UpperLeft);
 
             int id = this.uiRoot.transform.GetInstanceID();
@@ -176,9 +249,6 @@ namespace UnityExplorer.UI.Panels
 
             content = panelContent;
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.content, false, false, true, true, 2, 2, 2, 2, 2, TextAnchor.UpperLeft);
-
-            // always apply default pos and anchors (save data may only be partial)
-            SetTransformDefaults();
 
             // Title bar
             titleBar = UIFactory.CreateHorizontalGroup(content, "TitleBar", false, true, true, true, 2,
@@ -210,7 +280,7 @@ namespace UnityExplorer.UI.Panels
 
             // Panel dragger
 
-            Dragger = new PanelDragger(titleBar.GetComponent<RectTransform>(), mainPanelRect, this);
+            Dragger = new PanelDragger(titleBar.GetComponent<RectTransform>(), Rect, this);
             Dragger.OnFinishResize += OnFinishResize;
             Dragger.OnFinishDrag += OnFinishDrag;
 
@@ -223,6 +293,7 @@ namespace UnityExplorer.UI.Panels
             UIManager.SetPanelActive(this.PanelType, ShowByDefault);
 
             ApplyingSaveData = true;
+            SetTransformDefaults();
             // apply panel save data or revert to default
             try
             {
@@ -234,6 +305,13 @@ namespace UnityExplorer.UI.Panels
                 SetTransformDefaults();
             }
 
+            LayoutRebuilder.ForceRebuildLayoutImmediate(this.Rect);
+
+            // ensure initialized position is valid
+            EnsureValidSize();
+            EnsureValidPosition(this.Rect);
+
+            // update dragger and save data
             Dragger.OnEndResize();
 
             // simple listener for saving enabled state
@@ -241,61 +319,11 @@ namespace UnityExplorer.UI.Panels
             {
                 SaveToConfigManager();
             };
+
             ApplyingSaveData = false;
         }
 
         public override void ConstructUI(GameObject parent) => ConstructUI();
-
-        // SAVE DATA
-
-        public abstract void DoSaveToConfigElement();
-
-        public void SaveToConfigManager()
-        {
-            if (UIManager.Initializing)
-                return;
-
-            DoSaveToConfigElement();
-        }
-
-        public abstract string GetSaveDataFromConfigManager();
-
-        public bool ApplyingSaveData { get; set; }
-
-        public virtual string ToSaveData()
-        {
-            try
-            {
-                return $"{ShouldSaveActiveState && Enabled}" +
-                $"|{mainPanelRect.RectAnchorsToString()}" +
-                $"|{mainPanelRect.RectPositionToString()}";
-            }
-            catch (Exception ex)
-            {
-                ExplorerCore.LogWarning($"Exception generating Panel save data: {ex}");
-                return "";
-            }
-        }
-
-        public virtual void ApplySaveData(string data)
-        {
-            if (string.IsNullOrEmpty(data))
-                return;
-
-            var split = data.Split('|');
-
-            try
-            {
-                mainPanelRect.SetAnchorsFromString(split[1]);
-                mainPanelRect.SetPositionFromString(split[2]);
-                UIManager.SetPanelActive(this.PanelType, bool.Parse(split[0]));
-            }
-            catch 
-            {
-                ExplorerCore.LogWarning("Invalid or corrupt panel save data! Restoring to default.");
-                SetTransformDefaults();
-            }
-        }
     }
 
     #region WINDOW ANCHORS / POSITION HELPERS

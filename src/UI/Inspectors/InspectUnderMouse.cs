@@ -155,8 +155,8 @@ namespace UnityExplorer.UI.Inspectors
                 mousePos.x = 350;
             if (mousePos.x > Screen.width - 350)
                 mousePos.x = Screen.width - 350;
-            if (mousePos.y < mainPanelRect.rect.height)
-                mousePos.y += mainPanelRect.rect.height + 10;
+            if (mousePos.y < Rect.rect.height)
+                mousePos.y += Rect.rect.height + 10;
             else
                 mousePos.y -= 10;
 
@@ -341,10 +341,10 @@ namespace UnityExplorer.UI.Inspectors
 
         protected internal override void DoSetDefaultPosAndAnchors()
         {
-            mainPanelRect.anchorMin = Vector2.zero;
-            mainPanelRect.anchorMax = Vector2.zero;
-            mainPanelRect.pivot = new Vector2(0.5f, 1);
-            mainPanelRect.sizeDelta = new Vector2(700, 150);
+            Rect.anchorMin = Vector2.zero;
+            Rect.anchorMax = Vector2.zero;
+            Rect.pivot = new Vector2(0.5f, 1);
+            Rect.sizeDelta = new Vector2(700, 150);
         }
 
         public override void ConstructPanelContent()
