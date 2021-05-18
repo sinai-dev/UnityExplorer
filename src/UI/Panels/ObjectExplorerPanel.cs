@@ -99,10 +99,10 @@ namespace UnityExplorer.UI.Panels
 
         protected internal override void DoSetDefaultPosAndAnchors()
         {
-            mainPanelRect.localPosition = Vector2.zero;
-            mainPanelRect.pivot = new Vector2(0f, 1f);
-            mainPanelRect.anchorMin = new Vector2(0.125f, 0.175f);
-            mainPanelRect.anchorMax = new Vector2(0.325f, 0.925f);
+            Rect.localPosition = Vector2.zero;
+            Rect.pivot = new Vector2(0f, 1f);
+            Rect.anchorMin = new Vector2(0.125f, 0.175f);
+            Rect.anchorMax = new Vector2(0.325f, 0.925f);
             //mainPanelRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 350);
         }
 

@@ -123,6 +123,9 @@ namespace UnityExplorer.UI
 
         // Main UI Update loop
 
+        private static int lastScreenWidth;
+        private static int lastScreenHeight;
+
         public static void Update()
         {
             if (!CanvasRoot || Initializing)
@@ -150,6 +153,19 @@ namespace UnityExplorer.UI
             PanelDragger.UpdateInstances();
             InputFieldRef.UpdateInstances();
             UIBehaviourModel.UpdateInstances();
+
+            if (Screen.width != lastScreenWidth || Screen.height != lastScreenHeight)
+            {
+                lastScreenWidth = Screen.width;
+                lastScreenHeight = Screen.height;
+
+                foreach (var panel in UIPanels)
+                {
+                    panel.Value.EnsureValidSize();
+                    UIPanel.EnsureValidPosition(panel.Value.Rect);
+                    panel.Value.Dragger.OnEndResize();
+                }
+            }
         }
 
         // Initialization and UI Construction
@@ -183,6 +199,9 @@ namespace UnityExplorer.UI
             ConsoleController.Init();
 
             ShowMenu = !ConfigManager.Hide_On_Startup.Value;
+
+            lastScreenWidth = Screen.width;
+            lastScreenHeight = Screen.height;
 
             Initializing = false;
         }

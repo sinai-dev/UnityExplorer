@@ -292,9 +292,9 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         protected internal override void DoSetDefaultPosAndAnchors()
         {
-            mainPanelRect.pivot = new Vector2(0f, 1f);
-            mainPanelRect.anchorMin = new Vector2(0.42f, 0.4f);
-            mainPanelRect.anchorMax = new Vector2(0.68f, 0.6f);
+            Rect.pivot = new Vector2(0f, 1f);
+            Rect.anchorMin = new Vector2(0.42f, 0.4f);
+            Rect.anchorMax = new Vector2(0.68f, 0.6f);
         }
 
         public override void ConstructPanelContent()

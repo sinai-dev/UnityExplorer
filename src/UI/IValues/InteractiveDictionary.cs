@@ -75,10 +75,11 @@ namespace UnityExplorer.UI.IValues
             else
             {
                 var type = value.GetActualType();
-                if (type.IsGenericType && type.GetGenericArguments().Length == 2)
-                { 
-                    KeyType = type.GetGenericArguments()[0];
-                    ValueType = type.GetGenericArguments()[1];
+
+                if (type.TryGetGenericArguments(out var args) && args.Length == 2)
+                {
+                    KeyType = args[0];
+                    ValueType = args[1];
                 }
                 else
                 { 

@@ -250,15 +250,9 @@ namespace UnityExplorer.UI.Panels
             Vector2 diff = (Vector2)mousePos - m_lastDragPosition;
             m_lastDragPosition = mousePos;
 
-            var pos = Panel.localPosition + (Vector3)diff;
+            Panel.localPosition = Panel.localPosition + (Vector3)diff;
 
-            // Prevent panel going oustide screen bounds
-            var halfW = Screen.width * 0.5f;
-            var halfH = Screen.height * 0.5f;
-            pos.x = Math.Max(-halfW, Math.Min(pos.x, halfW - Panel.rect.width));
-            pos.y = Math.Max(-halfH + Panel.rect.height, Math.Min(pos.y, halfH));
-
-            Panel.localPosition = pos;
+            UIPanel.EnsureValidPosition(Panel);
         }
 
         public void OnEndDrag()
@@ -423,6 +417,9 @@ namespace UnityExplorer.UI.Panels
             Vector2 diff = m_lastResizePos - (Vector2)mousePos;
 
             if ((Vector2)mousePos == m_lastResizePos)
+                return;
+
+            if (mousePos.x < 0 || mousePos.y < 0 || mousePos.x > Screen.width || mousePos.y > Screen.height)
                 return;
 
             m_lastResizePos = mousePos;

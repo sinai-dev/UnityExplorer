@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.UI.CacheObject;
@@ -19,13 +20,15 @@ namespace UnityExplorer.UI.IValues
         object ICacheObjectController.Target => this.CurrentOwner.Value;
         public Type TargetType { get; private set; }
 
-        public override bool CanWrite => base.CanWrite && RefIList != null && !RefIList.IsReadOnly;
+        public override bool CanWrite => base.CanWrite && ((RefIList != null && !RefIList.IsReadOnly) || IsWritableGenericIList);
 
         public Type EntryType;
         public IList RefIList;
 
-        public int ItemCount => values.Count;
-        private readonly List<object> values = new List<object>();
+        private bool IsWritableGenericIList;
+        private PropertyInfo genericIndexer;
+
+        public int ItemCount => cachedEntries.Count;
         private readonly List<CacheListEntry> cachedEntries = new List<CacheListEntry>();
 
         public ScrollPool<CacheListEntryCell> ListScrollPool { get; private set; }
@@ -49,7 +52,6 @@ namespace UnityExplorer.UI.IValues
         private void ClearAndRelease()
         {
             RefIList = null;
-            values.Clear();
 
             foreach (var entry in cachedEntries)
             {
@@ -66,14 +68,14 @@ namespace UnityExplorer.UI.IValues
             if (value == null)
             {
                 // should never be null
-                if (values.Any())
+                if (cachedEntries.Any())
                     ClearAndRelease();
             }
             else
             {
                 var type = value.GetActualType();
-                if (type.IsGenericType)
-                    EntryType = type.GetGenericArguments()[0];
+                if (type.TryGetGenericArguments(out var args))
+                    EntryType = args[0];
                 else if (type.HasElementType)
                     EntryType = type.GetElementType();
                 else
@@ -92,7 +94,12 @@ namespace UnityExplorer.UI.IValues
         {
             RefIList = value as IList;
 
-            values.Clear();
+            // Check if the type implements IList<T> but not IList (ie. Il2CppArrayBase)
+            if (RefIList == null)
+                CheckGenericIList(value);
+            else
+                IsWritableGenericIList = false;
+
             int idx = 0;
 
             if (ReflectionUtility.TryGetEnumerator(value, out IEnumerator enumerator))
@@ -102,8 +109,6 @@ namespace UnityExplorer.UI.IValues
                 while (enumerator.MoveNext())
                 {
                     var entry = enumerator.Current;
-
-                    values.Add(entry);
 
                     // If list count increased, create new cache entries
                     CacheListEntry cache;
@@ -122,9 +127,9 @@ namespace UnityExplorer.UI.IValues
                 }
 
                 // Remove excess cached entries if list count decreased
-                if (cachedEntries.Count > values.Count)
+                if (cachedEntries.Count > idx)
                 {
-                    for (int i = cachedEntries.Count - 1; i >= values.Count; i--)
+                    for (int i = cachedEntries.Count - 1; i >= idx; i--)
                     {
                         var cache = cachedEntries[i];
                         if (cache.CellView != null)
@@ -141,14 +146,61 @@ namespace UnityExplorer.UI.IValues
             }
         }
 
+        private void CheckGenericIList(object value)
+        {
+            try
+            {
+                var type = value.GetType();
+                if (type.GetInterfaces().Any(it => it.IsGenericType && it.GetGenericTypeDefinition() == typeof(IList<>)))
+                    IsWritableGenericIList = !(bool)type.GetProperty("IsReadOnly").GetValue(value, null);
+                else
+                    IsWritableGenericIList = false;
+
+                if (IsWritableGenericIList)
+                {
+                    // Find the "this[int index]" property.
+                    // It might be a private implementation.
+                    foreach (var prop in type.GetProperties(ReflectionUtility.FLAGS))
+                    {
+                        if ((prop.Name == "Item"
+                                || (prop.Name.StartsWith("System.Collections.Generic.IList<") && prop.Name.EndsWith(">.Item")))
+                            && prop.GetIndexParameters() is ParameterInfo[] parameters
+                            && parameters.Length == 1
+                            && parameters[0].ParameterType == typeof(int))
+                        {
+                            genericIndexer = prop;
+                            break;
+                        }
+                    }
+
+                    if (genericIndexer == null)
+                    {
+                        ExplorerCore.LogWarning($"Failed to find indexer property for IList<T> type '{type.FullName}'!");
+                        IsWritableGenericIList = false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.LogWarning($"Exception processing IEnumerable for IList<T> check: {ex.ReflectionExToString()}");
+                IsWritableGenericIList = false;
+            }
+        }
+
         // Setting the value of an index to the list
 
         public void TrySetValueToIndex(object value, int index)
         {
             try
             {
-                //value = value.TryCast(this.EntryType);
-                RefIList[index] = value;
+                if (!IsWritableGenericIList)
+                {
+                    RefIList[index] = value;
+                }
+                else
+                {
+                    genericIndexer.SetValue(CurrentOwner.Value, value, new object[] { index });
+                }
 
                 var entry = cachedEntries[index];
                 entry.SetValueFromSource(value);

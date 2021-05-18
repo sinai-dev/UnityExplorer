@@ -37,6 +37,27 @@ namespace UnityExplorer
         // ------- Misc extensions --------
 
         /// <summary>
+        /// Recursively check the type and its base types to find any generic arguments.
+        /// </summary>
+        public static bool TryGetGenericArguments(this Type type, out Type[] args)
+        {
+            if (type.IsGenericType)
+            {
+                args = type.GetGenericArguments();
+                return true;
+            }
+            else if (type.BaseType != null)
+            {
+                return TryGetGenericArguments(type.BaseType, out args);
+            }
+            else
+            {
+                args = null;
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Safely try to get all Types inside an Assembly.
         /// </summary>
         public static IEnumerable<Type> TryGetTypes(this Assembly asm)

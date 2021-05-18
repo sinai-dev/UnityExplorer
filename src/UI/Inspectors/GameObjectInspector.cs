@@ -226,7 +226,7 @@ namespace UnityExplorer.UI.Inspectors
 
             var scrollObj = UIFactory.CreateScrollView(UIRoot, "GameObjectInspector", out Content, out var scrollbar, 
                 new Color(0.065f, 0.065f, 0.065f));
-            UIFactory.SetLayoutElement(scrollObj, minHeight: 300, flexibleWidth: 9999, flexibleHeight: 1);
+            UIFactory.SetLayoutElement(scrollObj, minHeight: 250, preferredHeight: 300, flexibleHeight: 0, flexibleWidth: 9999);
 
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(Content, spacing: 3, padTop: 2, padBottom: 2, padLeft: 2, padRight: 2);
 
@@ -244,10 +244,7 @@ namespace UnityExplorer.UI.Inspectors
         {
             var listHolder = UIFactory.CreateUIObject("ListHolders", UIRoot);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(listHolder, false, true, true, true, 8, 2, 2, 2, 2);
-            UIFactory.SetLayoutElement(listHolder, minHeight: 350, flexibleWidth: 9999, flexibleHeight: 9999);
-            //var listRect = listHolder.GetComponent<RectTransform>();
-            //listRect.anchorMin = new Vector2(0, 1);
-            //listRect.anchorMax = new Vector2(1, 1);
+            UIFactory.SetLayoutElement(listHolder, minHeight: 150, flexibleWidth: 9999, flexibleHeight: 9999);
 
             // Left group (Children)
 
