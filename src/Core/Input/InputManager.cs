@@ -61,7 +61,7 @@ namespace UnityExplorer.Core.Input
             // First, just try to use the legacy input, see if its working.
             // The InputSystem package may be present but not actually activated, so we can find out this way.
 
-            if (LegacyInput.TInput != null || (ReflectionUtility.LoadModule("UnityEngine.InputLegacyModule") && LegacyInput.TInput != null))
+            if (LegacyInput.TInput != null)
             {
                 try
                 {
@@ -80,7 +80,7 @@ namespace UnityExplorer.Core.Input
                 }
             }
 
-            if (InputSystem.TKeyboard != null || (ReflectionUtility.LoadModule("Unity.InputSystem") && InputSystem.TKeyboard != null))
+            if (InputSystem.TKeyboard != null)
             {
                 try
                 {

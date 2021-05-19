@@ -151,12 +151,14 @@ namespace UnityExplorer
         internal virtual string Internal_ProcessTypeInString(string theString, Type type)
             => theString;
 
-        // Force loading modules
-        public static bool LoadModule(string moduleName)
-            => Instance.Internal_LoadModule(moduleName);
+        //// Force loading modules
+        //public static bool LoadModule(string moduleName)
+        //    => Instance.Internal_LoadModule(moduleName);
+        //
+        //internal virtual bool Internal_LoadModule(string moduleName) 
+        //    => false;
 
-        internal virtual bool Internal_LoadModule(string moduleName) 
-            => false;
+        // Singleton finder
 
         public static void FindSingleton(string[] possibleNames, Type type, BindingFlags flags, List<object> instances)
             => Instance.Internal_FindSingleton(possibleNames, type, flags, instances);
@@ -441,7 +443,6 @@ namespace UnityExplorer
                 blacklist = Instance.DefaultReflectionBlacklist;
                 ConfigManager.Reflection_Signature_Blacklist.Value = blacklist;
                 ConfigManager.Handler.SaveConfig();
-                return;
             }
 
             if (string.IsNullOrEmpty(blacklist))
@@ -466,6 +467,7 @@ namespace UnityExplorer
                 return false;
 
             var sig = $"{member.DeclaringType.FullName}.{member.Name}";
+
             return currentBlacklist.Contains(sig);
         }
 

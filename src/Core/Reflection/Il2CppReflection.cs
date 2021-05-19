@@ -258,17 +258,17 @@ namespace UnityExplorer
             }
         }
 
-        private static bool IsAssignableFrom(Type thisType, Type fromType)
-        {
-            if (!Il2CppTypeNotNull(fromType, out IntPtr fromTypePtr)
-                || !Il2CppTypeNotNull(thisType, out IntPtr thisTypePtr))
-            {
-                // one or both of the types are not Il2Cpp types, use normal check
-                return thisType.IsAssignableFrom(fromType);
-            }
-
-            return il2cpp_class_is_assignable_from(thisTypePtr, fromTypePtr);
-        }
+        //private static bool IsAssignableFrom(Type thisType, Type fromType)
+        //{
+        //    if (!Il2CppTypeNotNull(fromType, out IntPtr fromTypePtr)
+        //        || !Il2CppTypeNotNull(thisType, out IntPtr thisTypePtr))
+        //    {
+        //        // one or both of the types are not Il2Cpp types, use normal check
+        //        return thisType.IsAssignableFrom(fromType);
+        //    }
+        //
+        //    return il2cpp_class_is_assignable_from(thisTypePtr, fromTypePtr);
+        //}
 
         #endregion
 
@@ -450,42 +450,35 @@ namespace UnityExplorer
 
         #region Force-loading game modules
 
+        internal static string UnhollowedFolderPath => Path.GetFullPath(
+#if ML
+                    Path.Combine("MelonLoader", "Managed")
+#elif BIE
+                    Path.Combine("BepInEx", "unhollowed")
+#else
+                    Path.Combine(ExplorerCore.Loader.ExplorerFolder, "Modules")
+#endif
+                );
+
         // Helper for IL2CPP to try to make sure the Unhollowed game assemblies are actually loaded.
 
-        internal override bool Internal_LoadModule(string moduleName)
-        {
-            if (!moduleName.EndsWith(".dll", StringComparison.InvariantCultureIgnoreCase))
-                moduleName += ".dll";
-#if ML
-            var path = Path.Combine("MelonLoader", "Managed", $"{moduleName}");
-#else
-            var path = Path.Combine("BepInEx", "unhollowed", $"{moduleName}");
-#endif
-            return DoLoadModule(path);
-        }
+        //internal override bool Internal_LoadModule(string moduleName)
+        //{
+        //    if (!moduleName.EndsWith(".dll", StringComparison.InvariantCultureIgnoreCase))
+        //        moduleName += ".dll";
+        //
+        //    return DoLoadModule(Path.Combine(UnhollowedFolderPath, moduleName));
+        //}
 
         // Force loading all il2cpp modules
 
         internal void TryLoadGameModules()
         {
-            string dirpath =
-            #if ML
-                    Path.Combine("MelonLoader", "Managed");
-            #elif BIE
-                    Path.Combine("BepInEx", "unhollowed");
-            #else
-                    Path.Combine(ExplorerCore.Loader.ExplorerFolder, "Modules");
-            #endif
-                ;
-
-            if (Directory.Exists(dirpath))
+            if (Directory.Exists(UnhollowedFolderPath))
             {
-                var files = Directory.GetFiles(dirpath);
+                var files = Directory.GetFiles(UnhollowedFolderPath);
                 foreach (var filePath in files)
                 {
-                    var name = Path.GetFileName(filePath);
-                    if (!name.StartsWith("Unity") && !name.StartsWith("Assembly-CSharp"))
-                        continue;
                     try
                     {
                         DoLoadModule(filePath, true);
@@ -496,6 +489,8 @@ namespace UnityExplorer
                     }
                 }
             }
+            else
+                ExplorerCore.LogWarning($"Expected Unhollowed folder path does not exist: '{UnhollowedFolderPath}'");
         }
 
         internal bool DoLoadModule(string fullPath, bool suppressWarning = false)
@@ -505,7 +500,8 @@ namespace UnityExplorer
 
             try
             {
-                Assembly.Load(File.ReadAllBytes(fullPath));
+                Assembly.LoadFile(fullPath);
+                //Assembly.Load(File.ReadAllBytes(fullPath));
                 return true;
             }
             catch (Exception e)
@@ -648,6 +644,9 @@ namespace UnityExplorer
             "UnityEngine.Scripting.GarbageCollector+CollectIncrementalDelegate.Invoke",
             "UnityEngine.Scripting.GarbageCollector.CollectIncremental",
             "UnityEngine.SpherecastCommand.ScheduleBatch",
+            "UnityEngine.Texture.GetPixelDataSize",
+            "UnityEngine.Texture.GetPixelDataOffset",
+            "UnityEngine.Texture.GetPixelDataOffset",
             "UnityEngine.Texture2D+SetPixelDataImplArrayDelegate.Invoke",
             "UnityEngine.Texture2D+SetPixelDataImplDelegate.Invoke",
             "UnityEngine.Texture2D.SetPixelDataImpl",
@@ -668,6 +667,8 @@ namespace UnityExplorer
 
         #endregion
 
+
+        #region IL2CPP IEnumerable and IDictionary
 
         protected override bool Internal_TryGetEntryType(Type enumerableType, out Type type)
         {
@@ -712,8 +713,6 @@ namespace UnityExplorer
             values = typeof(object);
             return false;
         }
-
-        #region Temp il2cpp list/dictionary fixes
 
         // Temp fix until Unhollower interface support improves
 

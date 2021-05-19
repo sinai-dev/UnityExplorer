@@ -246,7 +246,6 @@ namespace UnityExplorer.UI.CacheObject
                 var sig = GetSig(member);
 
                 //ExplorerCore.Log($"Trying to cache member {sig}...");
-                //ExplorerCore.Log(member.DeclaringType.FullName + "." + member.Name);
 
                 CacheMember cached;
                 Type returnType;
@@ -324,7 +323,8 @@ namespace UnityExplorer.UI.CacheObject
             }
         }
 
-        internal static string GetSig(MemberInfo member) => $"{member.DeclaringType.Name}.{member.Name}";
+        internal static string GetSig(MemberInfo member) 
+            => $"{member.DeclaringType.Name}.{member.Name}";
 
         internal static string GetArgumentString(ParameterInfo[] args)
         {
