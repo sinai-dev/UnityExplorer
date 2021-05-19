@@ -26,18 +26,16 @@ namespace UnityExplorer.Core.Input
 
         public static bool ShouldActuallyUnlock => UIManager.ShowMenu && Unlock;
 
-        private static CursorLockMode m_lastLockMode;
-        private static bool m_lastVisibleState;
+        private static CursorLockMode lastLockMode;
+        private static bool lastVisibleState;
 
-        private static bool m_currentlySettingCursor = false;
-
-        private static Type CursorType
-            => m_cursorType
-            ?? (m_cursorType = ReflectionUtility.GetTypeByName("UnityEngine.Cursor"));
-        private static Type m_cursorType;
+        private static bool currentlySettingCursor = false;
 
         public static void Init()
         {
+            lastLockMode = Cursor.lockState;
+            lastVisibleState = Cursor.visible;
+
             SetupPatches();
 
             UpdateCursorControl();
@@ -78,7 +76,7 @@ namespace UnityExplorer.Core.Input
         {
             try
             {
-                m_currentlySettingCursor = true;
+                currentlySettingCursor = true;
 
                 if (ShouldActuallyUnlock)
                 {
@@ -90,14 +88,14 @@ namespace UnityExplorer.Core.Input
                 }
                 else
                 {
-                    Cursor.lockState = m_lastLockMode;
-                    Cursor.visible = m_lastVisibleState;
+                    Cursor.lockState = lastLockMode;
+                    Cursor.visible = lastVisibleState;
 
                     if (UIManager.EventSys)
                         ReleaseEventSystem();
                 }
 
-                m_currentlySettingCursor = false;
+                currentlySettingCursor = false;
             }
             catch (Exception e)
             {
@@ -107,9 +105,9 @@ namespace UnityExplorer.Core.Input
 
         // Event system overrides
 
-        private static bool m_settingEventSystem;
-        private static EventSystem m_lastEventSystem;
-        private static BaseInputModule m_lastInputModule;
+        private static bool settingEventSystem;
+        private static EventSystem lastEventSystem;
+        private static BaseInputModule lastInputModule;
 
         public static void SetEventSystem()
         {
@@ -118,16 +116,16 @@ namespace UnityExplorer.Core.Input
 
             if (EventSystem.current && EventSystem.current != UIManager.EventSys)
             {
-                m_lastEventSystem = EventSystem.current;
-                m_lastEventSystem.enabled = false;
+                lastEventSystem = EventSystem.current;
+                lastEventSystem.enabled = false;
             }
 
             // Set to our current system
-            m_settingEventSystem = true;
+            settingEventSystem = true;
             UIManager.EventSys.enabled = true;
             EventSystem.current = UIManager.EventSys;
             InputManager.ActivateUIModule();
-            m_settingEventSystem = false;
+            settingEventSystem = false;
         }
 
         public static void ReleaseEventSystem()
@@ -135,14 +133,14 @@ namespace UnityExplorer.Core.Input
             if (InputManager.CurrentType == InputType.InputSystem)
                 return;
 
-            if (m_lastEventSystem && m_lastEventSystem.gameObject.activeSelf)
+            if (lastEventSystem && lastEventSystem.gameObject.activeSelf)
             {
-                m_lastEventSystem.enabled = true;
+                lastEventSystem.enabled = true;
 
-                m_settingEventSystem = true;
-                EventSystem.current = m_lastEventSystem;
-                m_lastInputModule?.ActivateModule();
-                m_settingEventSystem = false;
+                settingEventSystem = true;
+                EventSystem.current = lastEventSystem;
+                lastInputModule?.ActivateModule();
+                settingEventSystem = false;
             }
         }
 
@@ -152,30 +150,20 @@ namespace UnityExplorer.Core.Input
         {
             try
             {
-                if (CursorType == null)
-                    throw new Exception("Could not load Type 'UnityEngine.Cursor'!");
-
-                // Get current cursor state and enable cursor
-                m_lastLockMode = (CursorLockMode?)CursorType.GetProperty("lockState", BF.Public | BF.Static)?.GetValue(null, null)
-                                 ?? CursorLockMode.None;
-
-                m_lastVisibleState = (bool?)CursorType.GetProperty("visible", BF.Public | BF.Static)?.GetValue(null, null)
-                                     ?? false;
-
                 ExplorerCore.Loader.SetupCursorPatches();
             }
             catch (Exception e)
             {
-                ExplorerCore.Log($"Error on CursorUnlocker.Init! {e.GetType()}, {e.Message}");
+                ExplorerCore.Log($"Exception setting up Cursor patches: {e.GetType()}, {e.Message}");
             }
         }
 
         public static void Prefix_EventSystem_set_current(ref EventSystem value)
         {
-            if (!m_settingEventSystem && value != UIManager.EventSys)
+            if (!settingEventSystem && value != UIManager.EventSys)
             {
-                m_lastEventSystem = value;
-                m_lastInputModule = value?.currentInputModule;
+                lastEventSystem = value;
+                lastInputModule = value?.currentInputModule;
 
                 if (ShouldActuallyUnlock)
                 {
@@ -191,9 +179,9 @@ namespace UnityExplorer.Core.Input
 
         public static void Prefix_set_lockState(ref CursorLockMode value)
         {
-            if (!m_currentlySettingCursor)
+            if (!currentlySettingCursor)
             {
-                m_lastLockMode = value;
+                lastLockMode = value;
 
                 if (ShouldActuallyUnlock)
                     value = CursorLockMode.None;
@@ -202,9 +190,9 @@ namespace UnityExplorer.Core.Input
 
         public static void Prefix_set_visible(ref bool value)
         {
-            if (!m_currentlySettingCursor)
+            if (!currentlySettingCursor)
             {
-                m_lastVisibleState = value;
+                lastVisibleState = value;
 
                 if (ShouldActuallyUnlock)
                     value = true;
