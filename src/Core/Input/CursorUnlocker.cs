@@ -160,6 +160,16 @@ namespace UnityExplorer.Core.Input
 
         public static void Prefix_EventSystem_set_current(ref EventSystem value)
         {
+            if (!UIManager.EventSys)
+            {
+                if (value)
+                {
+                    lastEventSystem = value;
+                    lastInputModule = value.currentInputModule;
+                }
+                return;
+            }
+
             if (!settingEventSystem && value != UIManager.EventSys)
             {
                 lastEventSystem = value;
