@@ -15,6 +15,7 @@ using UnityExplorer.Core;
 using CppType = Il2CppSystem.Type;
 using BF = System.Reflection.BindingFlags;
 using UnityExplorer.Core.Config;
+using UnhollowerBaseLib.Attributes;
 
 namespace UnityExplorer
 {
@@ -80,15 +81,19 @@ namespace UnityExplorer
         {
             try
             {
-                // Thanks to Slaynash for this
-                if (type.CustomAttributes.Any(it => it.AttributeType.Name == "ObfuscatedNameAttribute"))
-                {
-                    var cppType = Il2CppType.From(type);
+                if (!type.CustomAttributes.Any())
+                    return;
 
-                    if (!DeobfuscatedTypes.ContainsKey(cppType.FullName))
+                foreach (var att in type.CustomAttributes)
+                {
+                    // Thanks to Slaynash for this
+
+                    if (att.AttributeType == typeof(ObfuscatedNameAttribute))
                     {
-                        DeobfuscatedTypes.Add(cppType.FullName, type);
-                        reverseDeobCache.Add(type.FullName, cppType.FullName);
+                        string obfuscatedName = att.ConstructorArguments[0].Value.ToString();
+
+                        DeobfuscatedTypes.Add(obfuscatedName, type);
+                        reverseDeobCache.Add(type.FullName, obfuscatedName);
                     }
                 }
             }
@@ -461,14 +466,6 @@ namespace UnityExplorer
                 );
 
         // Helper for IL2CPP to try to make sure the Unhollowed game assemblies are actually loaded.
-
-        //internal override bool Internal_LoadModule(string moduleName)
-        //{
-        //    if (!moduleName.EndsWith(".dll", StringComparison.InvariantCultureIgnoreCase))
-        //        moduleName += ".dll";
-        //
-        //    return DoLoadModule(Path.Combine(UnhollowedFolderPath, moduleName));
-        //}
 
         // Force loading all il2cpp modules
 
