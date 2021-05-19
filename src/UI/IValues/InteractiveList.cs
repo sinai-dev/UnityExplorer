@@ -74,12 +74,7 @@ namespace UnityExplorer.UI.IValues
             else
             {
                 var type = value.GetActualType();
-                if (type.TryGetGenericArguments(out var args))
-                    EntryType = args[0];
-                else if (type.HasElementType)
-                    EntryType = type.GetElementType();
-                else
-                    EntryType = typeof(object);
+                ReflectionUtility.TryGetEntryType(type, out EntryType);
 
                 CacheEntries(value);
 

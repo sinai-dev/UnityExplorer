@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.UI.CacheObject;
@@ -21,8 +22,8 @@ namespace UnityExplorer.UI.IValues
 
         public override bool CanWrite => base.CanWrite && RefIDictionary != null && !RefIDictionary.IsReadOnly;
 
-        public Type KeyType;
-        public Type ValueType;
+        public Type KeysType;
+        public Type ValuesType;
         public IDictionary RefIDictionary;
 
         public int ItemCount => cachedEntries.Count;
@@ -75,23 +76,12 @@ namespace UnityExplorer.UI.IValues
             else
             {
                 var type = value.GetActualType();
-
-                if (type.TryGetGenericArguments(out var args) && args.Length == 2)
-                {
-                    KeyType = args[0];
-                    ValueType = args[1];
-                }
-                else
-                { 
-                    KeyType = typeof(object);
-                    ValueType = typeof(object);
-                }
+                ReflectionUtility.TryGetEntryTypes(type, out KeysType, out ValuesType);
 
                 CacheEntries(value);
 
                 TopLabel.text = $"[{cachedEntries.Count}] {SignatureHighlighter.Parse(type, false)}";
             }
-
 
             this.DictScrollPool.Refresh(true, false);
         }
@@ -117,7 +107,7 @@ namespace UnityExplorer.UI.IValues
                     else
                         cache = cachedEntries[idx];
 
-                    cache.SetFallbackType(ValueType);
+                    cache.SetFallbackType(ValuesType);
                     cache.SetKey(dictEnumerator.Current.Key);
                     cache.SetValueFromSource(dictEnumerator.Current.Value);
 

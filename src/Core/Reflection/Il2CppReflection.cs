@@ -258,6 +258,18 @@ namespace UnityExplorer
             }
         }
 
+        private static bool IsAssignableFrom(Type thisType, Type fromType)
+        {
+            if (!Il2CppTypeNotNull(fromType, out IntPtr fromTypePtr)
+                || !Il2CppTypeNotNull(thisType, out IntPtr thisTypePtr))
+            {
+                // one or both of the types are not Il2Cpp types, use normal check
+                return thisType.IsAssignableFrom(fromType);
+            }
+
+            return il2cpp_class_is_assignable_from(thisTypePtr, fromTypePtr);
+        }
+
         #endregion
 
 
@@ -508,7 +520,7 @@ namespace UnityExplorer
 #endregion
 
 
-#region Il2cpp reflection blacklist
+        #region Il2cpp reflection blacklist
 
         public override string DefaultReflectionBlacklist => string.Join(";", defaultIl2CppBlacklist);
 
@@ -654,10 +666,54 @@ namespace UnityExplorer
             "UnityEngine.XR.InputDevice.SendHapticImpulse",
         };
 
-#endregion
+        #endregion
 
 
-#region Temp il2cpp list/dictionary fixes
+        protected override bool Internal_TryGetEntryType(Type enumerableType, out Type type)
+        {
+            // Check for system types (not unhollowed)
+            if (base.Internal_TryGetEntryType(enumerableType, out type))
+                return true;
+
+            // Type is either an IL2CPP enumerable, or its not generic.
+
+            if (type.IsGenericType)
+            {
+                // Temporary naive solution until IL2CPP interface support improves.
+                // This will work fine for most cases, but there are edge cases which would not work.
+                type = type.GetGenericArguments()[0];
+                return true;
+            }
+
+            // Unable to determine entry type
+            type = typeof(object);
+            return false;
+        }
+
+        protected override bool Internal_TryGetEntryTypes(Type type, out Type keys, out Type values)
+        {
+            if (base.Internal_TryGetEntryTypes(type, out keys, out values))
+                return true;
+
+            // Type is either an IL2CPP dictionary, or its not generic.
+            if (type.IsGenericType)
+            {
+                // Naive solution until IL2CPP interfaces improve.
+                var args = type.GetGenericArguments();
+                if (args.Length == 2)
+                {
+                    keys = args[0];
+                    values = args[1];
+                    return true;
+                }
+            }
+
+            keys = typeof(object);
+            values = typeof(object);
+            return false;
+        }
+
+        #region Temp il2cpp list/dictionary fixes
 
         // Temp fix until Unhollower interface support improves
 

@@ -22,7 +22,6 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
         public override void Initialize()
         {
             ExplorerCore.Context = RuntimeContext.IL2CPP;
-            //Reflection = new Il2CppReflection();
             TextureUtil = new Il2CppTextureUtil();
         }
 
@@ -30,19 +29,12 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
         {
             try
             {
-                //Application.add_logMessageReceived(new Action<string, string, LogType>(ExplorerCore.Instance.OnUnityLog));
-
-                var logType = ReflectionUtility.GetTypeByName("UnityEngine.Application+LogCallback");
-                var castMethod = logType.GetMethod("op_Implicit", new[] { typeof(Action<string, string, LogType>) });
-                var addMethod = typeof(Application).GetMethod("add_logMessageReceived", BF.Static | BF.Public, null, new[] { logType }, null);
-                addMethod.Invoke(null, new[]
-                {
-                    castMethod.Invoke(null, new[] { new Action<string, string, LogType>(Application_logMessageReceived) })
-                });
+                Application.add_logMessageReceived(new Action<string, string, LogType>(Application_logMessageReceived));
             }
-            catch 
+            catch (Exception ex)
             {
                 ExplorerCore.LogWarning("Exception setting up Unity log listener, make sure Unity libraries have been unstripped!");
+                ExplorerCore.Log(ex);
             }
         }
 

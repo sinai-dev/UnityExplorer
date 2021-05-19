@@ -495,6 +495,39 @@ namespace UnityExplorer
             enumerator = (list as IEnumerable).GetEnumerator();
             return true;
         }
+
+        // TryGetEntryType
+
+        public static bool TryGetEntryType(Type enumerableType, out Type type)
+            => Instance.Internal_TryGetEntryType(enumerableType, out type);
+
+        protected virtual bool Internal_TryGetEntryType(Type enumerableType, out Type type)
+        {
+            // Check for arrays
+            if (enumerableType.IsArray)
+            {
+                type = enumerableType.GetElementType();
+                return true;
+            }
+
+            // Check for implementation of IEnumerable<T>, IList<T> or ICollection<T>
+            foreach (var t in enumerableType.GetInterfaces())
+            {
+                if (t.IsGenericType)
+                {
+                    var typeDef = t.GetGenericTypeDefinition();
+                    if (typeDef == typeof(IEnumerable<>) || typeDef == typeof(IList<>) || typeDef == typeof(ICollection<>))
+                    {
+                        type = t.GetGenericArguments()[0];
+                        return true;
+                    }
+                }
+            }
+
+            // Unable to determine any generic element type, just use object.
+            type = typeof(object);
+            return false;
+        }
         
         // IsDictionary
 
@@ -523,6 +556,29 @@ namespace UnityExplorer
             {
                 yield return new DictionaryEntry(enumerator.Key, enumerator.Value);
             }
+        }
+
+        // TryGetEntryTypes
+
+        public static bool TryGetEntryTypes(Type dictionaryType, out Type keys, out Type values)
+            => Instance.Internal_TryGetEntryTypes(dictionaryType, out keys, out values);
+
+        protected virtual bool Internal_TryGetEntryTypes(Type dictionaryType, out Type keys, out Type values)
+        {
+            foreach (var t in dictionaryType.GetInterfaces())
+            {
+                if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+                {
+                    var args = t.GetGenericArguments();
+                    keys = args[0];
+                    values = args[1];
+                    return true;
+                }
+            }
+
+            keys = typeof(object);
+            values = typeof(object);
+            return false;
         }
     }
 }
