@@ -298,7 +298,7 @@ namespace UnityExplorer.UI.Widgets
                     if (CellPool.Count > 1)
                     {
                         int index = CellPool.Count - 1 - (topPoolIndex % (CellPool.Count - 1));
-                        cell.Rect.SetSiblingIndex(index);
+                        cell.Rect.SetSiblingIndex(index + 1);
 
                         if (bottomPoolIndex == index - 1)
                             bottomPoolIndex++;
