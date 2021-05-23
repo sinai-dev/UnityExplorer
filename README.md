@@ -37,7 +37,7 @@
 
 ### MelonLoader
 
-1. Install [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) 0.3.1+ for your game. This version can currently be obtained from [here](https://github.com/LavaGang/MelonLoader/actions).
+1. Install [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) 0.3.1+ for your game (or use `MelonLoader_Legacy` for `0.3.0`). This version can currently be obtained from [here](https://github.com/LavaGang/MelonLoader/actions).
 2. Download the UnityExplorer release for MelonLoader IL2CPP or Mono above.
 3. Take the `UnityExplorer.ML.___.dll` file and put it in the `[GameFolder]\Mods\` folder.
 
