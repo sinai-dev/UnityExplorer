@@ -2,11 +2,24 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     
     <Target Name="ILRepacker" AfterTargets="Build">
+        <!-- Actual merged assemblies -->
         <ItemGroup>
             <InputAssemblies Include="$(OutputPath)$(AssemblyName).dll" />
             <InputAssemblies Include="..\lib\mcs-unity\mcs\bin\Release\mcs.dll" />
             <InputAssemblies Include="packages\ini-parser.2.5.2\lib\net20\INIFileParser.dll" />
         </ItemGroup>
+
+        <!-- MonoMod for MelonLoader 0.3.0 -->
+        <ItemGroup Condition="'$(IsMelonLoaderLegacy)'=='true'">
+            <InputAssemblies Include="..\lib\HarmonyX\Harmony\bin\Release\net45\Mono.Cecil.dll" />
+            <InputAssemblies Include="..\lib\HarmonyX\Harmony\bin\Release\net45\Mono.Cecil.Mdb.dll" />
+            <InputAssemblies Include="..\lib\HarmonyX\Harmony\bin\Release\net45\Mono.Cecil.Pdb.dll" />
+            <InputAssemblies Include="..\lib\HarmonyX\Harmony\bin\Release\net45\Mono.Cecil.Rocks.dll" />
+            <InputAssemblies Include="..\lib\HarmonyX\Harmony\bin\Release\net45\MonoMod.RuntimeDetour.dll" />
+            <InputAssemblies Include="..\lib\HarmonyX\Harmony\bin\Release\net45\MonoMod.Utils.dll" />
+        </ItemGroup>
+        
+        <!-- Required references for ILRepack -->
         <ItemGroup>
             <ReferenceFolders Include="..\lib\" />
             <ReferenceFolders Include="..\lib\HarmonyX\Harmony\bin\Release\net35\" />
@@ -15,6 +28,7 @@
             <ReferenceFolders Include="..\lib\BepInEx.5\" />
             <ReferenceFolders Include="..\lib\MelonLoader\" />
         </ItemGroup>
+        
         <ILRepack
           Parallel="true"
           Internalize="true"

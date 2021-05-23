@@ -9,11 +9,15 @@ using UnityExplorer.Core;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Input;
 using UnityExplorer.Loader.ML;
+#if ML_LEGACY
+using Harmony;
+#else
 using HarmonyLib;
+[assembly: MelonPlatformDomain(MelonPlatformDomainAttribute.CompatibleDomains.UNIVERSAL)]
+#endif
 
 [assembly: MelonInfo(typeof(ExplorerMelonMod), ExplorerCore.NAME, ExplorerCore.VERSION, ExplorerCore.AUTHOR)]
 [assembly: MelonGame(null, null)]
-[assembly: MelonPlatformDomain(MelonPlatformDomainAttribute.CompatibleDomains.UNIVERSAL)]
 [assembly: MelonColor(ConsoleColor.DarkCyan)]
 
 namespace UnityExplorer
@@ -67,7 +71,11 @@ namespace UnityExplorer
             try
             {
                 var prop = type.GetProperty(property);
+#if ML_LEGACY
+                this.Harmony.Patch(prop.GetSetMethod(), prefix: prefix);
+#else
                 HarmonyInstance.Patch(prop.GetSetMethod(), prefix: prefix);
+#endif
             }
             catch (Exception e)
             {

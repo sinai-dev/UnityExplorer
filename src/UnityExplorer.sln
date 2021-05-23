@@ -18,6 +18,8 @@ Global
 		Release_BIE6_Mono|Any CPU = Release_BIE6_Mono|Any CPU
 		Release_ML_Cpp|Any CPU = Release_ML_Cpp|Any CPU
 		Release_ML_Mono|Any CPU = Release_ML_Mono|Any CPU
+		Release_MLLegacy_Cpp|Any CPU = Release_MLLegacy_Cpp|Any CPU
+		Release_MLLegacy_Mono|Any CPU = Release_MLLegacy_Mono|Any CPU
 		Release_STANDALONE_Cpp|Any CPU = Release_STANDALONE_Cpp|Any CPU
 		Release_STANDALONE_Mono|Any CPU = Release_STANDALONE_Mono|Any CPU
 	EndGlobalSection
@@ -32,6 +34,10 @@ Global
 		{F2D7872C-5D4D-49EB-A656-C3D496DB4204}.Release_ML_Cpp|Any CPU.Build.0 = Release|Any CPU
 		{F2D7872C-5D4D-49EB-A656-C3D496DB4204}.Release_ML_Mono|Any CPU.ActiveCfg = Release|Any CPU
 		{F2D7872C-5D4D-49EB-A656-C3D496DB4204}.Release_ML_Mono|Any CPU.Build.0 = Release|Any CPU
+		{F2D7872C-5D4D-49EB-A656-C3D496DB4204}.Release_MLLegacy_Cpp|Any CPU.ActiveCfg = Release_MLLegacy_Cpp|Any CPU
+		{F2D7872C-5D4D-49EB-A656-C3D496DB4204}.Release_MLLegacy_Cpp|Any CPU.Build.0 = Release_MLLegacy_Cpp|Any CPU
+		{F2D7872C-5D4D-49EB-A656-C3D496DB4204}.Release_MLLegacy_Mono|Any CPU.ActiveCfg = Release_MLLegacy_Mono|Any CPU
+		{F2D7872C-5D4D-49EB-A656-C3D496DB4204}.Release_MLLegacy_Mono|Any CPU.Build.0 = Release_MLLegacy_Mono|Any CPU
 		{F2D7872C-5D4D-49EB-A656-C3D496DB4204}.Release_STANDALONE_Cpp|Any CPU.ActiveCfg = Release|Any CPU
 		{F2D7872C-5D4D-49EB-A656-C3D496DB4204}.Release_STANDALONE_Cpp|Any CPU.Build.0 = Release|Any CPU
 		{F2D7872C-5D4D-49EB-A656-C3D496DB4204}.Release_STANDALONE_Mono|Any CPU.ActiveCfg = Release|Any CPU
@@ -46,6 +52,10 @@ Global
 		{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}.Release_ML_Cpp|Any CPU.Build.0 = Release|Any CPU
 		{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}.Release_ML_Mono|Any CPU.ActiveCfg = Release|Any CPU
 		{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}.Release_ML_Mono|Any CPU.Build.0 = Release|Any CPU
+		{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}.Release_MLLegacy_Cpp|Any CPU.ActiveCfg = Release_MLLegacy_Cpp|Any CPU
+		{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}.Release_MLLegacy_Cpp|Any CPU.Build.0 = Release_MLLegacy_Cpp|Any CPU
+		{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}.Release_MLLegacy_Mono|Any CPU.ActiveCfg = Release_MLLegacy_Mono|Any CPU
+		{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}.Release_MLLegacy_Mono|Any CPU.Build.0 = Release_MLLegacy_Mono|Any CPU
 		{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}.Release_STANDALONE_Cpp|Any CPU.ActiveCfg = Release|Any CPU
 		{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}.Release_STANDALONE_Cpp|Any CPU.Build.0 = Release|Any CPU
 		{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}.Release_STANDALONE_Mono|Any CPU.ActiveCfg = Release|Any CPU
@@ -60,6 +70,10 @@ Global
 		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_ML_Cpp|Any CPU.Build.0 = Release|Any CPU
 		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_ML_Mono|Any CPU.ActiveCfg = Release|Any CPU
 		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_ML_Mono|Any CPU.Build.0 = Release|Any CPU
+		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_MLLegacy_Cpp|Any CPU.ActiveCfg = Release_MLLegacy_Cpp|x64
+		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_MLLegacy_Cpp|Any CPU.Build.0 = Release_MLLegacy_Cpp|x64
+		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_MLLegacy_Mono|Any CPU.ActiveCfg = Release_MLLegacy_Mono|x64
+		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_MLLegacy_Mono|Any CPU.Build.0 = Release_MLLegacy_Mono|x64
 		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_STANDALONE_Cpp|Any CPU.ActiveCfg = Release|Any CPU
 		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_STANDALONE_Cpp|Any CPU.Build.0 = Release|Any CPU
 		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_STANDALONE_Mono|Any CPU.ActiveCfg = Release|Any CPU
@@ -74,6 +88,10 @@ Global
 		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_ML_Cpp|Any CPU.Build.0 = Release_ML_Cpp|Any CPU
 		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_ML_Mono|Any CPU.ActiveCfg = Release_ML_Mono|Any CPU
 		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_ML_Mono|Any CPU.Build.0 = Release_ML_Mono|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_MLLegacy_Cpp|Any CPU.ActiveCfg = Release_MLLegacy_Cpp|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_MLLegacy_Cpp|Any CPU.Build.0 = Release_MLLegacy_Cpp|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_MLLegacy_Mono|Any CPU.ActiveCfg = Release_MLLegacy_Mono|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_MLLegacy_Mono|Any CPU.Build.0 = Release_MLLegacy_Mono|Any CPU
 		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_STANDALONE_Cpp|Any CPU.ActiveCfg = Release_STANDALONE_Cpp|Any CPU
 		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_STANDALONE_Cpp|Any CPU.Build.0 = Release_STANDALONE_Cpp|Any CPU
 		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_STANDALONE_Mono|Any CPU.ActiveCfg = Release_STANDALONE_Mono|Any CPU
