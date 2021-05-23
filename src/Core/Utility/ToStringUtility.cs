@@ -13,7 +13,6 @@ namespace UnityExplorer
     public static class ToStringUtility
     {
         internal static Dictionary<string, MethodInfo> toStringMethods = new Dictionary<string, MethodInfo>();
-        internal static Dictionary<string, MethodInfo> toStringFormattedMethods = new Dictionary<string, MethodInfo>();
 
         private const string nullString = "<color=grey>null</color>";
         private const string nullUnknown = nullString + " (?)";
@@ -132,22 +131,12 @@ namespace UnityExplorer
 
             var type = value.GetActualType();
 
-            // Find and cache the relevant ToString method for this Type, if haven't already.
+            // Find and cache the ToString method for this Type, if haven't already.
 
             if (!toStringMethods.ContainsKey(type.AssemblyQualifiedName))
             {
-                try
-                {
-                    var formatMethod = type.GetMethod("ToString", ArgumentUtility.ParseArgs);
-                    formatMethod.Invoke(value, new object[] { ParseUtility.NUMBER_FORMAT });
-                    toStringFormattedMethods.Add(type.AssemblyQualifiedName, formatMethod);
-                    toStringMethods.Add(type.AssemblyQualifiedName, null);
-                }
-                catch
-                {
-                    var toStringMethod = type.GetMethod("ToString", ArgumentUtility.EmptyTypes);
-                    toStringMethods.Add(type.AssemblyQualifiedName, toStringMethod);
-                }
+                var toStringMethod = type.GetMethod("ToString", ArgumentUtility.EmptyTypes);
+                toStringMethods.Add(type.AssemblyQualifiedName, toStringMethod);
             }
 
             // Invoke the ToString method on the object
@@ -157,10 +146,7 @@ namespace UnityExplorer
             string toString;
             try
             {
-                if (toStringFormattedMethods.TryGetValue(type.AssemblyQualifiedName, out MethodInfo formatMethod))
-                    toString = (string)formatMethod.Invoke(value, new object[] { ParseUtility.NUMBER_FORMAT });
-                else
-                    toString = (string)toStringMethods[type.AssemblyQualifiedName].Invoke(value, ArgumentUtility.EmptyArgs);
+                toString = (string)toStringMethods[type.AssemblyQualifiedName].Invoke(value, ArgumentUtility.EmptyArgs);
             }
             catch (Exception ex)
             {
