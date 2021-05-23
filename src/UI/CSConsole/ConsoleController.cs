@@ -11,6 +11,7 @@ using UnityExplorer.UI.CSConsole;
 using UnityExplorer.Core.Input;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets.AutoComplete;
+using System.Reflection;
 
 namespace UnityExplorer.UI.CSConsole
 {
@@ -328,15 +329,28 @@ namespace UnityExplorer.UI.CSConsole
             RuntimeProvider.Instance.StartCoroutine(SetAutocompleteCaretCoro(caretPosition));
         }
 
+        internal static PropertyInfo SelectionGuardProperty => selectionGuardPropInfo ?? GetSelectionGuardPropInfo();
+
+        private static PropertyInfo GetSelectionGuardPropInfo()
+        {
+            selectionGuardPropInfo = typeof(EventSystem).GetProperty("m_SelectionGuard");
+            if (selectionGuardPropInfo == null)
+                selectionGuardPropInfo = typeof(EventSystem).GetProperty("m_selectionGuard");
+            return selectionGuardPropInfo;
+        }
+
+        private static PropertyInfo selectionGuardPropInfo;
+
         private static IEnumerator SetAutocompleteCaretCoro(int caretPosition)
         {
             var color = Input.Component.selectionColor;
             color.a = 0f;
             Input.Component.selectionColor = color;
-            EventSystem.current.SetSelectedGameObject(null, null);
+            try { EventSystem.current.SetSelectedGameObject(null, null); } catch { }
             yield return null;
 
-            EventSystem.current.SetSelectedGameObject(Input.UIRoot, null);
+            try { SelectionGuardProperty.SetValue(EventSystem.current, false, null); } catch { }
+            try { EventSystem.current.SetSelectedGameObject(Input.UIRoot, null); } catch { }
             Input.Component.Select();
             yield return null;
 

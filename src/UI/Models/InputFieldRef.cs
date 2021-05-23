@@ -16,8 +16,11 @@ namespace UnityExplorer.UI
         {
             if (inputsPendingUpdate.Any())
             {
-                foreach (var entry in inputsPendingUpdate)
+                var array = inputsPendingUpdate.ToArray();
+
+                for (int i = array.Length - 1; i >= 0; i--)
                 {
+                    var entry = array[i];
                     LayoutRebuilder.MarkLayoutForRebuild(entry.Rect);
                     entry.OnValueChanged?.Invoke(entry.Component.text);
                 }
