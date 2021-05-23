@@ -45,9 +45,9 @@ namespace UnityExplorer.UI.ObjectExplorer
                 case SceneFilter.DontDestroyOnLoad:
                     return scene == SceneHandler.DontDestroyScene;
                 case SceneFilter.HideAndDontSave:
-                    return scene == SceneHandler.AssetScene;
+                    return scene == default;
                 case SceneFilter.ActivelyLoaded:
-                    return scene != SceneHandler.DontDestroyScene && scene != SceneHandler.AssetScene;
+                    return scene != SceneHandler.DontDestroyScene && scene != default;
                 default:
                     return false;
             }

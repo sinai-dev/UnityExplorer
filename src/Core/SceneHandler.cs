@@ -82,25 +82,7 @@ namespace UnityExplorer.Core
         }
         private static GameObject dontDestroyObject;
 
-        public static bool InspectingAssetScene => SelectedScene == AssetScene;
-
-        internal static Scene AssetScene => AssetObject.scene;
-        internal static int AssetHandle => AssetScene.handle;
-
-        internal static GameObject AssetObject
-        {
-            get
-            {
-                if (!assetObject)
-                {
-                    assetObject = RuntimeProvider.Instance.FindObjectsOfTypeAll(typeof(GameObject))
-                        .First(it => !it.TryCast<GameObject>().scene.IsValid())
-                        .TryCast<GameObject>();
-                }
-                return assetObject;
-            }
-        }
-        private static GameObject assetObject;
+        public static bool InspectingAssetScene => !SelectedScene?.IsValid() ?? false;
 
         internal static void Init()
         {
@@ -122,7 +104,7 @@ namespace UnityExplorer.Core
             catch (Exception ex)
             {
                 gotAllScenesInBuild = false;
-                ExplorerCore.Log($"Unable to generate list of all Scenes in the build: {ex}");
+                ExplorerCore.LogWarning($"Unable to generate list of all Scenes in the build: {ex}");
             }
         }
 
@@ -131,7 +113,7 @@ namespace UnityExplorer.Core
             int curHandle = SelectedScene?.handle ?? -1;
             // DontDestroyOnLoad always exists, so default to true if our curHandle is that handle.
             // otherwise we will check while iterating.
-            bool inspectedExists = curHandle == DontDestroyHandle || curHandle == AssetHandle;
+            bool inspectedExists = curHandle == DontDestroyHandle || curHandle == 0;
 
             // Quick sanity check if the loaded scenes changed
             bool anyChange = LoadedSceneCount != allLoadedScenes.Count;
@@ -145,7 +127,7 @@ namespace UnityExplorer.Core
             for (int i = 0; i < SceneManager.sceneCount; i++)
             {
                 Scene scene = SceneManager.GetSceneAt(i);
-                if (scene == default || scene.handle == -1 || !scene.isLoaded)
+                if (scene == default || !scene.isLoaded)
                     continue;
 
                 // If no changes yet, ensure the previous list contained this handle.
@@ -161,7 +143,7 @@ namespace UnityExplorer.Core
 
             // Always add the DontDestroyOnLoad scene and the "none" scene.
             allLoadedScenes.Add(DontDestroyScene);
-            allLoadedScenes.Add(AssetScene);
+            allLoadedScenes.Add(default);
 
             // Default to first scene if none selected or previous selection no longer exists.
             if (!inspectedExists)
