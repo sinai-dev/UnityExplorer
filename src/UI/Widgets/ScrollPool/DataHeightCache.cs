@@ -6,13 +6,29 @@ using UnityEngine;
 
 namespace UnityExplorer.UI.Widgets
 {
-    public class DataViewInfo
+    public struct DataViewInfo
     {
-        public int dataIndex;
-        public float height, startPosition;
-        public int normalizedSpread;
+        // static
+        public static DataViewInfo None => s_default;
+        private static DataViewInfo s_default = default;
 
         public static implicit operator float(DataViewInfo it) => it.height;
+
+        // instance
+        public int dataIndex, normalizedSpread;
+        public float height, startPosition;
+
+        public override bool Equals(object obj)
+        {
+            var other = (DataViewInfo)obj;
+
+            return this.dataIndex == other.dataIndex
+                && this.height == other.height
+                && this.startPosition == other.startPosition
+                && this.normalizedSpread == other.normalizedSpread;
+        }
+
+        public override int GetHashCode() => base.GetHashCode();
     }
 
     public class DataHeightCache<T> where T : ICell
@@ -53,14 +69,8 @@ namespace UnityExplorer.UI.Widgets
         /// <summary>Get the first range (division of DefaultHeight) which the position appears in.</summary>
         private int GetRangeFloorOfPosition(float position) => (int)Math.Floor((decimal)position / (decimal)DefaultHeight);
 
-        /// <summary>Get the data index at the specified position of the total height cache.</summary>
-        public int GetFirstDataIndexAtPosition(float desiredHeight) => GetFirstDataIndexAtPosition(desiredHeight, out _);
-
-        /// <summary>Get the data index and DataViewInfo at the specified position of the total height cache.</summary>
-        public int GetFirstDataIndexAtPosition(float desiredHeight, out DataViewInfo cache)
+        public int GetFirstDataIndexAtPosition(float desiredHeight)
         {
-            cache = default;
-
             if (!heightCache.Any())
                 return 0;
 
@@ -72,12 +82,11 @@ namespace UnityExplorer.UI.Widgets
             if (rangeIndex >= rangeCache.Count)
             {
                 int idx = ScrollPool.DataSource.ItemCount - 1;
-                cache = heightCache[idx];
                 return idx;
             }
 
             int dataIndex = rangeCache[rangeIndex];
-            cache = heightCache[dataIndex];
+            var cache = heightCache[dataIndex];
 
             // if the DataViewInfo is outdated, need to rebuild
             int expectedMin = GetRangeCeilingOfPosition(cache.startPosition);
@@ -88,7 +97,7 @@ namespace UnityExplorer.UI.Widgets
 
                 rangeIndex = GetRangeFloorOfPosition(desiredHeight);
                 dataIndex = rangeCache[rangeIndex];
-                cache = heightCache[dataIndex];
+                //cache = heightCache[dataIndex];
             }
 
             return dataIndex;
@@ -141,8 +150,7 @@ namespace UnityExplorer.UI.Widgets
             if (!heightCache.Any())
                 return;
 
-            var val = heightCache[heightCache.Count - 1];
-            totalHeight -= val;            
+            totalHeight -= heightCache[heightCache.Count - 1];            
             heightCache.RemoveAt(heightCache.Count - 1);
 
             int idx = heightCache.Count;
@@ -214,6 +222,9 @@ namespace UnityExplorer.UI.Widgets
 
                 SetSpread(dataIndex, rangeIndex, spreadDiff);
             }
+
+            // set the struct back to the array (TODO necessary?)
+            heightCache[dataIndex] = cache;
         }
 
         private void SetSpread(int dataIndex, int rangeIndex, int spreadDiff)
@@ -244,12 +255,12 @@ namespace UnityExplorer.UI.Widgets
                 return;
 
             DataViewInfo cache;
-            DataViewInfo prev = null;
+            DataViewInfo prev = DataViewInfo.None;
             for (int i = 0; i <= toIndex && i < heightCache.Count; i++)
             {
                 cache = heightCache[i];
 
-                if (prev != null)
+                if (prev != DataViewInfo.None)
                     cache.startPosition = prev.startPosition + prev.height;
                 else
                     cache.startPosition = 0;
@@ -262,19 +273,5 @@ namespace UnityExplorer.UI.Widgets
                 prev = cache;
             }
         }
-
-        //private void HardRebuildRanges()
-        //{
-        //    var tempList = new List<float>();
-        //    for (int i = 0; i < heightCache.Count; i++)
-        //        tempList.Add(heightCache[i]);
-        //
-        //    heightCache.Clear();
-        //    rangeCache.Clear();
-        //    totalHeight = 0;
-        //
-        //    for (int i = 0; i < tempList.Count; i++)
-        //        SetIndex(i, tempList[i]);
-        //}
     }
 }
