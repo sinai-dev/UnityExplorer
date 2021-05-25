@@ -67,6 +67,8 @@ namespace UnityExplorer
 
         private static void BuildDeobfuscationCache()
         {
+            float start = UnityEngine.Time.realtimeSinceStartup;
+
             foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
             {
                 foreach (var type in asm.TryGetTypes())
@@ -74,7 +76,10 @@ namespace UnityExplorer
             }
 
             if (DeobfuscatedTypes.Count > 0)
-                ExplorerCore.Log($"Built IL2CPP deobfuscation cache, initial count: {DeobfuscatedTypes.Count}");
+            {
+                ExplorerCore.Log($"Built deobfuscation cache in {UnityEngine.Time.realtimeSinceStartup - start} seconds, " +
+                    $"initial count: {DeobfuscatedTypes.Count} ");
+            }
         }
 
         private static void TryCacheDeobfuscatedType(Type type)
