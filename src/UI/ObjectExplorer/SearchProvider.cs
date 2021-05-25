@@ -58,39 +58,22 @@ namespace UnityExplorer.UI.ObjectExplorer
         {
             var results = new List<object>();
 
-            Type searchType;
-            switch (context)
+            Type searchType = null;
+            if (!string.IsNullOrEmpty(customTypeInput))
             {
-                //case SearchContext.GameObject:
-                //    searchType = typeof(GameObject); 
-                //    break;
-
-                case SearchContext.UnityObject:
-                default:
-
-                    if (!string.IsNullOrEmpty(customTypeInput))
-                    {
-                        if (ReflectionUtility.GetTypeByName(customTypeInput) is Type customType)
-                        {
-                            if (typeof(UnityEngine.Object).IsAssignableFrom(customType))
-                            {
-                                searchType = customType;
-                                break;
-                            }
-                            else
-                                ExplorerCore.LogWarning($"Custom type '{customType.FullName}' is not assignable from UnityEngine.Object!");
-                        }
-                        else
-                            ExplorerCore.LogWarning($"Could not find any type by name '{customTypeInput}'!");
-                    }
-
-                    searchType = typeof(UnityEngine.Object); 
-                    break;
+                if (ReflectionUtility.GetTypeByName(customTypeInput) is Type customType)
+                {
+                    if (typeof(UnityEngine.Object).IsAssignableFrom(customType))
+                        searchType = customType;
+                    else
+                        ExplorerCore.LogWarning($"Custom type '{customType.FullName}' is not assignable from UnityEngine.Object!");
+                }
+                else
+                    ExplorerCore.LogWarning($"Could not find any type by name '{customTypeInput}'!");
             }
 
-
             if (searchType == null)
-                return results;
+                searchType = typeof(UnityEngine.Object);
 
             var allObjects = RuntimeProvider.Instance.FindObjectsOfTypeAll(searchType);
 
@@ -100,7 +83,7 @@ namespace UnityExplorer.UI.ObjectExplorer
             if (!string.IsNullOrEmpty(input))
                 nameFilter = input;
 
-            bool canGetGameObject = searchType == typeof(GameObject) || typeof(Component).IsAssignableFrom(searchType);
+            bool shouldFilterGOs = searchType == typeof(GameObject) || typeof(Component).IsAssignableFrom(searchType);
 
             foreach (var obj in allObjects)
             {
@@ -108,31 +91,39 @@ namespace UnityExplorer.UI.ObjectExplorer
                 if (!string.IsNullOrEmpty(nameFilter) && !obj.name.ContainsIgnoreCase(nameFilter))
                     continue;
 
-                if (canGetGameObject)
+                var type = obj.GetActualType();
+                if (type == typeof(GameObject) || typeof(Component).IsAssignableFrom(type))
                 {
-                    var go = searchType == typeof(GameObject)
-                            ? obj.TryCast<GameObject>()
-                            : obj.TryCast<Component>().gameObject;
+                    GameObject go = type == typeof(GameObject)
+                                    ? obj.TryCast<GameObject>()
+                                    : obj.TryCast<Component>()?.gameObject;
 
                     if (go)
                     {
-                        // scene check
-                        if (sceneFilter != SceneFilter.Any)
-                        {
-                            if (!Filter(go.scene, sceneFilter))
-                                continue;
-                        }
+                        // hide unityexplorer objects
+                        if (go.transform.root.name == "ExplorerCanvas")
+                            continue;
 
-                        if (childFilter != ChildFilter.Any)
+                        if (shouldFilterGOs)
                         {
-                            if (!go)
-                                continue;
+                            // scene check
+                            if (sceneFilter != SceneFilter.Any)
+                            {
+                                if (!Filter(go.scene, sceneFilter))
+                                    continue;
+                            }
 
-                            // root object check (no parent)
-                            if (childFilter == ChildFilter.HasParent && !go.transform.parent)
-                                continue;
-                            else if (childFilter == ChildFilter.RootObject && go.transform.parent)
-                                continue;
+                            if (childFilter != ChildFilter.Any)
+                            {
+                                if (!go)
+                                    continue;
+
+                                // root object check (no parent)
+                                if (childFilter == ChildFilter.HasParent && !go.transform.parent)
+                                    continue;
+                                else if (childFilter == ChildFilter.RootObject && go.transform.parent)
+                                    continue;
+                            }
                         }
                     }
                 }
