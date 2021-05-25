@@ -64,13 +64,12 @@ namespace UnityExplorer.UI.Inspectors
         internal static Camera MainCamera;
         internal static GraphicRaycaster[] graphicRaycasters;
 
-
         public void StartInspect(MouseInspectMode mode)
         {
             MainCamera = Camera.main;
             if (!MainCamera)
-                return;
-
+                return; 
+            
             PanelDragger.ForceEnd();
 
             Mode = mode;
@@ -94,8 +93,14 @@ namespace UnityExplorer.UI.Inspectors
         public void StopInspect()
         {
             Inspecting = false;
+
             UIManager.NavBarRect.gameObject.SetActive(true);
-            UIManager.PanelHolder.SetActive(true);
+            UIManager.PanelHolder.SetActive(true); 
+            
+            var drop = UIManager.MouseInspectDropdown;
+            if (drop.transform.Find("Dropdown List") is Transform list)
+                drop.DestroyDropdownList(list.gameObject);
+
             UIRoot.SetActive(false);
 
             if (Mode == MouseInspectMode.UI)
