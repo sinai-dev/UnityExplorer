@@ -22,9 +22,8 @@
 
 ### Known issues
 * Any `MissingMethodException` or `NotSupportedException`: please report the issue and provide a copy of your mod loader log and/or Unity log.
-* The C# console may unexpectedly produce a GC Mark Overflow crash when calling certain outside methods. Not clear yet what is causing this, but it's being looked into.
 * In IL2CPP, some IEnumerable and IDictionary types may fail enumeration. Waiting for the Unhollower rewrite to address this any further.
-* In IL2CPP, the C# console might not suggest deobfuscated (or obfuscated) names. Being looked into.
+* The C# Console's completions have some minor issues such as not suggestion global classes which have no namespace, and erronously suggesting classes from using directives when they shouldn't be suggested. These are issues with mcs itself which I am looking into.
 
 ## How to install
 
