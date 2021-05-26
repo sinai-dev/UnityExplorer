@@ -32,8 +32,6 @@ namespace UnityExplorer.UI.Widgets
 
         public int ItemCount => cachedTransforms.Count;
 
-        private readonly HashSet<int> highlightedTransforms = new HashSet<int>();
-
         public bool Filtering => !string.IsNullOrEmpty(currentFilter);
         private bool wasFiltering;
 
@@ -119,30 +117,17 @@ namespace UnityExplorer.UI.Widgets
                 if (cache.InstanceID == transformID)
                     break;
             }
-            ScrollPool.JumpToIndex(idx);
 
-            // 'select' (highlight) the cell containing our transform
-            foreach (var cellInfo in ScrollPool)
-            {
-                var cell = ScrollPool.CellPool[cellInfo.cellIndex];
-
-                if (!cell.Enabled)
-                    continue;
-
-                if (cell.cachedTransform.InstanceID == transformID)
-                {
-                    RuntimeProvider.Instance.StartCoroutine(HighlightCellCoroutine(cell, transformID));
-                    break;
-                }
-            }
+            ScrollPool.JumpToIndex(idx, OnCellJumpedTo);
         }
 
-        private IEnumerator HighlightCellCoroutine(TransformCell cell, int transformID)
+        private void OnCellJumpedTo(TransformCell cell)
         {
-            if (highlightedTransforms.Contains(transformID))
-                yield break;
-            highlightedTransforms.Add(transformID);
+            RuntimeProvider.Instance.StartCoroutine(HighlightCellCoroutine(cell));
+        }
 
+        private IEnumerator HighlightCellCoroutine(TransformCell cell)
+        {
             var button = cell.NameButton.Component;
             button.StartColorTween(new Color(0.2f, 0.3f, 0.2f), false);
 
@@ -151,7 +136,6 @@ namespace UnityExplorer.UI.Widgets
                 yield return null;
 
             button.OnDeselect(null);
-            highlightedTransforms.Remove(transformID);
         }
 
         public void Rebuild()

@@ -63,6 +63,9 @@ namespace UnityExplorer.UI.ObjectExplorer
             if (!transform)
                 return;
 
+            UIManager.SetPanelActive(this.Parent, true);
+            this.Parent.SetTab(0);
+
             // select the transform's scene
             var go = transform.gameObject;
             if (SceneHandler.SelectedScene != go.scene)

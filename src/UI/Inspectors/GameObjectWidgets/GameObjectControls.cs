@@ -235,9 +235,6 @@ namespace UnityExplorer.UI.Inspectors
         private void OnExploreButtonClicked()
         {
             var panel = UIManager.GetPanel<Panels.ObjectExplorerPanel>(UIManager.Panels.ObjectExplorer);
-            UIManager.SetPanelActive(panel, true);
-            panel.SetTab(0);
-
             panel.SceneExplorer.JumpToTransform(this.Parent.GOTarget.transform);
         }
 

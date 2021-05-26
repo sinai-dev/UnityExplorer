@@ -137,14 +137,31 @@ namespace UnityExplorer.UI.Widgets
             RefreshCells(setCellData, true);
         }
 
-        public void JumpToIndex(int index)
+        public void JumpToIndex(int index, Action<T> onJumped)
         {
             RefreshCells(true, true);
 
+            // Slide to the normalized position of the index
             float normalized = HeightCache[index].startPosition / HeightCache.TotalHeight;
+            RuntimeProvider.Instance.StartCoroutine(ForceDelayedJump(index, normalized, onJumped));
+        }
 
-            // Slide to the normalized position
-            OnSliderValueChanged(normalized);
+        private IEnumerator ForceDelayedJump(int dataIndex, float normalizedPos, Action<T> onJumped)
+        {
+            // Yielding two frames seems necessary in case the Explorer tab had not been opened before the jump.
+            yield return null;
+            yield return null;
+            slider.value = normalizedPos;
+
+            // Get the cell containing the data index and invoke the onJumped listener for it
+            foreach (var cellInfo in this)
+            {
+                if (cellInfo.dataIndex == dataIndex)
+                {
+                    onJumped?.Invoke(CellPool[cellInfo.cellIndex]);
+                    break;
+                }
+            }
         }
 
         // IEnumerable
