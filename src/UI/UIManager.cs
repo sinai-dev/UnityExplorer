@@ -12,7 +12,6 @@ using UnityExplorer.UI.CSConsole;
 using UnityExplorer.UI.Inspectors;
 using UnityExplorer.UI.Models;
 using UnityExplorer.UI.Panels;
-using UnityExplorer.UI.Utility;
 using UnityExplorer.UI.Widgets;
 using UnityExplorer.UI.Widgets.AutoComplete;
 

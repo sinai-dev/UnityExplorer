@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using UnityExplorer.UI.IValues;
+using UnityExplorer.UI.CacheObject.IValues;
 using System.Reflection;
 using UnityExplorer.UI;
 #if CPP

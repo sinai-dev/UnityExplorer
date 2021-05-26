@@ -7,7 +7,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityExplorer.Core.Config;
 using UnityExplorer.UI.CSConsole;
-using UnityExplorer.UI.Utility;
+using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Panels
 {

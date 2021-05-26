@@ -8,7 +8,6 @@ using UnityEngine.UI;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Input;
 using UnityExplorer.UI.Models;
-using UnityExplorer.UI.Utility;
 using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Panels

@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityExplorer.UI.CacheObject.Views;
-using UnityExplorer.UI.IValues;
-using UnityExplorer.UI.Utility;
+using UnityExplorer.UI.CacheObject.IValues;
 
 namespace UnityExplorer.UI.CacheObject
 {

@@ -6,9 +6,8 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Core.Input;
-using UnityExplorer.UI.ObjectPool;
+using UnityExplorer.UI.Models;
 using UnityExplorer.UI.Panels;
-using UnityExplorer.UI.Utility;
 using UnityExplorer.UI.Widgets;
 using UnityExplorer.UI.Widgets.AutoComplete;
 
@@ -221,8 +220,8 @@ namespace UnityExplorer.UI.Inspectors
 
         public override GameObject CreateContent(GameObject parent)
         {
-            UIRoot = UIFactory.CreateVerticalGroup(Pool<GameObjectInspector>.Instance.InactiveHolder,
-                "GameObjectInspector", true, false, true, true, 5, new Vector4(4, 4, 4, 4), new Color(0.065f, 0.065f, 0.065f));
+            UIRoot = UIFactory.CreateVerticalGroup(parent, "GameObjectInspector", true, false, true, true, 5, 
+                new Vector4(4, 4, 4, 4), new Color(0.065f, 0.065f, 0.065f));
 
             var scrollObj = UIFactory.CreateScrollView(UIRoot, "GameObjectInspector", out Content, out var scrollbar, 
                 new Color(0.065f, 0.065f, 0.065f));

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.UI.IValues;
+using UnityExplorer.UI.CacheObject.IValues;
 
 namespace UnityExplorer.UI.CacheObject.Views
 {

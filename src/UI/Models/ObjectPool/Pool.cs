@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace UnityExplorer.UI.ObjectPool
+namespace UnityExplorer.UI.Models
 {
     // Abstract non-generic class, handles the pool dictionary and interfacing with the generic pools.
     public abstract class Pool

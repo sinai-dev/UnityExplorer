@@ -7,7 +7,7 @@ using UnityEngine.UI;
 using UnityExplorer.UI;
 using UnityExplorer.UI.CacheObject;
 using UnityExplorer.UI.Inspectors;
-using UnityExplorer.UI.ObjectPool;
+using UnityExplorer.UI.Models;
 using UnityExplorer.UI.Panels;
 
 namespace UnityExplorer

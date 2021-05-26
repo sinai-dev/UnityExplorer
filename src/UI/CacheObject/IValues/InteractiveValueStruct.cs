@@ -6,9 +6,8 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.UI.CacheObject;
-using UnityExplorer.UI.Utility;
 
-namespace UnityExplorer.UI.IValues
+namespace UnityExplorer.UI.CacheObject.IValues
 {
     public class InteractiveValueStruct : InteractiveValue
     {

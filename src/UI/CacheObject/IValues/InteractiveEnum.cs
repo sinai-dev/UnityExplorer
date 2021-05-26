@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.UI.CacheObject;
 
-namespace UnityExplorer.UI.IValues
+namespace UnityExplorer.UI.CacheObject.IValues
 {
     public class InteractiveEnum : InteractiveValue
     {

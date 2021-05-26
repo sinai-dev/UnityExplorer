@@ -9,7 +9,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.Events;
 using UnityExplorer.UI.Models;
 
-namespace UnityExplorer.UI.Utility
+namespace UnityExplorer.UI.Widgets
 {
     // To fix an issue with Input Fields and allow them to go inside a ScrollRect nicely.
 

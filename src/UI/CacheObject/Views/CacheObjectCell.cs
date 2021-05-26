@@ -5,9 +5,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.UI.Inspectors;
-using UnityExplorer.UI.IValues;
-using UnityExplorer.UI.ObjectPool;
-using UnityExplorer.UI.Utility;
+using UnityExplorer.UI.CacheObject.IValues;
 using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.CacheObject.Views

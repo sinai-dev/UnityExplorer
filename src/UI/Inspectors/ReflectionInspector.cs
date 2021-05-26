@@ -12,9 +12,7 @@ using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI.CacheObject;
 using UnityExplorer.UI.CacheObject.Views;
-using UnityExplorer.UI.ObjectPool;
 using UnityExplorer.UI.Panels;
-using UnityExplorer.UI.Utility;
 using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Inspectors

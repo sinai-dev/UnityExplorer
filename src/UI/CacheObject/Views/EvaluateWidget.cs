@@ -5,8 +5,7 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.UI.ObjectPool;
-using UnityExplorer.UI.Utility;
+using UnityExplorer.UI.Models;
 using UnityExplorer.UI.Widgets.AutoComplete;
 
 namespace UnityExplorer.UI.CacheObject.Views

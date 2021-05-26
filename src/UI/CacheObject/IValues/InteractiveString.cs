@@ -9,7 +9,7 @@ using UnityExplorer.Core.Config;
 using UnityExplorer.UI.CacheObject;
 using UnityExplorer.UI.Widgets;
 
-namespace UnityExplorer.UI.IValues
+namespace UnityExplorer.UI.CacheObject.IValues
 {
     public class InteractiveString : InteractiveValue
     {

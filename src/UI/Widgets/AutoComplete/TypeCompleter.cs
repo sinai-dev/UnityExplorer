@@ -9,7 +9,6 @@ using UnityExplorer.Core.Input;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI.Models;
 using UnityExplorer.UI.Panels;
-using UnityExplorer.UI.Utility;
 
 namespace UnityExplorer.UI.Widgets.AutoComplete
 {

@@ -4,9 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityExplorer.UI.ObjectPool;
-using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Widgets
 {

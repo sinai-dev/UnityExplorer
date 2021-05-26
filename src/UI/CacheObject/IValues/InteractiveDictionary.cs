@@ -9,10 +9,9 @@ using UnityExplorer.UI.CacheObject;
 using UnityExplorer.UI.CacheObject.Views;
 using UnityExplorer.UI.Inspectors;
 using UnityExplorer.UI.Panels;
-using UnityExplorer.UI.Utility;
 using UnityExplorer.UI.Widgets;
 
-namespace UnityExplorer.UI.IValues
+namespace UnityExplorer.UI.CacheObject.IValues
 {
     public class InteractiveDictionary : InteractiveValue, ICellPoolDataSource<CacheKeyValuePairCell>, ICacheObjectController
     {

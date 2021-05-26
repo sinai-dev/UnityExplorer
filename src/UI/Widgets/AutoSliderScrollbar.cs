@@ -10,7 +10,7 @@ using UnityExplorer.Core;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Models;
 
-namespace UnityExplorer.UI.Utility
+namespace UnityExplorer.UI.Widgets
 {
     public class AutoSliderScrollbar : UIBehaviourModel
     {

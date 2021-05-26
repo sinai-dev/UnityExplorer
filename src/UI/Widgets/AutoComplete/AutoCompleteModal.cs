@@ -7,7 +7,6 @@ using UnityEngine.UI;
 using UnityExplorer.Core.Input;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI;
-using UnityExplorer.UI.ObjectPool;
 using UnityExplorer.UI.Panels;
 
 namespace UnityExplorer.UI.Widgets.AutoComplete

@@ -7,8 +7,7 @@ using UnityEngine;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI.CacheObject.Views;
 using UnityExplorer.UI.Inspectors;
-using UnityExplorer.UI.ObjectPool;
-using UnityExplorer.UI.Utility;
+using UnityExplorer.UI.Models;
 
 namespace UnityExplorer.UI.CacheObject
 {

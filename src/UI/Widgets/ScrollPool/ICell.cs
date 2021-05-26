@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using UnityExplorer.UI.ObjectPool;
+using UnityExplorer.UI.Models;
 
 namespace UnityExplorer.UI.Widgets
 {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.UI.ObjectPool;
+using UnityExplorer.UI.Models;
 using UnityExplorer.UI.Panels;
 
 namespace UnityExplorer.UI.Inspectors
