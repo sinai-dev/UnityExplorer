@@ -145,7 +145,7 @@ namespace UnityExplorer.UI
             if (InputManager.GetKeyDown(ConfigManager.Force_Unlock_Toggle.Value))
                 CursorUnlocker.Unlock = !CursorUnlocker.Unlock;
 
-            if (EventSystem.current != EventSys)
+            if (!ConfigManager.Disable_EventSystem_Override.Value && EventSystem.current != EventSys)
                 CursorUnlocker.SetEventSystem();
 
             UIPanel.UpdateFocus();

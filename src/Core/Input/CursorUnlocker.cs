@@ -37,12 +37,15 @@ namespace UnityExplorer.Core.Input
             lastVisibleState = Cursor.visible;
 
             SetupPatches();
-
             UpdateCursorControl();
 
+            // Hook up config values
+
+            // Force Unlock Mouse
             Unlock = ConfigManager.Force_Unlock_Mouse.Value;
             ConfigManager.Force_Unlock_Mouse.OnValueChanged += (bool val) => { Unlock = val; };
 
+            // Aggressive Mouse Unlock
             if (ConfigManager.Aggressive_Mouse_Unlock.Value)
                 SetupAggressiveUnlock();
         }
@@ -83,7 +86,7 @@ namespace UnityExplorer.Core.Input
                     Cursor.lockState = CursorLockMode.None;
                     Cursor.visible = true;
 
-                    if (UIManager.EventSys)
+                    if (!ConfigManager.Disable_EventSystem_Override.Value && UIManager.EventSys)
                         SetEventSystem();
                 }
                 else
@@ -91,7 +94,7 @@ namespace UnityExplorer.Core.Input
                     Cursor.lockState = lastLockMode;
                     Cursor.visible = lastVisibleState;
 
-                    if (UIManager.EventSys)
+                    if (!ConfigManager.Disable_EventSystem_Override.Value && UIManager.EventSys)
                         ReleaseEventSystem();
                 }
 
@@ -160,26 +163,19 @@ namespace UnityExplorer.Core.Input
 
         public static void Prefix_EventSystem_set_current(ref EventSystem value)
         {
-            if (!UIManager.EventSys)
-            {
-                if (value)
-                {
-                    lastEventSystem = value;
-                    lastInputModule = value.currentInputModule;
-                }
-                return;
-            }
-
-            if (!settingEventSystem && value != UIManager.EventSys)
+            if (!settingEventSystem && value)
             {
                 lastEventSystem = value;
-                lastInputModule = value?.currentInputModule;
+                lastInputModule = value.currentInputModule;
+            }
 
-                if (ShouldActuallyUnlock)
-                {
-                    value = UIManager.EventSys;
-                    value.enabled = true;
-                }
+            if (!UIManager.EventSys)
+                return;
+
+            if (!settingEventSystem && ShouldActuallyUnlock && !ConfigManager.Disable_EventSystem_Override.Value)
+            {
+                value = UIManager.EventSys;
+                value.enabled = true;
             }
         }
 

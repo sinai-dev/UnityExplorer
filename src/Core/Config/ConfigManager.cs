@@ -21,6 +21,7 @@ namespace UnityExplorer.Core.Config
         public static ConfigElement<bool>       Force_Unlock_Mouse;
         public static ConfigElement<KeyCode>    Force_Unlock_Toggle;
         public static ConfigElement<bool>       Aggressive_Mouse_Unlock;
+        public static ConfigElement<bool>       Disable_EventSystem_Override;
         public static ConfigElement<string>     Default_Output_Path;
         public static ConfigElement<bool>       Log_Unity_Debug;
         public static ConfigElement<bool>       Hide_On_Startup;
@@ -93,7 +94,11 @@ namespace UnityExplorer.Core.Config
                 KeyCode.None);
 
             Aggressive_Mouse_Unlock = new ConfigElement<bool>("Aggressive Mouse Unlock",
-                "Use WaitForEndOfFrame to aggressively force the Mouse to be unlocked (requires game restart).",
+                "Use WaitForEndOfFrame to aggressively force the Mouse to be unlocked.\n<b>Requires restart to take effect.</b>",
+                false);
+
+            Disable_EventSystem_Override = new ConfigElement<bool>("Disable EventSystem override",
+                "If enabled, UnityExplorer will not override the EventSystem from the game.\n<b>May require restart to take effect.</b>",
                 false);
 
             Log_Unity_Debug = new ConfigElement<bool>("Log Unity Debug",
