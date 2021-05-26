@@ -91,39 +91,39 @@ namespace UnityExplorer.UI.ObjectExplorer
                 if (!string.IsNullOrEmpty(nameFilter) && !obj.name.ContainsIgnoreCase(nameFilter))
                     continue;
 
+                GameObject go = null;
                 var type = obj.GetActualType();
-                if (type == typeof(GameObject) || typeof(Component).IsAssignableFrom(type))
+
+                if (type == typeof(GameObject))
+                    go = obj.TryCast<GameObject>();
+                else if (typeof(Component).IsAssignableFrom(type))
+                    go = obj.TryCast<Component>()?.gameObject;
+
+                if (go)
                 {
-                    GameObject go = type == typeof(GameObject)
-                                    ? obj.TryCast<GameObject>()
-                                    : obj.TryCast<Component>()?.gameObject;
+                    // hide unityexplorer objects
+                    if (go.transform.root.name == "ExplorerCanvas")
+                        continue;
 
-                    if (go)
+                    if (shouldFilterGOs)
                     {
-                        // hide unityexplorer objects
-                        if (go.transform.root.name == "ExplorerCanvas")
-                            continue;
-
-                        if (shouldFilterGOs)
+                        // scene check
+                        if (sceneFilter != SceneFilter.Any)
                         {
-                            // scene check
-                            if (sceneFilter != SceneFilter.Any)
-                            {
-                                if (!Filter(go.scene, sceneFilter))
-                                    continue;
-                            }
+                            if (!Filter(go.scene, sceneFilter))
+                                continue;
+                        }
 
-                            if (childFilter != ChildFilter.Any)
-                            {
-                                if (!go)
-                                    continue;
+                        if (childFilter != ChildFilter.Any)
+                        {
+                            if (!go)
+                                continue;
 
-                                // root object check (no parent)
-                                if (childFilter == ChildFilter.HasParent && !go.transform.parent)
-                                    continue;
-                                else if (childFilter == ChildFilter.RootObject && go.transform.parent)
-                                    continue;
-                            }
+                            // root object check (no parent)
+                            if (childFilter == ChildFilter.HasParent && !go.transform.parent)
+                                continue;
+                            else if (childFilter == ChildFilter.RootObject && go.transform.parent)
+                                continue;
                         }
                     }
                 }
