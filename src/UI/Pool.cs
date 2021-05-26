@@ -4,9 +4,16 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace UnityExplorer.UI.Models
+namespace UnityExplorer.UI
 {
-    // Abstract non-generic class, handles the pool dictionary and interfacing with the generic pools.
+    public interface IPooledObject
+    {
+        GameObject UIRoot { get; set; }
+        float DefaultHeight { get; }
+
+        GameObject CreateContent(GameObject parent);
+    }
+
     public abstract class Pool
     {
         protected static readonly Dictionary<Type, Pool> pools = new Dictionary<Type, Pool>();
@@ -39,7 +46,6 @@ namespace UnityExplorer.UI.Models
         protected abstract void TryReturn(IPooledObject obj);
     }
 
-    // Each generic implementation has its own pool, business logic is here
     public class Pool<T> : Pool where T : IPooledObject
     {
         public static Pool<T> GetPool() => (Pool<T>)GetPool(typeof(T));

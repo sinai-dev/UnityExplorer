@@ -290,8 +290,7 @@
     <Compile Include="UI\Inspectors\ReflectionInspector.cs" />
     <Compile Include="UI\CacheObject\IValues\InteractiveValueStruct.cs" />
     <Compile Include="UI\Models\InputFieldRef.cs" />
-    <Compile Include="UI\Models\ObjectPool\IPooledObject.cs" />
-    <Compile Include="UI\Models\ObjectPool\Pool.cs" />
+    <Compile Include="UI\Pool.cs" />
     <Compile Include="UI\Panels\LogPanel.cs" />
     <Compile Include="UI\Panels\CSConsolePanel.cs" />
     <Compile Include="Core\Utility\IOUtility.cs" />
