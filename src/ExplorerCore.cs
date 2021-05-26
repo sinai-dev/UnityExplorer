@@ -12,6 +12,7 @@ using UnityExplorer.Core.Runtime;
 using UnityExplorer.Tests;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Inspectors;
+using UnityExplorer.UI.ObjectExplorer;
 using UnityExplorer.UI.Panels;
 
 namespace UnityExplorer
@@ -19,7 +20,7 @@ namespace UnityExplorer
     public static class ExplorerCore
     {
         public const string NAME = "UnityExplorer";
-        public const string VERSION = "4.0.5";
+        public const string VERSION = "4.0.6";
         public const string AUTHOR = "Sinai";
         public const string GUID = "com.sinai.unityexplorer";
 
