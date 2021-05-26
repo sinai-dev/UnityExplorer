@@ -232,6 +232,15 @@ namespace UnityExplorer.UI.Inspectors
             }
         }
 
+        private void OnExploreButtonClicked()
+        {
+            var panel = UIManager.GetPanel<Panels.ObjectExplorerPanel>(UIManager.Panels.ObjectExplorer);
+            UIManager.SetPanelActive(panel, true);
+            panel.SetTab(0);
+
+            panel.SceneExplorer.JumpToTransform(this.Parent.GOTarget.transform);
+        }
+
         private void OnLayerDropdownChanged(int value)
         {
             GOTarget.layer = value;
@@ -533,6 +542,12 @@ namespace UnityExplorer.UI.Inspectors
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(thirdrow, false, false, true, true, 5, 0, 0, 0, 0, default);
             UIFactory.SetLayoutElement(thirdrow, minHeight: 25, flexibleWidth: 9999);
 
+            // Inspect in Explorer button
+            var explorerBtn = UIFactory.CreateButton(thirdrow, "ExploreBtn", "Show in Explorer", new Color(0.15f, 0.15f, 0.15f));
+            UIFactory.SetLayoutElement(explorerBtn.Component.gameObject, minHeight: 25, minWidth: 100);
+            explorerBtn.ButtonText.fontSize = 12;
+            explorerBtn.OnClick += OnExploreButtonClicked;
+
             // Scene
             var sceneLabel = UIFactory.CreateLabel(thirdrow, "SceneLabel", "Scene:", TextAnchor.MiddleLeft, Color.grey);
             UIFactory.SetLayoutElement(sceneLabel.gameObject, minHeight: 25, minWidth: 50);
@@ -547,7 +562,7 @@ namespace UnityExplorer.UI.Inspectors
             UIFactory.SetLayoutElement(layerLabel.gameObject, minHeight: 25, minWidth: 50);
 
             var layerDrop = UIFactory.CreateDropdown(thirdrow, out LayerDropdown, "0", 14, OnLayerDropdownChanged);
-            UIFactory.SetLayoutElement(layerDrop, minHeight: 25, minWidth: 120, flexibleWidth: 999);
+            UIFactory.SetLayoutElement(layerDrop, minHeight: 25, minWidth: 110, flexibleWidth: 999);
             LayerDropdown.captionText.color = SignatureHighlighter.EnumGreen;
             if (layerToNames == null)
                 GetLayerNames();

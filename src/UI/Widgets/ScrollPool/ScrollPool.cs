@@ -7,7 +7,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Core.Input;
 using UnityExplorer.UI.Models;
-using UnityExplorer.UI.ObjectPool;
 using UnityExplorer.UI.Panels;
 
 namespace UnityExplorer.UI.Widgets
@@ -20,7 +19,7 @@ namespace UnityExplorer.UI.Widgets
     /// <summary>
     /// An object-pooled ScrollRect, attempts to support content of any size and provide a scrollbar for it.
     /// </summary>
-    public class ScrollPool<T> : UIBehaviourModel where T : ICell
+    public class ScrollPool<T> : UIBehaviourModel, IEnumerable<CellInfo> where T : ICell
     {
         public ScrollPool(ScrollRect scrollRect)
         {
@@ -138,9 +137,23 @@ namespace UnityExplorer.UI.Widgets
             RefreshCells(setCellData, true);
         }
 
-        // Initialize
+        public void JumpToIndex(int index)
+        {
+            RefreshCells(true, true);
 
-        //private bool Initialized;
+            float normalized = HeightCache[index].startPosition / HeightCache.TotalHeight;
+
+            // Slide to the normalized position
+            OnSliderValueChanged(normalized);
+        }
+
+        // IEnumerable
+
+        public IEnumerator<CellInfo> GetEnumerator() => EnumerateCellPool();
+
+        IEnumerator IEnumerable.GetEnumerator() => EnumerateCellPool();
+
+        // Initialize
 
         /// <summary>Should be called only once, when the scroll pool is created.</summary>
         public void Initialize(ICellPoolDataSource<T> dataSource, Action onHeightChangedListener = null)
@@ -178,9 +191,8 @@ namespace UnityExplorer.UI.Widgets
             // create initial cell pool and set cells
             CreateCellPool();
 
-            var enumerator = GetPoolEnumerator();
-            while (enumerator.MoveNext())
-                SetCell(CellPool[enumerator.Current.cellIndex], enumerator.Current.dataIndex);
+            foreach (var cell in this)
+                SetCell(CellPool[cell.cellIndex], cell.dataIndex);
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
             prevContentHeight = Content.rect.height;
@@ -217,18 +229,18 @@ namespace UnityExplorer.UI.Widgets
 
         // Cell pool
 
-        private CellInfo _cellInfo = new CellInfo();
+        private CellInfo _current;
 
-        public IEnumerator<CellInfo> GetPoolEnumerator()
+        private IEnumerator<CellInfo> EnumerateCellPool()
         {
             int cellIdx = topPoolIndex;
             int dataIndex = TopDataIndex;
             int iterated = 0;
             while (iterated < CellPool.Count)
             {
-                _cellInfo.cellIndex = cellIdx;
-                _cellInfo.dataIndex = dataIndex;
-                yield return _cellInfo;
+                _current.cellIndex = cellIdx;
+                _current.dataIndex = dataIndex;
+                yield return _current;
 
                 cellIdx++;
                 if (cellIdx >= CellPool.Count)
@@ -368,16 +380,13 @@ namespace UnityExplorer.UI.Widgets
             CheckDataSourceCountChange(out bool jumpToBottom);
 
             // update date height cache, and set cells if 'andReload'
-            var enumerator = GetPoolEnumerator();
-            while (enumerator.MoveNext())
+            foreach (var cellInfo in this)
             {
-                var curr = enumerator.Current;
-                var cell = CellPool[curr.cellIndex];
-
+                var cell = CellPool[cellInfo.cellIndex];
                 if (andReloadFromDataSource)
-                    SetCell(cell, curr.dataIndex);
+                    SetCell(cell, cellInfo.dataIndex);
                 else
-                    HeightCache.SetIndex(curr.dataIndex, cell.Rect.rect.height);
+                    HeightCache.SetIndex(cellInfo.dataIndex, cell.Rect.rect.height);
             }
 
             // force check recycles
@@ -405,12 +414,8 @@ namespace UnityExplorer.UI.Widgets
 
         private void RefreshCellHeightsFast()
         {
-            var enumerator = GetPoolEnumerator();
-            while (enumerator.MoveNext())
-            {
-                var curr = enumerator.Current;
-                HeightCache.SetIndex(curr.dataIndex, CellPool[curr.cellIndex].Rect.rect.height);
-            }
+            foreach (var cellInfo in this)
+                HeightCache.SetIndex(cellInfo.dataIndex, CellPool[cellInfo.cellIndex].Rect.rect.height);
         }
 
         private void SetCell(T cachedCell, int dataIndex)
@@ -619,12 +624,10 @@ namespace UnityExplorer.UI.Widgets
             else
             {
                 bottomDataIndex = desiredBottomIndex;
-                var enumerator = GetPoolEnumerator();
-                while (enumerator.MoveNext())
+                foreach (var info in this)
                 {
-                    var curr = enumerator.Current;
-                    var cell = CellPool[curr.cellIndex];
-                    SetCell(cell, curr.dataIndex);
+                    var cell = CellPool[info.cellIndex];
+                    SetCell(cell, info.dataIndex);
                 }
             }
 

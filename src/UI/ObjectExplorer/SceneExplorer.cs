@@ -58,6 +58,23 @@ namespace UnityExplorer.UI.ObjectExplorer
             Tree.RefreshData(true);
         }
 
+        public void JumpToTransform(Transform transform)
+        {
+            if (!transform)
+                return;
+
+            // select the transform's scene
+            var go = transform.gameObject;
+            if (SceneHandler.SelectedScene != go.scene)
+            {
+                int idx = sceneDropdown.options.IndexOf(sceneToDropdownOption[go.scene.handle]);
+                sceneDropdown.value = idx;
+            }
+
+            // Let the TransformTree handle the rest
+            Tree.JumpAndExpandToTransform(transform);
+        }
+
         private void OnDropdownChanged(int value)
         {
             if (value < 0 || SceneHandler.LoadedScenes.Count <= value)
@@ -122,7 +139,7 @@ namespace UnityExplorer.UI.ObjectExplorer
         {
             if ((!string.IsNullOrEmpty(input) && !Tree.Filtering) || (string.IsNullOrEmpty(input) && Tree.Filtering))
             {
-                Tree.displayedObjects.Clear();
+                Tree.cachedTransforms.Clear();
             }
 
             Tree.CurrentFilter = input;

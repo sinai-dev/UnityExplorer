@@ -6,8 +6,6 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.UI.ObjectPool;
-using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Widgets
 {
@@ -22,13 +20,19 @@ namespace UnityExplorer.UI.Widgets
         /// Key: UnityEngine.Transform instance ID<br/>
         /// Value: CachedTransform
         /// </summary>
-        internal readonly OrderedDictionary displayedObjects = new OrderedDictionary();
+        internal readonly OrderedDictionary cachedTransforms = new OrderedDictionary();
 
         // for keeping track of which actual transforms are expanded or not, outside of the cache data.
         private readonly HashSet<int> expandedInstanceIDs = new HashSet<int>();
         private readonly HashSet<int> autoExpandedIDs = new HashSet<int>();
 
-        public int ItemCount => displayedObjects.Count;
+        private readonly HashSet<int> visited = new HashSet<int>();
+        private bool needRefresh;
+        private int displayIndex;
+
+        public int ItemCount => cachedTransforms.Count;
+
+        private readonly HashSet<int> highlightedTransforms = new HashSet<int>();
 
         public bool Filtering => !string.IsNullOrEmpty(currentFilter);
         private bool wasFiltering;
@@ -50,6 +54,25 @@ namespace UnityExplorer.UI.Widgets
         }
         private string currentFilter;
 
+        public TransformTree(ScrollPool<TransformCell> scrollPool, Func<IEnumerable<GameObject>> getRootEntriesMethod)
+        {
+            ScrollPool = scrollPool;
+            GetRootEntriesMethod = getRootEntriesMethod;
+        }
+
+        public void OnCellBorrowed(TransformCell cell)
+        {
+            cell.OnExpandToggled += ToggleExpandCell;
+            cell.OnGameObjectClicked += OnGameObjectClicked;
+        }
+
+        private void OnGameObjectClicked(GameObject obj)
+        {
+            if (OnClickOverrideHandler != null)
+                OnClickOverrideHandler.Invoke(obj);
+            else
+                InspectorManager.Inspect(obj);
+        }
 
         public void Init()
         {
@@ -58,35 +81,77 @@ namespace UnityExplorer.UI.Widgets
 
         public void Clear()
         {
-            this.displayedObjects.Clear();
+            this.cachedTransforms.Clear();
             displayIndex = 0;
             autoExpandedIDs.Clear();
             expandedInstanceIDs.Clear();
-        }
-
-
-        public void OnGameObjectClicked(GameObject obj)
-        {
-            if (OnClickOverrideHandler != null)
-            {
-                OnClickOverrideHandler.Invoke(obj);
-            }
-            else
-            {
-                InspectorManager.Inspect(obj);
-            }
-        }
-
-        public TransformTree(ScrollPool<TransformCell> scrollPool, Func<IEnumerable<GameObject>> getRootEntriesMethod)
-        {
-            ScrollPool = scrollPool;
-            GetRootEntriesMethod = getRootEntriesMethod;
         }
 
         public bool IsCellExpanded(int instanceID)
         {
             return Filtering ? autoExpandedIDs.Contains(instanceID)
                              : expandedInstanceIDs.Contains(instanceID);
+        }
+
+        public void JumpAndExpandToTransform(Transform transform)
+        {
+            // make sure all parents of the object are expanded
+            var parent = transform.parent;
+            while (parent)
+            {
+                int pid = parent.GetInstanceID();
+                if (!expandedInstanceIDs.Contains(pid))
+                    expandedInstanceIDs.Add(pid);
+
+                parent = parent.parent;
+            }
+
+            // Refresh cached transforms (no UI rebuild yet)
+            RefreshData(false);
+
+            int transformID = transform.GetInstanceID();
+
+            // find the index of our transform in the list and jump to it
+            int idx;
+            for (idx = 0; idx < cachedTransforms.Count; idx++)
+            {
+                var cache = (CachedTransform)cachedTransforms[idx];
+                if (cache.InstanceID == transformID)
+                    break;
+            }
+            ScrollPool.JumpToIndex(idx);
+
+            // 'select' (highlight) the cell containing our transform
+            foreach (var cellInfo in ScrollPool)
+            {
+                var cell = ScrollPool.CellPool[cellInfo.cellIndex];
+
+                if (!cell.Enabled)
+                    continue;
+
+                if (cell.cachedTransform.InstanceID == transformID)
+                {
+                    RuntimeProvider.Instance.StartCoroutine(HighlightCellCoroutine(cell, transformID));
+                    break;
+                }
+            }
+        }
+
+        private IEnumerator HighlightCellCoroutine(TransformCell cell, int transformID)
+        {
+            if (highlightedTransforms.Contains(transformID))
+                yield break;
+            highlightedTransforms.Add(transformID);
+
+            var button = cell.NameButton.Component;
+            button.StartColorTween(new Color(0.2f, 0.3f, 0.2f), false);
+
+            float start = Time.realtimeSinceStartup;
+            while (Time.realtimeSinceStartup - start < 1.5f)
+                yield return null;
+
+            button.OnDeselect(null);
+            highlightedTransforms.Remove(transformID);
         }
 
         public void Rebuild()
@@ -96,10 +161,6 @@ namespace UnityExplorer.UI.Widgets
 
             RefreshData(true, true);
         }
-
-        private readonly HashSet<int> visited = new HashSet<int>();
-        private bool needRefresh;
-        private int displayIndex;
 
         public void RefreshData(bool andReload = false, bool jumpToTop = false)
         {
@@ -114,12 +175,12 @@ namespace UnityExplorer.UI.Widgets
                 if (obj) Traverse(obj.transform);
 
             // Prune displayed transforms that we didnt visit in that traverse
-            for (int i = displayedObjects.Count - 1; i >= 0; i--)
+            for (int i = cachedTransforms.Count - 1; i >= 0; i--)
             {
-                var obj = (CachedTransform)displayedObjects[i];
+                var obj = (CachedTransform)cachedTransforms[i];
                 if (!visited.Contains(obj.InstanceID))
                 {
-                    displayedObjects.Remove(obj.InstanceID);
+                    cachedTransforms.Remove(obj.InstanceID);
                     needRefresh = true;
                 }
             }
@@ -159,9 +220,9 @@ namespace UnityExplorer.UI.Widgets
                 visited.Add(instanceID);
 
             CachedTransform cached;
-            if (displayedObjects.Contains(instanceID))
+            if (cachedTransforms.Contains(instanceID))
             {
-                cached = (CachedTransform)displayedObjects[(object)instanceID];
+                cached = (CachedTransform)cachedTransforms[(object)instanceID];
                 if (cached.Update(transform, depth))
                     needRefresh = true;
             }
@@ -169,10 +230,10 @@ namespace UnityExplorer.UI.Widgets
             {
                 needRefresh = true;
                 cached = new CachedTransform(this, transform, depth, parent);
-                if (displayedObjects.Count <= displayIndex)
-                    displayedObjects.Add(instanceID, cached);
+                if (cachedTransforms.Count <= displayIndex)
+                    cachedTransforms.Add(instanceID, cached);
                 else
-                    displayedObjects.Insert(displayIndex, instanceID, cached);
+                    cachedTransforms.Insert(displayIndex, instanceID, cached);
             }
 
             displayIndex++;
@@ -201,9 +262,9 @@ namespace UnityExplorer.UI.Widgets
 
         public void SetCell(TransformCell cell, int index)
         {
-            if (index < displayedObjects.Count)
+            if (index < cachedTransforms.Count)
             {
-                cell.ConfigureCell((CachedTransform)displayedObjects[index], index);
+                cell.ConfigureCell((CachedTransform)cachedTransforms[index], index);
                 if (Filtering)
                 {
                     if (cell.cachedTransform.Name.ContainsIgnoreCase(currentFilter))
@@ -226,16 +287,5 @@ namespace UnityExplorer.UI.Widgets
 
             RefreshData(true);
         }
-
-        public void OnCellBorrowed(TransformCell cell)
-        {
-            cell.OnExpandToggled += ToggleExpandCell;
-            cell.OnGameObjectClicked += OnGameObjectClicked;
-        }
-
-        //public void ReleaseCell(TransformCell cell)
-        //{
-        //    cell.OnExpandToggled -= ToggleExpandCell;
-        //}
     }
 }
