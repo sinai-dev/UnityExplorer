@@ -248,6 +248,8 @@ namespace UnityExplorer.UI.CSConsole
             UpdateCaret(out _);
         }
 
+        private static float timeOfLastCtrlR;
+
         public static void Update()
         {
             if (SRENotSupported)
@@ -269,8 +271,10 @@ namespace UnityExplorer.UI.CSConsole
 
             if (EnableCtrlRShortcut
                 && (InputManager.GetKey(KeyCode.LeftControl) || InputManager.GetKey(KeyCode.RightControl))
-                && InputManager.GetKeyDown(KeyCode.R))
+                && InputManager.GetKeyDown(KeyCode.R)
+                && timeOfLastCtrlR.OccuredEarlierThanDefault())
             {
+                timeOfLastCtrlR = Time.realtimeSinceStartup;
                 Evaluate(Panel.Input.Text);
             }
         }
