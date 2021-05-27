@@ -18,7 +18,7 @@ namespace UnityExplorer.UI.ObjectExplorer
             get => m_selectedScene;
             internal set
             {
-                if (m_selectedScene != null && m_selectedScene?.handle == value?.handle)
+                if (m_selectedScene != null && m_selectedScene == value)
                     return;
                 m_selectedScene = value;
                 OnInspectedSceneChanged?.Invoke((Scene)m_selectedScene);
@@ -37,6 +37,7 @@ namespace UnityExplorer.UI.ObjectExplorer
         /// </summary>
         public static ReadOnlyCollection<Scene> LoadedScenes => new ReadOnlyCollection<Scene>(allLoadedScenes);
         private static readonly List<Scene> allLoadedScenes = new List<Scene>();
+        private static HashSet<Scene> previousLoadedScenes;
 
         /// <summary>
         /// The names of all scenes in the build settings, if they could be retrieved.
@@ -82,7 +83,7 @@ namespace UnityExplorer.UI.ObjectExplorer
         }
         private static GameObject dontDestroyObject;
 
-        public static bool InspectingAssetScene => !SelectedScene?.IsValid() ?? false;
+        public static bool InspectingAssetScene => SelectedScene.HasValue && SelectedScene.Value == default;
 
         internal static void Init()
         {
@@ -110,17 +111,9 @@ namespace UnityExplorer.UI.ObjectExplorer
 
         internal static void Update()
         {
-            int curHandle = SelectedScene?.handle ?? -1;
-            // DontDestroyOnLoad always exists, so default to true if our curHandle is that handle.
-            // otherwise we will check while iterating.
-            bool inspectedExists = curHandle == DontDestroyHandle || curHandle == 0;
-
-            // Quick sanity check if the loaded scenes changed
-            bool anyChange = LoadedSceneCount != allLoadedScenes.Count;
-            // otherwise keep a lookup table of the previous handles to check if the list changed at all.
-            HashSet<int> previousHandles = null;
-            if (!anyChange)
-                previousHandles = new HashSet<int>(allLoadedScenes.Select(it => it.handle));
+            // check if the loaded scenes changed. always confirm DontDestroy / HideAndDontSave
+            int confirmedCount = 2;
+            bool inspectedExists = SelectedScene == DontDestroyScene || (SelectedScene.HasValue && SelectedScene.Value == default);
 
             allLoadedScenes.Clear();
 
@@ -130,20 +123,22 @@ namespace UnityExplorer.UI.ObjectExplorer
                 if (scene == default || !scene.isLoaded)
                     continue;
 
-                // If no changes yet, ensure the previous list contained this handle.
-                if (!anyChange && !previousHandles.Contains(scene.handle))
-                    anyChange = true;
+                // If no changes yet, ensure the previous list contained the scene
+                if (previousLoadedScenes != null && previousLoadedScenes.Contains(scene))
+                    confirmedCount++;
 
                 // If we have not yet confirmed inspectedExists, check if this scene is our currently inspected one.
-                if (curHandle != -1 && !inspectedExists && scene.handle == curHandle)
+                if (!inspectedExists && scene == SelectedScene)
                     inspectedExists = true;
 
                 allLoadedScenes.Add(scene);
             }
 
-            // Always add the DontDestroyOnLoad scene and the "none" scene.
+            bool anyChange = confirmedCount != allLoadedScenes.Count;
+
             allLoadedScenes.Add(DontDestroyScene);
             allLoadedScenes.Add(default);
+            previousLoadedScenes = new HashSet<Scene>(allLoadedScenes);
 
             // Default to first scene if none selected or previous selection no longer exists.
             if (!inspectedExists)
@@ -163,14 +158,14 @@ namespace UnityExplorer.UI.ObjectExplorer
             else
             {
                 var allObjects = RuntimeProvider.Instance.FindObjectsOfTypeAll(typeof(GameObject));
-                var list = new List<GameObject>();
+                var objects = new List<GameObject>();
                 foreach (var obj in allObjects)
                 {
                     var go = obj.TryCast<GameObject>();
                     if (go.transform.parent == null && !go.scene.IsValid())
-                        list.Add(go);
+                        objects.Add(go);
                 }
-                rootObjects = list.ToArray();
+                rootObjects = objects.ToArray();
             }
         }
     }

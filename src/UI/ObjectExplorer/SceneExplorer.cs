@@ -39,7 +39,7 @@ namespace UnityExplorer.UI.ObjectExplorer
 
         private GameObject refreshRow;
         private Dropdown sceneDropdown;
-        private readonly Dictionary<int, Dropdown.OptionData> sceneToDropdownOption = new Dictionary<int, Dropdown.OptionData>();
+        private readonly Dictionary<Scene, Dropdown.OptionData> sceneToDropdownOption = new Dictionary<Scene, Dropdown.OptionData>();
 
         private IEnumerable<GameObject> GetRootEntries() => SceneHandler.CurrentRootObjects;
 
@@ -70,7 +70,7 @@ namespace UnityExplorer.UI.ObjectExplorer
             var go = transform.gameObject;
             if (SceneHandler.SelectedScene != go.scene)
             {
-                int idx = sceneDropdown.options.IndexOf(sceneToDropdownOption[go.scene.handle]);
+                int idx = sceneDropdown.options.IndexOf(sceneToDropdownOption[go.scene]);
                 sceneDropdown.value = idx;
             }
 
@@ -91,12 +91,12 @@ namespace UnityExplorer.UI.ObjectExplorer
 
         private void SceneHandler_OnInspectedSceneChanged(Scene scene)
         {
-            if (!sceneToDropdownOption.ContainsKey(scene.handle))
+            if (!sceneToDropdownOption.ContainsKey(scene))
                 PopulateSceneDropdown();
 
-            if (sceneToDropdownOption.ContainsKey(scene.handle))
+            if (sceneToDropdownOption.ContainsKey(scene))
             {
-                var opt = sceneToDropdownOption[scene.handle];
+                var opt = sceneToDropdownOption[scene];
                 int idx = sceneDropdown.options.IndexOf(opt);
                 if (sceneDropdown.value != idx)
                     sceneDropdown.value = idx;
@@ -134,7 +134,7 @@ namespace UnityExplorer.UI.ObjectExplorer
 
                 var option = new Dropdown.OptionData(name);
                 sceneDropdown.options.Add(option);
-                sceneToDropdownOption.Add(scene.handle, option);
+                sceneToDropdownOption.Add(scene, option);
             }
         }
 
