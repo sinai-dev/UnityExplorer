@@ -142,7 +142,9 @@ namespace UnityExplorer.UI.Widgets
             RefreshCells(true, true);
 
             // Slide to the normalized position of the index
-            float normalized = HeightCache[index].startPosition / HeightCache.TotalHeight;
+            var cache = HeightCache[index];
+            float normalized = (cache.startPosition + (cache.height * 0.5f)) / HeightCache.TotalHeight;
+
             RuntimeProvider.Instance.StartCoroutine(ForceDelayedJump(index, normalized, onJumped));
         }
 
