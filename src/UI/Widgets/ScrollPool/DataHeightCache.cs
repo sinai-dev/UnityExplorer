@@ -6,31 +6,6 @@ using UnityEngine;
 
 namespace UnityExplorer.UI.Widgets
 {
-    public struct DataViewInfo
-    {
-        // static
-        public static DataViewInfo None => s_default;
-        private static DataViewInfo s_default = default;
-
-        public static implicit operator float(DataViewInfo it) => it.height;
-
-        // instance
-        public int dataIndex, normalizedSpread;
-        public float height, startPosition;
-
-        public override bool Equals(object obj)
-        {
-            var other = (DataViewInfo)obj;
-
-            return this.dataIndex == other.dataIndex
-                && this.height == other.height
-                && this.startPosition == other.startPosition
-                && this.normalizedSpread == other.normalizedSpread;
-        }
-
-        public override int GetHashCode() => base.GetHashCode();
-    }
-
     public class DataHeightCache<T> where T : ICell
     {
         private ScrollPool<T> ScrollPool { get; }
@@ -93,11 +68,10 @@ namespace UnityExplorer.UI.Widgets
             int expectedMax = expectedMin + cache.normalizedSpread - 1;
             if (rangeIndex < expectedMin || rangeIndex > expectedMax)
             {
-                RecalculateStartPositions(Math.Max(dataIndex, expectedMax));
+                RecalculateStartPositions(ScrollPool.DataSource.ItemCount - 1);
 
                 rangeIndex = GetRangeFloorOfPosition(desiredHeight);
                 dataIndex = rangeCache[rangeIndex];
-                //cache = heightCache[dataIndex];
             }
 
             return dataIndex;
@@ -125,17 +99,11 @@ namespace UnityExplorer.UI.Widgets
         /// <summary>Append a data index to the cache with the provided height value.</summary>
         public void Add(float value)
         {
-            value = (float)Math.Floor(value);
             value = Math.Max(DefaultHeight, value);
 
             int spread = GetRangeSpread(totalHeight, value);
 
-            heightCache.Add(new DataViewInfo()
-            {
-                height = value,
-                startPosition = TotalHeight,
-                normalizedSpread = spread,
-            });
+            heightCache.Add(new DataViewInfo(heightCache.Count, value, totalHeight, spread));
 
             int dataIdx = heightCache.Count - 1;
             for (int i = 0; i < spread; i++)
@@ -203,31 +171,31 @@ namespace UnityExplorer.UI.Widgets
             int spread = GetRangeSpread(cache.startPosition, height);
 
             // If the previous item in the range cache is not the previous data index, there is a gap.
-            if (dataIndex > 0 && rangeCache[rangeIndex - 1] != (dataIndex - 1))
+            if (rangeCache[rangeIndex] != dataIndex)
             {
                 // Recalculate start positions up to this index. The gap could be anywhere before here.
-                RecalculateStartPositions(dataIndex + 1);
+                RecalculateStartPositions(ScrollPool.DataSource.ItemCount - 1);
                 // Get the range index and spread again after rebuilding
                 rangeIndex = GetRangeCeilingOfPosition(cache.startPosition);
                 spread = GetRangeSpread(cache.startPosition, height);
             }
 
-            if (rangeCache.Count <= rangeIndex || rangeCache[rangeIndex] != dataIndex)
-                throw new Exception("ScrollPool data height cache is corrupt or invalid, rebuild failed!");
+            if (rangeCache[rangeIndex] != dataIndex)
+                throw new IndexOutOfRangeException($"Trying to set dataIndex {dataIndex} at rangeIndex {rangeIndex}, but cache is corrupt or invalid!");
 
             if (spread != cache.normalizedSpread)
             {
                 int spreadDiff = spread - cache.normalizedSpread;
                 cache.normalizedSpread = spread;
 
-                SetSpread(dataIndex, rangeIndex, spreadDiff);
+                UpdateSpread(dataIndex, rangeIndex, spreadDiff);
             }
 
-            // set the struct back to the array (TODO necessary?)
+            // set the struct back to the array
             heightCache[dataIndex] = cache;
         }
 
-        private void SetSpread(int dataIndex, int rangeIndex, int spreadDiff)
+        private void UpdateSpread(int dataIndex, int rangeIndex, int spreadDiff)
         {
             if (spreadDiff > 0)
             {
@@ -244,8 +212,6 @@ namespace UnityExplorer.UI.Widgets
                     rangeCache.RemoveAt(rangeIndex);
                     spreadDiff++;
                 }
-                //for (int i = 0; i < -spreadDiff; i++)
-                //    rangeCache.RemoveAt(rangeIndex);
             }
         }
 
@@ -254,24 +220,60 @@ namespace UnityExplorer.UI.Widgets
             if (heightCache.Count <= 1)
                 return;
 
+            rangeCache.Clear();
+
             DataViewInfo cache;
             DataViewInfo prev = DataViewInfo.None;
-            for (int i = 0; i <= toIndex && i < heightCache.Count; i++)
+            for (int idx = 0; idx <= toIndex && idx < heightCache.Count; idx++)
             {
-                cache = heightCache[i];
+                cache = heightCache[idx];
 
-                if (prev != DataViewInfo.None)
+                if (!prev.Equals(DataViewInfo.None))
                     cache.startPosition = prev.startPosition + prev.height;
                 else
                     cache.startPosition = 0;
 
-                var origSpread = cache.normalizedSpread;
                 cache.normalizedSpread = GetRangeSpread(cache.startPosition, cache.height);
-                if (cache.normalizedSpread != origSpread)
-                    SetSpread(i, GetRangeCeilingOfPosition(cache.startPosition), cache.normalizedSpread - origSpread);
+                for (int i = 0; i < cache.normalizedSpread; i++)
+                    rangeCache.Add(cache.dataIndex);
+
+                heightCache[idx] = cache;
 
                 prev = cache;
             }
+        }
+
+        public struct DataViewInfo
+        {
+            // static
+            public static DataViewInfo None => s_default;
+            private static DataViewInfo s_default = default;
+
+            public static implicit operator float(DataViewInfo it) => it.height;
+
+            public DataViewInfo(int index, float height, float startPos, int spread)
+            {
+                this.dataIndex = index;
+                this.height = height;
+                this.startPosition = startPos;
+                this.normalizedSpread = spread;
+            }
+
+            // instance
+            public int dataIndex, normalizedSpread;
+            public float height, startPosition;
+
+            public override bool Equals(object obj)
+            {
+                var other = (DataViewInfo)obj;
+
+                return this.dataIndex == other.dataIndex
+                    && this.height == other.height
+                    && this.startPosition == other.startPosition
+                    && this.normalizedSpread == other.normalizedSpread;
+            }
+
+            public override int GetHashCode() => base.GetHashCode();
         }
     }
 }
