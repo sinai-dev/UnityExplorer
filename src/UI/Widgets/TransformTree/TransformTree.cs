@@ -83,6 +83,7 @@ namespace UnityExplorer.UI.Widgets
             displayIndex = 0;
             autoExpandedIDs.Clear();
             expandedInstanceIDs.Clear();
+            this.ScrollPool.Refresh(true, true);
         }
 
         public bool IsCellExpanded(int instanceID)

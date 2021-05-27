@@ -63,7 +63,7 @@ namespace UnityExplorer.UI.Inspectors
             addCompInput.Text = "";
 
             TransformTree.Clear();
-            ComponentList.Clear();
+            UpdateComponents();
         }
 
         public override void CloseInspector()
@@ -112,6 +112,9 @@ namespace UnityExplorer.UI.Inspectors
 
         private IEnumerable<GameObject> GetTransformEntries()
         {
+            if (!GOTarget)
+                return Enumerable.Empty<GameObject>();
+
             cachedChildren.Clear();
             for (int i = 0; i < GOTarget.transform.childCount; i++)
                 cachedChildren.Add(GOTarget.transform.GetChild(i).gameObject);
@@ -124,10 +127,21 @@ namespace UnityExplorer.UI.Inspectors
         private readonly List<bool> behaviourEnabledStates = new List<bool>();
 
         // ComponentList.GetRootEntriesMethod
-        private List<Component> GetComponentEntries() => componentEntries;
+        private List<Component> GetComponentEntries() => GOTarget ? componentEntries : Enumerable.Empty<Component>().ToList();
 
         public void UpdateComponents()
         {
+            if (!GOTarget)
+            {
+                componentEntries.Clear();
+                compInstanceIDs.Clear();
+                behaviourEntries.Clear();
+                behaviourEnabledStates.Clear();
+                ComponentList.RefreshData();
+                ComponentList.ScrollPool.Refresh(true, true);
+                return;
+            }
+
             // Check if we actually need to refresh the component cells or not.
             var comps = GOTarget.GetComponents<Component>();
             var behaviours = GOTarget.GetComponents<Behaviour>();

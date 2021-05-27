@@ -21,7 +21,8 @@ namespace UnityExplorer.UI.Inspectors
 
         public void Clear()
         {
-            this.currentEntries.Clear();
+            RefreshData();
+            ScrollPool.Refresh(true, true);
         }
 
         private bool CheckShouldDisplay(Component _, string __) => true;
