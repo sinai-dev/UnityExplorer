@@ -44,15 +44,15 @@ namespace UnityExplorer
 
         public static bool Il2CppTypeNotNull(Type type, out IntPtr il2cppPtr)
         {
-            if (cppClassPointers.TryGetValue(type.AssemblyQualifiedName, out il2cppPtr))
-                return il2cppPtr != IntPtr.Zero;
-
-            il2cppPtr = (IntPtr)typeof(Il2CppClassPointerStore<>)
+            if (!cppClassPointers.TryGetValue(type.AssemblyQualifiedName, out il2cppPtr))
+            {
+                il2cppPtr = (IntPtr)typeof(Il2CppClassPointerStore<>)
                     .MakeGenericType(new Type[] { type })
                     .GetField("NativeClassPtr", BF.Public | BF.Static)
                     .GetValue(null);
 
-            cppClassPointers.Add(type.AssemblyQualifiedName, il2cppPtr);
+                cppClassPointers.Add(type.AssemblyQualifiedName, il2cppPtr);
+            }
 
             return il2cppPtr != IntPtr.Zero;
         }
@@ -242,10 +242,10 @@ namespace UnityExplorer
             else if (castTo == typeof(string))
                 return UnboxString(obj);
 
-            // Casting from il2cpp object to il2cpp object...
-
             if (!Il2CppTypeNotNull(castTo, out IntPtr castToPtr))
                 return obj;
+
+            // Casting from il2cpp object to il2cpp object...
 
             IntPtr castFromPtr = il2cpp_object_get_class(cppObj.Pointer);
 
