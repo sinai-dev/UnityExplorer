@@ -43,9 +43,9 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             ExplorerCore.LogUnity(condition, type);
         }
 
-        public override void StartCoroutine(IEnumerator routine)
+        public override void Update()
         {
-            Il2CppCoroutine.Start(routine);
+            Il2CppCoroutine.Process();
         }
 
         internal override void ProcessOnPostRender()
@@ -53,9 +53,14 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             Il2CppCoroutine.ProcessWaitForEndOfFrame();
         }
 
-        public override void Update()
+        internal override void ProcessFixedUpdate()
         {
-            Il2CppCoroutine.Process();
+            Il2CppCoroutine.ProcessWaitForFixedUpdate();
+        }
+
+        public override void StartCoroutine(IEnumerator routine)
+        {
+            Il2CppCoroutine.Start(routine);
         }
 
         public override T AddComponent<T>(GameObject obj, Type type)
