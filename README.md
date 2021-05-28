@@ -95,9 +95,8 @@ Depending on the release you are using, the config file will be found at:
 
 0. Clone the repository and run `git submodule update --init --recursive` to get the submodules.
 1. Open the `src\UnityExplorer.sln` project in Visual Studio.
-2. Select `Solution 'UnityExplorer' (1 of 1 project)` in the Solution Explorer panel, and set the <b>Active config</b> property to the version you want to build, then build it. Alternatively, use "Batch Build" and select all releases.
-3. The DLLs are built to the `Release\` folder in the root of the repository.
-4. If ILRepack complains about an error, just change the Active config to a different release and then back again. This sometimes happens for the first time you build the project.
+2. Build `Harmony`, `mcs`, and if IL2CPP `UnhollowerBaseLib` as well.
+3. Build the UnityExplorer release(s) you want to use, either by selecting the config as the Active Config, or batch-building. If ILRepack encounters an error on your first build, try changing the active config to a different one, then back again.
 
 ## Acknowledgments
 
