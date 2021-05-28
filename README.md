@@ -66,9 +66,8 @@ The standalone release can be used with any injector or loader of your choice, b
 
 The inspector is used to see detailed information on GameObjects (GameObject Inspector), C# objects (Reflection Inspector) and C# classes (Static Inspector).
 
-For the GameObject Inspector, you can edit any of the input fields in the inspector (excluding readonly fields) and press <b>Enter</b> to apply your changes. You can also do this to the GameObject path as a way to change the GameObject's parent. Press the <b>Escape</b> key to cancel your edits.
-
-In the Reflection Inspectors, automatic updating is not enabled by default, and you must press Apply for any changes you make to take effect. 
+* In the GameObject Inspector, you can edit any of the input fields in the inspector (excluding readonly fields) and press <b>Enter</b> to apply your changes. You can also do this to the GameObject path as a way to change the GameObject's parent. Press the <b>Escape</b> key to cancel your edits.
+* In the Reflection Inspectors, automatic updating is not enabled by default, and you must press Apply for any changes you make to take effect. 
 
 ### C# Console
 
