@@ -62,13 +62,13 @@ namespace UnityExplorer.Core.Input
             }
         }
 
-        private static readonly WaitForEndOfFrame _waitForEndOfFrame = new WaitForEndOfFrame();
+        private static WaitForEndOfFrame _waitForEndOfFrame = new WaitForEndOfFrame();
 
         private static IEnumerator AggressiveUnlockCoroutine()
         {
             while (true)
             {
-                yield return _waitForEndOfFrame;
+                yield return _waitForEndOfFrame ?? (_waitForEndOfFrame = new WaitForEndOfFrame());
 
                 if (UIManager.ShowMenu)
                     UpdateCursorControl();
