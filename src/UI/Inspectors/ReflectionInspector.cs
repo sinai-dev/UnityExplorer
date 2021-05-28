@@ -480,7 +480,7 @@ namespace UnityExplorer.UI.Inspectors
 
         private void SetUnityTargets()
         {
-            if (!typeof(UnityEngine.Object).IsAssignableFrom(TargetType))
+            if (StaticOnly || !typeof(UnityEngine.Object).IsAssignableFrom(TargetType))
             {
                 unityObjectRow.SetActive(false);
                 textureViewer.SetActive(false);
