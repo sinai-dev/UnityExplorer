@@ -164,6 +164,22 @@ namespace UnityExplorer.UI
             InputFieldRef.UpdateInstances();
             UIBehaviourModel.UpdateInstances();
 
+            // update the timescale value
+            if (!timeInput.Component.isFocused && lastTimeScale != Time.timeScale)
+            {
+                if (pauseButtonPausing && Time.timeScale != 0.0f)
+                {
+                    pauseButtonPausing = false;
+                    OnPauseButtonToggled();
+                }
+
+                if (!pauseButtonPausing)
+                {
+                    timeInput.Text = Time.timeScale.ToString("F2");
+                    lastTimeScale = Time.timeScale;
+                }
+            }
+
             // check screen dimension change
             if (Screen.width != lastScreenWidth || Screen.height != lastScreenHeight)
                 OnScreenDimensionsChanged();
@@ -274,13 +290,14 @@ namespace UnityExplorer.UI
         {
             pauseButtonPausing = !pauseButtonPausing;
 
-            if (pauseButtonPausing)
-                lastTimeScale = Time.timeScale;
+            Time.timeScale = pauseButtonPausing ? 0f : lastTimeScale;
 
-            float scale = pauseButtonPausing ? 0f : lastTimeScale;
-            Time.timeScale = scale;
+            OnPauseButtonToggled();
+        }
 
-            timeInput.Component.text = scale.ToString("F2");
+        private static void OnPauseButtonToggled()
+        {
+            timeInput.Component.text = Time.timeScale.ToString("F2");
             timeInput.Component.readOnly = pauseButtonPausing;
             timeInput.Component.textComponent.color = pauseButtonPausing ? Color.grey : Color.white;
 
