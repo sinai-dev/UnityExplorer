@@ -515,12 +515,12 @@ namespace UnityExplorer
             return false;
         }
 
-#endregion
+        #endregion
 
 
         #region Il2cpp reflection blacklist
 
-        public override string DefaultReflectionBlacklist => string.Join(";", defaultIl2CppBlacklist);
+        public override string[] DefaultReflectionBlacklist => defaultIl2CppBlacklist.ToArray();
 
         // These methods currently cause a crash in most il2cpp games,
         // even from doing "GetParameters()" on the MemberInfo.

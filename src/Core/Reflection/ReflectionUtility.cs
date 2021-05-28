@@ -12,7 +12,6 @@ using UnityExplorer.Core.Config;
 
 namespace UnityExplorer
 {
-
     public class ReflectionUtility
     {
         public const BF FLAGS = BF.Public | BF.Instance | BF.NonPublic | BF.Static;
@@ -434,31 +433,44 @@ namespace UnityExplorer
 
         #region Reflection Blacklist
 
-        public virtual string DefaultReflectionBlacklist => string.Empty;
+        public virtual string[] DefaultReflectionBlacklist => new string[0];
 
         public static void LoadBlacklistString(string blacklist)
         {
-            if (string.Equals(blacklist, "DEFAULT", StringComparison.InvariantCultureIgnoreCase))
+            try
             {
-                blacklist = Instance.DefaultReflectionBlacklist;
-                ConfigManager.Reflection_Signature_Blacklist.Value = blacklist;
-                ConfigManager.Handler.SaveConfig();
+                if (string.IsNullOrEmpty(blacklist) && !Instance.DefaultReflectionBlacklist.Any())
+                    return;
+
+                try
+                {
+                    var sigs = blacklist.Split(';');
+                    foreach (var sig in sigs)
+                    {
+                        var s = sig.Trim();
+                        if (string.IsNullOrEmpty(s))
+                            continue;
+                        if (!currentBlacklist.Contains(s))
+                            currentBlacklist.Add(s);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ExplorerCore.LogWarning($"Exception parsing blacklist string: {ex.ReflectionExToString()}");
+                }
+
+                foreach (var sig in Instance.DefaultReflectionBlacklist)
+                {
+                    if (!currentBlacklist.Contains(sig))
+                        currentBlacklist.Add(sig);
+                }
+
+                Mono.CSharp.IL2CPP.Blacklist.SignatureBlacklist = currentBlacklist;
             }
-
-            if (string.IsNullOrEmpty(blacklist))
-                return;
-
-            var sigs = blacklist.Split(';');
-            foreach (var sig in sigs)
+            catch (Exception ex)
             {
-                var s = sig.Trim();
-                if (string.IsNullOrEmpty(s))
-                    continue;
-                if (!currentBlacklist.Contains(s))
-                    currentBlacklist.Add(s);
+                ExplorerCore.LogWarning($"Exception setting up reflection blacklist: {ex.ReflectionExToString()}");
             }
-
-            Mono.CSharp.IL2CPP.Blacklist.SignatureBlacklist = currentBlacklist;
         }
 
         public static bool IsBlacklisted(MemberInfo member)
