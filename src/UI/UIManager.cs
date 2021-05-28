@@ -55,8 +55,14 @@ namespace UnityExplorer.UI
         internal static Shader BackupShader { get; private set; }
 
         public static RectTransform NavBarRect;
-        public static GameObject NavbarButtonHolder;
+        public static GameObject NavbarTabButtonHolder;
         public static Dropdown MouseInspectDropdown;
+
+        private static ButtonRef closeBtn;
+        private static ButtonRef pauseBtn;
+        private static InputFieldRef timeInput;
+        private static bool pauseButtonPausing;
+        private static float lastTimeScale;
 
         // defaults
         internal static readonly Color enabledButtonColor = new Color(0.2f, 0.4f, 0.28f);
@@ -79,6 +85,89 @@ namespace UnityExplorer.UI
             }
         }
         public static bool s_showMenu = true;
+
+        // Initialization
+
+        internal static void InitUI()
+        {
+            LoadBundle();
+
+            UIFactory.Init();
+
+            CreateRootCanvas();
+
+            // Global UI Pool Holder
+            PoolHolder = new GameObject("PoolHolder");
+            PoolHolder.transform.parent = CanvasRoot.transform;
+            PoolHolder.SetActive(false);
+
+            CreateTopNavBar();
+
+            UIPanels.Add(Panels.AutoCompleter, new AutoCompleteModal());
+            UIPanels.Add(Panels.ObjectExplorer, new ObjectExplorerPanel());
+            UIPanels.Add(Panels.Inspector, new InspectorPanel());
+            UIPanels.Add(Panels.CSConsole, new CSConsolePanel());
+            UIPanels.Add(Panels.ConsoleLog, new LogPanel());
+            UIPanels.Add(Panels.Options, new OptionsPanel());
+            UIPanels.Add(Panels.MouseInspector, new InspectUnderMouse());
+
+            foreach (var panel in UIPanels.Values)
+                panel.ConstructUI();
+
+            ConsoleController.Init();
+
+            ShowMenu = !ConfigManager.Hide_On_Startup.Value;
+
+            lastScreenWidth = Screen.width;
+            lastScreenHeight = Screen.height;
+
+            Initializing = false;
+        }
+
+        // Main UI Update loop
+
+        private static int lastScreenWidth;
+        private static int lastScreenHeight;
+
+        public static void Update()
+        {
+            if (!CanvasRoot || Initializing)
+                return;
+
+            // if doing Mouse Inspect, update that and return.
+            if (InspectUnderMouse.Inspecting)
+            {
+                InspectUnderMouse.Instance.UpdateInspect();
+                return;
+            }
+
+            // check master toggle
+            if (InputManager.GetKeyDown(ConfigManager.Master_Toggle.Value))
+                ShowMenu = !ShowMenu;
+
+            // return if menu closed
+            if (!ShowMenu)
+                return;
+
+            // Check forceUnlockMouse toggle
+            if (InputManager.GetKeyDown(ConfigManager.Force_Unlock_Toggle.Value))
+                CursorUnlocker.Unlock = !CursorUnlocker.Unlock;
+
+            // check event system state
+            if (!ConfigManager.Disable_EventSystem_Override.Value && EventSystem.current != EventSys)
+                CursorUnlocker.SetEventSystem();
+
+            // update focused panel
+            UIPanel.UpdateFocus();
+            // update UI model instances
+            PanelDragger.UpdateInstances();
+            InputFieldRef.UpdateInstances();
+            UIBehaviourModel.UpdateInstances();
+
+            // check screen dimension change
+            if (Screen.width != lastScreenWidth || Screen.height != lastScreenHeight)
+                OnScreenDimensionsChanged();
+        }
 
         // Panels
 
@@ -120,90 +209,87 @@ namespace UnityExplorer.UI
                 SetPanelActive(panel, value);
         }
 
-        // Main UI Update loop
+        // navbar
 
-        private static int lastScreenWidth;
-        private static int lastScreenHeight;
-
-        public static void Update()
+        public static void SetNavBarAnchor()
         {
-            if (!CanvasRoot || Initializing)
-                return;
-
-            if (InspectUnderMouse.Inspecting)
+            switch (NavbarAnchor)
             {
-                InspectUnderMouse.Instance.UpdateInspect();
-                return;
-            }
+                case VerticalAnchor.Top:
+                    NavBarRect.anchorMin = new Vector2(0.5f, 1f);
+                    NavBarRect.anchorMax = new Vector2(0.5f, 1f);
+                    NavBarRect.anchoredPosition = new Vector2(NavBarRect.anchoredPosition.x, 0);
+                    NavBarRect.sizeDelta = new Vector2(1000f, 35f);
+                    break;
 
-            if (InputManager.GetKeyDown(ConfigManager.Master_Toggle.Value))
-                ShowMenu = !ShowMenu;
-
-            if (!ShowMenu)
-                return;
-
-            if (InputManager.GetKeyDown(ConfigManager.Force_Unlock_Toggle.Value))
-                CursorUnlocker.Unlock = !CursorUnlocker.Unlock;
-
-            if (!ConfigManager.Disable_EventSystem_Override.Value && EventSystem.current != EventSys)
-                CursorUnlocker.SetEventSystem();
-
-            UIPanel.UpdateFocus();
-            PanelDragger.UpdateInstances();
-            InputFieldRef.UpdateInstances();
-            UIBehaviourModel.UpdateInstances();
-
-            if (Screen.width != lastScreenWidth || Screen.height != lastScreenHeight)
-            {
-                lastScreenWidth = Screen.width;
-                lastScreenHeight = Screen.height;
-
-                foreach (var panel in UIPanels)
-                {
-                    panel.Value.EnsureValidSize();
-                    UIPanel.EnsureValidPosition(panel.Value.Rect);
-                    panel.Value.Dragger.OnEndResize();
-                }
+                case VerticalAnchor.Bottom:
+                    NavBarRect.anchorMin = new Vector2(0.5f, 0f);
+                    NavBarRect.anchorMax = new Vector2(0.5f, 0f);
+                    NavBarRect.anchoredPosition = new Vector2(NavBarRect.anchoredPosition.x, 35);
+                    NavBarRect.sizeDelta = new Vector2(1000f, 35f);
+                    break;
             }
         }
 
-        // Initialization and UI Construction
+        // listeners
 
-        internal static void InitUI()
+        private static void OnScreenDimensionsChanged()
         {
-            LoadBundle();
-
-            UIFactory.Init();
-
-            CreateRootCanvas();
-
-            // Global UI Pool Holder
-            PoolHolder = new GameObject("PoolHolder");
-            PoolHolder.transform.parent = CanvasRoot.transform;
-            PoolHolder.SetActive(false);
-
-            CreateTopNavBar();
-
-            UIPanels.Add(Panels.AutoCompleter, new AutoCompleteModal());
-            UIPanels.Add(Panels.ObjectExplorer, new ObjectExplorerPanel());
-            UIPanels.Add(Panels.Inspector, new InspectorPanel());
-            UIPanels.Add(Panels.CSConsole, new CSConsolePanel());
-            UIPanels.Add(Panels.ConsoleLog, new LogPanel());
-            UIPanels.Add(Panels.Options, new OptionsPanel());
-            UIPanels.Add(Panels.MouseInspector, new InspectUnderMouse());
-
-            foreach (var panel in UIPanels.Values)
-                panel.ConstructUI();
-
-            ConsoleController.Init();
-
-            ShowMenu = !ConfigManager.Hide_On_Startup.Value;
-
             lastScreenWidth = Screen.width;
             lastScreenHeight = Screen.height;
 
-            Initializing = false;
+            foreach (var panel in UIPanels)
+            {
+                panel.Value.EnsureValidSize();
+                UIPanel.EnsureValidPosition(panel.Value.Rect);
+                panel.Value.Dragger.OnEndResize();
+            }
         }
+
+        private static void OnCloseButtonClicked()
+        {
+            ShowMenu = false;
+        }
+
+        private static void Master_Toggle_OnValueChanged(KeyCode val)
+        {
+            closeBtn.ButtonText.text = val.ToString();
+        }
+
+        private static void OnTimeInputEndEdit(string val)
+        {
+            if (pauseButtonPausing)
+                return;
+
+            if (float.TryParse(val, out float f))
+            {
+                Time.timeScale = f;
+                lastTimeScale = f;
+            }
+
+            timeInput.Text = Time.timeScale.ToString("F2");
+        }
+
+        private static void OnPauseButtonClicked()
+        {
+            pauseButtonPausing = !pauseButtonPausing;
+
+            if (pauseButtonPausing)
+                lastTimeScale = Time.timeScale;
+
+            float scale = pauseButtonPausing ? 0f : lastTimeScale;
+            Time.timeScale = scale;
+
+            timeInput.Component.text = scale.ToString("F2");
+            timeInput.Component.readOnly = pauseButtonPausing;
+            timeInput.Component.textComponent.color = pauseButtonPausing ? Color.grey : Color.white;
+
+            Color color = pauseButtonPausing ? new Color(0.3f, 0.3f, 0.2f) : new Color(0.2f, 0.2f, 0.2f);
+            RuntimeProvider.Instance.SetColorBlock(pauseBtn.Component, color, color * 1.2f, color * 0.7f);
+            pauseBtn.ButtonText.text = pauseButtonPausing ? "►" : "||";
+        }
+
+        // UI Construction
 
         private static void CreateRootCanvas()
         {
@@ -239,30 +325,10 @@ namespace UnityExplorer.UI
             PanelHolder.transform.SetAsFirstSibling();
         }
 
-        public static void SetNavBarAnchor()
-        {
-            switch (NavbarAnchor)
-            {
-                case VerticalAnchor.Top:
-                    NavBarRect.anchorMin = new Vector2(0.5f, 1f);
-                    NavBarRect.anchorMax = new Vector2(0.5f, 1f);
-                    NavBarRect.anchoredPosition = new Vector2(NavBarRect.anchoredPosition.x, 0);
-                    NavBarRect.sizeDelta = new Vector2(900f, 35f);
-                    break;
-
-                case VerticalAnchor.Bottom:
-                    NavBarRect.anchorMin = new Vector2(0.5f, 0f);
-                    NavBarRect.anchorMax = new Vector2(0.5f, 0f);
-                    NavBarRect.anchoredPosition = new Vector2(NavBarRect.anchoredPosition.x, 35);
-                    NavBarRect.sizeDelta = new Vector2(900f, 35f);
-                    break;
-            }
-        }
-
         private static void CreateTopNavBar()
         {
             var navbarPanel = UIFactory.CreateUIObject("MainNavbar", CanvasRoot);
-            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(navbarPanel, false, true, true, true, 5, 4, 4, 4, 4, TextAnchor.MiddleCenter);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(navbarPanel, false, false, true, true, 5, 4, 4, 4, 4, TextAnchor.MiddleCenter);
             navbarPanel.AddComponent<Image>().color = new Color(0.1f, 0.1f, 0.1f);
             NavBarRect = navbarPanel.GetComponent<RectTransform>();
             NavBarRect.pivot = new Vector2(0.5f, 1f);
@@ -278,14 +344,28 @@ namespace UnityExplorer.UI
             // UnityExplorer title
 
             string titleTxt = $"{ExplorerCore.NAME} <i><color=grey>{ExplorerCore.VERSION}</color></i>";
-            var title = UIFactory.CreateLabel(navbarPanel, "Title", titleTxt, TextAnchor.MiddleLeft, default, true, 18);
-            UIFactory.SetLayoutElement(title.gameObject, minWidth: 180, flexibleWidth: 0);
+            var title = UIFactory.CreateLabel(navbarPanel, "Title", titleTxt, TextAnchor.MiddleLeft, default, true, 17);
+            UIFactory.SetLayoutElement(title.gameObject, minWidth: 170, flexibleWidth: 0);
 
-            // Navbar
+            // panel tabs
 
-            NavbarButtonHolder = UIFactory.CreateUIObject("NavButtonHolder", navbarPanel);
-            UIFactory.SetLayoutElement(NavbarButtonHolder, flexibleHeight: 999, flexibleWidth: 999);
-            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(NavbarButtonHolder, false, true, true, true, 4, 2, 2, 2, 2);
+            NavbarTabButtonHolder = UIFactory.CreateUIObject("NavTabButtonHolder", navbarPanel);
+            UIFactory.SetLayoutElement(NavbarTabButtonHolder, minHeight: 25, flexibleHeight: 999, flexibleWidth: 999);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(NavbarTabButtonHolder, false, true, true, true, 4, 2, 2, 2, 2);
+
+            // Time controls
+
+            var timeLabel = UIFactory.CreateLabel(navbarPanel, "TimeLabel", "Time:", TextAnchor.MiddleRight, Color.grey);
+            UIFactory.SetLayoutElement(timeLabel.gameObject, minHeight: 25, minWidth: 50);
+
+            timeInput = UIFactory.CreateInputField(navbarPanel, "TimeInput", "timeScale");
+            UIFactory.SetLayoutElement(timeInput.Component.gameObject, minHeight: 25, minWidth: 40);
+            timeInput.Text = Time.timeScale.ToString("F2");
+            timeInput.Component.onEndEdit.AddListener(OnTimeInputEndEdit);
+
+            pauseBtn = UIFactory.CreateButton(navbarPanel, "PauseButton", "||", new Color(0.2f, 0.2f, 0.2f));
+            UIFactory.SetLayoutElement(pauseBtn.Component.gameObject, minHeight: 25, minWidth: 25);
+            pauseBtn.OnClick += OnPauseButtonClicked;
 
             // Inspect under mouse dropdown
 
@@ -298,14 +378,13 @@ namespace UnityExplorer.UI
 
             // Hide menu button
 
-            var closeBtn = UIFactory.CreateButton(navbarPanel, "CloseButton", ConfigManager.Master_Toggle.Value.ToString());
+            closeBtn = UIFactory.CreateButton(navbarPanel, "CloseButton", ConfigManager.Master_Toggle.Value.ToString());
             UIFactory.SetLayoutElement(closeBtn.Component.gameObject, minHeight: 25, minWidth: 80, flexibleWidth: 0);
             RuntimeProvider.Instance.SetColorBlock(closeBtn.Component, new Color(0.63f, 0.32f, 0.31f),
                 new Color(0.81f, 0.25f, 0.2f), new Color(0.6f, 0.18f, 0.16f));
 
-            ConfigManager.Master_Toggle.OnValueChanged += (KeyCode val) => { closeBtn.ButtonText.text = val.ToString(); };
-
-            closeBtn.OnClick += () => { ShowMenu = false; };
+            ConfigManager.Master_Toggle.OnValueChanged += Master_Toggle_OnValueChanged;
+            closeBtn.OnClick += OnCloseButtonClicked;
         }
 
         #region UI AssetBundle

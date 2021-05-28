@@ -225,7 +225,7 @@ namespace UnityExplorer.UI.Panels
             {
                 // create navbar button
 
-                NavButton = UIFactory.CreateButton(UIManager.NavbarButtonHolder, $"Button_{PanelType}", Name);
+                NavButton = UIFactory.CreateButton(UIManager.NavbarTabButtonHolder, $"Button_{PanelType}", Name);
                 var navBtn = NavButton.Component.gameObject;
                 navBtn.AddComponent<ContentSizeFitter>().horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
                 UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(navBtn, false, true, true, true, 0, 0, 0, 5, 5, TextAnchor.MiddleCenter);
