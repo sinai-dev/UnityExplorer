@@ -28,10 +28,11 @@ namespace UnityExplorer.UI.CacheObject
         {
             try
             {
+                object ret;
                 if (HasArguments)
-                    return PropertyInfo.GetValue(DeclaringInstance, this.Evaluator.TryParseArguments());
-
-                var ret = PropertyInfo.GetValue(DeclaringInstance, null);
+                    ret = PropertyInfo.GetValue(DeclaringInstance, this.Evaluator.TryParseArguments());
+                else 
+                    ret = PropertyInfo.GetValue(DeclaringInstance, null);
                 HadException = false;
                 LastException = null;
                 return ret;
