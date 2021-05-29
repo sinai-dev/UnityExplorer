@@ -74,11 +74,11 @@ jobs:
       
       - name: Build UnityExplorer MelonLoader Legacy Il2Cpp
         shell: cmd
-        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_ML_Legacy_Cpp
+        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_MLLegacy_Cpp
       
       - name: Build UnityExplorer MelonLoader Legacy Mono
         shell: cmd
-        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_ML_Legacy_Mono
+        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_MLLegacy_Mono
       
       - name: Build UnityExplorer Standalone Il2Cpp
         shell: cmd
