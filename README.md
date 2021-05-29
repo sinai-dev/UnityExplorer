@@ -12,9 +12,7 @@
 
 ## Releases  [![](https://img.shields.io/github/downloads/sinai-dev/UnityExplorer/total.svg)](../../releases) 
 
-* [Click here for Bleeding Edge releases](https://github.com/sinai-dev/UnityExplorer/actions) (click on the latest workflow and scroll down to Artifacts)
-
-### Stable [![](https://img.shields.io/github/release/sinai-dev/UnityExplorer.svg?label=release%20notes)](../../releases/latest) [![](https://img.shields.io/github/downloads/sinai-dev/UnityExplorer/latest/total.svg)](../../releases/latest)
+[![](https://img.shields.io/github/release/sinai-dev/UnityExplorer.svg?label=version)](../../releases/latest) [![](https://img.shields.io/github/downloads/sinai-dev/UnityExplorer/latest/total.svg)](../../releases/latest)
 | Mod Loader  | IL2CPP | Mono |
 | ----------- | ------ | ---- |
 | [BepInEx](https://github.com/BepInEx/BepInEx) 6.X | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx.Il2Cpp.zip) | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx6.Mono.zip) |
@@ -22,6 +20,8 @@
 | [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) 0.3.1 | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.MelonLoader.Il2Cpp.zip) | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.MelonLoader.Mono.zip) | 
 | [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader) 0.3.0 | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.MelonLoader_Legacy.Il2Cpp.zip) | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.MelonLoader_Legacy.Mono.zip) | 
 | Standalone | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.Standalone.Il2Cpp.zip) | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.Standalone.Mono.zip) | 
+
+* [Click here for Bleeding Edge releases](https://github.com/sinai-dev/UnityExplorer/actions) (click on the latest workflow and scroll down to Artifacts)
 
 ### Known issues
 * Any `MissingMethodException` or `NotSupportedException`: please report the issue and provide a copy of your mod loader log and/or Unity log.
