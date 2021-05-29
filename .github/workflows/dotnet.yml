@@ -31,7 +31,7 @@ jobs:
       
       # Restore mcs nuget
       - name: Restore mcs nuget
-      - uses: nuget/setup-nuget@v1
+        uses: nuget/setup-nuget@v1
         with:
           nuget-api-key: ${{ secrets.NuGetAPIKey }}
           nuget-version: '5.x'
