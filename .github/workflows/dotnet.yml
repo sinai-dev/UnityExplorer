@@ -27,12 +27,12 @@ jobs:
       # Build Il2CppAssemblyUnhollower
       - name: Build Il2CppAssemblyUnhollower
         shell: cmd
-        run: msbuild lib\Il2CppAssemblyUnhollower\UnhollowerBaseLib\UnhollowerBaseLib.csproj -t:Restore -t:Rebuild -p:Platform="Any CPU" -p:Configuration=Release
+        run: msbuild lib\Il2CppAssemblyUnhollower\UnhollowerBaseLib\UnhollowerBaseLib.csproj -t:Restore -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release
       
       # Build mcs
       - name: Build mcs
         shell: cmd
-        run: msbuild lib\mcs-unity\mcs\mcs.csproj -t:Restore -t:Rebuild -p:Platform="Any CPU" -p:Configuration=Release
+        run: msbuild lib\mcs-unity\mcs\mcs.csproj -t:Restore -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release
         
       # Restore NuGet packages
       - name: Restore NuGet
@@ -43,39 +43,39 @@ jobs:
       
       - name: Build UnityExplorer BepInEx Il2Cpp
         shell: cmd
-        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="Any CPU" -p:Configuration=Release_BIE_Cpp
+        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_BIE_Cpp
       
       - name: Build UnityExplorer BepInEx 5 Mono
         shell: cmd
-        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="Any CPU" -p:Configuration=Release_BIE5_Mono
+        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_BIE5_Mono
       
       - name: Build UnityExplorer BepInEx 6 Mono
         shell: cmd
-        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="Any CPU" -p:Configuration=Release_BIE6_Mono
+        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_BIE6_Mono
       
       - name: Build UnityExplorer MelonLoader Il2Cpp
         shell: cmd
-        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="Any CPU" -p:Configuration=Release_ML_Cpp
+        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_ML_Cpp
       
       - name: Build UnityExplorer MelonLoader Mono
         shell: cmd
-        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="Any CPU" -p:Configuration=Release_ML_Mono
+        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_ML_Mono
       
       - name: Build UnityExplorer MelonLoader Legacy Il2Cpp
         shell: cmd
-        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="Any CPU" -p:Configuration=Release_ML_Legacy_Cpp
+        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_ML_Legacy_Cpp
       
       - name: Build UnityExplorer MelonLoader Legacy Mono
         shell: cmd
-        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="Any CPU" -p:Configuration=Release_ML_Legacy_Mono
+        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_ML_Legacy_Mono
       
       - name: Build UnityExplorer Standalone Il2Cpp
         shell: cmd
-        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="Any CPU" -p:Configuration=Release_STANDALONE_Cpp
+        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_STANDALONE_Cpp
       
       - name: Build UnityExplorer Standalone Mono
         shell: cmd
-        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="Any CPU" -p:Configuration=Release_STANDALONE_Mono
+        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_STANDALONE_Mono
         
       # Upload artifacts
       
