@@ -11,18 +11,17 @@
 
         <!-- MonoMod for MelonLoader 0.3.0 -->
         <ItemGroup Condition="'$(IsMelonLoaderLegacy)'=='true'">
-            <InputAssemblies Include="..\lib\HarmonyX\Harmony\bin\Release\net45\Mono.Cecil.dll" />
-            <InputAssemblies Include="..\lib\HarmonyX\Harmony\bin\Release\net45\Mono.Cecil.Mdb.dll" />
-            <InputAssemblies Include="..\lib\HarmonyX\Harmony\bin\Release\net45\Mono.Cecil.Pdb.dll" />
-            <InputAssemblies Include="..\lib\HarmonyX\Harmony\bin\Release\net45\Mono.Cecil.Rocks.dll" />
-            <InputAssemblies Include="..\lib\HarmonyX\Harmony\bin\Release\net45\MonoMod.RuntimeDetour.dll" />
-            <InputAssemblies Include="..\lib\HarmonyX\Harmony\bin\Release\net45\MonoMod.Utils.dll" />
+            <InputAssemblies Include="..\lib\HarmonyX\Mono.Cecil.dll" />
+            <InputAssemblies Include="..\lib\HarmonyX\Mono.Cecil.Mdb.dll" />
+            <InputAssemblies Include="..\lib\HarmonyX\Mono.Cecil.Pdb.dll" />
+            <InputAssemblies Include="..\lib\HarmonyX\Mono.Cecil.Rocks.dll" />
+            <InputAssemblies Include="..\lib\HarmonyX\MonoMod.RuntimeDetour.dll" />
+            <InputAssemblies Include="..\lib\HarmonyX\MonoMod.Utils.dll" />
         </ItemGroup>
         
         <!-- Required references for ILRepack -->
         <ItemGroup>
-            <ReferenceFolders Include="..\lib\" />
-            <ReferenceFolders Include="..\lib\HarmonyX\Harmony\bin\Release\net35\" />
+            <ReferenceFolders Include="..\lib\HarmonyX" />
             <ReferenceFolders Include="..\lib\BepInEx.6.IL2CPP\" />
             <ReferenceFolders Include="..\lib\BepInEx.6.Mono\" />
             <ReferenceFolders Include="..\lib\BepInEx.5\" />
