@@ -29,6 +29,14 @@ jobs:
         shell: cmd
         run: msbuild lib\Il2CppAssemblyUnhollower\UnhollowerBaseLib\UnhollowerBaseLib.csproj -t:Restore -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release
       
+      # Restore mcs nuget
+      - name: Restore mcs nuget
+      - uses: nuget/setup-nuget@v1
+        with:
+          nuget-api-key: ${{ secrets.NuGetAPIKey }}
+          nuget-version: '5.x'
+      - run: nuget restore lib\mcs-unity\mcs.sln
+      
       # Build mcs
       - name: Build mcs
         shell: cmd
