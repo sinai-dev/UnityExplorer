@@ -27,17 +27,17 @@ jobs:
       # Build HarmonyX
       - name: Build HarmonyX
         shell: cmd
-        run: msbuild lib\HarmonyX\Harmony\Harmony.csproj -t:Rebuild -p:Platform="Any CPU" -p:Configuration=Release
+        run: msbuild lib\HarmonyX\Harmony\Harmony.csproj -t:Restore -t:Rebuild -p:Platform="Any CPU" -p:Configuration=Release
           
       # Build Il2CppAssemblyUnhollower
       - name: Build Il2CppAssemblyUnhollower
         shell: cmd
-        run: msbuild lib\Il2CppAssemblyUnhollower\UnhollowerBaseLib\UnhollowerBaseLib.csproj -t:Rebuild -p:Platform="Any CPU" -p:Configuration:Release
+        run: msbuild lib\Il2CppAssemblyUnhollower\UnhollowerBaseLib\UnhollowerBaseLib.csproj -t:Restore -t:Rebuild -p:Platform="Any CPU" -p:Configuration:Release
       
       # Build mcs
       - name: Build mcs
         shell: cmd
-        run: msbuild lib\mcs-unity\mcs\mcs.csproj -t:Rebuild -p:Platform="Any CPU" -p:Configuration:Release
+        run: msbuild lib\mcs-unity\mcs\mcs.csproj -t:Restore -t:Rebuild -p:Platform="Any CPU" -p:Configuration:Release
         
       # Restore NuGet packages
       - name: Restore NuGet
