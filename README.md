@@ -96,10 +96,16 @@ Depending on the release you are using, the config file will be found at:
 
 ## Building
 
+If you fork the repository on GitHub you can build using the [dotnet workflow](https://github.com/sinai-dev/UnityExplorer/blob/master/.github/workflows/dotnet.yml):
+0. Click on the Actions tab and enable workflows in your repository
+1. Click on the "Build UnityExplorer" workflow, then click "Run Workflow" and run it manually, or make a new commit to trigger the workflow.
+2. Take the artifact from the completed run.
+
+For Visual Studio:
 0. Clone the repository and run `git submodule update --init --recursive` to get the submodules.
-1. Open the `src\UnityExplorer.sln` project in Visual Studio.
-2. Build `Harmony`, `mcs`, and if IL2CPP `UnhollowerBaseLib` as well.
-3. Build the UnityExplorer release(s) you want to use, either by selecting the config as the Active Config, or batch-building. If ILRepack encounters an error on your first build, try changing the active config to a different one, then back again.
+1. Open the `src\UnityExplorer.sln` project.
+2. Build `mcs`, and if using IL2CPP then build `UnhollowerBaseLib` as well.
+3. Build the UnityExplorer release(s) you want to use, either by selecting the config as the Active Config, or batch-building.
 
 ## Acknowledgments
 
