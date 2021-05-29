@@ -7,21 +7,18 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
     runs-on: windows-latest
     if: "!contains(github.event.head_commit.message, '-noci')"
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      # Checkout latest with submodules
       - uses: actions/checkout@v2
         with:
           submodules: recursive
-    
+          
+      # Setup tools
       - name: Setup msbuild
         uses: microsoft/setup-msbuild@v1       
         
@@ -32,113 +29,84 @@ jobs:
           nuget-version: '5.x'
           
       # Build Il2CppAssemblyUnhollower
-      - name: Build Il2CppAssemblyUnhollower
-        shell: cmd
-        run: msbuild lib\Il2CppAssemblyUnhollower\UnhollowerBaseLib\UnhollowerBaseLib.csproj -t:Restore -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release
-      
-      # Restore mcs nuget
-      - name: Restore mcs nuget
-        run: nuget restore lib\mcs-unity\mcs.sln
+      - run: msbuild lib\Il2CppAssemblyUnhollower\UnhollowerBaseLib\UnhollowerBaseLib.csproj -t:Restore -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release
       
       # Build mcs
-      - name: Build mcs
-        shell: cmd
-        run: msbuild lib\mcs-unity\mcs\mcs.csproj -t:Restore -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release
+      - run: nuget restore lib\mcs-unity\mcs.sln
+      - run: msbuild lib\mcs-unity\mcs\mcs.csproj -t:Restore -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release
         
-      # Restore NuGet packages
-      - name: Restore UnityExplorer nuget
-        run: nuget restore src\UnityExplorer.sln
-        
-      # Build UnityExplorer Releases
+      # Build UnityExplorer releases, and upload artifacts
       
-      - name: Build UnityExplorer BepInEx Il2Cpp
-        shell: cmd
-        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_BIE_Cpp
+      - run: nuget restore src\UnityExplorer.sln      
       
-      - name: Build UnityExplorer BepInEx 5 Mono
-        shell: cmd
-        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_BIE5_Mono
-      
-      - name: Build UnityExplorer BepInEx 6 Mono
-        shell: cmd
-        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_BIE6_Mono
-      
-      - name: Build UnityExplorer MelonLoader Il2Cpp
-        shell: cmd
-        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_ML_Cpp
-      
-      - name: Build UnityExplorer MelonLoader Mono
-        shell: cmd
-        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_ML_Mono
-      
-      - name: Build UnityExplorer MelonLoader Legacy Il2Cpp
-        shell: cmd
-        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_MLLegacy_Cpp
-      
-      - name: Build UnityExplorer MelonLoader Legacy Mono
-        shell: cmd
-        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_MLLegacy_Mono
-      
-      - name: Build UnityExplorer Standalone Il2Cpp
-        shell: cmd
-        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_STANDALONE_Cpp
-      
-      - name: Build UnityExplorer Standalone Mono
-        shell: cmd
-        run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_STANDALONE_Mono
-        
-      # Upload artifacts
+      # BepInEx Il2Cpp
+      - run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_BIE_Cpp
       
       - uses: actions/upload-artifact@v2
-        name: Upload BepInEx Il2Cpp zip
         with:
           name: UnityExplorer.BepInEx.Il2Cpp
           path: ./Release/UnityExplorer.BepInEx.Il2Cpp/*
+     
+      # BepInEx 5 Mono
+      - run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_BIE5_Mono
       
       - uses: actions/upload-artifact@v2
-        name: Upload BepInEx 5 Mono zip
         with:
           name: UnityExplorer.BepInEx5.Mono
           path: ./Release/UnityExplorer.BepInEx5.Mono/*
       
+      # BepInEx 6 Mono
+      - run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_BIE6_Mono
+      
       - uses: actions/upload-artifact@v2
-        name: Upload BepInEx 6 Mono zip
         with:
           name: UnityExplorer.BepInEx6.Mono
           path: ./Release/UnityExplorer.BepInEx6.Mono/*
       
+      # MelonLoader Il2Cpp
+      - run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_ML_Cpp
+      
       - uses: actions/upload-artifact@v2
-        name: Upload MelonLoader Il2Cpp zip
         with:
           name: UnityExplorer.MelonLoader.Il2Cpp
           path: ./Release/UnityExplorer.MelonLoader.Il2Cpp/*
       
+      # MelonLoader Mono
+      - run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_ML_Mono
+      
       - uses: actions/upload-artifact@v2
-        name: Upload MelonLoader Mono zip
         with:
           name: UnityExplorer.MelonLoader.Mono
           path: ./Release/UnityExplorer.MelonLoader.Mono/*
       
+      # MelonLoader 0.3.0 Il2Cpp
+      - run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_MLLegacy_Cpp
+      
       - uses: actions/upload-artifact@v2
-        name: Upload MelonLoader Legacy Il2Cpp zip
         with:
           name: UnityExplorer.MelonLoader_Legacy.Il2Cpp
           path: ./Release/UnityExplorer.MelonLoader_Legacy.Il2Cpp/*
       
+      # MelonLoader 0.3.0 Mono
+      - run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_MLLegacy_Mono
+      
       - uses: actions/upload-artifact@v2
-        name: Upload MelonLoader Legacy Mono zip
         with:
           name: UnityExplorer.MelonLoader_Legacy.Mono
           path: ./Release/UnityExplorer.MelonLoader_Legacy.Mono/*
       
+      # Standalone Il2Cpp
+      - run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_STANDALONE_Cpp
+      
       - uses: actions/upload-artifact@v2
-        name: Upload Standalone Il2Cpp zip
         with:
           name: UnityExplorer.Standalone.Il2Cpp
           path: ./Release/UnityExplorer.Standalone.Il2Cpp/*
       
+      # Standalone Mono
+      - run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_STANDALONE_Mono
+      
       - uses: actions/upload-artifact@v2
-        name: Upload Standalone Mono zip
         with:
           name: UnityExplorer.Standalone.Mono
           path: ./Release/UnityExplorer.Standalone.Mono/*
