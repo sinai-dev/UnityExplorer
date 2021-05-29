@@ -113,6 +113,34 @@
   </PropertyGroup>
   <!-- Global refs, Mono and Il2Cpp -->
   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>packages\HarmonyX.2.4.2\lib\net35\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Mono.Cecil">
+      <HintPath>packages\Mono.Cecil.0.10.4\lib\net35\Mono.Cecil.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Mono.Cecil.Mdb">
+      <HintPath>packages\Mono.Cecil.0.10.4\lib\net35\Mono.Cecil.Mdb.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Mono.Cecil.Pdb">
+      <HintPath>packages\Mono.Cecil.0.10.4\lib\net35\Mono.Cecil.Pdb.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Mono.Cecil.Rocks">
+      <HintPath>packages\Mono.Cecil.0.10.4\lib\net35\Mono.Cecil.Rocks.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="MonoMod.RuntimeDetour">
+      <HintPath>packages\MonoMod.RuntimeDetour.21.4.21.3\lib\net35\MonoMod.RuntimeDetour.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="MonoMod.Utils">
+      <HintPath>packages\MonoMod.Utils.21.4.21.3\lib\net35\MonoMod.Utils.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -142,13 +170,6 @@
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-  <!-- BepInEx universal refs -->
-  <ItemGroup Condition="'$(IsBepInEx)'=='true'">
-    <Reference Include="0Harmony">
-      <HintPath>..\lib\HarmonyX\Harmony\bin\Release\net35\0Harmony.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
   <!-- BepInEx 5 Mono refs -->
   <ItemGroup Condition="'$(IsBepInEx)|$(IsCpp)|$(Configuration)'=='true|false|Release_BIE5_Mono'">
     <Reference Include="BepInEx">
@@ -175,13 +196,6 @@
     </Reference>
     <Reference Include="BepInEx.IL2CPP">
       <HintPath>..\lib\BepInEx.6.IL2CPP\BepInEx.IL2CPP.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
-  <!-- Standalone refs -->
-  <ItemGroup Condition="'$(IsStandalone)'=='true'">
-    <Reference Include="0Harmony">
-      <HintPath>..\lib\HarmonyX\Harmony\bin\Release\net35\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
