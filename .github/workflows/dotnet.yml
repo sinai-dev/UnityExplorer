@@ -43,9 +43,12 @@ jobs:
         run: msbuild lib\mcs-unity\mcs\mcs.csproj -t:Restore -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release
         
       # Restore NuGet packages
-      - name: Restore NuGet
-        shell: cmd
-        run: msbuild src\UnityExplorer.csproj -t:Restore 
+      - name: Restore UnityExplorer NuGet
+        uses: nuget/setup-nuget@v1
+        with:
+          nuget-api-key: ${{ secrets.NuGetAPIKey }}
+          nuget-version: '5.x'
+      - run: nuget restore src\UnityExplorer.sln
         
       # Build UnityExplorer Releases
       
