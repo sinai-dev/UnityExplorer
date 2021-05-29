@@ -50,8 +50,8 @@ namespace UnityExplorer.UI
         }
 
         public TextGenerator TextGenerator => Component.cachedInputTextGenerator;
-        public bool ReachedMaxVerts => TextGenerator.vertexCount >= UIManager.MAX_TEXT_VERTS;
 
+        public bool ReachedMaxVerts => TextGenerator.vertexCount >= UIManager.MAX_TEXT_VERTS;
 
         private void OnInputChanged(string value)
         {

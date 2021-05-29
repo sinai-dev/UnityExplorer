@@ -15,16 +15,16 @@ namespace UnityExplorer.UI.ObjectExplorer
         /// </summary>
         public static Scene? SelectedScene 
         {
-            get => m_selectedScene;
+            get => selectedScene;
             internal set
             {
-                if (m_selectedScene != null && m_selectedScene == value)
+                if (selectedScene != null && selectedScene == value)
                     return;
-                m_selectedScene = value;
-                OnInspectedSceneChanged?.Invoke((Scene)m_selectedScene);
+                selectedScene = value;
+                OnInspectedSceneChanged?.Invoke((Scene)selectedScene);
             }
         }
-        private static Scene? m_selectedScene;
+        private static Scene? selectedScene;
 
         /// <summary>
         /// The GameObjects in the currently inspected scene.
@@ -62,7 +62,7 @@ namespace UnityExplorer.UI.ObjectExplorer
         public static event Action<ReadOnlyCollection<Scene>> OnLoadedScenesChanged;
 
         /// <summary>
-        /// Equivalent to <see cref="SceneManager.sceneCount"/> + 2, to include 'DontDestroyOnLoad'.
+        /// Equivalent to <see cref="SceneManager.sceneCount"/> + 2, to include 'DontDestroyOnLoad' and the 'None' scene.
         /// </summary>
         public static int LoadedSceneCount => SceneManager.sceneCount + 2;
 
