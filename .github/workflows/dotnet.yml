@@ -23,11 +23,6 @@ jobs:
     
       - name: setup-msbuild
         uses: microsoft/setup-msbuild@v1
-      
-      # Build HarmonyX
-      - name: Build HarmonyX
-        shell: cmd
-        run: msbuild lib\HarmonyX\Harmony\Harmony.csproj -t:Restore -t:Rebuild -p:Platform="Any CPU" -p:Configuration=Release
           
       # Build Il2CppAssemblyUnhollower
       - name: Build Il2CppAssemblyUnhollower
