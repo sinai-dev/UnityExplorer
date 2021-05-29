@@ -97,6 +97,7 @@ Depending on the release you are using, the config file will be found at:
 ## Building
 
 If you fork the repository on GitHub you can build using the [dotnet workflow](https://github.com/sinai-dev/UnityExplorer/blob/master/.github/workflows/dotnet.yml):
+
 0. Click on the Actions tab and enable workflows in your repository
 1. Click on the "Build UnityExplorer" workflow, then click "Run Workflow" and run it manually, or make a new commit to trigger the workflow.
 2. Take the artifact from the completed run.
