@@ -10,8 +10,11 @@
   Supports most Unity games from versions 5.2 to 2020+.
 </p>
 
-## Releases [![](https://img.shields.io/github/release/sinai-dev/UnityExplorer.svg?label=release%20notes)](../../releases/latest) [![](https://img.shields.io/github/downloads/sinai-dev/UnityExplorer/total.svg)](../../releases) [![](https://img.shields.io/github/downloads/sinai-dev/UnityExplorer/latest/total.svg)](../../releases/latest)
+## Releases  [![](https://img.shields.io/github/downloads/sinai-dev/UnityExplorer/total.svg)](../../releases) 
 
+* [Click here for Bleeding Edge releases](https://github.com/sinai-dev/UnityExplorer/actions) (click on the latest workflow and scroll down to Artifacts)
+
+### Stable [![](https://img.shields.io/github/release/sinai-dev/UnityExplorer.svg?label=release%20notes)](../../releases/latest) [![](https://img.shields.io/github/downloads/sinai-dev/UnityExplorer/latest/total.svg)](../../releases/latest)
 | Mod Loader  | IL2CPP | Mono |
 | ----------- | ------ | ---- |
 | [BepInEx](https://github.com/BepInEx/BepInEx) 6.X | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx.Il2Cpp.zip) | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx6.Mono.zip) |
