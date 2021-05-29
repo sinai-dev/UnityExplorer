@@ -103,6 +103,7 @@ If you fork the repository on GitHub you can build using the [dotnet workflow](h
 2. Take the artifact from the completed run.
 
 For Visual Studio:
+
 0. Clone the repository and run `git submodule update --init --recursive` to get the submodules.
 1. Open the `src\UnityExplorer.sln` project.
 2. Build `mcs`, and if using IL2CPP then build `UnhollowerBaseLib` as well.
