@@ -617,12 +617,15 @@ namespace UnityExplorer.UI.Inspectors
 
             // Actual texture viewer
 
-            var imageObj = UIFactory.CreateUIObject("TextureViewerImage", textureViewer);
-            textureImage = imageObj.AddComponent<Image>();
-            textureImageLayout = textureImage.gameObject.AddComponent<LayoutElement>();
+            var imageViewport = UIFactory.CreateVerticalGroup(textureViewer, "Viewport", false, false, true, true);
+            imageViewport.GetComponent<Image>().color = Color.white;
+            imageViewport.AddComponent<Mask>().showMaskGraphic = false;
 
+            var imageObj = UIFactory.CreateUIObject("Image", imageViewport);
             var fitter = imageObj.AddComponent<ContentSizeFitter>();
             fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            textureImage = imageObj.AddComponent<Image>();
+            textureImageLayout = UIFactory.SetLayoutElement(imageObj, flexibleWidth: 9999, flexibleHeight: 9999);
 
             textureViewer.SetActive(false);
         }
