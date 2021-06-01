@@ -16,6 +16,7 @@ using CppType = Il2CppSystem.Type;
 using BF = System.Reflection.BindingFlags;
 using UnityExplorer.Core.Config;
 using UnhollowerBaseLib.Attributes;
+using UnityEngine;
 
 namespace UnityExplorer
 {
@@ -25,10 +26,15 @@ namespace UnityExplorer
         {
             base.Initialize();
 
+            float start = Time.realtimeSinceStartup;
             TryLoadGameModules();
+            ExplorerCore.Log($"Loaded Unhollowed modules in {Time.realtimeSinceStartup - start} seconds");
 
+            start = Time.realtimeSinceStartup;
             BuildDeobfuscationCache();
             OnTypeLoaded += TryCacheDeobfuscatedType;
+            ExplorerCore.Log($"Setup IL2CPP reflection in {Time.realtimeSinceStartup - start} seconds, " +
+                $"deobfuscated types count: {DeobfuscatedTypes.Count}");
         }
 
         #region IL2CPP Extern and pointers
@@ -67,18 +73,10 @@ namespace UnityExplorer
 
         private static void BuildDeobfuscationCache()
         {
-            float start = UnityEngine.Time.realtimeSinceStartup;
-
             foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
             {
                 foreach (var type in asm.TryGetTypes())
                     TryCacheDeobfuscatedType(type);
-            }
-
-            if (DeobfuscatedTypes.Count > 0)
-            {
-                ExplorerCore.Log($"Built deobfuscation cache in {UnityEngine.Time.realtimeSinceStartup - start} seconds, " +
-                    $"initial count: {DeobfuscatedTypes.Count} ");
             }
         }
 

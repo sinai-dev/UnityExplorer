@@ -65,10 +65,14 @@ namespace UnityExplorer
 
         private static void SetupTypeCache()
         {
+            float start = Time.realtimeSinceStartup;
+
             foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
                 CacheTypes(asm);
 
             AppDomain.CurrentDomain.AssemblyLoad += AssemblyLoaded;
+
+            ExplorerCore.Log($"Cached AppDomain assemblies in {Time.realtimeSinceStartup - start} seconds");
         }
 
         private static void AssemblyLoaded(object sender, AssemblyLoadEventArgs args)
