@@ -11,7 +11,7 @@ namespace UnityExplorer.UI.CSConsole.Lexers
         protected override Color HighlightColor => new Color(0.6f, 0.6f, 0.6f);
 
         // all symbols are delimiters
-        public override IEnumerable<char> Delimiters => symbols;
+        public override IEnumerable<char> Delimiters => symbols.Where(it => it != '.'); // '.' is not a delimiter, only a separator.
 
         public static bool IsSymbol(char c) => symbols.Contains(c);
 

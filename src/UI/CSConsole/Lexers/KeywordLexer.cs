@@ -41,6 +41,10 @@ namespace UnityExplorer.UI.CSConsole.Lexers
                 while (!lexer.EndOfInput && char.IsLetter(lexer.PeekNext()))
                     sb.Append(lexer.Current);
 
+                // next must be whitespace or delimiter
+                if (!lexer.EndOfInput && !(char.IsWhiteSpace(lexer.Current) || lexer.IsDelimiter(lexer.Current)))
+                    return false;
+
                 if (keywords.Contains(sb.ToString()))
                 {
                     if (!lexer.EndOfInput)

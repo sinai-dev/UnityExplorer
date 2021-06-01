@@ -41,7 +41,7 @@ namespace UnityExplorer.UI.CSConsole
             suggestions.Clear();
 
             int caret = Math.Max(0, Math.Min(InputField.Text.Length - 1, InputField.Component.caretPosition - 1));
-            int start = caret;
+            int startIdx = caret;
 
             // If the character at the caret index is whitespace or delimiter,
             // or if the next character (if it exists) is not whitespace,
@@ -55,17 +55,20 @@ namespace UnityExplorer.UI.CSConsole
             }
 
             // get the current composition string (from caret back to last delimiter)
-            while (start > 0)
+            while (startIdx > 0)
             {
-                start--;
-                char c = InputField.Text[start];
+                startIdx--;
+                char c = InputField.Text[startIdx];
                 if (delimiters.Contains(c))
                 {
-                    start++;
+                    startIdx++;
+                    while (char.IsWhiteSpace(InputField.Text[startIdx]))
+                        startIdx++;
                     break;
                 }
             }
-            string input = InputField.Text.Substring(start, caret - start + 1);
+            string input = InputField.Text.Substring(startIdx, caret - startIdx + 1);
+
 
             // Get MCS completions
 
