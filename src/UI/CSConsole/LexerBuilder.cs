@@ -14,6 +14,7 @@ namespace UnityExplorer.UI.CSConsole
         public int startIndex;
         public int endIndex;
         public string htmlColorTag;
+        public bool isStringOrComment;
     }
 
     public class LexerBuilder
@@ -82,8 +83,10 @@ namespace UnityExplorer.UI.CSConsole
         /// <param name="endIdx">The last character you want to highlight</param>
         /// <param name="leadingLines">The amount of leading empty lines you want before the first character in the return string.</param>
         /// <returns>A string which contains the amount of leading lines specified, as well as the rich-text highlighted section.</returns>
-        public string BuildHighlightedString(string input, int startIdx, int endIdx, int leadingLines)
+        public string BuildHighlightedString(string input, int startIdx, int endIdx, int leadingLines, int caretIdx, out bool caretInStringOrComment)
         {
+            caretInStringOrComment = false;
+
             if (string.IsNullOrEmpty(input) || endIdx <= startIdx)
                 return input;
 
@@ -105,11 +108,13 @@ namespace UnityExplorer.UI.CSConsole
 
                 // append the highlighted match
                 sb.Append(match.htmlColorTag);
-
                 for (int i = match.startIndex; i <= match.endIndex && i <= currentEndIdx; i++)
                     sb.Append(input[i]);
-
                 sb.Append(SignatureHighlighter.CLOSE_COLOR);
+
+                // check caretIdx to determine inStringOrComment state
+                if (caretIdx >= match.startIndex && caretIdx <= match.endIndex)
+                    caretInStringOrComment = match.isStringOrComment;
 
                 // update the last unhighlighted start index
                 lastUnhighlighted = match.endIndex + 1;
@@ -150,6 +155,7 @@ namespace UnityExplorer.UI.CSConsole
                             startIndex = startIndex,
                             endIndex = CommittedIndex,
                             htmlColorTag = lexer.ColorTag,
+                            isStringOrComment = lexer is StringLexer || lexer is CommentLexer,
                         };
                         break;
                     }

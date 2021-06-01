@@ -59,11 +59,9 @@ namespace UnityExplorer.UI.CSConsole
             {
                 startIdx--;
                 char c = InputField.Text[startIdx];
-                if (delimiters.Contains(c))
+                if (delimiters.Contains(c) || char.IsWhiteSpace(c))
                 {
                     startIdx++;
-                    while (char.IsWhiteSpace(InputField.Text[startIdx]))
-                        startIdx++;
                     break;
                 }
             }

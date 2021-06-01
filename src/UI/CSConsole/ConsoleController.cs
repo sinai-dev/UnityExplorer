@@ -231,19 +231,23 @@ namespace UnityExplorer.UI.CSConsole
             previousInput = value;
 
             if (EnableSuggestions && AutoCompleteModal.CheckEnter(Completer))
-            {
                 OnAutocompleteEnter();
-            }
-            else if (!settingCaretCoroutine)
+
+            var inStringOrComment = HighlightVisibleInput();
+            
+            if (!settingCaretCoroutine)
             {
                 if (EnableSuggestions)
-                    Completer.CheckAutocompletes();
+                {
+                    if (inStringOrComment)
+                        AutoCompleteModal.Instance.ReleaseOwnership(Completer);
+                    else
+                        Completer.CheckAutocompletes();
+                }
 
                 if (EnableAutoIndent)
                     DoAutoIndent();
             }
-
-            HighlightVisibleInput();
 
             UpdateCaret(out _);
         }
@@ -372,7 +376,10 @@ namespace UnityExplorer.UI.CSConsole
 
         #region Lexer Highlighting
 
-        private static void HighlightVisibleInput()
+        /// <summary>
+        /// Returns true if caret is inside string or comment, false otherwise
+        /// </summary>
+        private static bool HighlightVisibleInput()
         {
             int startIdx = 0;
             int endIdx = Input.Text.Length - 1;
@@ -410,7 +417,8 @@ namespace UnityExplorer.UI.CSConsole
             }
 
             // Highlight the visible text with the LexerBuilder
-            Panel.HighlightText.text = Lexer.BuildHighlightedString(Input.Text, startIdx, endIdx, topLine);
+            Panel.HighlightText.text = Lexer.BuildHighlightedString(Input.Text, startIdx, endIdx, topLine, LastCaretPosition, out bool ret);
+            return ret;
         }
 
         #endregion
