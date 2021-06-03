@@ -12,6 +12,7 @@ using UnityExplorer.Core.Input;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets.AutoComplete;
 using System.Reflection;
+using Mono.CSharp;
 
 namespace UnityExplorer.UI.CSConsole
 {
@@ -150,15 +151,16 @@ namespace UnityExplorer.UI.CSConsole
 
             try
             {
-                // Try to "Compile" the code (tries to interpret it as REPL)
-                var evaluation = Evaluator.Compile(input);
-                if (evaluation != null)
+                // Compile the code. If it returned a CompiledMethod, it is REPL.
+                CompiledMethod repl = Evaluator.Compile(input);
+
+                if (repl != null)
                 {
                     // Valid REPL, we have a delegate to the evaluation.
                     try
                     {
                         object ret = null;
-                        evaluation.Invoke(ref ret);
+                        repl.Invoke(ref ret);
                         var result = ret?.ToString();
                         if (!string.IsNullOrEmpty(result))
                             ExplorerCore.Log($"Invoked REPL, result: {ret}");
@@ -172,9 +174,7 @@ namespace UnityExplorer.UI.CSConsole
                 }
                 else
                 {
-                    // The input was not recognized as an evaluation. Compile the code.
-
-                    Evaluator.Run(input);
+                    // The compiled code was not REPL, so it was a using directive or it defined classes.
 
                     string output = ScriptEvaluator._textWriter.ToString();
                     var outputSplit = output.Split('\n');
@@ -233,6 +233,12 @@ namespace UnityExplorer.UI.CSConsole
             if (EnableSuggestions && AutoCompleteModal.CheckEnter(Completer))
                 OnAutocompleteEnter();
 
+            if (!settingCaretCoroutine)
+            {
+                if (EnableAutoIndent)
+                    DoAutoIndent();
+            }
+
             var inStringOrComment = HighlightVisibleInput();
             
             if (!settingCaretCoroutine)
@@ -244,9 +250,6 @@ namespace UnityExplorer.UI.CSConsole
                     else
                         Completer.CheckAutocompletes();
                 }
-
-                if (EnableAutoIndent)
-                    DoAutoIndent();
             }
 
             UpdateCaret(out _);
@@ -261,16 +264,16 @@ namespace UnityExplorer.UI.CSConsole
 
             UpdateCaret(out bool caretMoved);
 
-            if (!settingCaretCoroutine && EnableSuggestions && AutoCompleteModal.CheckEscape(Completer))
+            if (!settingCaretCoroutine && EnableSuggestions)
             {
-                OnAutocompleteEscaped();
-                return;
-            }
+                if (AutoCompleteModal.CheckEscape(Completer))
+                {
+                    OnAutocompleteEscaped();
+                    return;
+                }
 
-            if (!settingCaretCoroutine && EnableSuggestions && caretMoved)
-            {
-                AutoCompleteModal.Instance.ReleaseOwnership(Completer);
-                //Completer.CheckAutocompletes();
+                if (caretMoved)
+                    AutoCompleteModal.Instance.ReleaseOwnership(Completer);
             }
 
             if (EnableCtrlRShortcut
