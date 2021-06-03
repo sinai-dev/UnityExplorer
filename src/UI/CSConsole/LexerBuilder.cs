@@ -113,7 +113,7 @@ namespace UnityExplorer.UI.CSConsole
                 sb.Append(SignatureHighlighter.CLOSE_COLOR);
 
                 // check caretIdx to determine inStringOrComment state
-                if (caretIdx >= match.startIndex && caretIdx <= match.endIndex)
+                if (caretIdx >= match.startIndex && (caretIdx <= match.endIndex || (caretIdx >= input.Length && match.endIndex >= input.Length - 1)))
                     caretInStringOrComment = match.isStringOrComment;
 
                 // update the last unhighlighted start index
