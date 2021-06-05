@@ -35,7 +35,7 @@ namespace UnityExplorer.UI.ObjectExplorer
 
     public static class SearchProvider
     {
-       
+
         private static bool Filter(Scene scene, SceneFilter filter)
         {
             switch (filter)
@@ -53,7 +53,7 @@ namespace UnityExplorer.UI.ObjectExplorer
             }
         }
 
-        internal static List<object> UnityObjectSearch(string input, string customTypeInput, SearchContext context, 
+        internal static List<object> UnityObjectSearch(string input, string customTypeInput, SearchContext context,
             ChildFilter childFilter, SceneFilter sceneFilter)
         {
             var results = new List<object>();

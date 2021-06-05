@@ -1,6 +1,6 @@
 ﻿using System;
-using UnityEngine;
 using System.Diagnostics.CodeAnalysis;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace UnityExplorer.Core.Input
@@ -74,7 +74,7 @@ namespace UnityExplorer.Core.Input
                     ExplorerCore.Log("Initialized Legacy Input support");
                     return;
                 }
-                catch 
+                catch
                 {
                     // It's not working, we'll fall back to InputSystem.
                 }

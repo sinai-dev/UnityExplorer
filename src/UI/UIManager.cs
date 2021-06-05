@@ -352,7 +352,7 @@ namespace UnityExplorer.UI
 
             NavbarAnchor = ConfigManager.Main_Navbar_Anchor.Value;
             SetNavBarAnchor();
-            ConfigManager.Main_Navbar_Anchor.OnValueChanged += (VerticalAnchor val) => 
+            ConfigManager.Main_Navbar_Anchor.OnValueChanged += (VerticalAnchor val) =>
             {
                 NavbarAnchor = val;
                 SetNavBarAnchor();

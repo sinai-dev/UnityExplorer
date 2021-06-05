@@ -26,7 +26,7 @@ namespace UnityExplorer.UI.Widgets
         }
         private string currentFilter;
 
-        public ButtonListHandler(ScrollPool<TCell> scrollPool, Func<List<TData>> getEntriesMethod, 
+        public ButtonListHandler(ScrollPool<TCell> scrollPool, Func<List<TData>> getEntriesMethod,
             Action<TCell, int> setICellMethod, Func<TData, string, bool> shouldDisplayMethod,
             Action<int> onCellClickedMethod)
         {

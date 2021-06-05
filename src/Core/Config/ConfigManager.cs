@@ -16,18 +16,18 @@ namespace UnityExplorer.Core.Config
         // See the UnityExplorer.Loader namespace for the implementations.
         public static ConfigHandler Handler { get; private set; }
 
-        public static ConfigElement<KeyCode>    Master_Toggle;
+        public static ConfigElement<KeyCode> Master_Toggle;
         public static ConfigElement<UIManager.VerticalAnchor> Main_Navbar_Anchor;
-        public static ConfigElement<bool>       Force_Unlock_Mouse;
-        public static ConfigElement<KeyCode>    Force_Unlock_Toggle;
-        public static ConfigElement<bool>       Aggressive_Mouse_Unlock;
-        public static ConfigElement<bool>       Disable_EventSystem_Override;
-        public static ConfigElement<string>     Default_Output_Path;
-        public static ConfigElement<bool>       Log_Unity_Debug;
-        public static ConfigElement<bool>       Hide_On_Startup;
-        public static ConfigElement<float>      Startup_Delay_Time;
+        public static ConfigElement<bool> Force_Unlock_Mouse;
+        public static ConfigElement<KeyCode> Force_Unlock_Toggle;
+        public static ConfigElement<bool> Aggressive_Mouse_Unlock;
+        public static ConfigElement<bool> Disable_EventSystem_Override;
+        public static ConfigElement<string> Default_Output_Path;
+        public static ConfigElement<bool> Log_Unity_Debug;
+        public static ConfigElement<bool> Hide_On_Startup;
+        public static ConfigElement<float> Startup_Delay_Time;
 
-        public static ConfigElement<string>     Reflection_Signature_Blacklist;
+        public static ConfigElement<string> Reflection_Signature_Blacklist;
 
         // internal configs
         internal static InternalConfigHandler InternalHandler { get; private set; }

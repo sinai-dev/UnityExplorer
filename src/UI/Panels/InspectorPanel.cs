@@ -61,7 +61,7 @@ namespace UnityExplorer.UI.Panels
         {
             // add close all button to titlebar
 
-            var closeAllBtn = UIFactory.CreateButton(this.titleBar.transform.Find("CloseHolder").gameObject, "CloseAllBtn", "Close All", 
+            var closeAllBtn = UIFactory.CreateButton(this.titleBar.transform.Find("CloseHolder").gameObject, "CloseAllBtn", "Close All",
                 new Color(0.3f, 0.2f, 0.2f));
             UIFactory.SetLayoutElement(closeAllBtn.Component.gameObject, minHeight: 25, minWidth: 80);
             closeAllBtn.Component.transform.SetSiblingIndex(closeAllBtn.Component.transform.GetSiblingIndex() - 1);

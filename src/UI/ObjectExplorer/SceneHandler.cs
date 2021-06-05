@@ -13,7 +13,7 @@ namespace UnityExplorer.UI.ObjectExplorer
         /// <summary>
         /// The currently inspected Scene.
         /// </summary>
-        public static Scene? SelectedScene 
+        public static Scene? SelectedScene
         {
             get => selectedScene;
             internal set
@@ -93,7 +93,7 @@ namespace UnityExplorer.UI.ObjectExplorer
                 Type sceneUtil = ReflectionUtility.GetTypeByName("UnityEngine.SceneManagement.SceneUtility");
                 if (sceneUtil == null)
                     throw new Exception("This version of Unity does not ship with the 'SceneUtility' class, or it was not unstripped.");
-                
+
                 var method = sceneUtil.GetMethod("GetScenePathByBuildIndex", ReflectionUtility.FLAGS);
                 int sceneCount = SceneManager.sceneCountInBuildSettings;
                 for (int i = 0; i < sceneCount; i++)

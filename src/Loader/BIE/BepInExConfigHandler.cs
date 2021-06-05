@@ -27,7 +27,7 @@ namespace UnityExplorer.Loader.BIE
 
             var entry = Config.Bind(CTG_NAME, config.Name, config.Value, new ConfigDescription(config.Description, null, tags));
 
-            entry.SettingChanged += (object o, EventArgs e) => 
+            entry.SettingChanged += (object o, EventArgs e) =>
             {
                 config.Value = entry.Value;
             };

@@ -87,7 +87,7 @@ namespace UnityExplorer
             }
         }
 
-        private static void CreateInspector<T>(object target, bool staticReflection = false, 
+        private static void CreateInspector<T>(object target, bool staticReflection = false,
             CacheObjectBase sourceCache = null) where T : InspectorBase
         {
             var inspector = Pool<T>.Borrow();

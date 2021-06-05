@@ -143,7 +143,7 @@ namespace UnityExplorer.UI.CacheObject.IValues
                 ExplorerCore.LogWarning("Exception setting value: " + ex);
             }
         }
-        
+
         // UI Setup for type
 
         private void SetupUIForType()

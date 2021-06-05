@@ -1,18 +1,18 @@
-﻿using System;
+﻿using Mono.CSharp;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityExplorer.UI.CSConsole;
 using UnityExplorer.Core.Input;
+using UnityExplorer.UI.CSConsole;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets.AutoComplete;
-using System.Reflection;
-using Mono.CSharp;
 
 namespace UnityExplorer.UI.CSConsole
 {
@@ -221,7 +221,7 @@ namespace UnityExplorer.UI.CSConsole
             if (InputManager.GetKeyDown(KeyCode.Escape))
             {
                 Input.Text = previousInput;
-                
+
                 if (EnableSuggestions && AutoCompleteModal.CheckEscape(Completer))
                     OnAutocompleteEscaped();
 
@@ -240,7 +240,7 @@ namespace UnityExplorer.UI.CSConsole
             }
 
             var inStringOrComment = HighlightVisibleInput();
-            
+
             if (!settingCaretCoroutine)
             {
                 if (EnableSuggestions)

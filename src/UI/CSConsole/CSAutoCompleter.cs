@@ -22,7 +22,6 @@ namespace UnityExplorer.UI.CSConsole
             AutoCompleteModal.Instance.ReleaseOwnership(this);
         }
 
-        // Delimiters for completions, notably does not include '.'
         private readonly HashSet<char> delimiters = new HashSet<char>
         {
             '{', '}', ',', ';', '<', '>', '(', ')', '[', ']', '=', '|', '&', '?'
@@ -67,11 +66,10 @@ namespace UnityExplorer.UI.CSConsole
             }
             string input = InputField.Text.Substring(startIdx, caret - startIdx + 1);
 
-
             // Get MCS completions
 
             string[] evaluatorCompletions = ConsoleController.Evaluator.GetCompletions(input, out string prefix);
-            
+
             if (evaluatorCompletions != null && evaluatorCompletions.Any())
             {
                 suggestions.AddRange(from completion in evaluatorCompletions
@@ -100,7 +98,7 @@ namespace UnityExplorer.UI.CSConsole
                 {
                     if (!keywordHighlights.ContainsKey(kw))
                         keywordHighlights.Add(kw, $"<color=#{SignatureHighlighter.keywordBlueHex}>{kw}</color>");
-            
+
                     string completion = kw.Substring(input.Length, kw.Length - input.Length);
                     suggestions.Add(new Suggestion(keywordHighlights[kw], completion));
                 }
@@ -124,7 +122,7 @@ namespace UnityExplorer.UI.CSConsole
 
         private readonly StringBuilder highlightBuilder = new StringBuilder();
         private const string OPEN_HIGHLIGHT = "<color=cyan>";
-        
+
         private string GetHighlightString(string prefix, string completion)
         {
             highlightBuilder.Clear();

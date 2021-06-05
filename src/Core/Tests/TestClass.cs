@@ -2,11 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
-using UnityExplorer.UI.CacheObject.IValues;
-using System.Reflection;
 using UnityExplorer.UI;
+using UnityExplorer.UI.CacheObject.IValues;
 #if CPP
 using UnhollowerRuntimeLib;
 using UnhollowerBaseLib;
@@ -16,7 +16,7 @@ namespace UnityExplorer.Tests
 {
     public class TestIndexer : IList<int>
     {
-        private readonly List<int> list = new List<int>() { 1,2,3,4,5 };
+        private readonly List<int> list = new List<int>() { 1, 2, 3, 4, 5 };
 
         public int Count => list.Count;
         public bool IsReadOnly => false;
@@ -133,21 +133,21 @@ namespace UnityExplorer.Tests
             }
         }
 
-        private static void TestGeneric<T>() 
+        private static void TestGeneric<T>()
         {
             ExplorerCore.Log("Test1 " + typeof(T).FullName);
         }
-        
+
         private static void TestGenericClass<T>() where T : class
         {
             ExplorerCore.Log("Test2 " + typeof(T).FullName);
         }
-        
+
         private static void TestComponent<T>() where T : Component
         {
             ExplorerCore.Log("Test3 " + typeof(T).FullName);
         }
-        
+
         private static void TestStruct<T>() where T : struct
         {
             ExplorerCore.Log("Test3 " + typeof(T).FullName);

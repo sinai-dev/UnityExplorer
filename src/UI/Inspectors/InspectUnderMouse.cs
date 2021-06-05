@@ -68,8 +68,8 @@ namespace UnityExplorer.UI.Inspectors
         {
             MainCamera = Camera.main;
             if (!MainCamera)
-                return; 
-            
+                return;
+
             PanelDragger.ForceEnd();
 
             Mode = mode;
@@ -95,8 +95,8 @@ namespace UnityExplorer.UI.Inspectors
             Inspecting = false;
 
             UIManager.NavBarRect.gameObject.SetActive(true);
-            UIManager.PanelHolder.SetActive(true); 
-            
+            UIManager.PanelHolder.SetActive(true);
+
             var drop = UIManager.MouseInspectDropdown;
             if (drop.transform.Find("Dropdown List") is Transform list)
                 drop.DestroyDropdownList(list.gameObject);

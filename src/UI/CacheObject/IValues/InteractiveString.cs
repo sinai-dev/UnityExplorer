@@ -18,7 +18,7 @@ namespace UnityExplorer.UI.CacheObject.IValues
 
         public InputFieldRef inputField;
         public ButtonRef ApplyButton;
-        
+
         public GameObject SaveFileRow;
         public InputFieldRef SaveFilePath;
 
@@ -36,7 +36,7 @@ namespace UnityExplorer.UI.CacheObject.IValues
         {
             if (s == null)
                 return false;
-        
+
             return s.Length >= UIManager.MAX_INPUTFIELD_CHARS;
         }
 
@@ -83,7 +83,7 @@ namespace UnityExplorer.UI.CacheObject.IValues
 
             if (File.Exists(path))
                 File.Delete(path);
-            
+
             File.WriteAllText(path, RealValue);
         }
 
@@ -98,7 +98,7 @@ namespace UnityExplorer.UI.CacheObject.IValues
             UIFactory.SetLayoutElement(SaveFileRow, flexibleWidth: 9999);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(SaveFileRow, false, true, true, true, 3);
 
-            UIFactory.CreateLabel(SaveFileRow, "Info", "<color=red>String is too long! Save to file if you want to see the full string.</color>", 
+            UIFactory.CreateLabel(SaveFileRow, "Info", "<color=red>String is too long! Save to file if you want to see the full string.</color>",
                 TextAnchor.MiddleLeft);
 
             var horizRow = UIFactory.CreateUIObject("Horiz", SaveFileRow);

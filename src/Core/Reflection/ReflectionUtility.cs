@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using BF = System.Reflection.BindingFlags;
-using UnityExplorer.Core.Runtime;
 using System.Text;
 using UnityEngine;
 using UnityExplorer.Core.Config;
+using UnityExplorer.Core.Runtime;
+using BF = System.Reflection.BindingFlags;
 
 namespace UnityExplorer
 {
@@ -225,7 +225,7 @@ namespace UnityExplorer
             return ret;
         }
 
-#endregion
+        #endregion
 
 
         #region Type and Generic Parameter implementation cache
@@ -360,7 +360,7 @@ namespace UnityExplorer
             return genericParameterInheritance[key];
         }
 
-#endregion
+        #endregion
 
 
         #region Internal MemberInfo Cache
@@ -493,7 +493,7 @@ namespace UnityExplorer
 
 
         // Temp fix for IL2CPP until interface support improves
-        
+
         // IsEnumerable 
 
         public static bool IsEnumerable(Type type) => Instance.Internal_IsEnumerable(type);
@@ -505,7 +505,7 @@ namespace UnityExplorer
 
         // TryGetEnumerator (list)
 
-        public static bool TryGetEnumerator(object list, out IEnumerator enumerator) 
+        public static bool TryGetEnumerator(object list, out IEnumerator enumerator)
             => Instance.Internal_TryGetEnumerator(list, out enumerator);
 
         protected virtual bool Internal_TryGetEnumerator(object list, out IEnumerator enumerator)
@@ -546,7 +546,7 @@ namespace UnityExplorer
             type = typeof(object);
             return false;
         }
-        
+
         // IsDictionary
 
         public static bool IsDictionary(Type type) => Instance.Internal_IsDictionary(type);
@@ -558,7 +558,7 @@ namespace UnityExplorer
 
         // TryGetEnumerator (dictionary)
 
-        public static bool TryGetDictEnumerator(object dictionary, out IEnumerator<DictionaryEntry> dictEnumerator) 
+        public static bool TryGetDictEnumerator(object dictionary, out IEnumerator<DictionaryEntry> dictEnumerator)
             => Instance.Internal_TryGetDictEnumerator(dictionary, out dictEnumerator);
 
         protected virtual bool Internal_TryGetDictEnumerator(object dictionary, out IEnumerator<DictionaryEntry> dictEnumerator)

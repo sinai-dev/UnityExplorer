@@ -206,7 +206,7 @@ namespace UnityExplorer.UI.CacheObject.IValues
             {
                 ExplorerCore.LogWarning($"Exception setting IList value: {ex}");
             }
-        } 
+        }
 
         // List entry scroll pool
 
@@ -254,8 +254,8 @@ namespace UnityExplorer.UI.CacheObject.IValues
             ListScrollPool.Initialize(this, SetLayout);
             scrollLayout = scrollObj.GetComponent<LayoutElement>();
 
-            NotSupportedLabel = UIFactory.CreateLabel(ListScrollPool.Content.gameObject, "NotSupportedMessage", 
-                "The IEnumerable failed to enumerate. This is likely due to an issue with Unhollowed interfaces.", 
+            NotSupportedLabel = UIFactory.CreateLabel(ListScrollPool.Content.gameObject, "NotSupportedMessage",
+                "The IEnumerable failed to enumerate. This is likely due to an issue with Unhollowed interfaces.",
                 TextAnchor.MiddleLeft, Color.red);
 
             UIFactory.SetLayoutElement(NotSupportedLabel.gameObject, minHeight: 25, flexibleWidth: 9999);

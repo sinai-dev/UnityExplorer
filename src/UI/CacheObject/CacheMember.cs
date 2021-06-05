@@ -15,7 +15,7 @@ namespace UnityExplorer.UI.CacheObject
     {
         //public ReflectionInspector ParentInspector { get; internal set; }
         //public bool AutoUpdateWanted { get; internal set; }
-        
+
         public abstract Type DeclaringType { get; }
         public string NameForFiltering { get; protected set; }
         public object DeclaringInstance => IsStatic ? null : (m_declaringInstance ?? (m_declaringInstance = Owner.Target.TryCast(DeclaringType)));
@@ -27,7 +27,7 @@ namespace UnityExplorer.UI.CacheObject
         public Type[] GenericArguments { get; protected set; } = ArgumentUtility.EmptyTypes;
         public EvaluateWidget Evaluator { get; protected set; }
         public bool Evaluating => Evaluator != null && Evaluator.UIRoot.activeSelf;
-        
+
         public virtual void SetInspectorOwner(ReflectionInspector inspector, MemberInfo member)
         {
             this.Owner = inspector;
@@ -234,7 +234,7 @@ namespace UnityExplorer.UI.CacheObject
             return sorted;
         }
 
-        private static void TryCacheMember(MemberInfo member, List<CacheMember> list, HashSet<string> cachedSigs, 
+        private static void TryCacheMember(MemberInfo member, List<CacheMember> list, HashSet<string> cachedSigs,
             Type declaringType, ReflectionInspector _inspector, bool ignorePropertyMethodInfos = true)
         {
             try
@@ -253,7 +253,7 @@ namespace UnityExplorer.UI.CacheObject
                     case MemberTypes.Method:
                         {
                             var mi = member as MethodInfo;
-                            if (ignorePropertyMethodInfos 
+                            if (ignorePropertyMethodInfos
                                 && (mi.Name.StartsWith("get_") || mi.Name.StartsWith("set_")))
                                 return;
 
@@ -322,7 +322,7 @@ namespace UnityExplorer.UI.CacheObject
             }
         }
 
-        internal static string GetSig(MemberInfo member) 
+        internal static string GetSig(MemberInfo member)
             => $"{member.DeclaringType.Name}.{member.Name}";
 
         internal static string GetArgumentString(ParameterInfo[] args)

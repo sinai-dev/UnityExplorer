@@ -44,7 +44,7 @@ namespace UnityExplorer.UI.CSConsole.Lexers
                     while (!lexer.EndOfInput && !(lexer.Current == '/' && lexer.Previous == '*'));
 
                     return true;
-                }  
+                }
             }
 
             return false;

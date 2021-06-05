@@ -103,15 +103,15 @@ namespace UnityExplorer
             RuntimeProvider.Instance.ProcessOnPostRender();
         }
 
-#region LOGGING
+        #region LOGGING
 
-        public static void Log(object message) 
+        public static void Log(object message)
             => Log(message, LogType.Log);
 
-        public static void LogWarning(object message) 
+        public static void LogWarning(object message)
             => Log(message, LogType.Warning);
 
-        public static void LogError(object message) 
+        public static void LogError(object message)
             => Log(message, LogType.Error);
 
         public static void LogUnity(object message, LogType logType)
@@ -146,6 +146,6 @@ namespace UnityExplorer
             }
         }
 
-#endregion
+        #endregion
     }
 }

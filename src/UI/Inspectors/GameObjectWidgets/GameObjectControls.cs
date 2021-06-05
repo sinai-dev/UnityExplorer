@@ -186,7 +186,7 @@ namespace UnityExplorer.UI.Inspectors
                 if (parentToSet)
                     DoSetParent(parentToSet);
                 else
-                { 
+                {
                     ExplorerCore.LogWarning($"Could not find any GameObject name or path '{input}'!");
                     UpdateGameObjectInfo(false, true);
                 }
@@ -442,7 +442,7 @@ namespace UnityExplorer.UI.Inspectors
 
         private void ConstructTopInfo()
         {
-            var topInfoHolder = UIFactory.CreateVerticalGroup(Parent.Content, "TopInfoHolder", false, false, true, true, 3, 
+            var topInfoHolder = UIFactory.CreateVerticalGroup(Parent.Content, "TopInfoHolder", false, false, true, true, 3,
                 new Vector4(3, 3, 3, 3), new Color(0.1f, 0.1f, 0.1f), TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(topInfoHolder, minHeight: 100, flexibleWidth: 9999);
             topInfoHolder.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
@@ -575,7 +575,7 @@ namespace UnityExplorer.UI.Inspectors
             var flagsDrop = UIFactory.CreateDropdown(thirdrow, out FlagsDropdown, "None", 14, OnFlagsDropdownChanged);
             FlagsDropdown.captionText.color = SignatureHighlighter.EnumGreen;
             UIFactory.SetLayoutElement(flagsDrop, minHeight: 25, minWidth: 135, flexibleWidth: 999);
-            if (hideFlagsValues == null) 
+            if (hideFlagsValues == null)
                 GetHideFlagNames();
             foreach (var name in hideFlagsValues.Keys)
                 FlagsDropdown.options.Add(new Dropdown.OptionData(name));

@@ -7,12 +7,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using UnityExplorer.Core.Config;
-using UnityExplorer.Loader.BIE;
 using UnityEngine;
-using UnityExplorer.Core;
 using UnityEngine.EventSystems;
+using UnityExplorer.Core;
+using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Input;
+using UnityExplorer.Loader.BIE;
 #if CPP
 using BepInEx.IL2CPP;
 using UnhollowerRuntimeLib;
@@ -50,7 +50,7 @@ namespace UnityExplorer
 
         public Action<object> OnLogMessage => LogSource.LogMessage;
         public Action<object> OnLogWarning => LogSource.LogWarning;
-        public Action<object> OnLogError   => LogSource.LogError;
+        public Action<object> OnLogError => LogSource.LogError;
 
         // Init common to Mono and Il2Cpp
         internal void UniversalInit()

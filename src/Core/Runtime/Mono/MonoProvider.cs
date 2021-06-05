@@ -143,7 +143,7 @@ public static class MonoExtensions
     {
         if (pi_childControlHeight == null)
             pi_childControlHeight = group.GetType().GetProperty("childControlHeight");
-        
+
         pi_childControlHeight?.SetValue(group, value, null);
     }
 

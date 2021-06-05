@@ -7,8 +7,8 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Core.Runtime;
-using UnityExplorer.UI.CacheObject.Views;
 using UnityExplorer.UI.CacheObject.IValues;
+using UnityExplorer.UI.CacheObject.Views;
 using UnityExplorer.UI.Models;
 
 namespace UnityExplorer.UI.CacheObject
@@ -180,8 +180,8 @@ namespace UnityExplorer.UI.CacheObject
                 return ValueState.Enum;
             else if (type == typeof(Color) || type == typeof(Color32))
                 return ValueState.Color;
-             else if (InteractiveValueStruct.SupportsType(type))
-                 return ValueState.ValueStruct;
+            else if (InteractiveValueStruct.SupportsType(type))
+                return ValueState.ValueStruct;
             else if (ReflectionUtility.IsDictionary(type))
                 return ValueState.Dictionary;
             else if (!typeof(Transform).IsAssignableFrom(type) && ReflectionUtility.IsEnumerable(type))
@@ -197,7 +197,7 @@ namespace UnityExplorer.UI.CacheObject
             switch (State)
             {
                 case ValueState.NotEvaluated:
-                    return $"<i>{NOT_YET_EVAL} ({SignatureHighlighter.Parse(FallbackType, true)})</i>"; 
+                    return $"<i>{NOT_YET_EVAL} ({SignatureHighlighter.Parse(FallbackType, true)})</i>";
 
                 case ValueState.Exception:
                     return $"<i><color=red>{LastException.ReflectionExToString()}</color></i>";
@@ -221,7 +221,7 @@ namespace UnityExplorer.UI.CacheObject
                         return $"\"{ToStringUtility.PruneString(s, 200, 5)}\"";
                     }
                     break;
-                
+
                 // try to prefix the count of the collection for lists and dicts
                 case ValueState.Collection:
                     if (!LastValueWasNull)
@@ -263,7 +263,7 @@ namespace UnityExplorer.UI.CacheObject
 
             cell.SubContentHolder.gameObject.SetActive(SubContentShowWanted);
             if (IValue != null)
-            { 
+            {
                 IValue.UIRoot.transform.SetParent(cell.SubContentHolder.transform, false);
                 IValue.SetLayout();
             }

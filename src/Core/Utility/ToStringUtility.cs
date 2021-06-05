@@ -81,7 +81,7 @@ namespace UnityExplorer
                     sb.Append(PruneString(obj.name, 50, 1));
                     sb.Append('"');
                 }
-                
+
                 AppendRichType(sb, richType);
             }
             else if (type.FullName.StartsWith(eventSystemNamespace))
@@ -93,8 +93,8 @@ namespace UnityExplorer
             {
                 var toString = ToString(value);
 
-                if (type.IsGenericType 
-                    || toString == type.FullName 
+                if (type.IsGenericType
+                    || toString == type.FullName
                     || toString == $"{type.FullName} {type.FullName}"
                     || toString == $"Il2Cpp{type.FullName}" || type.FullName == $"Il2Cpp{toString}")
                 {

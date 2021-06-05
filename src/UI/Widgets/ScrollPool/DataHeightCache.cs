@@ -118,7 +118,7 @@ namespace UnityExplorer.UI.Widgets
             if (!heightCache.Any())
                 return;
 
-            totalHeight -= heightCache[heightCache.Count - 1];            
+            totalHeight -= heightCache[heightCache.Count - 1];
             heightCache.RemoveAt(heightCache.Count - 1);
 
             int idx = heightCache.Count;

@@ -31,7 +31,7 @@ namespace UnityExplorer.UI.CacheObject
                 object ret;
                 if (HasArguments)
                     ret = PropertyInfo.GetValue(DeclaringInstance, this.Evaluator.TryParseArguments());
-                else 
+                else
                     ret = PropertyInfo.GetValue(DeclaringInstance, null);
                 HadException = false;
                 LastException = null;

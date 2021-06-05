@@ -22,7 +22,7 @@ namespace UnityExplorer
         public const string NUMBER_FORMAT = "0.####";
 
         private static readonly Dictionary<int, string> numSequenceStrings = new Dictionary<int, string>();
-        
+
         // Helper for formatting float/double/decimal numbers to maximum of 4 decimal points.
         public static string FormatDecimalSequence(params object[] numbers)
         {
@@ -100,7 +100,7 @@ namespace UnityExplorer
                     obj = ReflectionUtility.GetMethodInfo(type, "Parse", ArgumentUtility.ParseArgs)
                         .Invoke(null, new object[] { input });
                 }
-                
+
                 return true;
             }
             catch (Exception ex)
@@ -148,7 +148,7 @@ namespace UnityExplorer
                 }
                 else
                     return obj.ToString();
-                
+
             }
             catch (Exception ex)
             {

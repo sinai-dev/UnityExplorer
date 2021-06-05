@@ -54,6 +54,7 @@ namespace UnityExplorer.UI.Inspectors
 
         private readonly Color disabledButtonColor = new Color(0.24f, 0.24f, 0.24f);
         private readonly Color enabledButtonColor = new Color(0.2f, 0.27f, 0.2f);
+
         private readonly Dictionary<BindingFlags, ButtonRef> scopeFilterButtons = new Dictionary<BindingFlags, ButtonRef>();
         private readonly List<Toggle> memberTypeToggles = new List<Toggle>();
         private InputFieldRef filterInputField;
@@ -73,7 +74,6 @@ namespace UnityExplorer.UI.Inspectors
         private IEnumerator InitCoroutine()
         {
             yield return null;
-
             LayoutRebuilder.ForceRebuildLayoutImmediate(InspectorPanel.Instance.ContentRect);
         }
 
@@ -142,7 +142,7 @@ namespace UnityExplorer.UI.Inspectors
             // reset filters
 
             this.filterInputField.Text = "";
-            
+
             SetFilter("", StaticOnly ? BindingFlags.Static : BindingFlags.Instance);
             scopeFilterButtons[BindingFlags.Default].Component.gameObject.SetActive(!StaticOnly);
             scopeFilterButtons[BindingFlags.Instance].Component.gameObject.SetActive(!StaticOnly);
@@ -307,11 +307,8 @@ namespace UnityExplorer.UI.Inspectors
 
         private void CalculateLayouts()
         {
-            // Calculate sizes
-            LeftGroupWidth = (int)Math.Max(200, (0.4f * InspectorManager.PanelWidth) - 5);// Math.Min(450f, 0.4f * InspectorManager.PanelWidth - 5));
+            LeftGroupWidth = (int)Math.Max(200, (0.4f * InspectorManager.PanelWidth) - 5);
             RightGroupWidth = (int)Math.Max(200, InspectorManager.PanelWidth - LeftGroupWidth - 65);
-
-            //memberTitleLayout.minWidth = LeftGroupWidth;
         }
 
         private void SetCellLayout(CacheObjectCell cell)
@@ -342,7 +339,7 @@ namespace UnityExplorer.UI.Inspectors
 
             ConstructUnityObjectRow();
 
-            mainContentHolder = UIFactory.CreateVerticalGroup(UIRoot, "MemberHolder", false, false, true, true, 5, new Vector4(2,2,2,2),
+            mainContentHolder = UIFactory.CreateVerticalGroup(UIRoot, "MemberHolder", false, false, true, true, 5, new Vector4(2, 2, 2, 2),
                 new Color(0.12f, 0.12f, 0.12f));
             UIFactory.SetLayoutElement(mainContentHolder, flexibleWidth: 9999, flexibleHeight: 9999);
 
@@ -352,7 +349,7 @@ namespace UnityExplorer.UI.Inspectors
 
             // Member scroll pool
 
-            var memberBorder = UIFactory.CreateVerticalGroup(mainContentHolder, "ScrollPoolHolder", false, false, true, true, padding: new Vector4(2,2,2,2),
+            var memberBorder = UIFactory.CreateVerticalGroup(mainContentHolder, "ScrollPoolHolder", false, false, true, true, padding: new Vector4(2, 2, 2, 2),
                 bgColor: new Color(0.05f, 0.05f, 0.05f));
             UIFactory.SetLayoutElement(memberBorder, flexibleWidth: 9999, flexibleHeight: 9999);
 
@@ -546,7 +543,7 @@ namespace UnityExplorer.UI.Inspectors
                 textureButton.ButtonText.text = "Hide Texture";
             }
         }
-        
+
         // UI construction
 
         private void ConstructUnityObjectRow()

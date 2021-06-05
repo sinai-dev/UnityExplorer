@@ -419,7 +419,7 @@ namespace UnityExplorer.UI
 
             toggle = toggleObj.AddComponent<Toggle>();
             toggle.isOn = true;
-            
+
             // second reference so we can use it inside the lambda, 'toggle' is an out var.
             Toggle toggleComp = toggle;
             toggle.onValueChanged.AddListener(Deselect);
@@ -729,7 +729,7 @@ namespace UnityExplorer.UI
 
             var sliderContainer = CreateVerticalGroup(mainObj, "SliderContainer",
                 false, false, true, true, 0, default, new Color(0.05f, 0.05f, 0.05f));
-            SetLayoutElement(sliderContainer, minWidth: 25, flexibleWidth:0, flexibleHeight: 9999);
+            SetLayoutElement(sliderContainer, minWidth: 25, flexibleWidth: 0, flexibleHeight: 9999);
             sliderContainer.AddComponent<Mask>();
 
             CreateSliderScrollbar(sliderContainer, out Slider slider);
@@ -837,7 +837,7 @@ namespace UnityExplorer.UI
             content.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             // Slider
-        
+
             GameObject scrollBarObj = CreateUIObject("AutoSliderScrollbar", mainObj);
             var scrollBarRect = scrollBarObj.GetComponent<RectTransform>();
             scrollBarRect.anchorMin = new Vector2(1, 0);
@@ -846,22 +846,22 @@ namespace UnityExplorer.UI
             SetLayoutGroup<VerticalLayoutGroup>(scrollBarObj, false, true, true, true);
             scrollBarObj.AddComponent<Image>().color = Color.white;
             scrollBarObj.AddComponent<Mask>().showMaskGraphic = false;
-            
+
             GameObject hiddenBar = CreateScrollbar(scrollBarObj, "HiddenScrollviewScroller", out var hiddenScrollbar);
             hiddenScrollbar.SetDirection(Scrollbar.Direction.BottomToTop, true);
-        
+
             for (int i = 0; i < hiddenBar.transform.childCount; i++)
             {
                 var child = hiddenBar.transform.GetChild(i);
                 child.gameObject.SetActive(false);
             }
-        
+
             CreateSliderScrollbar(scrollBarObj, out Slider scrollSlider);
-        
+
             autoScrollbar = new AutoSliderScrollbar(hiddenScrollbar, scrollSlider, contentRect, viewportRect);
-        
+
             // Set up the ScrollRect component
-        
+
             var scrollRect = mainObj.AddComponent<ScrollRect>();
             scrollRect.horizontal = false;
             scrollRect.vertical = true;
@@ -870,10 +870,10 @@ namespace UnityExplorer.UI
             scrollRect.scrollSensitivity = 35;
             scrollRect.horizontalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
             scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
-        
+
             scrollRect.viewport = viewportRect;
             scrollRect.content = contentRect;
-        
+
             return mainObj;
         }
 

@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Core.Input;
-using System.IO;
-using System.Diagnostics;
 using UnityExplorer.UI.Models;
-using System.Linq;
 using UnityExplorer.UI.Widgets.AutoComplete;
 
 namespace UnityExplorer.UI.Panels
 {
-    public class PanelDragger 
+    public class PanelDragger
     {
         #region Static
 
@@ -137,7 +137,7 @@ namespace UnityExplorer.UI.Panels
             Instances.Add(this);
             DragableArea = dragArea;
             Panel = panelToDrag;
-            
+
             if (!canvasTransform)
                 canvasTransform = Panel.GetComponentInParent<Canvas>().GetComponent<RectTransform>();
 

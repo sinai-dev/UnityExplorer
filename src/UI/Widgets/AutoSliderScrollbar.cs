@@ -91,7 +91,7 @@ namespace UnityExplorer.UI.Widgets
                 Slider.interactable = false;
                 return;
             }
-            
+
             var handleHeight = viewportHeight * Math.Min(1, viewportHeight / totalHeight);
             handleHeight = Math.Max(15f, handleHeight);
 

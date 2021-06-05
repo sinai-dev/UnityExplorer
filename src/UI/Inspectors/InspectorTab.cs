@@ -33,7 +33,7 @@ namespace UnityExplorer.UI.Inspectors
 
         public GameObject CreateContent(GameObject parent)
         {
-            UIRoot = UIFactory.CreateHorizontalGroup(parent, "TabObject", false, true, true, true, 0, 
+            UIRoot = UIFactory.CreateHorizontalGroup(parent, "TabObject", false, true, true, true, 0,
                 default, new Color(0.13f, 0.13f, 0.13f), childAlignment: TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(UIRoot, minWidth: 200, flexibleWidth: 0);
             UIRoot.AddComponent<Mask>();

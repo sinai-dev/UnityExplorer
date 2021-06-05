@@ -37,7 +37,7 @@ namespace UnityExplorer
                 $"deobfuscated types count: {DeobfuscatedTypes.Count}");
         }
 
-        #region IL2CPP Extern and pointers
+#region IL2CPP Extern and pointers
 
         // Extern C++ methods 
         [DllImport("GameAssembly", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
@@ -63,10 +63,10 @@ namespace UnityExplorer
             return il2cppPtr != IntPtr.Zero;
         }
 
-        #endregion
+#endregion
 
 
-        #region Deobfuscation cache
+#region Deobfuscation cache
 
         private static readonly Dictionary<string, Type> DeobfuscatedTypes = new Dictionary<string, Type>();
         private static readonly Dictionary<string, string> reverseDeobCache = new Dictionary<string, string>();
@@ -111,7 +111,7 @@ namespace UnityExplorer
             return theString;
         }
 
-        #endregion
+#endregion
 
 
         // Get type by name
@@ -124,7 +124,7 @@ namespace UnityExplorer
             return base.Internal_GetTypeByName(fullName);
         }
 
-        #region Get actual type
+#region Get actual type
 
         internal override Type Internal_GetActualType(object obj)
         {
@@ -183,10 +183,10 @@ namespace UnityExplorer
             return monoType;
         }
 
-        #endregion
+#endregion
 
 
-        #region Casting
+#region Casting
 
         private static readonly Dictionary<string, IntPtr> cppClassPointers = new Dictionary<string, IntPtr>();
 
@@ -278,10 +278,10 @@ namespace UnityExplorer
         //    return il2cpp_class_is_assignable_from(thisTypePtr, fromTypePtr);
         //}
 
-        #endregion
+#endregion
 
 
-        #region Boxing and unboxing ValueTypes
+#region Boxing and unboxing ValueTypes
 
         // cached il2cpp unbox methods
         internal static readonly Dictionary<string, MethodInfo> unboxMethods = new Dictionary<string, MethodInfo>();
@@ -384,10 +384,10 @@ namespace UnityExplorer
             return cppStruct;
         }
 
-        #endregion
+#endregion
 
 
-        #region String boxing/unboxing
+#region String boxing/unboxing
 
         private const string IL2CPP_STRING_FULLNAME = "Il2CppSystem.String";
         private const string STRING_FULLNAME = "System.String";
@@ -428,10 +428,10 @@ namespace UnityExplorer
             return s;
         }
 
-        #endregion
+#endregion
 
 
-        #region Singleton finder
+#region Singleton finder
 
         internal override void Internal_FindSingleton(string[] possibleNames, Type type, BF flags, List<object> instances)
         {
@@ -453,10 +453,10 @@ namespace UnityExplorer
             base.Internal_FindSingleton(possibleNames, type, flags, instances);
         }
 
-        #endregion
+#endregion
 
 
-        #region Force-loading game modules
+#region Force-loading game modules
 
         internal static string UnhollowedFolderPath => Path.GetFullPath(
 #if ML
@@ -513,10 +513,10 @@ namespace UnityExplorer
             return false;
         }
 
-        #endregion
+#endregion
 
 
-        #region Il2cpp reflection blacklist
+#region Il2cpp reflection blacklist
 
         public override string[] DefaultReflectionBlacklist => defaultIl2CppBlacklist.ToArray();
 
@@ -665,10 +665,10 @@ namespace UnityExplorer
             "UnityEngine.XR.InputDevice.SendHapticImpulse",
         };
 
-        #endregion
+#endregion
 
 
-        #region IL2CPP IEnumerable and IDictionary
+#region IL2CPP IEnumerable and IDictionary
 
         protected override bool Internal_TryGetEntryType(Type enumerableType, out Type type)
         {

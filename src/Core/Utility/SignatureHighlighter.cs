@@ -151,10 +151,10 @@ namespace UnityExplorer
         private static string HighlightType(Type type)
         {
             string key = type.ToString();
-         
+
             if (typeToRichType.ContainsKey(key))
                 return typeToRichType[key];
-            
+
             var sb = new StringBuilder(type.Name);
 
             bool isArray = false;
@@ -212,7 +212,7 @@ namespace UnityExplorer
         {
             if (args.Length < 1)
                 return string.Empty;
-            
+
             var sb = new StringBuilder();
 
             for (int i = 0; i < args.Length; i++)
@@ -254,7 +254,7 @@ namespace UnityExplorer
                     isStatic = true;
                     return FIELD_STATIC;
                 }
-                
+
                 return FIELD_INSTANCE;
             }
             else if (memberInfo is MethodInfo mi)
@@ -264,7 +264,7 @@ namespace UnityExplorer
                     isStatic = true;
                     return METHOD_STATIC;
                 }
-                
+
                 return METHOD_INSTANCE;
             }
             else if (memberInfo is PropertyInfo pi)
@@ -274,7 +274,7 @@ namespace UnityExplorer
                     isStatic = true;
                     return PROP_STATIC;
                 }
-                
+
                 return PROP_INSTANCE;
             }
             //else if (memberInfo is EventInfo ei)
@@ -284,7 +284,7 @@ namespace UnityExplorer
             //        isStatic = true;
             //        return EVENT_STATIC;
             //    }
-               
+
             //    return EVENT_INSTANCE;
             //}
 

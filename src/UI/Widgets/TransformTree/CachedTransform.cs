@@ -33,10 +33,10 @@ namespace UnityExplorer.UI.Widgets
         {
             bool ret = false;
 
-            if (Value != transform 
-                || depth != Depth 
-                || ChildCount != transform.childCount 
-                || Name != transform.name 
+            if (Value != transform
+                || depth != Depth
+                || ChildCount != transform.childCount
+                || Name != transform.name
                 || Enabled != transform.gameObject.activeSelf)
             {
                 Value = transform;

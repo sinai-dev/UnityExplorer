@@ -29,8 +29,8 @@ namespace UnityExplorer.UI
             }
         }
 
-        public InputFieldRef(InputField component) 
-        { 
+        public InputFieldRef(InputField component)
+        {
             this.Component = component;
             Rect = component.GetComponent<RectTransform>();
             PlaceholderText = component.placeholder.TryCast<Text>();

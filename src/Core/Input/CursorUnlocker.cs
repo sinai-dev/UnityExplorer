@@ -1,12 +1,12 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityExplorer.Core.Input;
-using BF = System.Reflection.BindingFlags;
-using UnityExplorer.Core.Config;
 using UnityExplorer.Core;
+using UnityExplorer.Core.Config;
+using UnityExplorer.Core.Input;
 using UnityExplorer.UI;
-using System.Collections;
+using BF = System.Reflection.BindingFlags;
 
 
 namespace UnityExplorer.Core.Input

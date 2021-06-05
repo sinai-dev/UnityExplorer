@@ -20,7 +20,7 @@ namespace UnityExplorer.UI.CacheObject.IValues
 
         public CachedEnumValue ValueAtIdx(int idx) => (CachedEnumValue)CurrentValues[idx];
         public CachedEnumValue ValueAtKey(object key) => (CachedEnumValue)CurrentValues[key];
-        
+
         private Dropdown enumDropdown;
         private GameObject toggleHolder;
         private readonly List<Toggle> flagToggles = new List<Toggle>();

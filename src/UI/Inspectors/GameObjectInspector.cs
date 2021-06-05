@@ -208,7 +208,7 @@ namespace UnityExplorer.UI.Inspectors
 
             TransformTree.RefreshData(true, false);
         }
-        
+
         private void OnAddComponentClicked(string input)
         {
             if (ReflectionUtility.AllTypes.TryGetValue(input, out Type type))
@@ -234,10 +234,10 @@ namespace UnityExplorer.UI.Inspectors
 
         public override GameObject CreateContent(GameObject parent)
         {
-            UIRoot = UIFactory.CreateVerticalGroup(parent, "GameObjectInspector", true, false, true, true, 5, 
+            UIRoot = UIFactory.CreateVerticalGroup(parent, "GameObjectInspector", true, false, true, true, 5,
                 new Vector4(4, 4, 4, 4), new Color(0.065f, 0.065f, 0.065f));
 
-            var scrollObj = UIFactory.CreateScrollView(UIRoot, "GameObjectInspector", out Content, out var scrollbar, 
+            var scrollObj = UIFactory.CreateScrollView(UIRoot, "GameObjectInspector", out Content, out var scrollbar,
                 new Color(0.065f, 0.065f, 0.065f));
             UIFactory.SetLayoutElement(scrollObj, minHeight: 250, preferredHeight: 300, flexibleHeight: 0, flexibleWidth: 9999);
 
@@ -245,7 +245,7 @@ namespace UnityExplorer.UI.Inspectors
 
             // Construct GO Controls
             GOControls = new GameObjectControls(this);
-            
+
             ConstructLists();
 
             return UIRoot;

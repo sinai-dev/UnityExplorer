@@ -11,7 +11,7 @@ namespace UnityExplorer.UI.Inspectors
     {
         public GameObjectInspector Parent;
 
-        public ComponentList(ScrollPool<ComponentCell> scrollPool, Func<List<Component>> getEntriesMethod) 
+        public ComponentList(ScrollPool<ComponentCell> scrollPool, Func<List<Component>> getEntriesMethod)
             : base(scrollPool, getEntriesMethod, null, null, null)
         {
             base.SetICell = SetComponentCell;
@@ -112,7 +112,7 @@ namespace UnityExplorer.UI.Inspectors
                 cell.BehaviourToggle.interactable = false;
                 cell.BehaviourToggle.Set(true, false);
                 //RuntimeProvider.Instance.SetColorBlock(cell.BehaviourToggle,)
-                cell.BehaviourToggle.graphic.color = new Color(0.2f, 0.2f, 0.2f); 
+                cell.BehaviourToggle.graphic.color = new Color(0.2f, 0.2f, 0.2f);
             }
 
             // if component is the first index it must be the transform, dont show Destroy button for it.

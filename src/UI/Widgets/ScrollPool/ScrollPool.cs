@@ -11,7 +11,7 @@ using UnityExplorer.UI.Panels;
 
 namespace UnityExplorer.UI.Widgets
 {
-    public struct CellInfo 
+    public struct CellInfo
     {
         public int cellIndex, dataIndex;
     }
@@ -120,7 +120,7 @@ namespace UnityExplorer.UI.Widgets
                     OnHeightChanged?.Invoke();
                 }
             }
-            
+
         }
         #endregion
 
@@ -129,7 +129,7 @@ namespace UnityExplorer.UI.Widgets
         public void Refresh(bool setCellData, bool jumpToTop = false)
         {
             if (jumpToTop)
-            { 
+            {
                 bottomDataIndex = CellPool.Count - 1;
                 Content.anchoredPosition = Vector2.zero;
             }

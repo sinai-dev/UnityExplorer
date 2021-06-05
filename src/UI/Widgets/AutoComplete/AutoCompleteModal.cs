@@ -169,7 +169,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         // Setting autocomplete cell buttons
 
-        private readonly Color selectedSuggestionColor = new Color(45/255f, 75/255f, 80/255f);
+        private readonly Color selectedSuggestionColor = new Color(45 / 255f, 75 / 255f, 80 / 255f);
         private readonly Color inactiveSuggestionColor = new Color(0.11f, 0.11f, 0.11f);
 
         private List<Suggestion> GetEntries() => Suggestions;
@@ -300,7 +300,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         {
             dataHandler = new ButtonListHandler<Suggestion, ButtonCell>(scrollPool, GetEntries, SetCell, ShouldDisplay, OnCellClicked);
 
-            scrollPool = UIFactory.CreateScrollPool<ButtonCell>(this.content, "AutoCompleter", out GameObject scrollObj, 
+            scrollPool = UIFactory.CreateScrollPool<ButtonCell>(this.content, "AutoCompleter", out GameObject scrollObj,
                 out GameObject scrollContent);
             scrollPool.Initialize(dataHandler);
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
@@ -308,7 +308,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
             navigationTipRow = UIFactory.CreateHorizontalGroup(this.content, "BottomRow", true, true, true, true, 0, new Vector4(2, 2, 2, 2));
             UIFactory.SetLayoutElement(navigationTipRow, minHeight: 20, flexibleWidth: 9999);
-            UIFactory.CreateLabel(navigationTipRow, "HelpText", "Up/Down to select, Enter to use, Esc to close", 
+            UIFactory.CreateLabel(navigationTipRow, "HelpText", "Up/Down to select, Enter to use, Esc to close",
                 TextAnchor.MiddleLeft, Color.grey, false, 13);
 
             UIRoot.SetActive(false);

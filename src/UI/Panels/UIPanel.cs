@@ -146,17 +146,17 @@ namespace UnityExplorer.UI.Panels
             if (Rect.rect.height < MinHeight)
                 Rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, MinHeight);
         }
-        
+
         public static void EnsureValidPosition(RectTransform panel)
         {
             var pos = panel.localPosition;
-        
+
             // Prevent panel going oustide screen bounds
             var halfW = Screen.width * 0.5f;
             var halfH = Screen.height * 0.5f;
             pos.x = Math.Max(-halfW, Math.Min(pos.x, halfW - panel.rect.width));
             pos.y = Math.Max(-halfH + panel.rect.height, Math.Min(pos.y, halfH));
-        
+
             panel.localPosition = pos;
         }
 

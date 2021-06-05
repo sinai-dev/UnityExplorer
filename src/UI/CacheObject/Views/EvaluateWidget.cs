@@ -67,7 +67,7 @@ namespace UnityExplorer.UI.CacheObject.Views
 
             for (int i = 0; i < genericArguments.Length; i++)
             {
-                outArgs[i] = ReflectionUtility.GetTypeByName(genericInput[i]) 
+                outArgs[i] = ReflectionUtility.GetTypeByName(genericInput[i])
                     ?? throw new Exception($"Could not find any type by name '{genericInput[i]}'!");
             }
 
@@ -206,7 +206,7 @@ namespace UnityExplorer.UI.CacheObject.Views
                     var elemType = arg.ParameterType;
                     if (elemType.IsByRef)
                         elemType = elemType.GetElementType();
-                    argInputFields[i].PlaceholderText.text = $"eg. {ParseUtility.GetExampleInput(elemType)}"; 
+                    argInputFields[i].PlaceholderText.text = $"eg. {ParseUtility.GetExampleInput(elemType)}";
                 }
             }
         }
@@ -249,7 +249,7 @@ namespace UnityExplorer.UI.CacheObject.Views
 
         public GameObject CreateContent(GameObject parent)
         {
-            UIRoot = UIFactory.CreateVerticalGroup(parent, "EvaluateWidget", false, false, true, true, 3, new Vector4(2, 2, 2, 2), 
+            UIRoot = UIFactory.CreateVerticalGroup(parent, "EvaluateWidget", false, false, true, true, 3, new Vector4(2, 2, 2, 2),
                 new Color(0.15f, 0.15f, 0.15f));
             UIFactory.SetLayoutElement(UIRoot, minWidth: 50, flexibleWidth: 9999, minHeight: 50, flexibleHeight: 800);
             //UIRoot.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
@@ -275,7 +275,7 @@ namespace UnityExplorer.UI.CacheObject.Views
             // evaluate button
             var evalButton = UIFactory.CreateButton(UIRoot, "EvaluateButton", "Evaluate", new Color(0.2f, 0.2f, 0.2f));
             UIFactory.SetLayoutElement(evalButton.Component.gameObject, minHeight: 25, minWidth: 150, flexibleWidth: 0);
-            evalButton.OnClick += () => 
+            evalButton.OnClick += () =>
             {
                 Owner.EvaluateAndSetCell();
             };

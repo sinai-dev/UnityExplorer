@@ -1,11 +1,11 @@
-﻿using System;
-using Mono.CSharp;
+﻿using Mono.CSharp;
+using System;
 using System.Collections;
-using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-using UnityExplorer.Core.Runtime;
 using System.Text;
+using UnityEngine;
+using UnityExplorer.Core.Runtime;
 
 /*
     Welcome to the UnityExplorer C# Console!
@@ -58,7 +58,7 @@ namespace UnityExplorer.UI.CSConsole
         public static void GetClasses()
         {
             if (ReflectionUtility.GetFieldInfo(typeof(Evaluator), "source_file")
-                    .GetValue(Evaluator) is CompilationSourceFile sourceFile 
+                    .GetValue(Evaluator) is CompilationSourceFile sourceFile
                 && sourceFile.Containers.Any())
             {
                 var sb = new StringBuilder();

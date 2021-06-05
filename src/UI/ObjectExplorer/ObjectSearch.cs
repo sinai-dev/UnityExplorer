@@ -25,7 +25,7 @@ namespace UnityExplorer.UI.ObjectExplorer
         private ChildFilter m_childFilter = ChildFilter.Any;
         private string desiredTypeInput;
         private string lastCheckedTypeInput;
-        private bool lastTypeCanHaveGO; 
+        private bool lastTypeCanHaveGO;
 
         public ButtonListHandler<object, ButtonCell> dataHandler;
 
@@ -241,7 +241,7 @@ namespace UnityExplorer.UI.ObjectExplorer
             // RESULTS SCROLL POOL
 
             dataHandler = new ButtonListHandler<object, ButtonCell>(resultsScrollPool, GetEntries, SetCell, ShouldDisplayCell, OnCellClicked);
-            resultsScrollPool = UIFactory.CreateScrollPool<ButtonCell>(uiRoot, "ResultsList", out GameObject scrollObj, 
+            resultsScrollPool = UIFactory.CreateScrollPool<ButtonCell>(uiRoot, "ResultsList", out GameObject scrollObj,
                 out GameObject scrollContent);
 
             resultsScrollPool.Initialize(dataHandler);
