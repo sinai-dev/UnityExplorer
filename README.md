@@ -11,6 +11,9 @@
 <p align="center">
   ☕ Enjoy this tool? Consider supporting me on <a href="https://ko-fi.com/sinaidev">ko-fi</a>!
 </p>
+<p align="center">
+  ⚡ UnityExplorer is on <a href="https://thunderstore.io/package/sinai-dev/UnityExplorer/">Thunderstore</a>! (and as <a href="https://gtfo.thunderstore.io/package/sinai-dev/UnityExplorer_IL2CPP/">IL2CPP</a>)
+</p>
 
 # Releases  [![](https://img.shields.io/github/downloads/sinai-dev/UnityExplorer/total.svg)](../../releases)
 
