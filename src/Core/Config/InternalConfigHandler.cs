@@ -87,9 +87,6 @@ namespace UnityExplorer.Core.Config
             foreach (var entry in ConfigManager.InternalConfigs)
                 sec.AddKey(entry.Key, entry.Value.BoxedValue.ToString());
 
-            if (!Directory.Exists(ExplorerCore.Loader.ConfigFolder))
-                Directory.CreateDirectory(ExplorerCore.Loader.ConfigFolder);
-
             File.WriteAllText(INI_PATH, data.ToString());
         }
 

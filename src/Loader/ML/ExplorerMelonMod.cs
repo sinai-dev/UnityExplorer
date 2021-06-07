@@ -27,7 +27,6 @@ namespace UnityExplorer
         public static ExplorerMelonMod Instance;
 
         public string ExplorerFolder => Path.Combine("Mods", ExplorerCore.NAME);
-        public string ConfigFolder => ExplorerFolder;
 
         public ConfigHandler ConfigHandler => _configHandler;
         public MelonLoaderConfigHandler _configHandler;

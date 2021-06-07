@@ -462,7 +462,7 @@ namespace UnityExplorer
 #if ML
                     Path.Combine("MelonLoader", "Managed")
 #elif BIE
-                    Path.Combine("BepInEx", "unhollowed")
+                    Path.Combine(BepInEx.Paths.BepInExRootPath, "unhollowed")
 #else
                     Path.Combine(ExplorerCore.Loader.ExplorerFolder, "Modules")
 #endif

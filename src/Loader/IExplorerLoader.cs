@@ -10,7 +10,6 @@ namespace UnityExplorer
     {
         string ExplorerFolder { get; }
 
-        string ConfigFolder { get; }
         ConfigHandler ConfigHandler { get; }
 
         Action<object> OnLogMessage { get; }

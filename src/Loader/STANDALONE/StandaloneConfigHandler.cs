@@ -13,11 +13,11 @@ namespace UnityExplorer.Loader.STANDALONE
     public class StandaloneConfigHandler : ConfigHandler
     {
         internal static IniDataParser _parser;
-        internal static string INI_PATH;
+        internal static string CONFIG_PATH;
 
         public override void Init()
         {
-            INI_PATH = Path.Combine(ExplorerCore.Loader.ConfigFolder, "config.ini");
+            CONFIG_PATH = Path.Combine(ExplorerCore.Loader.ExplorerFolder, "config.ini");
             _parser = new IniDataParser();
             _parser.Configuration.CommentString = "#";
         }
@@ -49,10 +49,10 @@ namespace UnityExplorer.Loader.STANDALONE
         {
             try
             {
-                if (!File.Exists(INI_PATH))
+                if (!File.Exists(CONFIG_PATH))
                     return false;
 
-                string ini = File.ReadAllText(INI_PATH);
+                string ini = File.ReadAllText(CONFIG_PATH);
 
                 var data = _parser.Parse(ini);
 
@@ -97,10 +97,10 @@ namespace UnityExplorer.Loader.STANDALONE
             foreach (var entry in ConfigManager.ConfigElements)
                 sec.AddKey(entry.Key, entry.Value.BoxedValue.ToString());
 
-            if (!Directory.Exists(ExplorerCore.Loader.ConfigFolder))
-                Directory.CreateDirectory(ExplorerCore.Loader.ConfigFolder);
+            if (!Directory.Exists(ExplorerCore.Loader.ExplorerFolder))
+                Directory.CreateDirectory(ExplorerCore.Loader.ExplorerFolder);
 
-            File.WriteAllText(INI_PATH, data.ToString());
+            File.WriteAllText(CONFIG_PATH, data.ToString());
         }
     }
 }

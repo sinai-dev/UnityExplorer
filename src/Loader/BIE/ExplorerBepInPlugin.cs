@@ -46,7 +46,6 @@ namespace UnityExplorer
         private static readonly Harmony s_harmony = new Harmony(ExplorerCore.GUID);
 
         public string ExplorerFolder => Path.Combine(Paths.PluginPath, ExplorerCore.NAME);
-        public string ConfigFolder => Path.Combine(Paths.ConfigPath, ExplorerCore.NAME);
 
         public Action<object> OnLogMessage => LogSource.LogMessage;
         public Action<object> OnLogWarning => LogSource.LogWarning;
