@@ -147,32 +147,39 @@ namespace UnityExplorer.UI.Inspectors
             var behaviours = GOTarget.GetComponents<Behaviour>();
 
             bool needRefresh = false;
-            if (comps.Length != componentEntries.Count || behaviours.Length != behaviourEntries.Count)
-            {
-                needRefresh = true;
-            }
-            else
-            {
-                foreach (var comp in comps)
-                {
-                    if (!compInstanceIDs.Contains(comp.GetInstanceID()))
-                    {
-                        needRefresh = true;
-                        break;
-                    }
-                }
 
-                if (!needRefresh)
+            int count = 0;
+            foreach (var comp in comps)
+            {
+                if (!comp)
+                    continue;
+                count++;
+                if (!compInstanceIDs.Contains(comp.GetInstanceID()))
                 {
-                    for (int i = 0; i < behaviours.Length; i++)
+                    needRefresh = true;
+                    break;
+                }
+            }
+            if (!needRefresh)
+            {
+                if (count != componentEntries.Count)
+                    needRefresh = true;
+                else
+                {
+                    count = 0;
+                    foreach (var behaviour in behaviours)
                     {
-                        var behaviour = behaviours[i];
-                        if (behaviour.enabled != behaviourEnabledStates[i])
+                        if (!behaviour)
+                            continue;
+                        if (count >= behaviourEnabledStates.Count || behaviour.enabled != behaviourEnabledStates[count])
                         {
                             needRefresh = true;
                             break;
                         }
+                        count++;
                     }
+                    if (!needRefresh && count != behaviourEntries.Count)
+                        needRefresh = true;
                 }
             }
 
@@ -181,9 +188,9 @@ namespace UnityExplorer.UI.Inspectors
 
             componentEntries.Clear();
             compInstanceIDs.Clear();
-
             foreach (var comp in comps)
             {
+                if (!comp) continue;
                 componentEntries.Add(comp);
                 compInstanceIDs.Add(comp.GetInstanceID());
             }
@@ -192,6 +199,7 @@ namespace UnityExplorer.UI.Inspectors
             behaviourEnabledStates.Clear();
             foreach (var behaviour in behaviours)
             {
+                if (!behaviour) continue;
                 behaviourEntries.Add(behaviour);
                 behaviourEnabledStates.Add(behaviour.enabled);
             }
@@ -211,7 +219,7 @@ namespace UnityExplorer.UI.Inspectors
 
         private void OnAddComponentClicked(string input)
         {
-            if (ReflectionUtility.AllTypes.TryGetValue(input, out Type type))
+            if (ReflectionUtility.GetTypeByName(input) is Type type)
             {
                 try
                 {
