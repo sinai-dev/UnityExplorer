@@ -42,7 +42,7 @@ namespace UnityExplorer
         public static Action<Type> OnTypeLoaded;
 
         /// <summary>Key: Type.FullName</summary>
-        public static readonly SortedDictionary<string, Type> AllTypes = new SortedDictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+        protected static readonly SortedDictionary<string, Type> AllTypes = new SortedDictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
 
         public static readonly List<string> AllNamespaces = new List<string>();
         private static readonly HashSet<string> uniqueNamespaces = new HashSet<string>();

@@ -87,7 +87,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             }
 
             // Check for exact match first
-            if (ReflectionUtility.AllTypes.TryGetValue(value, out Type t) && allowedTypes.Contains(t))
+            if (ReflectionUtility.GetTypeByName(value) is Type t && allowedTypes.Contains(t))
                 AddSuggestion(t);
 
             foreach (var entry in allowedTypes)

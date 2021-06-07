@@ -76,7 +76,7 @@ namespace UnityExplorer.UI.ObjectExplorer
                 lastCheckedTypeInput = desiredTypeInput;
 
                 //var type = ReflectionUtility.GetTypeByName(desiredTypeInput);
-                if (ReflectionUtility.AllTypes.TryGetValue(desiredTypeInput, out var cachedType))
+                if (ReflectionUtility.GetTypeByName(desiredTypeInput) is Type cachedType)
                 {
                     var type = cachedType;
                     lastTypeCanHaveGO = typeof(Component).IsAssignableFrom(type) || type == typeof(GameObject);
