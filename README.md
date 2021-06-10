@@ -118,7 +118,7 @@ For Visual Studio:
 
 0. Clone the repository and run `git submodule update --init --recursive` to get the submodules.
 1. Open the `src\UnityExplorer.sln` project.
-2. Build `mcs`, and if using IL2CPP then build `UnhollowerBaseLib` as well.
+2. Build `mcs` (Release/AnyCPU, you may need to run `nuget restore mcs.sln`), and if using IL2CPP then build `Il2CppAssemblyUnhollower` (Release/AnyCPU) as well.
 3. Build the UnityExplorer release(s) you want to use, either by selecting the config as the Active Config, or batch-building.
 
 # Acknowledgments
