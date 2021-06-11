@@ -67,8 +67,12 @@ namespace UnityExplorer.UI.Inspectors
         public void StartInspect(MouseInspectMode mode)
         {
             MainCamera = Camera.main;
-            if (!MainCamera)
+            
+            if (!MainCamera && mode == MouseInspectMode.World)
+            {
+                ExplorerCore.LogWarning("No MainCamera found! Cannot inspect world!");
                 return;
+            }
 
             PanelDragger.ForceEnd();
 
