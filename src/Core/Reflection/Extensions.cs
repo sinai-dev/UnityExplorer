@@ -101,8 +101,10 @@ namespace UnityExplorer
         {
             while (e != null)
             {
+                if (e.InnerException == null)
+                    break;
 #if CPP
-                if (e.InnerException == null || e.InnerException is System.Runtime.CompilerServices.RuntimeWrappedException)
+                if (e.InnerException is System.Runtime.CompilerServices.RuntimeWrappedException)
                     break;
 #endif
                 e = e.InnerException;
