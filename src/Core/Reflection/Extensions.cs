@@ -99,10 +99,10 @@ namespace UnityExplorer
 
         public static Exception GetInnerMostException(this Exception e)
         {
-            while (e.InnerException != null)
+            while (e != null)
             {
 #if CPP
-                if (e.InnerException is System.Runtime.CompilerServices.RuntimeWrappedException)
+                if (e.InnerException == null || e.InnerException is System.Runtime.CompilerServices.RuntimeWrappedException)
                     break;
 #endif
                 e = e.InnerException;
