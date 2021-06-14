@@ -154,13 +154,12 @@ namespace UnityExplorer.UI.Panels
             // Prevent panel going oustide screen bounds
             var halfW = Screen.width * 0.5f;
             var halfH = Screen.height * 0.5f;
-            pos.x = Math.Max(-halfW, Math.Min(pos.x, halfW - panel.rect.width));
-            pos.y = Math.Max(-halfH + panel.rect.height, Math.Min(pos.y, halfH));
+
+            pos.x = Math.Max(-halfW - panel.rect.width + 50, Math.Min(pos.x, halfW - 50));
+            pos.y = Math.Max(-halfH + 50, Math.Min(pos.y, halfH));
 
             panel.localPosition = pos;
         }
-
-
 
         #region Save Data
 
