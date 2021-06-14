@@ -87,6 +87,7 @@ namespace UnityExplorer
         {
             foreach (var type in asm.TryGetTypes())
             {
+                // Cache namespace if there is one
                 if (!string.IsNullOrEmpty(type.Namespace) && !uniqueNamespaces.Contains(type.Namespace))
                 {
                     uniqueNamespaces.Add(type.Namespace);
@@ -100,16 +101,16 @@ namespace UnityExplorer
                     AllNamespaces.Insert(i, type.Namespace);
                 }
 
+                // Cache the type. Overwrite type if one exists with the full name
                 if (AllTypes.ContainsKey(type.FullName))
                     AllTypes[type.FullName] = type;
                 else
-                {
                     AllTypes.Add(type.FullName, type);
-                    //allTypeNames.Add(type.FullName);
-                }
 
+                // Invoke listener
                 OnTypeLoaded?.Invoke(type);
 
+                // Check type inheritance cache, add this to any lists it should be in
                 foreach (var key in typeInheritance.Keys)
                 {
                     try
@@ -153,13 +154,6 @@ namespace UnityExplorer
 
         internal virtual string Internal_ProcessTypeInString(string theString, Type type)
             => theString;
-
-        //// Force loading modules
-        //public static bool LoadModule(string moduleName)
-        //    => Instance.Internal_LoadModule(moduleName);
-        //
-        //internal virtual bool Internal_LoadModule(string moduleName) 
-        //    => false;
 
         // Singleton finder
 

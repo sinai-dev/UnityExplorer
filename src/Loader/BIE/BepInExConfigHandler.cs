@@ -21,11 +21,7 @@ namespace UnityExplorer.Loader.BIE
 
         public override void RegisterConfigElement<T>(ConfigElement<T> config)
         {
-            object[] tags = null;
-            if (config.IsInternal)
-                tags = new[] { "Advanced" };
-
-            var entry = Config.Bind(CTG_NAME, config.Name, config.Value, new ConfigDescription(config.Description, null, tags));
+            var entry = Config.Bind(CTG_NAME, config.Name, config.Value, config.Description);
 
             entry.SettingChanged += (object o, EventArgs e) =>
             {
