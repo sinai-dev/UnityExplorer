@@ -409,56 +409,49 @@ namespace UnityExplorer.UI
         /// <summary>
         /// Create a Toggle control.
         /// </summary>
-        public static GameObject CreateToggle(GameObject parent, string name, out Toggle toggle, out Text text, Color bgColor = default)
+        public static GameObject CreateToggle(GameObject parent, string name, out Toggle toggle, out Text text, Color bgColor = default, 
+            int checkWidth = 20, int checkHeight = 20)
         {
+            // Main obj
             GameObject toggleObj = CreateUIObject(name, parent, _smallElementSize);
-
-            GameObject bgObj = CreateUIObject("Background", toggleObj);
-            GameObject checkObj = CreateUIObject("Checkmark", bgObj);
-            GameObject labelObj = CreateUIObject("Label", toggleObj);
-
+            SetLayoutGroup<HorizontalLayoutGroup>(toggleObj, false, false, true, true, 5, 0,0,0,0, childAlignment: TextAnchor.MiddleLeft);
             toggle = toggleObj.AddComponent<Toggle>();
             toggle.isOn = true;
+            SetDefaultSelectableColors(toggle);
+            // need a second reference so we can use it inside the lambda, since 'toggle' is an out var.
+            Toggle t2 = toggle;
+            toggle.onValueChanged.AddListener((bool _) => { t2.OnDeselect(null); });
 
-            // second reference so we can use it inside the lambda, 'toggle' is an out var.
-            Toggle toggleComp = toggle;
-            toggle.onValueChanged.AddListener(Deselect);
-            void Deselect(bool _)
-            {
-                toggleComp.OnDeselect(null);
-            }
+            // Check mark background
 
-            Image bgImage = bgObj.AddComponent<Image>();
+            GameObject checkBgObj = CreateUIObject("Background", toggleObj);
+            Image bgImage = checkBgObj.AddComponent<Image>();
             bgImage.color = bgColor == default ? new Color(0.04f, 0.04f, 0.04f, 0.75f) : bgColor;
 
-            Image checkImage = checkObj.AddComponent<Image>();
+            SetLayoutGroup<HorizontalLayoutGroup>(checkBgObj, true, true, true, true, 0, 2, 2, 2, 2);
+            SetLayoutElement(checkBgObj, minWidth: checkWidth, flexibleWidth: 0, minHeight: checkHeight, flexibleHeight: 0);
+
+            // Check mark image
+
+            GameObject checkMarkObj = CreateUIObject("Checkmark", checkBgObj);
+            Image checkImage = checkMarkObj.AddComponent<Image>();
             checkImage.color = new Color(0.8f, 1, 0.8f, 0.3f);
 
+            // Label 
+
+            GameObject labelObj = CreateUIObject("Label", toggleObj);
             text = labelObj.AddComponent<Text>();
-            text.text = "Toggle";
+            text.text = "";
+            text.alignment = TextAnchor.MiddleLeft;
             SetDefaultTextValues(text);
+
+            SetLayoutElement(labelObj, minWidth: 0, flexibleWidth: 0, minHeight: checkHeight, flexibleHeight: 0);
+
+            // References
 
             toggle.graphic = checkImage;
             toggle.targetGraphic = bgImage;
-            SetDefaultSelectableColors(toggle);
 
-            RectTransform bgRect = bgObj.GetComponent<RectTransform>();
-            bgRect.anchorMin = new Vector2(0f, 1f);
-            bgRect.anchorMax = new Vector2(0f, 1f);
-            bgRect.anchoredPosition = new Vector2(13f, -13f);
-            bgRect.sizeDelta = new Vector2(20f, 20f);
-
-            RectTransform checkRect = checkObj.GetComponent<RectTransform>();
-            checkRect.anchorMin = new Vector2(0.5f, 0.5f);
-            checkRect.anchorMax = new Vector2(0.5f, 0.5f);
-            checkRect.anchoredPosition = Vector2.zero;
-            checkRect.sizeDelta = new Vector2(14f, 14f);
-
-            RectTransform labelRect = labelObj.GetComponent<RectTransform>();
-            labelRect.anchorMin = new Vector2(0f, 0f);
-            labelRect.anchorMax = new Vector2(1f, 1f);
-            labelRect.offsetMin = new Vector2(28f, 2f);
-            labelRect.offsetMax = new Vector2(-5f, -5f);
             return toggleObj;
         }
 

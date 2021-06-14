@@ -60,8 +60,9 @@ namespace UnityExplorer.UI.Widgets
 
         public void OnCellBorrowed(TransformCell cell)
         {
-            cell.OnExpandToggled += ToggleExpandCell;
+            cell.OnExpandToggled += OnCellExpandToggled;
             cell.OnGameObjectClicked += OnGameObjectClicked;
+            cell.OnEnableToggled += OnCellEnableToggled;
         }
 
         private void OnGameObjectClicked(GameObject obj)
@@ -70,6 +71,24 @@ namespace UnityExplorer.UI.Widgets
                 OnClickOverrideHandler.Invoke(obj);
             else
                 InspectorManager.Inspect(obj);
+        }
+
+        public void OnCellExpandToggled(CachedTransform cache)
+        {
+            var instanceID = cache.InstanceID;
+            if (expandedInstanceIDs.Contains(instanceID))
+                expandedInstanceIDs.Remove(instanceID);
+            else
+                expandedInstanceIDs.Add(instanceID);
+
+            RefreshData(true);
+        }
+
+        public void OnCellEnableToggled(CachedTransform cache)
+        {
+            cache.Value.gameObject.SetActive(!cache.Value.gameObject.activeSelf);
+
+            RefreshData(true);
         }
 
         public void Init()
@@ -260,17 +279,6 @@ namespace UnityExplorer.UI.Widgets
             }
             else
                 cell.Disable();
-        }
-
-        public void ToggleExpandCell(CachedTransform cache)
-        {
-            var instanceID = cache.InstanceID;
-            if (expandedInstanceIDs.Contains(instanceID))
-                expandedInstanceIDs.Remove(instanceID);
-            else
-                expandedInstanceIDs.Add(instanceID);
-
-            RefreshData(true);
         }
     }
 }

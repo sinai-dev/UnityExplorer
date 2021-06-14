@@ -17,6 +17,7 @@ namespace UnityExplorer.UI.Widgets
         private bool m_enabled;
 
         public Action<CachedTransform> OnExpandToggled;
+        public Action<CachedTransform> OnEnableToggled;
         public Action<GameObject> OnGameObjectClicked;
 
         public CachedTransform cachedTransform;
@@ -27,15 +28,20 @@ namespace UnityExplorer.UI.Widgets
 
         public ButtonRef ExpandButton;
         public ButtonRef NameButton;
+        public Toggle EnabledToggle;
 
         public LayoutElement spacer;
 
-        public void OnMainButtonClicked()
+        public void Enable()
         {
-            if (cachedTransform.Value)
-                OnGameObjectClicked?.Invoke(cachedTransform.Value.gameObject);
-            else
-                ExplorerCore.LogWarning("The object was destroyed!");
+            m_enabled = true;
+            UIRoot.SetActive(true);
+        }
+
+        public void Disable()
+        {
+            m_enabled = false;
+            UIRoot.SetActive(false);
         }
 
         public void ConfigureCell(CachedTransform cached, int cellIndex)
@@ -58,6 +64,8 @@ namespace UnityExplorer.UI.Widgets
             {
                 NameButton.ButtonText.text = cached.Value.name;
                 NameButton.ButtonText.color = cached.Value.gameObject.activeSelf ? Color.white : Color.grey;
+
+                EnabledToggle.Set(cached.Value.gameObject.activeSelf, false);
 
                 int childCount = cached.Value.childCount;
                 if (childCount > 0)
@@ -82,16 +90,12 @@ namespace UnityExplorer.UI.Widgets
             }
         }
 
-        public void Disable()
+        public void OnMainButtonClicked()
         {
-            m_enabled = false;
-            UIRoot.SetActive(false);
-        }
-
-        public void Enable()
-        {
-            m_enabled = true;
-            UIRoot.SetActive(true);
+            if (cachedTransform.Value)
+                OnGameObjectClicked?.Invoke(cachedTransform.Value.gameObject);
+            else
+                ExplorerCore.LogWarning("The object was destroyed!");
         }
 
         public void OnExpandClicked()
@@ -99,10 +103,15 @@ namespace UnityExplorer.UI.Widgets
             OnExpandToggled?.Invoke(cachedTransform);
         }
 
+        private void OnEnableClicked(bool value)
+        {
+            OnEnableToggled?.Invoke(cachedTransform);
+        }
+
         public GameObject CreateContent(GameObject parent)
         {
             UIRoot = UIFactory.CreateUIObject("TransformCell", parent);
-            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(UIRoot, true, true, true, true, 2, childAlignment: TextAnchor.MiddleCenter);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(UIRoot, false, false, true, true, 2, childAlignment: TextAnchor.MiddleCenter);
             Rect = UIRoot.GetComponent<RectTransform>();
             Rect.anchorMin = new Vector2(0, 1);
             Rect.anchorMax = new Vector2(0, 1);
@@ -114,8 +123,18 @@ namespace UnityExplorer.UI.Widgets
             UIFactory.SetLayoutElement(spacerObj, minWidth: 0, flexibleWidth: 0, minHeight: 0, flexibleHeight: 0);
             this.spacer = spacerObj.GetComponent<LayoutElement>();
 
+            // Expand arrow
+
             ExpandButton = UIFactory.CreateButton(this.UIRoot, "ExpandButton", "►");
             UIFactory.SetLayoutElement(ExpandButton.Component.gameObject, minWidth: 15, flexibleWidth: 0, minHeight: 25, flexibleHeight: 0);
+
+            // Enabled toggle
+
+            var toggleObj = UIFactory.CreateToggle(UIRoot, "BehaviourToggle", out EnabledToggle, out var behavText, default, 17, 17);
+            UIFactory.SetLayoutElement(toggleObj, minHeight: 17, flexibleHeight: 0, minWidth: 17);
+            EnabledToggle.onValueChanged.AddListener(OnEnableClicked);
+
+            // Name button
 
             NameButton = UIFactory.CreateButton(this.UIRoot, "NameButton", "Name", null);
             UIFactory.SetLayoutElement(NameButton.Component.gameObject, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
