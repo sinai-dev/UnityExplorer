@@ -36,6 +36,8 @@ namespace UnityExplorer.UI.CSConsole
         public static bool EnableAutoIndent { get; private set; } = true;
         public static bool EnableSuggestions { get; private set; } = true;
 
+        internal static string ScriptsFolder => Path.Combine(ExplorerCore.Loader.ExplorerFolder, "Scripts");
+
         internal static readonly string[] DefaultUsing = new string[]
         {
             "System",
@@ -56,6 +58,18 @@ namespace UnityExplorer.UI.CSConsole
                 ResetConsole(false);
                 // ensure the compiler is supported (if this fails then SRE is probably stubbed)
                 Evaluator.Compile("0 == 0");
+
+                if (!Directory.Exists(ScriptsFolder))
+                    Directory.CreateDirectory(ScriptsFolder);
+
+                var startupPath = Path.Combine(ScriptsFolder, "startup.cs");
+                if (File.Exists(startupPath))
+                {
+                    ExplorerCore.Log($"Executing startup script from '{startupPath}'...");
+                    var text = File.ReadAllText(startupPath);
+                    Input.Text = text;
+                    Evaluate();
+                }
             }
             catch (Exception ex)
             {
@@ -69,7 +83,7 @@ namespace UnityExplorer.UI.CSConsole
             SetupHelpInteraction();
 
             Panel.OnInputChanged += OnInputChanged;
-            Panel.InputScroll.OnScroll += OnInputScrolled;
+            Panel.InputScroller.OnScroll += OnInputScrolled;
             Panel.OnCompileClicked += Evaluate;
             Panel.OnResetClicked += ResetConsole;
             Panel.OnHelpDropdownChanged += HelpSelected;
@@ -317,7 +331,7 @@ namespace UnityExplorer.UI.CSConsole
                 var charBot = charTop - CSCONSOLE_LINEHEIGHT;
 
                 var viewportMin = Input.Rect.rect.height - Input.Rect.anchoredPosition.y - (Input.Rect.rect.height * 0.5f);
-                var viewportMax = viewportMin - Panel.InputScroll.ViewportRect.rect.height;
+                var viewportMax = viewportMin - Panel.InputScroller.ViewportRect.rect.height;
 
                 float diff = 0f;
                 if (charTop > viewportMin)
@@ -337,7 +351,7 @@ namespace UnityExplorer.UI.CSConsole
         {
             settingCaretCoroutine = true;
             Input.Component.readOnly = true;
-            RuntimeProvider.Instance.StartCoroutine(SetAutocompleteCaretCoro(caretPosition));
+            RuntimeProvider.Instance.StartCoroutine(SetCaretCoroutine(caretPosition));
         }
 
         internal static PropertyInfo SelectionGuardProperty => selectionGuardPropInfo ?? GetSelectionGuardPropInfo();
@@ -352,7 +366,7 @@ namespace UnityExplorer.UI.CSConsole
 
         private static PropertyInfo selectionGuardPropInfo;
 
-        private static IEnumerator SetAutocompleteCaretCoro(int caretPosition)
+        private static IEnumerator SetCaretCoroutine(int caretPosition)
         {
             var color = Input.Component.selectionColor;
             color.a = 0f;
@@ -376,7 +390,6 @@ namespace UnityExplorer.UI.CSConsole
             settingCaretCoroutine = false;
         }
 
-
         #region Lexer Highlighting
 
         /// <summary>
@@ -384,43 +397,83 @@ namespace UnityExplorer.UI.CSConsole
         /// </summary>
         private static bool HighlightVisibleInput()
         {
-            int startIdx = 0;
-            int endIdx = Input.Text.Length - 1;
-            int topLine = 0;
-
-            // Calculate visible text if necessary
-            if (Input.Rect.rect.height > Panel.InputScroll.ViewportRect.rect.height)
+            if (string.IsNullOrEmpty(Input.Text))
             {
-                topLine = -1;
-                int bottomLine = -1;
-
-                // the top and bottom position of the viewport in relation to the text height
-                // they need the half-height adjustment to normalize against the 'line.topY' value.
-                var viewportMin = Input.Rect.rect.height - Input.Rect.anchoredPosition.y - (Input.Rect.rect.height * 0.5f);
-                var viewportMax = viewportMin - Panel.InputScroll.ViewportRect.rect.height;
-
-                for (int i = 0; i < Input.TextGenerator.lineCount; i++)
-                {
-                    var line = Input.TextGenerator.lines[i];
-                    // if not set the top line yet, and top of line is below the viewport top
-                    if (topLine == -1 && line.topY <= viewportMin)
-                        topLine = i;
-                    // if bottom of line is below the viewport bottom
-                    if ((line.topY - line.height) >= viewportMax)
-                        bottomLine = i;
-                }
-
-                topLine = Math.Max(0, topLine - 1);
-                bottomLine = Math.Min(Input.TextGenerator.lineCount - 1, bottomLine + 1);
-
-                startIdx = Input.TextGenerator.lines[topLine].startCharIdx;
-                endIdx = (bottomLine >= Input.TextGenerator.lineCount - 1)
-                    ? Input.Text.Length - 1
-                    : (Input.TextGenerator.lines[bottomLine + 1].startCharIdx - 1);
+                Panel.HighlightText.text = "";
+                Panel.LineNumberText.text = "1";
+                return false;
             }
 
+            // Calculate the visible lines
+
+            int topLine = -1;
+            int bottomLine = -1;
+
+            // the top and bottom position of the viewport in relation to the text height
+            // they need the half-height adjustment to normalize against the 'line.topY' value.
+            var viewportMin = Input.Rect.rect.height - Input.Rect.anchoredPosition.y - (Input.Rect.rect.height * 0.5f);
+            var viewportMax = viewportMin - Panel.InputScroller.ViewportRect.rect.height;
+
+            for (int i = 0; i < Input.TextGenerator.lineCount; i++)
+            {
+                var line = Input.TextGenerator.lines[i];
+                // if not set the top line yet, and top of line is below the viewport top
+                if (topLine == -1 && line.topY <= viewportMin)
+                    topLine = i;
+                // if bottom of line is below the viewport bottom
+                if ((line.topY - line.height) >= viewportMax)
+                    bottomLine = i;
+            }
+
+            topLine = Math.Max(0, topLine - 1);
+            bottomLine = Math.Min(Input.TextGenerator.lineCount - 1, bottomLine + 1);
+
+            int startIdx = Input.TextGenerator.lines[topLine].startCharIdx;
+            int endIdx = (bottomLine >= Input.TextGenerator.lineCount - 1)
+                ? Input.Text.Length - 1
+                : (Input.TextGenerator.lines[bottomLine + 1].startCharIdx - 1);
+
+
             // Highlight the visible text with the LexerBuilder
+
             Panel.HighlightText.text = Lexer.BuildHighlightedString(Input.Text, startIdx, endIdx, topLine, LastCaretPosition, out bool ret);
+
+            // Set the line numbers
+
+            // determine true starting line number (not the same as the cached TextGenerator line numbers)
+            int realStartLine = 0;
+            for (int i = 0; i < startIdx; i++)
+            {
+                if (LexerBuilder.IsNewLine(Input.Text[i]))
+                    realStartLine++;
+            }
+            realStartLine++;
+            char lastPrev = '\n';
+
+            var sb = new StringBuilder();
+
+            // append leading new lines for spacing (no point rendering line numbers we cant see)
+            for (int i = 0; i < topLine; i++)
+                sb.Append('\n');
+
+            // append the displayed line numbers
+            for (int i = topLine; i <= bottomLine; i++)
+            {
+                if (i > 0)
+                    lastPrev = Input.Text[Input.TextGenerator.lines[i].startCharIdx - 1];
+
+                // previous line ended with a newline character, this is an actual new line.
+                if (LexerBuilder.IsNewLine(lastPrev))
+                {
+                    sb.Append(realStartLine.ToString());
+                    realStartLine++;
+                }
+
+                sb.Append('\n');
+            }
+
+            Panel.LineNumberText.text = sb.ToString();
+
             return ret;
         }
 

@@ -80,12 +80,12 @@ namespace UnityExplorer.UI.Widgets
 
                 if (ContentRect.rect.height < desiredHeight)
                 {
-                    ContentRect.sizeDelta = new Vector2(0, desiredHeight);
+                    ContentRect.sizeDelta = new Vector2(ContentRect.sizeDelta.x, desiredHeight);
                     this.Slider.UpdateSliderHandle();
                 }
                 else if (ContentRect.rect.height > desiredHeight)
                 {
-                    ContentRect.sizeDelta = new Vector2(0, desiredHeight);
+                    ContentRect.sizeDelta = new Vector2(ContentRect.sizeDelta.x, desiredHeight);
                     this.Slider.UpdateSliderHandle();
                 }
             }

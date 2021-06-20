@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,10 +19,11 @@ namespace UnityExplorer.UI.Panels
         public override int MinWidth => 750;
         public override int MinHeight => 300;
 
-        public InputFieldScroller InputScroll { get; private set; }
-        public InputFieldRef Input => InputScroll.InputField;
+        public InputFieldScroller InputScroller { get; private set; }
+        public InputFieldRef Input => InputScroller.InputField;
         public Text InputText { get; private set; }
         public Text HighlightText { get; private set; }
+        public Text LineNumberText { get; private set; }
 
         public Dropdown HelpDropdown { get; private set; }
 
@@ -121,19 +123,53 @@ namespace UnityExplorer.UI.Panels
 
             // Console Input
 
+            var inputArea = UIFactory.CreateUIObject("InputGroup", content);
+            UIFactory.SetLayoutElement(inputArea, flexibleWidth: 9999, flexibleHeight: 9999);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(inputArea, false, true, true, true);
+            inputArea.AddComponent<Image>().color = Color.white;
+            inputArea.AddComponent<Mask>().showMaskGraphic = false;
+
+            // line numbers
+
+            var linesHolder = UIFactory.CreateUIObject("LinesHolder", inputArea);
+            var linesRect = linesHolder.GetComponent<RectTransform>();
+            linesRect.pivot = new Vector2(0, 1);
+            linesRect.anchorMin = new Vector2(0, 0);
+            linesRect.anchorMax = new Vector2(0, 1);
+            linesRect.sizeDelta = new Vector2(0, 305000);
+            linesRect.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, 0, 50);
+            linesHolder.AddComponent<Image>().color = new Color(0.05f, 0.05f, 0.05f);
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(linesHolder, true, true, true, true);
+
+            LineNumberText = UIFactory.CreateLabel(linesHolder, "LineNumbers", "1", TextAnchor.UpperCenter, Color.grey, fontSize: 16);
+            LineNumberText.font = UIManager.ConsoleFont;
+
+            // input field
+
             int fontSize = 16;
 
-            var inputObj = UIFactory.CreateScrollInputField(this.content, "ConsoleInput", ConsoleController.STARTUP_TEXT, out var inputScroller, fontSize);
-            InputScroll = inputScroller;
+            var inputObj = UIFactory.CreateScrollInputField(inputArea, "ConsoleInput", ConsoleController.STARTUP_TEXT, 
+                out var inputScroller, fontSize);
+            InputScroller = inputScroller;
             ConsoleController.defaultInputFieldAlpha = Input.Component.selectionColor.a;
             Input.OnValueChanged += InvokeOnValueChanged;
 
+            // move line number text with input field
+            linesRect.transform.SetParent(inputObj.transform.Find("Viewport"), false);
+            inputScroller.Slider.Scrollbar.onValueChanged.AddListener((float val) => { SetLinesPosition(); });
+            inputScroller.Slider.Slider.onValueChanged.AddListener((float val) => { SetLinesPosition(); });
+            void SetLinesPosition()
+            {
+                linesRect.anchoredPosition = new Vector2(linesRect.anchoredPosition.x, inputScroller.ContentRect.anchoredPosition.y);
+                //SetInputLayout();
+            }
+
             InputText = Input.Component.textComponent;
             InputText.supportRichText = false;
-            Input.PlaceholderText.fontSize = fontSize;
             InputText.color = Color.clear;
             Input.Component.customCaretColor = true;
             Input.Component.caretColor = Color.white;
+            Input.PlaceholderText.fontSize = fontSize;
 
             // Lexer highlight text overlay
             var highlightTextObj = UIFactory.CreateUIObject("HighlightText", InputText.gameObject);
@@ -154,7 +190,19 @@ namespace UnityExplorer.UI.Panels
             Input.PlaceholderText.font = UIManager.ConsoleFont;
             HighlightText.font = UIManager.ConsoleFont;
 
+            RuntimeProvider.Instance.StartCoroutine(DelayedLayoutSetup());
+        }
 
+        private IEnumerator DelayedLayoutSetup()
+        {
+            yield return null;
+            SetInputLayout();
+        }
+
+        public void SetInputLayout()
+        {
+            Input.Rect.offsetMin = new Vector2(52, Input.Rect.offsetMin.y);
+            Input.Rect.offsetMax = new Vector2(2, Input.Rect.offsetMax.y);
         }
     }
 }

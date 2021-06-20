@@ -13,8 +13,9 @@ namespace UnityExplorer.UI.CSConsole
     {
         public int startIndex;
         public int endIndex;
-        public string htmlColorTag;
         public bool isStringOrComment;
+        public bool matchToEndOfLine;
+        public string htmlColorTag;
     }
 
     public class LexerBuilder
@@ -112,12 +113,24 @@ namespace UnityExplorer.UI.CSConsole
                     sb.Append(input[i]);
                 sb.Append(SignatureHighlighter.CLOSE_COLOR);
 
-                // check caretIdx to determine inStringOrComment state
-                if (caretIdx >= match.startIndex && (caretIdx <= match.endIndex || (caretIdx >= input.Length && match.endIndex >= input.Length - 1)))
-                    caretInStringOrComment = match.isStringOrComment;
-
                 // update the last unhighlighted start index
                 lastUnhighlighted = match.endIndex + 1;
+
+                int matchEndIdx = match.endIndex;
+                if (match.matchToEndOfLine)
+                {
+                    while (input.Length - 1 >= matchEndIdx)
+                    {
+                        if (IsNewLine(input[matchEndIdx]))
+                            break;
+                        matchEndIdx++;
+                    }
+                }
+
+                // check caretIdx to determine inStringOrComment state
+                if (caretIdx >= match.startIndex && (caretIdx <= matchEndIdx || (caretIdx >= input.Length && matchEndIdx >= input.Length - 1)))
+                    caretInStringOrComment = match.isStringOrComment;
+
             }
 
             // Append trailing unhighlighted input
