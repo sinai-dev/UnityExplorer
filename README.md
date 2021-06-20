@@ -91,6 +91,7 @@ The inspector is used to see detailed information on objects of any type and man
 ### C# Console
 
 * The C# Console uses the `Mono.CSharp.Evaluator` to define temporary classes or run immediate REPL code.
+* You can execute a script automatically on startup by naming it `startup.cs` and placing it in the `UnityExplorer\Scripts\` folder (this folder will be created where you placed the DLL file).
 * See the "Help" dropdown in the C# console menu for more detailed information.
 
 ### Mouse-Inspect
