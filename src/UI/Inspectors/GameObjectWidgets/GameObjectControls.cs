@@ -468,7 +468,7 @@ namespace UnityExplorer.UI.Inspectors
             //UIFactory.SetLayoutElement(pathApplyBtn.Component.gameObject, minHeight: 25, minWidth: 120);
             //pathApplyBtn.OnClick += () => { OnPathEndEdit(PathInput.Text); };
 
-            PathInput.Component.onEndEdit.AddListener((string val) => { OnPathEndEdit(val); });
+            PathInput.Component.GetOnEndEdit().AddListener((string val) => { OnPathEndEdit(val); });
 
             // Title and update row
 
@@ -484,7 +484,7 @@ namespace UnityExplorer.UI.Inspectors
             NameInput = UIFactory.CreateInputField(titleRow, "NameInput", "untitled");
             UIFactory.SetLayoutElement(NameInput.Component.gameObject, minHeight: 30, minWidth: 100, flexibleWidth: 9999);
             NameInput.Component.textComponent.fontSize = 15;
-            NameInput.Component.onEndEdit.AddListener((string val) => { OnNameEndEdit(val); });
+            NameInput.Component.GetOnEndEdit().AddListener((string val) => { OnNameEndEdit(val); });
 
             // second row (toggles, instanceID, tag, buttons)
 
@@ -521,7 +521,7 @@ namespace UnityExplorer.UI.Inspectors
             TagInput = UIFactory.CreateInputField(secondRow, "TagInput", "none");
             UIFactory.SetLayoutElement(TagInput.Component.gameObject, minHeight: 25, minWidth: 100, flexibleWidth: 999);
             TagInput.Component.textComponent.color = Color.white;
-            TagInput.Component.onEndEdit.AddListener((string val) => { OnTagEndEdit(val); });
+            TagInput.Component.GetOnEndEdit().AddListener((string val) => { OnTagEndEdit(val); });
 
             // Instantiate
             var instantiateBtn = UIFactory.CreateButton(secondRow, "InstantiateBtn", "Instantiate", new Color(0.2f, 0.2f, 0.2f));
@@ -644,7 +644,7 @@ namespace UnityExplorer.UI.Inspectors
             var inputField = UIFactory.CreateInputField(rowObj, "InputField", "...");
             UIFactory.SetLayoutElement(inputField.Component.gameObject, minHeight: 25, minWidth: 100, flexibleWidth: 999);
 
-            inputField.Component.onEndEdit.AddListener((string value) => { OnTransformInputEndEdit(type, value); });
+            inputField.Component.GetOnEndEdit().AddListener((string value) => { OnTransformInputEndEdit(type, value); });
 
             var control = new TransformControl(type, inputField);
 

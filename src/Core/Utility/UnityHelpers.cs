@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 // Project-wide namespace for accessibility
@@ -106,6 +108,17 @@ namespace UnityExplorer
             };
 
             return color;
+        }
+
+        private static PropertyInfo onEndEdit;
+
+        public static UnityEvent<string> GetOnEndEdit(this InputField _this)
+        {
+            if (onEndEdit == null)
+                onEndEdit = typeof(InputField).GetProperty("onEndEdit")
+                            ?? throw new Exception("Could not get InputField.onEndEdit property!");
+
+            return onEndEdit.GetValue(_this, null).TryCast<UnityEvent<string>>();
         }
     }
 }

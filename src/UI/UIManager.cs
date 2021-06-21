@@ -378,7 +378,7 @@ namespace UnityExplorer.UI
             timeInput = UIFactory.CreateInputField(navbarPanel, "TimeInput", "timeScale");
             UIFactory.SetLayoutElement(timeInput.Component.gameObject, minHeight: 25, minWidth: 40);
             timeInput.Text = Time.timeScale.ToString("F2");
-            timeInput.Component.onEndEdit.AddListener(OnTimeInputEndEdit);
+            timeInput.Component.GetOnEndEdit().AddListener(OnTimeInputEndEdit);
 
             pauseBtn = UIFactory.CreateButton(navbarPanel, "PauseButton", "||", new Color(0.2f, 0.2f, 0.2f));
             UIFactory.SetLayoutElement(pauseBtn.Component.gameObject, minHeight: 25, minWidth: 25);
