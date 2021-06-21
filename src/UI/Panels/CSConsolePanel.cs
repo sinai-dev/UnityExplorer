@@ -35,6 +35,7 @@ namespace UnityExplorer.UI.Panels
         public Action<bool> OnCtrlRToggled;
         public Action<bool> OnSuggestionsToggled;
         public Action<bool> OnAutoIndentToggled;
+        public Action OnPanelResized;
 
         private void InvokeOnValueChanged(string value)
         {
@@ -61,6 +62,11 @@ namespace UnityExplorer.UI.Panels
         public override string GetSaveDataFromConfigManager() => ConfigManager.CSConsoleData.Value;
 
         // UI Construction
+
+        public override void OnFinishResize(RectTransform panel)
+        {
+            OnPanelResized?.Invoke();
+        }
 
         protected internal override void DoSetDefaultPosAndAnchors()
         {

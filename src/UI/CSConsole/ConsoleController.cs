@@ -80,6 +80,7 @@ namespace UnityExplorer.UI.CSConsole
             Panel.OnAutoIndentToggled += OnToggleAutoIndent;
             Panel.OnCtrlRToggled += OnToggleCtrlRShortcut;
             Panel.OnSuggestionsToggled += OnToggleSuggestions;
+            Panel.OnPanelResized += OnInputScrolled;
 
             // Run startup script
             try
