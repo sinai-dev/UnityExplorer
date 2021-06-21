@@ -53,12 +53,37 @@ namespace UnityExplorer.UI.CSConsole
 
         public static void Init()
         {
+            // Make sure console is supported on this platform
             try
             {
                 ResetConsole(false);
                 // ensure the compiler is supported (if this fails then SRE is probably stubbed)
                 Evaluator.Compile("0 == 0");
+            }
+            catch (Exception ex)
+            {
+                DisableConsole(ex);
+                return;
+            }
 
+            // Setup console
+            Lexer = new LexerBuilder();
+            Completer = new CSAutoCompleter();
+
+            SetupHelpInteraction();
+
+            Panel.OnInputChanged += OnInputChanged;
+            Panel.InputScroller.OnScroll += OnInputScrolled;
+            Panel.OnCompileClicked += Evaluate;
+            Panel.OnResetClicked += ResetConsole;
+            Panel.OnHelpDropdownChanged += HelpSelected;
+            Panel.OnAutoIndentToggled += OnToggleAutoIndent;
+            Panel.OnCtrlRToggled += OnToggleCtrlRShortcut;
+            Panel.OnSuggestionsToggled += OnToggleSuggestions;
+
+            // Run startup script
+            try
+            {
                 if (!Directory.Exists(ScriptsFolder))
                     Directory.CreateDirectory(ScriptsFolder);
 
@@ -73,23 +98,8 @@ namespace UnityExplorer.UI.CSConsole
             }
             catch (Exception ex)
             {
-                DisableConsole(ex);
-                return;
+                ExplorerCore.LogWarning($"Exception executing startup script: {ex}");
             }
-
-            Lexer = new LexerBuilder();
-            Completer = new CSAutoCompleter();
-
-            SetupHelpInteraction();
-
-            Panel.OnInputChanged += OnInputChanged;
-            Panel.InputScroller.OnScroll += OnInputScrolled;
-            Panel.OnCompileClicked += Evaluate;
-            Panel.OnResetClicked += ResetConsole;
-            Panel.OnHelpDropdownChanged += HelpSelected;
-            Panel.OnAutoIndentToggled += OnToggleAutoIndent;
-            Panel.OnCtrlRToggled += OnToggleCtrlRShortcut;
-            Panel.OnSuggestionsToggled += OnToggleSuggestions;
         }
 
 
