@@ -193,12 +193,11 @@ namespace UnityExplorer.UI.Widgets
             RuntimeProvider.Instance.StartCoroutine(InitCoroutine(onHeightChangedListener));
         }
 
-        private WaitForEndOfFrame waitForEndOfFrame = new WaitForEndOfFrame();
-
         private IEnumerator InitCoroutine(Action onHeightChangedListener)
         {
             ScrollRect.content.anchoredPosition = Vector2.zero;
-            yield return waitForEndOfFrame ?? (waitForEndOfFrame = new WaitForEndOfFrame());
+            yield return null;
+            yield return null;
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
 
