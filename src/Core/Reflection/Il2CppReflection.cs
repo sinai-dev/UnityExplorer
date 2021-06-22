@@ -132,7 +132,6 @@ namespace UnityExplorer
                 return null;
 
             var type = obj.GetType();
-
             try
             {
                 if (IsString(obj))
@@ -216,7 +215,7 @@ namespace UnityExplorer
                 // from other structs to il2cpp object
                 else if (typeof(Il2CppSystem.Object).IsAssignableFrom(castTo))
                 {
-                    return BoxIl2CppObject(obj);
+                    return BoxIl2CppObject(obj).TryCast(castTo);
                 }
                 else
                     return obj;
@@ -295,7 +294,27 @@ namespace UnityExplorer
             try
             {
                 if (toType.IsEnum)
+                {
+                    // Check for nullable enums
+                    var type = cppObj.GetType();
+                    if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Il2CppSystem.Nullable<>))
+                    {
+                        var nullable = cppObj.TryCast(type);
+                        var nullableHasValueProperty = type.GetProperty("HasValue");
+                        if ((bool)nullableHasValueProperty.GetValue(nullable, null))
+                        {
+                            // nullable has a value.
+                            var nullableValueProperty = type.GetProperty("Value");
+                            return Enum.Parse(toType, nullableValueProperty.GetValue(nullable, null).ToString());
+                        }
+                        // nullable and no current value.
+                        return cppObj;
+                    }
+
                     return Enum.Parse(toType, cppObj.ToString());
+                }
+
+                // Not enum, unbox with Il2CppObjectBase.Unbox
 
                 var name = toType.AssemblyQualifiedName;
 
