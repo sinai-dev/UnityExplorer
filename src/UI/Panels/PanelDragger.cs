@@ -23,6 +23,7 @@ namespace UnityExplorer.UI.Panels
         {
             s_resizeCursorObj.SetActive(false);
             wasAnyDragging = false;
+            Resizing = false;
 
             foreach (var instance in Instances)
             {
