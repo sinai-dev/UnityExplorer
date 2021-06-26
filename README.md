@@ -9,9 +9,6 @@
   ✔️ Supports most Unity versions from 5.2 to 2021+ (IL2CPP and Mono).
 </p>
 <p align="center">
-  ☕ Enjoy this tool? Consider supporting me on <a href="https://ko-fi.com/sinaidev">ko-fi</a>!
-</p>
-<p align="center">
   ⚡ UnityExplorer is on <a href="https://thunderstore.io/package/sinai-dev/UnityExplorer/">Thunderstore</a>! (and as <a href="https://gtfo.thunderstore.io/package/sinai-dev/UnityExplorer_IL2CPP/">IL2CPP</a>)
 </p>
 
