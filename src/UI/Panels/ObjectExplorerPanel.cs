@@ -11,7 +11,7 @@ using UnityEngine.UI;
 using UnityExplorer.Core;
 using UnityExplorer.Core.Config;
 using UnityExplorer.UI.Models;
-using UnityExplorer.UI.ObjectExplorer;
+using UnityExplorer.ObjectExplorer;
 using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Panels

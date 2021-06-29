@@ -11,8 +11,8 @@ using UnityExplorer.Core.Input;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.Tests;
 using UnityExplorer.UI;
-using UnityExplorer.UI.Inspectors;
-using UnityExplorer.UI.ObjectExplorer;
+using UnityExplorer.Inspectors;
+using UnityExplorer.ObjectExplorer;
 using UnityExplorer.UI.Panels;
 
 namespace UnityExplorer

@@ -5,8 +5,8 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Core.Config;
-using UnityExplorer.UI.CacheObject;
-using UnityExplorer.UI.CacheObject.Views;
+using UnityExplorer.CacheObject;
+using UnityExplorer.CacheObject.Views;
 using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Panels

@@ -143,12 +143,12 @@
     </Reference>
   </ItemGroup>
   <!-- BepInEx universal refs -->
-    <ItemGroup Condition="'$(IsBepInEx)'=='true'">
-        <Reference Include="0Harmony">
-            <HintPath>packages\HarmonyX.2.4.2\lib\net35\0Harmony.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-    </ItemGroup>
+  <ItemGroup Condition="'$(IsBepInEx)'=='true'">
+    <Reference Include="0Harmony">
+      <HintPath>packages\HarmonyX.2.4.2\lib\net35\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
   <!-- BepInEx 5 Mono refs -->
   <ItemGroup Condition="'$(IsBepInEx)|$(IsCpp)|$(Configuration)'=='true|false|Release_BIE5_Mono'">
     <Reference Include="BepInEx">
@@ -180,10 +180,10 @@
   </ItemGroup>
   <!-- Standalone refs -->
   <ItemGroup Condition="'$(IsStandalone)'=='true'">
-      <Reference Include="0Harmony">
-          <HintPath>packages\HarmonyX.2.4.2\lib\net35\0Harmony.dll</HintPath>
-          <Private>False</Private>
-      </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>packages\HarmonyX.2.4.2\lib\net35\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <!-- Mono refs -->
   <ItemGroup Condition="'$(IsCpp)'=='false'">
@@ -241,54 +241,54 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Config\InternalConfigHandler.cs" />
-    <Compile Include="UI\CacheObject\CacheConfigEntry.cs" />
-    <Compile Include="UI\CacheObject\Views\CacheConfigCell.cs" />
-    <Compile Include="UI\CSConsole\CSAutoCompleter.cs" />
-    <Compile Include="UI\CSConsole\LexerBuilder.cs" />
-    <Compile Include="UI\CSConsole\Lexers\CommentLexer.cs" />
-    <Compile Include="UI\CSConsole\Lexers\KeywordLexer.cs" />
-    <Compile Include="UI\CSConsole\Lexers\Lexer.cs" />
-    <Compile Include="UI\CSConsole\Lexers\NumberLexer.cs" />
-    <Compile Include="UI\CSConsole\Lexers\StringLexer.cs" />
-    <Compile Include="UI\CSConsole\Lexers\SymbolLexer.cs" />
-    <Compile Include="UI\CSConsole\ScriptEvaluator.cs" />
-    <Compile Include="UI\CSConsole\ScriptInteraction.cs" />
+    <Compile Include="CacheObject\CacheConfigEntry.cs" />
+    <Compile Include="CacheObject\Views\CacheConfigCell.cs" />
+    <Compile Include="CSConsole\CSAutoCompleter.cs" />
+    <Compile Include="CSConsole\LexerBuilder.cs" />
+    <Compile Include="CSConsole\Lexers\CommentLexer.cs" />
+    <Compile Include="CSConsole\Lexers\KeywordLexer.cs" />
+    <Compile Include="CSConsole\Lexers\Lexer.cs" />
+    <Compile Include="CSConsole\Lexers\NumberLexer.cs" />
+    <Compile Include="CSConsole\Lexers\StringLexer.cs" />
+    <Compile Include="CSConsole\Lexers\SymbolLexer.cs" />
+    <Compile Include="CSConsole\ScriptEvaluator.cs" />
+    <Compile Include="CSConsole\ScriptInteraction.cs" />
     <Compile Include="Core\ExplorerBehaviour.cs" />
     <Compile Include="Core\Reflection\Extensions.cs" />
     <Compile Include="Core\Reflection\Il2CppReflection.cs" />
     <Compile Include="Core\Utility\ArgumentUtility.cs" />
     <Compile Include="Core\Utility\MiscUtility.cs" />
     <Compile Include="Core\Utility\ParseUtility.cs" />
-    <Compile Include="UI\Inspectors\GameObjectWidgets\ComponentCell.cs" />
-    <Compile Include="UI\Inspectors\GameObjectWidgets\ComponentList.cs" />
-    <Compile Include="UI\Inspectors\GameObjectWidgets\GameObjectControls.cs" />
-    <Compile Include="UI\Inspectors\InspectUnderMouse.cs" />
-    <Compile Include="UI\CSConsole\ConsoleController.cs" />
-    <Compile Include="UI\CacheObject\CacheField.cs" />
-    <Compile Include="UI\CacheObject\CacheKeyValuePair.cs" />
-    <Compile Include="UI\CacheObject\CacheListEntry.cs" />
-    <Compile Include="UI\CacheObject\CacheMember.cs" />
-    <Compile Include="UI\CacheObject\CacheMethod.cs" />
-    <Compile Include="UI\CacheObject\CacheObjectBase.cs" />
-    <Compile Include="UI\CacheObject\CacheProperty.cs" />
-    <Compile Include="UI\CacheObject\Views\CacheKeyValuePairCell.cs" />
-    <Compile Include="UI\CacheObject\Views\CacheListEntryCell.cs" />
-    <Compile Include="UI\CacheObject\Views\CacheMemberCell.cs" />
-    <Compile Include="UI\CacheObject\Views\CacheObjectCell.cs" />
-    <Compile Include="UI\CacheObject\Views\EvaluateWidget.cs" />
-    <Compile Include="UI\Inspectors\GameObjectInspector.cs" />
-    <Compile Include="UI\CacheObject\ICacheObjectController.cs" />
-    <Compile Include="UI\Inspectors\InspectorManager.cs" />
-    <Compile Include="UI\Inspectors\InspectorTab.cs" />
-    <Compile Include="UI\Inspectors\InspectorBase.cs" />
-    <Compile Include="UI\CacheObject\IValues\InteractiveColor.cs" />
-    <Compile Include="UI\CacheObject\IValues\InteractiveDictionary.cs" />
-    <Compile Include="UI\CacheObject\IValues\InteractiveEnum.cs" />
-    <Compile Include="UI\CacheObject\IValues\InteractiveList.cs" />
-    <Compile Include="UI\CacheObject\IValues\InteractiveString.cs" />
-    <Compile Include="UI\CacheObject\IValues\InteractiveValue.cs" />
-    <Compile Include="UI\Inspectors\ReflectionInspector.cs" />
-    <Compile Include="UI\CacheObject\IValues\InteractiveValueStruct.cs" />
+    <Compile Include="Inspectors\GameObjectWidgets\ComponentCell.cs" />
+    <Compile Include="Inspectors\GameObjectWidgets\ComponentList.cs" />
+    <Compile Include="Inspectors\GameObjectWidgets\GameObjectControls.cs" />
+    <Compile Include="Inspectors\InspectUnderMouse.cs" />
+    <Compile Include="CSConsole\ConsoleController.cs" />
+    <Compile Include="CacheObject\CacheField.cs" />
+    <Compile Include="CacheObject\CacheKeyValuePair.cs" />
+    <Compile Include="CacheObject\CacheListEntry.cs" />
+    <Compile Include="CacheObject\CacheMember.cs" />
+    <Compile Include="CacheObject\CacheMethod.cs" />
+    <Compile Include="CacheObject\CacheObjectBase.cs" />
+    <Compile Include="CacheObject\CacheProperty.cs" />
+    <Compile Include="CacheObject\Views\CacheKeyValuePairCell.cs" />
+    <Compile Include="CacheObject\Views\CacheListEntryCell.cs" />
+    <Compile Include="CacheObject\Views\CacheMemberCell.cs" />
+    <Compile Include="CacheObject\Views\CacheObjectCell.cs" />
+    <Compile Include="CacheObject\Views\EvaluateWidget.cs" />
+    <Compile Include="Inspectors\GameObjectInspector.cs" />
+    <Compile Include="CacheObject\ICacheObjectController.cs" />
+    <Compile Include="Inspectors\InspectorManager.cs" />
+    <Compile Include="Inspectors\InspectorTab.cs" />
+    <Compile Include="Inspectors\InspectorBase.cs" />
+    <Compile Include="CacheObject\IValues\InteractiveColor.cs" />
+    <Compile Include="CacheObject\IValues\InteractiveDictionary.cs" />
+    <Compile Include="CacheObject\IValues\InteractiveEnum.cs" />
+    <Compile Include="CacheObject\IValues\InteractiveList.cs" />
+    <Compile Include="CacheObject\IValues\InteractiveString.cs" />
+    <Compile Include="CacheObject\IValues\InteractiveValue.cs" />
+    <Compile Include="Inspectors\ReflectionInspector.cs" />
+    <Compile Include="CacheObject\IValues\InteractiveValueStruct.cs" />
     <Compile Include="UI\Models\InputFieldRef.cs" />
     <Compile Include="UI\Pool.cs" />
     <Compile Include="UI\Panels\LogPanel.cs" />
@@ -318,8 +318,8 @@
     <Compile Include="Core\Runtime\RuntimeContext.cs" />
     <Compile Include="Core\Runtime\RuntimeProvider.cs" />
     <Compile Include="Core\Runtime\TextureUtilProvider.cs" />
-    <Compile Include="UI\ObjectExplorer\SceneHandler.cs" />
-    <Compile Include="UI\ObjectExplorer\SearchProvider.cs" />
+    <Compile Include="ObjectExplorer\SceneHandler.cs" />
+    <Compile Include="ObjectExplorer\SearchProvider.cs" />
     <Compile Include="Core\Tests\TestClass.cs" />
     <Compile Include="Core\Utility\UnityHelpers.cs" />
     <Compile Include="ExplorerCore.cs" />
@@ -344,8 +344,8 @@
     <Compile Include="UI\Widgets\AutoComplete\AutoCompleteModal.cs" />
     <Compile Include="UI\Widgets\AutoComplete\TypeCompleter.cs" />
     <Compile Include="UI\Models\ButtonRef.cs" />
-    <Compile Include="UI\ObjectExplorer\ObjectSearch.cs" />
-    <Compile Include="UI\ObjectExplorer\SceneExplorer.cs" />
+    <Compile Include="ObjectExplorer\ObjectSearch.cs" />
+    <Compile Include="ObjectExplorer\SceneExplorer.cs" />
     <Compile Include="UI\Widgets\ScrollPool\DataHeightCache.cs" />
     <Compile Include="UI\Widgets\ScrollPool\ICell.cs" />
     <Compile Include="UI\Widgets\ScrollPool\ICellPoolDataSource.cs" />

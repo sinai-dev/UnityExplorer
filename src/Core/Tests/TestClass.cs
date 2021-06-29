@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityExplorer.UI;
-using UnityExplorer.UI.CacheObject.IValues;
+using UnityExplorer.CacheObject.IValues;
 #if CPP
 using UnhollowerRuntimeLib;
 using UnhollowerBaseLib;

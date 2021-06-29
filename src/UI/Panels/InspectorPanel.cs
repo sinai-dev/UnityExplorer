@@ -6,7 +6,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Core.Config;
-using UnityExplorer.UI.Inspectors;
+using UnityExplorer.Inspectors;
 
 namespace UnityExplorer.UI.Panels
 {
