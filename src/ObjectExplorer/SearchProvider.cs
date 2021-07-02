@@ -13,9 +13,8 @@ namespace UnityExplorer.ObjectExplorer
     public enum SearchContext
     {
         UnityObject,
-        // GameObject,
         Singleton,
-        StaticClass
+        Class
     }
 
     public enum ChildFilter
@@ -134,7 +133,7 @@ namespace UnityExplorer.ObjectExplorer
             return results;
         }
 
-        internal static List<object> StaticClassSearch(string input)
+        internal static List<object> ClassSearch(string input)
         {
             var list = new List<object>();
 
@@ -144,11 +143,10 @@ namespace UnityExplorer.ObjectExplorer
 
             foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
             {
-                foreach (var type in asm.TryGetTypes().Where(it => it.IsSealed && it.IsAbstract))
+                foreach (var type in asm.TryGetTypes())
                 {
                     if (!string.IsNullOrEmpty(nameFilter) && !type.FullName.ContainsIgnoreCase(nameFilter))
                         continue;
-
                     list.Add(type);
                 }
             }

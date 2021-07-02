@@ -53,8 +53,8 @@ namespace UnityExplorer.ObjectExplorer
 
             if (m_context == SearchContext.Singleton)
                 currentResults = SearchProvider.SingletonSearch(nameInputField.Text);
-            else if (m_context == SearchContext.StaticClass)
-                currentResults = SearchProvider.StaticClassSearch(nameInputField.Text);
+            else if (m_context == SearchContext.Class)
+                currentResults = SearchProvider.ClassSearch(nameInputField.Text);
             else
             {
                 string compType = "";
@@ -130,7 +130,7 @@ namespace UnityExplorer.ObjectExplorer
             if (!cachedCellTexts.ContainsKey(index))
             {
                 string text;
-                if (m_context == SearchContext.StaticClass)
+                if (m_context == SearchContext.Class)
                     text = SignatureHighlighter.Parse(currentResults[index] as Type, true);
                 else
                     text = ToStringUtility.ToStringWithType(currentResults[index], currentResults[index]?.GetActualType());
@@ -143,7 +143,7 @@ namespace UnityExplorer.ObjectExplorer
 
         private void OnCellClicked(int dataIndex)
         {
-            if (m_context == SearchContext.StaticClass)
+            if (m_context == SearchContext.Class)
                 InspectorManager.Inspect(currentResults[dataIndex] as Type);
             else
                 InspectorManager.Inspect(currentResults[dataIndex]);
