@@ -1,0 +1,55 @@
+name: Bug Report
+description: File a bug or crash report
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for submitting a bug report, please fill out as much detail as possible.
+  - type: checkboxes
+    id: latestversion
+    attributes:
+      label: Are you on the latest version of UnityExplorer?
+      description: If not, please update first.
+      options:
+        - label: Yes, I'm on the latest version of UnityExplorer.
+          required: true
+  - type: dropdown
+    id: version
+    attributes:
+      label: Which release are you using?
+      description: Please select your environment for UnityExplorer.
+      options:
+        - BepInEx IL2CPP
+        - BepInEx 6.X Mono
+        - BepInEx 5.X Mono
+        - MelonLoader 0.4+ IL2CPP
+        - MelonLoader 0.4+ Mono
+        - MelonLoader 0.3 IL2CPP
+        - MelonLoader 0.3 Mono
+        - Standalone IL2CPP
+        - Standalone Mono
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: Describe the issue.
+      description: What happened? Should something else have happened instead?
+      placeholder: Tell us what you see!
+      value: ""
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log output
+      description: >
+        Please copy and paste your mod loader's log output.
+        * BepInEx: `BepInEx\LogOutput.log`
+        * MelonLoader: `MelonLoader\latest.log`
+        * Standalone: `{DLL_Location}\UnityExplorer\Logs\` (pick the most recent one)
+      render: shell
+    validations:
+      required: true
