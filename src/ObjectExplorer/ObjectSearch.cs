@@ -131,7 +131,10 @@ namespace UnityExplorer.ObjectExplorer
             {
                 string text;
                 if (m_context == SearchContext.Class)
-                    text = SignatureHighlighter.Parse(currentResults[index] as Type, true);
+                {
+                    var type = currentResults[index] as Type;
+                    text = $"{SignatureHighlighter.Parse(type, true)} <color=grey><i>({type.Assembly.GetName().Name})</i></color>";
+                }
                 else
                     text = ToStringUtility.ToStringWithType(currentResults[index], currentResults[index]?.GetActualType());
 
