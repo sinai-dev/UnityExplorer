@@ -53,9 +53,9 @@ body:
       label: Log output
       description: |
         Please copy and paste your mod loader's log output.
-        > BepInEx: `BepInEx\LogOutput.log`
-        > MelonLoader: `MelonLoader\latest.log`
-        > Standalone: `{DLL_Location}\UnityExplorer\Logs\` (pick the most recent one)
+        * BepInEx: `BepInEx\LogOutput.log`
+        * MelonLoader: `MelonLoader\latest.log`
+        * Standalone: `{DLL_Location}\UnityExplorer\Logs\` (pick the most recent one)
       render: shell
     validations:
       required: true
