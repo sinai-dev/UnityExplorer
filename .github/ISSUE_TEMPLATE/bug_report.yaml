@@ -50,12 +50,13 @@ body:
   - type: textarea
     id: logs
     attributes:
-      label: Log output
+      label: Relevant log output
       description: |
-        Please copy and paste your mod loader's log output.
+        Please copy and paste any relevant logs and stack traces.
+        * Unity log: `%userprofile%\AppData\LocalLow\{Company}\{Game}\Player.log` or `output_log.txt`
         * BepInEx: `BepInEx\LogOutput.log`
         * MelonLoader: `MelonLoader\latest.log`
         * Standalone: `{DLL_Location}\UnityExplorer\Logs\` (pick the most recent one)
       render: shell
     validations:
-      required: true
+      required: false
