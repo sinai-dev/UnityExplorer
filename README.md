@@ -50,11 +50,6 @@ The standalone release can be used with any injector or loader of your choice, b
 3. Create an instance of Unity Explorer with `UnityExplorer.ExplorerStandalone.CreateInstance();`
 4. Optionally subscribe to the `ExplorerStandalone.OnLog` event to handle logging if you wish
 
-# Known issues
-* Any `MissingMethodException` or `NotSupportedException`: please report the issue and provide a copy of your mod loader log and/or Unity log.
-* In IL2CPP, some IEnumerable and IDictionary types may fail enumeration. Waiting for the Unhollower rewrite to address this any further.
-* The C# Console's completions have some minor issues such as not suggestion global classes which have no namespace, and erronously suggesting classes from using directives when they shouldn't be suggested. These are issues with mcs itself which I am looking into.
-
 # Features
 
 <p align="center">
