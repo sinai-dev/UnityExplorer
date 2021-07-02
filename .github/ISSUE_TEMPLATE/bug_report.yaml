@@ -38,7 +38,6 @@ body:
       label: Describe the issue.
       description: What happened? Should something else have happened instead?
       placeholder: Tell us what you see!
-      value: ""
     validations:
       required: true
   - type: textarea
