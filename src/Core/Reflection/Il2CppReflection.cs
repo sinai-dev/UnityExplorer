@@ -804,7 +804,9 @@ namespace UnityExplorer
 
             if (!getEnumeratorMethods.ContainsKey(key))
             {
-                getEnumeratorMethods.Add(key, type.GetMethod("GetEnumerator"));
+                var method = type.GetMethod("System_Collections_IEnumerable_GetEnumerator", FLAGS)
+                             ?? type.GetMethod("GetEnumerator");
+                getEnumeratorMethods.Add(key, method);
 
                 // ensure the enumerator type is supported
                 try
@@ -890,7 +892,9 @@ namespace UnityExplorer
                 var cacheKey = keys.GetType().AssemblyQualifiedName;
                 if (!getEnumeratorMethods.ContainsKey(cacheKey))
                 {
-                    getEnumeratorMethods.Add(cacheKey, keyCollType.GetMethod("GetEnumerator"));
+                    var method = keyCollType.GetMethod("System_Collections_IDictionary_GetEnumerator", FLAGS)
+                                 ?? keyCollType.GetMethod("GetEnumerator");
+                    getEnumeratorMethods.Add(cacheKey, method);
 
                     // test support
                     try
