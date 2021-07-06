@@ -799,23 +799,24 @@ namespace UnityExplorer
 
             // Some ugly reflection to use the il2cpp interface for the instance type
 
-            var type = list.GetType();
+            var type = list.GetActualType();
             var key = type.AssemblyQualifiedName;
 
             if (!getEnumeratorMethods.ContainsKey(key))
             {
-                var method = type.GetMethod("System_Collections_IEnumerable_GetEnumerator", FLAGS)
-                             ?? type.GetMethod("GetEnumerator");
+                var method = type.GetMethod("GetEnumerator")
+                             ?? type.GetMethod("System_Collections_IEnumerable_GetEnumerator", FLAGS);
                 getEnumeratorMethods.Add(key, method);
 
                 // ensure the enumerator type is supported
                 try
                 {
                     var test = getEnumeratorMethods[key].Invoke(list, null);
-                    test.GetType().GetMethod("MoveNext").Invoke(test, null);
+                    test.GetActualType().GetMethod("MoveNext").Invoke(test, null);
                 }
-                catch
+                catch (Exception ex)
                 {
+                    ExplorerCore.Log($"IEnumerable failed to enumerate: {ex}");
                     notSupportedTypes.Add(key);
                 }
             }
@@ -824,7 +825,7 @@ namespace UnityExplorer
                 throw new NotSupportedException($"The IEnumerable type '{type.FullName}' does not support MoveNext.");
 
             cppEnumerator = getEnumeratorMethods[key].Invoke(list, null);
-            var enumeratorType = cppEnumerator.GetType();
+            var enumeratorType = cppEnumerator.GetActualType();
 
             var enumInfoKey = enumeratorType.AssemblyQualifiedName;
 
@@ -878,7 +879,7 @@ namespace UnityExplorer
 
             try
             {
-                var type = dictionary.GetType();
+                var type = dictionary.GetActualType();
 
                 if (typeof(Il2CppSystem.Collections.Hashtable).IsAssignableFrom(type))
                 {
@@ -888,22 +889,23 @@ namespace UnityExplorer
 
                 var keys = type.GetProperty("Keys").GetValue(dictionary, null);
 
-                var keyCollType = keys.GetType();
-                var cacheKey = keys.GetType().AssemblyQualifiedName;
+                var keyCollType = keys.GetActualType();
+                var cacheKey = keyCollType.AssemblyQualifiedName;
                 if (!getEnumeratorMethods.ContainsKey(cacheKey))
                 {
-                    var method = keyCollType.GetMethod("System_Collections_IDictionary_GetEnumerator", FLAGS)
-                                 ?? keyCollType.GetMethod("GetEnumerator");
+                    var method = keyCollType.GetMethod("GetEnumerator")
+                                 ?? keyCollType.GetMethod("System_Collections_IDictionary_GetEnumerator", FLAGS);
                     getEnumeratorMethods.Add(cacheKey, method);
 
                     // test support
                     try
                     {
                         var test = getEnumeratorMethods[cacheKey].Invoke(keys, null);
-                        test.GetType().GetMethod("MoveNext").Invoke(test, null);
+                        test.GetActualType().GetMethod("MoveNext").Invoke(test, null);
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        ExplorerCore.Log($"IDictionary failed to enumerate: {ex}");
                         notSupportedTypes.Add(cacheKey);
                     }
                 }
@@ -914,16 +916,16 @@ namespace UnityExplorer
                 var keyEnumerator = getEnumeratorMethods[cacheKey].Invoke(keys, null);
                 var keyInfo = new EnumeratorInfo
                 {
-                    current = keyEnumerator.GetType().GetProperty("Current"),
-                    moveNext = keyEnumerator.GetType().GetMethod("MoveNext"),
+                    current = keyEnumerator.GetActualType().GetProperty("Current"),
+                    moveNext = keyEnumerator.GetActualType().GetMethod("MoveNext"),
                 };
 
                 var values = type.GetProperty("Values").GetValue(dictionary, null);
-                var valueEnumerator = values.GetType().GetMethod("GetEnumerator").Invoke(values, null);
+                var valueEnumerator = values.GetActualType().GetMethod("GetEnumerator").Invoke(values, null);
                 var valueInfo = new EnumeratorInfo
                 {
-                    current = valueEnumerator.GetType().GetProperty("Current"),
-                    moveNext = valueEnumerator.GetType().GetMethod("MoveNext"),
+                    current = valueEnumerator.GetActualType().GetProperty("Current"),
+                    moveNext = valueEnumerator.GetActualType().GetMethod("MoveNext"),
                 };
 
                 dictEnumerator = EnumerateCppDict(keyInfo, keyEnumerator, valueInfo, valueEnumerator);
