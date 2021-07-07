@@ -7,12 +7,6 @@ using System.Text;
 using UnityEngine;
 using UnityExplorer.Core.Runtime;
 
-/*
-    Welcome to the UnityExplorer C# Console!
-    Use the Help dropdown to see detailed examples of how to use this console.
-    To see your output, use the Log panel or a Console Log window.
-*/
-
 namespace UnityExplorer.CSConsole
 {
     public class ScriptInteraction : InteractiveBase
