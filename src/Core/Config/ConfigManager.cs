@@ -116,7 +116,7 @@ namespace UnityExplorer.Core.Config
             Reflection_Signature_Blacklist = new ConfigElement<string>("Member Signature Blacklist",
                 "Use this to blacklist certain member signatures if they are known to cause a crash or other issues.\r\n" +
                 "Seperate signatures with a semicolon ';'.\r\n" +
-                "For example, to blacklist Camera.main, you would add 'Camera.main;'",
+                "For example, to blacklist Camera.main, you would add 'UnityEngine.Camera.main;'",
                 "");
 
             // Internal configs (panel save data)
