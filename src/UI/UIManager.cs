@@ -417,8 +417,14 @@ namespace UnityExplorer.UI
             AssetBundle bundle = null;
             try
             {
-                // Get the Unity version (without the 'f_' suffix).
-                Version version = new Version(Application.unityVersion.Substring(0, Application.unityVersion.LastIndexOf('f')));
+                // Get the Unity version (without the 'f' suffix).
+                // I'm not sure if Unity always includes the 'f' suffix.
+                int len;
+                if (Application.unityVersion.Contains("f"))
+                    len = Application.unityVersion.LastIndexOf("f");
+                else
+                    len = Application.unityVersion.Length;
+                Version version = new Version(Application.unityVersion.Substring(0, len));
 
                 // Use appropriate AssetBundle for Unity version
                 // >= 2017.3
