@@ -417,21 +417,17 @@ namespace UnityExplorer.UI
             AssetBundle bundle = null;
             try
             {
-                // Get the Unity version (without the 'f' suffix).
-                // I'm not sure if Unity always includes the 'f' suffix.
-                int len;
-                if (Application.unityVersion.Contains("f"))
-                    len = Application.unityVersion.LastIndexOf("f");
-                else
-                    len = Application.unityVersion.Length;
-                Version version = new Version(Application.unityVersion.Substring(0, len));
+                // Get the Major and Minor of the Unity version
+                var split = Application.unityVersion.Split('.');
+                int major = int.Parse(split[0]);
+                int minor = int.Parse(split[1]);
 
                 // Use appropriate AssetBundle for Unity version
                 // >= 2017.3
-                if (version.Major > 2017 || (version.Major == 2017 && version.Minor >= 3))
+                if (major > 2017 || (major == 2017 && minor >= 3))
                     bundle = LoadBundle("modern");
                 // 5.6.0 to 2017.3
-                else if (version.Major == 2017 || (version.Major == 5 && version.Minor >= 6))
+                else if (major == 2017 || (major == 5 && minor >= 6))
                     bundle = LoadBundle("legacy.5.6");
                 // < 5.6.0
                 else
