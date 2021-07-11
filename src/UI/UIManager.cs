@@ -121,6 +121,12 @@ namespace UnityExplorer.UI
             lastScreenWidth = Screen.width;
             lastScreenHeight = Screen.height;
 
+            // Failsafe fix
+            foreach (var dropdown in CanvasRoot.GetComponentsInChildren<Dropdown>(true))
+                dropdown.RefreshShownValue();
+            timeInput.Text = string.Empty;
+            timeInput.Text = Time.timeScale.ToString();
+
             Initializing = false;
         }
 
@@ -404,18 +410,41 @@ namespace UnityExplorer.UI
             closeBtn.OnClick += OnCloseButtonClicked;
         }
 
-        #region UI AssetBundle
+        // UI AssetBundle
 
         private static void LoadBundle()
         {
             AssetBundle bundle = null;
             try
             {
-                bundle = LoadBundle("modern");
-                if (bundle == null)
-                    bundle = LoadBundle("legacy");
+                // Get the Unity version (without the 'f_' suffix).
+                Version version = new Version(Application.unityVersion.Substring(0, Application.unityVersion.LastIndexOf('f')));
+
+                // Use appropriate AssetBundle for Unity version
+                // >= 2017.3
+                if (version.Major > 2017 || (version.Major == 2017 && version.Minor >= 3))
+                    bundle = LoadBundle("modern");
+                // 5.6.0 to 2017.3
+                else if (version.Major == 2017 || (version.Major == 5 && version.Minor >= 6))
+                    bundle = LoadBundle("legacy.5.6");
+                // < 5.6.0
+                else
+                    bundle = LoadBundle("legacy");      
             }
-            catch { }
+            catch (Exception ex)
+            {
+                ExplorerCore.LogWarning($"Exception loading Explorer AssetBundle!");
+                ExplorerCore.Log(ex);
+            }
+
+            AssetBundle LoadBundle(string id)
+            {
+                ExplorerCore.Log($"Loading {id} bundle for Unity {Application.unityVersion}");
+
+                return AssetBundle.LoadFromMemory(ReadFully(typeof(ExplorerCore)
+                        .Assembly
+                        .GetManifestResourceStream($"UnityExplorer.Resources.{id}.bundle")));
+            }
 
             if (bundle == null)
             {
@@ -438,14 +467,6 @@ namespace UnityExplorer.UI
             ConsoleFont = bundle.LoadAsset<Font>("CONSOLA");
         }
 
-        private static AssetBundle LoadBundle(string id)
-        {
-            var stream = typeof(ExplorerCore).Assembly
-                .GetManifestResourceStream($"UnityExplorer.Resources.explorerui.{id}.bundle");
-
-            return AssetBundle.LoadFromMemory(ReadFully(stream));
-        }
-
         private static byte[] ReadFully(Stream input)
         {
             using (var ms = new MemoryStream())
@@ -457,7 +478,5 @@ namespace UnityExplorer.UI
                 return ms.ToArray();
             }
         }
-
-        #endregion
     }
 }
