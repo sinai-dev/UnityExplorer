@@ -12,6 +12,8 @@ namespace UnityExplorer.Core.Input
     {
         public InputSystem()
         {
+            SetupSupportedDevices();
+
             m_kbCurrentProp = TKeyboard.GetProperty("current");
             m_kbIndexer = TKeyboard.GetProperty("Item", new Type[] { TKey });
 
@@ -32,7 +34,37 @@ namespace UnityExplorer.Core.Input
                                       .GetMethod("ReadValue");
         }
 
-        #region reflection cache
+        internal static void SetupSupportedDevices()
+        {
+            try
+            {
+                // typeof(InputSystem)
+                Type TInputSystem = ReflectionUtility.GetTypeByName("UnityEngine.InputSystem.InputSystem");
+                // InputSystem.settings
+                var settings = TInputSystem.GetProperty("settings", BindingFlags.Public | BindingFlags.Static).GetValue(null, null);
+                // typeof(InputSettings)
+                Type TSettings = settings.GetActualType();
+                // InputSettings.supportedDevices
+                PropertyInfo supportedProp = TSettings.GetProperty("supportedDevices", BindingFlags.Public | BindingFlags.Instance);
+                var supportedDevices = supportedProp.GetValue(settings, null);
+                // An empty supportedDevices list means all devices are supported.
+#if CPP
+                // weird hack for il2cpp, use the implicit operator and cast Il2CppStringArray to ReadOnlyArray<string>
+                var args = new object[] { new UnhollowerBaseLib.Il2CppStringArray(0) };
+                var method = supportedDevices.GetActualType().GetMethod("op_Implicit", BindingFlags.Static | BindingFlags.Public);
+                supportedProp.SetValue(settings, method.Invoke(null, args), null);
+#else
+                supportedProp.SetValue(settings, Activator.CreateInstance(supportedDevices.GetActualType(), new object[] { new string[0] }), null);
+#endif
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.LogWarning($"Exception setting up InputSystem.settings.supportedDevices list!");
+                ExplorerCore.Log(ex);
+            }
+        }
+
+#region reflection cache
 
         public static Type TKeyboard => m_tKeyboard ?? (m_tKeyboard = ReflectionUtility.GetTypeByName("UnityEngine.InputSystem.Keyboard"));
         private static Type m_tKeyboard;
@@ -73,7 +105,7 @@ namespace UnityExplorer.Core.Input
         private static object m_scrollInfo;
         private static PropertyInfo m_scrollDeltaProp;
 
-        #endregion
+#endregion
 
         public Vector2 MousePosition
         {
@@ -138,6 +170,8 @@ namespace UnityExplorer.Core.Input
 
         public bool GetMouseButtonDown(int btn)
         {
+            if (CurrentMouse == null)
+                return false;
             switch (btn)
             {
                 case 0: return (bool)m_btnWasPressedProp.GetValue(LeftMouseButton, null);
@@ -149,6 +183,8 @@ namespace UnityExplorer.Core.Input
 
         public bool GetMouseButton(int btn)
         {
+            if (CurrentMouse == null)
+                return false;
             switch (btn)
             {
                 case 0: return (bool)m_btnIsPressedProp.GetValue(LeftMouseButton, null);
