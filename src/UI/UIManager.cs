@@ -414,7 +414,7 @@ namespace UnityExplorer.UI
 
         private static void LoadBundle()
         {
-            AssetBundle bundle = null;
+            AssetBundle bundle;
             try
             {
                 // Get the Major and Minor of the Unity version
@@ -433,10 +433,10 @@ namespace UnityExplorer.UI
                 else
                     bundle = LoadBundle("legacy");      
             }
-            catch (Exception ex)
+            catch
             {
-                ExplorerCore.LogWarning($"Exception loading Explorer AssetBundle!");
-                ExplorerCore.Log(ex);
+                ExplorerCore.LogWarning($"Exception parsing Unity version, falling back to old AssetBundle load method...");
+                bundle = LoadBundle("modern") ?? LoadBundle("legacy.5.6") ?? LoadBundle("legacy");
             }
 
             AssetBundle LoadBundle(string id)
