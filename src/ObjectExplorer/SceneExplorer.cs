@@ -114,7 +114,7 @@ namespace UnityExplorer.ObjectExplorer
                 refreshRow.SetActive(!scene.IsValid());
         }
 
-        private void SceneHandler_OnLoadedScenesChanged(ReadOnlyCollection<Scene> loadedScenes)
+        private void SceneHandler_OnLoadedScenesChanged(List<Scene> loadedScenes)
         {
             PopulateSceneDropdown();
         }
@@ -126,6 +126,9 @@ namespace UnityExplorer.ObjectExplorer
 
             foreach (var scene in SceneHandler.LoadedScenes)
             {
+                if (sceneToDropdownOption.ContainsKey(scene))
+                    continue;
+
                 string name = scene.name?.Trim();
 
                 if (!scene.IsValid())
