@@ -20,7 +20,7 @@ namespace UnityExplorer
     public static class ExplorerCore
     {
         public const string NAME = "UnityExplorer";
-        public const string VERSION = "4.1.10";
+        public const string VERSION = "4.1.11";
         public const string AUTHOR = "Sinai";
         public const string GUID = "com.sinai.unityexplorer";
 
@@ -47,10 +47,9 @@ namespace UnityExplorer
                 Directory.CreateDirectory(Loader.ExplorerFolder);
 
             ConfigManager.Init(Loader.ConfigHandler);
-
             ReflectionUtility.Init();
-
             RuntimeProvider.Init();
+            
             SceneHandler.Init();
             InputManager.Init();
 
