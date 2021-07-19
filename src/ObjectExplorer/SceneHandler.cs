@@ -29,14 +29,12 @@ namespace UnityExplorer.ObjectExplorer
         /// <summary>
         /// The GameObjects in the currently inspected scene.
         /// </summary>
-        public static ReadOnlyCollection<GameObject> CurrentRootObjects => new ReadOnlyCollection<GameObject>(rootObjects);
-        private static GameObject[] rootObjects = new GameObject[0];
+        public static GameObject[] CurrentRootObjects { get; private set; } = new GameObject[0];
 
         /// <summary>
         /// All currently loaded Scenes.
         /// </summary>
-        public static ReadOnlyCollection<Scene> LoadedScenes => new ReadOnlyCollection<Scene>(allLoadedScenes);
-        private static readonly List<Scene> allLoadedScenes = new List<Scene>();
+        public static List<Scene> LoadedScenes { get; private set; } = new List<Scene>();
         private static HashSet<Scene> previousLoadedScenes;
 
         /// <summary>
@@ -59,7 +57,7 @@ namespace UnityExplorer.ObjectExplorer
         /// <summary>
         /// Invoked whenever the list of currently loaded Scenes changes. The argument contains all loaded scenes after the change.
         /// </summary>
-        public static event Action<ReadOnlyCollection<Scene>> OnLoadedScenesChanged;
+        public static event Action<List<Scene>> OnLoadedScenesChanged;
 
         /// <summary>
         /// Equivalent to <see cref="SceneManager.sceneCount"/> + 2, to include 'DontDestroyOnLoad' and the 'None' scene.
@@ -115,7 +113,7 @@ namespace UnityExplorer.ObjectExplorer
             int confirmedCount = 2;
             bool inspectedExists = SelectedScene == DontDestroyScene || (SelectedScene.HasValue && SelectedScene.Value == default);
 
-            allLoadedScenes.Clear();
+            LoadedScenes.Clear();
 
             for (int i = 0; i < SceneManager.sceneCount; i++)
             {
@@ -131,30 +129,26 @@ namespace UnityExplorer.ObjectExplorer
                 if (!inspectedExists && scene == SelectedScene)
                     inspectedExists = true;
 
-                allLoadedScenes.Add(scene);
+                LoadedScenes.Add(scene);
             }
 
-            bool anyChange = confirmedCount != allLoadedScenes.Count;
+            bool anyChange = confirmedCount != LoadedScenes.Count;
 
-            allLoadedScenes.Add(DontDestroyScene);
-            allLoadedScenes.Add(default);
-            previousLoadedScenes = new HashSet<Scene>(allLoadedScenes);
+            LoadedScenes.Add(DontDestroyScene);
+            LoadedScenes.Add(default);
+            previousLoadedScenes = new HashSet<Scene>(LoadedScenes);
 
             // Default to first scene if none selected or previous selection no longer exists.
             if (!inspectedExists)
-            {
-                SelectedScene = allLoadedScenes.First();
-            }
+                SelectedScene = LoadedScenes.First();
 
             // Notify on the list changing at all
             if (anyChange)
-            {
                 OnLoadedScenesChanged?.Invoke(LoadedScenes);
-            }
 
             // Finally, update the root objects list.
             if (SelectedScene != null && ((Scene)SelectedScene).IsValid())
-                rootObjects = RuntimeProvider.Instance.GetRootGameObjects((Scene)SelectedScene);
+                CurrentRootObjects = RuntimeProvider.Instance.GetRootGameObjects((Scene)SelectedScene);
             else
             {
                 var allObjects = RuntimeProvider.Instance.FindObjectsOfTypeAll(typeof(GameObject));
@@ -165,7 +159,7 @@ namespace UnityExplorer.ObjectExplorer
                     if (go.transform.parent == null && !go.scene.IsValid())
                         objects.Add(go);
                 }
-                rootObjects = objects.ToArray();
+                CurrentRootObjects = objects.ToArray();
             }
         }
     }
