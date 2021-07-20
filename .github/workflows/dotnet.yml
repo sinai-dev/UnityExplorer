@@ -79,22 +79,6 @@ jobs:
           name: UnityExplorer.MelonLoader.Mono
           path: ./Release/UnityExplorer.MelonLoader.Mono/*
       
-      # MelonLoader 0.3.0 Il2Cpp
-      - run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_MLLegacy_Cpp
-      
-      - uses: actions/upload-artifact@v2
-        with:
-          name: UnityExplorer.MelonLoader_Legacy.Il2Cpp
-          path: ./Release/UnityExplorer.MelonLoader_Legacy.Il2Cpp/*
-      
-      # MelonLoader 0.3.0 Mono
-      - run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_MLLegacy_Mono
-      
-      - uses: actions/upload-artifact@v2
-        with:
-          name: UnityExplorer.MelonLoader_Legacy.Mono
-          path: ./Release/UnityExplorer.MelonLoader_Legacy.Mono/*
-      
       # Standalone Il2Cpp
       - run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_STANDALONE_Cpp
       
