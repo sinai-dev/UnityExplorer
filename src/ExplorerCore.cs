@@ -14,18 +14,21 @@ using UnityExplorer.UI;
 using UnityExplorer.Inspectors;
 using UnityExplorer.ObjectExplorer;
 using UnityExplorer.UI.Panels;
+using HarmonyLib;
 
 namespace UnityExplorer
 {
     public static class ExplorerCore
     {
         public const string NAME = "UnityExplorer";
-        public const string VERSION = "4.1.11";
+        public const string VERSION = "4.2.0";
         public const string AUTHOR = "Sinai";
         public const string GUID = "com.sinai.unityexplorer";
 
         public static IExplorerLoader Loader { get; private set; }
         public static RuntimeContext Context { get; internal set; }
+
+        public static HarmonyLib.Harmony Harmony { get; } = new HarmonyLib.Harmony(GUID);
 
         /// <summary>
         /// Initialize UnityExplorer with the provided Loader implementation.
