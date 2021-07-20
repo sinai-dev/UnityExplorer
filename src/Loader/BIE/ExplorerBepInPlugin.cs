@@ -51,8 +51,7 @@ namespace UnityExplorer
         public Action<object> OnLogWarning => LogSource.LogWarning;
         public Action<object> OnLogError => LogSource.LogError;
 
-        // Init common to Mono and Il2Cpp
-        internal void UniversalInit()
+        private void Init()
         {
             Instance = this;
             _configHandler = new BepInExConfigHandler();
@@ -62,57 +61,15 @@ namespace UnityExplorer
 #if MONO // Mono
         internal void Awake()
         {
-            UniversalInit();
+            Init();
         }
 
 #else   // Il2Cpp
         public override void Load()
         {
-            UniversalInit();
+            Init();
         }
 #endif
-
-        public void SetupCursorPatches()
-        {
-            try
-            {
-                this.HarmonyInstance.PatchAll();
-            }
-            catch (Exception ex)
-            {
-                ExplorerCore.Log($"Exception setting up Harmony patches:\r\n{ex.ReflectionExToString()}");
-            }
-        }
-
-        [HarmonyPatch(typeof(EventSystem), "current", MethodType.Setter)]
-        public class PATCH_EventSystem_current
-        {
-            [HarmonyPrefix]
-            public static void Prefix_EventSystem_set_current(ref EventSystem value)
-            {
-                CursorUnlocker.Prefix_EventSystem_set_current(ref value);
-            }
-        }
-
-        [HarmonyPatch(typeof(Cursor), "lockState", MethodType.Setter)]
-        public class PATCH_Cursor_lockState
-        {
-            [HarmonyPrefix]
-            public static void Prefix_set_lockState(ref CursorLockMode value)
-            {
-                CursorUnlocker.Prefix_set_lockState(ref value);
-            }
-        }
-
-        [HarmonyPatch(typeof(Cursor), "visible", MethodType.Setter)]
-        public class PATCH_Cursor_visible
-        {
-            [HarmonyPrefix]
-            public static void Prefix_set_visible(ref bool value)
-            {
-                CursorUnlocker.Prefix_set_visible(ref value);
-            }
-        }
     }
 }
 #endif

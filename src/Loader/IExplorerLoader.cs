@@ -15,7 +15,5 @@ namespace UnityExplorer
         Action<object> OnLogMessage { get; }
         Action<object> OnLogWarning { get; }
         Action<object> OnLogError { get; }
-
-        void SetupCursorPatches();
     }
 }

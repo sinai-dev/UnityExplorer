@@ -21,8 +21,7 @@ namespace UnityExplorer
         /// Call this to initialize UnityExplorer without adding a log listener.
         /// </summary>
         /// <returns>The new (or active, if one exists) instance of ExplorerStandalone.</returns>
-        public static ExplorerStandalone CreateInstance()
-            => CreateInstance(null);
+        public static ExplorerStandalone CreateInstance() => CreateInstance(null);
 
         /// <summary>
         /// Call this to initialize UnityExplorer and add a listener for UnityExplorer's log messages.
@@ -34,7 +33,8 @@ namespace UnityExplorer
             if (Instance != null)
                 return Instance;
 
-            OnLog += logListener;
+            if (logListener != null)
+                OnLog += logListener;
 
             var instance = new ExplorerStandalone();
             instance.Init();
@@ -58,19 +58,7 @@ namespace UnityExplorer
         {
             get
             {
-                if (s_explorerFolder == null)
-                {
-                    s_explorerFolder = 
-                        Path.Combine(
-                            Path.GetDirectoryName(
-                                Uri.UnescapeDataString(new Uri(Assembly.GetExecutingAssembly().CodeBase)
-                                .AbsolutePath)), 
-                        "UnityExplorer");
-
-                    if (!Directory.Exists(s_explorerFolder))
-                        Directory.CreateDirectory(s_explorerFolder);
-                }
-
+                CheckExplorerFolder();
                 return s_explorerFolder;
             }
         }
@@ -88,45 +76,18 @@ namespace UnityExplorer
             ExplorerCore.Init(this);
         }
 
-        public void SetupCursorPatches()
+        private void CheckExplorerFolder()
         {
-            try
+            if (s_explorerFolder == null)
             {
-                this.HarmonyInstance.PatchAll();
-            }
-            catch (Exception ex)
-            {
-                ExplorerCore.Log($"Exception setting up Harmony patches:\r\n{ex.ReflectionExToString()}");
-            }
-        }
+                s_explorerFolder =
+                    Path.Combine(
+                        Path.GetDirectoryName(
+                            Uri.UnescapeDataString(new Uri(Assembly.GetExecutingAssembly().CodeBase).AbsolutePath)),
+                        "UnityExplorer");
 
-        [HarmonyPatch(typeof(EventSystem), "current", MethodType.Setter)]
-        public class PATCH_EventSystem_current
-        {
-            [HarmonyPrefix]
-            public static void Prefix_EventSystem_set_current(ref EventSystem value)
-            {
-                CursorUnlocker.Prefix_EventSystem_set_current(ref value);
-            }
-        }
-
-        [HarmonyPatch(typeof(Cursor), "lockState", MethodType.Setter)]
-        public class PATCH_Cursor_lockState
-        {
-            [HarmonyPrefix]
-            public static void Prefix_set_lockState(ref CursorLockMode value)
-            {
-                CursorUnlocker.Prefix_set_lockState(ref value);
-            }
-        }
-
-        [HarmonyPatch(typeof(Cursor), "visible", MethodType.Setter)]
-        public class PATCH_Cursor_visible
-        {
-            [HarmonyPrefix]
-            public static void Prefix_set_visible(ref bool value)
-            {
-                CursorUnlocker.Prefix_set_visible(ref value);
+                if (!Directory.Exists(s_explorerFolder))
+                    Directory.CreateDirectory(s_explorerFolder);
             }
         }
     }
