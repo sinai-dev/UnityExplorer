@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -149,17 +150,72 @@ namespace UnityExplorer.Core.Input
 
         // Patches
 
-        private static void SetupPatches()
+        public static void SetupPatches()
         {
             try
             {
-                ExplorerCore.Loader.SetupCursorPatches();
+                PrefixPropertySetter(typeof(Cursor),
+                    "lockState",
+                    new HarmonyMethod(typeof(CursorUnlocker).GetMethod(nameof(CursorUnlocker.Prefix_set_lockState))));
+
+                PrefixPropertySetter(typeof(Cursor),
+                    "visible",
+                    new HarmonyMethod(typeof(CursorUnlocker).GetMethod(nameof(CursorUnlocker.Prefix_set_visible))));
+
+                PrefixPropertySetter(typeof(EventSystem),
+                    "current",
+                    new HarmonyMethod(typeof(CursorUnlocker).GetMethod(nameof(CursorUnlocker.Prefix_EventSystem_set_current))));
+
+                PrefixMethod(typeof(EventSystem),
+                    "SetSelectedGameObject",
+                    new Type[] { typeof(GameObject), typeof(BaseEventData), typeof(int) },
+                    new HarmonyMethod(typeof(CursorUnlocker).GetMethod(nameof(CursorUnlocker.Prefix_EventSystem_SetSelectedGameObject))));
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.Log($"Exception setting up Harmony patches:\r\n{ex.ReflectionExToString()}");
+            }
+        }
+
+        private static void PrefixMethod(Type type, string method, Type[] arguments, HarmonyMethod prefix)
+        {
+            try
+            {
+                var processor = ExplorerCore.Harmony.CreateProcessor(type.GetMethod(method, arguments));
+                processor.AddPrefix(prefix);
+                processor.Patch();
             }
             catch (Exception e)
             {
-                ExplorerCore.Log($"Exception setting up Cursor patches: {e.GetType()}, {e.Message}");
+                ExplorerCore.LogWarning($"Unable to patch {type.Name}.{method}: {e.Message}");
             }
         }
+
+        private static void PrefixPropertySetter(Type type, string property, HarmonyMethod prefix)
+        {
+            try
+            {
+                var processor = ExplorerCore.Harmony.CreateProcessor(type.GetProperty(property).GetSetMethod());
+                processor.AddPrefix(prefix);
+                processor.Patch();
+            }
+            catch (Exception e)
+            {
+                ExplorerCore.Log($"Unable to patch {type.Name}.set_{property}: {e.Message}");
+            }
+        }
+
+        // Prevent setting non-UnityExplorer objects as selected when menu is open
+
+        public static bool Prefix_EventSystem_SetSelectedGameObject(GameObject __0)
+        {
+            if (!UIManager.ShowMenu || !UIManager.CanvasRoot)
+                return true;
+
+            return __0 && __0.transform.root.gameObject.GetInstanceID() == UIManager.CanvasRoot.GetInstanceID();
+        }
+
+        // Force EventSystem.current to be UnityExplorer's when menu is open
 
         public static void Prefix_EventSystem_set_current(ref EventSystem value)
         {
