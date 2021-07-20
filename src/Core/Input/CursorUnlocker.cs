@@ -7,8 +7,6 @@ using UnityExplorer.Core;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Core.Input;
 using UnityExplorer.UI;
-using BF = System.Reflection.BindingFlags;
-
 
 namespace UnityExplorer.Core.Input
 {
@@ -168,8 +166,15 @@ namespace UnityExplorer.Core.Input
 
                 PrefixMethod(typeof(EventSystem),
                     "SetSelectedGameObject",
-                    new Type[] { typeof(GameObject), typeof(BaseEventData), typeof(int) },
-                    new HarmonyMethod(typeof(CursorUnlocker).GetMethod(nameof(CursorUnlocker.Prefix_EventSystem_SetSelectedGameObject))));
+                    new Type[] { typeof(GameObject), typeof(BaseEventData) },
+                    new HarmonyMethod(typeof(CursorUnlocker).GetMethod(nameof(CursorUnlocker.Prefix_EventSystem_SetSelectedGameObject))),
+                    new Type[] { typeof(GameObject), typeof(BaseEventData), typeof(int) });
+                    // some games use a modified version of uGUI that includes this extra int argument on this method.
+
+                PrefixMethod(typeof(PointerInputModule),
+                    "ClearSelection",
+                    new Type[] { },
+                    new HarmonyMethod(typeof(CursorUnlocker).GetMethod(nameof(CursorUnlocker.Prefix_PointerInputModule_ClearSelection))));
             }
             catch (Exception ex)
             {
@@ -177,11 +182,21 @@ namespace UnityExplorer.Core.Input
             }
         }
 
-        private static void PrefixMethod(Type type, string method, Type[] arguments, HarmonyMethod prefix)
+        private static void PrefixMethod(Type type, string method, Type[] arguments, HarmonyMethod prefix, Type[] backupArgs = null)
         {
             try
             {
-                var processor = ExplorerCore.Harmony.CreateProcessor(type.GetMethod(method, arguments));
+                var methodInfo = type.GetMethod(method, ReflectionUtility.FLAGS, null, arguments, null);
+                if (methodInfo == null)
+                {
+                    if (backupArgs != null)
+                        methodInfo = type.GetMethod(method, ReflectionUtility.FLAGS, null, backupArgs, null);
+                    
+                    if (methodInfo == null)
+                        throw new MissingMethodException($"Could not find method for patching - '{type.FullName}.{method}'!");
+                }
+
+                var processor = ExplorerCore.Harmony.CreateProcessor(methodInfo);
                 processor.AddPrefix(prefix);
                 processor.Patch();
             }
@@ -195,7 +210,7 @@ namespace UnityExplorer.Core.Input
         {
             try
             {
-                var processor = ExplorerCore.Harmony.CreateProcessor(type.GetProperty(property).GetSetMethod());
+                var processor = ExplorerCore.Harmony.CreateProcessor(type.GetProperty(property, ReflectionUtility.FLAGS).GetSetMethod());
                 processor.AddPrefix(prefix);
                 processor.Patch();
             }
@@ -206,6 +221,11 @@ namespace UnityExplorer.Core.Input
         }
 
         // Prevent setting non-UnityExplorer objects as selected when menu is open
+
+        public static bool Prefix_PointerInputModule_ClearSelection()
+        {
+            return !(UIManager.ShowMenu && UIManager.CanvasRoot);
+        }
 
         public static bool Prefix_EventSystem_SetSelectedGameObject(GameObject __0)
         {
