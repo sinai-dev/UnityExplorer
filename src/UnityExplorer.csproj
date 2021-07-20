@@ -93,24 +93,6 @@
     <IsCpp>true</IsCpp>
     <IsStandalone>true</IsStandalone>
   </PropertyGroup>
-  <!-- ML 0.3.0 CPP -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_MLLegacy_Cpp|AnyCPU'">
-    <OutputPath>..\Release\UnityExplorer.MelonLoader_Legacy.Il2Cpp\</OutputPath>
-    <DefineConstants>CPP,ML,ML_LEGACY</DefineConstants>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <AssemblyName>UnityExplorer.MLLEGACY.IL2CPP</AssemblyName>
-    <IsCpp>true</IsCpp>
-    <IsMelonLoaderLegacy>true</IsMelonLoaderLegacy>
-  </PropertyGroup>
-  <!-- ML 0.3.0 Mono -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_MLLegacy_Mono|AnyCPU'">
-    <OutputPath>..\Release\UnityExplorer.MelonLoader_Legacy.Mono\</OutputPath>
-    <DefineConstants>MONO,ML,ML_LEGACY</DefineConstants>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <AssemblyName>UnityExplorer.MLLEGACY.Mono</AssemblyName>
-    <IsCpp>false</IsCpp>
-    <IsMelonLoaderLegacy>true</IsMelonLoaderLegacy>
-  </PropertyGroup>
   <!-- Global refs, Mono and Il2Cpp -->
   <ItemGroup>
     <Reference Include="System" />
@@ -132,13 +114,6 @@
   <ItemGroup Condition="'$(IsMelonLoader)'=='true'">
     <Reference Include="MelonLoader">
       <HintPath>..\lib\MelonLoader\MelonLoader.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
-  <!-- MelonLoader Legacy refs -->
-  <ItemGroup Condition="'$(IsMelonLoaderLegacy)'=='true'">
-    <Reference Include="MelonLoader">
-      <HintPath>..\lib\MelonLoader_Legacy\MelonLoader.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
