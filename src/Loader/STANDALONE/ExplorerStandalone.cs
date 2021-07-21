@@ -48,9 +48,6 @@ namespace UnityExplorer
         /// </summary>
         public static event Action<string, LogType> OnLog;
 
-        public Harmony HarmonyInstance => s_harmony;
-        public static readonly Harmony s_harmony = new Harmony(ExplorerCore.GUID);
-
         public ConfigHandler ConfigHandler => _configHandler;
         private StandaloneConfigHandler _configHandler;
 
