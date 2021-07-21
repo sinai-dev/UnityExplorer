@@ -14,7 +14,6 @@ using UnityExplorer.UI;
 using UnityExplorer.Inspectors;
 using UnityExplorer.ObjectExplorer;
 using UnityExplorer.UI.Panels;
-using HarmonyLib;
 
 namespace UnityExplorer
 {
