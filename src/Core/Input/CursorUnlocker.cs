@@ -166,15 +166,17 @@ namespace UnityExplorer.Core.Input
 
                 PrefixMethod(typeof(EventSystem),
                     "SetSelectedGameObject",
-                    new Type[] { typeof(GameObject), typeof(BaseEventData) },
-                    new HarmonyMethod(typeof(CursorUnlocker).GetMethod(nameof(CursorUnlocker.Prefix_EventSystem_SetSelectedGameObject))),
-                    new Type[] { typeof(GameObject), typeof(BaseEventData), typeof(int) });
                     // some games use a modified version of uGUI that includes this extra int argument on this method.
+                    new Type[] { typeof(GameObject), typeof(BaseEventData), typeof(int) },
+                    new HarmonyMethod(typeof(CursorUnlocker).GetMethod(nameof(CursorUnlocker.Prefix_EventSystem_SetSelectedGameObject))),
+                    // most games use these arguments, we'll use them as our "backup".
+                    new Type[] { typeof(GameObject), typeof(BaseEventData) });
 
-                PrefixMethod(typeof(PointerInputModule),
-                    "ClearSelection",
-                    new Type[] { },
-                    new HarmonyMethod(typeof(CursorUnlocker).GetMethod(nameof(CursorUnlocker.Prefix_PointerInputModule_ClearSelection))));
+                //// Not sure if this one is needed.
+                //PrefixMethod(typeof(PointerInputModule),
+                //    "ClearSelection",
+                //    new Type[0],
+                //    new HarmonyMethod(typeof(CursorUnlocker).GetMethod(nameof(CursorUnlocker.Prefix_PointerInputModule_ClearSelection))));
             }
             catch (Exception ex)
             {
@@ -222,11 +224,6 @@ namespace UnityExplorer.Core.Input
 
         // Prevent setting non-UnityExplorer objects as selected when menu is open
 
-        public static bool Prefix_PointerInputModule_ClearSelection()
-        {
-            return !(UIManager.ShowMenu && UIManager.CanvasRoot);
-        }
-
         public static bool Prefix_EventSystem_SetSelectedGameObject(GameObject __0)
         {
             if (!UIManager.ShowMenu || !UIManager.CanvasRoot)
@@ -234,6 +231,11 @@ namespace UnityExplorer.Core.Input
 
             return __0 && __0.transform.root.gameObject.GetInstanceID() == UIManager.CanvasRoot.GetInstanceID();
         }
+
+        //public static bool Prefix_PointerInputModule_ClearSelection()
+        //{
+        //    return !(UIManager.ShowMenu && UIManager.CanvasRoot);
+        //}
 
         // Force EventSystem.current to be UnityExplorer's when menu is open
 
