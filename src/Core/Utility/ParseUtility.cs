@@ -10,8 +10,6 @@ namespace UnityExplorer
 {
     public static class ParseUtility
     {
-        public static CultureInfo en_US = new CultureInfo("en-US");
-
         private static readonly HashSet<Type> nonPrimitiveTypes = new HashSet<Type>
         {
             typeof(string),
@@ -19,20 +17,18 @@ namespace UnityExplorer
             typeof(DateTime),
         };
 
-        public const string NUMBER_FORMAT = "0.####";
+        // Helper for formatting float/double/decimal numbers to maximum of 4 decimal points.
+        // And also for formatting a sequence of those numbers, ie a Vector3, Color etc
 
+        public static readonly string NumberFormatString = $"0{CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator}####";
         private static readonly Dictionary<int, string> numSequenceStrings = new Dictionary<int, string>();
 
-        // Helper for formatting float/double/decimal numbers to maximum of 4 decimal points.
         public static string FormatDecimalSequence(params object[] numbers)
         {
             if (numbers.Length <= 0)
                 return null;
 
-            int count = numbers.Length;
-            var formatString = GetSequenceFormatString(count);
-
-            return string.Format(en_US, formatString, numbers);
+            return string.Format(CultureInfo.CurrentCulture, GetSequenceFormatString(numbers.Length), numbers);
         }
 
         public static string GetSequenceFormatString(int count)
@@ -46,19 +42,19 @@ namespace UnityExplorer
             string[] strings = new string[count];
 
             for (int i = 0; i < count; i++)
-                strings[i] = $"{{{i}:{NUMBER_FORMAT}}}";
+                strings[i] = $"{{{i}:{NumberFormatString}}}";
 
-            string s = string.Join(", ", strings);
-
-            numSequenceStrings.Add(count, s);
-            return s;
+            string ret = string.Join(" ", strings);
+            numSequenceStrings.Add(count, ret);
+            return ret;
         }
+
+        // Main parsing API
 
         public static bool CanParse(Type type)
         {
-            if (string.IsNullOrEmpty(type.FullName))
-                return false;
-            return type.IsPrimitive || type.IsEnum || nonPrimitiveTypes.Contains(type) || customTypes.ContainsKey(type.FullName);
+            return !string.IsNullOrEmpty(type?.FullName)
+                && (type.IsPrimitive || type.IsEnum || nonPrimitiveTypes.Contains(type) || customTypes.ContainsKey(type.FullName));
         }
 
         public static bool TryParse(string input, Type type, out object obj, out Exception parseException)
@@ -143,7 +139,7 @@ namespace UnityExplorer
                 else if (formattedTypes.Contains(type))
                 {
                     return ReflectionUtility.GetMethodInfo(type, "ToString", new Type[] { typeof(string), typeof(IFormatProvider) })
-                            .Invoke(obj, new object[] { NUMBER_FORMAT, en_US })
+                            .Invoke(obj, new object[] { NumberFormatString, CultureInfo.CurrentCulture })
                             as string;
                 }
                 else
@@ -166,9 +162,7 @@ namespace UnityExplorer
                 try
                 {
                     if (type.IsEnum)
-                    {
                         typeInputExamples.Add(type.AssemblyQualifiedName, Enum.GetNames(type).First());
-                    }
                     else
                     {
                         var instance = Activator.CreateInstance(type);
@@ -222,10 +216,10 @@ namespace UnityExplorer
         {
             Vector2 vector = default;
 
-            var split = input.Split(',');
+            var split = input.Split(' ');
 
-            vector.x = float.Parse(split[0].Trim(), en_US);
-            vector.y = float.Parse(split[1].Trim(), en_US);
+            vector.x = float.Parse(split[0].Trim(), CultureInfo.CurrentCulture);
+            vector.y = float.Parse(split[1].Trim(), CultureInfo.CurrentCulture);
 
             return vector;
         }
@@ -244,11 +238,11 @@ namespace UnityExplorer
         {
             Vector3 vector = default;
 
-            var split = input.Split(',');
+            var split = input.Split(' ');
 
-            vector.x = float.Parse(split[0].Trim(), en_US);
-            vector.y = float.Parse(split[1].Trim(), en_US);
-            vector.z = float.Parse(split[2].Trim(), en_US);
+            vector.x = float.Parse(split[0].Trim(), CultureInfo.CurrentCulture);
+            vector.y = float.Parse(split[1].Trim(), CultureInfo.CurrentCulture);
+            vector.z = float.Parse(split[2].Trim(), CultureInfo.CurrentCulture);
 
             return vector;
         }
@@ -267,12 +261,12 @@ namespace UnityExplorer
         {
             Vector4 vector = default;
 
-            var split = input.Split(',');
+            var split = input.Split(' ');
 
-            vector.x = float.Parse(split[0].Trim(), en_US);
-            vector.y = float.Parse(split[1].Trim(), en_US);
-            vector.z = float.Parse(split[2].Trim(), en_US);
-            vector.w = float.Parse(split[3].Trim(), en_US);
+            vector.x = float.Parse(split[0].Trim(), CultureInfo.CurrentCulture);
+            vector.y = float.Parse(split[1].Trim(), CultureInfo.CurrentCulture);
+            vector.z = float.Parse(split[2].Trim(), CultureInfo.CurrentCulture);
+            vector.w = float.Parse(split[3].Trim(), CultureInfo.CurrentCulture);
 
             return vector;
         }
@@ -291,22 +285,22 @@ namespace UnityExplorer
         {
             Vector3 vector = default;
 
-            var split = input.Split(',');
+            var split = input.Split(' ');
 
             if (split.Length == 4)
             {
                 Quaternion quat = default;
-                quat.x = float.Parse(split[0].Trim(), en_US);
-                quat.y = float.Parse(split[1].Trim(), en_US);
-                quat.z = float.Parse(split[2].Trim(), en_US);
-                quat.w = float.Parse(split[3].Trim(), en_US);
+                quat.x = float.Parse(split[0].Trim(), CultureInfo.CurrentCulture);
+                quat.y = float.Parse(split[1].Trim(), CultureInfo.CurrentCulture);
+                quat.z = float.Parse(split[2].Trim(), CultureInfo.CurrentCulture);
+                quat.w = float.Parse(split[3].Trim(), CultureInfo.CurrentCulture);
                 return quat;
             }
             else
             {
-                vector.x = float.Parse(split[0].Trim(), en_US);
-                vector.y = float.Parse(split[1].Trim(), en_US);
-                vector.z = float.Parse(split[2].Trim(), en_US);
+                vector.x = float.Parse(split[0].Trim(), CultureInfo.CurrentCulture);
+                vector.y = float.Parse(split[1].Trim(), CultureInfo.CurrentCulture);
+                vector.z = float.Parse(split[2].Trim(), CultureInfo.CurrentCulture);
                 return Quaternion.Euler(vector);
             }
         }
@@ -327,12 +321,12 @@ namespace UnityExplorer
         {
             Rect rect = default;
 
-            var split = input.Split(',');
+            var split = input.Split(' ');
 
-            rect.x = float.Parse(split[0].Trim(), en_US);
-            rect.y = float.Parse(split[1].Trim(), en_US);
-            rect.width = float.Parse(split[2].Trim(), en_US);
-            rect.height = float.Parse(split[3].Trim(), en_US);
+            rect.x = float.Parse(split[0].Trim(), CultureInfo.CurrentCulture);
+            rect.y = float.Parse(split[1].Trim(), CultureInfo.CurrentCulture);
+            rect.width = float.Parse(split[2].Trim(), CultureInfo.CurrentCulture);
+            rect.height = float.Parse(split[3].Trim(), CultureInfo.CurrentCulture);
 
             return rect;
         }
@@ -351,13 +345,13 @@ namespace UnityExplorer
         {
             Color color = default;
 
-            var split = input.Split(',');
+            var split = input.Split(' ');
 
-            color.r = float.Parse(split[0].Trim(), en_US);
-            color.g = float.Parse(split[1].Trim(), en_US);
-            color.b = float.Parse(split[2].Trim(), en_US);
+            color.r = float.Parse(split[0].Trim(), CultureInfo.CurrentCulture);
+            color.g = float.Parse(split[1].Trim(), CultureInfo.CurrentCulture);
+            color.b = float.Parse(split[2].Trim(), CultureInfo.CurrentCulture);
             if (split.Length > 3)
-                color.a = float.Parse(split[3].Trim(), en_US);
+                color.a = float.Parse(split[3].Trim(), CultureInfo.CurrentCulture);
             else
                 color.a = 1;
 
@@ -378,13 +372,13 @@ namespace UnityExplorer
         {
             Color32 color = default;
 
-            var split = input.Split(',');
+            var split = input.Split(' ');
 
-            color.r = byte.Parse(split[0].Trim(), en_US);
-            color.g = byte.Parse(split[1].Trim(), en_US);
-            color.b = byte.Parse(split[2].Trim(), en_US);
+            color.r = byte.Parse(split[0].Trim(), CultureInfo.CurrentCulture);
+            color.g = byte.Parse(split[1].Trim(), CultureInfo.CurrentCulture);
+            color.b = byte.Parse(split[2].Trim(), CultureInfo.CurrentCulture);
             if (split.Length > 3)
-                color.a = byte.Parse(split[3].Trim(), en_US);
+                color.a = byte.Parse(split[3].Trim(), CultureInfo.CurrentCulture);
             else
                 color.a = 255;
 
@@ -397,7 +391,7 @@ namespace UnityExplorer
                 return null;
 
             // ints, this is fine
-            return $"{color.r}, {color.g}, {color.b}, {color.a}";
+            return $"{color.r} {color.g} {color.b} {color.a}";
         }
 
         // Layermask (Int32)

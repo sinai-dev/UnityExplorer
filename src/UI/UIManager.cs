@@ -36,7 +36,7 @@ namespace UnityExplorer.UI
             Bottom
         }
 
-        public static bool Initializing { get; private set; } = true;
+        public static bool Initializing { get; internal set; } = true;
 
         private static readonly Dictionary<Panels, UIPanel> UIPanels = new Dictionary<Panels, UIPanel>();
 

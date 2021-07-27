@@ -13,7 +13,7 @@ namespace UnityExplorer
         /// </summary>
         public static bool ContainsIgnoreCase(this string _this, string s)
         {
-            return ParseUtility.en_US.CompareInfo.IndexOf(_this, s, CompareOptions.IgnoreCase) >= 0;
+            return CultureInfo.CurrentCulture.CompareInfo.IndexOf(_this, s, CompareOptions.IgnoreCase) >= 0;
         }
 
         /// <summary>

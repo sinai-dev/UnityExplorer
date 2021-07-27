@@ -209,6 +209,10 @@ namespace UnityExplorer.UI.Panels
             {
                 ExplorerCore.LogWarning("Invalid or corrupt panel save data! Restoring to default.");
                 SetTransformDefaults();
+                UIManager.Initializing = false;
+                DoSaveToConfigElement();
+                ConfigManager.InternalHandler.SaveConfig();
+                UIManager.Initializing = true;
             }
         }
 
@@ -335,7 +339,7 @@ namespace UnityExplorer.UI.Panels
             if (!rect)
                 throw new ArgumentNullException("rect");
 
-            return string.Format(ParseUtility.en_US, "{0},{1},{2},{3}", new object[]
+            return string.Format(CultureInfo.CurrentCulture, "{0} {1} {2} {3}", new object[]
             {
                 rect.anchorMin.x,
                 rect.anchorMin.y,
@@ -349,16 +353,16 @@ namespace UnityExplorer.UI.Panels
             if (string.IsNullOrEmpty(stringAnchors))
                 throw new ArgumentNullException("stringAnchors");
 
-            var split = stringAnchors.Split(',');
+            var split = stringAnchors.Split(' ');
 
             if (split.Length != 4)
                 throw new Exception($"stringAnchors split is unexpected length: {split.Length}");
 
             Vector4 anchors;
-            anchors.x = float.Parse(split[0], ParseUtility.en_US);
-            anchors.y = float.Parse(split[1], ParseUtility.en_US);
-            anchors.z = float.Parse(split[2], ParseUtility.en_US);
-            anchors.w = float.Parse(split[3], ParseUtility.en_US);
+            anchors.x = float.Parse(split[0], CultureInfo.CurrentCulture);
+            anchors.y = float.Parse(split[1], CultureInfo.CurrentCulture);
+            anchors.z = float.Parse(split[2], CultureInfo.CurrentCulture);
+            anchors.w = float.Parse(split[3], CultureInfo.CurrentCulture);
 
             panel.anchorMin = new Vector2(anchors.x, anchors.y);
             panel.anchorMax = new Vector2(anchors.z, anchors.w);
@@ -369,7 +373,7 @@ namespace UnityExplorer.UI.Panels
             if (!rect)
                 throw new ArgumentNullException("rect");
 
-            return string.Format(ParseUtility.en_US, "{0},{1}", new object[]
+            return string.Format(CultureInfo.CurrentCulture, "{0} {1}", new object[]
             {
                 rect.localPosition.x, rect.localPosition.y
             });
@@ -377,14 +381,14 @@ namespace UnityExplorer.UI.Panels
 
         internal static void SetPositionFromString(this RectTransform rect, string stringPosition)
         {
-            var split = stringPosition.Split(',');
+            var split = stringPosition.Split(' ');
 
             if (split.Length != 2)
                 throw new Exception($"stringPosition split is unexpected length: {split.Length}");
 
             Vector3 vector = rect.localPosition;
-            vector.x = float.Parse(split[0], ParseUtility.en_US);
-            vector.y = float.Parse(split[1], ParseUtility.en_US);
+            vector.x = float.Parse(split[0], CultureInfo.CurrentCulture);
+            vector.y = float.Parse(split[1], CultureInfo.CurrentCulture);
             rect.localPosition = vector;
         }
     }
