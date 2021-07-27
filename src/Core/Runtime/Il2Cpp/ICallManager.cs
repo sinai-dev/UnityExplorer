@@ -7,7 +7,6 @@ using System.Runtime.InteropServices;
 
 namespace UnityExplorer.Core.Runtime.Il2Cpp
 {
-    [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "External methods")]
     public static class ICallManager
     {
         [DllImport("GameAssembly", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]

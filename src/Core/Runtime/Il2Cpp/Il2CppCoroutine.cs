@@ -6,8 +6,8 @@ using System.Linq;
 using UnhollowerBaseLib;
 using UnityEngine;
 
-// CREDIT HerpDerpenstine
-// https://github.com/LavaGang/MelonLoader/blob/master/MelonLoader.Support.Il2Cpp/MelonCoroutines.cs
+// Credit to HerpDerpenstine and knah
+// https://github.com/LavaGang/MelonLoader/blob/master/SM_Il2Cpp/Coroutines.cs
 
 namespace UnityExplorer.Core.Runtime.Il2Cpp
 {
