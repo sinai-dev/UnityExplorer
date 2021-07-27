@@ -24,10 +24,8 @@ body:
         - BepInEx IL2CPP
         - BepInEx 6.X Mono
         - BepInEx 5.X Mono
-        - MelonLoader 0.4+ IL2CPP
-        - MelonLoader 0.4+ Mono
-        - MelonLoader 0.3 IL2CPP
-        - MelonLoader 0.3 Mono
+        - MelonLoader IL2CPP
+        - MelonLoader Mono
         - Standalone IL2CPP
         - Standalone Mono
     validations:
