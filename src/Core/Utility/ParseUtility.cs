@@ -20,7 +20,7 @@ namespace UnityExplorer
         // Helper for formatting float/double/decimal numbers to maximum of 4 decimal points.
         // And also for formatting a sequence of those numbers, ie a Vector3, Color etc
 
-        public static readonly string NumberFormatString = $"0{CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator}####";
+        public static readonly string NumberFormatString = $"0.####";
         private static readonly Dictionary<int, string> numSequenceStrings = new Dictionary<int, string>();
 
         public static string FormatDecimalSequence(params object[] numbers)
