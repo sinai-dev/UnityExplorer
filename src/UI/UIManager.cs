@@ -52,6 +52,7 @@ namespace UnityExplorer.UI
         internal static GameObject PanelHolder { get; private set; }
 
         internal static Font ConsoleFont { get; private set; }
+        internal static Font DefaultFont { get; private set; }
         internal static Shader BackupShader { get; private set; }
 
         public static RectTransform NavBarRect;
@@ -91,8 +92,6 @@ namespace UnityExplorer.UI
         internal static void InitUI()
         {
             LoadBundle();
-
-            UIFactory.Init();
 
             CreateRootCanvas();
 
@@ -423,11 +422,11 @@ namespace UnityExplorer.UI
                 int minor = int.Parse(split[1]);
 
                 // Use appropriate AssetBundle for Unity version
-                // >= 2017.3
-                if (major > 2017 || (major == 2017 && minor >= 3))
+                // >= 2017
+                if (major >= 2017)
                     bundle = LoadBundle("modern");
-                // 5.6.0 to 2017.3
-                else if (major == 2017 || (major == 5 && minor >= 6))
+                // 5.6.0 to <2017
+                else if (major == 5 && minor >= 6)
                     bundle = LoadBundle("legacy.5.6");
                 // < 5.6.0
                 else
@@ -452,11 +451,15 @@ namespace UnityExplorer.UI
             {
                 ExplorerCore.LogWarning("Could not load the ExplorerUI Bundle!");
                 ConsoleFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
+                DefaultFont = ConsoleFont;
                 return;
             }
 
-            BackupShader = bundle.LoadAsset<Shader>("DefaultUI");
+            // Bundle loaded
+            ConsoleFont = bundle.LoadAsset<Font>("CONSOLA");
+            DefaultFont = bundle.LoadAsset<Font>("arial");
 
+            BackupShader = bundle.LoadAsset<Shader>("DefaultUI");
             // Fix for games which don't ship with 'UI/Default' shader.
             if (Graphic.defaultGraphicMaterial.shader?.name != "UI/Default")
             {
@@ -466,7 +469,6 @@ namespace UnityExplorer.UI
             else
                 BackupShader = Graphic.defaultGraphicMaterial.shader;
 
-            ConsoleFont = bundle.LoadAsset<Font>("CONSOLA");
         }
 
         private static byte[] ReadFully(Stream input)

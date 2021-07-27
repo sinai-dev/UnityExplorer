@@ -16,12 +16,6 @@ namespace UnityExplorer.UI
         internal static Vector2 _largeElementSize = new Vector2(100, 30);
         internal static Vector2 _smallElementSize = new Vector2(25, 25);
         internal static Color _defaultTextColor = Color.white;
-        internal static Font _defaultFont;
-
-        public static void Init()
-        {
-            _defaultFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
-        }
 
         public static GameObject CreateUIObject(string name, GameObject parent, Vector2 size = default)
         {
@@ -48,7 +42,7 @@ namespace UnityExplorer.UI
         internal static void SetDefaultTextValues(Text text)
         {
             text.color = _defaultTextColor;
-            text.font = _defaultFont;
+            text.font = UIManager.DefaultFont;
             text.fontSize = 14;
         }
 
