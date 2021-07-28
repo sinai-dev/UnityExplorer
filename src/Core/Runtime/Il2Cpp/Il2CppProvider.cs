@@ -73,6 +73,7 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             return ScriptableObject.CreateInstance(Il2CppType.From(type));
         }
 
+        // Pretty disgusting but couldn't figure out a cleaner way yet unfortunately
         public override void GraphicRaycast(GraphicRaycaster raycaster, PointerEventData data, List<RaycastResult> list)
         {
             var il2cppList = new Il2CppSystem.Collections.Generic.List<RaycastResult>();
@@ -117,22 +118,17 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             if (!scene.isLoaded)
                 return new GameObject[0];
 
-            int handle = scene.handle;
-
-            if (handle == -1)
+            if (scene.handle == -1)
                 return new GameObject[0];
 
-            int count = GetRootCount(handle);
+            int count = GetRootCount(scene.handle);
 
             if (count < 1)
                 return new GameObject[0];
 
             var list = new Il2CppSystem.Collections.Generic.List<GameObject>(count);
-
             var iCall = ICallManager.GetICall<d_GetRootGameObjects>("UnityEngine.SceneManagement.Scene::GetRootGameObjectsInternal");
-
-            iCall.Invoke(handle, list.Pointer);
-
+            iCall.Invoke(scene.handle, list.Pointer);
             return list.ToArray();
         }
 

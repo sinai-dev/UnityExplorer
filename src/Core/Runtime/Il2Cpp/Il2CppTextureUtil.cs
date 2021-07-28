@@ -38,19 +38,6 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
             return new Il2CppStructArray<byte>(ptr);
         }
 
-        // bool ImageConversion.LoadImage(this Texture2D tex, byte[] data, bool markNonReadable);
-
-        internal delegate bool d_LoadImage(IntPtr tex, IntPtr data, bool markNonReadable);
-
-        public override bool LoadImage(Texture2D tex, byte[] data, bool markNonReadable)
-        {
-            var il2cppArray = (Il2CppStructArray<byte>)data;
-
-            var iCall = ICallManager.GetICall<d_LoadImage>("UnityEngine.ImageConversion::LoadImage");
-
-            return iCall.Invoke(tex.Pointer, il2cppArray.Pointer, markNonReadable);
-        }
-
         // Sprite Sprite.Create
 
         public override Sprite CreateSprite(Texture2D texture)

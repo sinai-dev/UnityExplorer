@@ -10,6 +10,7 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityExplorer;
 
 namespace UnityExplorer.Core.Runtime.Mono
 {
@@ -18,7 +19,6 @@ namespace UnityExplorer.Core.Runtime.Mono
         public override void Initialize()
         {
             ExplorerCore.Context = RuntimeContext.Mono;
-            //Reflection = new MonoReflection();
             TextureUtil = new MonoTextureUtil();
         }
 
@@ -28,60 +28,35 @@ namespace UnityExplorer.Core.Runtime.Mono
         }
 
         private void Application_logMessageReceived(string condition, string stackTrace, LogType type)
-        {
-            ExplorerCore.LogUnity(condition, type);
-        }
+             => ExplorerCore.LogUnity(condition, type);
 
-        public override void StartCoroutine(IEnumerator routine)
-        {
-            ExplorerBehaviour.Instance.StartCoroutine(routine);
-        }
+        public override void StartCoroutine(IEnumerator routine) 
+            => ExplorerBehaviour.Instance.StartCoroutine(routine);
 
         public override void Update()
         {
-
         }
 
-        public override T AddComponent<T>(GameObject obj, Type type)
-        {
-            return (T)obj.AddComponent(type);
-        }
+        public override T AddComponent<T>(GameObject obj, Type type) 
+            => (T)obj.AddComponent(type);
 
-        public override ScriptableObject CreateScriptable(Type type)
-        {
-            return ScriptableObject.CreateInstance(type);
-        }
+        public override ScriptableObject CreateScriptable(Type type) 
+            => ScriptableObject.CreateInstance(type);
 
         public override void GraphicRaycast(GraphicRaycaster raycaster, PointerEventData data, List<RaycastResult> list)
-        {
-            raycaster.Raycast(data, list);
-        }
+            => raycaster.Raycast(data, list);
 
-        public override string LayerToName(int layer)
+        public override string LayerToName(int layer) 
             => LayerMask.LayerToName(layer);
 
-        public override UnityEngine.Object[] FindObjectsOfTypeAll(Type type)
+        public override UnityEngine.Object[] FindObjectsOfTypeAll(Type type) 
             => Resources.FindObjectsOfTypeAll(type);
 
-        //private static readonly FieldInfo fi_Scene_handle = typeof(Scene).GetField("m_Handle", ReflectionUtility.AllFlags);
+        public override GameObject[] GetRootGameObjects(Scene scene) 
+            => scene.isLoaded ? scene.GetRootGameObjects() : new GameObject[0];
 
-        //public override int GetSceneHandle(Scene scene)
-        //{
-        //    return (int)fi_Scene_handle.GetValue(scene);
-        //}
-
-        public override GameObject[] GetRootGameObjects(Scene scene)
-        {
-            if (!scene.isLoaded)
-                return new GameObject[0];
-
-            return scene.GetRootGameObjects();
-        }
-
-        public override int GetRootCount(Scene scene)
-        {
-            return scene.rootCount;
-        }
+        public override int GetRootCount(Scene scene) 
+            => scene.rootCount;
 
         public override void SetColorBlock(Selectable selectable, Color? normal = null, Color? highlighted = null, Color? pressed = null,
             Color? disabled = null)
@@ -103,59 +78,42 @@ namespace UnityExplorer.Core.Runtime.Mono
             SetColorBlock(selectable, colors);
         }
 
-        public override void SetColorBlock(Selectable selectable, ColorBlock colors)
-        {
-            selectable.colors = colors;
-        }
+        public override void SetColorBlock(Selectable selectable, ColorBlock colors) 
+            => selectable.colors = colors;
     }
 }
 
 public static class MonoExtensions
 {
+    // Helpers to use the same style of AddListener that IL2CPP uses.
+
     public static void AddListener(this UnityEvent _event, Action listener)
-    {
-        _event.AddListener(new UnityAction(listener));
-    }
+        => _event.AddListener(new UnityAction(listener));
 
     public static void AddListener<T>(this UnityEvent<T> _event, Action<T> listener)
-    {
-        _event.AddListener(new UnityAction<T>(listener));
-    }
+        => _event.AddListener(new UnityAction<T>(listener));
 
     public static void RemoveListener(this UnityEvent _event, Action listener)
-    {
-        _event.RemoveListener(new UnityAction(listener));
-    }
+        => _event.RemoveListener(new UnityAction(listener));
 
     public static void RemoveListener<T>(this UnityEvent<T> _event, Action<T> listener)
-    {
-        _event.RemoveListener(new UnityAction<T>(listener));
-    }
+        => _event.RemoveListener(new UnityAction<T>(listener));
 
-    public static void Clear(this StringBuilder sb)
-    {
-        sb.Remove(0, sb.Length);
-    }
+    // Doesn't exist in NET 3.5
 
-    private static PropertyInfo pi_childControlHeight;
+    public static void Clear(this StringBuilder sb) 
+        => sb.Remove(0, sb.Length);
+
+    // These properties don't exist in some earlier games, so null check before trying to set them.
 
     public static void SetChildControlHeight(this HorizontalOrVerticalLayoutGroup group, bool value)
-    {
-        if (pi_childControlHeight == null)
-            pi_childControlHeight = group.GetType().GetProperty("childControlHeight");
+        => ReflectionUtility.GetPropertyInfo(typeof(HorizontalOrVerticalLayoutGroup), "childControlHeight")
+            ?.SetValue(group, value, null);
 
-        pi_childControlHeight?.SetValue(group, value, null);
-    }
-
-    private static PropertyInfo pi_childControlWidth;
 
     public static void SetChildControlWidth(this HorizontalOrVerticalLayoutGroup group, bool value)
-    {
-        if (pi_childControlWidth == null)
-            pi_childControlWidth = group.GetType().GetProperty("childControlWidth");
-
-        pi_childControlWidth?.SetValue(group, value, null);
-    }
+        => ReflectionUtility.GetPropertyInfo(typeof(HorizontalOrVerticalLayoutGroup), "childControlWidth")
+            ?.SetValue(group, value, null);
 }
 
 #endif

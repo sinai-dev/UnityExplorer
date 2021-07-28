@@ -32,16 +32,6 @@ namespace UnityExplorer
             return new AssetBundle(ptr);
         }
 
-        // static void UnloadAllAssetBundles(bool unloadAllObjects);
-
-        internal delegate void d_UnloadAllAssetBundles(bool unloadAllObjects);
-
-        public static void UnloadAllAssetBundles(bool unloadAllObjects)
-        {
-            var iCall = ICallManager.GetICall<d_UnloadAllAssetBundles>("UnityEngine.AssetBundle::UnloadAllAssetBundles");
-            iCall.Invoke(unloadAllObjects);
-        }
-
         // ~~~~~~~~~~~~ Instance ~~~~~~~~~~~~
 
         private readonly IntPtr m_bundlePtr = IntPtr.Zero;
@@ -78,7 +68,8 @@ namespace UnityExplorer
             return new UnityEngine.Object(ptr).TryCast<T>();
         }
 
-        // public extern void Unload(bool unloadAllLoadedObjects);
+        // Unload(bool unloadAllLoadedObjects);
+
         internal delegate void d_Unload(IntPtr _this, bool unloadAllLoadedObjects);
 
         public void Unload(bool unloadAssets = true)

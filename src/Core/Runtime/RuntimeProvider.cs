@@ -40,8 +40,6 @@ namespace UnityExplorer
 
         public abstract void Update();
 
-        //public virtual bool IsReferenceEqual(object a, object b) => ReferenceEquals(a, b);
-
         // Unity API handlers
 
         public abstract T AddComponent<T>(GameObject obj, Type type) where T : Component;
@@ -53,8 +51,6 @@ namespace UnityExplorer
         public abstract UnityEngine.Object[] FindObjectsOfTypeAll(Type type);
 
         public abstract void GraphicRaycast(GraphicRaycaster raycaster, PointerEventData data, List<RaycastResult> list);
-
-        //public abstract int GetSceneHandle(Scene scene);
 
         public abstract GameObject[] GetRootGameObjects(Scene scene);
 

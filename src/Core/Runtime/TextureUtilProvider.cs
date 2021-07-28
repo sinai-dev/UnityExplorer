@@ -22,7 +22,7 @@ namespace UnityExplorer.Core.Runtime
 
         public abstract void Blit(Texture2D tex, RenderTexture rt);
 
-        public abstract bool LoadImage(Texture2D tex, byte[] data, bool markNonReadable);
+        //public abstract bool LoadImage(Texture2D tex, byte[] data, bool markNonReadable);
 
         public abstract Sprite CreateSprite(Texture2D texture);
 
@@ -43,27 +43,22 @@ namespace UnityExplorer.Core.Runtime
             }
         }
 
-        public static bool LoadImage(Texture2D tex, string filePath, bool markNonReadable)
-        {
-            if (!File.Exists(filePath))
-                return false;
-
-            return Instance.LoadImage(tex, File.ReadAllBytes(filePath), markNonReadable);
-        }
+        //public static bool LoadImage(Texture2D tex, string filePath, bool markNonReadable)
+        //{
+        //    if (!File.Exists(filePath))
+        //        return false;
+        //
+        //    return Instance.LoadImage(tex, File.ReadAllBytes(filePath), markNonReadable);
+        //}
 
         public static Texture2D Copy(Texture2D orig, Rect rect)
         {
-            Color[] pixels;
-
             if (!IsReadable(orig))
                 orig = ForceReadTexture(orig);
 
-            pixels = orig.GetPixels((int)rect.x, (int)rect.y, (int)rect.width, (int)rect.height);
-
+            Color[] pixels = orig.GetPixels((int)rect.x, (int)rect.y, (int)rect.width, (int)rect.height);
             Texture2D newTex = Instance.NewTexture2D((int)rect.width, (int)rect.height);
-
             newTex.SetPixels(pixels);
-
             return newTex;
         }
 
@@ -92,7 +87,7 @@ namespace UnityExplorer.Core.Runtime
             }
             catch (Exception e)
             {
-                ExplorerCore.Log("Exception on ForceReadTexture: " + e.ToString());
+                ExplorerCore.Log($"Exception on ForceReadTexture: {e.ToString()}");
                 return default;
             }
         }
@@ -103,13 +98,11 @@ namespace UnityExplorer.Core.Runtime
                 Directory.CreateDirectory(dir);
 
             byte[] data;
-            string savepath = dir + @"\" + name + ".png";
+            string savepath = $@"{dir}\{name}.png";
 
             // Make sure we can EncodeToPNG it.
             if (tex.format != TextureFormat.ARGB32 || !IsReadable(tex))
-            {
                 tex = ForceReadTexture(tex);
-            }
 
             if (isDTXnmNormal)
             {
@@ -120,13 +113,9 @@ namespace UnityExplorer.Core.Runtime
             data = Instance.EncodeToPNG(tex);
 
             if (data == null || !data.Any())
-            {
                 ExplorerCore.LogWarning("Couldn't get any data for the texture!");
-            }
             else
-            {
                 File.WriteAllBytes(savepath, data);
-            }
         }
 
         // Converts DTXnm-format Normal Map to RGBA-format Normal Map.
