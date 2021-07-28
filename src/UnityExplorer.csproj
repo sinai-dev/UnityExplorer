@@ -120,7 +120,7 @@
   <!-- BepInEx universal refs -->
   <ItemGroup Condition="'$(IsBepInEx)'=='true'">
     <Reference Include="0Harmony">
-      <HintPath>packages\HarmonyX.2.4.2\lib\net35\0Harmony.dll</HintPath>
+      <HintPath>packages\HarmonyX.2.5.2\lib\net35\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -156,7 +156,7 @@
   <!-- Standalone refs -->
   <ItemGroup Condition="'$(IsStandalone)'=='true'">
     <Reference Include="0Harmony">
-      <HintPath>packages\HarmonyX.2.4.2\lib\net35\0Harmony.dll</HintPath>
+      <HintPath>packages\HarmonyX.2.5.2\lib\net35\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
