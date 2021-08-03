@@ -49,6 +49,21 @@ The standalone release can be used with any injector or loader of your choice, b
 3. Create an instance of Unity Explorer with `UnityExplorer.ExplorerStandalone.CreateInstance();`
 4. Optionally subscribe to the `ExplorerStandalone.OnLog` event to handle logging if you wish
 
+# Known issues
+
+**C# Console completions are inaccurate or incomplete**
+
+* Issue with `Mono.CSharp.Evaluator`, [being looked into](https://github.com/sinai-dev/UnityExplorer/issues/75).
+
+**[IL2CPP] List or Dictionary fails to enumerate**
+
+* Issue with `Il2CppAssemblyUnhollower`, [being looked into](https://github.com/sinai-dev/UnityExplorer/issues/74).
+
+**[MelonLoader] Game classes do not load / all non-Unity components show up as "UnityEngine.Component"**
+
+* Unsure of the cause of this issue, try with BepInEx and see if issue persists. Seems to be an issue with MelonLoader not being able to do `Assembly.Load` on the unhollowed `Assembly-CSharp` for some reason, despite the fact that referencing the assembly from a mod and loading it that way works fine.
+
+
 # Features
 
 <p align="center">

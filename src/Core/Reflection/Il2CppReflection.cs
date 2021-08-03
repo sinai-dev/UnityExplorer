@@ -499,15 +499,14 @@ namespace UnityExplorer
         {
             if (Directory.Exists(UnhollowedFolderPath))
             {
-                var files = Directory.GetFiles(UnhollowedFolderPath);
-                foreach (var filePath in files)
-                    DoLoadModule(filePath, false);
+                foreach (var filePath in Directory.GetFiles(UnhollowedFolderPath, "*.dll"))
+                    DoLoadModule(filePath);
             }
             else
                 ExplorerCore.LogWarning($"Expected Unhollowed folder path does not exist: '{UnhollowedFolderPath}'");
         }
 
-        internal bool DoLoadModule(string fullPath, bool suppressWarning = false)
+        internal bool DoLoadModule(string fullPath)
         {
             if (string.IsNullOrEmpty(fullPath) || !File.Exists(fullPath))
                 return false;

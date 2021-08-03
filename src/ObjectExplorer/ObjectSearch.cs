@@ -56,13 +56,7 @@ namespace UnityExplorer.ObjectExplorer
             else if (m_context == SearchContext.Class)
                 currentResults = SearchProvider.ClassSearch(nameInputField.Text);
             else
-            {
-                string compType = "";
-                if (m_context == SearchContext.UnityObject)
-                    compType = this.desiredTypeInput;
-
-                currentResults = SearchProvider.UnityObjectSearch(nameInputField.Text, compType, m_context, m_childFilter, m_sceneFilter);
-            }
+                currentResults = SearchProvider.UnityObjectSearch(nameInputField.Text, desiredTypeInput, m_context, m_childFilter, m_sceneFilter);
 
             dataHandler.RefreshData();
             resultsScrollPool.Refresh(true);
