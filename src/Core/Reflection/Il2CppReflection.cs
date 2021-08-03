@@ -134,6 +134,9 @@ namespace UnityExplorer
             var type = obj.GetType();
             try
             {
+                if (type.IsGenericType)
+                    return type;
+
                 if (IsString(obj))
                     return typeof(string);
 
@@ -178,7 +181,8 @@ namespace UnityExplorer
             if (fullname.StartsWith("System."))
                 fullname = $"Il2Cpp{fullname}";
 
-            AllTypes.TryGetValue(fullname, out Type monoType);
+            if (!AllTypes.TryGetValue(fullname, out Type monoType))
+                ExplorerCore.LogWarning($"Failed to get type by name '{fullname}'!");
             return monoType;
         }
 
@@ -497,16 +501,7 @@ namespace UnityExplorer
             {
                 var files = Directory.GetFiles(UnhollowedFolderPath);
                 foreach (var filePath in files)
-                {
-                    try
-                    {
-                        DoLoadModule(filePath, true);
-                    }
-                    catch //(Exception ex)
-                    {
-                        //ExplorerCore.LogWarning($"Failed to force-load module '{name}': {ex.ReflectionExToString()}");
-                    }
-                }
+                    DoLoadModule(filePath, false);
             }
             else
                 ExplorerCore.LogWarning($"Expected Unhollowed folder path does not exist: '{UnhollowedFolderPath}'");
@@ -514,7 +509,7 @@ namespace UnityExplorer
 
         internal bool DoLoadModule(string fullPath, bool suppressWarning = false)
         {
-            if (!File.Exists(fullPath))
+            if (string.IsNullOrEmpty(fullPath) || !File.Exists(fullPath))
                 return false;
 
             try
@@ -525,11 +520,9 @@ namespace UnityExplorer
             }
             catch (Exception e)
             {
-                if (!suppressWarning)
-                    Console.WriteLine($"Failed loading module '{Path.GetFileName(fullPath)}'! {e.ReflectionExToString()}");
+                //ExplorerCore.LogWarning($"Failed loading module '{Path.GetFileName(fullPath)}'! {e.ReflectionExToString()}");
+                return false;
             }
-
-            return false;
         }
 
 #endregion
