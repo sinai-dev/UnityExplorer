@@ -30,15 +30,14 @@ namespace UnityExplorer.CacheObject
             try
             {
                 var methodInfo = MethodInfo;
-
                 if (methodInfo.IsGenericMethod)
                     methodInfo = MethodInfo.MakeGenericMethod(Evaluator.TryParseGenericArguments());
 
-                if (Arguments.Length > 0)
-                    return methodInfo.Invoke(DeclaringInstance, Evaluator.TryParseArguments());
-
-                var ret = methodInfo.Invoke(DeclaringInstance, ArgumentUtility.EmptyArgs);
-
+                object ret;
+                if (HasArguments)
+                    ret = methodInfo.Invoke(DeclaringInstance, Evaluator.TryParseArguments());
+                else 
+                    ret = methodInfo.Invoke(DeclaringInstance, ArgumentUtility.EmptyArgs);
                 HadException = false;
                 LastException = null;
                 return ret;
