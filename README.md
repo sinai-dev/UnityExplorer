@@ -61,7 +61,7 @@ The standalone release can be used with any injector or loader of your choice, b
 
 **[MelonLoader] Game classes do not load / all non-Unity components show up as "UnityEngine.Component"**
 
-* Unsure of the cause of this issue, try with BepInEx and see if issue persists. Seems to be an issue with MelonLoader not being able to do `Assembly.Load` on the unhollowed `Assembly-CSharp` for some reason, despite the fact that referencing the assembly from a mod and loading it that way works fine.
+* Unsure of the cause of this issue. Try with BepInEx, or create a mod which uses a class from `Assembly-CSharp` and load it alongside UnityExplorer. Seems to be an issue with MelonLoader not being able to do `Assembly.Load` on the unhollowed `Assembly-CSharp` for some reason, despite the fact that referencing the assembly from a mod and loading it that way works fine.
 
 
 # Features
