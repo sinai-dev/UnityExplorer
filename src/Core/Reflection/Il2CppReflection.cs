@@ -517,7 +517,7 @@ namespace UnityExplorer
                 //Assembly.Load(File.ReadAllBytes(fullPath));
                 return true;
             }
-            catch (Exception e)
+            catch //(Exception e)
             {
                 //ExplorerCore.LogWarning($"Failed loading module '{Path.GetFileName(fullPath)}'! {e.ReflectionExToString()}");
                 return false;

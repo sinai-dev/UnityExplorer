@@ -40,14 +40,12 @@ namespace UnityExplorer.ObjectExplorer
         /// <summary>
         /// The names of all scenes in the build settings, if they could be retrieved.
         /// </summary>
-        public static ReadOnlyCollection<string> AllSceneNames => new ReadOnlyCollection<string>(allScenesInBuild);
-        private static readonly List<string> allScenesInBuild = new List<string>();
+        public static readonly List<string> AllSceneNames = new List<string>();
 
         /// <summary>
         /// Whether or not we successfuly retrieved the names of the scenes in the build settings.
         /// </summary>
-        public static bool WasAbleToGetScenesInBuild => gotAllScenesInBuild;
-        private static bool gotAllScenesInBuild = true;
+        public static bool WasAbleToGetScenesInBuild { get; private set; }
 
         /// <summary>
         /// Invoked when the currently inspected Scene changes. The argument is the new scene.
@@ -97,12 +95,12 @@ namespace UnityExplorer.ObjectExplorer
                 for (int i = 0; i < sceneCount; i++)
                 {
                     var scenePath = (string)method.Invoke(null, new object[] { i });
-                    allScenesInBuild.Add(scenePath);
+                    AllSceneNames.Add(scenePath);
                 }
             }
             catch (Exception ex)
             {
-                gotAllScenesInBuild = false;
+                WasAbleToGetScenesInBuild = false;
                 ExplorerCore.LogWarning($"Unable to generate list of all Scenes in the build: {ex}");
             }
         }
