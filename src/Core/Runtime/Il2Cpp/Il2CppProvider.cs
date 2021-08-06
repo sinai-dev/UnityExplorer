@@ -98,15 +98,17 @@ namespace UnityExplorer.Core.Runtime.Il2Cpp
 
         internal delegate IntPtr d_FindObjectsOfTypeAll(IntPtr type);
 
+        internal static readonly string[] findObjectsOfTypeAllSignatures = new[]
+        {
+            "UnityEngine.Resources::FindObjectsOfTypeAll",
+            "UnityEngine.ResourcesAPIInternal::FindObjectsOfTypeAll" // Unity 2020+ updated to this
+        };
+
         public override UnityEngine.Object[] FindObjectsOfTypeAll(Type type)
         {
-            var iCall = ICallManager.GetICallUnreliable<d_FindObjectsOfTypeAll>(new[]
-            {
-                "UnityEngine.Resources::FindObjectsOfTypeAll",
-                "UnityEngine.ResourcesAPIInternal::FindObjectsOfTypeAll" // Unity 2020+ updated to this
-            });
-
-            return new Il2CppReferenceArray<UnityEngine.Object>(iCall.Invoke(Il2CppType.From(type).Pointer));
+            return new Il2CppReferenceArray<UnityEngine.Object>(
+                ICallManager.GetICallUnreliable<d_FindObjectsOfTypeAll>(findObjectsOfTypeAllSignatures)
+                .Invoke(Il2CppType.From(type).Pointer));
         }
 
         // Scene.GetRootGameObjects();
