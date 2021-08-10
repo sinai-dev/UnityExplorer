@@ -15,7 +15,7 @@ namespace UnityExplorer
             {
                 var method = typeof(Assembly).GetMethod(nameof(Assembly.GetTypes), new Type[0]);
                 var processor = ExplorerCore.Harmony.CreateProcessor(method);
-                processor.AddPrefix(typeof(ReflectionPatches).GetMethod(nameof(ReflectionPatches.Assembly_GetTypes)));
+                processor.AddFinalizer(typeof(ReflectionPatches).GetMethod(nameof(ReflectionPatches.Assembly_GetTypes)));
                 processor.Patch();
             }
             catch (Exception ex)
@@ -24,10 +24,34 @@ namespace UnityExplorer
             }
         }
 
-        public static bool Assembly_GetTypes(Assembly __instance, ref Type[] __result)
+        private static readonly Type[] emptyTypes = new Type[0];
+
+        public static Exception Assembly_GetTypes(Assembly __instance, Exception __exception, ref Type[] __result)
         {
-            __result = __instance.TryGetTypes().ToArray();
-            return false;
+            if (__exception != null)
+            {
+                try
+                {
+                    __result = __instance.GetExportedTypes();
+                }
+                catch (ReflectionTypeLoadException e)
+                {
+                    try
+                    {
+                        __result = e.Types.Where(it => it != null).ToArray();
+                    }
+                    catch
+                    {
+                        __result = emptyTypes;
+                    }
+                }
+                catch
+                {
+                    __result = emptyTypes;
+                }
+            }
+
+            return null;
         }
     }
 }
