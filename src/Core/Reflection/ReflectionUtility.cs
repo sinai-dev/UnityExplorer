@@ -27,6 +27,8 @@ namespace UnityExplorer
                 new ReflectionUtility();
 #endif
             Instance.Initialize();
+
+            ReflectionPatches.Init();
         }
 
         protected virtual void Initialize()

@@ -218,6 +218,7 @@
     <Compile Include="Core\Config\InternalConfigHandler.cs" />
     <Compile Include="CacheObject\CacheConfigEntry.cs" />
     <Compile Include="CacheObject\Views\CacheConfigCell.cs" />
+    <Compile Include="Core\Reflection\Patches.cs" />
     <Compile Include="CSConsole\CSAutoCompleter.cs" />
     <Compile Include="CSConsole\LexerBuilder.cs" />
     <Compile Include="CSConsole\Lexers\CommentLexer.cs" />
