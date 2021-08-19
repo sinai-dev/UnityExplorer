@@ -39,6 +39,8 @@ namespace UnityExplorer
             => Log;
 #endif
 
+        public string UnhollowedModulesFolder => Path.Combine(Paths.BepInExRootPath, "unhollowed");
+
         public ConfigHandler ConfigHandler => _configHandler;
         private BepInExConfigHandler _configHandler;
 

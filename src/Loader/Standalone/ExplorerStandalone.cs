@@ -18,26 +18,43 @@ namespace UnityExplorer
 	public class ExplorerStandalone : IExplorerLoader
     {
         /// <summary>
-        /// Call this to initialize UnityExplorer without adding a log listener.
+        /// Call this to initialize UnityExplorer without adding a log listener or Unhollowed modules path.
+        /// The default Unhollowed path "UnityExplorer\Modules\" will be used.
         /// </summary>
         /// <returns>The new (or active, if one exists) instance of ExplorerStandalone.</returns>
-        public static ExplorerStandalone CreateInstance() => CreateInstance(null);
+        public static ExplorerStandalone CreateInstance() => CreateInstance(null, null);
 
         /// <summary>
-        /// Call this to initialize UnityExplorer and add a listener for UnityExplorer's log messages.
+        /// Call this to initialize UnityExplorer and add a listener for UnityExplorer's log messages, without specifying an Unhollowed modules path.
+        /// The default Unhollowed path "UnityExplorer\Modules\" will be used.
         /// </summary>
         /// <param name="logListener">Your log listener to handle UnityExplorer logs.</param>
         /// <returns>The new (or active, if one exists) instance of ExplorerStandalone.</returns>
-        public static ExplorerStandalone CreateInstance(Action<string, LogType> logListener)
+        public static ExplorerStandalone CreateInstance(Action<string, LogType> logListener) => CreateInstance(logListener, null);
+
+        /// <summary>
+        /// Call this to initialize UnityExplorer with the provided log listener and Unhollowed modules path.
+        /// </summary>
+        /// <param name="logListener">Your log listener to handle UnityExplorer logs.</param>
+        /// <param name="unhollowedModulesPath">The path of the Unhollowed modules, either relative or absolute.</param>
+        /// <returns>The new (or active, if one exists) instance of ExplorerStandalone.</returns>
+        public static ExplorerStandalone CreateInstance(Action<string, LogType> logListener, string unhollowedModulesPath)
         {
             if (Instance != null)
                 return Instance;
 
+            var instance = new ExplorerStandalone();
+            instance.Init();
+            instance.CheckExplorerFolder();
+
             if (logListener != null)
                 OnLog += logListener;
 
-            var instance = new ExplorerStandalone();
-            instance.Init();
+            if (string.IsNullOrEmpty(unhollowedModulesPath) || !Directory.Exists(unhollowedModulesPath))
+                instance._unhollowedPath = Path.Combine(instance.ExplorerFolder, "Modules");
+            else
+                instance._unhollowedPath = unhollowedModulesPath;
+
             return instance;
         }
 
@@ -47,6 +64,9 @@ namespace UnityExplorer
         /// Invoked whenever Explorer logs something. Subscribe to this to handle logging.
         /// </summary>
         public static event Action<string, LogType> OnLog;
+
+        public string UnhollowedModulesFolder => _unhollowedPath;
+        private string _unhollowedPath;
 
         public ConfigHandler ConfigHandler => _configHandler;
         private StandaloneConfigHandler _configHandler;

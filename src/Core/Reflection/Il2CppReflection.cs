@@ -481,29 +481,21 @@ namespace UnityExplorer
 
 #region Force-loading game modules
 
-        internal static string UnhollowedFolderPath => Path.GetFullPath(
-#if ML
-                    Path.Combine("MelonLoader", "Managed")
-#elif BIE
-                    Path.Combine(BepInEx.Paths.BepInExRootPath, "unhollowed")
-#else
-                    Path.Combine(ExplorerCore.Loader.ExplorerFolder, "Modules")
-#endif
-                );
-
         // Helper for IL2CPP to try to make sure the Unhollowed game assemblies are actually loaded.
 
         // Force loading all il2cpp modules
 
         internal void TryLoadGameModules()
         {
-            if (Directory.Exists(UnhollowedFolderPath))
+            var dir = ExplorerCore.Loader.UnhollowedModulesFolder;
+            if (Directory.Exists(dir))
             {
-                foreach (var filePath in Directory.GetFiles(UnhollowedFolderPath, "*.dll"))
+                foreach (var filePath in Directory.GetFiles(dir, "*.dll"))
                     DoLoadModule(filePath);
             }
             else
-                ExplorerCore.LogWarning($"Expected Unhollowed folder path does not exist: '{UnhollowedFolderPath}'");
+                ExplorerCore.LogWarning($"Expected Unhollowed folder path does not exist: '{dir}'. " +
+                    $"If you are using the standalone release, you can specify the Unhollowed modules path when you call CreateInstance().");
         }
 
         internal bool DoLoadModule(string fullPath)
@@ -514,7 +506,6 @@ namespace UnityExplorer
             try
             {
                 Assembly.LoadFile(fullPath);
-                //Assembly.Load(File.ReadAllBytes(fullPath));
                 return true;
             }
             catch //(Exception e)
