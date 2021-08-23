@@ -47,6 +47,7 @@ namespace UnityExplorer.Inspectors
 
         public ScrollPool<CacheMemberCell> MemberScrollPool { get; private set; }
 
+        public InputFieldRef HiddenNameText;
         public Text NameText;
         public Text AssemblyText;
         private Toggle autoUpdateToggle;
@@ -125,6 +126,7 @@ namespace UnityExplorer.Inspectors
             currentBaseTabText = $"{prefix} {SignatureHighlighter.Parse(TargetType, false)}";
             Tab.TabText.text = currentBaseTabText;
             NameText.text = SignatureHighlighter.Parse(TargetType, true);
+            HiddenNameText.Text = TargetType.FullName;
 
             string asmText;
             if (TargetType.Assembly is AssemblyBuilder || string.IsNullOrEmpty(TargetType.Assembly.Location))
@@ -332,8 +334,27 @@ namespace UnityExplorer.Inspectors
 
             // Class name, assembly
 
-            NameText = UIFactory.CreateLabel(UIRoot, "Title", "not set", TextAnchor.MiddleLeft, fontSize: 17);
-            UIFactory.SetLayoutElement(NameText.gameObject, minHeight: 25, flexibleHeight: 0);
+            var titleHolder = UIFactory.CreateUIObject("TitleHolder", UIRoot);
+            UIFactory.SetLayoutElement(titleHolder, minHeight: 35, flexibleHeight: 0, flexibleWidth: 9999);
+
+            NameText = UIFactory.CreateLabel(titleHolder, "VisibleTitle", "NotSet", TextAnchor.MiddleLeft);
+            var namerect = NameText.GetComponent<RectTransform>();
+            namerect.anchorMin = new Vector2(0, 0);
+            namerect.anchorMax = new Vector2(1, 1);
+            NameText.fontSize = 17;
+            UIFactory.SetLayoutElement(NameText.gameObject, minHeight: 35, flexibleHeight: 0, minWidth: 300, flexibleWidth: 9999);
+
+            HiddenNameText = UIFactory.CreateInputField(titleHolder, "Title", "not set");
+            var hiddenrect = HiddenNameText.Component.gameObject.GetComponent<RectTransform>();
+            hiddenrect.anchorMin = new Vector2(0, 0);
+            hiddenrect.anchorMax = new Vector2(1, 1);
+            HiddenNameText.Component.readOnly = true;
+            HiddenNameText.Component.lineType = InputField.LineType.MultiLineNewline;
+            HiddenNameText.Component.gameObject.GetComponent<Image>().color = Color.clear;
+            HiddenNameText.Component.textComponent.horizontalOverflow = HorizontalWrapMode.Wrap;
+            HiddenNameText.Component.textComponent.fontSize = 17;
+            HiddenNameText.Component.textComponent.color = Color.clear;
+            UIFactory.SetLayoutElement(HiddenNameText.Component.gameObject, minHeight: 35, flexibleHeight: 0, flexibleWidth: 9999);
 
             AssemblyText = UIFactory.CreateLabel(UIRoot, "AssemblyLabel", "not set", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(AssemblyText.gameObject, minHeight: 25, flexibleWidth: 9999);

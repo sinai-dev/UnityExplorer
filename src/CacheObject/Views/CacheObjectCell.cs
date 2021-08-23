@@ -45,6 +45,7 @@ namespace UnityExplorer.CacheObject.Views
         public LayoutElement RightGroupLayout;
 
         public Text NameLabel;
+        public InputFieldRef HiddenNameLabel;
         public Text TypeLabel;
         public Text ValueLabel;
         public Toggle Toggle;
@@ -116,8 +117,19 @@ namespace UnityExplorer.CacheObject.Views
 
             NameLabel = UIFactory.CreateLabel(horiRow, "NameLabel", "<notset>", TextAnchor.MiddleLeft);
             NameLabel.horizontalOverflow = HorizontalWrapMode.Wrap;
-            UIFactory.SetLayoutElement(NameLabel.gameObject, minHeight: 25, minWidth: 20, flexibleHeight: 300, flexibleWidth: 0);
-            NameLayout = NameLabel.GetComponent<LayoutElement>();
+            NameLayout = UIFactory.SetLayoutElement(NameLabel.gameObject, minHeight: 25, minWidth: 20, flexibleHeight: 300, flexibleWidth: 0);
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(NameLabel.gameObject, true, true, true, true);
+
+            HiddenNameLabel = UIFactory.CreateInputField(NameLabel.gameObject, "HiddenNameLabel", "");
+            var hiddenRect = HiddenNameLabel.Component.GetComponent<RectTransform>();
+            hiddenRect.anchorMin = Vector2.zero;
+            hiddenRect.anchorMax = Vector2.one;
+            HiddenNameLabel.Component.readOnly = true;
+            HiddenNameLabel.Component.lineType = UnityEngine.UI.InputField.LineType.MultiLineNewline;
+            HiddenNameLabel.Component.textComponent.horizontalOverflow = HorizontalWrapMode.Wrap;
+            HiddenNameLabel.Component.gameObject.GetComponent<Image>().color = Color.clear;
+            HiddenNameLabel.Component.textComponent.color = Color.clear;
+            UIFactory.SetLayoutElement(HiddenNameLabel.Component.gameObject, minHeight: 25, minWidth: 20, flexibleHeight: 300, flexibleWidth: 0);
 
             // Right vertical group
 

@@ -34,6 +34,7 @@ namespace UnityExplorer.CacheObject
             this.Owner = inspector;
             this.NameLabelText = SignatureHighlighter.Parse(member.DeclaringType, false, member);
             this.NameForFiltering = $"{member.DeclaringType.Name}.{member.Name}";
+            this.NameLabelTextRaw = NameForFiltering;
         }
 
         public override void ReleasePooledObjects()

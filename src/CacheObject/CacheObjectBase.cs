@@ -47,6 +47,7 @@ namespace UnityExplorer.CacheObject
         public bool SubContentShowWanted { get; private set; }
 
         public string NameLabelText { get; protected set; }
+        public string NameLabelTextRaw { get; protected set; }
         public string ValueLabelText { get; protected set; }
 
         public abstract bool ShouldAutoEvaluate { get; }
@@ -260,6 +261,8 @@ namespace UnityExplorer.CacheObject
         public virtual void SetDataToCell(CacheObjectCell cell)
         {
             cell.NameLabel.text = NameLabelText;
+            if (cell.HiddenNameLabel != null)
+                cell.HiddenNameLabel.Text = NameLabelTextRaw;
             cell.ValueLabel.gameObject.SetActive(true);
 
             cell.SubContentHolder.gameObject.SetActive(SubContentShowWanted);

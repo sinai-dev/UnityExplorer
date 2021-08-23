@@ -12,11 +12,11 @@ namespace UnityExplorer.CacheObject
         public CacheConfigEntry(IConfigElement configElement)
         {
             this.RefConfigElement = configElement;
+            this.FallbackType = configElement.ElementType;
 
             this.NameLabelText = $"<color=cyan>{configElement.Name}</color>" +
                 $"\r\n<color=grey><i>{configElement.Description}</i></color>";
-
-            this.FallbackType = configElement.ElementType;
+            this.NameLabelTextRaw = string.Empty;
 
             configElement.OnValueChangedNotify += UpdateValueFromSource;
         }

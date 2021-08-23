@@ -28,6 +28,7 @@ namespace UnityExplorer.CacheObject
             var listCell = cell as CacheListEntryCell;
 
             listCell.NameLabel.text = $"{ListIndex}:";
+            listCell.HiddenNameLabel.Text = "";
             listCell.Image.color = ListIndex % 2 == 0 ? CacheListEntryCell.EvenColor : CacheListEntryCell.OddColor;
         }
 

@@ -61,6 +61,7 @@ namespace UnityExplorer.CacheObject
             var kvpCell = cell as CacheKeyValuePairCell;
 
             kvpCell.NameLabel.text = $"{DictIndex}:";
+            kvpCell.HiddenNameLabel.Text = "";
             kvpCell.Image.color = DictIndex % 2 == 0 ? CacheListEntryCell.EvenColor : CacheListEntryCell.OddColor;
 
             if (KeyInputWanted)
