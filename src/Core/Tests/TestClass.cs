@@ -118,7 +118,7 @@ namespace UnityExplorer.Tests
 
             ExplorerCore.Log($"5: Big list");
             for (int i = 0; i < ABigList.Capacity; i++)
-                ABigList[i] = (short)UnityEngine.Random.Range(0, short.MaxValue);
+                ABigList.Add((short)UnityEngine.Random.Range(0, short.MaxValue));
 
             ExplorerCore.Log("Finished TestClass Init_Mono");
         }
