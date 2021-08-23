@@ -121,16 +121,15 @@ namespace UnityExplorer.CSConsole
                 {
                     while (input.Length - 1 >= matchEndIdx)
                     {
+                        matchEndIdx++;
                         if (IsNewLine(input[matchEndIdx]))
                             break;
-                        matchEndIdx++;
                     }
                 }
 
                 // check caretIdx to determine inStringOrComment state
-                if (caretIdx >= match.startIndex && (caretIdx <= matchEndIdx || (caretIdx >= input.Length && matchEndIdx >= input.Length - 1)))
+                if (caretIdx >= match.startIndex && (caretIdx <= (matchEndIdx+1) || (caretIdx >= input.Length && matchEndIdx >= input.Length - 1)))
                     caretInStringOrComment = match.isStringOrComment;
-
             }
 
             // Append trailing unhighlighted input
