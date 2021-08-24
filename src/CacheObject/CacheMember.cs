@@ -79,7 +79,6 @@ namespace UnityExplorer.CacheObject
         public override void TrySetUserValue(object value)
         {
             TrySetValue(value);
-
             Evaluate();
         }
 
@@ -246,7 +245,7 @@ namespace UnityExplorer.CacheObject
 
                 var sig = GetSig(member);
 
-                //ExplorerCore.Log($"Trying to cache member {sig}...");
+                //ExplorerCore.Log($"Trying to cache member {sig}... ({member.MemberType})");
 
                 CacheMember cached;
                 Type returnType;
@@ -311,7 +310,6 @@ namespace UnityExplorer.CacheObject
 
                 cachedSigs.Add(sig);
 
-                //cached.Initialize(_inspector, declaringType, member, returnType);
                 cached.SetFallbackType(returnType);
                 cached.SetInspectorOwner(_inspector, member);
 

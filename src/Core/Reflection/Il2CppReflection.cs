@@ -14,7 +14,6 @@ using System.Diagnostics.CodeAnalysis;
 using UnityExplorer.Core;
 using CppType = Il2CppSystem.Type;
 using BF = System.Reflection.BindingFlags;
-using UnityExplorer.Core.Config;
 using UnhollowerBaseLib.Attributes;
 using UnityEngine;
 
@@ -562,6 +561,7 @@ namespace UnityExplorer
             "UnityEngine.Audio.AudioMixerPlayable.Create",
             "UnityEngine.BoxcastCommand.ScheduleBatch",
             "UnityEngine.Camera.CalculateProjectionMatrixFromPhysicalProperties",
+            "UnityEngine.Canvas.renderingDisplaySize",
             "UnityEngine.CapsulecastCommand.ScheduleBatch",
             "UnityEngine.Collider2D.Cast",
             "UnityEngine.Collider2D.Raycast",
