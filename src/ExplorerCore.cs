@@ -66,14 +66,13 @@ namespace UnityExplorer
         private static IEnumerator SetupCoroutine()
         {
             yield return null;
-
-            float start = Time.realtimeSinceStartup;
+            float prevRealTime = Time.realtimeSinceStartup;
             float delay = ConfigManager.Startup_Delay_Time.Value;
-
             while (delay > 0)
             {
-                float diff = Math.Max(Time.deltaTime, Time.realtimeSinceStartup - start);
+                float diff = Math.Max(Time.deltaTime, Time.realtimeSinceStartup - prevRealTime);
                 delay -= diff;
+                prevRealTime = Time.realtimeSinceStartup;
                 yield return null;
             }
 
