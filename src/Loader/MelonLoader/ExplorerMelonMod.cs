@@ -22,7 +22,7 @@ namespace UnityExplorer
     {
         public static ExplorerMelonMod Instance;
 
-        public string ExplorerFolder => Path.Combine("Mods", ExplorerCore.NAME);
+        public string ExplorerFolder => Path.Combine(MelonHandler.ModsDirectory, ExplorerCore.NAME);
 
         public string UnhollowedModulesFolder => Path.Combine(
             Path.GetDirectoryName(MelonHandler.ModsDirectory),
