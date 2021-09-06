@@ -215,6 +215,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Hooks\HookCell.cs" />
+    <Compile Include="Hooks\HookInstance.cs" />
+    <Compile Include="Hooks\HookManager.cs" />
     <Compile Include="Core\Config\InternalConfigHandler.cs" />
     <Compile Include="CacheObject\CacheConfigEntry.cs" />
     <Compile Include="CacheObject\Views\CacheConfigCell.cs" />
@@ -235,6 +238,7 @@
     <Compile Include="Core\Utility\ArgumentUtility.cs" />
     <Compile Include="Core\Utility\MiscUtility.cs" />
     <Compile Include="Core\Utility\ParseUtility.cs" />
+    <Compile Include="Hooks\MethodAddCell.cs" />
     <Compile Include="Inspectors\GameObjectWidgets\ComponentCell.cs" />
     <Compile Include="Inspectors\GameObjectWidgets\ComponentList.cs" />
     <Compile Include="Inspectors\GameObjectWidgets\GameObjectControls.cs" />
@@ -269,6 +273,7 @@
     <Compile Include="Inspectors\ReflectionInspector.cs" />
     <Compile Include="CacheObject\IValues\InteractiveValueStruct.cs" />
     <Compile Include="UI\Models\InputFieldRef.cs" />
+    <Compile Include="UI\Panels\HookManagerPanel.cs" />
     <Compile Include="UI\Panels\UiInspectorResultsPanel.cs" />
     <Compile Include="UI\Pool.cs" />
     <Compile Include="UI\Panels\LogPanel.cs" />

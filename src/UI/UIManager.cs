@@ -29,6 +29,7 @@ namespace UnityExplorer.UI
             AutoCompleter,
             MouseInspector,
             UIInspectorResults,
+            HookManager,
         }
 
         public enum VerticalAnchor
@@ -107,6 +108,7 @@ namespace UnityExplorer.UI
             UIPanels.Add(Panels.ObjectExplorer, new ObjectExplorerPanel());
             UIPanels.Add(Panels.Inspector, new InspectorPanel());
             UIPanels.Add(Panels.CSConsole, new CSConsolePanel());
+            UIPanels.Add(Panels.HookManager, new HookManagerPanel());
             UIPanels.Add(Panels.ConsoleLog, new LogPanel());
             UIPanels.Add(Panels.Options, new OptionsPanel());
             UIPanels.Add(Panels.UIInspectorResults, new UiInspectorResultsPanel());
@@ -242,14 +244,14 @@ namespace UnityExplorer.UI
                     NavBarRect.anchorMin = new Vector2(0.5f, 1f);
                     NavBarRect.anchorMax = new Vector2(0.5f, 1f);
                     NavBarRect.anchoredPosition = new Vector2(NavBarRect.anchoredPosition.x, 0);
-                    NavBarRect.sizeDelta = new Vector2(1000f, 35f);
+                    NavBarRect.sizeDelta = new Vector2(1080f, 35f);
                     break;
 
                 case VerticalAnchor.Bottom:
                     NavBarRect.anchorMin = new Vector2(0.5f, 0f);
                     NavBarRect.anchorMax = new Vector2(0.5f, 0f);
                     NavBarRect.anchoredPosition = new Vector2(NavBarRect.anchoredPosition.x, 35);
-                    NavBarRect.sizeDelta = new Vector2(1000f, 35f);
+                    NavBarRect.sizeDelta = new Vector2(1080f, 35f);
                     break;
             }
         }

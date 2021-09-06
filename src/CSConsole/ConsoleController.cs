@@ -202,7 +202,7 @@ namespace UnityExplorer.CSConsole
                 {
                     // The compiled code was not REPL, so it was a using directive or it defined classes.
 
-                    string output = ScriptEvaluator._textWriter.ToString();
+                    string output = Evaluator._textWriter.ToString();
                     var outputSplit = output.Split('\n');
                     if (outputSplit.Length >= 2)
                         output = outputSplit[outputSplit.Length - 2];
