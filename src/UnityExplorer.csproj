@@ -263,9 +263,13 @@
     <Compile Include="CacheObject\IValues\InteractiveList.cs" />
     <Compile Include="CacheObject\IValues\InteractiveString.cs" />
     <Compile Include="CacheObject\IValues\InteractiveValue.cs" />
+    <Compile Include="Inspectors\MouseInspectors\MouseInspectorBase.cs" />
+    <Compile Include="Inspectors\MouseInspectors\UiInspector.cs" />
+    <Compile Include="Inspectors\MouseInspectors\WorldInspector.cs" />
     <Compile Include="Inspectors\ReflectionInspector.cs" />
     <Compile Include="CacheObject\IValues\InteractiveValueStruct.cs" />
     <Compile Include="UI\Models\InputFieldRef.cs" />
+    <Compile Include="UI\Panels\UiInspectorResultsPanel.cs" />
     <Compile Include="UI\Pool.cs" />
     <Compile Include="UI\Panels\LogPanel.cs" />
     <Compile Include="UI\Panels\CSConsolePanel.cs" />
