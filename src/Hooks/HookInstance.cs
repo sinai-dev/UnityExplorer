@@ -5,13 +5,15 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using HarmonyLib;
-using Microsoft.CSharp;
+using Mono.CSharp;
 using UnityExplorer.CSConsole;
 
 namespace UnityExplorer.Hooks
 {
     public class HookInstance
     {
+        // Static 
+
         private static readonly StringBuilder evalOutput = new StringBuilder();
         private static readonly ScriptEvaluator scriptEvaluator = new ScriptEvaluator(new StringWriter(evalOutput));
 
@@ -34,6 +36,11 @@ namespace UnityExplorer.Hooks
             Patch();
         }
 
+        // Evaluator.source_file 
+        private static readonly FieldInfo fi_sourceFile = ReflectionUtility.GetFieldInfo(typeof(Evaluator), "source_file");
+        // TypeDefinition.Definition
+        private static readonly PropertyInfo pi_Definition = ReflectionUtility.GetPropertyInfo(typeof(TypeDefinition), "Definition");
+
         private void GenerateProcessorAndDelegate()
         {
             try
@@ -44,25 +51,16 @@ namespace UnityExplorer.Hooks
 
                 scriptEvaluator.Run(GeneratePatchSourceCode(TargetMethod));
 
-                // Get the compiled method and check for errors
-
-                string output = scriptEvaluator._textWriter.ToString();
-                var outputSplit = output.Split('\n');
-                if (outputSplit.Length >= 2)
-                    output = outputSplit[outputSplit.Length - 2];
-                evalOutput.Clear();
                 if (ScriptEvaluator._reportPrinter.ErrorsCount > 0)
-                    throw new FormatException($"Unable to compile the code. Evaluator's last output was:\r\n{output}");
+                    throw new FormatException($"Unable to compile the generated patch:\r\n{scriptEvaluator._textWriter}");
 
-                // Could publicize MCS to avoid this reflection, but not bothering for now
-                var source = (Mono.CSharp.CompilationSourceFile)ReflectionUtility.GetFieldInfo(typeof(Mono.CSharp.Evaluator), "source_file")
-                             .GetValue(scriptEvaluator);
-                var type = (Mono.CSharp.Class)source.Containers.Last();
-                var systemType = ((Mono.CSharp.TypeSpec)ReflectionUtility.GetPropertyInfo(typeof(Mono.CSharp.TypeDefinition), "Definition")
-                                 .GetValue(type, null))
-                                 .GetMetaInfo();
-
-                this.patchDelegateMethodInfo = systemType.GetMethod("Patch", ReflectionUtility.FLAGS);
+                // TODO: Publicize MCS to avoid this reflection
+                // Get the last defined type in the source file
+                var typeContainer = ((CompilationSourceFile)fi_sourceFile.GetValue(scriptEvaluator)).Containers.Last();
+                // Get the TypeSpec from the TypeDefinition, then get its "MetaInfo" (System.Type), then get the method called Patch.
+                this.patchDelegateMethodInfo = ((TypeSpec)pi_Definition.GetValue((Class)typeContainer, null))
+                    .GetMetaInfo()
+                    .GetMethod("Patch", ReflectionUtility.FLAGS);
 
                 // Actually create the harmony patch
                 this.patchDelegate = new HarmonyMethod(patchDelegateMethodInfo);
@@ -119,9 +117,9 @@ namespace UnityExplorer.Hooks
             foreach (var param in parameters)
             {
                 if (param.ParameterType.IsValueType)
-                    logMessage.AppendLine($"Parameter {paramIdx}: {{__{paramIdx}.ToString()}}");
+                    logMessage.AppendLine($"Parameter {paramIdx} {param.Name}: {{__{paramIdx}.ToString()}}");
                 else
-                    logMessage.AppendLine($"Parameter {paramIdx}: {{__{paramIdx}?.ToString() ?? \"null\"}}");
+                    logMessage.AppendLine($"Parameter {paramIdx} {param.Name}: {{__{paramIdx}?.ToString() ?? \"null\"}}");
                 paramIdx++;
             }
 
