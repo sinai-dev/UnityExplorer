@@ -238,7 +238,7 @@
     <Compile Include="Core\Utility\ArgumentUtility.cs" />
     <Compile Include="Core\Utility\MiscUtility.cs" />
     <Compile Include="Core\Utility\ParseUtility.cs" />
-    <Compile Include="Hooks\MethodAddCell.cs" />
+    <Compile Include="Hooks\AddHookCell.cs" />
     <Compile Include="Inspectors\GameObjectWidgets\ComponentCell.cs" />
     <Compile Include="Inspectors\GameObjectWidgets\ComponentList.cs" />
     <Compile Include="Inspectors\GameObjectWidgets\GameObjectControls.cs" />

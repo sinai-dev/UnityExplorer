@@ -59,7 +59,7 @@ namespace UnityExplorer.Hooks
             UIFactory.SetLayoutElement(DeleteButton.Component.gameObject, minHeight: 25, minWidth: 100);
             DeleteButton.OnClick += OnDeleteClicked;
 
-            EditPatchButton = UIFactory.CreateButton(UIRoot, "EditButton", "Log Patch Source", new Color(0.15f, 0.15f, 0.15f));
+            EditPatchButton = UIFactory.CreateButton(UIRoot, "EditButton", "Log Hook Source", new Color(0.15f, 0.15f, 0.15f));
             UIFactory.SetLayoutElement(EditPatchButton.Component.gameObject, minHeight: 25, minWidth: 150);
             EditPatchButton.OnClick += OnEditPatchClicked;
 

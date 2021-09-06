@@ -84,6 +84,12 @@ The inspector is used to see detailed information on objects of any type and man
 * You can execute a script automatically on startup by naming it `startup.cs` and placing it in the `UnityExplorer\Scripts\` folder (this folder will be created where you placed the DLL file).
 * See the "Help" dropdown in the C# console menu for more detailed information.
 
+### Hook Manager
+
+* The Hooks panel allows you to hook methods at the click of a button for debugging purposes.
+  * Simply enter any class (generic types not yet supported) and hook the methods you want from the menu. 
+  * To quickly copy the hook into your own project for further development, use the "Log Hook Source" button.
+
 ### Mouse-Inspect
 
 * The "Mouse Inspect" dropdown on the main UnityExplorer navbar allows you to inspect objects under the mouse.
@@ -99,18 +105,18 @@ The inspector is used to see detailed information on objects of any type and man
 
 # Building
 
-If you fork the repository on GitHub you can build using the [dotnet workflow](https://github.com/sinai-dev/UnityExplorer/blob/master/.github/workflows/dotnet.yml):
-
-0. Click on the Actions tab and enable workflows in your repository
-1. Click on the "Build UnityExplorer" workflow, then click "Run Workflow" and run it manually, or make a new commit to trigger the workflow.
-2. Take the artifact from the completed run.
-
 For Visual Studio:
 
 0. Clone the repository and run `git submodule update --init --recursive` to get the submodules.
 1. Open the `src\UnityExplorer.sln` project.
 2. Build `mcs` (Release/AnyCPU, you may need to run `nuget restore mcs.sln`), and if using IL2CPP then build `Il2CppAssemblyUnhollower` (Release/AnyCPU) as well.
 3. Build the UnityExplorer release(s) you want to use, either by selecting the config as the Active Config, or batch-building.
+
+If you fork the repository on GitHub you can build using the [dotnet workflow](https://github.com/sinai-dev/UnityExplorer/blob/master/.github/workflows/dotnet.yml):
+
+0. Click on the Actions tab and enable workflows in your repository
+1. Click on the "Build UnityExplorer" workflow, then click "Run Workflow" and run it manually, or make a new commit to trigger the workflow.
+2. Take the artifact from the completed run.
 
 # Acknowledgments
 
