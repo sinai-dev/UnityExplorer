@@ -21,19 +21,6 @@ namespace UnityExplorer
 
         public static float PanelWidth;
 
-        internal static void CloseAllTabs()
-        {
-            if (Inspectors.Any())
-            {
-                for (int i = Inspectors.Count - 1; i >= 0; i--)
-                    Inspectors[i].CloseInspector();
-
-                Inspectors.Clear();
-            }
-
-            UIManager.SetPanelActive(UIManager.Panels.Inspector, false);
-        }
-
         public static void Inspect(object obj, CacheObjectBase sourceCache = null)
         {
             if (obj.IsNullOrDestroyed())
@@ -50,6 +37,11 @@ namespace UnityExplorer
                 CreateInspector<ReflectionInspector>(obj, false, sourceCache);
         }
 
+        public static void Inspect(Type type)
+        {
+            CreateInspector<ReflectionInspector>(type, true);
+        }
+
         private static bool TryFocusActiveInspector(object target)
         {
             foreach (var inspector in Inspectors)
@@ -62,11 +54,6 @@ namespace UnityExplorer
                 }
             }
             return false;
-        }
-
-        public static void Inspect(Type type)
-        {
-            CreateInspector<ReflectionInspector>(type, true);
         }
 
         public static void SetInspectorActive(InspectorBase inspector)
@@ -85,6 +72,19 @@ namespace UnityExplorer
                 ActiveInspector.OnSetInactive();
                 ActiveInspector = null;
             }
+        }
+
+        internal static void CloseAllTabs()
+        {
+            if (Inspectors.Any())
+            {
+                for (int i = Inspectors.Count - 1; i >= 0; i--)
+                    Inspectors[i].CloseInspector();
+
+                Inspectors.Clear();
+            }
+
+            UIManager.SetPanelActive(UIManager.Panels.Inspector, false);
         }
 
         private static void CreateInspector<T>(object target, bool staticReflection = false,

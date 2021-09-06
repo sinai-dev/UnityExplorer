@@ -11,8 +11,6 @@ using UnityExplorer.UI.Widgets;
 
 namespace UnityExplorer.UI.Panels
 {
-    // TODO move the logic out of this class into ConfigManager
-
     public class OptionsPanel : UIPanel, ICacheObjectController, ICellPoolDataSource<ConfigEntryCell>
     {
         public override string Name => "Options";

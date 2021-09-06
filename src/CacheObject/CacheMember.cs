@@ -61,19 +61,22 @@ namespace UnityExplorer.CacheObject
 
         protected abstract void TrySetValue(object value);
 
+        /// <summary>
+        /// Evaluate is called when first shown (if ShouldAutoEvaluate), or else when Evaluate button is clicked, or auto-updated.
+        /// </summary>
+        public void Evaluate()
+        {
+            SetValueFromSource(TryEvaluate());
+        }
+
+        /// <summary>
+        /// Called when user presses the Evaluate button.
+        /// </summary>
         public void EvaluateAndSetCell()
         {
             Evaluate();
             if (CellView != null)
                 SetDataToCell(CellView);
-        }
-
-        /// <summary>
-        /// Evaluate when first shown (if ShouldAutoEvaluate), or else when Evaluate button is clicked, or auto-updated.
-        /// </summary>
-        public void Evaluate()
-        {
-            SetValueFromSource(TryEvaluate());
         }
 
         public override void TrySetUserValue(object value)
@@ -85,9 +88,6 @@ namespace UnityExplorer.CacheObject
         protected override void SetValueState(CacheObjectCell cell, ValueStateArgs args)
         {
             base.SetValueState(cell, args);
-
-            //var memCell = cell as CacheMemberCell;
-            //memCell.UpdateToggle.gameObject.SetActive(ShouldAutoEvaluate);
         }
 
         private static readonly Color evalEnabledColor = new Color(0.15f, 0.25f, 0.15f);
@@ -100,7 +100,6 @@ namespace UnityExplorer.CacheObject
             cell.EvaluateHolder.SetActive(!ShouldAutoEvaluate);
             if (!ShouldAutoEvaluate)
             {
-                //cell.UpdateToggle.gameObject.SetActive(false);
                 cell.EvaluateButton.Component.gameObject.SetActive(true);
                 if (HasArguments)
                 {
@@ -119,11 +118,6 @@ namespace UnityExplorer.CacheObject
                 if (!Evaluating)
                     RuntimeProvider.Instance.SetColorBlock(cell.EvaluateButton.Component, evalDisabledColor, evalDisabledColor * 1.3f);
             }
-            //else
-            //{
-            //    cell.UpdateToggle.gameObject.SetActive(true);
-            //    cell.UpdateToggle.isOn = AutoUpdateWanted;
-            //}
 
             if (State == ValueState.NotEvaluated && !ShouldAutoEvaluate)
             {

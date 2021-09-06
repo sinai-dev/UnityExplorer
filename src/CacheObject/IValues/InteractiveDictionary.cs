@@ -169,7 +169,6 @@ namespace UnityExplorer.CacheObject.IValues
         }
 
         public int AdjustedWidth => (int)UIRect.rect.width - 80;
-        //public int AdjustedKeyWidth => HalfWidth - 50;
 
         public override void SetLayout()
         {

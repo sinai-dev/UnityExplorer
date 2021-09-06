@@ -2,16 +2,11 @@
 using System;
 using System.IO;
 using MelonLoader;
-using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityExplorer;
-using UnityExplorer.Core;
 using UnityExplorer.Core.Config;
-using UnityExplorer.Core.Input;
 using UnityExplorer.Loader.ML;
-using HarmonyLib;
-[assembly: MelonPlatformDomain(MelonPlatformDomainAttribute.CompatibleDomains.UNIVERSAL)]
 
+[assembly: MelonPlatformDomain(MelonPlatformDomainAttribute.CompatibleDomains.UNIVERSAL)]
 [assembly: MelonInfo(typeof(ExplorerMelonMod), ExplorerCore.NAME, ExplorerCore.VERSION, ExplorerCore.AUTHOR)]
 [assembly: MelonGame(null, null)]
 [assembly: MelonColor(ConsoleColor.DarkCyan)]

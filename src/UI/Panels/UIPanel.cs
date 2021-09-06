@@ -116,10 +116,8 @@ namespace UnityExplorer.UI.Panels
 
             if (NavButtonWanted)
             {
-                if (active)
-                    RuntimeProvider.Instance.SetColorBlock(NavButton.Component, UIManager.enabledButtonColor, UIManager.enabledButtonColor * 1.2f);
-                else
-                    RuntimeProvider.Instance.SetColorBlock(NavButton.Component, UIManager.disabledButtonColor, UIManager.disabledButtonColor * 1.2f);
+                var color = active ? UIManager.enabledButtonColor : UIManager.disabledButtonColor;
+                RuntimeProvider.Instance.SetColorBlock(NavButton.Component, color, color * 1.2f);
             }
 
             if (!active)

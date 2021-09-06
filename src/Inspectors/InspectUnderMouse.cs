@@ -46,13 +46,16 @@ namespace UnityExplorer.Inspectors
         public override bool ShouldSaveActiveState => false;
         public override bool ShowByDefault => false;
 
-        internal static Text objNameLabel;
-        internal static Text objPathLabel;
-        internal static Text mousePosLabel;
+        private static Text objNameLabel;
+        private static Text objPathLabel;
+        private static Text mousePosLabel;
 
         // Mouse Inspector
         public static bool Inspecting { get; set; }
         public static MouseInspectMode Mode { get; set; }
+
+        private static Camera MainCamera;
+        private static GraphicRaycaster[] graphicRaycasters;
 
         private static GameObject lastHitObject;
         private static Vector3 lastMousePos;
@@ -60,9 +63,6 @@ namespace UnityExplorer.Inspectors
         private static readonly List<Graphic> wasDisabledGraphics = new List<Graphic>();
         private static readonly List<CanvasGroup> wasDisabledCanvasGroups = new List<CanvasGroup>();
         private static readonly List<GameObject> objectsAddedCastersTo = new List<GameObject>();
-
-        internal static Camera MainCamera;
-        internal static GraphicRaycaster[] graphicRaycasters;
 
         public void StartInspect(MouseInspectMode mode)
         {
