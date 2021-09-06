@@ -56,6 +56,9 @@ namespace UnityExplorer
 
         public abstract int GetRootCount(Scene scene);
 
+        public void SetColorBlockAuto(Selectable selectable, Color baseColor) 
+            => SetColorBlock(selectable, baseColor, baseColor * 1.2f, baseColor * 0.8f);
+
         public abstract void SetColorBlock(Selectable selectable, ColorBlock colors);
 
         public abstract void SetColorBlock(Selectable selectable, Color? normal = null, Color? highlighted = null, Color? pressed = null,

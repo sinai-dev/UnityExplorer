@@ -31,9 +31,6 @@ namespace UnityExplorer
             }
         }
 
-        public static HashSet<Type> GetImplementationsOf(this Type baseType, bool allowAbstract, bool allowGeneric)
-             => ReflectionUtility.GetImplementationsOf(baseType, allowAbstract, allowGeneric);
-
         // ------- Misc extensions --------
 
         /// <summary>

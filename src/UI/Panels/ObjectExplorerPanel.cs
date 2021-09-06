@@ -102,7 +102,6 @@ namespace UnityExplorer.UI.Panels
             Rect.pivot = new Vector2(0f, 1f);
             Rect.anchorMin = new Vector2(0.125f, 0.175f);
             Rect.anchorMax = new Vector2(0.325f, 0.925f);
-            //mainPanelRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 350);
         }
 
         public override void ConstructPanelContent()

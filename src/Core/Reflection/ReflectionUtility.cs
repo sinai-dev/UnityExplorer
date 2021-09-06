@@ -251,27 +251,25 @@ namespace UnityExplorer
         /// </summary>
         /// <param name="baseType">The base type, which can optionally be abstract / interface.</param>
         /// <returns>All implementations of the type in the current AppDomain.</returns>
-        public static HashSet<Type> GetImplementationsOf(Type baseType, bool allowAbstract, bool allowGeneric, bool allowRecursive = true)
+        public static HashSet<Type> GetImplementationsOf(Type baseType, bool allowAbstract, bool allowGeneric, bool allowEnum, bool allowRecursive = true)
         {
             var key = GetImplementationKey(baseType);
 
             int count = AllTypes.Count;
             HashSet<Type> ret;
             if (!baseType.IsGenericParameter)
-                ret = GetImplementations(key, baseType, allowAbstract, allowGeneric);
+                ret = GetImplementations(key, baseType, allowAbstract, allowGeneric, allowEnum);
             else
                 ret = GetGenericParameterImplementations(key, baseType, allowAbstract, allowGeneric);
 
             // types were resolved during the parse, do it again if we're not already rebuilding.
             if (allowRecursive && AllTypes.Count != count)
-            {
                 ret = GetImplementationsOf(baseType, allowAbstract, allowGeneric, false);
-            }
 
             return ret;
         }
 
-        private static HashSet<Type> GetImplementations(string key, Type baseType, bool allowAbstract, bool allowGeneric)
+        private static HashSet<Type> GetImplementations(string key, Type baseType, bool allowAbstract, bool allowGeneric, bool allowEnum)
         {
             if (!typeInheritance.ContainsKey(key))
             {
@@ -287,7 +285,8 @@ namespace UnityExplorer
                         if (set.Contains(type)
                         || (type.IsAbstract && type.IsSealed) // ignore static classes
                         || (!allowAbstract && type.IsAbstract)
-                        || (!allowGeneric && (type.IsGenericType || type.IsGenericTypeDefinition)))
+                        || (!allowGeneric && (type.IsGenericType || type.IsGenericTypeDefinition))
+                        || (!allowEnum && type.IsEnum))
                             continue;
 
                         if (type.FullName.Contains("PrivateImplementationDetails")

@@ -14,9 +14,6 @@ namespace UnityExplorer.CacheObject
 {
     public abstract class CacheMember : CacheObjectBase
     {
-        //public ReflectionInspector ParentInspector { get; internal set; }
-        //public bool AutoUpdateWanted { get; internal set; }
-
         public abstract Type DeclaringType { get; }
         public string NameForFiltering { get; protected set; }
         public object DeclaringInstance => IsStatic ? null : (m_declaringInstance ?? (m_declaringInstance = Owner.Target.TryCast(DeclaringType)));
@@ -132,7 +129,6 @@ namespace UnityExplorer.CacheObject
 
             return false;
         }
-
 
         public void OnEvaluateClicked()
         {

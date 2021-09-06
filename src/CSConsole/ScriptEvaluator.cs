@@ -16,7 +16,7 @@ namespace UnityExplorer.CSConsole
             "mscorlib", "System.Core", "System", "System.Xml"
         };
 
-        internal static TextWriter _textWriter;
+        internal TextWriter _textWriter;
         internal static StreamReportPrinter _reportPrinter;
 
         public ScriptEvaluator(TextWriter tw) : base(BuildContext(tw))
@@ -51,8 +51,13 @@ namespace UnityExplorer.CSConsole
             ReferenceAssembly(asm);
         }
 
+        private static CompilerContext context;
+
         private static CompilerContext BuildContext(TextWriter tw)
         {
+            if (context != null)
+                return context;
+
             _reportPrinter = new StreamReportPrinter(tw);
 
             var settings = new CompilerSettings
@@ -65,7 +70,7 @@ namespace UnityExplorer.CSConsole
                 EnhancedWarnings = false
             };
 
-            return new CompilerContext(settings, _reportPrinter);
+            return context = new CompilerContext(settings, _reportPrinter);
         }
 
         private static void ImportAppdomainAssemblies(Action<Assembly> import)

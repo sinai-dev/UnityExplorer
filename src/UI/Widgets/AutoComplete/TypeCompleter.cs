@@ -20,6 +20,8 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         public Type BaseType { get; set; }
         public Type[] GenericConstraints { get; set; }
+        private bool allowAbstract;
+        private bool allowEnum;
 
         public InputFieldRef InputField { get; }
         public bool AnchorToCaretPosition => false;
@@ -33,10 +35,15 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         bool ISuggestionProvider.AllowNavigation => false;
 
-        public TypeCompleter(Type baseType, InputFieldRef inputField)
+        public TypeCompleter(Type baseType, InputFieldRef inputField) : this(baseType, inputField, true, true) { }
+
+        public TypeCompleter(Type baseType, InputFieldRef inputField, bool allowAbstract, bool allowEnum)
         {
             BaseType = baseType;
             InputField = inputField;
+
+            this.allowAbstract = allowAbstract;
+            this.allowEnum = allowEnum;
 
             inputField.OnValueChanged += OnInputFieldChanged;
 
@@ -46,7 +53,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         public void CacheTypes()
         {
-            allowedTypes = ReflectionUtility.GetImplementationsOf(BaseType, true, false);
+            allowedTypes = ReflectionUtility.GetImplementationsOf(BaseType, allowAbstract, allowEnum, false);
         }
 
         public void OnSuggestionClicked(Suggestion suggestion)
