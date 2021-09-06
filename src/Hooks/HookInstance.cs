@@ -32,8 +32,8 @@ namespace UnityExplorer.Hooks
         {
             this.TargetMethod = targetMethod;
             this.shortSignature = $"{targetMethod.DeclaringType.Name}.{targetMethod.Name}";
-            GenerateProcessorAndDelegate();
-            Patch();
+            if (GenerateProcessorAndDelegate())
+                Patch();
         }
 
         // Evaluator.source_file 
@@ -41,7 +41,7 @@ namespace UnityExplorer.Hooks
         // TypeDefinition.Definition
         private static readonly PropertyInfo pi_Definition = ReflectionUtility.GetPropertyInfo(typeof(TypeDefinition), "Definition");
 
-        private void GenerateProcessorAndDelegate()
+        private bool GenerateProcessorAndDelegate()
         {
             try
             {
@@ -52,7 +52,7 @@ namespace UnityExplorer.Hooks
                 scriptEvaluator.Run(GeneratePatchSourceCode(TargetMethod));
 
                 if (ScriptEvaluator._reportPrinter.ErrorsCount > 0)
-                    throw new FormatException($"Unable to compile the generated patch:\r\n{scriptEvaluator._textWriter}");
+                    throw new FormatException($"Unable to compile the generated patch!");
 
                 // TODO: Publicize MCS to avoid this reflection
                 // Get the last defined type in the source file
@@ -65,10 +65,13 @@ namespace UnityExplorer.Hooks
                 // Actually create the harmony patch
                 this.patchDelegate = new HarmonyMethod(patchDelegateMethodInfo);
                 patchProcessor.AddPostfix(patchDelegate);
+
+                return true;
             }
             catch (Exception ex)
             {
                 ExplorerCore.LogWarning($"Exception creating patch processor for target method {TargetMethod.FullDescription()}!\r\n{ex}");
+                return false;
             }
         }
 
@@ -93,7 +96,9 @@ namespace UnityExplorer.Hooks
             var parameters = targetMethod.GetParameters();
             foreach (var param in parameters)
             {
-                codeBuilder.Append($", {param.ParameterType.FullName} __{paramIdx}");
+                Type pType = param.ParameterType;
+                if (pType.IsByRef) pType = pType.GetElementType();
+                codeBuilder.Append($", {pType.FullName} __{paramIdx}");
                 paramIdx++;
             }
 
@@ -116,7 +121,9 @@ namespace UnityExplorer.Hooks
             paramIdx = 0;
             foreach (var param in parameters)
             {
-                if (param.ParameterType.IsValueType)
+                Type pType = param.ParameterType;
+                if (pType.IsByRef) pType = pType.GetElementType();
+                if (pType.IsValueType)
                     logMessage.AppendLine($"Parameter {paramIdx} {param.Name}: {{__{paramIdx}.ToString()}}");
                 else
                     logMessage.AppendLine($"Parameter {paramIdx} {param.Name}: {{__{paramIdx}?.ToString() ?? \"null\"}}");
