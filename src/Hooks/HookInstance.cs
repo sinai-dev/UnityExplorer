@@ -17,6 +17,14 @@ namespace UnityExplorer.Hooks
         private static readonly StringBuilder evalOutput = new StringBuilder();
         private static readonly ScriptEvaluator scriptEvaluator = new ScriptEvaluator(new StringWriter(evalOutput));
 
+        static HookInstance()
+        {
+            scriptEvaluator.Run("using System;");
+            scriptEvaluator.Run("using System.Reflection;");
+            scriptEvaluator.Run("using System.Collections;");
+            scriptEvaluator.Run("using System.Collections.Generic;");
+        }
+
         // Instance
 
         public bool Enabled;
@@ -117,13 +125,12 @@ namespace UnityExplorer.Hooks
             if (targetMethod.ReturnType != typeof(void))
                 codeBuilder.Append($", {targetMethod.ReturnType.FullName} __result");
 
-            int paramIdx = 0;
             var parameters = targetMethod.GetParameters();
+
+            int paramIdx = 0;
             foreach (var param in parameters)
             {
-                Type pType = param.ParameterType;
-                if (pType.IsByRef) pType = pType.GetElementType();
-                codeBuilder.Append($", {pType.FullName} __{paramIdx}");
+                codeBuilder.Append($", {param.ParameterType.FullDescription().Replace("&", "")} __{paramIdx}");
                 paramIdx++;
             }
 
@@ -176,6 +183,8 @@ namespace UnityExplorer.Hooks
             // End patch body
 
             codeBuilder.AppendLine("}");
+
+            //ExplorerCore.Log(codeBuilder.ToString());
 
             return PatchSourceCode = codeBuilder.ToString();
         }
