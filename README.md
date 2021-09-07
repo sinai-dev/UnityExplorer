@@ -88,7 +88,7 @@ The inspector is used to see detailed information on objects of any type and man
 
 * The Hooks panel allows you to hook methods at the click of a button for debugging purposes.
   * Simply enter any class (generic types not yet supported) and hook the methods you want from the menu. 
-  * To quickly copy the hook into your own project for further development, use the "Log Hook Source" button.
+  * You can edit the source code of the generated hook with the "Edit Hook Source" button. Accepted method names are `Prefix` (which can return `bool` or `void`), `Postfix`, `Finalizer` (which can return `Exception` or `void`), and `Transpiler` (which must return `IEnumerable<HarmonyLib.CodeInstruction>`). You can define multiple patches if you wish.
 
 ### Mouse-Inspect
 
