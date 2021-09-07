@@ -21,18 +21,24 @@ namespace UnityExplorer.Hooks
 
         public bool Enabled;
         public MethodInfo TargetMethod;
-        public string GeneratedSource;
+        public string PatchSourceCode;
 
-        private string shortSignature;
+        private readonly string shortSignature;
         private PatchProcessor patchProcessor;
-        private HarmonyMethod patchDelegate;
-        private MethodInfo patchDelegateMethodInfo;
+
+        private MethodInfo postfix;
+        private MethodInfo prefix;
+        private MethodInfo finalizer;
+        private MethodInfo transpiler;
 
         public HookInstance(MethodInfo targetMethod)
         {
             this.TargetMethod = targetMethod;
             this.shortSignature = $"{targetMethod.DeclaringType.Name}.{targetMethod.Name}";
-            if (GenerateProcessorAndDelegate())
+
+            GenerateDefaultPatchSourceCode(targetMethod);
+
+            if (CompileAndGenerateProcessor(PatchSourceCode))
                 Patch();
         }
 
@@ -41,30 +47,53 @@ namespace UnityExplorer.Hooks
         // TypeDefinition.Definition
         private static readonly PropertyInfo pi_Definition = ReflectionUtility.GetPropertyInfo(typeof(TypeDefinition), "Definition");
 
-        private bool GenerateProcessorAndDelegate()
+        public bool CompileAndGenerateProcessor(string patchSource)
         {
+            Unpatch();
+
             try
             {
                 patchProcessor = ExplorerCore.Harmony.CreateProcessor(TargetMethod);
 
                 // Dynamically compile the patch method
 
-                scriptEvaluator.Run(GeneratePatchSourceCode(TargetMethod));
+                var codeBuilder = new StringBuilder();
+
+                codeBuilder.AppendLine($"public class DynamicPatch_{DateTime.Now.Ticks}");
+                codeBuilder.AppendLine("{");
+                codeBuilder.AppendLine(patchSource);
+                codeBuilder.AppendLine("}");
+
+                scriptEvaluator.Run(codeBuilder.ToString());
 
                 if (ScriptEvaluator._reportPrinter.ErrorsCount > 0)
                     throw new FormatException($"Unable to compile the generated patch!");
 
                 // TODO: Publicize MCS to avoid this reflection
-                // Get the last defined type in the source file
-                var typeContainer = ((CompilationSourceFile)fi_sourceFile.GetValue(scriptEvaluator)).Containers.Last();
-                // Get the TypeSpec from the TypeDefinition, then get its "MetaInfo" (System.Type), then get the method called Patch.
-                this.patchDelegateMethodInfo = ((TypeSpec)pi_Definition.GetValue((Class)typeContainer, null))
-                    .GetMetaInfo()
-                    .GetMethod("Patch", ReflectionUtility.FLAGS);
+                // Get the most recent Patch type in the source file
+                var typeContainer = ((CompilationSourceFile)fi_sourceFile.GetValue(scriptEvaluator))
+                    .Containers
+                    .Last(it => it.MemberName.Name.StartsWith("DynamicPatch_"));
+                // Get the TypeSpec from the TypeDefinition, then get its "MetaInfo" (System.Type)
+                var patchClass = ((TypeSpec)pi_Definition.GetValue((Class)typeContainer, null)).GetMetaInfo();
 
-                // Actually create the harmony patch
-                this.patchDelegate = new HarmonyMethod(patchDelegateMethodInfo);
-                patchProcessor.AddPostfix(patchDelegate);
+                // Create the harmony patches as defined
+
+                postfix = patchClass.GetMethod("Postfix", ReflectionUtility.FLAGS);
+                if (postfix != null)
+                    patchProcessor.AddPostfix(new HarmonyMethod(postfix));
+
+                prefix = patchClass.GetMethod("Prefix", ReflectionUtility.FLAGS);
+                if (prefix != null)
+                    patchProcessor.AddPrefix(new HarmonyMethod(prefix));
+
+                finalizer = patchClass.GetMethod("Finalizer", ReflectionUtility.FLAGS);
+                if (finalizer != null)
+                    patchProcessor.AddFinalizer(new HarmonyMethod(finalizer));
+
+                transpiler = patchClass.GetMethod("Transpiler", ReflectionUtility.FLAGS);
+                if (transpiler != null)
+                    patchProcessor.AddTranspiler(new HarmonyMethod(transpiler));
 
                 return true;
             }
@@ -75,16 +104,12 @@ namespace UnityExplorer.Hooks
             }
         }
 
-        private string GeneratePatchSourceCode(MethodInfo targetMethod)
+        private string GenerateDefaultPatchSourceCode(MethodInfo targetMethod)
         {
             var codeBuilder = new StringBuilder();
-
-            codeBuilder.AppendLine($"public class DynamicPatch_{DateTime.Now.Ticks}");
-            codeBuilder.AppendLine("{");
-
             // Arguments 
 
-            codeBuilder.Append("    public static void Patch(System.Reflection.MethodBase __originalMethod");
+            codeBuilder.Append("public static void Postfix(System.Reflection.MethodBase __originalMethod");
 
             if (!targetMethod.IsStatic)
                 codeBuilder.Append($", {targetMethod.DeclaringType.FullName} __instance");
@@ -106,55 +131,53 @@ namespace UnityExplorer.Hooks
 
             // Patch body
 
-            codeBuilder.AppendLine("    {");
+            codeBuilder.AppendLine("{");
 
-            codeBuilder.AppendLine("        try {");
+            codeBuilder.AppendLine("    try {");
 
             // Log message 
 
             var logMessage = new StringBuilder();
-            logMessage.AppendLine($"$@\"Patch called: {shortSignature}");
-            
+            logMessage.Append($"Patch called: {shortSignature}\\n");
+
             if (!targetMethod.IsStatic)
-                logMessage.AppendLine("__instance: {__instance.ToString()}");
+                logMessage.Append("__instance: {__instance.ToString()}\\n");
 
             paramIdx = 0;
             foreach (var param in parameters)
             {
+                logMessage.Append($"Parameter {paramIdx} {param.Name}: ");
                 Type pType = param.ParameterType;
                 if (pType.IsByRef) pType = pType.GetElementType();
                 if (pType.IsValueType)
-                    logMessage.AppendLine($"Parameter {paramIdx} {param.Name}: {{__{paramIdx}.ToString()}}");
+                    logMessage.Append($"{{__{paramIdx}.ToString()}}");
                 else
-                    logMessage.AppendLine($"Parameter {paramIdx} {param.Name}: {{__{paramIdx}?.ToString() ?? \"null\"}}");
+                    logMessage.Append($"{{__{paramIdx}?.ToString() ?? \"null\"}}");
+                logMessage.Append("\\n");
                 paramIdx++;
             }
 
             if (targetMethod.ReturnType != typeof(void))
             {
+                logMessage.Append("Return value: ");
                 if (targetMethod.ReturnType.IsValueType)
-                    logMessage.AppendLine("Return value: {__result.ToString()}");
+                    logMessage.Append("{__result.ToString()}");
                 else
-                    logMessage.AppendLine("Return value: {__result?.ToString() ?? \"null\"}");
+                    logMessage.Append("{__result?.ToString() ?? \"null\"}");
+                logMessage.Append("\\n");
             }
 
-            logMessage.Append('"');
-
-            codeBuilder.AppendLine($"            UnityExplorer.ExplorerCore.Log({logMessage});");
-            codeBuilder.AppendLine("        }");
-            codeBuilder.AppendLine("        catch (System.Exception ex) {");
-            codeBuilder.AppendLine($"            UnityExplorer.ExplorerCore.LogWarning($\"Exception in patch of {shortSignature}:\\n{{ex}}\");");
-            codeBuilder.AppendLine("        }");
+            codeBuilder.AppendLine($"        UnityExplorer.ExplorerCore.Log($\"{logMessage}\");");
+            codeBuilder.AppendLine("    }");
+            codeBuilder.AppendLine("    catch (System.Exception ex) {");
+            codeBuilder.AppendLine($"        UnityExplorer.ExplorerCore.LogWarning($\"Exception in patch of {shortSignature}:\\n{{ex}}\");");
+            codeBuilder.AppendLine("    }");
 
             // End patch body
 
-            codeBuilder.AppendLine("    }");
-
-            // End class
-
             codeBuilder.AppendLine("}");
 
-            return GeneratedSource = codeBuilder.ToString();
+            return PatchSourceCode = codeBuilder.ToString();
         }
 
         public void TogglePatch()
@@ -181,12 +204,16 @@ namespace UnityExplorer.Hooks
 
         public void Unpatch()
         {
-            if (!Enabled)
-                return;
-
             try
             {
-                this.patchProcessor.Unpatch(patchDelegateMethodInfo);
+                if (prefix != null)
+                    patchProcessor.Unpatch(prefix);
+                if (postfix != null)
+                    patchProcessor.Unpatch(postfix);
+                if (finalizer != null)
+                    patchProcessor.Unpatch(finalizer);
+                if (transpiler != null)
+                    patchProcessor.Unpatch(transpiler);
                 Enabled = false;
             }
             catch (Exception ex)
