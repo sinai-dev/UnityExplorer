@@ -182,8 +182,7 @@ namespace UnityExplorer.Hooks
 
         public void TogglePatch()
         {
-            Enabled = !Enabled;
-            if (Enabled)
+            if (!Enabled)
                 Patch();
             else
                 Unpatch();
@@ -194,6 +193,7 @@ namespace UnityExplorer.Hooks
             try
             {
                 patchProcessor.Patch();
+
                 Enabled = true;
             }
             catch (Exception ex)
@@ -214,6 +214,7 @@ namespace UnityExplorer.Hooks
                     patchProcessor.Unpatch(finalizer);
                 if (transpiler != null)
                     patchProcessor.Unpatch(transpiler);
+
                 Enabled = false;
             }
             catch (Exception ex)
