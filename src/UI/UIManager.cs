@@ -158,6 +158,10 @@ namespace UnityExplorer.UI
             if (!ShowMenu)
                 return;
 
+            // In case the bundle has been unloaded, reload it.
+            if (!DefaultFont)
+                LoadBundle();
+
             // Check forceUnlockMouse toggle
             if (InputManager.GetKeyDown(ConfigManager.Force_Unlock_Toggle.Value))
                 CursorUnlocker.Unlock = !CursorUnlocker.Unlock;
@@ -454,14 +458,19 @@ namespace UnityExplorer.UI
             if (bundle == null)
             {
                 ExplorerCore.LogWarning("Could not load the ExplorerUI Bundle!");
-                ConsoleFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
-                DefaultFont = ConsoleFont;
+                DefaultFont = ConsoleFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
                 return;
             }
 
             // Bundle loaded
+
             ConsoleFont = bundle.LoadAsset<Font>("CONSOLA");
+            ConsoleFont.hideFlags = HideFlags.HideAndDontSave;
+            UnityEngine.Object.DontDestroyOnLoad(ConsoleFont);
+
             DefaultFont = bundle.LoadAsset<Font>("arial");
+            DefaultFont.hideFlags = HideFlags.HideAndDontSave;
+            UnityEngine.Object.DontDestroyOnLoad(DefaultFont);
 
             BackupShader = bundle.LoadAsset<Shader>("DefaultUI");
             // Fix for games which don't ship with 'UI/Default' shader.
