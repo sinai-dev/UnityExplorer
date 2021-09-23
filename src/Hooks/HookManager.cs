@@ -68,6 +68,8 @@ namespace UnityExplorer.Hooks
 
         // Set current hook cell
 
+        public void OnCellBorrowed(HookCell cell) { }
+
         public void SetCell(HookCell cell, int index)
         {
             if (index >= this.currentHooks.Count)
@@ -163,6 +165,36 @@ namespace UnityExplorer.Hooks
             Panel.AddHooksScrollPool.Refresh(true, true);
         }
 
+        // Set eligable method cell
+
+        public void OnCellBorrowed(AddHookCell cell) { }
+
+        public void SetCell(AddHookCell cell, int index)
+        {
+            if (index >= this.filteredEligableMethods.Count)
+            {
+                cell.Disable();
+                return;
+            }
+
+            cell.CurrentDisplayedIndex = index;
+            var method = this.filteredEligableMethods[index];
+
+            cell.MethodNameLabel.text = HighlightMethod(method);
+
+            var sig = method.FullDescription();
+            if (hookedSignatures.Contains(sig))
+            {
+                cell.HookButton.Component.gameObject.SetActive(false);
+                cell.HookedLabel.gameObject.SetActive(true);
+            }
+            else
+            {
+                cell.HookButton.Component.gameObject.SetActive(true);
+                cell.HookedLabel.gameObject.SetActive(false);
+            }
+        }
+
         // ~~~~~~~~~~~ Hook source editor window ~~~~~~~~~~~
 
         public void OnEditorInputChanged(string value)
@@ -191,40 +223,7 @@ namespace UnityExplorer.Hooks
             }
         }
 
-        // OnBorrow methods not needed
-        public void OnCellBorrowed(HookCell cell) { }
-        public void OnCellBorrowed(AddHookCell cell) { }
-
-
-        // Set eligable method cell
-
-        public void SetCell(AddHookCell cell, int index)
-        {
-            if (index >= this.filteredEligableMethods.Count)
-            {
-                cell.Disable();
-                return;
-            }
-
-            cell.CurrentDisplayedIndex = index;
-            var method = this.filteredEligableMethods[index];
-
-            cell.MethodNameLabel.text = HighlightMethod(method);
-
-            var sig = method.FullDescription();
-            if (hookedSignatures.Contains(sig))
-            {
-                cell.HookButton.Component.gameObject.SetActive(false);
-                cell.HookedLabel.gameObject.SetActive(true);
-            }
-            else
-            {
-                cell.HookButton.Component.gameObject.SetActive(true);
-                cell.HookedLabel.gameObject.SetActive(false);
-            }
-        }
-
-        // private static readonly string VOID_HIGHLIGHT = $"<color=#{SignatureHighlighter.keywordBlueHex}>void</color> ";
+        // ~~~~~~~~~~ Method syntax highlighting
 
         private static readonly Dictionary<string, string> highlightedMethods = new Dictionary<string, string>();
 

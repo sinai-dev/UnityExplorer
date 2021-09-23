@@ -23,7 +23,6 @@
 | BIE 5.X | ✖️ n/a | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx5.Mono.zip) |
 
 1. Take the `UnityExplorer.BIE.[version].dll` file and put it in `BepInEx\plugins\`
-2. In IL2CPP, you will need to download the [Unity libs](https://github.com/LavaGang/Unity-Runtime-Libraries) for the game's Unity version, create a folder `BepInEx\unity-libs\`, then extract the Unity libs into this folder.
 
 <i>Note: BepInEx 6 is obtainable via [BepisBuilds](https://builds.bepis.io/projects/bepinex_be)</i>
 
