@@ -1,7 +1,10 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -40,18 +43,15 @@ namespace UnityExplorer.UI
 
         public static bool Initializing { get; internal set; } = true;
 
-        private static readonly Dictionary<Panels, UIPanel> UIPanels = new Dictionary<Panels, UIPanel>();
-
         public static VerticalAnchor NavbarAnchor = VerticalAnchor.Top;
 
-        // References
         public static GameObject CanvasRoot { get; private set; }
         public static Canvas Canvas { get; private set; }
         public static EventSystem EventSys { get; private set; }
 
         internal static GameObject PoolHolder { get; private set; }
-
         internal static GameObject PanelHolder { get; private set; }
+        private static readonly Dictionary<Panels, UIPanel> UIPanels = new Dictionary<Panels, UIPanel>();
 
         internal static Font ConsoleFont { get; private set; }
         internal static Font DefaultFont { get; private set; }
@@ -158,10 +158,6 @@ namespace UnityExplorer.UI
             if (!ShowMenu)
                 return;
 
-            // In case the bundle has been unloaded, reload it.
-            if (!DefaultFont)
-                LoadBundle();
-
             // Check forceUnlockMouse toggle
             if (InputManager.GetKeyDown(ConfigManager.Force_Unlock_Toggle.Value))
                 CursorUnlocker.Unlock = !CursorUnlocker.Unlock;
@@ -200,15 +196,9 @@ namespace UnityExplorer.UI
 
         // Panels
 
-        public static UIPanel GetPanel(Panels panel)
-        {
-            return UIPanels[panel];
-        }
+        public static UIPanel GetPanel(Panels panel) => UIPanels[panel];
 
-        public static T GetPanel<T>(Panels panel) where T : UIPanel
-        {
-            return (T)UIPanels[panel];
-        }
+        public static T GetPanel<T>(Panels panel) where T : UIPanel => (T)UIPanels[panel];
 
         public static void TogglePanel(Panels panel)
         {
@@ -329,8 +319,13 @@ namespace UnityExplorer.UI
             CanvasRoot.layer = 5;
             CanvasRoot.transform.position = new Vector3(0f, 0f, 1f);
 
+            CanvasRoot.SetActive(false);
+
             EventSys = CanvasRoot.AddComponent<EventSystem>();
             InputManager.AddUIModule();
+
+            EventSys.enabled = false;
+            CanvasRoot.SetActive(true);
 
             Canvas = CanvasRoot.AddComponent<Canvas>();
             Canvas.renderMode = RenderMode.ScreenSpaceCamera;
@@ -419,9 +414,12 @@ namespace UnityExplorer.UI
 
         // UI AssetBundle
 
+        internal static AssetBundle ExplorerBundle;
+
         private static void LoadBundle()
         {
-            AssetBundle bundle;
+            SetupAssetBundlePatches();
+
             try
             {
                 // Get the Major and Minor of the Unity version
@@ -432,18 +430,18 @@ namespace UnityExplorer.UI
                 // Use appropriate AssetBundle for Unity version
                 // >= 2017
                 if (major >= 2017)
-                    bundle = LoadBundle("modern");
+                    ExplorerBundle = LoadBundle("modern");
                 // 5.6.0 to <2017
                 else if (major == 5 && minor >= 6)
-                    bundle = LoadBundle("legacy.5.6");
+                    ExplorerBundle = LoadBundle("legacy.5.6");
                 // < 5.6.0
                 else
-                    bundle = LoadBundle("legacy");      
+                    ExplorerBundle = LoadBundle("legacy");      
             }
             catch
             {
                 ExplorerCore.LogWarning($"Exception parsing Unity version, falling back to old AssetBundle load method...");
-                bundle = LoadBundle("modern") ?? LoadBundle("legacy.5.6") ?? LoadBundle("legacy");
+                ExplorerBundle = LoadBundle("modern") ?? LoadBundle("legacy.5.6") ?? LoadBundle("legacy");
             }
 
             AssetBundle LoadBundle(string id)
@@ -455,7 +453,7 @@ namespace UnityExplorer.UI
                         .GetManifestResourceStream($"UnityExplorer.Resources.{id}.bundle")));
             }
 
-            if (bundle == null)
+            if (ExplorerBundle == null)
             {
                 ExplorerCore.LogWarning("Could not load the ExplorerUI Bundle!");
                 DefaultFont = ConsoleFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
@@ -464,15 +462,17 @@ namespace UnityExplorer.UI
 
             // Bundle loaded
 
-            ConsoleFont = bundle.LoadAsset<Font>("CONSOLA");
+            ConsoleFont = ExplorerBundle.LoadAsset<Font>("CONSOLA");
             ConsoleFont.hideFlags = HideFlags.HideAndDontSave;
             UnityEngine.Object.DontDestroyOnLoad(ConsoleFont);
 
-            DefaultFont = bundle.LoadAsset<Font>("arial");
+            DefaultFont = ExplorerBundle.LoadAsset<Font>("arial");
             DefaultFont.hideFlags = HideFlags.HideAndDontSave;
             UnityEngine.Object.DontDestroyOnLoad(DefaultFont);
 
-            BackupShader = bundle.LoadAsset<Shader>("DefaultUI");
+            BackupShader = ExplorerBundle.LoadAsset<Shader>("DefaultUI");
+            BackupShader.hideFlags = HideFlags.HideAndDontSave;
+            UnityEngine.Object.DontDestroyOnLoad(BackupShader);
             // Fix for games which don't ship with 'UI/Default' shader.
             if (Graphic.defaultGraphicMaterial.shader?.name != "UI/Default")
             {
@@ -481,7 +481,6 @@ namespace UnityExplorer.UI
             }
             else
                 BackupShader = Graphic.defaultGraphicMaterial.shader;
-
         }
 
         private static byte[] ReadFully(Stream input)
@@ -494,6 +493,59 @@ namespace UnityExplorer.UI
                     ms.Write(buffer, 0, read);
                 return ms.ToArray();
             }
+        }
+
+        // AssetBundle patch
+
+        static bool donePatch;
+        private static Type T_AssetBundle => ReflectionUtility.GetTypeByName("UnityEngine.AssetBundle");
+
+        private static void SetupAssetBundlePatches()
+        {
+            if (!donePatch)
+            {
+                try
+                {
+                    if (T_AssetBundle.GetMethod("UnloadAllAssetBundles", AccessTools.all) is MethodInfo unloadAllBundles)
+                    {
+                        var processor = ExplorerCore.Harmony.CreateProcessor(unloadAllBundles);
+                        var prefix = new HarmonyMethod(typeof(UIManager).GetMethod(nameof(Prefix_UnloadAllAssetBundles), AccessTools.all));
+                        processor.AddPrefix(prefix);
+                        processor.Patch();
+
+                        donePatch = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ExplorerCore.LogWarning($"Exception setting up AssetBundle.UnloadAllAssetBundles patch: {ex}");
+                }
+            }
+        }
+
+
+        static bool Prefix_UnloadAllAssetBundles(bool unloadAllObjects)
+        {
+            try
+            {
+                var method = typeof(AssetBundle).GetMethod("GetAllLoadedAssetBundles", AccessTools.all);
+                if (method == null)
+                    return true;
+                var bundles = method.Invoke(null, ArgumentUtility.EmptyArgs) as AssetBundle[];
+                foreach (var obj in bundles)
+                {
+                    if (obj.m_CachedPtr == ExplorerBundle.m_CachedPtr)
+                        continue;
+
+                    obj.Unload(unloadAllObjects);
+                }
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.LogWarning($"Exception unloading AssetBundles: {ex}");
+            }
+
+            return false;
         }
     }
 }
