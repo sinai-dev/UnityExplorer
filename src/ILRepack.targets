@@ -16,6 +16,7 @@
             <ReferenceFolders Include="..\lib\BepInEx.6.Mono\" />
             <ReferenceFolders Include="..\lib\BepInEx.5\" />
             <ReferenceFolders Include="..\lib\MelonLoader\" />
+            <ReferenceFolders Include="..\lib\Il2CppAssemblyUnhollower\UnhollowerBaseLib\bin\Release\net4.7.2\" />
         </ItemGroup>
         
         <ILRepack
