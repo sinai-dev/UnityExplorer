@@ -42,17 +42,25 @@ namespace UnityExplorer.Core.Input
 
         // UI Input module
 
-        public BaseInputModule UIModule => m_inputModule;
+        public BaseInputModule UIInputModule => m_inputModule;
         internal StandaloneInputModule m_inputModule;
 
         public void AddUIInputModule()
         {
             m_inputModule = UIManager.CanvasRoot.gameObject.AddComponent<StandaloneInputModule>();
+            m_inputModule.m_EventSystem = UIManager.EventSys;
         }
 
         public void ActivateModule()
         {
-            m_inputModule.ActivateModule();
+            try
+            {
+                m_inputModule.ActivateModule();
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.LogWarning($"Exception enabling StandaloneInputModule: {ex}");
+            }
         }
     }
 }

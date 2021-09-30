@@ -113,9 +113,6 @@ namespace UnityExplorer.Core.Input
 
         public static void SetEventSystem()
         {
-            if (InputManager.CurrentType == InputType.InputSystem)
-                return;
-
             if (EventSystem.current && EventSystem.current != UIManager.EventSys)
             {
                 lastEventSystem = EventSystem.current;
@@ -132,14 +129,12 @@ namespace UnityExplorer.Core.Input
 
         public static void ReleaseEventSystem()
         {
-            if (InputManager.CurrentType == InputType.InputSystem)
-                return;
-
             if (lastEventSystem && lastEventSystem.gameObject.activeSelf)
             {
                 lastEventSystem.enabled = true;
 
                 settingEventSystem = true;
+                UIManager.EventSys.enabled = false;
                 EventSystem.current = lastEventSystem;
                 lastInputModule?.ActivateModule();
                 settingEventSystem = false;

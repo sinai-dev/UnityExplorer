@@ -16,7 +16,7 @@ namespace UnityExplorer.Core.Input
         public bool GetMouseButton(int btn) => false;
         public bool GetMouseButtonDown(int btn) => false;
 
-        public BaseInputModule UIModule => null;
+        public BaseInputModule UIInputModule => null;
         public void ActivateModule() { }
         public void AddUIInputModule() { }
     }

@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityExplorer.UI;
 
 namespace UnityExplorer.Core.Input
 {
@@ -16,37 +17,42 @@ namespace UnityExplorer.Core.Input
     {
         public static InputType CurrentType { get; private set; }
 
-        private static IHandleInput m_inputModule;
+        private static IHandleInput m_inputHandler;
 
-        public static Vector3 MousePosition => m_inputModule.MousePosition;
+        public static Vector3 MousePosition => m_inputHandler.MousePosition;
 
         public static bool GetKeyDown(KeyCode key)
         {
             if (key == KeyCode.None)
                 return false;
-            return m_inputModule.GetKeyDown(key);
+            return m_inputHandler.GetKeyDown(key);
         }
 
         public static bool GetKey(KeyCode key)
         {
             if (key == KeyCode.None)
                 return false;
-            return m_inputModule.GetKey(key);
+            return m_inputHandler.GetKey(key);
         }
 
-        public static bool GetMouseButtonDown(int btn) => m_inputModule.GetMouseButtonDown(btn);
-        public static bool GetMouseButton(int btn) => m_inputModule.GetMouseButton(btn);
+        public static bool GetMouseButtonDown(int btn) => m_inputHandler.GetMouseButtonDown(btn);
+        public static bool GetMouseButton(int btn) => m_inputHandler.GetMouseButton(btn);
 
-        public static BaseInputModule UIInput => m_inputModule.UIModule;
+        public static BaseInputModule UIInput => m_inputHandler.UIInputModule;
 
-        public static Vector2 MouseScrollDelta => m_inputModule.MouseScrollDelta;
-
-        public static void ActivateUIModule() => m_inputModule.ActivateModule();
+        public static Vector2 MouseScrollDelta => m_inputHandler.MouseScrollDelta;
 
         public static void AddUIModule()
         {
-            m_inputModule.AddUIInputModule();
-            ActivateUIModule();
+            m_inputHandler.AddUIInputModule();
+            //ActivateUIModule();
+            CursorUnlocker.SetEventSystem();
+        }
+
+        public static void ActivateUIModule()
+        {
+            UIManager.EventSys.m_CurrentInputModule = UIInput;
+            m_inputHandler.ActivateModule();
         }
 
         public static void Init()
@@ -65,7 +71,7 @@ namespace UnityExplorer.Core.Input
             {
                 try
                 {
-                    m_inputModule = new LegacyInput();
+                    m_inputHandler = new LegacyInput();
                     CurrentType = InputType.Legacy;
 
                     // make sure its working
@@ -84,7 +90,7 @@ namespace UnityExplorer.Core.Input
             {
                 try
                 {
-                    m_inputModule = new InputSystem();
+                    m_inputHandler = new InputSystem();
                     CurrentType = InputType.InputSystem;
                     ExplorerCore.Log("Initialized new InputSystem support.");
                     return;
@@ -96,7 +102,7 @@ namespace UnityExplorer.Core.Input
             }
 
             ExplorerCore.LogWarning("Could not find any Input Module Type!");
-            m_inputModule = new NoInput();
+            m_inputHandler = new NoInput();
             CurrentType = InputType.None;
         }
     }

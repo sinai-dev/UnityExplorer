@@ -201,7 +201,7 @@ namespace UnityExplorer.Core.Input
             ?? (m_tUIInputModule = ReflectionUtility.GetTypeByName("UnityEngine.InputSystem.UI.InputSystemUIInputModule"));
         internal Type m_tUIInputModule;
 
-        public BaseInputModule UIModule => m_newInputModule;
+        public BaseInputModule UIInputModule => m_newInputModule;
         internal BaseInputModule m_newInputModule;
 
         public void AddUIInputModule()
@@ -239,6 +239,9 @@ namespace UnityExplorer.Core.Input
 
         private void CreateAction(object map, string actionName, string[] bindings, string propertyName)
         {
+            var disable = map.GetType().GetMethod("Disable");
+            disable.Invoke(map, ArgumentUtility.EmptyArgs);
+
             var inputActionType = ReflectionUtility.GetTypeByName("UnityEngine.InputSystem.InputAction");
             var addAction = inputExtensions.GetMethod("AddAction");
             var action = addAction.Invoke(null, new object[] { map, actionName, default, null, null, null, null, null })
@@ -262,8 +265,16 @@ namespace UnityExplorer.Core.Input
 
         public void ActivateModule()
         {
-            m_newInputModule.ActivateModule();
-            UI_Enable.Invoke(UI_ActionMap, ArgumentUtility.EmptyArgs);
+            try
+            {
+                m_newInputModule.m_EventSystem = UIManager.EventSys;
+                m_newInputModule.ActivateModule();
+                UI_Enable.Invoke(UI_ActionMap, ArgumentUtility.EmptyArgs);
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.LogWarning("Exception enabling InputSystem UI Input Module: " + ex);
+            }
         }
     }
 }
