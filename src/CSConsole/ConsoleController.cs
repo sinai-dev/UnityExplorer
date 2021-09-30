@@ -104,7 +104,6 @@ namespace UnityExplorer.CSConsole
             }
         }
 
-
         #region UI Listeners and options
 
         // TODO save
@@ -659,7 +658,7 @@ var x = 5;
 // You can soft-overwrite a class by compiling it again with the same name. The old class will still technically exist in memory.
 
 // Compiled classes can be accessed from both inside and outside this console.
-// Note: in IL2CPP, injecting these classes with ClassInjector may crash the game!
+// Note: in IL2CPP, you must declare a Namespace to inject these classes with ClassInjector or it will crash the game.
 
 public class HelloWorld
 {
