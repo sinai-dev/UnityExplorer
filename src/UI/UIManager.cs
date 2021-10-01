@@ -497,29 +497,23 @@ namespace UnityExplorer.UI
 
         // AssetBundle patch
 
-        static bool donePatch;
-        private static Type T_AssetBundle => ReflectionUtility.GetTypeByName("UnityEngine.AssetBundle");
+        private static Type TypeofAssetBundle => ReflectionUtility.GetTypeByName("UnityEngine.AssetBundle");
 
         private static void SetupAssetBundlePatches()
         {
-            if (!donePatch)
+            try
             {
-                try
+                if (TypeofAssetBundle.GetMethod("UnloadAllAssetBundles", AccessTools.all) is MethodInfo unloadAllBundles)
                 {
-                    if (T_AssetBundle.GetMethod("UnloadAllAssetBundles", AccessTools.all) is MethodInfo unloadAllBundles)
-                    {
-                        var processor = ExplorerCore.Harmony.CreateProcessor(unloadAllBundles);
-                        var prefix = new HarmonyMethod(typeof(UIManager).GetMethod(nameof(Prefix_UnloadAllAssetBundles), AccessTools.all));
-                        processor.AddPrefix(prefix);
-                        processor.Patch();
-
-                        donePatch = true;
-                    }
+                    var processor = ExplorerCore.Harmony.CreateProcessor(unloadAllBundles);
+                    var prefix = new HarmonyMethod(typeof(UIManager).GetMethod(nameof(Prefix_UnloadAllAssetBundles), AccessTools.all));
+                    processor.AddPrefix(prefix);
+                    processor.Patch();
                 }
-                catch (Exception ex)
-                {
-                    ExplorerCore.LogWarning($"Exception setting up AssetBundle.UnloadAllAssetBundles patch: {ex}");
-                }
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.LogWarning($"Exception setting up AssetBundle.UnloadAllAssetBundles patch: {ex}");
             }
         }
 
