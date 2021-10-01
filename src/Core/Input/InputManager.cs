@@ -45,8 +45,7 @@ namespace UnityExplorer.Core.Input
         public static void AddUIModule()
         {
             m_inputHandler.AddUIInputModule();
-            //ActivateUIModule();
-            CursorUnlocker.SetEventSystem();
+            ActivateUIModule();
         }
 
         public static void ActivateUIModule()
