@@ -51,7 +51,7 @@ namespace UnityExplorer
             }
             catch
             {
-                return false;
+                return true;
             }
         }
 
