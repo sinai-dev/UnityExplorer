@@ -9,7 +9,6 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
-// Project-wide namespace for accessibility
 namespace UnityExplorer
 {
     public static class UnityHelpers
@@ -32,25 +31,28 @@ namespace UnityExplorer
         /// </summary>
         public static bool IsNullOrDestroyed(this object obj, bool suppressWarning = true)
         {
-            var unityObj = obj as Object;
-            if (obj == null)
+            try
             {
-                if (!suppressWarning)
-                    ExplorerCore.LogWarning("The target instance is null!");
+                if (obj == null)
+                {
+                    if (!suppressWarning)
+                        ExplorerCore.LogWarning("The target instance is null!");
 
-                return true;
-            }
-            else if (obj is Object)
-            {
-                if (!unityObj)
+                    return true;
+                }
+                else if (obj is Object unityObj && !unityObj)
                 {
                     if (!suppressWarning)
                         ExplorerCore.LogWarning("The target UnityEngine.Object was destroyed!");
 
                     return true;
                 }
+                return false;
             }
-            return false;
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>
