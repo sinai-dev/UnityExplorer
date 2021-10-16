@@ -80,7 +80,7 @@ namespace UnityExplorer.CacheObject.IValues
                 return;
             }
 
-            var path = IOUtility.EnsureValidDirectory(SaveFilePath.Text);
+            var path = IOUtility.EnsureValidFilePath(SaveFilePath.Text);
 
             if (File.Exists(path))
                 File.Delete(path);

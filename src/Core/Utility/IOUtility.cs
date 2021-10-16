@@ -11,14 +11,15 @@ namespace UnityExplorer
         private static readonly char[] invalidDirectoryCharacters = Path.GetInvalidPathChars();
         private static readonly char[] invalidFilenameCharacters = Path.GetInvalidFileNameChars();
 
-        public static string EnsureValidDirectory(string path)
+        public static string EnsureValidFilePath(string fullPathWithFile)
         {
-            path = string.Concat(path.Split(invalidDirectoryCharacters));
+            // Remove invalid path characters
+            fullPathWithFile = string.Concat(fullPathWithFile.Split(invalidDirectoryCharacters));
 
-            if (!Directory.Exists(path))
-                Directory.CreateDirectory(path);
+            // Create directory (does nothing if it exists)
+            Directory.CreateDirectory(Path.GetDirectoryName(fullPathWithFile));
 
-            return path;
+            return fullPathWithFile;
         }
 
         public static string EnsureValidFilename(string filename)

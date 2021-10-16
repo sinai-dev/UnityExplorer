@@ -62,7 +62,7 @@ namespace UnityExplorer.UI.Panels
         private void SetupIO()
         {
             var path = Path.Combine(ExplorerCore.Loader.ExplorerFolder, "Logs");
-            path = IOUtility.EnsureValidDirectory(path);
+            path = IOUtility.EnsureValidFilePath(path);
 
             // clean old log(s)
             var files = Directory.GetFiles(path);

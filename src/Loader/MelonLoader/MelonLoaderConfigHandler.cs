@@ -34,7 +34,7 @@ namespace UnityExplorer.Loader.ML
             }
         }
 
-        // This wrapper exists to handle the arbitrary "LemonAction" delegates which ML now uses in 0.4.4+.
+        // This wrapper exists to handle the "LemonAction" delegates which ML now uses in 0.4.4+.
         // Reflection is required since the delegate type changed between 0.4.3 and 0.4.4.
         // A wrapper class is required to link the MelonPreferences_Entry and the delegate instance.
         public class EntryDelegateWrapper<T>

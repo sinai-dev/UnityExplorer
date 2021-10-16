@@ -644,7 +644,7 @@ namespace UnityExplorer.Inspectors
             var fitter = imageObj.AddComponent<ContentSizeFitter>();
             fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             textureImage = imageObj.AddComponent<Image>();
-            textureImageLayout = UIFactory.SetLayoutElement(imageObj, flexibleWidth: 9999, flexibleHeight: 9999);
+            textureImageLayout = UIFactory.SetLayoutElement(imageObj, flexibleWidth: 1, flexibleHeight: 1);
 
             textureViewer.SetActive(false);
         }
@@ -664,6 +664,7 @@ namespace UnityExplorer.Inspectors
             textureImage.sprite = sprite;
 
             textureImageLayout.preferredHeight = sprite.rect.height;
+            // not really working, its always stretched horizontally for some reason.
             textureImageLayout.preferredWidth = sprite.rect.width;
         }
 
@@ -688,7 +689,7 @@ namespace UnityExplorer.Inspectors
                 return;
             }
 
-            path = IOUtility.EnsureValidDirectory(path);
+            path = IOUtility.EnsureValidFilePath(path);
 
             if (File.Exists(path))
                 File.Delete(path);
@@ -699,7 +700,6 @@ namespace UnityExplorer.Inspectors
                 tex = TextureUtilProvider.ForceReadTexture(tex);
 
             byte[] data = TextureUtilProvider.Instance.EncodeToPNG(tex);
-
             File.WriteAllBytes(path, data);
 
             if (tex != TextureRef)
