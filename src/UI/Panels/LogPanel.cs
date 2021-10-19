@@ -77,9 +77,8 @@ namespace UnityExplorer.UI.Panels
 
             var fileName = $"UnityExplorer {DateTime.Now:u}.txt";
             fileName = IOUtility.EnsureValidFilename(fileName);
-            fileName = IOUtility.EnsureValidFilePath(fileName);
 
-            CurrentStreamPath = Path.Combine(path, fileName);
+            CurrentStreamPath = IOUtility.EnsureValidFilePath(Path.Combine(path, fileName));
 
             File.WriteAllLines(CurrentStreamPath, Logs.Select(it => it.message).ToArray());
         }
