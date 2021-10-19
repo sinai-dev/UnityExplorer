@@ -61,8 +61,10 @@ namespace UnityExplorer.UI.Panels
 
         private void SetupIO()
         {
+            var fileName = $"UnityExplorer {DateTime.Now:u}.txt";
+            fileName = IOUtility.EnsureValidFilename(fileName);
             var path = Path.Combine(ExplorerCore.Loader.ExplorerFolder, "Logs");
-            //path = IOUtility.EnsureValidFilePath(path);
+            CurrentStreamPath = IOUtility.EnsureValidFilePath(Path.Combine(path, fileName));
 
             // clean old log(s)
             var files = Directory.GetFiles(path);
@@ -74,11 +76,6 @@ namespace UnityExplorer.UI.Panels
                 for (int i = 0; i < files.Length - 9; i++)
                     File.Delete(files[i]);
             }
-
-            var fileName = $"UnityExplorer {DateTime.Now:u}.txt";
-            fileName = IOUtility.EnsureValidFilename(fileName);
-
-            CurrentStreamPath = IOUtility.EnsureValidFilePath(Path.Combine(path, fileName));
 
             File.WriteAllLines(CurrentStreamPath, Logs.Select(it => it.message).ToArray());
         }
