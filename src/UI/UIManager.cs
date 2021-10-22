@@ -446,16 +446,17 @@ namespace UnityExplorer.UI
 
             AssetBundle LoadBundle(string id)
             {
-                ExplorerCore.Log($"Loading {id} bundle for Unity {Application.unityVersion}");
-
-                return AssetBundle.LoadFromMemory(ReadFully(typeof(ExplorerCore)
+                var bundle = AssetBundle.LoadFromMemory(ReadFully(typeof(ExplorerCore)
                         .Assembly
                         .GetManifestResourceStream($"UnityExplorer.Resources.{id}.bundle")));
+                if (bundle)
+                    ExplorerCore.Log($"Loaded {id} bundle for Unity {Application.unityVersion}");
+                return bundle;
             }
 
             if (ExplorerBundle == null)
             {
-                ExplorerCore.LogWarning("Could not load the ExplorerUI Bundle!");
+                ExplorerCore.LogWarning("Could not load the UnityExplorer UI Bundle!");
                 DefaultFont = ConsoleFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
                 return;
             }
@@ -505,6 +506,11 @@ namespace UnityExplorer.UI
             {
                 if (TypeofAssetBundle.GetMethod("UnloadAllAssetBundles", AccessTools.all) is MethodInfo unloadAllBundles)
                 {
+#if CPP
+                    // if IL2CPP, ensure method wasn't stripped
+                    if (UnhollowerBaseLib.UnhollowerUtils.GetIl2CppMethodInfoPointerFieldForGeneratedMethod(unloadAllBundles) == null)
+                        return;
+#endif
                     var processor = ExplorerCore.Harmony.CreateProcessor(unloadAllBundles);
                     var prefix = new HarmonyMethod(typeof(UIManager).GetMethod(nameof(Prefix_UnloadAllAssetBundles), AccessTools.all));
                     processor.AddPrefix(prefix);
