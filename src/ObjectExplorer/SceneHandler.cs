@@ -97,6 +97,8 @@ namespace UnityExplorer.ObjectExplorer
                     var scenePath = (string)method.Invoke(null, new object[] { i });
                     AllSceneNames.Add(scenePath);
                 }
+
+                WasAbleToGetScenesInBuild = true;
             }
             catch (Exception ex)
             {
