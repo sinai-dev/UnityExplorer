@@ -42,6 +42,11 @@ namespace UnityExplorer.ObjectExplorer
         private Dropdown sceneDropdown;
         private readonly Dictionary<Scene, Dropdown.OptionData> sceneToDropdownOption = new Dictionary<Scene, Dropdown.OptionData>();
 
+        // scene loader
+        private Dropdown allSceneDropdown;
+        private ButtonRef loadButton;
+        private ButtonRef loadAdditiveButton;
+
         private IEnumerable<GameObject> GetRootEntries() => SceneHandler.CurrentRootObjects;
 
         public void Update()
@@ -155,7 +160,7 @@ namespace UnityExplorer.ObjectExplorer
 
         private void TryLoadScene(LoadSceneMode mode, Dropdown allSceneDrop)
         {
-            var text = allSceneDrop.options[allSceneDrop.value].text;
+            var text = allSceneDrop.captionText.text;
 
             if (text == DEFAULT_LOAD_TEXT)
                 return;
@@ -250,6 +255,38 @@ namespace UnityExplorer.ObjectExplorer
 
         private const string DEFAULT_LOAD_TEXT = "[Select a scene]";
 
+        private void RefreshSceneLoaderOptions(string filter)
+        {
+            allSceneDropdown.options.Clear();
+            allSceneDropdown.options.Add(new Dropdown.OptionData(DEFAULT_LOAD_TEXT));
+
+            foreach (var scene in SceneHandler.AllSceneNames)
+            {
+                if (string.IsNullOrEmpty(filter) || scene.ContainsIgnoreCase(filter))
+                    allSceneDropdown.options.Add(new Dropdown.OptionData(Path.GetFileNameWithoutExtension(scene)));
+            }
+
+            allSceneDropdown.RefreshShownValue();
+
+            if (loadButton != null)
+                RefreshSceneLoaderButtons();
+        }
+
+        private void RefreshSceneLoaderButtons()
+        {
+            var text = allSceneDropdown.captionText.text;
+            if (text == DEFAULT_LOAD_TEXT)
+            {
+                loadButton.Component.interactable = false;
+                loadAdditiveButton.Component.interactable = false;
+            }
+            else
+            {
+                loadButton.Component.interactable = true;
+                loadAdditiveButton.Component.interactable = true;
+            }
+        }
+
         private void ConstructSceneLoader()
         {
             // Scene Loader
@@ -259,36 +296,41 @@ namespace UnityExplorer.ObjectExplorer
                 {
                     var sceneLoaderObj = UIFactory.CreateVerticalGroup(m_uiRoot, "SceneLoader", true, true, true, true);
                     UIFactory.SetLayoutElement(sceneLoaderObj, minHeight: 25);
-                    //sceneLoaderObj.SetActive(false);
+
+                    // Title
 
                     var loaderTitle = UIFactory.CreateLabel(sceneLoaderObj, "SceneLoaderLabel", "Scene Loader", TextAnchor.MiddleLeft, Color.white, true, 14);
                     UIFactory.SetLayoutElement(loaderTitle.gameObject, minHeight: 25, flexibleHeight: 0);
 
-                    var allSceneDropObj = UIFactory.CreateDropdown(sceneLoaderObj, out Dropdown allSceneDrop, "", 14, null);
+                    // Search filter
+
+                    var searchFilterObj = UIFactory.CreateInputField(sceneLoaderObj, "SearchFilterInput", "Filter scene names...");
+                    UIFactory.SetLayoutElement(searchFilterObj.UIRoot, minHeight: 25, flexibleHeight: 0);
+                    searchFilterObj.OnValueChanged += RefreshSceneLoaderOptions;
+
+                    // Dropdown
+
+                    var allSceneDropObj = UIFactory.CreateDropdown(sceneLoaderObj, out allSceneDropdown, "", 14, null);
                     UIFactory.SetLayoutElement(allSceneDropObj, minHeight: 25, minWidth: 150, flexibleWidth: 0, flexibleHeight: 0);
 
-                    allSceneDrop.options.Add(new Dropdown.OptionData(DEFAULT_LOAD_TEXT));
+                    RefreshSceneLoaderOptions(string.Empty);
 
-                    foreach (var scene in SceneHandler.AllSceneNames)
-                        allSceneDrop.options.Add(new Dropdown.OptionData(Path.GetFileNameWithoutExtension(scene)));
-
-                    allSceneDrop.value = 1;
-                    allSceneDrop.value = 0;
+                    // Button row
 
                     var buttonRow = UIFactory.CreateHorizontalGroup(sceneLoaderObj, "LoadButtons", true, true, true, true, 4);
 
-                    var loadButton = UIFactory.CreateButton(buttonRow, "LoadSceneButton", "Load (Single)", new Color(0.1f, 0.3f, 0.3f));
+                    loadButton = UIFactory.CreateButton(buttonRow, "LoadSceneButton", "Load (Single)", new Color(0.1f, 0.3f, 0.3f));
                     UIFactory.SetLayoutElement(loadButton.Component.gameObject, minHeight: 25, minWidth: 150);
                     loadButton.OnClick += () =>
                     {
-                        TryLoadScene(LoadSceneMode.Single, allSceneDrop);
+                        TryLoadScene(LoadSceneMode.Single, allSceneDropdown);
                     };
 
-                    var loadAdditiveButton = UIFactory.CreateButton(buttonRow, "LoadSceneButton", "Load (Additive)", new Color(0.1f, 0.3f, 0.3f));
+                    loadAdditiveButton = UIFactory.CreateButton(buttonRow, "LoadSceneButton", "Load (Additive)", new Color(0.1f, 0.3f, 0.3f));
                     UIFactory.SetLayoutElement(loadAdditiveButton.Component.gameObject, minHeight: 25, minWidth: 150);
                     loadAdditiveButton.OnClick += () =>
                     {
-                        TryLoadScene(LoadSceneMode.Additive, allSceneDrop);
+                        TryLoadScene(LoadSceneMode.Additive, allSceneDropdown);
                     };
 
                     var disabledColor = new Color(0.24f, 0.24f, 0.24f);
@@ -298,19 +340,9 @@ namespace UnityExplorer.ObjectExplorer
                     loadButton.Component.interactable = false;
                     loadAdditiveButton.Component.interactable = false;
 
-                    allSceneDrop.onValueChanged.AddListener((int val) =>
+                    allSceneDropdown.onValueChanged.AddListener((int val) =>
                     {
-                        var text = allSceneDrop.options[val].text;
-                        if (text == DEFAULT_LOAD_TEXT)
-                        {
-                            loadButton.Component.interactable = false;
-                            loadAdditiveButton.Component.interactable = false;
-                        }
-                        else
-                        {
-                            loadButton.Component.interactable = true;
-                            loadAdditiveButton.Component.interactable = true;
-                        }
+                        RefreshSceneLoaderButtons();
                     });
                 }
             }
