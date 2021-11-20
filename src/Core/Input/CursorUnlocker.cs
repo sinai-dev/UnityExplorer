@@ -193,7 +193,7 @@ namespace UnityExplorer.Core.Input
                         throw new MissingMethodException($"Could not find method for patching - '{type.FullName}.{method}'!");
                 }
 
-                var processor = ExplorerCore.Harmony.CreateProcessor(methodInfo);
+                var processor = ExplorerCore.CreatePatch(methodInfo);
                 processor.AddPrefix(prefix);
                 processor.Patch();
             }
@@ -207,7 +207,7 @@ namespace UnityExplorer.Core.Input
         {
             try
             {
-                var processor = ExplorerCore.Harmony.CreateProcessor(type.GetProperty(property, ReflectionUtility.FLAGS).GetSetMethod());
+                var processor = ExplorerCore.CreatePatch(type.GetProperty(property, ReflectionUtility.FLAGS).GetSetMethod());
                 processor.AddPrefix(prefix);
                 processor.Patch();
             }

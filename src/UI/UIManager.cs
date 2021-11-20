@@ -511,7 +511,7 @@ namespace UnityExplorer.UI
                     if (UnhollowerBaseLib.UnhollowerUtils.GetIl2CppMethodInfoPointerFieldForGeneratedMethod(unloadAllBundles) == null)
                         return;
 #endif
-                    var processor = ExplorerCore.Harmony.CreateProcessor(unloadAllBundles);
+                    var processor = ExplorerCore.CreatePatch(unloadAllBundles);
                     var prefix = new HarmonyMethod(typeof(UIManager).GetMethod(nameof(Prefix_UnloadAllAssetBundles), AccessTools.all));
                     processor.AddPrefix(prefix);
                     processor.Patch();

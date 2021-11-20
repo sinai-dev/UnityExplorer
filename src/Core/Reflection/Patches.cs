@@ -14,7 +14,7 @@ namespace UnityExplorer
             try
             {
                 var method = typeof(Assembly).GetMethod(nameof(Assembly.GetTypes), new Type[0]);
-                var processor = ExplorerCore.Harmony.CreateProcessor(method);
+                var processor = ExplorerCore.CreatePatch(method);
                 processor.AddFinalizer(typeof(ReflectionPatches).GetMethod(nameof(Assembly_GetTypes)));
                 processor.Patch();
             }
