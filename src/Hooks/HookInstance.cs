@@ -61,7 +61,7 @@ namespace UnityExplorer.Hooks
 
             try
             {
-                patchProcessor = ExplorerCore.CreatePatch(TargetMethod);
+                patchProcessor = ExplorerCore.Harmony.CreateProcessor(TargetMethod);
 
                 // Dynamically compile the patch method
 

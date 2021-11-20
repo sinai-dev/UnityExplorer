@@ -14,8 +14,6 @@ using UnityExplorer.UI;
 using UnityExplorer.Inspectors;
 using UnityExplorer.ObjectExplorer;
 using UnityExplorer.UI.Panels;
-using HarmonyLib;
-using System.Reflection;
 
 namespace UnityExplorer
 {
@@ -29,9 +27,7 @@ namespace UnityExplorer
         public static IExplorerLoader Loader { get; private set; }
         public static RuntimeContext Context { get; internal set; }
 
-        private static HarmonyLib.Harmony Harmony { get; } = new HarmonyLib.Harmony(GUID);
-
-        public static PatchProcessor CreatePatch(MethodBase targetMethod) => new PatchProcessor(Harmony, targetMethod);
+        public static HarmonyLib.Harmony Harmony { get; } = new HarmonyLib.Harmony(GUID);
 
         /// <summary>
         /// Initialize UnityExplorer with the provided Loader implementation.
