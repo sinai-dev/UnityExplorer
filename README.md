@@ -47,24 +47,6 @@ The standalone release can be used with any injector or loader of your choice, b
 3. Create an instance of Unity Explorer with `UnityExplorer.ExplorerStandalone.CreateInstance();`
 4. Optionally subscribe to the `ExplorerStandalone.OnLog` event to handle logging if you wish
 
-# Common issues
-
-These are some common fixes to issues which are present in some games, please create an issue in this repository if these fixes don't work.
-
-### Input not working properly
-
-This can be caused by a number of issues, but most commonly by the Event System.
-
-1. Open the UnityExplorer config file. See the "Settings" section below if you're unsure where it is.
-2. For the "Disable EventSystem Override" option, set the value to `true`
-3. Restart the game.
-
-### UI not appearing or gets destroyed during startup
-
-1. Open the UnityExplorer config file. See the "Settings" section below if you're unsure where it is.
-2. For the "Startup Delay" option, set the value to something higher, at least as long as it takes to reach the main menu of the game.
-3. Restart the game.
-
 # Features
 
 <p align="center">
