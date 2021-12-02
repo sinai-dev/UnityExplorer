@@ -9,7 +9,7 @@
   ✔️ Supports most Unity versions from 5.2 to 2021+ (IL2CPP and Mono).
 </p>
 <p align="center">
-  ✨ Powered by [UniverseLib](https://github.com/sinai-dev/UniverseLib)
+  ✨ Powered by <a href="https://github.com/sinai-dev/UniverseLib">UniverseLib</a>
 </p>
 
 # Releases  [![](https://img.shields.io/github/downloads/sinai-dev/UnityExplorer/total.svg)](../../releases)
