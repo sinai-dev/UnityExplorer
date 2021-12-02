@@ -45,7 +45,7 @@
 
 The standalone release can be used with any injector or loader of your choice, but it requires you to load the dependencies manually: HarmonyX, and the IL2CPP version also requires that you set up an [Il2CppAssemblyUnhollower runtime](https://github.com/knah/Il2CppAssemblyUnhollower#required-external-setup).
 
-1. Load the required libs - HarmonyX, and Il2CppAssemblyUnhollower if IL2CPP
+1. Load the required libs - UniverseLib, HarmonyX, and Il2CppAssemblyUnhollower if IL2CPP
 2. Load the UnityExplorer DLL
 3. Create an instance of Unity Explorer with `UnityExplorer.ExplorerStandalone.CreateInstance();`
 4. Optionally subscribe to the `ExplorerStandalone.OnLog` event to handle logging if you wish
