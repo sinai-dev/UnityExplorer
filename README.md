@@ -25,7 +25,7 @@
 | BIE 6.X | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx.Il2Cpp.zip) | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx6.Mono.zip) |
 | BIE 5.X | ✖️ n/a | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx5.Mono.zip) |
 
-1. Take the `UnityExplorer.BIE.[version].dll` file and put it in `BepInEx\plugins\`
+1. Take the `UnityExplorer.BIE.[version].dll` and the `UniverseLib.[version].dll` files and put them in `BepInEx\plugins\`
 
 <i>Note: BepInEx 6 is obtainable via [BepisBuilds](https://builds.bepis.io/projects/bepinex_be)</i>
 
@@ -35,7 +35,7 @@
 | ------- | ------ | ---- |
 | ML 0.4+ | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.MelonLoader.Il2Cpp.zip) | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.MelonLoader.Mono.zip) | 
 
-1. Take the `UnityExplorer.ML.[version].dll` file and put it in the `Mods\` folder created by MelonLoader.
+1. Take the `UnityExplorer.ML.[version].dll` and the `UniverseLib.[version].dll` files and put them in the `Mods\` folder created by MelonLoader.
 
 ## Standalone
 
