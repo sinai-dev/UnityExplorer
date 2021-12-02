@@ -4,8 +4,10 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.Core.Input;
+using UniverseLib.Input;
 using UnityExplorer.UI;
+using UniverseLib.UI;
+using UniverseLib;
 
 namespace UnityExplorer.Inspectors
 {

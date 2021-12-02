@@ -1,14 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityExplorer.Core.Input;
-using UnityExplorer.Core.Runtime;
-using UnityExplorer.UI.Models;
-using UnityExplorer.UI.Panels;
+using UniverseLib;
+using UniverseLib.UI;
 
 namespace UnityExplorer.UI.Widgets.AutoComplete
 {

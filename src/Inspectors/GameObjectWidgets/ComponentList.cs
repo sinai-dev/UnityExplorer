@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityExplorer.UI.Widgets;
+using UniverseLib;
+using UniverseLib.UI.Widgets;
 
 namespace UnityExplorer.Inspectors
 {

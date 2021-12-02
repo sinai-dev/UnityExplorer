@@ -11,6 +11,9 @@ using UnityExplorer.Inspectors;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets;
+using UniverseLib;
+using UniverseLib.UI;
+using UniverseLib.UI.Widgets;
 
 namespace UnityExplorer.CacheObject.IValues
 {

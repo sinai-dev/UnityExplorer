@@ -6,6 +6,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.CSConsole.Lexers;
+using UniverseLib;
 
 namespace UnityExplorer.CSConsole
 {

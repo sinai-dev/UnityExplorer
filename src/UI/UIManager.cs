@@ -10,13 +10,15 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityExplorer.Core.Config;
-using UnityExplorer.Core.Input;
 using UnityExplorer.CSConsole;
 using UnityExplorer.Inspectors;
-using UnityExplorer.UI.Models;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets;
 using UnityExplorer.UI.Widgets.AutoComplete;
+using UniverseLib;
+using UniverseLib.Input;
+using UniverseLib.UI;
+using UniverseLib.UI.Widgets;
 
 namespace UnityExplorer.UI
 {
@@ -41,21 +43,15 @@ namespace UnityExplorer.UI
             Bottom
         }
 
-        public static bool Initializing { get; internal set; } = true;
-
         public static VerticalAnchor NavbarAnchor = VerticalAnchor.Top;
 
-        public static GameObject CanvasRoot { get; private set; }
-        public static Canvas Canvas { get; private set; }
-        public static EventSystem EventSys { get; private set; }
+        public static bool Initializing { get; internal set; } = true;
 
-        internal static GameObject PoolHolder { get; private set; }
+        private static UIBase uiBase;
+        public static GameObject UIRoot => uiBase?.RootObject;
+
         internal static GameObject PanelHolder { get; private set; }
         private static readonly Dictionary<Panels, UIPanel> UIPanels = new Dictionary<Panels, UIPanel>();
-
-        internal static Font ConsoleFont { get; private set; }
-        internal static Font DefaultFont { get; private set; }
-        internal static Shader BackupShader { get; private set; }
 
         public static RectTransform NavBarRect;
         public static GameObject NavbarTabButtonHolder;
@@ -67,40 +63,25 @@ namespace UnityExplorer.UI
         private static bool pauseButtonPausing;
         private static float lastTimeScale;
 
-        // defaults
-        internal static readonly Color enabledButtonColor = new Color(0.2f, 0.4f, 0.28f);
-        internal static readonly Color disabledButtonColor = new Color(0.25f, 0.25f, 0.25f);
-
-        public const int MAX_INPUTFIELD_CHARS = 16000;
-        public const int MAX_TEXT_VERTS = 65000;
-
         public static bool ShowMenu
         {
-            get => s_showMenu;
+            get => uiBase != null && uiBase.Enabled;
             set
             {
-                if (s_showMenu == value || !CanvasRoot)
+                if (uiBase == null || !UIRoot || uiBase.Enabled == value)
                     return;
 
-                s_showMenu = value;
-                CanvasRoot.SetActive(value);
-                CursorUnlocker.UpdateCursorControl();
+                UniversalUI.SetUIActive(ExplorerCore.GUID, value);
             }
         }
-        public static bool s_showMenu = true;
 
         // Initialization
 
         internal static void InitUI()
         {
-            LoadBundle();
+            uiBase = UniversalUI.RegisterUI(ExplorerCore.GUID, Update);
 
-            CreateRootCanvas();
-
-            // Global UI Pool Holder
-            PoolHolder = new GameObject("PoolHolder");
-            PoolHolder.transform.parent = CanvasRoot.transform;
-            PoolHolder.SetActive(false);
+            CreatePanelHolder();
 
             CreateTopNavBar();
 
@@ -125,10 +106,12 @@ namespace UnityExplorer.UI
             lastScreenHeight = Screen.height;
 
             // Failsafe fix
-            foreach (var dropdown in CanvasRoot.GetComponentsInChildren<Dropdown>(true))
+            foreach (var dropdown in UIRoot.GetComponentsInChildren<Dropdown>(true))
                 dropdown.RefreshShownValue();
             timeInput.Text = string.Empty;
             timeInput.Text = Time.timeScale.ToString();
+
+            ScrollPool<ICell>.writingLockedListeners.Add(() => !PanelDragger.Resizing);
 
             Initializing = false;
         }
@@ -140,7 +123,7 @@ namespace UnityExplorer.UI
 
         public static void Update()
         {
-            if (!CanvasRoot || Initializing)
+            if (!UIRoot)
                 return;
 
             // if doing Mouse Inspect, update that and return.
@@ -150,28 +133,13 @@ namespace UnityExplorer.UI
                 return;
             }
 
-            // check master toggle
-            if (InputManager.GetKeyDown(ConfigManager.Master_Toggle.Value))
-                ShowMenu = !ShowMenu;
-
-            // return if menu closed
-            if (!ShowMenu)
-                return;
-
             // Check forceUnlockMouse toggle
             if (InputManager.GetKeyDown(ConfigManager.Force_Unlock_Toggle.Value))
-                CursorUnlocker.Unlock = !CursorUnlocker.Unlock;
-
-            // check event system state
-            if (!ConfigManager.Disable_EventSystem_Override.Value && EventSystem.current != EventSys)
-                CursorUnlocker.SetEventSystem();
+                UniverseLib.Config.ConfigManager.Force_Unlock_Mouse = !UniverseLib.Config.ConfigManager.Force_Unlock_Mouse;
 
             // update focused panel
             UIPanel.UpdateFocus();
-            // update UI model instances
             PanelDragger.UpdateInstances();
-            InputFieldRef.UpdateInstances();
-            UIBehaviourModel.UpdateInstances();
 
             // update the timescale value
             if (!timeInput.Component.isFocused && lastTimeScale != Time.timeScale)
@@ -311,35 +279,10 @@ namespace UnityExplorer.UI
 
         // UI Construction
 
-        private static void CreateRootCanvas()
+        private static void CreatePanelHolder()
         {
-            CanvasRoot = new GameObject("ExplorerCanvas");
-            UnityEngine.Object.DontDestroyOnLoad(CanvasRoot);
-            CanvasRoot.hideFlags |= HideFlags.HideAndDontSave;
-            CanvasRoot.layer = 5;
-            CanvasRoot.transform.position = new Vector3(0f, 0f, 1f);
-
-            CanvasRoot.SetActive(false);
-
-            EventSys = CanvasRoot.AddComponent<EventSystem>();
-            InputManager.AddUIModule();
-
-            EventSys.enabled = false;
-            CanvasRoot.SetActive(true);
-
-            Canvas = CanvasRoot.AddComponent<Canvas>();
-            Canvas.renderMode = RenderMode.ScreenSpaceCamera;
-            Canvas.referencePixelsPerUnit = 100;
-            Canvas.sortingOrder = 999;
-
-            CanvasScaler scaler = CanvasRoot.AddComponent<CanvasScaler>();
-            scaler.referenceResolution = new Vector2(1920, 1080);
-            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
-
-            CanvasRoot.AddComponent<GraphicRaycaster>();
-
             PanelHolder = new GameObject("PanelHolder");
-            PanelHolder.transform.SetParent(CanvasRoot.transform, false);
+            PanelHolder.transform.SetParent(UIRoot.transform, false);
             PanelHolder.layer = 5;
             var rect = PanelHolder.AddComponent<RectTransform>();
             rect.sizeDelta = Vector2.zero;
@@ -352,7 +295,7 @@ namespace UnityExplorer.UI
 
         private static void CreateTopNavBar()
         {
-            var navbarPanel = UIFactory.CreateUIObject("MainNavbar", CanvasRoot);
+            var navbarPanel = UIFactory.CreateUIObject("MainNavbar", UIRoot);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(navbarPanel, false, false, true, true, 5, 4, 4, 4, 4, TextAnchor.MiddleCenter);
             navbarPanel.AddComponent<Image>().color = new Color(0.1f, 0.1f, 0.1f);
             NavBarRect = navbarPanel.GetComponent<RectTransform>();
@@ -410,142 +353,6 @@ namespace UnityExplorer.UI
 
             ConfigManager.Master_Toggle.OnValueChanged += Master_Toggle_OnValueChanged;
             closeBtn.OnClick += OnCloseButtonClicked;
-        }
-
-        // UI AssetBundle
-
-        internal static AssetBundle ExplorerBundle;
-
-        private static void LoadBundle()
-        {
-            SetupAssetBundlePatches();
-
-            try
-            {
-                // Get the Major and Minor of the Unity version
-                var split = Application.unityVersion.Split('.');
-                int major = int.Parse(split[0]);
-                int minor = int.Parse(split[1]);
-
-                // Use appropriate AssetBundle for Unity version
-                // >= 2017
-                if (major >= 2017)
-                    ExplorerBundle = LoadBundle("modern");
-                // 5.6.0 to <2017
-                else if (major == 5 && minor >= 6)
-                    ExplorerBundle = LoadBundle("legacy.5.6");
-                // < 5.6.0
-                else
-                    ExplorerBundle = LoadBundle("legacy");      
-            }
-            catch
-            {
-                ExplorerCore.LogWarning($"Exception parsing Unity version, falling back to old AssetBundle load method...");
-                ExplorerBundle = LoadBundle("modern") ?? LoadBundle("legacy.5.6") ?? LoadBundle("legacy");
-            }
-
-            AssetBundle LoadBundle(string id)
-            {
-                var bundle = AssetBundle.LoadFromMemory(ReadFully(typeof(ExplorerCore)
-                        .Assembly
-                        .GetManifestResourceStream($"UnityExplorer.Resources.{id}.bundle")));
-                if (bundle)
-                    ExplorerCore.Log($"Loaded {id} bundle for Unity {Application.unityVersion}");
-                return bundle;
-            }
-
-            if (ExplorerBundle == null)
-            {
-                ExplorerCore.LogWarning("Could not load the UnityExplorer UI Bundle!");
-                DefaultFont = ConsoleFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
-                return;
-            }
-
-            // Bundle loaded
-
-            ConsoleFont = ExplorerBundle.LoadAsset<Font>("CONSOLA");
-            ConsoleFont.hideFlags = HideFlags.HideAndDontSave;
-            UnityEngine.Object.DontDestroyOnLoad(ConsoleFont);
-
-            DefaultFont = ExplorerBundle.LoadAsset<Font>("arial");
-            DefaultFont.hideFlags = HideFlags.HideAndDontSave;
-            UnityEngine.Object.DontDestroyOnLoad(DefaultFont);
-
-            BackupShader = ExplorerBundle.LoadAsset<Shader>("DefaultUI");
-            BackupShader.hideFlags = HideFlags.HideAndDontSave;
-            UnityEngine.Object.DontDestroyOnLoad(BackupShader);
-            // Fix for games which don't ship with 'UI/Default' shader.
-            if (Graphic.defaultGraphicMaterial.shader?.name != "UI/Default")
-            {
-                ExplorerCore.Log("This game does not ship with the 'UI/Default' shader, using manual Default Shader...");
-                Graphic.defaultGraphicMaterial.shader = BackupShader;
-            }
-            else
-                BackupShader = Graphic.defaultGraphicMaterial.shader;
-        }
-
-        private static byte[] ReadFully(Stream input)
-        {
-            using (var ms = new MemoryStream())
-            {
-                byte[] buffer = new byte[81920];
-                int read;
-                while ((read = input.Read(buffer, 0, buffer.Length)) != 0)
-                    ms.Write(buffer, 0, read);
-                return ms.ToArray();
-            }
-        }
-
-        // AssetBundle patch
-
-        private static Type TypeofAssetBundle => ReflectionUtility.GetTypeByName("UnityEngine.AssetBundle");
-
-        private static void SetupAssetBundlePatches()
-        {
-            try
-            {
-                if (TypeofAssetBundle.GetMethod("UnloadAllAssetBundles", AccessTools.all) is MethodInfo unloadAllBundles)
-                {
-#if CPP
-                    // if IL2CPP, ensure method wasn't stripped
-                    if (UnhollowerBaseLib.UnhollowerUtils.GetIl2CppMethodInfoPointerFieldForGeneratedMethod(unloadAllBundles) == null)
-                        return;
-#endif
-                    var processor = ExplorerCore.Harmony.CreateProcessor(unloadAllBundles);
-                    var prefix = new HarmonyMethod(typeof(UIManager).GetMethod(nameof(Prefix_UnloadAllAssetBundles), AccessTools.all));
-                    processor.AddPrefix(prefix);
-                    processor.Patch();
-                }
-            }
-            catch (Exception ex)
-            {
-                ExplorerCore.LogWarning($"Exception setting up AssetBundle.UnloadAllAssetBundles patch: {ex}");
-            }
-        }
-
-
-        static bool Prefix_UnloadAllAssetBundles(bool unloadAllObjects)
-        {
-            try
-            {
-                var method = typeof(AssetBundle).GetMethod("GetAllLoadedAssetBundles", AccessTools.all);
-                if (method == null)
-                    return true;
-                var bundles = method.Invoke(null, ArgumentUtility.EmptyArgs) as AssetBundle[];
-                foreach (var obj in bundles)
-                {
-                    if (obj.m_CachedPtr == ExplorerBundle.m_CachedPtr)
-                        continue;
-
-                    obj.Unload(unloadAllObjects);
-                }
-            }
-            catch (Exception ex)
-            {
-                ExplorerCore.LogWarning($"Exception unloading AssetBundles: {ex}");
-            }
-
-            return false;
         }
     }
 }

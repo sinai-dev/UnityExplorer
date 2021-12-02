@@ -11,7 +11,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityExplorer.Core;
 using UnityExplorer.Core.Config;
-using UnityExplorer.Core.Input;
+using UniverseLib.Input;
 using UnityExplorer.Loader.BIE;
 #if CPP
 using BepInEx.IL2CPP;

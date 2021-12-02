@@ -6,11 +6,13 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityExplorer.Core;
-using UnityExplorer.Core.Input;
+using UniverseLib.Input;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.Inspectors.MouseInspectors;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
+using UniverseLib;
+using UniverseLib.UI;
 
 namespace UnityExplorer.Inspectors
 {
@@ -163,7 +165,7 @@ namespace UnityExplorer.Inspectors
                 mousePos.y -= 10;
 
             // calculate and set our UI position
-            var inversePos = UIManager.CanvasRoot.transform.InverseTransformPoint(mousePos);
+            var inversePos = UIManager.UIRoot.transform.InverseTransformPoint(mousePos);
             UIRoot.transform.localPosition = new Vector3(inversePos.x, inversePos.y, 0);
         }
 
@@ -181,7 +183,7 @@ namespace UnityExplorer.Inspectors
         {
             // hide title bar
             this.titleBar.SetActive(false);
-            this.UIRoot.transform.SetParent(UIManager.CanvasRoot.transform, false);
+            this.UIRoot.transform.SetParent(UIManager.UIRoot.transform, false);
 
             var inspectContent = UIFactory.CreateVerticalGroup(this.content, "InspectContent", true, true, true, true, 3, new Vector4(2, 2, 2, 2));
             UIFactory.SetLayoutElement(inspectContent, flexibleWidth: 9999, flexibleHeight: 9999);

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityExplorer.Inspectors;
+using UniverseLib;
 
 namespace UnityExplorer.CacheObject
 {

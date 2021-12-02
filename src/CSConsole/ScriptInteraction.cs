@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityExplorer.Core.Runtime;
+using UniverseLib;
 
 namespace UnityExplorer.CSConsole
 {

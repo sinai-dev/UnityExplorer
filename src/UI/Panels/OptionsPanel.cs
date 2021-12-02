@@ -8,6 +8,8 @@ using UnityExplorer.Core.Config;
 using UnityExplorer.CacheObject;
 using UnityExplorer.CacheObject.Views;
 using UnityExplorer.UI.Widgets;
+using UniverseLib.UI.Widgets;
+using UniverseLib.UI;
 
 namespace UnityExplorer.UI.Panels
 {

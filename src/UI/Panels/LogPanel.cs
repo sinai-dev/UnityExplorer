@@ -8,6 +8,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Core.Config;
 using UnityExplorer.UI.Widgets;
+using UniverseLib;
+using UniverseLib.UI;
+using UniverseLib.UI.Widgets;
 
 namespace UnityExplorer.UI.Panels
 {
@@ -233,8 +236,8 @@ namespace UnityExplorer.UI.Panels
             Input.Component.readOnly = true;
             Input.Component.textComponent.supportRichText = true;
             Input.Component.lineType = InputField.LineType.MultiLineNewline;
-            Input.Component.textComponent.font = UIManager.ConsoleFont;
-            Input.PlaceholderText.font = UIManager.ConsoleFont;
+            Input.Component.textComponent.font = UniversalUI.ConsoleFont;
+            Input.PlaceholderText.font = UniversalUI.ConsoleFont;
 
             return UIRoot;
         }

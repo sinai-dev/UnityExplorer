@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Loader.STANDALONE;
 using UnityEngine.EventSystems;
-using UnityExplorer.Core.Input;
+using UniverseLib.Input;
 using UnityExplorer.Core;
 #if CPP
 using UnhollowerRuntimeLib;

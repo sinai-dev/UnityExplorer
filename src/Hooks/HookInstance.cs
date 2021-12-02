@@ -7,6 +7,7 @@ using System.Text;
 using HarmonyLib;
 using Mono.CSharp;
 using UnityExplorer.CSConsole;
+using UniverseLib;
 
 namespace UnityExplorer.Hooks
 {

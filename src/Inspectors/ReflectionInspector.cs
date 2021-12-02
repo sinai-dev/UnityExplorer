@@ -15,6 +15,10 @@ using UnityExplorer.CacheObject.Views;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets;
 using UnityExplorer.UI;
+using UniverseLib.UI.Widgets;
+using UniverseLib.UI;
+using UniverseLib;
+using UniverseLib.Runtime;
 
 namespace UnityExplorer.Inspectors
 {

@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityExplorer.Core;
 using UnityExplorer.Core.Runtime;
+using UniverseLib;
 
 namespace UnityExplorer.ObjectExplorer
 {
@@ -101,7 +102,7 @@ namespace UnityExplorer.ObjectExplorer
                 if (go)
                 {
                     // hide unityexplorer objects
-                    if (go.transform.root.name == "ExplorerCanvas")
+                    if (go.transform.root.name == "UniverseLibCanvas")
                         continue;
 
                     if (shouldFilterGOs)

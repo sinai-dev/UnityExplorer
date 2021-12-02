@@ -162,6 +162,9 @@
   </ItemGroup>
   <!-- Mono refs -->
   <ItemGroup Condition="'$(IsCpp)'=='false'">
+    <Reference Include="UniverseLib.Mono">
+      <HintPath>packages\UniverseLib.1.0.1\lib\net35\UniverseLib.Mono.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\lib\mono\UnityEngine.dll</HintPath>
       <Private>False</Private>
@@ -173,6 +176,9 @@
   </ItemGroup>
   <!-- Il2Cpp refs -->
   <ItemGroup Condition="'$(IsCpp)'=='true'">
+    <Reference Include="UniverseLib.IL2CPP">
+      <HintPath>packages\UniverseLib.1.0.1\lib\net472\UniverseLib.IL2CPP.dll</HintPath>
+    </Reference>
     <Reference Include="UnhollowerBaseLib">
       <HintPath>..\lib\Il2CppAssemblyUnhollower\UnhollowerBaseLib\bin\Release\net4.7.2\UnhollowerBaseLib.dll</HintPath>
       <Private>False</Private>
@@ -221,7 +227,6 @@
     <Compile Include="Core\Config\InternalConfigHandler.cs" />
     <Compile Include="CacheObject\CacheConfigEntry.cs" />
     <Compile Include="CacheObject\Views\CacheConfigCell.cs" />
-    <Compile Include="Core\Reflection\Patches.cs" />
     <Compile Include="CSConsole\CSAutoCompleter.cs" />
     <Compile Include="CSConsole\LexerBuilder.cs" />
     <Compile Include="CSConsole\Lexers\CommentLexer.cs" />
@@ -233,11 +238,6 @@
     <Compile Include="CSConsole\ScriptEvaluator.cs" />
     <Compile Include="CSConsole\ScriptInteraction.cs" />
     <Compile Include="Core\ExplorerBehaviour.cs" />
-    <Compile Include="Core\Reflection\Extensions.cs" />
-    <Compile Include="Core\Reflection\Il2CppReflection.cs" />
-    <Compile Include="Core\Utility\ArgumentUtility.cs" />
-    <Compile Include="Core\Utility\MiscUtility.cs" />
-    <Compile Include="Core\Utility\ParseUtility.cs" />
     <Compile Include="Hooks\AddHookCell.cs" />
     <Compile Include="Inspectors\GameObjectWidgets\ComponentCell.cs" />
     <Compile Include="Inspectors\GameObjectWidgets\ComponentList.cs" />
@@ -272,13 +272,10 @@
     <Compile Include="Inspectors\MouseInspectors\WorldInspector.cs" />
     <Compile Include="Inspectors\ReflectionInspector.cs" />
     <Compile Include="CacheObject\IValues\InteractiveValueStruct.cs" />
-    <Compile Include="UI\Models\InputFieldRef.cs" />
     <Compile Include="UI\Panels\HookManagerPanel.cs" />
     <Compile Include="UI\Panels\UiInspectorResultsPanel.cs" />
-    <Compile Include="UI\Pool.cs" />
     <Compile Include="UI\Panels\LogPanel.cs" />
     <Compile Include="UI\Panels\CSConsolePanel.cs" />
-    <Compile Include="Core\Utility\IOUtility.cs" />
     <Compile Include="UI\Panels\OptionsPanel.cs" />
     <Compile Include="UI\Widgets\AutoComplete\ISuggestionProvider.cs" />
     <Compile Include="UI\Widgets\AutoComplete\Suggestion.cs" />
@@ -286,27 +283,12 @@
     <Compile Include="Core\Config\ConfigHandler.cs" />
     <Compile Include="Core\Config\ConfigManager.cs" />
     <Compile Include="Core\Config\IConfigElement.cs" />
-    <Compile Include="Core\Input\CursorUnlocker.cs" />
-    <Compile Include="Core\Input\IHandleInput.cs" />
-    <Compile Include="Core\Input\InputManager.cs" />
-    <Compile Include="Core\Input\InputSystem.cs" />
-    <Compile Include="Core\Input\LegacyInput.cs" />
-    <Compile Include="Core\Input\NoInput.cs" />
-    <Compile Include="Core\Reflection\ReflectionUtility.cs" />
-    <Compile Include="Core\Runtime\Il2Cpp\AssetBundle.cs" />
-    <Compile Include="Core\Runtime\Il2Cpp\ICallManager.cs" />
-    <Compile Include="Core\Runtime\Il2Cpp\Il2CppCoroutine.cs" />
-    <Compile Include="Core\Runtime\Il2Cpp\Il2CppProvider.cs" />
-    <Compile Include="Core\Runtime\Il2Cpp\Il2CppTextureUtil.cs" />
-    <Compile Include="Core\Runtime\Mono\MonoProvider.cs" />
-    <Compile Include="Core\Runtime\Mono\MonoTextureUtil.cs" />
-    <Compile Include="Core\Runtime\RuntimeContext.cs" />
-    <Compile Include="Core\Runtime\RuntimeProvider.cs" />
-    <Compile Include="Core\Runtime\TextureUtilProvider.cs" />
+    <Compile Include="Core\Runtime\Il2CppProvider.cs" />
+    <Compile Include="Core\Runtime\MonoProvider.cs" />
+    <Compile Include="Core\Runtime\RuntimeHelper.cs" />
     <Compile Include="ObjectExplorer\SceneHandler.cs" />
     <Compile Include="ObjectExplorer\SearchProvider.cs" />
     <Compile Include="Core\Tests\TestClass.cs" />
-    <Compile Include="Core\Utility\UnityHelpers.cs" />
     <Compile Include="ExplorerCore.cs" />
     <Compile Include="Loader\BepInEx\BepInExConfigHandler.cs" />
     <Compile Include="Loader\BepInEx\ExplorerBepInPlugin.cs" />
@@ -316,34 +298,18 @@
     <Compile Include="Loader\Standalone\ExplorerStandalone.cs" />
     <Compile Include="Loader\Standalone\StandaloneConfigHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\Models\UIBehaviourModel.cs" />
-    <Compile Include="UI\Models\UIModel.cs" />
     <Compile Include="UI\Panels\UIPanel.cs" />
     <Compile Include="UI\Panels\InspectorPanel.cs" />
     <Compile Include="UI\Panels\ObjectExplorerPanel.cs" />
-    <Compile Include="UI\UIFactory.cs" />
     <Compile Include="UI\UIManager.cs" />
     <Compile Include="UI\Panels\PanelDragger.cs" />
-    <Compile Include="Core\Utility\SignatureHighlighter.cs" />
-    <Compile Include="Core\Utility\ToStringUtility.cs" />
     <Compile Include="UI\Widgets\AutoComplete\AutoCompleteModal.cs" />
     <Compile Include="UI\Widgets\AutoComplete\TypeCompleter.cs" />
-    <Compile Include="UI\Models\ButtonRef.cs" />
     <Compile Include="ObjectExplorer\ObjectSearch.cs" />
     <Compile Include="ObjectExplorer\SceneExplorer.cs" />
-    <Compile Include="UI\Widgets\ScrollPool\DataHeightCache.cs" />
-    <Compile Include="UI\Widgets\ScrollPool\ICell.cs" />
-    <Compile Include="UI\Widgets\ScrollPool\ICellPoolDataSource.cs" />
-    <Compile Include="UI\Widgets\ScrollPool\ScrollPool.cs" />
-    <Compile Include="UI\Widgets\ScrollPool\UIExtensions.cs" />
-    <Compile Include="UI\Widgets\InputFieldScroller.cs" />
-    <Compile Include="UI\Widgets\ButtonList\ButtonCell.cs" />
-    <Compile Include="UI\Widgets\ButtonList\ButtonListHandler.cs" />
-    <Compile Include="UI\Widgets\AutoSliderScrollbar.cs" />
     <Compile Include="UI\Widgets\TransformTree\CachedTransform.cs" />
     <Compile Include="UI\Widgets\TransformTree\TransformCell.cs" />
     <Compile Include="UI\Widgets\TransformTree\TransformTree.cs" />
-    <EmbeddedResource Include="Resources\*" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ILRepack.targets" />

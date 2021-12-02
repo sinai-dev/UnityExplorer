@@ -6,10 +6,13 @@ using System.Reflection;
 using System.Text;
 using HarmonyLib;
 using UnityEngine;
+using UnityExplorer.Core.Runtime;
 using UnityExplorer.CSConsole;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets;
+using UniverseLib;
+using UniverseLib.UI.Widgets;
 
 namespace UnityExplorer.Hooks
 {
@@ -106,7 +109,7 @@ namespace UnityExplorer.Hooks
             currentAddEligableMethods.Clear();
             foreach (var method in type.GetMethods(ReflectionUtility.FLAGS))
             {
-                if (method.IsGenericMethod /* || method.IsAbstract */ || ReflectionUtility.IsBlacklisted(method))
+                if (method.IsGenericMethod /* || method.IsAbstract */ || RuntimeHelper.IsBlacklisted(method))
                     continue;
                 currentAddEligableMethods.Add(method);
                 filteredEligableMethods.Add(method);

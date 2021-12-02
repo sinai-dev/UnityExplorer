@@ -4,10 +4,13 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityExplorer.Core.Input;
+using UniverseLib.Input;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
+using UniverseLib.UI.Widgets;
+using UniverseLib;
+using UniverseLib.UI;
 
 namespace UnityExplorer.UI.Widgets.AutoComplete
 {

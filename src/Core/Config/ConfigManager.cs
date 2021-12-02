@@ -89,18 +89,22 @@ namespace UnityExplorer.Core.Config
             Force_Unlock_Mouse = new ConfigElement<bool>("Force Unlock Mouse",
                 "Force the Cursor to be unlocked (visible) when the UnityExplorer menu is open.",
                 true);
+            Force_Unlock_Mouse.OnValueChanged += (bool value) =>
+            {
+                UniverseLib.Config.ConfigManager.Force_Unlock_Mouse = value;
+            };
 
             Force_Unlock_Toggle = new ConfigElement<KeyCode>("Force Unlock Toggle Key",
                 "The keybind to toggle the 'Force Unlock Mouse' setting. Only usable when UnityExplorer is open.",
                 KeyCode.None);
 
-            Aggressive_Mouse_Unlock = new ConfigElement<bool>("Aggressive Mouse Unlock",
-                "Use WaitForEndOfFrame to aggressively force the Mouse to be unlocked.\n<b>Requires restart to take effect.</b>",
-                false);
-
             Disable_EventSystem_Override = new ConfigElement<bool>("Disable EventSystem override",
                 "If enabled, UnityExplorer will not override the EventSystem from the game.\n<b>May require restart to take effect.</b>",
                 false);
+            Disable_EventSystem_Override.OnValueChanged += (bool value) => 
+            {
+                UniverseLib.Config.ConfigManager.Disable_EventSystem_Override = value;
+            };
 
             Log_Unity_Debug = new ConfigElement<bool>("Log Unity Debug",
                 "Should UnityEngine.Debug.Log messages be printed to UnityExplorer's log?",

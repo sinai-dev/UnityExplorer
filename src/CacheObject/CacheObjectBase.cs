@@ -9,8 +9,10 @@ using UnityEngine.UI;
 using UnityExplorer.Core.Runtime;
 using UnityExplorer.CacheObject.IValues;
 using UnityExplorer.CacheObject.Views;
-using UnityExplorer.UI.Models;
+using UniverseLib.UI.Models;
 using UnityExplorer.UI;
+using UniverseLib;
+using UniverseLib.UI;
 
 namespace UnityExplorer.CacheObject
 {
@@ -442,7 +444,7 @@ namespace UnityExplorer.CacheObject
                 {
                     inactiveIValueHolder = new GameObject("Temp_IValue_Holder");
                     GameObject.DontDestroyOnLoad(inactiveIValueHolder);
-                    inactiveIValueHolder.transform.parent = UIManager.PoolHolder.transform;
+                    inactiveIValueHolder.transform.parent = UniversalUI.PoolHolder.transform;
                     inactiveIValueHolder.SetActive(false);
                 }
                 return inactiveIValueHolder;

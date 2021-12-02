@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using UniverseLib;
+using UniverseLib.UI.Widgets;
 
 namespace UnityExplorer.UI.Widgets
 {

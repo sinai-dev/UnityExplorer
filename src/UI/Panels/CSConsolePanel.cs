@@ -9,6 +9,9 @@ using UnityEngine.UI;
 using UnityExplorer.Core.Config;
 using UnityExplorer.CSConsole;
 using UnityExplorer.UI.Widgets;
+using UniverseLib;
+using UniverseLib.UI;
+using UniverseLib.UI.Widgets;
 
 namespace UnityExplorer.UI.Panels
 {
@@ -39,8 +42,8 @@ namespace UnityExplorer.UI.Panels
 
         private void InvokeOnValueChanged(string value)
         {
-            if (value.Length == UIManager.MAX_INPUTFIELD_CHARS)
-                ExplorerCore.LogWarning($"Reached maximum InputField character length! ({UIManager.MAX_INPUTFIELD_CHARS})");
+            if (value.Length == UniversalUI.MAX_INPUTFIELD_CHARS)
+                ExplorerCore.LogWarning($"Reached maximum InputField character length! ({UniversalUI.MAX_INPUTFIELD_CHARS})");
 
             OnInputChanged?.Invoke(value);
         }
@@ -148,7 +151,7 @@ namespace UnityExplorer.UI.Panels
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(linesHolder, true, true, true, true);
 
             LineNumberText = UIFactory.CreateLabel(linesHolder, "LineNumbers", "1", TextAnchor.UpperCenter, Color.grey, fontSize: 16);
-            LineNumberText.font = UIManager.ConsoleFont;
+            LineNumberText.font = UniversalUI.ConsoleFont;
 
             // input field
 
@@ -192,9 +195,9 @@ namespace UnityExplorer.UI.Panels
             HighlightText.fontSize = fontSize;
 
             // Set fonts
-            InputText.font = UIManager.ConsoleFont;
-            Input.PlaceholderText.font = UIManager.ConsoleFont;
-            HighlightText.font = UIManager.ConsoleFont;
+            InputText.font = UniversalUI.ConsoleFont;
+            Input.PlaceholderText.font = UniversalUI.ConsoleFont;
+            HighlightText.font = UniversalUI.ConsoleFont;
 
             RuntimeProvider.Instance.StartCoroutine(DelayedLayoutSetup());
         }

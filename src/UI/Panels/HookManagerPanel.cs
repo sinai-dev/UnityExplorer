@@ -8,6 +8,8 @@ using UnityExplorer.Core.Config;
 using UnityExplorer.Hooks;
 using UnityExplorer.UI.Widgets;
 using UnityExplorer.UI.Widgets.AutoComplete;
+using UniverseLib.UI;
+using UniverseLib.UI.Widgets;
 
 namespace UnityExplorer.UI.Panels
 {
@@ -185,9 +187,9 @@ namespace UnityExplorer.UI.Panels
             EditorHighlightText.fontSize = fontSize;
 
             // Set fonts
-            EditorInputText.font = UIManager.ConsoleFont;
-            EditorInput.PlaceholderText.font = UIManager.ConsoleFont;
-            EditorHighlightText.font = UIManager.ConsoleFont;
+            EditorInputText.font = UniversalUI.ConsoleFont;
+            EditorInput.PlaceholderText.font = UniversalUI.ConsoleFont;
+            EditorHighlightText.font = UniversalUI.ConsoleFont;
 
             editorPanel.SetActive(false);
         }

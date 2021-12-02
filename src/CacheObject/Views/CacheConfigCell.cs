@@ -5,6 +5,8 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.UI;
+using UniverseLib;
+using UniverseLib.UI;
 
 namespace UnityExplorer.CacheObject.Views
 {

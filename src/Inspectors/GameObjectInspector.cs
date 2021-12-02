@@ -5,12 +5,15 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.Core.Input;
+using UniverseLib.Input;
 using UnityExplorer.UI;
-using UnityExplorer.UI.Models;
+using UniverseLib.UI.Models;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets;
 using UnityExplorer.UI.Widgets.AutoComplete;
+using UniverseLib.UI.Widgets;
+using UniverseLib.UI;
+using UniverseLib;
 
 namespace UnityExplorer.Inspectors
 {

@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.Core;
 using UnityExplorer.Core.Config;
-using UnityExplorer.Core.Input;
-using UnityExplorer.Core.Runtime;
-using UnityExplorer.Tests;
 using UnityExplorer.UI;
-using UnityExplorer.Inspectors;
 using UnityExplorer.ObjectExplorer;
 using UnityExplorer.UI.Panels;
+using UnityExplorer.Core.Runtime;
+using UniverseLib.Input;
 
 namespace UnityExplorer
 {
@@ -25,7 +21,6 @@ namespace UnityExplorer
         public const string GUID = "com.sinai.unityexplorer";
 
         public static IExplorerLoader Loader { get; private set; }
-        public static RuntimeContext Context { get; internal set; }
 
         public static HarmonyLib.Harmony Harmony { get; } = new HarmonyLib.Harmony(GUID);
 
@@ -43,38 +38,31 @@ namespace UnityExplorer
 
             Log($"{NAME} {VERSION} initializing...");
 
-            ExplorerBehaviour.Setup();
-
             if (!Directory.Exists(Loader.ExplorerFolder))
                 Directory.CreateDirectory(Loader.ExplorerFolder);
 
             ConfigManager.Init(Loader.ConfigHandler);
-            ReflectionUtility.Init();
-            RuntimeProvider.Init();
+            RuntimeHelper.Init();
+            ExplorerBehaviour.Setup();
+
+            UniverseLib.Universe.Init(ConfigManager.Startup_Delay_Time.Value, LateInit, Log, new UniverseLib.Config.UUConfig
+            {
+                Disable_EventSystem_Override = ConfigManager.Disable_EventSystem_Override.Value,
+                Force_Unlock_Mouse = ConfigManager.Force_Unlock_Mouse.Value,
+                Unhollowed_Modules_Folder = loader.UnhollowedModulesFolder
+            });
             
-            SceneHandler.Init();
-            InputManager.Init();
-
-            RuntimeProvider.Instance.StartCoroutine(SetupCoroutine());
-
-            Log($"Finished core setup, waiting for UI setup...");
+            Log($"Finished core setup, waiting for late setup...");
         }
 
         // Do a delayed setup so that objects aren't destroyed instantly.
         // This can happen for a multitude of reasons.
         // Default delay is 1 second which is usually enough.
-        private static IEnumerator SetupCoroutine()
+        private static void LateInit()
         {
-            yield return null;
-            float prevRealTime = Time.realtimeSinceStartup;
-            float delay = ConfigManager.Startup_Delay_Time.Value;
-            while (delay > 0)
-            {
-                float diff = Math.Max(Time.deltaTime, Time.realtimeSinceStartup - prevRealTime);
-                delay -= diff;
-                prevRealTime = Time.realtimeSinceStartup;
-                yield return null;
-            }
+            Log($"Setting up late core features...");
+
+            SceneHandler.Init();
 
             Log($"Creating UI...");
 
@@ -88,19 +76,11 @@ namespace UnityExplorer
         /// </summary>
         public static void Update()
         {
-            RuntimeProvider.Instance.Update();
-
             UIManager.Update();
-        }
 
-        public static void FixedUpdate()
-        {
-            RuntimeProvider.Instance.ProcessFixedUpdate();
-        }
-
-        public static void OnPostRender()
-        {
-            RuntimeProvider.Instance.ProcessOnPostRender();
+            // check master toggle
+            if (InputManager.GetKeyDown(ConfigManager.Master_Toggle.Value))
+                UIManager.ShowMenu = !UIManager.ShowMenu;
         }
 
         #region LOGGING

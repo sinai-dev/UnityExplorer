@@ -9,11 +9,13 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityExplorer.Core.Input;
+using UniverseLib.Input;
 using UnityExplorer.CSConsole;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets.AutoComplete;
+using UniverseLib.UI;
+using UniverseLib;
 
 namespace UnityExplorer.CSConsole
 {

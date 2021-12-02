@@ -6,6 +6,8 @@ using UnityEngine;
 using UnityExplorer.CSConsole.Lexers;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Widgets.AutoComplete;
+using UniverseLib;
+using UniverseLib.UI;
 
 namespace UnityExplorer.CSConsole
 {

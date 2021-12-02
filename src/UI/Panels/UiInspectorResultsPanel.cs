@@ -5,6 +5,9 @@ using System.Text;
 using UnityEngine;
 using UnityExplorer.Inspectors.MouseInspectors;
 using UnityExplorer.UI.Widgets;
+using UniverseLib;
+using UniverseLib.UI;
+using UniverseLib.UI.Widgets;
 
 namespace UnityExplorer.UI.Panels
 {

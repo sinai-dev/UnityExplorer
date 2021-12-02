@@ -5,8 +5,9 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.UI;
-using UnityExplorer.UI.Models;
+using UniverseLib.UI.Models;
 using UnityExplorer.UI.Panels;
+using UniverseLib.UI;
 
 namespace UnityExplorer.Inspectors
 {

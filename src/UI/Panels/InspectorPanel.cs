@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Core.Config;
 using UnityExplorer.Inspectors;
+using UniverseLib.UI;
 
 namespace UnityExplorer.UI.Panels
 {

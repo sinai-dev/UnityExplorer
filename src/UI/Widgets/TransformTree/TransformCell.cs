@@ -6,6 +6,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Inspectors;
 using UnityExplorer.UI.Widgets;
+using UniverseLib;
+using UniverseLib.UI;
+using UniverseLib.UI.Widgets;
 
 namespace UnityExplorer.UI.Widgets
 {

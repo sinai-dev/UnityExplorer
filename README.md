@@ -8,6 +8,9 @@
 <p align="center">
   ✔️ Supports most Unity versions from 5.2 to 2021+ (IL2CPP and Mono).
 </p>
+<p align="center">
+  ✨ Powered by [UniverseLib](https://github.com/sinai-dev/UniverseLib)
+</p>
 
 # Releases  [![](https://img.shields.io/github/downloads/sinai-dev/UnityExplorer/total.svg)](../../releases)
 
@@ -46,6 +49,21 @@ The standalone release can be used with any injector or loader of your choice, b
 2. Load the UnityExplorer DLL
 3. Create an instance of Unity Explorer with `UnityExplorer.ExplorerStandalone.CreateInstance();`
 4. Optionally subscribe to the `ExplorerStandalone.OnLog` event to handle logging if you wish
+
+# Common issues and solutions
+
+Although UnityExplorer should work out of the box for most Unity games, in some cases you may need to tweak the settings for it to work properly.
+
+To adjust the settings, open the config file:
+* BepInEx: `BepInEx\config\com.sinai.unityexplorer.cfg`
+* MelonLoader: `UserData\MelonPreferences.cfg`
+* Standalone: `UnityExplorer\config.ini`
+
+Try adjusting the following settings and see if it fixes your issues:
+* `Startup_Delay_Time` - increase to 5-10 seconds (or more as needed), can fix issues with UnityExplorer being destroyed or corrupted during startup.
+* `Disable_EventSystem_Override` - if input is not working properly, try setting this to `true`.
+
+If these fixes do not work, please create an issue in this repo and I'll do my best to look into it.
 
 # Features
 

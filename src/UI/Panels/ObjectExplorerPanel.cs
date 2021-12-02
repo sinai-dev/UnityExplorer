@@ -10,9 +10,11 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityExplorer.Core;
 using UnityExplorer.Core.Config;
-using UnityExplorer.UI.Models;
+using UniverseLib.UI.Models;
 using UnityExplorer.ObjectExplorer;
 using UnityExplorer.UI.Widgets;
+using UniverseLib.UI;
+using UniverseLib;
 
 namespace UnityExplorer.UI.Panels
 {
@@ -42,7 +44,7 @@ namespace UnityExplorer.UI.Panels
             content.SetActive(true);
 
             var button = tabButtons[tabIndex];
-            RuntimeProvider.Instance.SetColorBlock(button.Component, UIManager.enabledButtonColor, UIManager.enabledButtonColor * 1.2f);
+            RuntimeProvider.Instance.SetColorBlock(button.Component, UniversalUI.enabledButtonColor, UniversalUI.enabledButtonColor * 1.2f);
 
             SelectedTab = tabIndex;
             SaveToConfigManager();
@@ -51,7 +53,7 @@ namespace UnityExplorer.UI.Panels
         private void DisableTab(int tabIndex)
         {
             tabPages[tabIndex].SetActive(false);
-            RuntimeProvider.Instance.SetColorBlock(tabButtons[tabIndex].Component, UIManager.disabledButtonColor, UIManager.disabledButtonColor * 1.2f);
+            RuntimeProvider.Instance.SetColorBlock(tabButtons[tabIndex].Component, UniversalUI.disabledButtonColor, UniversalUI.disabledButtonColor * 1.2f);
         }
 
         public override void Update()

@@ -5,9 +5,11 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.Core.Input;
-using UnityExplorer.UI.Models;
+using UniverseLib.Input;
+using UniverseLib.UI.Models;
 using UnityExplorer.UI.Widgets.AutoComplete;
+using UniverseLib.UI;
+using UniverseLib;
 
 namespace UnityExplorer.UI.Panels
 {
@@ -472,7 +474,7 @@ namespace UnityExplorer.UI.Panels
         {
             try
             {
-                var text = UIFactory.CreateLabel(UIManager.CanvasRoot, "ResizeCursor", "↔", TextAnchor.MiddleCenter, Color.white, true, 35);
+                var text = UIFactory.CreateLabel(UIManager.UIRoot, "ResizeCursor", "↔", TextAnchor.MiddleCenter, Color.white, true, 35);
                 s_resizeCursorObj = text.gameObject;
 
                 RectTransform rect = s_resizeCursorObj.GetComponent<RectTransform>();

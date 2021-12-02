@@ -7,8 +7,10 @@ using UnityEngine.UI;
 using UnityExplorer.UI;
 using UnityExplorer.CacheObject;
 using UnityExplorer.Inspectors;
-using UnityExplorer.UI.Models;
+using UniverseLib.UI.Models;
 using UnityExplorer.UI.Panels;
+using UniverseLib;
+using UniverseLib.UI;
 
 namespace UnityExplorer
 {

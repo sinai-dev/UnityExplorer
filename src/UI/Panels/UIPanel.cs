@@ -6,9 +6,11 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Core.Config;
-using UnityExplorer.Core.Input;
-using UnityExplorer.UI.Models;
+using UniverseLib.Input;
 using UnityExplorer.UI.Widgets;
+using UniverseLib.UI.Models;
+using UniverseLib.UI;
+using UniverseLib;
 
 namespace UnityExplorer.UI.Panels
 {
@@ -35,6 +37,7 @@ namespace UnityExplorer.UI.Panels
                 int count = UIManager.PanelHolder.transform.childCount;
                 var mousePos = InputManager.MousePosition;
                 bool clickedInAny = false;
+
                 for (int i = count - 1; i >= 0; i--)
                 {
                     // make sure this is a real recognized panel
@@ -106,7 +109,7 @@ namespace UnityExplorer.UI.Panels
 
         public override void SetActive(bool active)
         {
-            if (this.Enabled.Equals(active))
+            if (this.Enabled == active)
                 return;
 
             base.SetActive(active);
@@ -116,7 +119,7 @@ namespace UnityExplorer.UI.Panels
 
             if (NavButtonWanted)
             {
-                var color = active ? UIManager.enabledButtonColor : UIManager.disabledButtonColor;
+                var color = active ? UniversalUI.enabledButtonColor : UniversalUI.disabledButtonColor;
                 RuntimeProvider.Instance.SetColorBlock(NavButton.Component, color, color * 1.2f);
             }
 
@@ -232,7 +235,7 @@ namespace UnityExplorer.UI.Panels
                 UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(navBtn, false, true, true, true, 0, 0, 0, 5, 5, TextAnchor.MiddleCenter);
                 UIFactory.SetLayoutElement(navBtn, minWidth: 80);
 
-                RuntimeProvider.Instance.SetColorBlock(NavButton.Component, UIManager.disabledButtonColor, UIManager.disabledButtonColor * 1.2f);
+                RuntimeProvider.Instance.SetColorBlock(NavButton.Component, UniversalUI.disabledButtonColor, UniversalUI.disabledButtonColor * 1.2f);
                 NavButton.OnClick += () => { UIManager.TogglePanel(PanelType); };
 
                 var txtObj = navBtn.transform.Find("Text").gameObject;
@@ -240,7 +243,7 @@ namespace UnityExplorer.UI.Panels
             }
 
             // create core canvas 
-            uiRoot = UIFactory.CreatePanel(Name, out GameObject panelContent);
+            uiRoot = UIFactory.CreatePanel(Name, UIManager.PanelHolder, out GameObject panelContent);
             Rect = this.uiRoot.GetComponent<RectTransform>();
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.uiRoot, false, false, true, true, 0, 2, 2, 2, 2, TextAnchor.UpperLeft);
 

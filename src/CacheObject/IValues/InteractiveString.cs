@@ -9,6 +9,8 @@ using UnityExplorer.Core.Config;
 using UnityExplorer.CacheObject;
 using UnityExplorer.UI.Widgets;
 using UnityExplorer.UI;
+using UniverseLib.UI;
+using UniverseLib;
 
 namespace UnityExplorer.CacheObject.IValues
 {
@@ -38,7 +40,7 @@ namespace UnityExplorer.CacheObject.IValues
             if (s == null)
                 return false;
 
-            return s.Length >= UIManager.MAX_INPUTFIELD_CHARS;
+            return s.Length >= UniversalUI.MAX_INPUTFIELD_CHARS;
         }
 
         public override void SetValue(object value)
