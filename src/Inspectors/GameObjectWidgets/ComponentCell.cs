@@ -34,7 +34,8 @@ namespace UnityExplorer.Inspectors
             var root = base.CreateContent(parent);
 
             // Add mask to button so text doesnt overlap on Close button
-            this.Button.Component.gameObject.AddComponent<Mask>().showMaskGraphic = true;
+            //this.Button.Component.gameObject.AddComponent<Mask>().showMaskGraphic = true;
+            this.Button.ButtonText.horizontalOverflow = HorizontalWrapMode.Wrap;
 
             // Behaviour toggle
 

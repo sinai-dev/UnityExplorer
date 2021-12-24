@@ -220,10 +220,7 @@ namespace UnityExplorer.CacheObject
                 // string wants it trimmed to max 200 chars
                 case ValueState.String:
                     if (!LastValueWasNull)
-                    {
-                        string s = Value as string;
-                        return $"\"{ToStringUtility.PruneString(s, 200, 5)}\"";
-                    }
+                        return $"\"{ToStringUtility.PruneString(Value as string, 200, 5)}\"";
                     break;
 
                 // try to prefix the count of the collection for lists and dicts
