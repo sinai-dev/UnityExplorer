@@ -210,12 +210,13 @@ namespace UnityExplorer.ObjectExplorer
             UIFactory.SetLayoutElement(filterRow, minHeight: 25, flexibleHeight: 0);
 
             //Filter input field
-            var inputField = UIFactory.CreateInputField(filterRow, "FilterInput", "Search...");
+            var inputField = UIFactory.CreateInputField(filterRow, "FilterInput", "Search and press enter...");
             inputField.Component.targetGraphic.color = new Color(0.2f, 0.2f, 0.2f);
             RuntimeProvider.Instance.SetColorBlock(inputField.Component, new Color(0.4f, 0.4f, 0.4f), new Color(0.2f, 0.2f, 0.2f),
                 new Color(0.08f, 0.08f, 0.08f));
             UIFactory.SetLayoutElement(inputField.UIRoot, minHeight: 25);
-            inputField.OnValueChanged += OnFilterInput;
+            //inputField.OnValueChanged += OnFilterInput;
+            inputField.Component.GetOnEndEdit().AddListener(OnFilterInput);
 
             // refresh row
 
