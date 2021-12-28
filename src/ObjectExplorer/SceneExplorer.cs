@@ -14,6 +14,7 @@ using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets;
 using UniverseLib.UI;
 using UniverseLib;
+using System.Collections;
 
 namespace UnityExplorer.ObjectExplorer
 {
@@ -254,6 +255,21 @@ namespace UnityExplorer.ObjectExplorer
             // Scene Loader
 
             ConstructSceneLoader();
+
+            RuntimeProvider.Instance.StartCoroutine(TempFixCoro());
+        }
+
+        // To "fix" a strange FPS drop issue with MelonLoader.
+        private IEnumerator TempFixCoro()
+        {
+            float start = Time.realtimeSinceStartup;
+
+            while (Time.realtimeSinceStartup - start < 2.5f)
+                yield return null;
+
+            // Select "HideAndDontSave" and then go back to first scene.
+            this.sceneDropdown.value = sceneDropdown.options.Count - 1;
+            this.sceneDropdown.value = 0;
         }
 
         private const string DEFAULT_LOAD_TEXT = "[Select a scene]";

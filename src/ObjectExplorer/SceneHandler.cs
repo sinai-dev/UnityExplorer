@@ -133,10 +133,11 @@ namespace UnityExplorer.ObjectExplorer
                 LoadedScenes.Add(scene);
             }
 
-            bool anyChange = confirmedCount != LoadedScenes.Count;
-
             LoadedScenes.Add(DontDestroyScene);
             LoadedScenes.Add(default);
+
+            bool anyChange = confirmedCount != LoadedScenes.Count;
+
             previousLoadedScenes = new HashSet<Scene>(LoadedScenes);
 
             // Default to first scene if none selected or previous selection no longer exists.
