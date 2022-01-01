@@ -23,6 +23,8 @@ namespace UnityExplorer
 
         public static float PanelWidth;
 
+        public static event Action OnInspectedTabsChanged;
+
         public static void Inspect(object obj, CacheObjectBase sourceCache = null)
         {
             if (obj.IsNullOrDestroyed())
@@ -111,6 +113,8 @@ namespace UnityExplorer
 
             inspector.OnBorrowedFromPool(target);
             SetInspectorActive(inspector);
+
+            OnInspectedTabsChanged?.Invoke();
         }
 
         internal static void ReleaseInspector<T>(T inspector) where T : InspectorBase
@@ -144,6 +148,8 @@ namespace UnityExplorer
                     UIManager.SetPanelActive(UIManager.Panels.Inspector, false);
                 }
             }
+
+            OnInspectedTabsChanged?.Invoke();
         }
 
         internal static void Update()

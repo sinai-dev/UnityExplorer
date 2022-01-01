@@ -162,22 +162,22 @@ namespace UnityExplorer.CacheObject
 
         #region Cache Member Util
 
-        public static bool CanParseArgs(ParameterInfo[] parameters)
-        {
-            foreach (var param in parameters)
-            {
-                var pType = param.ParameterType;
-
-                if (pType.IsByRef && pType.HasElementType)
-                    pType = pType.GetElementType();
-
-                if (pType != null && ParseUtility.CanParse(pType))
-                    continue;
-                else
-                    return false;
-            }
-            return true;
-        }
+        //public static bool CanParseArgs(ParameterInfo[] parameters)
+        //{
+        //    foreach (var param in parameters)
+        //    {
+        //        var pType = param.ParameterType;
+        //
+        //        if (pType.IsByRef && pType.HasElementType)
+        //            pType = pType.GetElementType();
+        //
+        //        if (pType != null && ParseUtility.CanParse(pType))
+        //            continue;
+        //        else
+        //            return false;
+        //    }
+        //    return true;
+        //}
 
         public static List<CacheMember> GetCacheMembers(object inspectorTarget, Type _type, ReflectionInspector _inspector)
         {
@@ -250,11 +250,11 @@ namespace UnityExplorer.CacheObject
                                 && (mi.Name.StartsWith("get_") || mi.Name.StartsWith("set_")))
                                 return;
 
-                            var args = mi.GetParameters();
-                            if (!CanParseArgs(args))
-                                return;
+                            //var args = mi.GetParameters();
+                            //if (!CanParseArgs(args))
+                            //    return;
 
-                            sig += GetArgumentString(args);
+                            sig += GetArgumentString(mi.GetParameters());
                             if (cachedSigs.Contains(sig))
                                 return;
 
@@ -267,9 +267,9 @@ namespace UnityExplorer.CacheObject
                         {
                             var pi = member as PropertyInfo;
 
-                            var args = pi.GetIndexParameters();
-                            if (!CanParseArgs(args))
-                                return;
+                            //var args = pi.GetIndexParameters();
+                            //if (!CanParseArgs(args))
+                            //    return;
 
                             if (!pi.CanRead && pi.CanWrite)
                             {
@@ -280,7 +280,7 @@ namespace UnityExplorer.CacheObject
                                 return;
                             }
 
-                            sig += GetArgumentString(args);
+                            sig += GetArgumentString(pi.GetIndexParameters());
                             if (cachedSigs.Contains(sig))
                                 return;
 

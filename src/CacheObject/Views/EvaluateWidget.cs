@@ -26,6 +26,8 @@ namespace UnityExplorer.CacheObject.Views
         private GameObject argHolder;
         private readonly List<GameObject> argRows = new List<GameObject>();
         private readonly List<Text> argLabels = new List<Text>();
+        private readonly List<InputFieldRef> argInputFields = new List<InputFieldRef>();
+        private readonly List<Dropdown> argDropdowns = new List<Dropdown>();
 
         private Type[] genericArguments;
         private string[] genericInput;
@@ -34,9 +36,6 @@ namespace UnityExplorer.CacheObject.Views
         private readonly List<GameObject> genericArgRows = new List<GameObject>();
         private readonly List<Text> genericArgLabels = new List<Text>();
         private readonly List<TypeCompleter> genericAutocompleters = new List<TypeCompleter>();
-
-        //private readonly List<InputFieldRef> inputFields = new List<InputFieldRef>();
-        private readonly List<InputFieldRef> argInputFields = new List<InputFieldRef>();
         private readonly List<InputFieldRef> genericInputFields = new List<InputFieldRef>();
 
         public void OnBorrowedFromPool(CacheMember owner)
@@ -52,6 +51,8 @@ namespace UnityExplorer.CacheObject.Views
             SetArgRows();
 
             this.UIRoot.SetActive(true);
+
+            InspectorManager.OnInspectedTabsChanged += InspectorManager_OnInspectedTabsChanged;
         }
 
         public void OnReturnToPool()
@@ -62,6 +63,17 @@ namespace UnityExplorer.CacheObject.Views
                 input.Text = "";
 
             this.Owner = null;
+
+            InspectorManager.OnInspectedTabsChanged -= InspectorManager_OnInspectedTabsChanged;
+        }
+
+        private void InspectorManager_OnInspectedTabsChanged()
+        {
+            for (int i = 0; i < argDropdowns.Count; i++)
+            {
+                var drop = argDropdowns[i];
+                PopulateNonPrimitiveArgumentDropdown(drop, i);
+            }
         }
 
         public Type[] TryParseGenericArguments()
@@ -83,33 +95,62 @@ namespace UnityExplorer.CacheObject.Views
 
             for (int i = 0; i < arguments.Length; i++)
             {
-                var arg = arguments[i];
-                var input = argumentInput[i];
+                var paramInfo = arguments[i];
 
-                var type = arg.ParameterType;
-                if (type.IsByRef)
-                    type = type.GetElementType();
+                var argType = paramInfo.ParameterType;
+                if (argType.IsByRef)
+                    argType = argType.GetElementType();
 
-                if (type == typeof(string))
+                if (ParseUtility.CanParse(argType))
                 {
-                    outArgs[i] = input;
-                    continue;
-                }
+                    var input = argumentInput[i];
 
-                if (string.IsNullOrEmpty(input))
-                {
-                    if (arg.IsOptional)
-                        outArgs[i] = arg.DefaultValue;
-                    else
+                    if (argType == typeof(string))
+                    {
+                        outArgs[i] = input;
+                        continue;
+                    }
+
+                    if (string.IsNullOrEmpty(input))
+                    {
+                        if (paramInfo.IsOptional)
+                            outArgs[i] = paramInfo.DefaultValue;
+                        else
+                            outArgs[i] = null;
+                        continue;
+                    }
+
+                    if (!ParseUtility.TryParse(input, argType, out outArgs[i], out Exception ex))
+                    {
                         outArgs[i] = null;
-                    continue;
+                        ExplorerCore.LogWarning($"Cannot parse argument '{paramInfo.Name}' ({paramInfo.ParameterType.Name})" +
+                            $"{(ex == null ? "" : $", {ex.GetType().Name}: {ex.Message}")}");
+                    }
                 }
-
-                if (!ParseUtility.TryParse(input, type, out outArgs[i], out Exception ex))
+                else
                 {
-                    outArgs[i] = null;
-                    ExplorerCore.LogWarning($"Cannot parse argument '{arg.Name}' ({arg.ParameterType.Name})" +
-                        $"{(ex == null ? "" : $", {ex.GetType().Name}: {ex.Message}")}");
+                    var dropdown = argDropdowns[i];
+                    if (dropdown.value == 0)
+                    {
+                        outArgs[i] = null;
+                    }
+                    else
+                    {
+                        // Probably should do this in a better way...
+                        // Parse the text of the dropdown option to get the inspector tab index.
+                        string tabIndexString = "";
+                        for (int j = 4; ; j++)
+                        {
+                            char c = dropdown.options[dropdown.value].text[j];
+                            if (c == ':')
+                                break;
+                            tabIndexString += c;
+                        }
+                        int tabIndex = int.Parse(tabIndexString);
+                        var tab = InspectorManager.Inspectors[tabIndex - 1];
+
+                        outArgs[i] = tab.Target;
+                    }
                 }
             }
 
@@ -195,22 +236,51 @@ namespace UnityExplorer.CacheObject.Views
                 }
 
                 var arg = arguments[i];
-
+                var argType = arg.ParameterType;
+                if (argType.IsByRef)
+                    argType = argType.GetElementType();
 
                 if (i >= argRows.Count)
                     AddArgRow(i, false);
 
                 argRows[i].SetActive(true);
-                argLabels[i].text = $"{SignatureHighlighter.Parse(arg.ParameterType, false)} <color={SignatureHighlighter.LOCAL_ARG}>{arg.Name}</color>";
-                if (arg.ParameterType == typeof(string))
-                    argInputFields[i].PlaceholderText.text = "";
+                argLabels[i].text = 
+                    $"{SignatureHighlighter.Parse(argType, false)} <color={SignatureHighlighter.LOCAL_ARG}>{arg.Name}</color>";
+
+                if (ParseUtility.CanParse(argType))
+                {
+                    argInputFields[i].Component.gameObject.SetActive(true);
+                    argDropdowns[i].gameObject.SetActive(false);
+
+                    if (arg.ParameterType == typeof(string))
+                        argInputFields[i].PlaceholderText.text = "";
+                    else
+                        argInputFields[i].PlaceholderText.text = $"eg. {ParseUtility.GetExampleInput(argType)}";
+                }
                 else
                 {
-                    var elemType = arg.ParameterType;
-                    if (elemType.IsByRef)
-                        elemType = elemType.GetElementType();
-                    argInputFields[i].PlaceholderText.text = $"eg. {ParseUtility.GetExampleInput(elemType)}";
+                    argInputFields[i].Component.gameObject.SetActive(false);
+                    argDropdowns[i].gameObject.SetActive(true);
+
+                    PopulateNonPrimitiveArgumentDropdown(argDropdowns[i], i);
                 }
+            }
+        }
+
+        private void PopulateNonPrimitiveArgumentDropdown(Dropdown dropdown, int argIndex)
+        {
+            dropdown.options.Clear();
+            dropdown.options.Add(new Dropdown.OptionData("null"));
+
+            var argType = arguments[argIndex].ParameterType;
+
+            int tabIndex = 0;
+            foreach (var tab in InspectorManager.Inspectors)
+            {
+                tabIndex++;
+
+                if (argType.IsAssignableFrom(tab.Target.GetActualType()))
+                    dropdown.options.Add(new Dropdown.OptionData($"Tab {tabIndex}: {tab.Tab.TabText.text}"));
             }
         }
 
@@ -242,12 +312,27 @@ namespace UnityExplorer.CacheObject.Views
             inputField.OnValueChanged += (string val) => { inputArray[index] = val; };
 
             if (!generic)
+            {
+                var dropdownObj = UIFactory.CreateDropdown(horiGroup, out Dropdown dropdown, "Select argument...", 14, (int val) =>
+                {
+                    ArgDropdownChanged(index, val);
+                });
+                UIFactory.SetLayoutElement(dropdownObj, minHeight: 25, flexibleHeight: 50, minWidth: 100, flexibleWidth: 1000);
+                dropdownObj.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
                 argInputFields.Add(inputField);
+                argDropdowns.Add(dropdown);
+            }
             else
                 genericInputFields.Add(inputField);
 
             if (generic)
                 genericAutocompleters.Add(new TypeCompleter(null, inputField));
+        }
+
+        private void ArgDropdownChanged(int argIndex, int value)
+        {
+            // not sure if necessary
         }
 
         public GameObject CreateContent(GameObject parent)
