@@ -80,9 +80,18 @@ namespace UnityExplorer.Tests
             ExplorerCore.Log($"Test3 {typeof(T).FullName}");
         }
 
-        public static void TestArgumentParse(string s, int i, Color color, CameraClearFlags flags, Vector3 vector, Quaternion quaternion, object obj)
+        public static void TestArgumentParse(string _string, 
+                                             int integer, 
+                                             Color color, 
+                                             CameraClearFlags flags, 
+                                             Vector3 vector, 
+                                             Quaternion quaternion, 
+                                             object obj,
+                                             Type type)
         {
-            ExplorerCore.Log($"{s}, {i}, {color.ToString()}, {flags}, {vector.ToString()}, {quaternion.ToString()}, {obj?.ToString() ?? "null"}");
+            ExplorerCore.Log($"_string: {_string}, integer: {integer}, color: {color.ToString()}, flags: {flags}, " +
+                $"vector: {vector.ToString()}, quaternion: {quaternion.ToString()}, obj: {obj?.ToString() ?? "null"}," +
+                $"type: {type?.FullName ?? "null"}");
         }
 
         private static void Init_Mono()

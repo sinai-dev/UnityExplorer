@@ -97,6 +97,9 @@ namespace UnityExplorer.UI.Widgets
             {
                 var input = this.inputField.Text;
 
+                if (typeof(Type).IsAssignableFrom(paramType))
+                    return ReflectionUtility.GetTypeByName(input);
+
                 if (paramType == typeof(string))
                     return input;
 
