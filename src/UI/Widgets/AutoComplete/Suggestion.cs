@@ -12,8 +12,6 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         public readonly string DisplayText;
         public readonly string UnderlyingValue;
 
-        public string Combined => DisplayText + UnderlyingValue;
-
         public Suggestion(string displayText, string underlyingValue)
         {
             DisplayText = displayText;

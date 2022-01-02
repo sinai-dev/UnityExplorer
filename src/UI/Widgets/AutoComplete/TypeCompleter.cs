@@ -9,12 +9,24 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
     {
         internal static readonly Dictionary<string, string> sharedTypeToLabel = new Dictionary<string, string>(4096);
 
+        public bool Enabled
+        {
+            get => _enabled;
+            set
+            {
+                _enabled = value;
+                if (!_enabled)
+                    AutoCompleteModal.Instance.ReleaseOwnership(this);
+            }
+        }
+        private bool _enabled = true;
+
         public event Action<Suggestion> SuggestionClicked;
 
         public Type BaseType { get; set; }
         public Type[] GenericConstraints { get; set; }
-        private bool allowAbstract;
-        private bool allowEnum;
+        private readonly bool allowAbstract;
+        private readonly bool allowEnum;
 
         public InputFieldRef InputField { get; }
         public bool AnchorToCaretPosition => false;
@@ -61,6 +73,9 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         private void OnInputFieldChanged(string value)
         {
+            if (!Enabled)
+                return;
+
             if (string.IsNullOrEmpty(value) || value == chosenSuggestion)
             {
                 chosenSuggestion = null;

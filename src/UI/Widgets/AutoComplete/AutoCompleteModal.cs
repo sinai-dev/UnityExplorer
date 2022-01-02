@@ -164,9 +164,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
                 if (!CurrentHandler.InputField.UIRoot.activeInHierarchy)
                     ReleaseOwnership(CurrentHandler);
                 else
-                {
                     UpdatePosition();
-                }
             }
         }
 
@@ -228,9 +226,9 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         private int lastCaretPosition;
         private Vector3 lastInputPosition;
 
-        private void UpdatePosition()
+        internal void UpdatePosition()
         {
-            if (CurrentHandler == null || !CurrentHandler.InputField.Component.isFocused)
+            if (CurrentHandler == null)
                 return;
 
             var input = CurrentHandler.InputField;
@@ -255,9 +253,10 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             }
             else
             {
-                var textGen = input.Component.textComponent.cachedTextGenerator;
-                var pos = input.UIRoot.transform.TransformPoint(textGen.characters[0].cursorPos);
-                uiRoot.transform.position = new Vector3(pos.x + 10, pos.y - 20, 0);
+                uiRoot.transform.position = input.Rect.position + new Vector3(-(input.Rect.rect.width / 2) + 10, -20, 0);
+                //var textGen = input.Component.textComponent.cachedTextGenerator;
+                //var pos = input.UIRoot.transform.TransformPoint(textGen.characters[0].cursorPos);
+                //uiRoot.transform.position = new Vector3(pos.x + 10, pos.y - 20, 0);
             }
 
             this.Dragger.OnEndResize();

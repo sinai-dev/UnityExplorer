@@ -7,6 +7,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.CacheObject;
 using UnityExplorer.UI;
+using UnityExplorer.UI.Widgets.AutoComplete;
+using UniverseLib;
 using UniverseLib.UI;
 
 namespace UnityExplorer.CacheObject.IValues
@@ -20,10 +22,10 @@ namespace UnityExplorer.CacheObject.IValues
 
         public OrderedDictionary CurrentValues;
 
-        public CachedEnumValue ValueAtIdx(int idx) => (CachedEnumValue)CurrentValues[idx];
-        public CachedEnumValue ValueAtKey(object key) => (CachedEnumValue)CurrentValues[key];
+        private InputFieldRef inputField;
+        private ButtonRef enumHelperButton;
+        private EnumCompleter enumCompleter;
 
-        private Dropdown enumDropdown;
         private GameObject toggleHolder;
         private readonly List<Toggle> flagToggles = new List<Toggle>();
         private readonly List<Text> flagTexts = new List<Text>();
@@ -35,38 +37,68 @@ namespace UnityExplorer.CacheObject.IValues
 
             if (lastType != EnumType)
             {
-                CurrentValues = GetEnumValues(EnumType, out IsFlags);
+                CurrentValues = GetEnumValues(EnumType);
 
+                IsFlags = EnumType.GetCustomAttributes(typeof(FlagsAttribute), true) is object[] fa && fa.Any();
                 if (IsFlags)
                     SetupTogglesForEnumType();
                 else
-                    SetupDropdownForEnumType();
+                {
+                    inputField.Component.gameObject.SetActive(true);
+                    enumHelperButton.Component.gameObject.SetActive(true);
+                    toggleHolder.SetActive(false);
+                }
+
+                enumCompleter.EnumType = EnumType;
+                enumCompleter.CacheEnumValues();
 
                 lastType = EnumType;
             }
 
-            // setup ui for changes
-            if (IsFlags)
-                SetTogglesForValue(value);
+            if (!IsFlags)
+                inputField.Text = value.ToString();
             else
-                SetDropdownForValue(value);
+                SetTogglesForValue(value);
+
+            this.enumCompleter.chosenSuggestion = value.ToString();
+            AutoCompleteModal.Instance.ReleaseOwnership(this.enumCompleter);
+        }
+
+        private void SetTogglesForValue(object value)
+        {
+            try
+            {
+                var split = value.ToString().Split(',');
+                var set = new HashSet<string>();
+                foreach (var s in split)
+                    set.Add(s.Trim());
+
+                for (int i = 0; i < CurrentValues.Count; i++)
+                    flagToggles[i].isOn = set.Contains(ValueAtIdx(i).Name);
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.LogWarning("Exception setting flag toggles: " + ex);
+            }
         }
 
         // Setting value to owner
 
         private void OnApplyClicked()
         {
-            if (IsFlags)
-                SetValueFromFlags();
-            else
-                SetValueFromDropdown();
-        }
-
-        private void SetValueFromDropdown()
-        {
             try
             {
-                CurrentOwner.SetUserValue(ValueAtIdx(enumDropdown.value).ActualValue);
+                if (!IsFlags)
+                {
+                    if (ParseUtility.TryParse(this.inputField.Text, EnumType, out object value, out Exception ex))
+                        CurrentOwner.SetUserValue(value);
+                    else
+                        throw ex;
+                }
+                else
+                {
+                    SetValueFromFlags();
+                }
             }
             catch (Exception ex)
             {
@@ -93,59 +125,53 @@ namespace UnityExplorer.CacheObject.IValues
             }
         }
 
-        // setting UI state for value 
+        // UI Construction
 
-        private void SetDropdownForValue(object value)
+        private void EnumHelper_OnClick()
         {
-            if (CurrentValues.Contains(value))
-            {
-                var cached = ValueAtKey(value);
-                enumDropdown.value = cached.EnumIndex;
-                enumDropdown.RefreshShownValue();
-            }
-            else
-                ExplorerCore.LogWarning("CurrentValues does not contain key '" + value?.ToString() ?? "<null>" + "'");
+            enumCompleter.HelperButtonClicked();
         }
 
-        private void SetTogglesForValue(object value)
+        public override GameObject CreateContent(GameObject parent)
         {
-            try
-            {
-                var split = value.ToString().Split(',');
-                var set = new HashSet<string>();
-                foreach (var s in split)
-                    set.Add(s.Trim());
+            UIRoot = UIFactory.CreateVerticalGroup(parent, "InteractiveEnum", false, false, true, true, 3, new Vector4(4, 4, 4, 4),
+                new Color(0.06f, 0.06f, 0.06f));
+            UIFactory.SetLayoutElement(UIRoot, minHeight: 25, flexibleHeight: 9999, flexibleWidth: 9999);
 
-                for (int i = 0; i < CurrentValues.Count; i++)
-                    flagToggles[i].isOn = set.Contains(ValueAtIdx(i).Name);
-            }
-            catch (Exception ex)
-            {
-                ExplorerCore.LogWarning("Exception setting flag toggles: " + ex);
-            }
+            var hori = UIFactory.CreateUIObject("Hori", UIRoot);
+            UIFactory.SetLayoutElement(hori, minHeight: 25, flexibleWidth: 9999);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(hori, false, false, true, true, 2);
+
+            var applyButton = UIFactory.CreateButton(hori, "ApplyButton", "Apply", new Color(0.2f, 0.27f, 0.2f));
+            UIFactory.SetLayoutElement(applyButton.Component.gameObject, minHeight: 25, minWidth: 100);
+            applyButton.OnClick += OnApplyClicked;
+
+            inputField = UIFactory.CreateInputField(hori, "InputField", "Enter name or underlying value...");
+            UIFactory.SetLayoutElement(inputField.UIRoot, minHeight: 25, flexibleHeight: 50, minWidth: 100, flexibleWidth: 1000);
+            inputField.Component.lineType = InputField.LineType.MultiLineNewline;
+            inputField.UIRoot.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            enumHelperButton = UIFactory.CreateButton(hori, "EnumHelper", "▼");
+            UIFactory.SetLayoutElement(enumHelperButton.Component.gameObject, minWidth: 25, minHeight: 25, flexibleWidth: 0, flexibleHeight: 0);
+            enumHelperButton.OnClick += EnumHelper_OnClick;
+
+            enumCompleter = new EnumCompleter(this.EnumType, this.inputField);
+
+            toggleHolder = UIFactory.CreateUIObject("ToggleHolder", UIRoot);
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(toggleHolder, false, false, true, true, 4);
+            UIFactory.SetLayoutElement(toggleHolder, minHeight: 25, flexibleWidth: 9999, flexibleHeight: 9999);
+
+            return UIRoot;
         }
 
-        // Setting up the UI for the enum type when it changes or is first set
-
-        private void SetupDropdownForEnumType()
-        {
-            toggleHolder.SetActive(false);
-            enumDropdown.gameObject.SetActive(true);
-
-            // create dropdown entries
-            enumDropdown.options.Clear();
-
-            foreach (CachedEnumValue entry in CurrentValues.Values)
-                enumDropdown.options.Add(new Dropdown.OptionData(entry.Name));
-
-            enumDropdown.value = 0;
-            enumDropdown.RefreshShownValue();
-        }
+        public CachedEnumValue ValueAtIdx(int idx) => (CachedEnumValue)CurrentValues[idx];
+        public CachedEnumValue ValueAtKey(object key) => (CachedEnumValue)CurrentValues[key];
 
         private void SetupTogglesForEnumType()
         {
             toggleHolder.SetActive(true);
-            enumDropdown.gameObject.SetActive(false);
+            inputField.Component.gameObject.SetActive(false);
+            enumHelperButton.Component.gameObject.SetActive(false);
 
             // create / set / hide toggles
             for (int i = 0; i < CurrentValues.Count || i < flagToggles.Count; i++)
@@ -180,54 +206,13 @@ namespace UnityExplorer.CacheObject.IValues
             flagTexts.Add(toggleText);
         }
 
-        // UI Construction
-
-        public override GameObject CreateContent(GameObject parent)
-        {
-            UIRoot = UIFactory.CreateVerticalGroup(parent, "InteractiveEnum", false, false, true, true, 3, new Vector4(4, 4, 4, 4),
-                new Color(0.06f, 0.06f, 0.06f));
-            UIFactory.SetLayoutElement(UIRoot, minHeight: 25, flexibleHeight: 9999, flexibleWidth: 9999);
-
-            var hori = UIFactory.CreateUIObject("Hori", UIRoot);
-            UIFactory.SetLayoutElement(hori, minHeight: 25, flexibleWidth: 9999);
-            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(hori, false, false, true, true, 2);
-
-            var applyButton = UIFactory.CreateButton(hori, "ApplyButton", "Apply", new Color(0.2f, 0.27f, 0.2f));
-            UIFactory.SetLayoutElement(applyButton.Component.gameObject, minHeight: 25, minWidth: 100);
-            applyButton.OnClick += OnApplyClicked;
-
-            var dropdownObj = UIFactory.CreateDropdown(hori, out enumDropdown, "not set", 14, null);
-            UIFactory.SetLayoutElement(dropdownObj, minHeight: 25, flexibleWidth: 600);
-
-            toggleHolder = UIFactory.CreateUIObject("ToggleHolder", UIRoot);
-            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(toggleHolder, false, false, true, true, 4);
-            UIFactory.SetLayoutElement(toggleHolder, minHeight: 25, flexibleWidth: 9999, flexibleHeight: 9999);
-
-            return UIRoot;
-        }
-
-
         #region Enum cache 
-
-        public struct CachedEnumValue
-        {
-            public CachedEnumValue(object value, int index, string name)
-            {
-                EnumIndex = index;
-                Name = name;
-                ActualValue = value;
-            }
-
-            public readonly object ActualValue;
-            public int EnumIndex;
-            public readonly string Name;
-        }
 
         internal static readonly Dictionary<string, OrderedDictionary> enumCache = new Dictionary<string, OrderedDictionary>();
 
-        internal static OrderedDictionary GetEnumValues(Type enumType, out bool isFlags)
+        internal static OrderedDictionary GetEnumValues(Type enumType)
         {
-            isFlags = enumType.GetCustomAttributes(typeof(FlagsAttribute), true) is object[] fa && fa.Any();
+            //isFlags = enumType.GetCustomAttributes(typeof(FlagsAttribute), true) is object[] fa && fa.Any();
 
             if (!enumCache.ContainsKey(enumType.AssemblyQualifiedName))
             {
@@ -253,5 +238,19 @@ namespace UnityExplorer.CacheObject.IValues
         }
 
         #endregion
+    }
+
+    public struct CachedEnumValue
+    {
+        public CachedEnumValue(object value, int index, string name)
+        {
+            EnumIndex = index;
+            Name = name;
+            ActualValue = value;
+        }
+
+        public readonly object ActualValue;
+        public int EnumIndex;
+        public readonly string Name;
     }
 }

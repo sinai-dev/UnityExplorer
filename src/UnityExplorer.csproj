@@ -255,7 +255,8 @@
     <Compile Include="CacheObject\Views\CacheListEntryCell.cs" />
     <Compile Include="CacheObject\Views\CacheMemberCell.cs" />
     <Compile Include="CacheObject\Views\CacheObjectCell.cs" />
-    <Compile Include="CacheObject\Views\EvaluateWidget.cs" />
+    <Compile Include="UI\Widgets\AutoComplete\EnumCompleter.cs" />
+    <Compile Include="UI\Widgets\EvaluateWidget\EvaluateWidget.cs" />
     <Compile Include="Inspectors\GameObjectInspector.cs" />
     <Compile Include="CacheObject\ICacheObjectController.cs" />
     <Compile Include="Inspectors\InspectorManager.cs" />
@@ -307,6 +308,9 @@
     <Compile Include="UI\Widgets\AutoComplete\TypeCompleter.cs" />
     <Compile Include="ObjectExplorer\ObjectSearch.cs" />
     <Compile Include="ObjectExplorer\SceneExplorer.cs" />
+    <Compile Include="UI\Widgets\EvaluateWidget\BaseArgumentHandler.cs" />
+    <Compile Include="UI\Widgets\EvaluateWidget\GenericArgumentHandler.cs" />
+    <Compile Include="UI\Widgets\EvaluateWidget\ParameterHandler.cs" />
     <Compile Include="UI\Widgets\TransformTree\CachedTransform.cs" />
     <Compile Include="UI\Widgets\TransformTree\TransformCell.cs" />
     <Compile Include="UI\Widgets\TransformTree\TransformTree.cs" />

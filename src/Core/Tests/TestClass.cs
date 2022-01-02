@@ -36,6 +36,8 @@ namespace UnityExplorer.Tests
         public const int ConstantInt5 = 5;
 
         // Testing other InteractiveValues
+        public static BindingFlags EnumTest;
+        public static CameraClearFlags EnumTest2;
         public static Color Color = Color.magenta;
         public static Color32 Color32 = Color.red;
         public static string ALongString = new string('#', 10000);
@@ -78,9 +80,9 @@ namespace UnityExplorer.Tests
             ExplorerCore.Log($"Test3 {typeof(T).FullName}");
         }
 
-        public static void TestArgumentParse(string s, int i, Color color, CameraClearFlags flags, Vector3 vector, Quaternion quaternion)
+        public static void TestArgumentParse(string s, int i, Color color, CameraClearFlags flags, Vector3 vector, Quaternion quaternion, object obj)
         {
-            ExplorerCore.Log($"{s}, {i}, {color.ToString()}, {flags}, {vector.ToString()}, {quaternion.ToString()}");
+            ExplorerCore.Log($"{s}, {i}, {color.ToString()}, {flags}, {vector.ToString()}, {quaternion.ToString()}, {obj?.ToString() ?? "null"}");
         }
 
         private static void Init_Mono()
