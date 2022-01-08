@@ -16,7 +16,7 @@ namespace UnityExplorer
     public static class ExplorerCore
     {
         public const string NAME = "UnityExplorer";
-        public const string VERSION = "4.4.3";
+        public const string VERSION = "4.4.4";
         public const string AUTHOR = "Sinai";
         public const string GUID = "com.sinai.unityexplorer";
 
@@ -45,7 +45,7 @@ namespace UnityExplorer
             RuntimeHelper.Init();
             ExplorerBehaviour.Setup();
 
-            UniverseLib.Universe.Init(ConfigManager.Startup_Delay_Time.Value, LateInit, Log, new UniverseLib.Config.UUConfig
+            UniverseLib.Universe.Init(ConfigManager.Startup_Delay_Time.Value, LateInit, Log, new()
             {
                 Disable_EventSystem_Override = ConfigManager.Disable_EventSystem_Override.Value,
                 Force_Unlock_Mouse = ConfigManager.Force_Unlock_Mouse.Value,
