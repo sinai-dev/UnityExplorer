@@ -14,7 +14,7 @@ using UnhollowerBaseLib;
 
 namespace UnityExplorer.Tests
 {
-    public static class TestClass
+    public class TestClass
     {
         static TestClass()
         {
@@ -54,6 +54,12 @@ namespace UnityExplorer.Tests
             }
         }
 
+        public int this[int index]
+        {
+            get => UnityEngine.Random.Range(0, int.MaxValue);
+            set => ExplorerCore.Log(index);
+        }
+
         // Test methods
 
         private static object GetRandomObject()
@@ -87,11 +93,12 @@ namespace UnityExplorer.Tests
                                              Vector3 vector, 
                                              Quaternion quaternion, 
                                              object obj,
-                                             Type type)
+                                             Type type,
+                                             GameObject go)
         {
             ExplorerCore.Log($"_string: {_string}, integer: {integer}, color: {color.ToString()}, flags: {flags}, " +
                 $"vector: {vector.ToString()}, quaternion: {quaternion.ToString()}, obj: {obj?.ToString() ?? "null"}," +
-                $"type: {type?.FullName ?? "null"}");
+                $"type: {type?.FullName ?? "null"}, go: {go?.ToString() ?? "null"}");
         }
 
         private static void Init_Mono()
