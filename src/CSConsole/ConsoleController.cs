@@ -27,6 +27,7 @@ namespace UnityExplorer.CSConsole
 
         private static HashSet<string> usingDirectives;
         private static StringBuilder evaluatorOutput;
+        private static StringWriter evaluatorStringWriter;
 
         public static CSConsolePanel Panel => UIManager.GetPanel<CSConsolePanel>(UIManager.Panels.CSConsole);
         public static InputFieldRef Input => Panel.Input;
@@ -46,6 +47,7 @@ namespace UnityExplorer.CSConsole
             "System",
             "System.Linq",
             "System.Text",
+            "System.Collections",
             "System.Collections.Generic",
             "UnityEngine",
 #if CPP
@@ -130,6 +132,12 @@ namespace UnityExplorer.CSConsole
 
         #region Evaluating
 
+        private static void GenerateTextWriter()
+        {
+            evaluatorOutput = new StringBuilder();
+            evaluatorStringWriter = new StringWriter(evaluatorOutput);
+        }
+
         public static void ResetConsole() => ResetConsole(true);
 
         public static void ResetConsole(bool logSuccess = true)
@@ -140,8 +148,8 @@ namespace UnityExplorer.CSConsole
             if (Evaluator != null)
                 Evaluator.Dispose();
 
-            evaluatorOutput = new StringBuilder();
-            Evaluator = new ScriptEvaluator(new StringWriter(evaluatorOutput))
+            GenerateTextWriter();
+            Evaluator = new ScriptEvaluator(evaluatorStringWriter)
             {
                 InteractiveBaseClass = typeof(ScriptInteraction)
             };
@@ -175,6 +183,12 @@ namespace UnityExplorer.CSConsole
         {
             if (SRENotSupported)
                 return;
+
+            if (evaluatorStringWriter == null || evaluatorOutput == null)
+            {
+                GenerateTextWriter();
+                Evaluator._textWriter = evaluatorStringWriter;
+            }
 
             try
             {
