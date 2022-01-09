@@ -35,6 +35,15 @@ namespace UnityExplorer.Inspectors.MouseInspectors
 
         public override void UpdateMouseInspect(Vector2 mousePos)
         {
+            if (!MainCamera)
+                MainCamera = Camera.main;
+            if (!MainCamera)
+            {
+                ExplorerCore.LogWarning("No Main Camera was found, unable to inspect world!");
+                InspectUnderMouse.Instance.StopInspect();
+                return;
+            }
+
             var ray = MainCamera.ScreenPointToRay(mousePos);
             Physics.Raycast(ray, out RaycastHit hit, 1000f);
 
