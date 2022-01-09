@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}</ProjectGuid>
     <OutputType>Library</OutputType>
-	<LangVersion>9.0</LangVersion>
+    <LangVersion>9.0</LangVersion>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -163,9 +163,6 @@
   </ItemGroup>
   <!-- Mono refs -->
   <ItemGroup Condition="'$(IsCpp)'=='false'">
-    <Reference Include="UniverseLib.Mono">
-      <HintPath>packages\UniverseLib.1.0.1\lib\net35\UniverseLib.Mono.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\lib\mono\UnityEngine.dll</HintPath>
       <Private>False</Private>
@@ -174,11 +171,14 @@
       <HintPath>..\lib\mono\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UniverseLib.Mono">
+      <HintPath>packages\UniverseLib.1.0.2\lib\net35\UniverseLib.Mono.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <!-- Il2Cpp refs -->
   <ItemGroup Condition="'$(IsCpp)'=='true'">
     <Reference Include="UniverseLib.IL2CPP">
-      <HintPath>packages\UniverseLib.1.0.1\lib\net472\UniverseLib.IL2CPP.dll</HintPath>
+      <HintPath>packages\UniverseLib.1.0.2\lib\net472\UniverseLib.IL2CPP.dll</HintPath>
     </Reference>
     <Reference Include="UnhollowerBaseLib">
       <HintPath>..\lib\Il2CppAssemblyUnhollower\UnhollowerBaseLib\bin\Release\net4.7.2\UnhollowerBaseLib.dll</HintPath>
