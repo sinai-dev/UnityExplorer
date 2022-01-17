@@ -77,7 +77,7 @@ namespace UnityExplorer.Inspectors
                 case 1: Instance.StartInspect(MouseInspectMode.World); break;
                 case 2: Instance.StartInspect(MouseInspectMode.UI); break;
             }
-            UIManager.MouseInspectDropdown.value = 0;
+            InspectorPanel.Instance.MouseInspectDropdown.value = 0;
         }
 
         public void StartInspect(MouseInspectMode mode)
@@ -111,7 +111,7 @@ namespace UnityExplorer.Inspectors
             UIManager.NavBarRect.gameObject.SetActive(true);
             UIManager.PanelHolder.SetActive(true);
 
-            var drop = UIManager.MouseInspectDropdown;
+            var drop = InspectorPanel.Instance.MouseInspectDropdown;
             if (drop.transform.Find("Dropdown List") is Transform list)
                 drop.DestroyDropdownList(list.gameObject);
 

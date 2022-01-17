@@ -55,7 +55,6 @@ namespace UnityExplorer.UI
 
         public static RectTransform NavBarRect;
         public static GameObject NavbarTabButtonHolder;
-        public static Dropdown MouseInspectDropdown;
 
         private static ButtonRef closeBtn;
         private static ButtonRef pauseBtn;
@@ -84,9 +83,11 @@ namespace UnityExplorer.UI
             lastScreenWidth = Screen.width;
             lastScreenHeight = Screen.height;
 
-            // Create UI
+            // Create UI.
             CreatePanelHolder();
             CreateTopNavBar();
+            // This could be automated with Assembly.GetTypes(),
+            // but the order is important and I'd have to write something to handle the order.
             UIPanels.Add(Panels.AutoCompleter, new AutoCompleteModal());
             UIPanels.Add(Panels.ObjectExplorer, new ObjectExplorerPanel());
             UIPanels.Add(Panels.Inspector, new InspectorPanel());
@@ -337,15 +338,6 @@ namespace UnityExplorer.UI
             pauseBtn = UIFactory.CreateButton(navbarPanel, "PauseButton", "||", new Color(0.2f, 0.2f, 0.2f));
             UIFactory.SetLayoutElement(pauseBtn.Component.gameObject, minHeight: 25, minWidth: 25);
             pauseBtn.OnClick += OnPauseButtonClicked;
-
-            // Inspect under mouse dropdown
-
-            var mouseDropdown = UIFactory.CreateDropdown(navbarPanel, out MouseInspectDropdown, "Mouse Inspect", 14,
-                InspectUnderMouse.OnDropdownSelect);
-            UIFactory.SetLayoutElement(mouseDropdown, minHeight: 25, minWidth: 140);
-            MouseInspectDropdown.options.Add(new Dropdown.OptionData("Mouse Inspect"));
-            MouseInspectDropdown.options.Add(new Dropdown.OptionData("World"));
-            MouseInspectDropdown.options.Add(new Dropdown.OptionData("UI"));
 
             // Hide menu button
 

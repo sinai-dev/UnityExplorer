@@ -24,6 +24,7 @@ namespace UnityExplorer.UI.Panels
         public override int MinHeight => 350;
 
         public GameObject NavbarHolder;
+        public Dropdown MouseInspectDropdown;
         public GameObject ContentHolder;
         public RectTransform ContentRect;
 
@@ -60,9 +61,21 @@ namespace UnityExplorer.UI.Panels
 
         public override void ConstructPanelContent()
         {
+            var closeHolder = this.titleBar.transform.Find("CloseHolder").gameObject;
+
+            // Inspect under mouse dropdown on title bar
+
+            var mouseDropdown = UIFactory.CreateDropdown(closeHolder, out MouseInspectDropdown, "Mouse Inspect", 14,
+                InspectUnderMouse.OnDropdownSelect);
+            UIFactory.SetLayoutElement(mouseDropdown, minHeight: 25, minWidth: 140);
+            MouseInspectDropdown.options.Add(new Dropdown.OptionData("Mouse Inspect"));
+            MouseInspectDropdown.options.Add(new Dropdown.OptionData("World"));
+            MouseInspectDropdown.options.Add(new Dropdown.OptionData("UI"));
+            mouseDropdown.transform.SetSiblingIndex(0);
+
             // add close all button to titlebar
 
-            var closeAllBtn = UIFactory.CreateButton(this.titleBar.transform.Find("CloseHolder").gameObject, "CloseAllBtn", "Close All",
+            var closeAllBtn = UIFactory.CreateButton(closeHolder.gameObject, "CloseAllBtn", "Close All",
                 new Color(0.3f, 0.2f, 0.2f));
             UIFactory.SetLayoutElement(closeAllBtn.Component.gameObject, minHeight: 25, minWidth: 80);
             closeAllBtn.Component.transform.SetSiblingIndex(closeAllBtn.Component.transform.GetSiblingIndex() - 1);
