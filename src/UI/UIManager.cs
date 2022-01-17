@@ -102,6 +102,7 @@ namespace UnityExplorer.UI
 
             // Call some initialize methods
             ConsoleController.Init();
+            Clipboard.Init();
 
             // Add this listener to prevent ScrollPool doing anything while we are resizing panels
             ScrollPool<ICell>.writingLockedListeners.Add(() => !PanelDragger.Resizing);

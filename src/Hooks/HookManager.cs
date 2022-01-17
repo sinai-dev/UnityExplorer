@@ -84,7 +84,7 @@ namespace UnityExplorer.Hooks
             cell.CurrentDisplayedIndex = index;
             var hook = (HookInstance)this.currentHooks[index];
 
-            cell.MethodNameLabel.text = HighlightMethod(hook.TargetMethod);
+            cell.MethodNameLabel.text = SignatureHighlighter.HighlightMethod(hook.TargetMethod);
 
             cell.ToggleActiveButton.ButtonText.text = hook.Enabled ? "Enabled" : "Disabled";
             RuntimeProvider.Instance.SetColorBlockAuto(cell.ToggleActiveButton.Component,
@@ -183,7 +183,7 @@ namespace UnityExplorer.Hooks
             cell.CurrentDisplayedIndex = index;
             var method = this.filteredEligableMethods[index];
 
-            cell.MethodNameLabel.text = HighlightMethod(method);
+            cell.MethodNameLabel.text = SignatureHighlighter.HighlightMethod(method);
 
             var sig = method.FullDescription();
             if (hookedSignatures.Contains(sig))
@@ -224,51 +224,6 @@ namespace UnityExplorer.Hooks
                 currentEditedHook = null;
                 Panel.SetPage(HookManagerPanel.Pages.CurrentHooks);
             }
-        }
-
-        // ~~~~~~~~~~ Method syntax highlighting
-
-        private static readonly Dictionary<string, string> highlightedMethods = new Dictionary<string, string>();
-
-        private string HighlightMethod(MethodInfo method)
-        {
-            var sig = method.FullDescription();
-            if (highlightedMethods.ContainsKey(sig))
-                return highlightedMethods[sig];
-
-            var sb = new StringBuilder();
-
-            // declaring type
-            sb.Append(SignatureHighlighter.Parse(method.DeclaringType, false));
-            sb.Append('.');
-
-            // method name
-            var color = !method.IsStatic
-                    ? SignatureHighlighter.METHOD_INSTANCE
-                    : SignatureHighlighter.METHOD_STATIC;
-            sb.Append($"<color={color}>{method.Name}</color>");
-
-            // arguments
-            sb.Append('(');
-            var args = method.GetParameters();
-            if (args != null && args.Any())
-            {
-                int i = 0;
-                foreach (var param in args)
-                {
-                    sb.Append(SignatureHighlighter.Parse(param.ParameterType, false));
-                    sb.Append(' ');
-                    sb.Append($"<color={SignatureHighlighter.LOCAL_ARG}>{param.Name}</color>");
-                    i++;
-                    if (i < args.Length)
-                        sb.Append(", ");
-                }
-            }
-            sb.Append(')');
-
-            var ret = sb.ToString();
-            highlightedMethods.Add(sig, ret);
-            return ret;
         }
     }
 }

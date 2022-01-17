@@ -32,7 +32,9 @@ namespace UnityExplorer.CacheObject
         public virtual void SetInspectorOwner(ReflectionInspector inspector, MemberInfo member)
         {
             this.Owner = inspector;
-            this.NameLabelText = SignatureHighlighter.Parse(member.DeclaringType, false, member);
+            this.NameLabelText = this is CacheMethod 
+                ? SignatureHighlighter.HighlightMethod(member as MethodInfo) 
+                : SignatureHighlighter.Parse(member.DeclaringType, false, member);
             this.NameForFiltering = $"{member.DeclaringType.Name}.{member.Name}";
             this.NameLabelTextRaw = NameForFiltering;
         }
