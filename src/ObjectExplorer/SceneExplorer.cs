@@ -7,7 +7,6 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using UnityExplorer.Core;
 using UnityExplorer.UI;
 using UniverseLib.UI.Models;
 using UnityExplorer.UI.Panels;

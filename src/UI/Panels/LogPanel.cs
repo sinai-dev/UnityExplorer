@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.Core.Config;
+using UnityExplorer.Config;
 using UnityExplorer.UI.Widgets;
 using UniverseLib;
 using UniverseLib.UI;

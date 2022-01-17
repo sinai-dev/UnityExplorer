@@ -14,7 +14,7 @@ using System.Collections;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-namespace UnityExplorer.Core.Runtime
+namespace UnityExplorer.Runtime
 {
     public class Il2CppProvider : RuntimeHelper
     {

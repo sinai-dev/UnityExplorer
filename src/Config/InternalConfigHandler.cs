@@ -7,7 +7,7 @@ using System.Text;
 using UnityEngine;
 using UnityExplorer.UI;
 
-namespace UnityExplorer.Core.Config
+namespace UnityExplorer.Config
 {
     public class InternalConfigHandler : ConfigHandler
     {

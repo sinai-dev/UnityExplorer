@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.Core.Config;
+using UnityExplorer.Config;
 using UnityExplorer.UI;
 using UnityExplorer.ObjectExplorer;
 using UnityExplorer.UI.Panels;
-using UnityExplorer.Core.Runtime;
+using UnityExplorer.Runtime;
 using UniverseLib.Input;
 
 namespace UnityExplorer
@@ -51,8 +51,6 @@ namespace UnityExplorer
                 Force_Unlock_Mouse = ConfigManager.Force_Unlock_Mouse.Value,
                 Unhollowed_Modules_Folder = loader.UnhollowedModulesFolder
             });
-            
-            Log($"Finished core setup, waiting for late setup...");
         }
 
         // Do a delayed setup so that objects aren't destroyed instantly.

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.Core.Config;
+using UnityExplorer.Config;
 using UniverseLib.Input;
 using UnityExplorer.UI.Widgets;
 using UniverseLib.UI.Models;

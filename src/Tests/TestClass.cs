@@ -30,7 +30,7 @@ namespace UnityExplorer.Tests
         public static IDictionary MixedDictionary;
         public static Hashtable Hashtable;
         public static byte[] ByteArray = new byte[16];
-        public static List<short> ABigList = new List<short>(10000);
+        public static List<short> ABigList = new(10000);
 
         // Test const behaviour (should be a readonly field)
         public const int ConstantInt5 = 5;
@@ -64,21 +64,17 @@ namespace UnityExplorer.Tests
 
         private static object GetRandomObject()
         {
-            object ret = null;
-
-            int ran = UnityEngine.Random.Range(0, 7);
-            switch (ran)
+            return UnityEngine.Random.Range(0, 7) switch
             {
-                case 0: return null;
-                case 1: return 123;
-                case 2: return true;
-                case 3: return "hello";
-                case 4: return 50.5f;
-                case 5: return CameraClearFlags.Color;
-                case 6: return new List<string> { "one", "two" };
-            }
-
-            return ret;
+                0 => null,
+                1 => 123,
+                2 => true,
+                3 => "hello",
+                4 => 50.5f,
+                5 => CameraClearFlags.Color,
+                6 => new List<string> { "one", "two" },
+                _ => null,
+            };
         }
 
         public static void TestComponent<T>() where T : Component

@@ -5,8 +5,7 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityExplorer.Core;
-using UnityExplorer.Core.Runtime;
+using UnityExplorer.Runtime;
 using UniverseLib;
 
 namespace UnityExplorer.ObjectExplorer

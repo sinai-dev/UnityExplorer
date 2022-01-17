@@ -8,10 +8,10 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using UnityExplorer.Core.Config;
+using UnityExplorer.Config;
 using UniverseLib;
 
-namespace UnityExplorer.Core.Runtime
+namespace UnityExplorer.Runtime
 {
     public abstract class RuntimeHelper
     {

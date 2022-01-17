@@ -4,7 +4,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
-using UnityExplorer.Core.Config;
+using UnityExplorer.Config;
 using UnityExplorer.Loader.STANDALONE;
 using UnityEngine.EventSystems;
 using UniverseLib.Input;

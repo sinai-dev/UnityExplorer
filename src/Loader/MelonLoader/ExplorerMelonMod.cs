@@ -3,7 +3,7 @@ using System;
 using System.IO;
 using MelonLoader;
 using UnityExplorer;
-using UnityExplorer.Core.Config;
+using UnityExplorer.Config;
 using UnityExplorer.Loader.ML;
 
 [assembly: MelonPlatformDomain(MelonPlatformDomainAttribute.CompatibleDomains.UNIVERSAL)]

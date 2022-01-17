@@ -6,7 +6,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityExplorer.Core.Config;
+using UnityExplorer.Config;
 using UnityExplorer.CSConsole;
 using UnityExplorer.UI.Widgets;
 using UniverseLib;

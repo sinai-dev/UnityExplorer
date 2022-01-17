@@ -9,8 +9,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityExplorer.Core;
-using UnityExplorer.Core.Config;
+using UnityExplorer.Config;
 using UniverseLib.Input;
 using UnityExplorer.Loader.BIE;
 #if CPP

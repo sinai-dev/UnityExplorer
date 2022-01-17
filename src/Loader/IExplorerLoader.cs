@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using UnityExplorer.Core.Config;
+using UnityExplorer.Config;
 
 namespace UnityExplorer
 {

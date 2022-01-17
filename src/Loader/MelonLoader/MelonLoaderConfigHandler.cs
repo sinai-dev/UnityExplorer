@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityExplorer.Core;
-using UnityExplorer.Core.Config;
+using UnityExplorer.Config;
 
 namespace UnityExplorer.Loader.ML
 {

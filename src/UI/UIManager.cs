@@ -9,7 +9,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityExplorer.Core.Config;
+using UnityExplorer.Config;
 using UnityExplorer.CSConsole;
 using UnityExplorer.Inspectors;
 using UnityExplorer.UI.Panels;
@@ -81,10 +81,12 @@ namespace UnityExplorer.UI
         {
             uiBase = UniversalUI.RegisterUI(ExplorerCore.GUID, Update);
 
+            lastScreenWidth = Screen.width;
+            lastScreenHeight = Screen.height;
+
+            // Create UI
             CreatePanelHolder();
-
             CreateTopNavBar();
-
             UIPanels.Add(Panels.AutoCompleter, new AutoCompleteModal());
             UIPanels.Add(Panels.ObjectExplorer, new ObjectExplorerPanel());
             UIPanels.Add(Panels.Inspector, new InspectorPanel());
@@ -98,20 +100,18 @@ namespace UnityExplorer.UI
             foreach (var panel in UIPanels.Values)
                 panel.ConstructUI();
 
+            // Call some initialize methods
             ConsoleController.Init();
 
+            // Add this listener to prevent ScrollPool doing anything while we are resizing panels
+            ScrollPool<ICell>.writingLockedListeners.Add(() => !PanelDragger.Resizing);
+
+            // Set default menu visibility
             ShowMenu = !ConfigManager.Hide_On_Startup.Value;
 
-            lastScreenWidth = Screen.width;
-            lastScreenHeight = Screen.height;
-
-            // Failsafe fix
+            // Failsafe fix, in some games all dropdowns displayed values are blank on startup for some reason.
             foreach (var dropdown in UIRoot.GetComponentsInChildren<Dropdown>(true))
                 dropdown.RefreshShownValue();
-            timeInput.Text = string.Empty;
-            timeInput.Text = Time.timeScale.ToString();
-
-            ScrollPool<ICell>.writingLockedListeners.Add(() => !PanelDragger.Resizing);
 
             Initializing = false;
         }
@@ -328,8 +328,10 @@ namespace UnityExplorer.UI
 
             timeInput = UIFactory.CreateInputField(navbarPanel, "TimeInput", "timeScale");
             UIFactory.SetLayoutElement(timeInput.Component.gameObject, minHeight: 25, minWidth: 40);
-            timeInput.Text = Time.timeScale.ToString("F2");
             timeInput.Component.GetOnEndEdit().AddListener(OnTimeInputEndEdit);
+
+            timeInput.Text = string.Empty;
+            timeInput.Text = Time.timeScale.ToString();
 
             pauseBtn = UIFactory.CreateButton(navbarPanel, "PauseButton", "||", new Color(0.2f, 0.2f, 0.2f));
             UIFactory.SetLayoutElement(pauseBtn.Component.gameObject, minHeight: 25, minWidth: 25);

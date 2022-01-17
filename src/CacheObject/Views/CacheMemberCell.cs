@@ -12,14 +12,10 @@ namespace UnityExplorer.CacheObject.Views
 {
     public class CacheMemberCell : CacheObjectCell
     {
-        //public ReflectionInspector Owner { get; set; }
-
         public CacheMember MemberOccupant => Occupant as CacheMember;
 
         public GameObject EvaluateHolder;
         public ButtonRef EvaluateButton;
-
-        //public Toggle UpdateToggle;
 
         protected virtual void EvaluateClicked()
         {
@@ -38,16 +34,5 @@ namespace UnityExplorer.CacheObject.Views
             UIFactory.SetLayoutElement(EvaluateButton.Component.gameObject, minWidth: 100, minHeight: 25);
             EvaluateButton.OnClick += EvaluateClicked;
         }
-
-        //protected override void ConstructUpdateToggle(GameObject parent)
-        //{
-        //    // Auto-update toggle
-        //
-        //    var updateToggle = UIFactory.CreateToggle(parent, "AutoUpdate", out UpdateToggle, out Text autoText);
-        //    UIFactory.SetLayoutElement(updateToggle, minHeight: 25, minWidth: 30, flexibleWidth: 0, flexibleHeight: 0);
-        //    GameObject.Destroy(autoText);
-        //    UpdateToggle.isOn = false;
-        //    UpdateToggle.onValueChanged.AddListener((bool val) => { MemberOccupant.AutoUpdateWanted = val; });
-        //}
     }
 }

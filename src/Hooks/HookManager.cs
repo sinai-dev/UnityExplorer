@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using HarmonyLib;
 using UnityEngine;
-using UnityExplorer.Core.Runtime;
+using UnityExplorer.Runtime;
 using UnityExplorer.CSConsole;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;

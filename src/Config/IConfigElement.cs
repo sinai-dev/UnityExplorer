@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace UnityExplorer.Core.Config
+namespace UnityExplorer.Config
 {
     public interface IConfigElement
     {

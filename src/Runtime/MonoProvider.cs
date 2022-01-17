@@ -12,7 +12,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityExplorer;
 
-namespace UnityExplorer.Core.Runtime
+namespace UnityExplorer.Runtime
 {
     public class MonoProvider : RuntimeHelper
     {

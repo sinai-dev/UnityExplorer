@@ -45,6 +45,7 @@ namespace UnityExplorer.CacheObject.Views
         public bool SubContentActive => SubContentHolder.activeSelf;
 
         public LayoutElement NameLayout;
+        public GameObject RightGroupContent;
         public LayoutElement RightGroupLayout;
 
         public Text NameLabel;
@@ -136,16 +137,16 @@ namespace UnityExplorer.CacheObject.Views
 
             // Right vertical group
 
-            var rightGroupHolder = UIFactory.CreateUIObject("RightGroup", horiRow);
-            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(rightGroupHolder, false, false, true, true, 4, childAlignment: TextAnchor.UpperLeft);
-            UIFactory.SetLayoutElement(rightGroupHolder, minHeight: 25, minWidth: 200, flexibleWidth: 9999, flexibleHeight: 800);
-            RightGroupLayout = rightGroupHolder.GetComponent<LayoutElement>();
+            RightGroupContent = UIFactory.CreateUIObject("RightGroup", horiRow);
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(RightGroupContent, false, false, true, true, 4, childAlignment: TextAnchor.UpperLeft);
+            UIFactory.SetLayoutElement(RightGroupContent, minHeight: 25, minWidth: 200, flexibleWidth: 9999, flexibleHeight: 800);
+            RightGroupLayout = RightGroupContent.GetComponent<LayoutElement>();
 
-            ConstructEvaluateHolder(rightGroupHolder);
+            ConstructEvaluateHolder(RightGroupContent);
 
             // Right horizontal group
 
-            var rightHoriGroup = UIFactory.CreateUIObject("RightHoriGroup", rightGroupHolder);
+            var rightHoriGroup = UIFactory.CreateUIObject("RightHoriGroup", RightGroupContent);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(rightHoriGroup, false, false, true, true, 4, childAlignment: TextAnchor.UpperLeft);
             UIFactory.SetLayoutElement(rightHoriGroup, minHeight: 25, minWidth: 200, flexibleWidth: 9999, flexibleHeight: 800);
 

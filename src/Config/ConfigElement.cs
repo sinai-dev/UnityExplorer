@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace UnityExplorer.Core.Config
+namespace UnityExplorer.Config
 {
     public class ConfigElement<T> : IConfigElement
     {
