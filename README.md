@@ -109,9 +109,17 @@ The inspector is used to see detailed information on objects of any type and man
 
 ### Mouse-Inspect
 
-* The "Mouse Inspect" dropdown on the main UnityExplorer navbar allows you to inspect objects under the mouse.
+* The "Mouse Inspect" dropdown in the "Inspector" panel allows you to inspect objects under the mouse.
   * <b>World</b>: uses Physics.Raycast to look for Colliders
   * <b>UI</b>: uses GraphicRaycasters to find UI objects
+
+### Clipboard
+
+* The "Clipboard" panel allows you to see your current paste value, or clear it (resets it to `null`)
+  * Can copy the value from any member in a Reflection Inspector, Enumerable or Dictionary, and from the target of any Inspector tab
+  * Can paste values onto any member in a Reflection Inspector
+  * Non-parsable arguments in Method/Property Evaluators allow pasting values
+  * The C# Console has helper methods `Copy(obj)` and `Paste()` for accessing the Clipboard
 
 ### Settings
 
