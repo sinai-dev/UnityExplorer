@@ -6,40 +6,39 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityExplorer.Runtime;
+using UnityExplorer.UI.Panels;
 using UniverseLib;
 
 namespace UnityExplorer.CSConsole
 {
     public class ScriptInteraction : InteractiveBase
     {
+        public static object CurrentTarget
+            => InspectorManager.ActiveInspector?.Target;
+
+        public static object[] AllTargets
+            => InspectorManager.Inspectors.Select(it => it.Target).ToArray();
+
         public static void Log(object message)
-        {
-            ExplorerCore.Log(message);
-        }
-
-        public static object CurrentTarget => InspectorManager.ActiveInspector?.Target;
-
-        public static object[] AllTargets => InspectorManager.Inspectors.Select(it => it.Target).ToArray();
+            => ExplorerCore.Log(message);
 
         public static void Inspect(object obj)
-        {
-            InspectorManager.Inspect(obj);
-        }
+            => InspectorManager.Inspect(obj);
 
         public static void Inspect(Type type)
-        {
-            InspectorManager.Inspect(type);
-        }
+            => InspectorManager.Inspect(type);
 
-        public static void Start(IEnumerator ienumerator)
-        {
-            RuntimeProvider.Instance.StartCoroutine(ienumerator);
-        }
+        public static void Start(IEnumerator ienumerator) 
+            => RuntimeProvider.Instance.StartCoroutine(ienumerator);
+
+        public static void Copy(object obj) 
+            => ClipboardPanel.Copy(obj);
+
+        public static object Paste() 
+            => ClipboardPanel.Current;
 
         public static void GetUsing()
-        {
-            Log(Evaluator.GetUsing());
-        }
+            => Log(Evaluator.GetUsing());
 
         public static void GetVars()
         {

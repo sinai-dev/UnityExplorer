@@ -254,8 +254,8 @@ namespace UnityExplorer.CacheObject
 
         // Setting cell state from our model
 
-        /// <summary>Return true if SetCell should abort, false if it should continue.</summary>
-        protected abstract bool SetCellEvaluateState(CacheObjectCell cell);
+        /// <summary>Return false if SetCell should abort, true if it should continue.</summary>
+        protected abstract bool TryAutoEvaluateIfUnitialized(CacheObjectCell cell);
 
         public virtual void SetDataToCell(CacheObjectCell cell)
         {
@@ -271,8 +271,20 @@ namespace UnityExplorer.CacheObject
                 IValue.SetLayout();
             }
 
-            if (SetCellEvaluateState(cell))
+            bool evaluated = TryAutoEvaluateIfUnitialized(cell);
+
+            if (cell.CopyButton != null)
+            {
+                bool hasEvaluated = State != ValueState.NotEvaluated && State != ValueState.Exception;
+                cell.CopyButton.Component.gameObject.SetActive(hasEvaluated);
+                cell.PasteButton.Component.gameObject.SetActive(hasEvaluated && this.CanWrite);
+            }
+
+            if (!evaluated)
                 return;
+
+            // The following only executes if the object has evaluated.
+            // For members and properties with args, they will return by default now.
 
             switch (State)
             {

@@ -27,17 +27,6 @@ namespace UnityExplorer.UI.Panels
         private ButtonListHandler<GameObject, ButtonCell> dataHandler;
         private ScrollPool<ButtonCell> buttonScrollPool;
 
-        public override void ConstructPanelContent()
-        {
-            dataHandler = new ButtonListHandler<GameObject, ButtonCell>(buttonScrollPool, GetEntries, SetCell, ShouldDisplayCell, OnCellClicked);
-
-            buttonScrollPool = UIFactory.CreateScrollPool<ButtonCell>(this.content, "ResultsList", out GameObject scrollObj,
-                out GameObject scrollContent);
-
-            buttonScrollPool.Initialize(dataHandler);
-            UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
-        }
-
         public void ShowResults()
         {
             dataHandler.RefreshData();
@@ -63,6 +52,17 @@ namespace UnityExplorer.UI.Panels
 
             var obj = UiInspector.LastHitObjects[index];
             cell.Button.ButtonText.text = $"<color=cyan>{obj.name}</color> ({obj.transform.GetTransformPath(true)})";
+        }
+
+        public override void ConstructPanelContent()
+        {
+            dataHandler = new ButtonListHandler<GameObject, ButtonCell>(buttonScrollPool, GetEntries, SetCell, ShouldDisplayCell, OnCellClicked);
+
+            buttonScrollPool = UIFactory.CreateScrollPool<ButtonCell>(this.content, "ResultsList", out GameObject scrollObj,
+                out GameObject scrollContent);
+
+            buttonScrollPool.Initialize(dataHandler);
+            UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
         }
 
         protected internal override void DoSetDefaultPosAndAnchors()

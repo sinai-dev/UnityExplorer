@@ -241,7 +241,6 @@ namespace UnityExplorer.Inspectors
             }
         }
 
-
         #region UI Construction
 
         public override GameObject CreateContent(GameObject parent)

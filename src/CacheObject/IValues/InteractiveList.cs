@@ -32,11 +32,13 @@ namespace UnityExplorer.CacheObject.IValues
         private PropertyInfo genericIndexer;
 
         public int ItemCount => cachedEntries.Count;
-        private readonly List<CacheListEntry> cachedEntries = new List<CacheListEntry>();
+        private readonly List<CacheListEntry> cachedEntries = new();
 
         public ScrollPool<CacheListEntryCell> ListScrollPool { get; private set; }
 
         public Text TopLabel;
+        private LayoutElement scrollLayout;
+        private Text NotSupportedLabel;
 
         public override void OnBorrowed(CacheObjectBase owner)
         {
@@ -63,6 +65,28 @@ namespace UnityExplorer.CacheObject.IValues
             }
 
             cachedEntries.Clear();
+        }
+
+        // List entry scroll pool
+
+        public override void SetLayout()
+        {
+            var minHeight = 5f;
+
+            foreach (var cell in ListScrollPool.CellPool)
+            {
+                if (cell.Enabled)
+                    minHeight += cell.Rect.rect.height;
+            }
+
+            this.scrollLayout.minHeight = Math.Min(InspectorPanel.CurrentPanelHeight - 400f, minHeight);
+        }
+
+        public void OnCellBorrowed(CacheListEntryCell cell) { } // not needed
+
+        public void SetCell(CacheListEntryCell cell, int index)
+        {
+            CacheObjectControllerHelper.SetCell(cell, index, cachedEntries, null);
         }
 
         // Setting the List value itself to this model
@@ -211,32 +235,6 @@ namespace UnityExplorer.CacheObject.IValues
                 ExplorerCore.LogWarning($"Exception setting IList value: {ex}");
             }
         }
-
-        // List entry scroll pool
-
-        public override void SetLayout()
-        {
-            var minHeight = 5f;
-
-            foreach (var cell in ListScrollPool.CellPool)
-            {
-                if (cell.Enabled)
-                    minHeight += cell.Rect.rect.height;
-            }
-
-            this.scrollLayout.minHeight = Math.Min(InspectorPanel.CurrentPanelHeight - 400f, minHeight);
-        }
-
-        public void OnCellBorrowed(CacheListEntryCell cell) { } // not needed
-
-        public void SetCell(CacheListEntryCell cell, int index)
-        {
-            CacheObjectControllerHelper.SetCell(cell, index, cachedEntries, null);
-        }
-
-        private LayoutElement scrollLayout;
-
-        private Text NotSupportedLabel;
 
         public override GameObject CreateContent(GameObject parent)
         {

@@ -1,9 +1,12 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Reflection;
+using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.CacheObject.IValues;
+using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets.AutoComplete;
 using UniverseLib;
 using UniverseLib.UI;
@@ -15,10 +18,14 @@ namespace UnityExplorer.UI.Widgets
         private ParameterInfo paramInfo;
         private Type paramType;
 
-        internal Dropdown dropdown;
-        private bool usingDropdown;
         internal EnumCompleter enumCompleter;
         private ButtonRef enumHelperButton;
+
+        private bool usingBasicLabel;
+        private object basicValue;
+        private GameObject basicLabelHolder;
+        private Text basicLabel;
+        private ButtonRef pasteButton;
 
         public void OnBorrowed(EvaluateWidget evaluator, ParameterInfo paramInfo)
         {
@@ -34,8 +41,10 @@ namespace UnityExplorer.UI.Widgets
 
             if (ParseUtility.CanParse(paramType) || typeof(Type).IsAssignableFrom(paramType))
             {
+                usingBasicLabel = false;
+
                 this.inputField.Component.gameObject.SetActive(true);
-                this.dropdown.gameObject.SetActive(false);
+                this.basicLabelHolder.SetActive(false);
                 this.typeCompleter.Enabled = typeof(Type).IsAssignableFrom(paramType);
                 this.enumCompleter.Enabled = paramType.IsEnum;
                 this.enumHelperButton.Component.gameObject.SetActive(paramType.IsEnum);
@@ -63,16 +72,15 @@ namespace UnityExplorer.UI.Widgets
             else
             {
                 // non-parsable, and not a Type
+                usingBasicLabel = true;
+
                 this.inputField.Component.gameObject.SetActive(false);
-                this.dropdown.gameObject.SetActive(true);
+                this.basicLabelHolder.SetActive(true);
                 this.typeCompleter.Enabled = false;
                 this.enumCompleter.Enabled = false;
                 this.enumHelperButton.Component.gameObject.SetActive(false);
 
-                usingDropdown = true;
-                PopulateDropdown();
-
-                InspectorManager.OnInspectedTabsChanged += PopulateDropdown;
+                SetDisplayedValueFromPaste();
             }
         }
 
@@ -81,109 +89,89 @@ namespace UnityExplorer.UI.Widgets
             this.evaluator = null;
             this.paramInfo = null;
 
-            usingDropdown = false;
-
             this.enumCompleter.Enabled = false;
             this.typeCompleter.Enabled = false;
 
             this.inputField.Text = "";
 
-            InspectorManager.OnInspectedTabsChanged -= PopulateDropdown;
+            this.usingBasicLabel = false;
+            this.basicValue = null;
         }
 
         public object Evaluate()
         {
-            if (!usingDropdown)
+            if (usingBasicLabel)
+                return basicValue;
+
+            var input = this.inputField.Text;
+
+            if (typeof(Type).IsAssignableFrom(paramType))
+                return ReflectionUtility.GetTypeByName(input);
+
+            if (paramType == typeof(string))
+                return input;
+
+            if (string.IsNullOrEmpty(input))
             {
-                var input = this.inputField.Text;
-
-                if (typeof(Type).IsAssignableFrom(paramType))
-                    return ReflectionUtility.GetTypeByName(input);
-
-                if (paramType == typeof(string))
-                    return input;
-
-                if (string.IsNullOrEmpty(input))
-                {
-                    if (paramInfo.IsOptional)
-                        return paramInfo.DefaultValue;
-                    else
-                        return null;
-                }
-
-                if (!ParseUtility.TryParse(input, paramType, out object parsed, out Exception ex))
-                {
-                    ExplorerCore.LogWarning($"Cannot parse argument '{paramInfo.Name}' ({paramInfo.ParameterType.Name})" +
-                        $"{(ex == null ? "" : $", {ex.GetType().Name}: {ex.Message}")}");
-                    return null;
-                }
+                if (paramInfo.IsOptional)
+                    return paramInfo.DefaultValue;
                 else
-                    return parsed;
+                    return null;
+            }
+
+            if (!ParseUtility.TryParse(input, paramType, out object parsed, out Exception ex))
+            {
+                ExplorerCore.LogWarning($"Cannot parse argument '{paramInfo.Name}' ({paramInfo.ParameterType.Name})" +
+                    $"{(ex == null ? "" : $", {ex.GetType().Name}: {ex.Message}")}");
+                return null;
             }
             else
+                return parsed;
+        }
+
+        private void OnPasteClicked()
+        {
+            if (ClipboardPanel.TryPaste(this.paramType, out object paste))
             {
-                if (dropdown.value == 0)
-                    return null;
+                basicValue = paste;
+                SetDisplayedValueFromPaste();
+            }
+        }
+
+        private void SetDisplayedValueFromPaste()
+        {
+            if (usingBasicLabel)
+                basicLabel.text = ToStringUtility.ToStringWithType(basicValue, paramType, false);
+            else
+            {
+                if (typeof(Type).IsAssignableFrom(paramType))
+                    inputField.Text = (basicValue as Type).FullDescription();
                 else
-                    return dropdownUnderlyingValues[dropdown.value];
+                    inputField.Text = ParseUtility.ToStringForInput(basicValue, paramType);
             }
-        }
-
-        private object[] dropdownUnderlyingValues;
-
-        internal void PopulateDropdown()
-        {
-            if (!usingDropdown)
-                return;
-
-            dropdown.options.Clear();
-            var underlyingValues = new List<object>();
-
-            dropdown.options.Add(new Dropdown.OptionData("null"));
-            underlyingValues.Add(null);
-
-            var argType = paramType;
-
-            int tabIndex = 0;
-            foreach (var tab in InspectorManager.Inspectors)
-            {
-                tabIndex++;
-
-                if (argType.IsAssignableFrom(tab.Target.GetActualType()))
-                {
-                    dropdown.options.Add(new Dropdown.OptionData($"Tab {tabIndex}: {tab.Tab.TabText.text}"));
-                    underlyingValues.Add(tab.Target);
-                }
-            }
-
-            dropdownUnderlyingValues = underlyingValues.ToArray();
-        }
-
-        private void EnumHelper_OnClick()
-        {
-            enumCompleter.HelperButtonClicked();
         }
 
         public override void CreateSpecialContent()
         {
+            enumCompleter = new(paramType, this.inputField)
+            {
+                Enabled = false
+            };
+
             enumHelperButton = UIFactory.CreateButton(UIRoot, "EnumHelper", "▼");
             UIFactory.SetLayoutElement(enumHelperButton.Component.gameObject, minWidth: 25, minHeight: 25, flexibleWidth: 0, flexibleHeight: 0);
-            enumHelperButton.OnClick += EnumHelper_OnClick;
+            enumHelperButton.OnClick += enumCompleter.HelperButtonClicked;
 
-            var dropdownObj = UIFactory.CreateDropdown(UIRoot, out dropdown, "Select argument...", 14, (int val) =>
-            {
-                //ArgDropdownChanged(val);
-            });
-            UIFactory.SetLayoutElement(dropdownObj, minHeight: 25, flexibleHeight: 50, minWidth: 100, flexibleWidth: 1000);
-            dropdownObj.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            basicLabelHolder = UIFactory.CreateHorizontalGroup(UIRoot, "BasicLabelHolder", true, true, true, true, bgColor: new(0.1f, 0.1f, 0.1f));
+            UIFactory.SetLayoutElement(basicLabelHolder, minHeight: 25, flexibleHeight: 50, minWidth: 100, flexibleWidth: 1000);
+            basicLabel = UIFactory.CreateLabel(basicLabelHolder, "BasicLabel", "null", TextAnchor.MiddleLeft);
+            basicLabel.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-            enumCompleter = new EnumCompleter(paramType, this.inputField);
-            enumCompleter.Enabled = false;
+            pasteButton = UIFactory.CreateButton(UIRoot, "PasteButton", "Paste", new Color(0.13f, 0.13f, 0.13f, 1f));
+            UIFactory.SetLayoutElement(pasteButton.Component.gameObject, minHeight: 25, minWidth: 28, flexibleWidth: 0);
+            pasteButton.ButtonText.color = Color.green;
+            pasteButton.ButtonText.fontSize = 10;
+            pasteButton.OnClick += OnPasteClicked;
         }
-
-        //private void ArgDropdownChanged(int value)
-        //{
-        //    // not needed
-        //}
     }
 }

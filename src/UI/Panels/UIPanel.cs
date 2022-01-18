@@ -23,8 +23,8 @@ namespace UnityExplorer.UI.Panels
         public static event Action OnPanelsReordered;
         public static event Action OnClickedOutsidePanels;
 
-        internal static readonly List<UIPanel> instances = new List<UIPanel>();
-        internal static readonly Dictionary<int, UIPanel> transformToPanelDict = new Dictionary<int, UIPanel>();
+        internal static readonly List<UIPanel> instances = new();
+        internal static readonly Dictionary<int, UIPanel> transformToPanelDict = new();
 
         public static void UpdateFocus()
         {

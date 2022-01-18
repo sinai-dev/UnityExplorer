@@ -38,6 +38,7 @@ namespace UnityExplorer.Config
         public static ConfigElement<string> OptionsPanelData;
         public static ConfigElement<string> ConsoleLogData;
         public static ConfigElement<string> HookManagerData;
+        public static ConfigElement<string> ClipboardData;
 
         internal static readonly Dictionary<string, IConfigElement> ConfigElements = new Dictionary<string, IConfigElement>();
         internal static readonly Dictionary<string, IConfigElement> InternalConfigs = new Dictionary<string, IConfigElement>();
@@ -132,6 +133,7 @@ namespace UnityExplorer.Config
             OptionsPanelData = new ConfigElement<string>("OptionsPanel", "", "", true);
             ConsoleLogData = new ConfigElement<string>("ConsoleLog", "", "", true);
             HookManagerData = new ConfigElement<string>("HookManager", "", "", true);
+            ClipboardData = new ConfigElement<string>("Clipboard", "", "", true);
         }
     }
 }

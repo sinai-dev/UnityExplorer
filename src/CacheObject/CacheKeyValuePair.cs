@@ -92,10 +92,6 @@ namespace UnityExplorer.CacheObject
         }
 
 
-        protected override bool SetCellEvaluateState(CacheObjectCell cell)
-        {
-            // not needed
-            return false;
-        }
+        protected override bool TryAutoEvaluateIfUnitialized(CacheObjectCell cell) => true;
     }
 }

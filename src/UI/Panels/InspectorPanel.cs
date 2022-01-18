@@ -46,10 +46,7 @@ namespace UnityExplorer.UI.Panels
 
         public override string GetSaveDataFromConfigManager() => ConfigManager.InspectorData.Value;
 
-        public override void DoSaveToConfigElement()
-        {
-            ConfigManager.InspectorData.Value = this.ToSaveData();
-        }
+        public override void DoSaveToConfigElement() => ConfigManager.InspectorData.Value = this.ToSaveData();
 
         protected internal override void DoSetDefaultPosAndAnchors()
         {

@@ -172,13 +172,13 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="UniverseLib.Mono">
-      <HintPath>packages\UniverseLib.1.0.4\lib\net35\UniverseLib.Mono.dll</HintPath>
+      <HintPath>packages\UniverseLib.1.0.6\lib\net35\UniverseLib.Mono.dll</HintPath>
     </Reference>
   </ItemGroup>
   <!-- Il2Cpp refs -->
   <ItemGroup Condition="'$(IsCpp)'=='true'">
     <Reference Include="UniverseLib.IL2CPP">
-      <HintPath>packages\UniverseLib.1.0.4\lib\net472\UniverseLib.IL2CPP.dll</HintPath>
+      <HintPath>packages\UniverseLib.1.0.6\lib\net472\UniverseLib.IL2CPP.dll</HintPath>
     </Reference>
     <Reference Include="UnhollowerBaseLib">
       <HintPath>..\lib\Il2CppAssemblyUnhollower\UnhollowerBaseLib\bin\Release\net4.7.2\UnhollowerBaseLib.dll</HintPath>
@@ -222,7 +222,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="UI\Clipboard\Clipboard.cs" />
     <Compile Include="Hooks\HookCell.cs" />
     <Compile Include="Hooks\HookInstance.cs" />
     <Compile Include="Hooks\HookManager.cs" />
@@ -257,6 +256,8 @@
     <Compile Include="CacheObject\Views\CacheListEntryCell.cs" />
     <Compile Include="CacheObject\Views\CacheMemberCell.cs" />
     <Compile Include="CacheObject\Views\CacheObjectCell.cs" />
+    <Compile Include="UI\Notification.cs" />
+    <Compile Include="UI\Panels\ClipboardPanel.cs" />
     <Compile Include="UI\Widgets\AutoComplete\EnumCompleter.cs" />
     <Compile Include="UI\Widgets\EvaluateWidget\EvaluateWidget.cs" />
     <Compile Include="Inspectors\GameObjectInspector.cs" />
@@ -276,7 +277,7 @@
     <Compile Include="Inspectors\ReflectionInspector.cs" />
     <Compile Include="CacheObject\IValues\InteractiveValueStruct.cs" />
     <Compile Include="UI\Panels\HookManagerPanel.cs" />
-    <Compile Include="UI\Panels\UiInspectorResultsPanel.cs" />
+    <Compile Include="UI\Panels\UIInspectorResultsPanel.cs" />
     <Compile Include="UI\Panels\LogPanel.cs" />
     <Compile Include="UI\Panels\CSConsolePanel.cs" />
     <Compile Include="UI\Panels\OptionsPanel.cs" />

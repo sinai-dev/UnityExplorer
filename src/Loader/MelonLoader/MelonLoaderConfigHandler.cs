@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using UnityExplorer.Core;
 using UnityExplorer.Config;
 
 namespace UnityExplorer.Loader.ML

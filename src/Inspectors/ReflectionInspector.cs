@@ -327,6 +327,11 @@ namespace UnityExplorer.Inspectors
                 cell.Occupant.IValue.SetLayout();
         }
 
+        private void OnCopyClicked()
+        {
+            ClipboardPanel.Copy(this.Target ?? this.TargetType);
+        }
+
         // UI Construction
 
         private GameObject mainContentHolder;
@@ -338,7 +343,10 @@ namespace UnityExplorer.Inspectors
 
             // Class name, assembly
 
-            var titleHolder = UIFactory.CreateUIObject("TitleHolder", UIRoot);
+            var topRow = UIFactory.CreateHorizontalGroup(UIRoot, "TopRow", false, false, true, true, 4, default, new(1, 1, 1, 0), TextAnchor.MiddleLeft);
+            UIFactory.SetLayoutElement(topRow, minHeight: 25, flexibleWidth: 9999);
+
+            var titleHolder = UIFactory.CreateUIObject("TitleHolder", topRow);
             UIFactory.SetLayoutElement(titleHolder, minHeight: 35, flexibleHeight: 0, flexibleWidth: 9999);
 
             NameText = UIFactory.CreateLabel(titleHolder, "VisibleTitle", "NotSet", TextAnchor.MiddleLeft);
@@ -359,6 +367,11 @@ namespace UnityExplorer.Inspectors
             HiddenNameText.Component.textComponent.fontSize = 17;
             HiddenNameText.Component.textComponent.color = Color.clear;
             UIFactory.SetLayoutElement(HiddenNameText.Component.gameObject, minHeight: 35, flexibleHeight: 0, flexibleWidth: 9999);
+
+            var copyButton = UIFactory.CreateButton(topRow, "CopyButton", "Copy to Clipboard", new Color(0.2f, 0.2f, 0.2f, 1));
+            copyButton.ButtonText.color = Color.yellow;
+            UIFactory.SetLayoutElement(copyButton.Component.gameObject, minHeight: 25, minWidth: 120, flexibleWidth: 0);
+            copyButton.OnClick += OnCopyClicked;
 
             AssemblyText = UIFactory.CreateLabel(UIRoot, "AssemblyLabel", "not set", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(AssemblyText.gameObject, minHeight: 25, flexibleWidth: 9999);

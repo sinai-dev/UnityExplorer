@@ -35,6 +35,7 @@ namespace UnityExplorer.UI
             MouseInspector,
             UIInspectorResults,
             HookManager,
+            Clipboard
         }
 
         public enum VerticalAnchor
@@ -49,18 +50,24 @@ namespace UnityExplorer.UI
 
         private static UIBase uiBase;
         public static GameObject UIRoot => uiBase?.RootObject;
+        public static RectTransform UIRootRect => _uiRootRect ??= UIRoot.GetComponent<RectTransform>();
+        private static RectTransform _uiRootRect;
 
         internal static GameObject PanelHolder { get; private set; }
-        private static readonly Dictionary<Panels, UIPanel> UIPanels = new Dictionary<Panels, UIPanel>();
+        private static readonly Dictionary<Panels, UIPanel> UIPanels = new();
 
         public static RectTransform NavBarRect;
         public static GameObject NavbarTabButtonHolder;
+        private static readonly Vector2 NAVBAR_DIMENSIONS = new(1020f, 35f);
 
         private static ButtonRef closeBtn;
         private static ButtonRef pauseBtn;
         private static InputFieldRef timeInput;
         private static bool pauseButtonPausing;
         private static float lastTimeScale;
+
+        private static int lastScreenWidth;
+        private static int lastScreenHeight;
 
         public static bool ShowMenu
         {
@@ -83,6 +90,7 @@ namespace UnityExplorer.UI
             lastScreenWidth = Screen.width;
             lastScreenHeight = Screen.height;
 
+
             // Create UI.
             CreatePanelHolder();
             CreateTopNavBar();
@@ -93,6 +101,7 @@ namespace UnityExplorer.UI
             UIPanels.Add(Panels.Inspector, new InspectorPanel());
             UIPanels.Add(Panels.CSConsole, new CSConsolePanel());
             UIPanels.Add(Panels.HookManager, new HookManagerPanel());
+            UIPanels.Add(Panels.Clipboard, new ClipboardPanel());
             UIPanels.Add(Panels.ConsoleLog, new LogPanel());
             UIPanels.Add(Panels.Options, new OptionsPanel());
             UIPanels.Add(Panels.UIInspectorResults, new UiInspectorResultsPanel());
@@ -102,8 +111,8 @@ namespace UnityExplorer.UI
                 panel.ConstructUI();
 
             // Call some initialize methods
+            Notification.Init();
             ConsoleController.Init();
-            Clipboard.Init();
 
             // Add this listener to prevent ScrollPool doing anything while we are resizing panels
             ScrollPool<ICell>.writingLockedListeners.Add(() => !PanelDragger.Resizing);
@@ -120,9 +129,6 @@ namespace UnityExplorer.UI
 
         // Main UI Update loop
 
-        private static int lastScreenWidth;
-        private static int lastScreenHeight;
-
         public static void Update()
         {
             if (!UIRoot)
@@ -134,6 +140,9 @@ namespace UnityExplorer.UI
                 InspectUnderMouse.Instance.UpdateInspect();
                 return;
             }
+
+            // Update Notification modal
+            Notification.Update();
 
             // Check forceUnlockMouse toggle
             if (InputManager.GetKeyDown(ConfigManager.Force_Unlock_Toggle.Value))
@@ -208,14 +217,14 @@ namespace UnityExplorer.UI
                     NavBarRect.anchorMin = new Vector2(0.5f, 1f);
                     NavBarRect.anchorMax = new Vector2(0.5f, 1f);
                     NavBarRect.anchoredPosition = new Vector2(NavBarRect.anchoredPosition.x, 0);
-                    NavBarRect.sizeDelta = new Vector2(1080f, 35f);
+                    NavBarRect.sizeDelta = NAVBAR_DIMENSIONS;
                     break;
 
                 case VerticalAnchor.Bottom:
                     NavBarRect.anchorMin = new Vector2(0.5f, 0f);
                     NavBarRect.anchorMax = new Vector2(0.5f, 0f);
                     NavBarRect.anchoredPosition = new Vector2(NavBarRect.anchoredPosition.x, 35);
-                    NavBarRect.sizeDelta = new Vector2(1080f, 35f);
+                    NavBarRect.sizeDelta = NAVBAR_DIMENSIONS;
                     break;
             }
         }

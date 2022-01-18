@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using UnityExplorer.CacheObject.IValues;
 using UnityExplorer.Inspectors;
 using UnityExplorer.UI;
+using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets;
 using UniverseLib;
 using UniverseLib.UI;
@@ -47,9 +48,10 @@ namespace UnityExplorer.CacheObject.Views
         public LayoutElement NameLayout;
         public GameObject RightGroupContent;
         public LayoutElement RightGroupLayout;
+        public GameObject SubContentHolder;
 
         public Text NameLabel;
-        public InputFieldRef HiddenNameLabel;
+        public InputFieldRef HiddenNameLabel; // for selecting the name label
         public Text TypeLabel;
         public Text ValueLabel;
         public Toggle Toggle;
@@ -60,7 +62,11 @@ namespace UnityExplorer.CacheObject.Views
         public ButtonRef SubContentButton;
         public ButtonRef ApplyButton;
 
-        public GameObject SubContentHolder;
+        public ButtonRef CopyButton;
+        public ButtonRef PasteButton;
+
+        public readonly Color subInactiveColor = new(0.23f, 0.23f, 0.23f);
+        public readonly Color subActiveColor = new(0.23f, 0.33f, 0.23f);
 
         protected virtual void ApplyClicked()
         {
@@ -82,25 +88,25 @@ namespace UnityExplorer.CacheObject.Views
             this.Occupant.OnCellSubContentToggle();
         }
 
-        public readonly Color subInactiveColor = new Color(0.23f, 0.23f, 0.23f);
-        public readonly Color subActiveColor = new Color(0.23f, 0.33f, 0.23f);
+        protected virtual void OnCopyClicked()
+        {
+            ClipboardPanel.Copy(this.Occupant.Value);
+        }
+
+        protected virtual void OnPasteClicked()
+        {
+            if (ClipboardPanel.TryPaste(this.Occupant.FallbackType, out object paste))
+                this.Occupant.SetUserValue(paste);
+        }
 
         public void RefreshSubcontentButton()
         {
-            if (!this.SubContentHolder.activeSelf)
-            {
-                this.SubContentButton.ButtonText.text = "▲";
-                RuntimeProvider.Instance.SetColorBlock(SubContentButton.Component, subInactiveColor, subInactiveColor * 1.3f);
-            }
-            else
-            {
-                this.SubContentButton.ButtonText.text = "▼";
-                RuntimeProvider.Instance.SetColorBlock(SubContentButton.Component, subActiveColor, subActiveColor * 1.3f);
-            }
+            this.SubContentButton.ButtonText.text = SubContentHolder.activeSelf ? "▼" : "▲";
+            Color color = SubContentHolder.activeSelf ? subActiveColor : subInactiveColor;
+            RuntimeProvider.Instance.SetColorBlock(SubContentButton.Component, color, color * 1.3f);
         }
 
         protected abstract void ConstructEvaluateHolder(GameObject parent);
-
 
         public virtual GameObject CreateContent(GameObject parent)
         {
@@ -158,7 +164,7 @@ namespace UnityExplorer.CacheObject.Views
 
             TypeLabel = UIFactory.CreateLabel(rightHoriGroup, "ReturnLabel", "<notset>", TextAnchor.MiddleLeft);
             TypeLabel.horizontalOverflow = HorizontalWrapMode.Wrap;
-            UIFactory.SetLayoutElement(TypeLabel.gameObject, minHeight: 25, flexibleHeight: 150, minWidth: 60, flexibleWidth: 0);
+            UIFactory.SetLayoutElement(TypeLabel.gameObject, minHeight: 25, flexibleHeight: 150, minWidth: 45, flexibleWidth: 0);
 
             // Bool and number value interaction
 
@@ -187,6 +193,24 @@ namespace UnityExplorer.CacheObject.Views
             ValueLabel = UIFactory.CreateLabel(rightHoriGroup, "ValueLabel", "Value goes here", TextAnchor.MiddleLeft);
             ValueLabel.horizontalOverflow = HorizontalWrapMode.Wrap;
             UIFactory.SetLayoutElement(ValueLabel.gameObject, minHeight: 25, flexibleHeight: 150, flexibleWidth: 9999);
+
+            // Copy and Paste buttons
+
+            var buttonHolder = UIFactory.CreateHorizontalGroup(rightHoriGroup, "CopyPasteButtons", false, false, true, true, 4, 
+                bgColor: new(1,1,1,0), childAlignment: TextAnchor.MiddleLeft);
+            UIFactory.SetLayoutElement(buttonHolder, minWidth: 60, flexibleWidth: 0);
+
+            CopyButton = UIFactory.CreateButton(buttonHolder, "CopyButton", "Copy", new Color(0.13f, 0.13f, 0.13f, 1f));
+            UIFactory.SetLayoutElement(CopyButton.Component.gameObject, minHeight: 25, minWidth: 28, flexibleWidth: 0);
+            CopyButton.ButtonText.color = Color.yellow;
+            CopyButton.ButtonText.fontSize = 10;
+            CopyButton.OnClick += OnCopyClicked;
+
+            PasteButton = UIFactory.CreateButton(buttonHolder, "PasteButton", "Paste", new Color(0.13f, 0.13f, 0.13f, 1f));
+            UIFactory.SetLayoutElement(PasteButton.Component.gameObject, minHeight: 25, minWidth: 28, flexibleWidth: 0);
+            PasteButton.ButtonText.color = Color.green;
+            PasteButton.ButtonText.fontSize = 10;
+            PasteButton.OnClick += OnPasteClicked;
 
             // Subcontent
 

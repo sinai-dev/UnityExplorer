@@ -44,6 +44,6 @@ namespace UnityExplorer.CacheObject
             RefConfigElement.BoxedValue = value;
         }
 
-        protected override bool SetCellEvaluateState(CacheObjectCell cell) => false;
+        protected override bool TryAutoEvaluateIfUnitialized(CacheObjectCell cell) => true;
     }
 }

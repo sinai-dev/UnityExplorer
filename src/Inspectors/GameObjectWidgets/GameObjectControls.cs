@@ -8,6 +8,7 @@ using UniverseLib.Input;
 using UnityExplorer.UI;
 using UniverseLib.UI;
 using UniverseLib;
+using UnityExplorer.UI.Panels;
 
 namespace UnityExplorer.Inspectors
 {
@@ -49,6 +50,11 @@ namespace UnityExplorer.Inspectors
 
             ConstructTopInfo();
             ConstructTransformControls();
+        }
+
+        private void OnCopyClicked()
+        {
+            ClipboardPanel.Copy(this.GOTarget);
         }
 
         #region GO Controls
@@ -466,6 +472,11 @@ namespace UnityExplorer.Inspectors
             PathInput.Component.textComponent.fontSize = 14;
             UIFactory.SetLayoutElement(PathInput.UIRoot, minHeight: 25, minWidth: 100, flexibleWidth: 9999);
             PathInput.Component.lineType = InputField.LineType.MultiLineSubmit;
+
+            var copyButton = UIFactory.CreateButton(firstRow, "CopyButton", "Copy to Clipboard", new Color(0.2f, 0.2f, 0.2f, 1));
+            copyButton.ButtonText.color = Color.yellow;
+            UIFactory.SetLayoutElement(copyButton.Component.gameObject, minHeight: 25, minWidth: 120);
+            copyButton.OnClick += OnCopyClicked;
 
             //var pathApplyBtn = UIFactory.CreateButton(firstRow, "PathButton", "Set Parent Path", new Color(0.2f, 0.2f, 0.2f));
             //UIFactory.SetLayoutElement(pathApplyBtn.Component.gameObject, minHeight: 25, minWidth: 120);

@@ -603,7 +603,7 @@ If the game was built with Unity's stubbed netstandard 2.0 runtime, you can fix 
             }
         }
 
-        private static readonly Dictionary<string, string> helpDict = new Dictionary<string, string>();
+        private static readonly Dictionary<string, string> helpDict = new();
 
         public static void SetupHelpInteraction()
         {
@@ -658,15 +658,17 @@ var x = 5;
 ++x;
 
 /* The following helpers are available in REPL mode:
- * GetUsing();        - prints the current using directives to the console log
- * GetVars();         - prints the names and values of the REPL variables you have defined
- * GetClasses();      - prints the names and members of the classes you have defined
- * Log(obj);          - prints a message to the console log
  * CurrentTarget;     - System.Object, the target of the active Inspector tab
  * AllTargets;        - System.Object[], the targets of all Inspector tabs
+ * Log(obj);          - prints a message to the console log
  * Inspect(obj);      - inspect the object with the Inspector
  * Inspect(someType); - inspect a Type with static reflection
  * Start(enumerator); - starts the IEnumerator as a Coroutine
+ * Copy(obj);         - copies the object to the UnityExplorer Clipboard
+ * Paste();           - System.Object, the contents of the Clipboard.
+ * GetUsing();        - prints the current using directives to the console log
+ * GetVars();         - prints the names and values of the REPL variables you have defined
+ * GetClasses();      - prints the names and members of the classes you have defined
  * help;              - the default REPL help command, contains additional helpers.
 */";
 

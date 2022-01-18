@@ -24,7 +24,10 @@ namespace UnityExplorer.Tests
 #endif
         }
 
+        public static object LiterallyAnything = null;
+
         // Test enumerables
+        public static int[,,] MultiDimensionalArray = new int[45, 45, 45];
         public static List<object> ListOfInts;
         public static List<List<List<string>>> NestedList;
         public static IDictionary MixedDictionary;
@@ -40,7 +43,12 @@ namespace UnityExplorer.Tests
         public static CameraClearFlags EnumTest2;
         public static Color Color = Color.magenta;
         public static Color32 Color32 = Color.red;
-        public static string ALongString = new string('#', 10000);
+        public static string ALongString = new('#', 10000);
+
+        public static float[] AParseTest(ref List<float[,,]> arg0, ref float[,] arg1)
+        {
+            return new float[] { 1, 2, 3 };
+        }
 
         public static List<object> RandomList
         {

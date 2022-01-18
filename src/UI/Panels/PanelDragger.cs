@@ -15,15 +15,33 @@ namespace UnityExplorer.UI.Panels
 {
     public class PanelDragger
     {
+        private enum MouseState
+        {
+            Down,
+            Held,
+            NotPressed
+        }
+
         #region Static
 
         public static bool Resizing { get; private set; }
+        public static bool ResizePrompting => resizeCursorObj && resizeCursorObj.activeSelf;
 
-        public static bool ResizePrompting => s_resizeCursorObj && s_resizeCursorObj.activeSelf;
+        public static GameObject resizeCursorObj;
+        internal static bool wasAnyDragging;
+
+        internal static List<PanelDragger> Instances = new();
+
+        private static bool handledInstanceThisFrame;
+
+        static PanelDragger()
+        {
+            UIPanel.OnPanelsReordered += OnPanelsReordered;
+        }
 
         internal static void ForceEnd()
         {
-            s_resizeCursorObj.SetActive(false);
+            resizeCursorObj.SetActive(false);
             wasAnyDragging = false;
             Resizing = false;
 
@@ -32,13 +50,6 @@ namespace UnityExplorer.UI.Panels
                 instance.WasDragging = false;
                 instance.WasResizing = false;
             }
-        }
-
-        internal static List<PanelDragger> Instances = new List<PanelDragger>();
-
-        static PanelDragger()
-        {
-            UIPanel.OnPanelsReordered += OnPanelsReordered;
         }
 
         public static void OnPanelsReordered()
@@ -54,18 +65,9 @@ namespace UnityExplorer.UI.Panels
             }
         }
 
-        private enum MouseState
-        {
-            Down,
-            Held,
-            NotPressed
-        }
-
-        private static bool handledInstanceThisFrame;
-
         public static void UpdateInstances()
         {
-            if (!s_resizeCursorObj)
+            if (!resizeCursorObj)
                 CreateCursorUI();
 
             MouseState state;
@@ -99,10 +101,6 @@ namespace UnityExplorer.UI.Panels
 
         #endregion
 
-        public static GameObject s_resizeCursorObj;
-
-        internal static bool wasAnyDragging;
-
         // Instance
 
         public UIPanel UIPanel { get; private set; }
@@ -112,27 +110,23 @@ namespace UnityExplorer.UI.Panels
         public event Action<RectTransform> OnFinishResize;
         public event Action<RectTransform> OnFinishDrag;
 
-        private readonly RectTransform canvasTransform;
-
         // Dragging
         public RectTransform DragableArea { get; set; }
         public bool WasDragging { get; set; }
-        private Vector2 m_lastDragPosition;
+        private Vector2 lastDragPosition;
 
         // Resizing
         private const int RESIZE_THICKNESS = 10;
 
-        //internal readonly Vector2 minResize = new Vector2(200, 50);
-
         private bool WasResizing { get; set; }
-        private ResizeTypes m_currentResizeType = ResizeTypes.NONE;
-        private Vector2 m_lastResizePos;
+        private ResizeTypes currentResizeType = ResizeTypes.NONE;
+        private Vector2 lastResizePos;
 
-        private bool WasHoveringResize => s_resizeCursorObj.activeInHierarchy;
+        private bool WasHoveringResize => resizeCursorObj.activeInHierarchy;
 
-        private ResizeTypes m_lastResizeHoverType;
+        private ResizeTypes lastResizeHoverType;
 
-        private Rect m_totalResizeRect;
+        private Rect totalResizeRect;
 
         public PanelDragger(RectTransform dragArea, RectTransform panelToDrag, UIPanel panel)
         {
@@ -141,16 +135,13 @@ namespace UnityExplorer.UI.Panels
             DragableArea = dragArea;
             Panel = panelToDrag;
 
-            if (!canvasTransform)
-                canvasTransform = Panel.GetComponentInParent<Canvas>().GetComponent<RectTransform>();
-
             UpdateResizeCache();
         }
 
         public void Destroy()
         {
-            if (s_resizeCursorObj)
-                GameObject.Destroy(s_resizeCursorObj);
+            if (resizeCursorObj)
+                GameObject.Destroy(resizeCursorObj);
 
             if (Instances.Contains(this))
                 Instances.Remove(this);
@@ -166,7 +157,7 @@ namespace UnityExplorer.UI.Panels
             Vector3 dragPos = DragableArea.InverseTransformPoint(rawMousePos);
             bool inDragPos = DragableArea.rect.Contains(dragPos);
 
-            if (WasHoveringResize && s_resizeCursorObj)
+            if (WasHoveringResize && resizeCursorObj)
                 UpdateHoverImagePos();
 
             switch (state)
@@ -243,15 +234,15 @@ namespace UnityExplorer.UI.Panels
         {
             wasAnyDragging = true;
             WasDragging = true;
-            m_lastDragPosition = InputManager.MousePosition;
+            lastDragPosition = InputManager.MousePosition;
         }
 
         public void OnDrag()
         {
             var mousePos = InputManager.MousePosition;
 
-            Vector2 diff = (Vector2)mousePos - m_lastDragPosition;
-            m_lastDragPosition = mousePos;
+            Vector2 diff = (Vector2)mousePos - lastDragPosition;
+            lastDragPosition = mousePos;
 
             Panel.localPosition = Panel.localPosition + (Vector3)diff;
 
@@ -296,7 +287,7 @@ namespace UnityExplorer.UI.Panels
 
         private void UpdateResizeCache()
         {
-            m_totalResizeRect = new Rect(Panel.rect.x - RESIZE_THICKNESS + 1,
+            totalResizeRect = new Rect(Panel.rect.x - RESIZE_THICKNESS + 1,
                 Panel.rect.y - RESIZE_THICKNESS + 1,
                 Panel.rect.width + DBL_THICKESS - 2,
                 Panel.rect.height + DBL_THICKESS - 2);
@@ -305,34 +296,34 @@ namespace UnityExplorer.UI.Panels
             if (AllowDragAndResize)
             {
                 m_resizeMask[ResizeTypes.Bottom] = new Rect(
-                    m_totalResizeRect.x,
-                    m_totalResizeRect.y,
-                    m_totalResizeRect.width,
+                    totalResizeRect.x,
+                    totalResizeRect.y,
+                    totalResizeRect.width,
                     RESIZE_THICKNESS);
 
                 m_resizeMask[ResizeTypes.Left] = new Rect(
-                    m_totalResizeRect.x,
-                    m_totalResizeRect.y,
+                    totalResizeRect.x,
+                    totalResizeRect.y,
                     RESIZE_THICKNESS,
-                    m_totalResizeRect.height);
+                    totalResizeRect.height);
 
                 m_resizeMask[ResizeTypes.Top] = new Rect(
-                    m_totalResizeRect.x,
+                    totalResizeRect.x,
                     Panel.rect.y + Panel.rect.height - 2,
-                    m_totalResizeRect.width,
+                    totalResizeRect.width,
                     RESIZE_THICKNESS);
 
                 m_resizeMask[ResizeTypes.Right] = new Rect(
-                    m_totalResizeRect.x + Panel.rect.width + RESIZE_THICKNESS - 2,
-                    m_totalResizeRect.y,
+                    totalResizeRect.x + Panel.rect.width + RESIZE_THICKNESS - 2,
+                    totalResizeRect.y,
                     RESIZE_THICKNESS,
-                    m_totalResizeRect.height);
+                    totalResizeRect.height);
             }
         }
 
         private bool MouseInResizeArea(Vector2 mousePos)
         {
-            return m_totalResizeRect.Contains(mousePos);
+            return totalResizeRect.Contains(mousePos);
         }
 
         private ResizeTypes GetResizeType(Vector2 mousePos)
@@ -361,16 +352,16 @@ namespace UnityExplorer.UI.Panels
 
         public void OnHoverResize(ResizeTypes resizeType)
         {
-            if (WasHoveringResize && m_lastResizeHoverType == resizeType)
+            if (WasHoveringResize && lastResizeHoverType == resizeType)
                 return;
 
             // we are entering resize, or the resize type has changed.
 
             //WasHoveringResize = true;
-            m_lastResizeHoverType = resizeType;
+            lastResizeHoverType = resizeType;
 
-            s_resizeCursorObj.SetActive(true);
-            s_resizeCursorObj.transform.SetAsLastSibling();
+            resizeCursorObj.SetActive(true);
+            resizeCursorObj.transform.SetAsLastSibling();
 
             // set the rotation for the resize icon
             float iconRotation = 0f;
@@ -387,9 +378,9 @@ namespace UnityExplorer.UI.Panels
                     iconRotation = 135f; break;
             }
 
-            Quaternion rot = s_resizeCursorObj.transform.rotation;
+            Quaternion rot = resizeCursorObj.transform.rotation;
             rot.eulerAngles = new Vector3(0, 0, iconRotation);
-            s_resizeCursorObj.transform.rotation = rot;
+            resizeCursorObj.transform.rotation = rot;
 
             UpdateHoverImagePos();
         }
@@ -397,19 +388,19 @@ namespace UnityExplorer.UI.Panels
         // update the resize icon position to be above the mouse
         private void UpdateHoverImagePos()
         {
-            s_resizeCursorObj.transform.localPosition = canvasTransform.InverseTransformPoint(InputManager.MousePosition);
+            resizeCursorObj.transform.localPosition = UIManager.UIRootRect.InverseTransformPoint(InputManager.MousePosition);
         }
 
         public void OnHoverResizeEnd()
         {
             //WasHoveringResize = false;
-            s_resizeCursorObj.SetActive(false);
+            resizeCursorObj.SetActive(false);
         }
 
         public void OnBeginResize(ResizeTypes resizeType)
         {
-            m_currentResizeType = resizeType;
-            m_lastResizePos = InputManager.MousePosition;
+            currentResizeType = resizeType;
+            lastResizePos = InputManager.MousePosition;
             WasResizing = true;
             Resizing = true;
         }
@@ -417,15 +408,15 @@ namespace UnityExplorer.UI.Panels
         public void OnResize()
         {
             Vector3 mousePos = InputManager.MousePosition;
-            Vector2 diff = m_lastResizePos - (Vector2)mousePos;
+            Vector2 diff = lastResizePos - (Vector2)mousePos;
 
-            if ((Vector2)mousePos == m_lastResizePos)
+            if ((Vector2)mousePos == lastResizePos)
                 return;
 
             if (mousePos.x < 0 || mousePos.y < 0 || mousePos.x > Screen.width || mousePos.y > Screen.height)
                 return;
 
-            m_lastResizePos = mousePos;
+            lastResizePos = mousePos;
 
             float diffX = (float)((decimal)diff.x / Screen.width);
             float diffY = (float)((decimal)diff.y / Screen.height);
@@ -433,14 +424,14 @@ namespace UnityExplorer.UI.Panels
             Vector2 anchorMin = Panel.anchorMin;
             Vector2 anchorMax = Panel.anchorMax;
 
-            if (m_currentResizeType.HasFlag(ResizeTypes.Left))
+            if (currentResizeType.HasFlag(ResizeTypes.Left))
                 anchorMin.x -= diffX;
-            else if (m_currentResizeType.HasFlag(ResizeTypes.Right))
+            else if (currentResizeType.HasFlag(ResizeTypes.Right))
                 anchorMax.x -= diffX;
 
-            if (m_currentResizeType.HasFlag(ResizeTypes.Top))
+            if (currentResizeType.HasFlag(ResizeTypes.Top))
                 anchorMax.y -= diffY;
-            else if (m_currentResizeType.HasFlag(ResizeTypes.Bottom))
+            else if (currentResizeType.HasFlag(ResizeTypes.Bottom))
                 anchorMin.y -= diffY;
 
             var prevMin = Panel.anchorMin;
@@ -475,13 +466,13 @@ namespace UnityExplorer.UI.Panels
             try
             {
                 var text = UIFactory.CreateLabel(UIManager.UIRoot, "ResizeCursor", "↔", TextAnchor.MiddleCenter, Color.white, true, 35);
-                s_resizeCursorObj = text.gameObject;
+                resizeCursorObj = text.gameObject;
 
-                RectTransform rect = s_resizeCursorObj.GetComponent<RectTransform>();
+                RectTransform rect = resizeCursorObj.GetComponent<RectTransform>();
                 rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 64);
                 rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 64);
 
-                s_resizeCursorObj.SetActive(false);
+                resizeCursorObj.SetActive(false);
             }
             catch (Exception e)
             {

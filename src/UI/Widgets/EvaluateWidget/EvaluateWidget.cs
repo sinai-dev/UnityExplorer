@@ -42,8 +42,6 @@ namespace UnityExplorer.UI.Widgets
             SetArgRows();
 
             this.UIRoot.SetActive(true);
-
-            InspectorManager.OnInspectedTabsChanged += InspectorManager_OnInspectedTabsChanged;
         }
 
         public void OnReturnToPool()
@@ -63,14 +61,6 @@ namespace UnityExplorer.UI.Widgets
             genericHandlers = null;
 
             this.Owner = null;
-
-            InspectorManager.OnInspectedTabsChanged -= InspectorManager_OnInspectedTabsChanged;
-        }
-
-        private void InspectorManager_OnInspectedTabsChanged()
-        {
-            foreach (var handler in this.paramHandlers)
-                handler.PopulateDropdown();
         }
 
         public Type[] TryParseGenericArguments()

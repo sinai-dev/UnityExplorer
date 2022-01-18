@@ -95,7 +95,7 @@ namespace UnityExplorer.CacheObject
         private static readonly Color evalEnabledColor = new Color(0.15f, 0.25f, 0.15f);
         private static readonly Color evalDisabledColor = new Color(0.15f, 0.15f, 0.15f);
 
-        protected override bool SetCellEvaluateState(CacheObjectCell objectcell)
+        protected override bool TryAutoEvaluateIfUnitialized(CacheObjectCell objectcell)
         {
             var cell = objectcell as CacheMemberCell;
 
@@ -126,13 +126,13 @@ namespace UnityExplorer.CacheObject
                 SetValueState(cell, ValueStateArgs.Default);
                 cell.RefreshSubcontentButton();
 
-                return true;
+                return false;
             }
 
             if (State == ValueState.NotEvaluated)
                 Evaluate();
 
-            return false;
+            return true;
         }
 
         public void OnEvaluateClicked()
@@ -148,7 +148,7 @@ namespace UnityExplorer.CacheObject
                     this.Evaluator = Pool<EvaluateWidget>.Borrow();
                     Evaluator.OnBorrowedFromPool(this);
                     Evaluator.UIRoot.transform.SetParent((CellView as CacheMemberCell).EvaluateHolder.transform, false);
-                    SetCellEvaluateState(CellView);
+                    TryAutoEvaluateIfUnitialized(CellView);
                 }
                 else
                 {
@@ -157,7 +157,7 @@ namespace UnityExplorer.CacheObject
                     else
                         Evaluator.UIRoot.SetActive(true);
 
-                    SetCellEvaluateState(CellView);
+                    TryAutoEvaluateIfUnitialized(CellView);
                 }
             }
         }
