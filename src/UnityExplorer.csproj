@@ -106,11 +106,14 @@
       <HintPath>..\lib\mcs-unity\mcs\bin\Release\mcs.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Tomlet, Version=3.1.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\Samboy063.Tomlet.3.1.3\lib\net35\Tomlet.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
   </ItemGroup>
+    <!-- Non-MelonLoader (it includes Tomlet) -->
+    <ItemGroup Condition="'$(IsMelonLoader)'=='false'">
+        <Reference Include="Tomlet, Version=3.1.3.0, Culture=neutral, processorArchitecture=MSIL">
+            <HintPath>packages\Samboy063.Tomlet.3.1.3\lib\net35\Tomlet.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+    </ItemGroup>
   <!-- MelonLoader refs -->
   <ItemGroup Condition="'$(IsMelonLoader)'=='true'">
     <Reference Include="MelonLoader">

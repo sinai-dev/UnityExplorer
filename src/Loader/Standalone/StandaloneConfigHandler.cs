@@ -4,22 +4,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityExplorer.Config;
-using IniParser.Parser;
 using System.IO;
 using UnityEngine;
+using Tomlet;
+using Tomlet.Models;
 
 namespace UnityExplorer.Loader.STANDALONE
 {
     public class StandaloneConfigHandler : ConfigHandler
     {
-        internal static IniDataParser _parser;
         internal static string CONFIG_PATH;
 
         public override void Init()
         {
-            CONFIG_PATH = Path.Combine(ExplorerCore.Loader.ExplorerFolder, "config.ini");
-            _parser = new IniDataParser();
-            _parser.Configuration.CommentString = "#";
+            CONFIG_PATH = Path.Combine(ExplorerCore.Loader.ExplorerFolder, "config.cfg");
         }
 
         public override void LoadConfig()
@@ -52,14 +50,11 @@ namespace UnityExplorer.Loader.STANDALONE
                 if (!File.Exists(CONFIG_PATH))
                     return false;
 
-                string ini = File.ReadAllText(CONFIG_PATH);
-
-                var data = _parser.Parse(ini);
-
-                foreach (var config in data.Sections["Config"])
+                var document = TomlParser.ParseFile(CONFIG_PATH);
+                foreach (var key in document.Keys)
                 {
-                    if (ConfigManager.ConfigElements.TryGetValue(config.KeyName, out IConfigElement configElement))
-                        configElement.BoxedValue = StringToConfigValue(config.Value, configElement.ElementType);
+                    var config = ConfigManager.ConfigElements[key];
+                    config.BoxedValue = StringToConfigValue(document.GetValue(key).StringValue, config.ElementType);
                 }
 
                 return true;
@@ -89,18 +84,14 @@ namespace UnityExplorer.Loader.STANDALONE
 
         public override void SaveConfig()
         {
-            var data = new IniParser.Model.IniData();
-
-            data.Sections.AddSection("Config");
-            var sec = data.Sections["Config"];
-
-            foreach (var entry in ConfigManager.ConfigElements)
-                sec.AddKey(entry.Key, entry.Value.BoxedValue.ToString());
+            var document = TomlDocument.CreateEmpty();
+            foreach (var config in ConfigManager.ConfigElements)
+                document.Put(config.Key, config.Value.BoxedValue.ToString());
 
             if (!Directory.Exists(ExplorerCore.Loader.ExplorerFolder))
                 Directory.CreateDirectory(ExplorerCore.Loader.ExplorerFolder);
 
-            File.WriteAllText(CONFIG_PATH, data.ToString());
+            File.WriteAllText(CONFIG_PATH, document.SerializedValue);
         }
     }
 }
