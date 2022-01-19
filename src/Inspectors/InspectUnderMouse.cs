@@ -208,9 +208,5 @@ namespace UnityExplorer.Inspectors
 
             UIRoot.SetActive(false);
         }
-
-        public override void DoSaveToConfigElement() { }
-
-        public override string GetSaveDataFromConfigManager() => null;
     }
 }

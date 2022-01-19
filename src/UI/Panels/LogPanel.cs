@@ -144,18 +144,6 @@ namespace UnityExplorer.UI.Panels
             RuntimeProvider.Instance.SetColorBlock(cell.Input.Component, color);
         }
 
-        // Panel save data
-
-        public override string GetSaveDataFromConfigManager()
-        {
-            return ConfigManager.ConsoleLogData.Value;
-        }
-
-        public override void DoSaveToConfigElement()
-        {
-            ConfigManager.ConsoleLogData.Value = this.ToSaveData();
-        }
-
         protected internal override void DoSetDefaultPosAndAnchors()
         {
             Rect.localPosition = Vector2.zero;

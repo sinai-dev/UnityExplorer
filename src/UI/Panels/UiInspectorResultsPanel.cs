@@ -72,8 +72,5 @@ namespace UnityExplorer.UI.Panels
             this.Rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 500f);
             this.Rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 500f);
         }
-
-        public override void DoSaveToConfigElement() { }
-        public override string GetSaveDataFromConfigManager() => null;
     }
 }

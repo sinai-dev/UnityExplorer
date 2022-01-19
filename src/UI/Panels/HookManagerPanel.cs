@@ -46,10 +46,6 @@ namespace UnityExplorer.UI.Panels
         public Text EditorInputText { get; private set; }
         public Text EditorHighlightText { get; private set; }
 
-        public override string GetSaveDataFromConfigManager() => ConfigManager.HookManagerData.Value;
-
-        public override void DoSaveToConfigElement() => ConfigManager.HookManagerData.Value = this.ToSaveData();
-
         private void OnClassInputAddClicked()
         {
             HookManager.Instance.OnClassSelectedForHooks(this.classSelectorInputField.Text);

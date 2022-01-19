@@ -12,10 +12,14 @@ namespace UnityExplorer.Config
 {
     public static class ConfigManager
     {
+        internal static readonly Dictionary<string, IConfigElement> ConfigElements = new();
+        internal static readonly Dictionary<string, IConfigElement> InternalConfigs = new();
+
         // Each Mod Loader has its own ConfigHandler.
         // See the UnityExplorer.Loader namespace for the implementations.
         public static ConfigHandler Handler { get; private set; }
 
+        // Actual UE Settings
         public static ConfigElement<KeyCode> Master_Toggle;
         public static ConfigElement<UIManager.VerticalAnchor> Main_Navbar_Anchor;
         public static ConfigElement<bool> Force_Unlock_Mouse;
@@ -26,22 +30,18 @@ namespace UnityExplorer.Config
         public static ConfigElement<bool> Log_Unity_Debug;
         public static ConfigElement<bool> Hide_On_Startup;
         public static ConfigElement<float> Startup_Delay_Time;
-
         public static ConfigElement<string> Reflection_Signature_Blacklist;
 
         // internal configs
         internal static InternalConfigHandler InternalHandler { get; private set; }
+        internal static readonly Dictionary<UIManager.Panels, ConfigElement<string>> PanelSaveData = new();
 
-        public static ConfigElement<string> ObjectExplorerData;
-        public static ConfigElement<string> InspectorData;
-        public static ConfigElement<string> CSConsoleData;
-        public static ConfigElement<string> OptionsPanelData;
-        public static ConfigElement<string> ConsoleLogData;
-        public static ConfigElement<string> HookManagerData;
-        public static ConfigElement<string> ClipboardData;
-
-        internal static readonly Dictionary<string, IConfigElement> ConfigElements = new Dictionary<string, IConfigElement>();
-        internal static readonly Dictionary<string, IConfigElement> InternalConfigs = new Dictionary<string, IConfigElement>();
+        internal static ConfigElement<string> GetPanelSaveData(UIManager.Panels panel)
+        {
+            if (!PanelSaveData.ContainsKey(panel))
+                PanelSaveData.Add(panel, new ConfigElement<string>(panel.ToString(), string.Empty, string.Empty, true));
+            return PanelSaveData[panel];
+        }
 
         public static void Init(ConfigHandler configHandler)
         {
@@ -124,16 +124,6 @@ namespace UnityExplorer.Config
                 "Seperate signatures with a semicolon ';'.\r\n" +
                 "For example, to blacklist Camera.main, you would add 'UnityEngine.Camera.main;'",
                 "");
-
-            // Internal configs (panel save data)
-
-            ObjectExplorerData = new ConfigElement<string>("ObjectExplorer", "", "", true);
-            InspectorData = new ConfigElement<string>("Inspector", "", "", true);
-            CSConsoleData = new ConfigElement<string>("CSConsole", "", "", true);
-            OptionsPanelData = new ConfigElement<string>("OptionsPanel", "", "", true);
-            ConsoleLogData = new ConfigElement<string>("ConsoleLog", "", "", true);
-            HookManagerData = new ConfigElement<string>("HookManager", "", "", true);
-            ClipboardData = new ConfigElement<string>("Clipboard", "", "", true);
         }
     }
 }

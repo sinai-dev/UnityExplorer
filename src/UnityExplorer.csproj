@@ -106,8 +106,8 @@
       <HintPath>..\lib\mcs-unity\mcs\bin\Release\mcs.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="INIFileParser, Version=2.5.2.0, Culture=neutral, PublicKeyToken=79af7b307b65cf3c, processorArchitecture=MSIL">
-      <HintPath>packages\ini-parser.2.5.2\lib\net20\INIFileParser.dll</HintPath>
+    <Reference Include="Tomlet, Version=3.1.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Samboy063.Tomlet.3.1.3\lib\net35\Tomlet.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

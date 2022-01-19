@@ -27,8 +27,6 @@ namespace UnityExplorer.UI.Panels
         public override bool NavButtonWanted => true;
         public override bool ShouldSaveActiveState => true;
         public override bool ShowByDefault => true;
-        public override string GetSaveDataFromConfigManager() => ConfigManager.ClipboardData.Value;
-        public override void DoSaveToConfigElement() => ConfigManager.ClipboardData.Value = this.ToSaveData();
 
         private static Text CurrentPasteLabel;
 

@@ -55,15 +55,6 @@ namespace UnityExplorer.UI.Panels
             ConsoleController.Update();
         }
 
-        // Saving
-
-        public override void DoSaveToConfigElement()
-        {
-            ConfigManager.CSConsoleData.Value = this.ToSaveData();
-        }
-
-        public override string GetSaveDataFromConfigManager() => ConfigManager.CSConsoleData.Value;
-
         // UI Construction
 
         public override void OnFinishResize(RectTransform panel)

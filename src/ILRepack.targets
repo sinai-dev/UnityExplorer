@@ -6,9 +6,9 @@
         <ItemGroup>
             <InputAssemblies Include="$(OutputPath)$(AssemblyName).dll" />
             <InputAssemblies Include="..\lib\mcs-unity\mcs\bin\Release\mcs.dll" />
-            <InputAssemblies Include="packages\ini-parser.2.5.2\lib\net20\INIFileParser.dll" />
+            <InputAssemblies Include="packages\Samboy063.Tomlet.3.1.3\lib\net35\Tomlet.dll" />
         </ItemGroup>
-        
+
         <!-- Required references for ILRepack -->
         <ItemGroup>
             <ReferenceFolders Include="packages\HarmonyX.2.5.2\lib\net35\" />

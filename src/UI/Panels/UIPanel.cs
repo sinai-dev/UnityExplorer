@@ -92,19 +92,16 @@ namespace UnityExplorer.UI.Panels
         protected GameObject uiRoot;
         public RectTransform Rect;
         public GameObject content;
-
         public GameObject titleBar;
-
-        public abstract void ConstructPanelContent();
 
         public virtual void OnFinishResize(RectTransform panel)
         {
-            SaveToConfigManager();
+            SaveInternalData();
         }
 
         public virtual void OnFinishDrag(RectTransform panel)
         {
-            SaveToConfigManager();
+            SaveInternalData();
         }
 
         public override void SetActive(bool active)
@@ -115,7 +112,7 @@ namespace UnityExplorer.UI.Panels
             base.SetActive(active);
 
             if (!ApplyingSaveData)
-                SaveToConfigManager();
+                SaveInternalData();
 
             if (NavButtonWanted)
             {
@@ -162,29 +159,30 @@ namespace UnityExplorer.UI.Panels
             panel.localPosition = pos;
         }
 
-        #region Save Data
+        // Save Data
 
-        public abstract void DoSaveToConfigElement();
+        public bool ApplyingSaveData { get; set; }
 
-        public void SaveToConfigManager()
+        public void SaveInternalData()
         {
             if (UIManager.Initializing)
                 return;
 
-            DoSaveToConfigElement();
+            SetSaveDataToConfigValue();
         }
 
-        public abstract string GetSaveDataFromConfigManager();
-
-        public bool ApplyingSaveData { get; set; }
+        private void SetSaveDataToConfigValue() => ConfigManager.GetPanelSaveData(this.PanelType).Value = this.ToSaveData();
 
         public virtual string ToSaveData()
         {
             try
             {
-                return $"{ShouldSaveActiveState && Enabled}" +
-                $"|{Rect.RectAnchorsToString()}" +
-                $"|{Rect.RectPositionToString()}";
+                return string.Join("|", new string[] 
+                { 
+                    $"{ShouldSaveActiveState && Enabled}", 
+                    Rect.RectAnchorsToString(), 
+                    Rect.RectPositionToString() 
+                });
             }
             catch (Exception ex)
             {
@@ -193,7 +191,13 @@ namespace UnityExplorer.UI.Panels
             }
         }
 
-        public virtual void ApplySaveData(string data)
+        public virtual void ApplySaveData()
+        {
+            string data = ConfigManager.GetPanelSaveData(this.PanelType).Value;
+            ApplySaveData(data);
+        }
+
+        protected virtual void ApplySaveData(string data)
         {
             if (string.IsNullOrEmpty(data))
                 return;
@@ -210,16 +214,13 @@ namespace UnityExplorer.UI.Panels
             {
                 ExplorerCore.LogWarning("Invalid or corrupt panel save data! Restoring to default.");
                 SetTransformDefaults();
-                UIManager.Initializing = false;
-                DoSaveToConfigElement();
-                ConfigManager.InternalHandler.SaveConfig();
-                UIManager.Initializing = true;
+                SetSaveDataToConfigValue();
             }
         }
 
-        #endregion
-
         // UI Construction
+
+        public abstract void ConstructPanelContent();
 
         public void ConstructUI()
         {
@@ -275,7 +276,7 @@ namespace UnityExplorer.UI.Panels
             closeBtn.OnClick += () =>
             {
                 UIManager.SetPanelActive(this.PanelType, false);
-                SaveToConfigManager();
+                SaveInternalData();
             };
 
             if (!CanDragAndResize)
@@ -300,7 +301,7 @@ namespace UnityExplorer.UI.Panels
             // apply panel save data or revert to default
             try
             {
-                ApplySaveData(GetSaveDataFromConfigManager());
+                ApplySaveData();
             }
             catch (Exception ex)
             {
@@ -320,7 +321,7 @@ namespace UnityExplorer.UI.Panels
             // simple listener for saving enabled state
             this.OnToggleEnabled += (bool val) =>
             {
-                SaveToConfigManager();
+                SaveInternalData();
             };
 
             ApplyingSaveData = false;

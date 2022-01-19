@@ -55,17 +55,7 @@ namespace UnityExplorer.UI.Panels
             CacheObjectControllerHelper.SetCell(cell, index, this.configEntries, null);
         }
 
-        // Panel save data
-
-        public override string GetSaveDataFromConfigManager()
-        {
-            return ConfigManager.OptionsPanelData.Value;
-        }
-
-        public override void DoSaveToConfigElement()
-        {
-            ConfigManager.OptionsPanelData.Value = this.ToSaveData();
-        }
+        // UI Construction
 
         protected internal override void DoSetDefaultPosAndAnchors()
         {
@@ -75,8 +65,6 @@ namespace UnityExplorer.UI.Panels
             Rect.anchorMax = new Vector2(0.5f, 0.85f);
             Rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 600f);
         }
-
-        // UI Construction
 
         public override void ConstructPanelContent()
         {

@@ -44,10 +44,6 @@ namespace UnityExplorer.UI.Panels
             InspectorManager.OnPanelResized(panel.rect.width);
         }
 
-        public override string GetSaveDataFromConfigManager() => ConfigManager.InspectorData.Value;
-
-        public override void DoSaveToConfigElement() => ConfigManager.InspectorData.Value = this.ToSaveData();
-
         protected internal override void DoSetDefaultPosAndAnchors()
         {
             Rect.localPosition = Vector2.zero;

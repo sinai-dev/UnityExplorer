@@ -46,7 +46,7 @@ namespace UnityExplorer.UI.Panels
             RuntimeProvider.Instance.SetColorBlock(button.Component, UniversalUI.enabledButtonColor, UniversalUI.enabledButtonColor * 1.2f);
 
             SelectedTab = tabIndex;
-            SaveToConfigManager();
+            SaveInternalData();
         }
 
         private void DisableTab(int tabIndex)
@@ -63,21 +63,12 @@ namespace UnityExplorer.UI.Panels
                 ObjectSearch.Update();
         }
 
-        public override string GetSaveDataFromConfigManager() => ConfigManager.ObjectExplorerData.Value;
-
-        public override void DoSaveToConfigElement()
-        {
-            ConfigManager.ObjectExplorerData.Value = this.ToSaveData();
-        }
-
         public override string ToSaveData()
         {
-            string ret = base.ToSaveData();
-            ret += "|" + SelectedTab;
-            return ret;
+            return string.Join("|", new string[] { base.ToSaveData(), SelectedTab.ToString() });
         }
 
-        public override void ApplySaveData(string data)
+        protected override void ApplySaveData(string data)
         {
             base.ApplySaveData(data);
 

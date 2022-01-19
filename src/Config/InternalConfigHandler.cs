@@ -1,24 +1,22 @@
-﻿using IniParser.Parser;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityExplorer.UI;
+using Tomlet;
+using Tomlet.Models;
 
 namespace UnityExplorer.Config
 {
     public class InternalConfigHandler : ConfigHandler
     {
-        internal static IniDataParser _parser;
-        internal static string INI_PATH;
+        internal static string CONFIG_PATH;
 
         public override void Init()
         {
-            INI_PATH = Path.Combine(ExplorerCore.Loader.ExplorerFolder, "data.ini");
-            _parser = new IniDataParser();
-            _parser.Configuration.CommentString = "#";
+            CONFIG_PATH = Path.Combine(ExplorerCore.Loader.ExplorerFolder, "data.cfg");
         }
 
         public override void LoadConfig()
@@ -37,32 +35,24 @@ namespace UnityExplorer.Config
             // Not necessary
         }
 
-        public override T GetConfigValue<T>(ConfigElement<T> element)
-        {
-            // Not necessary, just return the value.
-            return element.Value;
-        }
+        // Not necessary, just return the value.
+        public override T GetConfigValue<T>(ConfigElement<T> element) => element.Value;
 
-        public override void OnAnyConfigChanged()
-        {
-            SaveConfig();
-        }
+        // Always just auto-save.
+        public override void OnAnyConfigChanged() => SaveConfig();
 
         public bool TryLoadConfig()
         {
             try
             {
-                if (!File.Exists(INI_PATH))
+                if (!File.Exists(CONFIG_PATH))
                     return false;
 
-                string ini = File.ReadAllText(INI_PATH);
-
-                var data = _parser.Parse(ini);
-
-                foreach (var config in data.Sections["Config"])
+                TomlDocument document = TomlParser.ParseFile(CONFIG_PATH);
+                foreach (var key in document.Keys)
                 {
-                    if (ConfigManager.InternalConfigs.TryGetValue(config.KeyName, out IConfigElement configElement))
-                        configElement.BoxedValue = StringToConfigValue(config.Value, configElement.ElementType);
+                    var panelKey = (UIManager.Panels)Enum.Parse(typeof(UIManager.Panels), key);
+                    ConfigManager.GetPanelSaveData(panelKey).Value = document.GetString(key);
                 }
 
                 return true;
@@ -79,27 +69,11 @@ namespace UnityExplorer.Config
             if (UIManager.Initializing)
                 return;
 
-            var data = new IniParser.Model.IniData();
-
-            data.Sections.AddSection("Config");
-            var sec = data.Sections["Config"];
-
+            var tomlDocument = TomlDocument.CreateEmpty();
             foreach (var entry in ConfigManager.InternalConfigs)
-                sec.AddKey(entry.Key, entry.Value.BoxedValue.ToString());
+                tomlDocument.Put(entry.Key, entry.Value.BoxedValue as string, false);
 
-            File.WriteAllText(INI_PATH, data.ToString());
-        }
-
-        public object StringToConfigValue(string value, Type elementType)
-        {
-            if (elementType.IsEnum)
-                return Enum.Parse(elementType, value);
-            else if (elementType == typeof(bool))
-                return bool.Parse(value);
-            else if (elementType == typeof(int))
-                return int.Parse(value);
-            else
-                return value;
+            File.WriteAllText(CONFIG_PATH, tomlDocument.SerializedValue);
         }
     }
 }
