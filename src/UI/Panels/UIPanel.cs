@@ -11,6 +11,7 @@ using UnityExplorer.UI.Widgets;
 using UniverseLib.UI.Models;
 using UniverseLib.UI;
 using UniverseLib;
+using System.Collections;
 
 namespace UnityExplorer.UI.Panels
 {
@@ -150,8 +151,8 @@ namespace UnityExplorer.UI.Panels
             var pos = panel.localPosition;
 
             // Prevent panel going oustide screen bounds
-            var halfW = Screen.width * 0.5f;
-            var halfH = Screen.height * 0.5f;
+            var halfW = DisplayManager.Width * 0.5f;
+            var halfH = DisplayManager.Height * 0.5f;
 
             pos.x = Math.Max(-halfW - panel.rect.width + 50, Math.Min(pos.x, halfW - 50));
             pos.y = Math.Max(-halfH + 50, Math.Min(pos.y, halfH));
@@ -309,14 +310,7 @@ namespace UnityExplorer.UI.Panels
                 SetTransformDefaults();
             }
 
-            LayoutRebuilder.ForceRebuildLayoutImmediate(this.Rect);
-
-            // ensure initialized position is valid
-            EnsureValidSize();
-            EnsureValidPosition(this.Rect);
-
-            // update dragger and save data
-            Dragger.OnEndResize();
+            RuntimeProvider.Instance.StartCoroutine(LateSetupCoroutine());
 
             // simple listener for saving enabled state
             this.OnToggleEnabled += (bool val) =>
@@ -325,6 +319,18 @@ namespace UnityExplorer.UI.Panels
             };
 
             ApplyingSaveData = false;
+        }
+
+        private IEnumerator LateSetupCoroutine()
+        {
+            yield return null;
+
+            // ensure initialized position is valid
+            EnsureValidSize();
+            EnsureValidPosition(this.Rect);
+
+            // update dragger and save data
+            Dragger.OnEndResize();
         }
 
         public override void ConstructUI(GameObject parent) => ConstructUI();
@@ -381,7 +387,7 @@ namespace UnityExplorer.UI.Panels
 
             return string.Format(CultureInfo.InvariantCulture, "{0},{1}", new object[]
             {
-                rect.localPosition.x, rect.localPosition.y
+                rect.anchoredPosition.x, rect.anchoredPosition.y
             });
         }
 
@@ -399,10 +405,10 @@ namespace UnityExplorer.UI.Panels
             if (split.Length != 2)
                 throw new Exception($"stringPosition split is unexpected length: {split.Length}");
 
-            Vector3 vector = rect.localPosition;
+            Vector3 vector = rect.anchoredPosition;
             vector.x = float.Parse(split[0], CultureInfo.InvariantCulture);
             vector.y = float.Parse(split[1], CultureInfo.InvariantCulture);
-            rect.localPosition = vector;
+            rect.anchoredPosition = vector;
         }
     }
 

@@ -260,7 +260,7 @@ namespace UnityExplorer.UI.Panels
 
         #region RESIZE
 
-        private readonly Dictionary<ResizeTypes, Rect> m_resizeMask = new Dictionary<ResizeTypes, Rect>
+        private readonly Dictionary<ResizeTypes, Rect> m_resizeMask = new()
         {
             { ResizeTypes.Top,      default },
             { ResizeTypes.Left,     default },
@@ -413,13 +413,13 @@ namespace UnityExplorer.UI.Panels
             if ((Vector2)mousePos == lastResizePos)
                 return;
 
-            if (mousePos.x < 0 || mousePos.y < 0 || mousePos.x > Screen.width || mousePos.y > Screen.height)
+            if (mousePos.x < 0 || mousePos.y < 0 || mousePos.x > DisplayManager.Width || mousePos.y > DisplayManager.Height)
                 return;
 
             lastResizePos = mousePos;
 
-            float diffX = (float)((decimal)diff.x / Screen.width);
-            float diffY = (float)((decimal)diff.y / Screen.height);
+            float diffX = (float)((decimal)diff.x / DisplayManager.Width);
+            float diffY = (float)((decimal)diff.y / DisplayManager.Height);
 
             Vector2 anchorMin = Panel.anchorMin;
             Vector2 anchorMax = Panel.anchorMax;

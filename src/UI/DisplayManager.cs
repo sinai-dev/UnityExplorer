@@ -13,6 +13,11 @@ namespace UnityExplorer.UI
         public static int ActiveDisplayIndex { get; private set; }
         public static Display ActiveDisplay => Display.displays[ActiveDisplayIndex];
 
+        public static int Width => ActiveDisplay.renderingWidth;
+        public static int Height => ActiveDisplay.renderingHeight;
+
+        public static Vector3 MousePosition => Display.RelativeMouseAt(InputManager.MousePosition);
+
         private static Camera canvasCamera;
 
         internal static void Init()
@@ -20,8 +25,6 @@ namespace UnityExplorer.UI
             SetDisplay(ConfigManager.Target_Display.Value);
             ConfigManager.Target_Display.OnValueChanged += SetDisplay;
         }
-
-        public static Vector3 MousePosition => Display.RelativeMouseAt(InputManager.MousePosition);
 
         public static void SetDisplay(int display)
         {
