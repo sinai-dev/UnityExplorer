@@ -1,19 +1,10 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityExplorer.Config;
 using UnityExplorer.CSConsole;
 using UnityExplorer.Inspectors;
 using UnityExplorer.UI.Panels;
-using UnityExplorer.UI.Widgets;
 using UnityExplorer.UI.Widgets.AutoComplete;
 using UniverseLib;
 using UniverseLib.Input;
@@ -48,10 +39,10 @@ namespace UnityExplorer.UI
 
         public static bool Initializing { get; internal set; } = true;
 
-        private static UIBase uiBase;
-        public static GameObject UIRoot => uiBase?.RootObject;
-        public static RectTransform UIRootRect => _uiRootRect ??= UIRoot.GetComponent<RectTransform>();
-        private static RectTransform _uiRootRect;
+        internal static UIBase UiBase { get; private set; }
+        public static GameObject UIRoot => UiBase?.RootObject;
+        public static RectTransform UIRootRect { get; private set; }
+        public static Canvas UICanvas { get; private set; }
 
         internal static GameObject PanelHolder { get; private set; }
         private static readonly Dictionary<Panels, UIPanel> UIPanels = new();
@@ -71,10 +62,10 @@ namespace UnityExplorer.UI
 
         public static bool ShowMenu
         {
-            get => uiBase != null && uiBase.Enabled;
+            get => UiBase != null && UiBase.Enabled;
             set
             {
-                if (uiBase == null || !UIRoot || uiBase.Enabled == value)
+                if (UiBase == null || !UIRoot || UiBase.Enabled == value)
                     return;
 
                 UniversalUI.SetUIActive(ExplorerCore.GUID, value);
@@ -85,11 +76,16 @@ namespace UnityExplorer.UI
 
         internal static void InitUI()
         {
-            uiBase = UniversalUI.RegisterUI(ExplorerCore.GUID, Update);
+            UiBase = UniversalUI.RegisterUI(ExplorerCore.GUID, Update);
 
-            lastScreenWidth = Screen.width;
-            lastScreenHeight = Screen.height;
+            UIRootRect = UIRoot.GetComponent<RectTransform>();
+            UICanvas = UIRoot.GetComponent<Canvas>();
 
+            DisplayManager.Init();
+
+            var display = DisplayManager.ActiveDisplay;
+            lastScreenWidth = display.renderingWidth;
+            lastScreenHeight = display.renderingHeight;
 
             // Create UI.
             CreatePanelHolder();
@@ -169,7 +165,8 @@ namespace UnityExplorer.UI
             }
 
             // check screen dimension change
-            if (Screen.width != lastScreenWidth || Screen.height != lastScreenHeight)
+            var display = DisplayManager.ActiveDisplay;
+            if (display.renderingWidth != lastScreenWidth || display.renderingHeight != lastScreenHeight)
                 OnScreenDimensionsChanged();
         }
 
@@ -233,8 +230,9 @@ namespace UnityExplorer.UI
 
         private static void OnScreenDimensionsChanged()
         {
-            lastScreenWidth = Screen.width;
-            lastScreenHeight = Screen.height;
+            var display = DisplayManager.ActiveDisplay;
+            lastScreenWidth = display.renderingWidth;
+            lastScreenHeight = display.renderingHeight;
 
             foreach (var panel in UIPanels)
             {
@@ -253,6 +251,8 @@ namespace UnityExplorer.UI
         {
             closeBtn.ButtonText.text = val.ToString();
         }
+
+        // Time controls
 
         private static void OnTimeInputEndEdit(string val)
         {

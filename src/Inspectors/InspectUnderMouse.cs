@@ -31,24 +31,18 @@ namespace UnityExplorer.Inspectors
         public static bool Inspecting { get; set; }
         public static MouseInspectMode Mode { get; set; }
 
+        public MouseInspectorBase CurrentInspector => Mode switch
+        {
+            MouseInspectMode.UI => uiInspector,
+            MouseInspectMode.World => worldInspector,
+            _ => null,
+        };
+
         private static Vector3 lastMousePos;
 
-        public MouseInspectorBase CurrentInspector
-        {
-            get
-            {
-                switch (Mode)
-                {
-                    case MouseInspectMode.UI:
-                        return uiInspector;
-                    case MouseInspectMode.World:
-                        return worldInspector;
-                }
-                return null;
-            }
-        }
-
         // UIPanel
+        private UIBase inspectorUIBase;
+
         public override string Name => "Inspect Under Mouse";
         public override UIManager.Panels PanelType => UIManager.Panels.MouseInspector;
         public override int MinWidth => -1;
@@ -164,7 +158,7 @@ namespace UnityExplorer.Inspectors
                 mousePos.y -= 10;
 
             // calculate and set our UI position
-            var inversePos = UIManager.UIRoot.transform.InverseTransformPoint(mousePos);
+            var inversePos = inspectorUIBase.RootObject.transform.InverseTransformPoint(mousePos);
             UIRoot.transform.localPosition = new Vector3(inversePos.x, inversePos.y, 0);
         }
 
@@ -207,6 +201,12 @@ namespace UnityExplorer.Inspectors
             UIFactory.SetLayoutElement(objPathLabel.gameObject, minHeight: 75);
 
             UIRoot.SetActive(false);
+
+            // Create a new canvas for this panel to live on.
+            // It needs to always be shown on the main display, other panels can move displays.
+
+            inspectorUIBase = UniversalUI.RegisterUI($"{ExplorerCore.GUID}.MouseInspector", null);
+            UIRoot.transform.SetParent(inspectorUIBase.RootObject.transform);
         }
     }
 }

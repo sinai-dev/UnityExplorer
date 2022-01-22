@@ -107,13 +107,13 @@
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-    <!-- Non-MelonLoader (it includes Tomlet) -->
-    <ItemGroup Condition="'$(IsMelonLoader)'=='false'">
-        <Reference Include="Tomlet, Version=3.1.3.0, Culture=neutral, processorArchitecture=MSIL">
-            <HintPath>packages\Samboy063.Tomlet.3.1.3\lib\net35\Tomlet.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-    </ItemGroup>
+  <!-- Non-MelonLoader (it includes Tomlet) -->
+  <ItemGroup Condition="'$(IsMelonLoader)'=='false'">
+    <Reference Include="Tomlet, Version=3.1.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Samboy063.Tomlet.3.1.3\lib\net35\Tomlet.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
   <!-- MelonLoader refs -->
   <ItemGroup Condition="'$(IsMelonLoader)'=='true'">
     <Reference Include="MelonLoader">
@@ -259,6 +259,7 @@
     <Compile Include="CacheObject\Views\CacheListEntryCell.cs" />
     <Compile Include="CacheObject\Views\CacheMemberCell.cs" />
     <Compile Include="CacheObject\Views\CacheObjectCell.cs" />
+    <Compile Include="UI\DisplayManager.cs" />
     <Compile Include="UI\Notification.cs" />
     <Compile Include="UI\Panels\ClipboardPanel.cs" />
     <Compile Include="UI\Widgets\AutoComplete\EnumCompleter.cs" />

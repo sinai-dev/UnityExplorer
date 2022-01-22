@@ -21,6 +21,7 @@ namespace UnityExplorer.Config
 
         // Actual UE Settings
         public static ConfigElement<KeyCode> Master_Toggle;
+        public static ConfigElement<int> Target_Display;
         public static ConfigElement<UIManager.VerticalAnchor> Main_Navbar_Anchor;
         public static ConfigElement<bool> Force_Unlock_Mouse;
         public static ConfigElement<KeyCode> Force_Unlock_Toggle;
@@ -78,6 +79,11 @@ namespace UnityExplorer.Config
             Master_Toggle = new ConfigElement<KeyCode>("UnityExplorer Toggle",
                 "The key to enable or disable UnityExplorer's menu and features.",
                 KeyCode.F7);
+
+            Target_Display = new ConfigElement<int>("Target Display",
+                "The monitor index for UnityExplorer to use, if you have multiple. 0 is the default display, 1 is secondary, etc. " +
+                "A restart is required to deactivate extra windows.",
+                0);
 
             Main_Navbar_Anchor = new ConfigElement<UIManager.VerticalAnchor>("Main Navbar Anchor",
                 "The vertical anchor of the main UnityExplorer Navbar, in case you want to move it.",

@@ -27,7 +27,7 @@ namespace UnityExplorer.UI
             _currentNotification = message;
             _timeOfLastNotification = Time.realtimeSinceStartup;
 
-            popupLabel.transform.localPosition = UIManager.UIRootRect.InverseTransformPoint(InputManager.MousePosition) + (Vector3.up * 25);
+            popupLabel.transform.localPosition = UIManager.UIRootRect.InverseTransformPoint(DisplayManager.MousePosition) + (Vector3.up * 25);
         }
 
         public static void Update()

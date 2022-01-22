@@ -78,7 +78,7 @@ namespace UnityExplorer.UI.Panels
             else
                 state = MouseState.NotPressed;
 
-            var mousePos = InputManager.MousePosition;
+            var mousePos = DisplayManager.MousePosition;
 
             handledInstanceThisFrame = false;
             foreach (var instance in Instances)
@@ -234,12 +234,12 @@ namespace UnityExplorer.UI.Panels
         {
             wasAnyDragging = true;
             WasDragging = true;
-            lastDragPosition = InputManager.MousePosition;
+            lastDragPosition = DisplayManager.MousePosition;
         }
 
         public void OnDrag()
         {
-            var mousePos = InputManager.MousePosition;
+            var mousePos = DisplayManager.MousePosition;
 
             Vector2 diff = (Vector2)mousePos - lastDragPosition;
             lastDragPosition = mousePos;
@@ -388,7 +388,7 @@ namespace UnityExplorer.UI.Panels
         // update the resize icon position to be above the mouse
         private void UpdateHoverImagePos()
         {
-            resizeCursorObj.transform.localPosition = UIManager.UIRootRect.InverseTransformPoint(InputManager.MousePosition);
+            resizeCursorObj.transform.localPosition = UIManager.UIRootRect.InverseTransformPoint(DisplayManager.MousePosition);
         }
 
         public void OnHoverResizeEnd()
@@ -400,14 +400,14 @@ namespace UnityExplorer.UI.Panels
         public void OnBeginResize(ResizeTypes resizeType)
         {
             currentResizeType = resizeType;
-            lastResizePos = InputManager.MousePosition;
+            lastResizePos = DisplayManager.MousePosition;
             WasResizing = true;
             Resizing = true;
         }
 
         public void OnResize()
         {
-            Vector3 mousePos = InputManager.MousePosition;
+            Vector3 mousePos = DisplayManager.MousePosition;
             Vector2 diff = lastResizePos - (Vector2)mousePos;
 
             if ((Vector2)mousePos == lastResizePos)

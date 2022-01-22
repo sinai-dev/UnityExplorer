@@ -35,7 +35,7 @@ namespace UnityExplorer.UI.Panels
             if (InputManager.GetMouseButtonDown(0) || InputManager.GetMouseButtonDown(1))
             {
                 int count = UIManager.PanelHolder.transform.childCount;
-                var mousePos = InputManager.MousePosition;
+                var mousePos = DisplayManager.MousePosition;
                 bool clickedInAny = false;
 
                 for (int i = count - 1; i >= 0; i--)
