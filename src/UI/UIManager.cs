@@ -45,7 +45,7 @@ namespace UnityExplorer.UI
         public static Canvas UICanvas { get; private set; }
 
         internal static GameObject PanelHolder { get; private set; }
-        private static readonly Dictionary<Panels, UIPanel> UIPanels = new();
+        internal static readonly Dictionary<Panels, UIPanel> UIPanels = new();
 
         public static RectTransform NavBarRect;
         public static GameObject NavbarTabButtonHolder;

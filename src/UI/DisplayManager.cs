@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityExplorer.Config;
+using UniverseLib;
 using UniverseLib.Input;
 
 namespace UnityExplorer.UI
@@ -56,6 +58,21 @@ namespace UnityExplorer.UI
                     canvasCamera.hideFlags = HideFlags.HideAndDontSave;
                 }
                 canvasCamera.targetDisplay = display;
+            }
+
+            RuntimeProvider.Instance.StartCoroutine(FixPanels());
+        }
+
+        private static IEnumerator FixPanels()
+        {
+            yield return null;
+            yield return null;
+
+            foreach (var panel in UIManager.UIPanels.Values)
+            {
+                panel.EnsureValidSize();
+                panel.EnsureValidPosition();
+                panel.Dragger.OnEndResize();
             }
         }
     }

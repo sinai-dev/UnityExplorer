@@ -146,6 +146,8 @@ namespace UnityExplorer.UI.Panels
                 Rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, MinHeight);
         }
 
+        public void EnsureValidPosition() => EnsureValidPosition(this.Rect);
+
         public static void EnsureValidPosition(RectTransform panel)
         {
             var pos = panel.localPosition;
