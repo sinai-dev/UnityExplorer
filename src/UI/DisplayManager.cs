@@ -19,6 +19,7 @@ namespace UnityExplorer.UI
         public static int Height => ActiveDisplay.renderingHeight;
 
         public static Vector3 MousePosition => Display.RelativeMouseAt(InputManager.MousePosition);
+        public static bool MouseInTargetDisplay => MousePosition.z == ActiveDisplayIndex;
 
         private static Camera canvasCamera;
 

@@ -33,7 +33,8 @@ namespace UnityExplorer.UI.Panels
                 return;
 
             // if the user is clicking
-            if (InputManager.GetMouseButtonDown(0) || InputManager.GetMouseButtonDown(1))
+            if (DisplayManager.MouseInTargetDisplay 
+                && (InputManager.GetMouseButtonDown(0) || InputManager.GetMouseButtonDown(1)))
             {
                 int count = UIManager.PanelHolder.transform.childCount;
                 var mousePos = DisplayManager.MousePosition;

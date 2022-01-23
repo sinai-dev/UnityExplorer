@@ -67,6 +67,9 @@ namespace UnityExplorer.UI.Panels
 
         public static void UpdateInstances()
         {
+            if (!DisplayManager.MouseInTargetDisplay)
+                return;
+
             if (!resizeCursorObj)
                 CreateCursorUI();
 
