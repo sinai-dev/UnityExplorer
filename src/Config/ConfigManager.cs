@@ -82,7 +82,7 @@ namespace UnityExplorer.Config
 
             Target_Display = new ConfigElement<int>("Target Display",
                 "The monitor index for UnityExplorer to use, if you have multiple. 0 is the default display, 1 is secondary, etc. " +
-                "A restart is required to deactivate extra windows.",
+                "Restart recommended when changing this setting. Make sure your extra monitors are the same resolution as your primary monitor.",
                 0);
 
             Main_Navbar_Anchor = new ConfigElement<UIManager.VerticalAnchor>("Main Navbar Anchor",
