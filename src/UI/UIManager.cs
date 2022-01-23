@@ -69,6 +69,7 @@ namespace UnityExplorer.UI
                     return;
 
                 UniversalUI.SetUIActive(ExplorerCore.GUID, value);
+                UniversalUI.SetUIActive(InspectUnderMouse.UIBaseGUID, value);
             }
         }
 

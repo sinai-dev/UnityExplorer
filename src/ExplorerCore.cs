@@ -10,6 +10,7 @@ using UnityExplorer.ObjectExplorer;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.Runtime;
 using UniverseLib.Input;
+using UniverseLib.UI;
 
 namespace UnityExplorer
 {

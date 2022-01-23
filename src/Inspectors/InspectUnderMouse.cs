@@ -41,6 +41,7 @@ namespace UnityExplorer.Inspectors
         private static Vector3 lastMousePos;
 
         // UIPanel
+        internal static readonly string UIBaseGUID = $"{ExplorerCore.GUID}.MouseInspector";
         private UIBase inspectorUIBase;
 
         public override string Name => "Inspect Under Mouse";
@@ -205,7 +206,7 @@ namespace UnityExplorer.Inspectors
             // Create a new canvas for this panel to live on.
             // It needs to always be shown on the main display, other panels can move displays.
 
-            inspectorUIBase = UniversalUI.RegisterUI($"{ExplorerCore.GUID}.MouseInspector", null);
+            inspectorUIBase = UniversalUI.RegisterUI(UIBaseGUID, null);
             UIRoot.transform.SetParent(inspectorUIBase.RootObject.transform);
         }
     }
