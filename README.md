@@ -57,7 +57,7 @@ Although UnityExplorer should work out of the box for most Unity games, in some 
 To adjust the settings, open the config file:
 * BepInEx: `BepInEx\config\com.sinai.unityexplorer.cfg`
 * MelonLoader: `UserData\MelonPreferences.cfg`
-* Standalone: `UnityExplorer\config.ini`
+* Standalone: `UnityExplorer\config.cfg`
 
 Try adjusting the following settings and see if it fixes your issues:
 * `Startup_Delay_Time` - increase to 5-10 seconds (or more as needed), can fix issues with UnityExplorer being destroyed or corrupted during startup.
@@ -126,7 +126,7 @@ The inspector is used to see detailed information on objects of any type and man
 * You can change the settings via the "Options" tab of the menu, or directly from the config file.
   * BepInEx: `BepInEx\config\com.sinai.unityexplorer.cfg`
   * MelonLoader: `UserData\MelonPreferences.cfg`
-  * Standalone `{DLL_location}\UnityExplorer\config.ini`
+  * Standalone `{DLL_location}\UnityExplorer\config.cfg`
 
 # Building
 
