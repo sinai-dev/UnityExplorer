@@ -24,9 +24,9 @@ namespace UnityExplorer.ObjectExplorer
             Parent = parent;
         }
 
-        private SearchContext m_context = SearchContext.UnityObject;
-        private SceneFilter m_sceneFilter = SceneFilter.Any;
-        private ChildFilter m_childFilter = ChildFilter.Any;
+        private SearchContext context = SearchContext.UnityObject;
+        private SceneFilter sceneFilter = SceneFilter.Any;
+        private ChildFilter childFilter = ChildFilter.Any;
         private string desiredTypeInput;
         private string lastCheckedTypeInput;
         private bool lastTypeCanHaveGO;
@@ -34,7 +34,7 @@ namespace UnityExplorer.ObjectExplorer
         public ButtonListHandler<object, ButtonCell> dataHandler;
 
         private ScrollPool<ButtonCell> resultsScrollPool;
-        private List<object> currentResults = new List<object>();
+        private List<object> currentResults = new();
 
         public TypeCompleter typeAutocompleter;
 
@@ -54,12 +54,12 @@ namespace UnityExplorer.ObjectExplorer
         {
             cachedCellTexts.Clear();
 
-            if (m_context == SearchContext.Singleton)
+            if (context == SearchContext.Singleton)
                 currentResults = SearchProvider.SingletonSearch(nameInputField.Text);
-            else if (m_context == SearchContext.Class)
+            else if (context == SearchContext.Class)
                 currentResults = SearchProvider.ClassSearch(nameInputField.Text);
             else
-                currentResults = SearchProvider.UnityObjectSearch(nameInputField.Text, desiredTypeInput, m_context, m_childFilter, m_sceneFilter);
+                currentResults = SearchProvider.UnityObjectSearch(nameInputField.Text, desiredTypeInput, childFilter, sceneFilter);
 
             dataHandler.RefreshData();
             resultsScrollPool.Refresh(true);
@@ -69,7 +69,7 @@ namespace UnityExplorer.ObjectExplorer
 
         public void Update()
         {
-            if (m_context == SearchContext.UnityObject && lastCheckedTypeInput != desiredTypeInput)
+            if (context == SearchContext.UnityObject && lastCheckedTypeInput != desiredTypeInput)
             {
                 lastCheckedTypeInput = desiredTypeInput;
 
@@ -94,18 +94,18 @@ namespace UnityExplorer.ObjectExplorer
 
         private void OnContextDropdownChanged(int value)
         {
-            m_context = (SearchContext)value;
+            context = (SearchContext)value;
 
             lastCheckedTypeInput = null;
             sceneFilterRow.SetActive(false);
             childFilterRow.SetActive(false);
 
-            unityObjectClassRow.SetActive(m_context == SearchContext.UnityObject);
+            unityObjectClassRow.SetActive(context == SearchContext.UnityObject);
         }
 
-        private void OnSceneFilterDropChanged(int value) => m_sceneFilter = (SceneFilter)value;
+        private void OnSceneFilterDropChanged(int value) => sceneFilter = (SceneFilter)value;
 
-        private void OnChildFilterDropChanged(int value) => m_childFilter = (ChildFilter)value;
+        private void OnChildFilterDropChanged(int value) => childFilter = (ChildFilter)value;
 
         private void OnTypeInputChanged(string val)
         {
@@ -127,7 +127,7 @@ namespace UnityExplorer.ObjectExplorer
             if (!cachedCellTexts.ContainsKey(index))
             {
                 string text;
-                if (m_context == SearchContext.Class)
+                if (context == SearchContext.Class)
                 {
                     var type = currentResults[index] as Type;
                     text = $"{SignatureHighlighter.Parse(type, true)} <color=grey><i>({type.Assembly.GetName().Name})</i></color>";
@@ -143,7 +143,7 @@ namespace UnityExplorer.ObjectExplorer
 
         private void OnCellClicked(int dataIndex)
         {
-            if (m_context == SearchContext.Class)
+            if (context == SearchContext.Class)
                 InspectorManager.Inspect(currentResults[dataIndex] as Type);
             else
                 InspectorManager.Inspect(currentResults[dataIndex]);
@@ -210,7 +210,11 @@ namespace UnityExplorer.ObjectExplorer
 
             var sceneDropObj = UIFactory.CreateDropdown(sceneFilterRow, out Dropdown sceneDrop, null, 14, OnSceneFilterDropChanged);
             foreach (var name in Enum.GetNames(typeof(SceneFilter)))
+            {
+                if (!SceneHandler.DontDestroyExists && name == "DontDestroyOnLoad")
+                    continue;
                 sceneDrop.options.Add(new Dropdown.OptionData(name));
+            }
             UIFactory.SetLayoutElement(sceneDropObj, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
 
             sceneFilterRow.SetActive(false);

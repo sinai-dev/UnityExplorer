@@ -42,18 +42,17 @@ namespace UnityExplorer.ObjectExplorer
                 case SceneFilter.Any:
                     return true;
                 case SceneFilter.DontDestroyOnLoad:
-                    return scene == SceneHandler.DontDestroyScene;
+                    return scene.handle == -12;
                 case SceneFilter.HideAndDontSave:
                     return scene == default;
                 case SceneFilter.ActivelyLoaded:
-                    return scene != SceneHandler.DontDestroyScene && scene != default;
+                    return scene.buildIndex != -1;
                 default:
                     return false;
             }
         }
 
-        internal static List<object> UnityObjectSearch(string input, string customTypeInput, SearchContext context,
-            ChildFilter childFilter, SceneFilter sceneFilter)
+        internal static List<object> UnityObjectSearch(string input, string customTypeInput, ChildFilter childFilter, SceneFilter sceneFilter)
         {
             var results = new List<object>();
 
