@@ -11,9 +11,7 @@ namespace UnityExplorer.ObjectExplorer
 {
     public static class SceneHandler
     {
-        /// <summary>
-        /// The currently inspected Scene.
-        /// </summary>
+        /// <summary>The currently inspected Scene.</summary>
         public static Scene? SelectedScene
         {
             get => selectedScene;
@@ -27,63 +25,39 @@ namespace UnityExplorer.ObjectExplorer
         }
         private static Scene? selectedScene;
 
-        /// <summary>
-        /// The GameObjects in the currently inspected scene.
-        /// </summary>
+        /// <summary>The GameObjects in the currently inspected scene.</summary>
         public static GameObject[] CurrentRootObjects { get; private set; } = new GameObject[0];
 
-        /// <summary>
-        /// All currently loaded Scenes.
-        /// </summary>
-        public static List<Scene> LoadedScenes { get; private set; } = new List<Scene>();
+        /// <summary>All currently loaded Scenes.</summary>
+        public static List<Scene> LoadedScenes { get; private set; } = new();
         private static HashSet<Scene> previousLoadedScenes;
 
-        /// <summary>
-        /// The names of all scenes in the build settings, if they could be retrieved.
-        /// </summary>
-        public static readonly List<string> AllSceneNames = new List<string>();
+        /// <summary>The names of all scenes in the build settings, if they could be retrieved.</summary>
+        public static List<string> AllSceneNames { get; private set; } = new();
 
-        /// <summary>
-        /// Whether or not we successfuly retrieved the names of the scenes in the build settings.
-        /// </summary>
-        public static bool WasAbleToGetScenesInBuild { get; private set; }
-
-        /// <summary>
-        /// Invoked when the currently inspected Scene changes. The argument is the new scene.
-        /// </summary>
+        /// <summary>Invoked when the currently inspected Scene changes. The argument is the new scene.</summary>
         public static event Action<Scene> OnInspectedSceneChanged;
 
-        /// <summary>
-        /// Invoked whenever the list of currently loaded Scenes changes. The argument contains all loaded scenes after the change.
-        /// </summary>
+        /// <summary>Invoked whenever the list of currently loaded Scenes changes. The argument contains all loaded scenes after the change.</summary>
         public static event Action<List<Scene>> OnLoadedScenesChanged;
 
-        /// <summary>
-        /// Equivalent to <see cref="SceneManager.sceneCount"/> + 2, to include 'DontDestroyOnLoad' and the 'None' scene.
-        /// </summary>
-        public static int LoadedSceneCount => SceneManager.sceneCount + 2;
+        /// <summary>Generally will be 2, unless DontDestroyExists == false, then this will be 1.</summary>
+        internal static int DefaultSceneCount => 1 + (DontDestroyExists ? 1 : 0);
 
-        internal static Scene DontDestroyScene => DontDestroyMe.scene;
-        internal static int DontDestroyHandle => DontDestroyScene.handle;
-
-        internal static GameObject DontDestroyMe
-        {
-            get
-            {
-                if (!dontDestroyObject)
-                {
-                    dontDestroyObject = new GameObject("DontDestroyMe");
-                    GameObject.DontDestroyOnLoad(dontDestroyObject);
-                }
-                return dontDestroyObject;
-            }
-        }
-        private static GameObject dontDestroyObject;
-
+        /// <summary>Whether or not we are currently inspecting the "HideAndDontSave" asset scene.</summary>
         public static bool InspectingAssetScene => SelectedScene.HasValue && SelectedScene.Value == default;
+
+        /// <summary>Whether or not we successfuly retrieved the names of the scenes in the build settings.</summary>
+        public static bool WasAbleToGetScenesInBuild { get; private set; }
+
+        /// <summary>Whether or not the "DontDestroyOnLoad" scene exists in this game.</summary>
+        public static bool DontDestroyExists { get; private set; }
 
         internal static void Init()
         {
+            // Check if the game has "DontDestroyOnLoad"
+            DontDestroyExists = Scene.GetNameInternal(-12) == "DontDestroyOnLoad";
+
             // Try to get all scenes in the build settings. This may not work.
             try
             {
@@ -111,8 +85,9 @@ namespace UnityExplorer.ObjectExplorer
         internal static void Update()
         {
             // check if the loaded scenes changed. always confirm DontDestroy / HideAndDontSave
-            int confirmedCount = 2;
-            bool inspectedExists = SelectedScene == DontDestroyScene || (SelectedScene.HasValue && SelectedScene.Value == default);
+            int confirmedCount = DefaultSceneCount;
+            bool inspectedExists = (SelectedScene.HasValue && SelectedScene.Value.handle == -12) 
+                                   || (SelectedScene.HasValue && SelectedScene.Value.handle == -1);
 
             LoadedScenes.Clear();
 
@@ -133,8 +108,9 @@ namespace UnityExplorer.ObjectExplorer
                 LoadedScenes.Add(scene);
             }
 
-            LoadedScenes.Add(DontDestroyScene);
-            LoadedScenes.Add(default);
+            if (DontDestroyExists)
+                LoadedScenes.Add(new Scene { m_Handle = -12 });
+            LoadedScenes.Add(new Scene { m_Handle = -1 });
 
             bool anyChange = confirmedCount != LoadedScenes.Count;
 
