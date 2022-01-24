@@ -16,15 +16,15 @@ namespace UnityExplorer.UI.Widgets
     {
         public float DefaultHeight => 25f;
 
-        public bool Enabled => m_enabled;
-        private bool m_enabled;
+        public bool Enabled => enabled;
+        private bool enabled;
 
         public Action<CachedTransform> OnExpandToggled;
         public Action<CachedTransform> OnEnableToggled;
         public Action<GameObject> OnGameObjectClicked;
 
         public CachedTransform cachedTransform;
-        public int _cellIndex;
+        public int cellIndex;
 
         public GameObject UIRoot { get; set; }
         public RectTransform Rect { get; set; }
@@ -37,13 +37,13 @@ namespace UnityExplorer.UI.Widgets
 
         public void Enable()
         {
-            m_enabled = true;
+            enabled = true;
             UIRoot.SetActive(true);
         }
 
         public void Disable()
         {
-            m_enabled = false;
+            enabled = false;
             UIRoot.SetActive(false);
         }
 
@@ -58,14 +58,17 @@ namespace UnityExplorer.UI.Widgets
             if (!Enabled)
                 Enable();
 
-            _cellIndex = cellIndex;
+            this.cellIndex = cellIndex;
             cachedTransform = cached;
 
             spacer.minWidth = cached.Depth * 15;
 
             if (cached.Value)
             {
-                NameButton.ButtonText.text = cached.Value.name;
+                string name = cached.Value.name?.Trim();
+                if (string.IsNullOrEmpty(name))
+                    name = "<i><color=grey>untitled</color></i>";
+                NameButton.ButtonText.text = name;
                 NameButton.ButtonText.color = cached.Value.gameObject.activeSelf ? Color.white : Color.grey;
 
                 EnabledToggle.Set(cached.Value.gameObject.activeSelf, false);
