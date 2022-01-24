@@ -261,7 +261,7 @@ namespace UnityExplorer.CacheObject
         {
             cell.NameLabel.text = NameLabelText;
             if (cell.HiddenNameLabel != null)
-                cell.HiddenNameLabel.Text = NameLabelTextRaw;
+                cell.HiddenNameLabel.Text = NameLabelTextRaw ?? string.Empty;
             cell.ValueLabel.gameObject.SetActive(true);
 
             cell.SubContentHolder.gameObject.SetActive(SubContentShowWanted);
