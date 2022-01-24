@@ -29,8 +29,8 @@ namespace UnityExplorer.ObjectExplorer
             SceneHandler.OnLoadedScenesChanged += SceneHandler_OnLoadedScenesChanged;
         }
 
-        public override GameObject UIRoot => m_uiRoot;
-        private GameObject m_uiRoot;
+        public override GameObject UIRoot => uiRoot;
+        private GameObject uiRoot;
 
         /// <summary>
         /// Whether to automatically update per auto-update interval or not.
@@ -180,13 +180,13 @@ namespace UnityExplorer.ObjectExplorer
 
         public override void ConstructUI(GameObject content)
         {
-            m_uiRoot = UIFactory.CreateUIObject("SceneExplorer", content);
-            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(m_uiRoot, true, true, true, true, 0, 2, 2, 2, 2);
-            UIFactory.SetLayoutElement(m_uiRoot, flexibleHeight: 9999);
+            uiRoot = UIFactory.CreateUIObject("SceneExplorer", content);
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(uiRoot, true, true, true, true, 0, 2, 2, 2, 2);
+            UIFactory.SetLayoutElement(uiRoot, flexibleHeight: 9999);
 
             // Tool bar (top area)
 
-            var toolbar = UIFactory.CreateVerticalGroup(m_uiRoot, "Toolbar", true, true, true, true, 2, new Vector4(2, 2, 2, 2),
+            var toolbar = UIFactory.CreateVerticalGroup(uiRoot, "Toolbar", true, true, true, true, 2, new Vector4(2, 2, 2, 2),
                new Color(0.15f, 0.15f, 0.15f));
 
             // Scene selector dropdown
@@ -240,7 +240,7 @@ namespace UnityExplorer.ObjectExplorer
 
             // Transform Tree
 
-            var scrollPool = UIFactory.CreateScrollPool<TransformCell>(m_uiRoot, "TransformTree", out GameObject scrollObj,
+            var scrollPool = UIFactory.CreateScrollPool<TransformCell>(uiRoot, "TransformTree", out GameObject scrollObj,
                 out GameObject scrollContent, new Color(0.11f, 0.11f, 0.11f));
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
             UIFactory.SetLayoutElement(scrollContent, flexibleHeight: 9999);
@@ -312,7 +312,7 @@ namespace UnityExplorer.ObjectExplorer
             {
                 if (SceneHandler.WasAbleToGetScenesInBuild)
                 {
-                    var sceneLoaderObj = UIFactory.CreateVerticalGroup(m_uiRoot, "SceneLoader", true, true, true, true);
+                    var sceneLoaderObj = UIFactory.CreateVerticalGroup(uiRoot, "SceneLoader", true, true, true, true);
                     UIFactory.SetLayoutElement(sceneLoaderObj, minHeight: 25);
 
                     // Title
