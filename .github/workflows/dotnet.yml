@@ -34,7 +34,8 @@ jobs:
         
       # Build UnityExplorer releases, and upload artifacts
       
-      - run: nuget restore src\UnityExplorer.sln      
+      - run: dotnet nuget add source https://nuget.bepinex.dev/v3/index.json
+      - run: dotnet restore src\UnityExplorer.sln      
       
       # BepInEx Il2Cpp
       - run: msbuild src\UnityExplorer.csproj -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release_BIE_Cpp
