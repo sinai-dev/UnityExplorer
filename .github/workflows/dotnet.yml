@@ -28,9 +28,6 @@ jobs:
           nuget-api-key: ${{ secrets.NuGetAPIKey }}
           nuget-version: '5.x'
           
-      # Build Il2CppAssemblyUnhollower
-      - run: msbuild lib\Il2CppAssemblyUnhollower\UnhollowerBaseLib\UnhollowerBaseLib.csproj -t:Restore -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release
-      
       # Build mcs
       - run: nuget restore lib\mcs-unity\mcs.sln
       - run: msbuild lib\mcs-unity\mcs\mcs.csproj -t:Restore -t:Rebuild -p:Platform="AnyCPU" -p:Configuration=Release
