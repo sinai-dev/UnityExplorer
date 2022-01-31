@@ -8,6 +8,8 @@ using UnityExplorer.UI;
 using UnityExplorer.UI.Widgets.AutoComplete;
 using UniverseLib;
 using UniverseLib.UI;
+using UniverseLib.UI.Models;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.CSConsole
 {
@@ -25,7 +27,7 @@ namespace UnityExplorer.CSConsole
             AutoCompleteModal.Instance.ReleaseOwnership(this);
         }
 
-        private readonly HashSet<char> delimiters = new HashSet<char>
+        private readonly HashSet<char> delimiters = new()
         {
             '{', '}', ',', ';', '<', '>', '(', ')', '[', ']', '=', '|', '&', '?'
         };

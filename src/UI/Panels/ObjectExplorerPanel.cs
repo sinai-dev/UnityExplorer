@@ -43,7 +43,7 @@ namespace UnityExplorer.UI.Panels
             content.SetActive(true);
 
             var button = tabButtons[tabIndex];
-            RuntimeProvider.Instance.SetColorBlock(button.Component, UniversalUI.enabledButtonColor, UniversalUI.enabledButtonColor * 1.2f);
+            RuntimeHelper.SetColorBlock(button.Component, UniversalUI.EnabledButtonColor, UniversalUI.EnabledButtonColor * 1.2f);
 
             SelectedTab = tabIndex;
             SaveInternalData();
@@ -52,7 +52,7 @@ namespace UnityExplorer.UI.Panels
         private void DisableTab(int tabIndex)
         {
             tabPages[tabIndex].SetActive(false);
-            RuntimeProvider.Instance.SetColorBlock(tabButtons[tabIndex].Component, UniversalUI.disabledButtonColor, UniversalUI.disabledButtonColor * 1.2f);
+            RuntimeHelper.SetColorBlock(tabButtons[tabIndex].Component, UniversalUI.DisabledButtonColor, UniversalUI.DisabledButtonColor * 1.2f);
         }
 
         public override void Update()
@@ -99,17 +99,17 @@ namespace UnityExplorer.UI.Panels
         public override void ConstructPanelContent()
         {
             // Tab bar
-            var tabGroup = UIFactory.CreateHorizontalGroup(content, "TabBar", true, true, true, true, 2, new Vector4(2, 2, 2, 2));
+            var tabGroup = UIFactory.CreateHorizontalGroup(uiRoot, "TabBar", true, true, true, true, 2, new Vector4(2, 2, 2, 2));
             UIFactory.SetLayoutElement(tabGroup, minHeight: 25, flexibleHeight: 0);
 
             // Scene Explorer
             SceneExplorer = new SceneExplorer(this);
-            SceneExplorer.ConstructUI(content);
+            SceneExplorer.ConstructUI(uiRoot);
             tabPages.Add(SceneExplorer);
 
             // Object search
             ObjectSearch = new ObjectSearch(this);
-            ObjectSearch.ConstructUI(content);
+            ObjectSearch.ConstructUI(uiRoot);
             tabPages.Add(ObjectSearch);
 
             // set up tabs

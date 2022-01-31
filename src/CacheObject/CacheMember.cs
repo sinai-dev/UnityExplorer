@@ -12,6 +12,8 @@ using UnityExplorer.UI;
 using UniverseLib;
 using UniverseLib.UI;
 using UnityExplorer.UI.Widgets;
+using UniverseLib.Utility;
+using UniverseLib.UI.ObjectPool;
 
 namespace UnityExplorer.CacheObject
 {
@@ -111,14 +113,14 @@ namespace UnityExplorer.CacheObject
                     {
                         cell.EvaluateButton.ButtonText.text = "Hide";
                         Evaluator.UIRoot.transform.SetParent(cell.EvaluateHolder.transform, false);
-                        RuntimeProvider.Instance.SetColorBlock(cell.EvaluateButton.Component, evalEnabledColor, evalEnabledColor * 1.3f);
+                        RuntimeHelper.SetColorBlock(cell.EvaluateButton.Component, evalEnabledColor, evalEnabledColor * 1.3f);
                     }
                 }
                 else
                     cell.EvaluateButton.ButtonText.text = "Evaluate";
 
                 if (!Evaluating)
-                    RuntimeProvider.Instance.SetColorBlock(cell.EvaluateButton.Component, evalDisabledColor, evalDisabledColor * 1.3f);
+                    RuntimeHelper.SetColorBlock(cell.EvaluateButton.Component, evalDisabledColor, evalDisabledColor * 1.3f);
             }
 
             if (State == ValueState.NotEvaluated && !ShouldAutoEvaluate)
@@ -235,7 +237,7 @@ namespace UnityExplorer.CacheObject
         {
             try
             {
-                if (RuntimeHelper.IsBlacklisted(member))
+                if (UERuntimeHelper.IsBlacklisted(member))
                     return;
 
                 var sig = GetSig(member);

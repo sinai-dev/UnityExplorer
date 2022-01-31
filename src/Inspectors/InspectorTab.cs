@@ -10,6 +10,7 @@ using UnityExplorer.UI.Widgets;
 using UniverseLib.UI;
 using UniverseLib;
 using UnityExplorer.UI.Panels;
+using UniverseLib.UI.ObjectPool;
 
 namespace UnityExplorer.Inspectors
 {
@@ -28,7 +29,7 @@ namespace UnityExplorer.Inspectors
         public void SetTabColor(bool active)
         {
             Color color = active ? enabledTabColor : disabledTabColor;
-            RuntimeProvider.Instance.SetColorBlock(TabButton.Component, color, color * 1.2f);
+            RuntimeHelper.SetColorBlock(TabButton.Component, color, color * 1.2f);
         }
 
         public GameObject CreateContent(GameObject parent)

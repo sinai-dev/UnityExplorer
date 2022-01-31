@@ -11,6 +11,9 @@ using UnityExplorer.UI.Panels;
 using UniverseLib.UI.Widgets;
 using UniverseLib;
 using UniverseLib.UI;
+using UniverseLib.UI.Widgets.ButtonList;
+using UniverseLib.UI.Widgets.ScrollView;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.UI.Widgets.AutoComplete
 {
@@ -37,7 +40,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         public static ScrollPool<ButtonCell> scrollPool;
         private static GameObject navigationTipRow;
 
-        private static List<Suggestion> Suggestions = new List<Suggestion>();
+        private static List<Suggestion> Suggestions = new();
         private static int SelectedIndex = 0;
 
         public static Suggestion SelectedSuggestion => Suggestions[SelectedIndex];
@@ -213,10 +216,10 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
                     scrollPool.Content.anchoredPosition = pos;
                 }
 
-                RuntimeProvider.Instance.SetColorBlock(cell.Button.Component, selectedSuggestionColor);
+                RuntimeHelper.SetColorBlock(cell.Button.Component, selectedSuggestionColor);
             }
             else
-                RuntimeProvider.Instance.SetColorBlock(cell.Button.Component, inactiveSuggestionColor);
+                RuntimeHelper.SetColorBlock(cell.Button.Component, inactiveSuggestionColor);
 
             setFirstCell = true;
         }
@@ -247,13 +250,13 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
                 Vector3 caretPos = textGen.characters[caretIdx].cursorPos;
                 // transform to world point
                 caretPos = input.UIRoot.transform.TransformPoint(caretPos);
-                caretPos += new Vector3(input.Rect.rect.width * 0.5f, -(input.Rect.rect.height * 0.5f), 0);
+                caretPos += new Vector3(input.Transform.rect.width * 0.5f, -(input.Transform.rect.height * 0.5f), 0);
 
                 uiRoot.transform.position = new Vector3(caretPos.x + 10, caretPos.y - 30, 0);
             }
             else
             {
-                uiRoot.transform.position = input.Rect.position + new Vector3(-(input.Rect.rect.width / 2) + 10, -20, 0);
+                uiRoot.transform.position = input.Transform.position + new Vector3(-(input.Transform.rect.width / 2) + 10, -20, 0);
                 //var textGen = input.Component.textComponent.cachedTextGenerator;
                 //var pos = input.UIRoot.transform.TransformPoint(textGen.characters[0].cursorPos);
                 //uiRoot.transform.position = new Vector3(pos.x + 10, pos.y - 20, 0);
@@ -302,13 +305,13 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         {
             dataHandler = new ButtonListHandler<Suggestion, ButtonCell>(scrollPool, GetEntries, SetCell, ShouldDisplay, OnCellClicked);
 
-            scrollPool = UIFactory.CreateScrollPool<ButtonCell>(this.content, "AutoCompleter", out GameObject scrollObj,
+            scrollPool = UIFactory.CreateScrollPool<ButtonCell>(this.uiRoot, "AutoCompleter", out GameObject scrollObj,
                 out GameObject scrollContent);
             scrollPool.Initialize(dataHandler);
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(scrollContent, true, false, true, false);
 
-            navigationTipRow = UIFactory.CreateHorizontalGroup(this.content, "BottomRow", true, true, true, true, 0, new Vector4(2, 2, 2, 2));
+            navigationTipRow = UIFactory.CreateHorizontalGroup(this.uiRoot, "BottomRow", true, true, true, true, 0, new Vector4(2, 2, 2, 2));
             UIFactory.SetLayoutElement(navigationTipRow, minHeight: 20, flexibleWidth: 9999);
             UIFactory.CreateLabel(navigationTipRow, "HelpText", "Up/Down to select, Enter to use, Esc to close",
                 TextAnchor.MiddleLeft, Color.grey, false, 13);

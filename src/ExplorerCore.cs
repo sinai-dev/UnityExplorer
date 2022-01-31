@@ -43,7 +43,7 @@ namespace UnityExplorer
                 Directory.CreateDirectory(Loader.ExplorerFolder);
 
             ConfigManager.Init(Loader.ConfigHandler);
-            RuntimeHelper.Init();
+            UERuntimeHelper.Init();
             ExplorerBehaviour.Setup();
 
             UniverseLib.Universe.Init(ConfigManager.Startup_Delay_Time.Value, LateInit, Log, new()

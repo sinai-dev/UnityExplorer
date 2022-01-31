@@ -8,6 +8,9 @@ using UnityExplorer.UI.Widgets;
 using UniverseLib;
 using UniverseLib.UI;
 using UniverseLib.UI.Widgets;
+using UniverseLib.UI.Widgets.ButtonList;
+using UniverseLib.UI.Widgets.ScrollView;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.UI.Panels
 {
@@ -58,7 +61,7 @@ namespace UnityExplorer.UI.Panels
         {
             dataHandler = new ButtonListHandler<GameObject, ButtonCell>(buttonScrollPool, GetEntries, SetCell, ShouldDisplayCell, OnCellClicked);
 
-            buttonScrollPool = UIFactory.CreateScrollPool<ButtonCell>(this.content, "ResultsList", out GameObject scrollObj,
+            buttonScrollPool = UIFactory.CreateScrollPool<ButtonCell>(this.uiRoot, "ResultsList", out GameObject scrollObj,
                 out GameObject scrollContent);
 
             buttonScrollPool.Initialize(dataHandler);

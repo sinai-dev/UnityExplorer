@@ -13,16 +13,18 @@ using UniverseLib;
 
 namespace UnityExplorer.Runtime
 {
-    public abstract class RuntimeHelper
+    // Not really that necessary anymore, can eventually just be refactored away into the few classes that use this class.
+
+    public abstract class UERuntimeHelper
     {
-        public static RuntimeHelper Instance;
+        public static UERuntimeHelper Instance;
 
         public static void Init()
         { 
 #if CPP
-            Instance = new Il2CppProvider();
+            Instance = new Il2CppHelper();
 #else
-            Instance = new MonoProvider();
+            Instance = new MonoHelper();
 #endif
             Instance.SetupEvents();
 
@@ -35,9 +37,7 @@ namespace UnityExplorer.Runtime
 
         public abstract void SetupEvents();
 
-        #region Reflection Blacklist
-
-        private static readonly HashSet<string> currentBlacklist = new HashSet<string>();
+        private static readonly HashSet<string> currentBlacklist = new();
 
         public virtual string[] DefaultReflectionBlacklist => new string[0];
 
@@ -88,7 +88,5 @@ namespace UnityExplorer.Runtime
 
             return currentBlacklist.Contains(sig);
         }
-
-        #endregion
     }
 }

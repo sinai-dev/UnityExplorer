@@ -5,6 +5,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UniverseLib.UI;
+using UniverseLib.UI.Models;
 
 namespace UnityExplorer.UI.Widgets.AutoComplete
 {

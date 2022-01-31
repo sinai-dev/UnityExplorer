@@ -7,6 +7,8 @@ using UnityEngine.UI;
 using UnityExplorer.CacheObject;
 using UnityExplorer.UI;
 using UniverseLib.UI;
+using UniverseLib.UI.Models;
+using UniverseLib;
 
 namespace UnityExplorer.CacheObject.IValues
 {
@@ -16,11 +18,11 @@ namespace UnityExplorer.CacheObject.IValues
 
         public Color EditedColor;
 
-        private Image m_colorImage;
-        private readonly InputFieldRef[] m_inputs = new InputFieldRef[4];
-        private readonly Slider[] m_sliders = new Slider[4];
+        private Image colorImage;
+        private readonly InputFieldRef[] inputs = new InputFieldRef[4];
+        private readonly Slider[] sliders = new Slider[4];
 
-        private ButtonRef m_applyButton;
+        private ButtonRef applyButton;
 
         private static readonly string[] fieldNames = new[] { "R", "G", "B", "A" };
 
@@ -28,11 +30,11 @@ namespace UnityExplorer.CacheObject.IValues
         {
             base.OnBorrowed(owner);
 
-            m_applyButton.Component.gameObject.SetActive(owner.CanWrite);
+            applyButton.Component.gameObject.SetActive(owner.CanWrite);
 
-            foreach (var slider in m_sliders)
+            foreach (var slider in sliders)
                 slider.interactable = owner.CanWrite;
-            foreach (var input in m_inputs)
+            foreach (var input in inputs)
                 input.Component.readOnly = !owner.CanWrite;
         }
 
@@ -48,27 +50,27 @@ namespace UnityExplorer.CacheObject.IValues
             {
                 IsValueColor32 = true;
                 EditedColor = c32;
-                m_inputs[0].Text = c32.r.ToString();
-                m_inputs[1].Text = c32.g.ToString();
-                m_inputs[2].Text = c32.b.ToString();
-                m_inputs[3].Text = c32.a.ToString();
-                foreach (var slider in m_sliders)
+                inputs[0].Text = c32.r.ToString();
+                inputs[1].Text = c32.g.ToString();
+                inputs[2].Text = c32.b.ToString();
+                inputs[3].Text = c32.a.ToString();
+                foreach (var slider in sliders)
                     slider.maxValue = 255;
             }
             else
             {
                 IsValueColor32 = false;
                 EditedColor = (Color)value;
-                m_inputs[0].Text = EditedColor.r.ToString();
-                m_inputs[1].Text = EditedColor.g.ToString();
-                m_inputs[2].Text = EditedColor.b.ToString();
-                m_inputs[3].Text = EditedColor.a.ToString();
-                foreach (var slider in m_sliders)
+                inputs[0].Text = EditedColor.r.ToString();
+                inputs[1].Text = EditedColor.g.ToString();
+                inputs[2].Text = EditedColor.b.ToString();
+                inputs[3].Text = EditedColor.a.ToString();
+                foreach (var slider in sliders)
                     slider.maxValue = 1;
             }
 
-            if (m_colorImage)
-                m_colorImage.color = EditedColor;
+            if (colorImage)
+                colorImage.color = EditedColor;
         }
 
         // setting value to owner
@@ -91,8 +93,8 @@ namespace UnityExplorer.CacheObject.IValues
                 case 3: EditedColor.a = val; break;
             }
 
-            if (m_colorImage)
-                m_colorImage.color = EditedColor;
+            if (colorImage)
+                colorImage.color = EditedColor;
         }
 
         private void OnInputChanged(string val, int fieldIndex)
@@ -103,13 +105,13 @@ namespace UnityExplorer.CacheObject.IValues
                 if (IsValueColor32)
                 {
                     byte value = byte.Parse(val);
-                    m_sliders[fieldIndex].value = value;
+                    sliders[fieldIndex].value = value;
                     f = (float)((decimal)value / 255);
                 }
                 else
                 {
                     f = float.Parse(val);
-                    m_sliders[fieldIndex].value = f;
+                    sliders[fieldIndex].value = f;
                 }
 
                 SetColorField(f, fieldIndex);
@@ -129,12 +131,12 @@ namespace UnityExplorer.CacheObject.IValues
             {
                 if (IsValueColor32)
                 {
-                    m_inputs[fieldIndex].Text = ((byte)val).ToString();
+                    inputs[fieldIndex].Text = ((byte)val).ToString();
                     val /= 255f;
                 }
                 else
                 {
-                    m_inputs[fieldIndex].Text = val.ToString();
+                    inputs[fieldIndex].Text = val.ToString();
                 }
 
                 SetColorField(val, fieldIndex);
@@ -167,15 +169,15 @@ namespace UnityExplorer.CacheObject.IValues
 
             // apply button
 
-            m_applyButton = UIFactory.CreateButton(horiGroup, "ApplyButton", "Apply", new Color(0.2f, 0.26f, 0.2f));
-            UIFactory.SetLayoutElement(m_applyButton.Component.gameObject, minHeight: 25, minWidth: 90);
-            m_applyButton.OnClick += SetValueToOwner;
+            applyButton = UIFactory.CreateButton(horiGroup, "ApplyButton", "Apply", new Color(0.2f, 0.26f, 0.2f));
+            UIFactory.SetLayoutElement(applyButton.Component.gameObject, minHeight: 25, minWidth: 90);
+            applyButton.OnClick += SetValueToOwner;
 
             // image of color
 
             var imgObj = UIFactory.CreateUIObject("ColorImageHelper", horiGroup);
             UIFactory.SetLayoutElement(imgObj, minHeight: 25, minWidth: 50, flexibleWidth: 50);
-            m_colorImage = imgObj.AddComponent<Image>();
+            colorImage = imgObj.AddComponent<Image>();
 
             return UIRoot;
         }
@@ -190,11 +192,11 @@ namespace UnityExplorer.CacheObject.IValues
 
             var input = UIFactory.CreateInputField(row, "Input", "...");
             UIFactory.SetLayoutElement(input.UIRoot, minWidth: 40, minHeight: 25, flexibleHeight: 0);
-            m_inputs[index] = input;
+            inputs[index] = input;
             input.OnValueChanged += (string val) => { OnInputChanged(val, index); };
 
             var sliderObj = UIFactory.CreateSlider(row, "Slider", out Slider slider);
-            m_sliders[index] = slider;
+            sliders[index] = slider;
             UIFactory.SetLayoutElement(sliderObj, minHeight: 25, minWidth: 70, flexibleWidth: 999, flexibleHeight: 0);
             slider.minValue = 0;
             slider.maxValue = 1;

@@ -7,7 +7,9 @@ using UnityEngine.UI;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Widgets;
 using UniverseLib.UI;
+using UniverseLib.UI.Models;
 using UniverseLib.UI.Widgets;
+using UniverseLib.UI.Widgets.ScrollView;
 
 namespace UnityExplorer.Hooks
 {

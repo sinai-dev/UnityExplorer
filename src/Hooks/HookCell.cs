@@ -5,7 +5,9 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UniverseLib.UI;
+using UniverseLib.UI.Models;
 using UniverseLib.UI.Widgets;
+using UniverseLib.UI.Widgets.ScrollView;
 
 namespace UnityExplorer.Hooks
 {

@@ -16,6 +16,8 @@ using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets.AutoComplete;
 using UniverseLib.UI;
 using UniverseLib;
+using UniverseLib.UI.Models;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.CSConsole
 {
@@ -357,7 +359,7 @@ namespace UnityExplorer.CSConsole
                 var charTop = charInfo.cursorPos.y;
                 var charBot = charTop - CSCONSOLE_LINEHEIGHT;
 
-                var viewportMin = Input.Rect.rect.height - Input.Rect.anchoredPosition.y - (Input.Rect.rect.height * 0.5f);
+                var viewportMin = Input.Transform.rect.height - Input.Transform.anchoredPosition.y - (Input.Transform.rect.height * 0.5f);
                 var viewportMax = viewportMin - Panel.InputScroller.ViewportRect.rect.height;
 
                 float diff = 0f;
@@ -368,7 +370,7 @@ namespace UnityExplorer.CSConsole
 
                 if (Math.Abs(diff) > 1)
                 {
-                    var rect = Input.Rect;
+                    var rect = Input.Transform;
                     rect.anchoredPosition = new Vector2(rect.anchoredPosition.x, rect.anchoredPosition.y - diff);
                 }
             }
@@ -378,7 +380,7 @@ namespace UnityExplorer.CSConsole
         {
             settingCaretCoroutine = true;
             Input.Component.readOnly = true;
-            RuntimeProvider.Instance.StartCoroutine(SetCaretCoroutine(caretPosition));
+            RuntimeHelper.StartCoroutine(SetCaretCoroutine(caretPosition));
         }
 
         internal static PropertyInfo SelectionGuardProperty => selectionGuardPropInfo ?? GetSelectionGuardPropInfo();
@@ -438,7 +440,7 @@ namespace UnityExplorer.CSConsole
 
             // the top and bottom position of the viewport in relation to the text height
             // they need the half-height adjustment to normalize against the 'line.topY' value.
-            var viewportMin = Input.Rect.rect.height - Input.Rect.anchoredPosition.y - (Input.Rect.rect.height * 0.5f);
+            var viewportMin = Input.Transform.rect.height - Input.Transform.anchoredPosition.y - (Input.Transform.rect.height * 0.5f);
             var viewportMax = viewportMin - Panel.InputScroller.ViewportRect.rect.height;
 
             for (int i = 0; i < Input.TextGenerator.lineCount; i++)

@@ -14,6 +14,7 @@ using UnityExplorer.UI.Widgets;
 using UniverseLib.UI;
 using UniverseLib;
 using System.Collections;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.ObjectExplorer
 {
@@ -42,7 +43,7 @@ namespace UnityExplorer.ObjectExplorer
 
         private GameObject refreshRow;
         private Dropdown sceneDropdown;
-        private readonly Dictionary<Scene, Dropdown.OptionData> sceneToDropdownOption = new Dictionary<Scene, Dropdown.OptionData>();
+        private readonly Dictionary<Scene, Dropdown.OptionData> sceneToDropdownOption = new();
 
         // scene loader
         private Dropdown allSceneDropdown;
@@ -197,7 +198,7 @@ namespace UnityExplorer.ObjectExplorer
             var dropLabel = UIFactory.CreateLabel(dropRow, "SelectorLabel", "Scene:", TextAnchor.MiddleLeft, Color.cyan, false, 15);
             UIFactory.SetLayoutElement(dropLabel.gameObject, minHeight: 25, minWidth: 60, flexibleWidth: 0);
 
-            var dropdownObj = UIFactory.CreateDropdown(dropRow, out sceneDropdown, "<notset>", 13, OnDropdownChanged);
+            var dropdownObj = UIFactory.CreateDropdown(dropRow, "SceneDropdown", out sceneDropdown, "<notset>", 13, OnDropdownChanged);
             UIFactory.SetLayoutElement(dropdownObj, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
 
             SceneHandler.Update();
@@ -212,7 +213,7 @@ namespace UnityExplorer.ObjectExplorer
             //Filter input field
             var inputField = UIFactory.CreateInputField(filterRow, "FilterInput", "Search and press enter...");
             inputField.Component.targetGraphic.color = new Color(0.2f, 0.2f, 0.2f);
-            RuntimeProvider.Instance.SetColorBlock(inputField.Component, new Color(0.4f, 0.4f, 0.4f), new Color(0.2f, 0.2f, 0.2f),
+            RuntimeHelper.SetColorBlock(inputField.Component, new Color(0.4f, 0.4f, 0.4f), new Color(0.2f, 0.2f, 0.2f),
                 new Color(0.08f, 0.08f, 0.08f));
             UIFactory.SetLayoutElement(inputField.UIRoot, minHeight: 25);
             //inputField.OnValueChanged += OnFilterInput;
@@ -255,7 +256,7 @@ namespace UnityExplorer.ObjectExplorer
 
             ConstructSceneLoader();
 
-            RuntimeProvider.Instance.StartCoroutine(TempFixCoro());
+            RuntimeHelper.StartCoroutine(TempFixCoro());
         }
 
         // To "fix" a strange FPS drop issue with MelonLoader.
@@ -328,7 +329,7 @@ namespace UnityExplorer.ObjectExplorer
 
                     // Dropdown
 
-                    var allSceneDropObj = UIFactory.CreateDropdown(sceneLoaderObj, out allSceneDropdown, "", 14, null);
+                    var allSceneDropObj = UIFactory.CreateDropdown(sceneLoaderObj, "SceneLoaderDropdown", out allSceneDropdown, "", 14, null);
                     UIFactory.SetLayoutElement(allSceneDropObj, minHeight: 25, minWidth: 150, flexibleWidth: 0, flexibleHeight: 0);
 
                     RefreshSceneLoaderOptions(string.Empty);
@@ -352,8 +353,8 @@ namespace UnityExplorer.ObjectExplorer
                     };
 
                     var disabledColor = new Color(0.24f, 0.24f, 0.24f);
-                    RuntimeProvider.Instance.SetColorBlock(loadButton.Component, disabled: disabledColor);
-                    RuntimeProvider.Instance.SetColorBlock(loadAdditiveButton.Component, disabled: disabledColor);
+                    RuntimeHelper.SetColorBlock(loadButton.Component, disabled: disabledColor);
+                    RuntimeHelper.SetColorBlock(loadAdditiveButton.Component, disabled: disabledColor);
 
                     loadButton.Component.interactable = false;
                     loadAdditiveButton.Component.interactable = false;

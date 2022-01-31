@@ -4,14 +4,12 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.CacheObject.IValues;
-using UnityExplorer.Inspectors;
-using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
-using UnityExplorer.UI.Widgets;
 using UniverseLib;
 using UniverseLib.UI;
-using UniverseLib.UI.Widgets;
+using UniverseLib.UI.Models;
+using UniverseLib.UI.Widgets.ScrollView;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.CacheObject.Views
 {
@@ -103,7 +101,7 @@ namespace UnityExplorer.CacheObject.Views
         {
             this.SubContentButton.ButtonText.text = SubContentHolder.activeSelf ? "▼" : "▲";
             Color color = SubContentHolder.activeSelf ? subActiveColor : subInactiveColor;
-            RuntimeProvider.Instance.SetColorBlock(SubContentButton.Component, color, color * 1.3f);
+            RuntimeHelper.SetColorBlock(SubContentButton.Component, color, color * 1.3f);
         }
 
         protected abstract void ConstructEvaluateHolder(GameObject parent);

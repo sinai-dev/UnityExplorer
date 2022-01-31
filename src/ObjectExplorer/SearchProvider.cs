@@ -7,6 +7,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityExplorer.Runtime;
 using UniverseLib;
+using UniverseLib.Input;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.ObjectExplorer
 {
@@ -34,22 +36,16 @@ namespace UnityExplorer.ObjectExplorer
 
     public static class SearchProvider
     {
-
         private static bool Filter(Scene scene, SceneFilter filter)
         {
-            switch (filter)
+            return filter switch
             {
-                case SceneFilter.Any:
-                    return true;
-                case SceneFilter.DontDestroyOnLoad:
-                    return scene.handle == -12;
-                case SceneFilter.HideAndDontSave:
-                    return scene == default;
-                case SceneFilter.ActivelyLoaded:
-                    return scene.buildIndex != -1;
-                default:
-                    return false;
-            }
+                SceneFilter.Any => true,
+                SceneFilter.DontDestroyOnLoad => scene.handle == -12,
+                SceneFilter.HideAndDontSave => scene == default,
+                SceneFilter.ActivelyLoaded => scene.buildIndex != -1,
+                _ => false,
+            };
         }
 
         internal static List<object> UnityObjectSearch(string input, string customTypeInput, ChildFilter childFilter, SceneFilter sceneFilter)
@@ -73,7 +69,7 @@ namespace UnityExplorer.ObjectExplorer
             if (searchType == null)
                 searchType = typeof(UnityEngine.Object);
 
-            var allObjects = RuntimeProvider.Instance.FindObjectsOfTypeAll(searchType);
+            var allObjects = RuntimeHelper.FindObjectsOfTypeAll(searchType);
 
             // perform filter comparers
 
@@ -167,7 +163,7 @@ namespace UnityExplorer.ObjectExplorer
             "<instance>k__BackingField",
         };
 
-        internal static List<object> SingletonSearch(string input)
+        internal static List<object> InstanceSearch(string input)
         {
             var instances = new List<object>();
 
@@ -176,7 +172,7 @@ namespace UnityExplorer.ObjectExplorer
                 nameFilter = input;
 
             var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
-
+            
             foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
             {
                 // Search all non-static, non-enum classes.
@@ -186,13 +182,13 @@ namespace UnityExplorer.ObjectExplorer
                     {
                         if (!string.IsNullOrEmpty(nameFilter) && !type.FullName.ContainsIgnoreCase(nameFilter))
                             continue;
-
+            
                         ReflectionUtility.FindSingleton(instanceNames, type, flags, instances);
                     }
                     catch { }
                 }
             }
-
+            
             return instances;
         }
 

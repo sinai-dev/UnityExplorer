@@ -13,6 +13,8 @@ using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets;
 using UniverseLib;
 using UniverseLib.UI.Widgets;
+using UniverseLib.UI.Widgets.ScrollView;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.Hooks
 {
@@ -87,7 +89,7 @@ namespace UnityExplorer.Hooks
             cell.MethodNameLabel.text = SignatureHighlighter.HighlightMethod(hook.TargetMethod);
 
             cell.ToggleActiveButton.ButtonText.text = hook.Enabled ? "Enabled" : "Disabled";
-            RuntimeProvider.Instance.SetColorBlockAuto(cell.ToggleActiveButton.Component,
+            RuntimeHelper.SetColorBlockAuto(cell.ToggleActiveButton.Component,
                 hook.Enabled ? new Color(0.15f, 0.2f, 0.15f) : new Color(0.2f, 0.2f, 0.15f));
         }
 
@@ -109,7 +111,7 @@ namespace UnityExplorer.Hooks
             currentAddEligableMethods.Clear();
             foreach (var method in type.GetMethods(ReflectionUtility.FLAGS))
             {
-                if (method.IsGenericMethod /* || method.IsAbstract */ || RuntimeHelper.IsBlacklisted(method))
+                if (method.IsGenericMethod || UERuntimeHelper.IsBlacklisted(method))
                     continue;
                 currentAddEligableMethods.Add(method);
                 filteredEligableMethods.Add(method);

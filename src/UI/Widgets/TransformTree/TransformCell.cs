@@ -1,6 +1,8 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,7 +10,9 @@ using UnityExplorer.Inspectors;
 using UnityExplorer.UI.Widgets;
 using UniverseLib;
 using UniverseLib.UI;
+using UniverseLib.UI.Models;
 using UniverseLib.UI.Widgets;
+using UniverseLib.UI.Widgets.ScrollView;
 
 namespace UnityExplorer.UI.Widgets
 {
@@ -152,8 +156,8 @@ namespace UnityExplorer.UI.Widgets
             Color highlight = new Color(0.25f, 0.25f, 0.25f);
             Color pressed = new Color(0.05f, 0.05f, 0.05f);
             Color disabled = new Color(1, 1, 1, 0);
-            RuntimeProvider.Instance.SetColorBlock(ExpandButton.Component, normal, highlight, pressed, disabled);
-            RuntimeProvider.Instance.SetColorBlock(NameButton.Component, normal, highlight, pressed, disabled);
+            RuntimeHelper.SetColorBlock(ExpandButton.Component, normal, highlight, pressed, disabled);
+            RuntimeHelper.SetColorBlock(NameButton.Component, normal, highlight, pressed, disabled);
 
             NameButton.OnClick += OnMainButtonClicked;
             ExpandButton.OnClick += OnExpandClicked;

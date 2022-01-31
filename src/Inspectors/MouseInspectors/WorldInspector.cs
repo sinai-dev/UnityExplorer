@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UniverseLib;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.Inspectors.MouseInspectors
 {

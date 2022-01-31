@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using UniverseLib;
 using UniverseLib.UI;
+using UniverseLib.UI.Models;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.UI.Widgets.AutoComplete
 {
     public class TypeCompleter : ISuggestionProvider
     {
-        internal static readonly Dictionary<string, string> sharedTypeToLabel = new Dictionary<string, string>(4096);
-
         public bool Enabled
         {
             get => _enabled;
@@ -31,8 +31,8 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         public InputFieldRef InputField { get; }
         public bool AnchorToCaretPosition => false;
 
-        private readonly List<Suggestion> suggestions = new List<Suggestion>();
-        private readonly HashSet<string> suggestedNames = new HashSet<string>();
+        private readonly List<Suggestion> suggestions = new();
+        private readonly HashSet<string> suggestedNames = new();
 
         private HashSet<Type> allowedTypes;
 
@@ -111,6 +111,8 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
                     AddSuggestion(entry);
             }
         }
+
+        internal static readonly Dictionary<string, string> sharedTypeToLabel = new();
 
         void AddSuggestion(Type type)
         {

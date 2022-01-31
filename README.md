@@ -35,7 +35,7 @@
 | ------- | ------ | ---- |
 | ML 0.4+ | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.MelonLoader.Il2Cpp.zip) | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.MelonLoader.Mono.zip) | 
 
-1. Take the `UnityExplorer.ML.[version].dll` and the `UniverseLib.[version].dll` files and put them in the `Mods\` folder created by MelonLoader.
+1. Take the `UnityExplorer.ML.[version].dll` file and put them in the `Mods\` folder created by MelonLoader, and then put the `UniverseLib.[version].dll` file in the `UserLibs\` folder.
 
 ## Standalone
 
@@ -43,9 +43,10 @@
 | ------ | ---- |
 | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.Standalone.Il2Cpp.zip) | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.Standalone.Mono.zip) | 
 
-The standalone release can be used with any injector or loader of your choice, but it requires you to load the dependencies manually: HarmonyX, and the IL2CPP version also requires that you set up an [Il2CppAssemblyUnhollower runtime](https://github.com/knah/Il2CppAssemblyUnhollower#required-external-setup).
+The standalone release can be used with any injector or loader of your choice, but it requires you to load the dependencies manually.
 
-1. Load the required libs - UniverseLib, HarmonyX, and Il2CppAssemblyUnhollower if IL2CPP
+1. Ensure the required libs are loaded - UniverseLib, HarmonyX and MonoMod
+2. For IL2CPP, load Il2CppAssemblyUnhollower and start an [Il2CppAssemblyUnhollower runtime](https://github.com/knah/Il2CppAssemblyUnhollower#required-external-setup)
 2. Load the UnityExplorer DLL
 3. Create an instance of Unity Explorer with `UnityExplorer.ExplorerStandalone.CreateInstance();`
 4. Optionally subscribe to the `ExplorerStandalone.OnLog` event to handle logging if you wish
@@ -130,11 +131,9 @@ The inspector is used to see detailed information on objects of any type and man
 
 # Building
 
-For Visual Studio:
-
 0. Clone the repository and run `git submodule update --init --recursive` to get the submodules.
 1. Open the `src\UnityExplorer.sln` project.
-2. Build `mcs` (Release/AnyCPU, you may need to run `nuget restore mcs.sln`), and if using IL2CPP then build `Il2CppAssemblyUnhollower` (Release/AnyCPU) as well.
+2. Build `mcs` (Release/AnyCPU, you may need to run `nuget restore mcs.sln`)
 3. Build the UnityExplorer release(s) you want to use, either by selecting the config as the Active Config, or batch-building.
 
 If you fork the repository on GitHub you can build using the [dotnet workflow](https://github.com/sinai-dev/UnityExplorer/blob/master/.github/workflows/dotnet.yml):
@@ -146,7 +145,7 @@ If you fork the repository on GitHub you can build using the [dotnet workflow](h
 # Acknowledgments
 
 * [ManlyMarco](https://github.com/ManlyMarco) for [Runtime Unity Editor](https://github.com/ManlyMarco/RuntimeUnityEditor) \[[license](THIRDPARTY_LICENSES.md#runtimeunityeditor-license)\], the ScriptEvaluator from RUE's REPL console was used as the base for UnityExplorer's C# console.
-* [denikson](https://github.com/denikson) (aka Horse) for [mcs-unity](https://github.com/denikson/mcs-unity) \[no license\], used as the `Mono.CSharp` reference for the C# Console.
+* [Geoffrey Horsington](https://github.com/ghorsington) for [mcs-unity](https://github.com/sinai-dev/mcs-unity) \[no license\], used as the `Mono.CSharp` reference for the C# Console.
 
 ### Disclaimer
 

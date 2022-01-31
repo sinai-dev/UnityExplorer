@@ -13,6 +13,8 @@ using UniverseLib.UI.Models;
 using UnityExplorer.UI;
 using UniverseLib;
 using UniverseLib.UI;
+using UniverseLib.Utility;
+using UniverseLib.UI.ObjectPool;
 
 namespace UnityExplorer.CacheObject
 {

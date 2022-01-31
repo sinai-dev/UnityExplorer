@@ -1,4 +1,5 @@
-﻿using Mono.CSharp;
+﻿using HarmonyLib;
+using Mono.CSharp;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -29,7 +30,7 @@ namespace UnityExplorer.CSConsole
             => InspectorManager.Inspect(type);
 
         public static void Start(IEnumerator ienumerator) 
-            => RuntimeProvider.Instance.StartCoroutine(ienumerator);
+            => RuntimeHelper.StartCoroutine(ienumerator);
 
         public static void Copy(object obj) 
             => ClipboardPanel.Copy(obj);
@@ -51,7 +52,7 @@ namespace UnityExplorer.CSConsole
 
         public static void GetClasses()
         {
-            if (ReflectionUtility.GetFieldInfo(typeof(Evaluator), "source_file")
+            if (AccessTools.Field(typeof(Evaluator), "source_file")
                     .GetValue(Evaluator) is CompilationSourceFile sourceFile
                 && sourceFile.Containers.Any())
             {

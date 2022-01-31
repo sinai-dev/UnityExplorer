@@ -8,6 +8,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UniverseLib;
 using UniverseLib.UI.Widgets;
+using UniverseLib.UI.Widgets.ScrollView;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.UI.Widgets
 {
@@ -145,7 +147,7 @@ namespace UnityExplorer.UI.Widgets
 
         private void OnCellJumpedTo(TransformCell cell)
         {
-            RuntimeProvider.Instance.StartCoroutine(HighlightCellCoroutine(cell));
+            RuntimeHelper.StartCoroutine(HighlightCellCoroutine(cell));
         }
 
         private IEnumerator HighlightCellCoroutine(TransformCell cell)

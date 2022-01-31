@@ -52,9 +52,9 @@ namespace UnityExplorer.Hooks
         }
 
         // Evaluator.source_file 
-        private static readonly FieldInfo fi_sourceFile = ReflectionUtility.GetFieldInfo(typeof(Evaluator), "source_file");
+        private static readonly FieldInfo fi_sourceFile = AccessTools.Field(typeof(Evaluator), "source_file");
         // TypeDefinition.Definition
-        private static readonly PropertyInfo pi_Definition = ReflectionUtility.GetPropertyInfo(typeof(TypeDefinition), "Definition");
+        private static readonly PropertyInfo pi_Definition = AccessTools.Property(typeof(TypeDefinition), "Definition");
 
         public bool CompileAndGenerateProcessor(string patchSource)
         {

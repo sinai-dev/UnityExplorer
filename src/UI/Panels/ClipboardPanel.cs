@@ -12,6 +12,7 @@ using UniverseLib;
 using UniverseLib.Input;
 using UniverseLib.UI;
 using UniverseLib.UI.Widgets;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.UI.Panels
 {

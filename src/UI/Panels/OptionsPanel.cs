@@ -10,6 +10,7 @@ using UnityExplorer.CacheObject.Views;
 using UnityExplorer.UI.Widgets;
 using UniverseLib.UI.Widgets;
 using UniverseLib.UI;
+using UniverseLib.UI.Widgets.ScrollView;
 
 namespace UnityExplorer.UI.Panels
 {
@@ -70,13 +71,13 @@ namespace UnityExplorer.UI.Panels
         {
             // Save button
 
-            var saveBtn = UIFactory.CreateButton(this.content, "Save", "Save Options", new Color(0.2f, 0.3f, 0.2f));
+            var saveBtn = UIFactory.CreateButton(this.uiRoot, "Save", "Save Options", new Color(0.2f, 0.3f, 0.2f));
             UIFactory.SetLayoutElement(saveBtn.Component.gameObject, flexibleWidth: 9999, minHeight: 30, flexibleHeight: 0);
             saveBtn.OnClick += ConfigManager.Handler.SaveConfig;
 
             // Config entries
 
-            var scrollPool = UIFactory.CreateScrollPool<ConfigEntryCell>(this.content, "ConfigEntries", out GameObject scrollObj,
+            var scrollPool = UIFactory.CreateScrollPool<ConfigEntryCell>(this.uiRoot, "ConfigEntries", out GameObject scrollObj,
                 out GameObject scrollContent);
 
             scrollPool.Initialize(this);

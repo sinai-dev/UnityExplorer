@@ -14,6 +14,8 @@ using UnityExplorer.UI.Widgets.AutoComplete;
 using UniverseLib.UI.Widgets;
 using UniverseLib.UI;
 using UniverseLib;
+using UniverseLib.UI.Widgets.ScrollView;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.Inspectors
 {
@@ -44,7 +46,7 @@ namespace UnityExplorer.Inspectors
             GOControls.UpdateGameObjectInfo(true, true);
             GOControls.UpdateTransformControlValues(true);
 
-            RuntimeProvider.Instance.StartCoroutine(InitCoroutine());
+            RuntimeHelper.StartCoroutine(InitCoroutine());
         }
 
         private IEnumerator InitCoroutine()
@@ -227,7 +229,7 @@ namespace UnityExplorer.Inspectors
             {
                 try
                 {
-                    RuntimeProvider.Instance.AddComponent<Component>(GOTarget, type);
+                    RuntimeHelper.AddComponent<Component>(GOTarget, type);
                     UpdateComponents();
                 }
                 catch (Exception ex)

@@ -12,6 +12,7 @@ using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
 using UniverseLib;
 using UniverseLib.UI;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.Inspectors
 {
@@ -179,7 +180,7 @@ namespace UnityExplorer.Inspectors
             this.titleBar.SetActive(false);
             this.UIRoot.transform.SetParent(UIManager.UIRoot.transform, false);
 
-            var inspectContent = UIFactory.CreateVerticalGroup(this.content, "InspectContent", true, true, true, true, 3, new Vector4(2, 2, 2, 2));
+            var inspectContent = UIFactory.CreateVerticalGroup(this.uiRoot, "InspectContent", true, true, true, true, 3, new Vector4(2, 2, 2, 2));
             UIFactory.SetLayoutElement(inspectContent, flexibleWidth: 9999, flexibleHeight: 9999);
 
             // Title text

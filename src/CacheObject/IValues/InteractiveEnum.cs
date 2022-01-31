@@ -10,6 +10,8 @@ using UnityExplorer.UI;
 using UnityExplorer.UI.Widgets.AutoComplete;
 using UniverseLib;
 using UniverseLib.UI;
+using UniverseLib.UI.Models;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.CacheObject.IValues
 {

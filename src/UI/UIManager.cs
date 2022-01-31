@@ -9,7 +9,11 @@ using UnityExplorer.UI.Widgets.AutoComplete;
 using UniverseLib;
 using UniverseLib.Input;
 using UniverseLib.UI;
+using UniverseLib.UI.Models;
+using UniverseLib.UI.ObjectPool;
 using UniverseLib.UI.Widgets;
+using UniverseLib.UI.Widgets.ScrollView;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.UI
 {
@@ -285,7 +289,7 @@ namespace UnityExplorer.UI
             timeInput.Component.textComponent.color = pauseButtonPausing ? Color.grey : Color.white;
 
             Color color = pauseButtonPausing ? new Color(0.3f, 0.3f, 0.2f) : new Color(0.2f, 0.2f, 0.2f);
-            RuntimeProvider.Instance.SetColorBlock(pauseBtn.Component, color, color * 1.2f, color * 0.7f);
+            RuntimeHelper.SetColorBlock(pauseBtn.Component, color, color * 1.2f, color * 0.7f);
             pauseBtn.ButtonText.text = pauseButtonPausing ? "►" : "||";
         }
 
@@ -353,7 +357,7 @@ namespace UnityExplorer.UI
 
             closeBtn = UIFactory.CreateButton(navbarPanel, "CloseButton", ConfigManager.Master_Toggle.Value.ToString());
             UIFactory.SetLayoutElement(closeBtn.Component.gameObject, minHeight: 25, minWidth: 80, flexibleWidth: 0);
-            RuntimeProvider.Instance.SetColorBlock(closeBtn.Component, new Color(0.63f, 0.32f, 0.31f),
+            RuntimeHelper.SetColorBlock(closeBtn.Component, new Color(0.63f, 0.32f, 0.31f),
                 new Color(0.81f, 0.25f, 0.2f), new Color(0.6f, 0.18f, 0.16f));
 
             ConfigManager.Master_Toggle.OnValueChanged += Master_Toggle_OnValueChanged;

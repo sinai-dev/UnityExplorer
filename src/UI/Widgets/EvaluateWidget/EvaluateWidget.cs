@@ -11,6 +11,7 @@ using UnityExplorer.UI.Widgets.AutoComplete;
 using UniverseLib.UI;
 using UniverseLib;
 using UnityExplorer.CacheObject;
+using UniverseLib.UI.ObjectPool;
 
 namespace UnityExplorer.UI.Widgets
 {

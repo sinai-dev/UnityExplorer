@@ -8,6 +8,7 @@ using UnityExplorer.CacheObject;
 using UnityExplorer.UI;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
+using UniverseLib.UI.ObjectPool;
 
 namespace UnityExplorer.CacheObject.IValues
 {

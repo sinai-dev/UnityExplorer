@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using UnityExplorer.UI.Widgets;
 using UniverseLib;
-using UniverseLib.UI.Widgets;
+using UniverseLib.UI.Widgets.ButtonList;
+using UniverseLib.UI.Widgets.ScrollView;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.Inspectors
 {
@@ -113,7 +114,7 @@ namespace UnityExplorer.Inspectors
             {
                 cell.BehaviourToggle.interactable = false;
                 cell.BehaviourToggle.Set(true, false);
-                //RuntimeProvider.Instance.SetColorBlock(cell.BehaviourToggle,)
+                //RuntimeHelper.SetColorBlock(cell.BehaviourToggle,)
                 cell.BehaviourToggle.graphic.color = new Color(0.2f, 0.2f, 0.2f);
             }
 

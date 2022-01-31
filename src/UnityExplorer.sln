@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30128.74
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnhollowerBaseLib", "..\lib\Il2CppAssemblyUnhollower\UnhollowerBaseLib\UnhollowerBaseLib.csproj", "{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mcs", "..\lib\mcs-unity\mcs\mcs.csproj", "{E4989E4C-0875-4528-9031-08E2C0E70103}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityExplorer", "UnityExplorer.csproj", "{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}"
@@ -20,20 +18,6 @@ Global
 		Release_STANDALONE_Mono|Any CPU = Release_STANDALONE_Mono|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}.Release_BIE_Cpp|Any CPU.ActiveCfg = Release|Any CPU
-		{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}.Release_BIE_Cpp|Any CPU.Build.0 = Release|Any CPU
-		{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}.Release_BIE5_Mono|Any CPU.ActiveCfg = Release|Any CPU
-		{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}.Release_BIE5_Mono|Any CPU.Build.0 = Release|Any CPU
-		{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}.Release_BIE6_Mono|Any CPU.ActiveCfg = Release|Any CPU
-		{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}.Release_BIE6_Mono|Any CPU.Build.0 = Release|Any CPU
-		{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}.Release_ML_Cpp|Any CPU.ActiveCfg = Release|Any CPU
-		{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}.Release_ML_Cpp|Any CPU.Build.0 = Release|Any CPU
-		{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}.Release_ML_Mono|Any CPU.ActiveCfg = Release|Any CPU
-		{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}.Release_ML_Mono|Any CPU.Build.0 = Release|Any CPU
-		{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}.Release_STANDALONE_Cpp|Any CPU.ActiveCfg = Release|Any CPU
-		{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}.Release_STANDALONE_Cpp|Any CPU.Build.0 = Release|Any CPU
-		{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}.Release_STANDALONE_Mono|Any CPU.ActiveCfg = Release|Any CPU
-		{7B7E5024-385D-4A46-9196-A6AF8F7FBDD5}.Release_STANDALONE_Mono|Any CPU.Build.0 = Release|Any CPU
 		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_BIE_Cpp|Any CPU.ActiveCfg = Release|Any CPU
 		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_BIE_Cpp|Any CPU.Build.0 = Release|Any CPU
 		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_BIE5_Mono|Any CPU.ActiveCfg = Release|Any CPU

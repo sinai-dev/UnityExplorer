@@ -2,21 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using BF = System.Reflection.BindingFlags;
-using System.Text;
-using UnhollowerBaseLib;
-using UnhollowerRuntimeLib;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.SceneManagement;
-using System.Collections;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
 
 namespace UnityExplorer.Runtime
 {
-    public class Il2CppProvider : RuntimeHelper
+    public class Il2CppHelper : UERuntimeHelper
     {
         public override void SetupEvents()
         {
@@ -41,7 +31,7 @@ namespace UnityExplorer.Runtime
         // These methods currently cause a crash in most il2cpp games,
         // even from doing "GetParameters()" on the MemberInfo.
         // Blacklisting until the issue is fixed in Unhollower.
-        public static HashSet<string> defaultIl2CppBlacklist = new HashSet<string>
+        public static HashSet<string> defaultIl2CppBlacklist = new()
         {
             // These were deprecated a long time ago, still show up in some IL2CPP games for some reason
             "UnityEngine.MonoBehaviour.allowPrefabModeInPlayMode",

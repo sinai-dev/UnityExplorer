@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using UnityExplorer.UI.Widgets.AutoComplete;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
+using UniverseLib.UI.ObjectPool;
 
 namespace UnityExplorer.UI.Widgets
 {

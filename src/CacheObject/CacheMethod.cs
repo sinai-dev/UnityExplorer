@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using UnityExplorer.Inspectors;
 using UniverseLib;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.CacheObject
 {

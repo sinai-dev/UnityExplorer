@@ -61,7 +61,7 @@ namespace UnityExplorer.UI
                 canvasCamera.targetDisplay = display;
             }
 
-            RuntimeProvider.Instance.StartCoroutine(FixPanels());
+            RuntimeHelper.StartCoroutine(FixPanels());
         }
 
         private static IEnumerator FixPanels()

@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using UnityExplorer.UI;
 using UniverseLib;
 using UniverseLib.UI;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.CacheObject.Views
 {

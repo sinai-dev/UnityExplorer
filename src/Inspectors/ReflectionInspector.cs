@@ -19,6 +19,9 @@ using UniverseLib.UI.Widgets;
 using UniverseLib.UI;
 using UniverseLib;
 using UniverseLib.Runtime;
+using UniverseLib.UI.Models;
+using UniverseLib.UI.Widgets.ScrollView;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.Inspectors
 {
@@ -29,8 +32,8 @@ namespace UnityExplorer.Inspectors
         public bool StaticOnly { get; internal set; }
         public bool CanWrite => true;
 
-        private List<CacheMember> members = new List<CacheMember>();
-        private readonly List<CacheMember> filteredMembers = new List<CacheMember>();
+        private List<CacheMember> members = new();
+        private readonly List<CacheMember> filteredMembers = new();
 
         public bool AutoUpdateWanted => autoUpdateToggle.isOn;
 
@@ -58,11 +61,11 @@ namespace UnityExplorer.Inspectors
 
         private string currentBaseTabText;
 
-        private readonly Color disabledButtonColor = new Color(0.24f, 0.24f, 0.24f);
-        private readonly Color enabledButtonColor = new Color(0.2f, 0.27f, 0.2f);
+        private readonly Color disabledButtonColor = new(0.24f, 0.24f, 0.24f);
+        private readonly Color enabledButtonColor = new(0.2f, 0.27f, 0.2f);
 
-        private readonly Dictionary<BindingFlags, ButtonRef> scopeFilterButtons = new Dictionary<BindingFlags, ButtonRef>();
-        private readonly List<Toggle> memberTypeToggles = new List<Toggle>();
+        private readonly Dictionary<BindingFlags, ButtonRef> scopeFilterButtons = new();
+        private readonly List<Toggle> memberTypeToggles = new();
         private InputFieldRef filterInputField;
 
         // Setup / return
@@ -74,7 +77,7 @@ namespace UnityExplorer.Inspectors
 
             SetTarget(target);
 
-            RuntimeProvider.Instance.StartCoroutine(InitCoroutine());
+            RuntimeHelper.StartCoroutine(InitCoroutine());
         }
 
         private IEnumerator InitCoroutine()
@@ -225,11 +228,11 @@ namespace UnityExplorer.Inspectors
             if (flagsFilter != FlagsFilter)
             {
                 var btn = scopeFilterButtons[FlagsFilter].Component;
-                RuntimeProvider.Instance.SetColorBlock(btn, disabledButtonColor, disabledButtonColor * 1.3f);
+                RuntimeHelper.SetColorBlock(btn, disabledButtonColor, disabledButtonColor * 1.3f);
 
                 this.FlagsFilter = flagsFilter;
                 btn = scopeFilterButtons[FlagsFilter].Component;
-                RuntimeProvider.Instance.SetColorBlock(btn, enabledButtonColor, enabledButtonColor * 1.3f);
+                RuntimeHelper.SetColorBlock(btn, enabledButtonColor, enabledButtonColor * 1.3f);
             }
         }
 
@@ -477,7 +480,13 @@ namespace UnityExplorer.Inspectors
         {
             var toggleObj = UIFactory.CreateToggle(parent, "Toggle_" + type, out Toggle toggle, out Text toggleText);
             UIFactory.SetLayoutElement(toggleObj, minHeight: 25, minWidth: width);
-            var color = SignatureHighlighter.GetMemberInfoColor(type);
+            var color = type switch
+            {
+                MemberTypes.Method => SignatureHighlighter.METHOD_INSTANCE,
+                MemberTypes.Field => SignatureHighlighter.FIELD_INSTANCE,
+                MemberTypes.Property => SignatureHighlighter.PROP_INSTANCE,
+                _ => throw new NotImplementedException()
+            };
             toggleText.text = $"<color={color}>{type}</color>";
 
             toggle.graphic.TryCast<Image>().color = color.ToColor() * 0.65f;
@@ -677,7 +686,7 @@ namespace UnityExplorer.Inspectors
 
             textureSavePathInput.Text = Path.Combine(ConfigManager.Default_Output_Path.Value, $"{name}.png");
 
-            var sprite = TextureUtilProvider.Instance.CreateSprite(TextureRef);
+            var sprite = TextureHelper.CreateSprite(TextureRef);
             textureImage.sprite = sprite;
 
             textureImageLayout.preferredHeight = sprite.rect.height;
@@ -713,10 +722,10 @@ namespace UnityExplorer.Inspectors
 
             var tex = TextureRef;
 
-            if (!TextureUtilProvider.IsReadable(tex))
-                tex = TextureUtilProvider.ForceReadTexture(tex);
+            if (!TextureHelper.IsReadable(tex))
+                tex = TextureHelper.ForceReadTexture(tex);
 
-            byte[] data = TextureUtilProvider.Instance.EncodeToPNG(tex);
+            byte[] data = TextureHelper.EncodeToPNG(tex);
             File.WriteAllBytes(path, data);
 
             if (tex != TextureRef)

@@ -11,6 +11,8 @@ using UniverseLib.UI.Models;
 using UnityExplorer.UI.Panels;
 using UniverseLib;
 using UniverseLib.UI;
+using UniverseLib.UI.ObjectPool;
+using UniverseLib.Utility;
 
 namespace UnityExplorer
 {

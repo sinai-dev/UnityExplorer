@@ -9,6 +9,8 @@ using UnityExplorer.UI;
 using UniverseLib.UI;
 using UniverseLib;
 using UnityExplorer.UI.Panels;
+using UniverseLib.UI.Models;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.Inspectors
 {
@@ -175,7 +177,7 @@ namespace UnityExplorer.Inspectors
                 {
                     // look for inactive objects
                     var name = input.Split('/').Last();
-                    var allObjects = RuntimeProvider.Instance.FindObjectsOfTypeAll(typeof(GameObject));
+                    var allObjects = RuntimeHelper.FindObjectsOfTypeAll(typeof(GameObject));
                     var shortList = new List<GameObject>();
                     foreach (var obj in allObjects)
                         if (obj.name == name) shortList.Add(obj.TryCast<GameObject>());
@@ -572,7 +574,7 @@ namespace UnityExplorer.Inspectors
             var layerLabel = UIFactory.CreateLabel(thirdrow, "LayerLabel", "Layer:", TextAnchor.MiddleLeft, Color.grey);
             UIFactory.SetLayoutElement(layerLabel.gameObject, minHeight: 25, minWidth: 50);
 
-            var layerDrop = UIFactory.CreateDropdown(thirdrow, out LayerDropdown, "0", 14, OnLayerDropdownChanged);
+            var layerDrop = UIFactory.CreateDropdown(thirdrow, "LayerDropdown", out LayerDropdown, "0", 14, OnLayerDropdownChanged);
             UIFactory.SetLayoutElement(layerDrop, minHeight: 25, minWidth: 110, flexibleWidth: 999);
             LayerDropdown.captionText.color = SignatureHighlighter.EnumGreen;
             if (layerToNames == null)
@@ -586,7 +588,7 @@ namespace UnityExplorer.Inspectors
             var flagsLabel = UIFactory.CreateLabel(thirdrow, "FlagsLabel", "Flags:", TextAnchor.MiddleRight, Color.grey);
             UIFactory.SetLayoutElement(flagsLabel.gameObject, minHeight: 25, minWidth: 50);
 
-            var flagsDrop = UIFactory.CreateDropdown(thirdrow, out FlagsDropdown, "None", 14, OnFlagsDropdownChanged);
+            var flagsDrop = UIFactory.CreateDropdown(thirdrow, "FlagsDropdown", out FlagsDropdown, "None", 14, OnFlagsDropdownChanged);
             FlagsDropdown.captionText.color = SignatureHighlighter.EnumGreen;
             UIFactory.SetLayoutElement(flagsDrop, minHeight: 25, minWidth: 135, flexibleWidth: 999);
             if (hideFlagsValues == null)
@@ -604,7 +606,7 @@ namespace UnityExplorer.Inspectors
             layerToNames = new List<string>();
             for (int i = 0; i < 32; i++)
             {
-                var name = RuntimeProvider.Instance.LayerToName(i);
+                var name = RuntimeHelper.LayerToName(i);
                 if (string.IsNullOrEmpty(name))
                     name = i.ToString();
                 layerToNames.Add(name);

@@ -175,16 +175,16 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="UniverseLib.Mono">
-      <HintPath>packages\UniverseLib.1.1.2\lib\net35\UniverseLib.Mono.dll</HintPath>
+      <HintPath>packages\UniverseLib.1.2.1\lib\net35\UniverseLib.Mono.dll</HintPath>
     </Reference>
   </ItemGroup>
   <!-- Il2Cpp refs -->
   <ItemGroup Condition="'$(IsCpp)'=='true'">
     <Reference Include="UniverseLib.IL2CPP">
-      <HintPath>packages\UniverseLib.1.1.2\lib\net472\UniverseLib.IL2CPP.dll</HintPath>
+      <HintPath>packages\UniverseLib.1.2.1\lib\net472\UniverseLib.IL2CPP.dll</HintPath>
     </Reference>
-    <Reference Include="UnhollowerBaseLib">
-      <HintPath>..\lib\Il2CppAssemblyUnhollower\UnhollowerBaseLib\bin\Release\net4.7.2\UnhollowerBaseLib.dll</HintPath>
+    <Reference Include="UnhollowerBaseLib, Version=0.4.22.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Il2CppAssemblyUnhollower.BaseLib.0.4.22\lib\net472\UnhollowerBaseLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Il2Cppmscorlib">
@@ -291,9 +291,9 @@
     <Compile Include="Config\ConfigHandler.cs" />
     <Compile Include="Config\ConfigManager.cs" />
     <Compile Include="Config\IConfigElement.cs" />
-    <Compile Include="Runtime\Il2CppProvider.cs" />
-    <Compile Include="Runtime\MonoProvider.cs" />
-    <Compile Include="Runtime\RuntimeHelper.cs" />
+    <Compile Include="Runtime\Il2CppHelper.cs" />
+    <Compile Include="Runtime\MonoHelper.cs" />
+    <Compile Include="Runtime\UERuntimeHelper.cs" />
     <Compile Include="ObjectExplorer\SceneHandler.cs" />
     <Compile Include="ObjectExplorer\SearchProvider.cs" />
     <Compile Include="Tests\TestClass.cs" />
@@ -326,7 +326,9 @@
     <None Include="ILRepack.targets" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Analyzer Include="packages\UniverseLib.Analyzers.1.0.3\analyzers\dotnet\cs\UniverseLib.Analyzers.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\ILRepack.Lib.MSBuild.Task.2.0.18.2\build\ILRepack.Lib.MSBuild.Task.targets" Condition="Exists('packages\ILRepack.Lib.MSBuild.Task.2.0.18.2\build\ILRepack.Lib.MSBuild.Task.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

@@ -10,6 +10,7 @@ using UniverseLib.UI.Models;
 using UnityExplorer.UI.Widgets.AutoComplete;
 using UniverseLib.UI;
 using UniverseLib;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.UI.Panels
 {

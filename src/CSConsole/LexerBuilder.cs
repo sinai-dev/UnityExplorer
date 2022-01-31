@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.CSConsole.Lexers;
 using UniverseLib;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.CSConsole
 {

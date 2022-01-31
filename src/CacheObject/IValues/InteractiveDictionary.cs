@@ -14,6 +14,8 @@ using UnityExplorer.UI.Widgets;
 using UniverseLib;
 using UniverseLib.UI;
 using UniverseLib.UI.Widgets;
+using UniverseLib.UI.Widgets.ScrollView;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.CacheObject.IValues
 {

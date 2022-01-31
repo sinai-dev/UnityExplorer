@@ -93,7 +93,6 @@ namespace UnityExplorer.UI.Panels
         public override GameObject UIRoot => uiRoot;
         protected GameObject uiRoot;
         public RectTransform Rect;
-        public GameObject content;
         public GameObject titleBar;
 
         public virtual void OnFinishResize(RectTransform panel)
@@ -118,8 +117,8 @@ namespace UnityExplorer.UI.Panels
 
             if (NavButtonWanted)
             {
-                var color = active ? UniversalUI.enabledButtonColor : UniversalUI.disabledButtonColor;
-                RuntimeProvider.Instance.SetColorBlock(NavButton.Component, color, color * 1.2f);
+                var color = active ? UniversalUI.EnabledButtonColor : UniversalUI.DisabledButtonColor;
+                RuntimeHelper.SetColorBlock(NavButton.Component, color, color * 1.2f);
             }
 
             if (!active)
@@ -240,7 +239,7 @@ namespace UnityExplorer.UI.Panels
                 UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(navBtn, false, true, true, true, 0, 0, 0, 5, 5, TextAnchor.MiddleCenter);
                 UIFactory.SetLayoutElement(navBtn, minWidth: 80);
 
-                RuntimeProvider.Instance.SetColorBlock(NavButton.Component, UniversalUI.disabledButtonColor, UniversalUI.disabledButtonColor * 1.2f);
+                RuntimeHelper.SetColorBlock(NavButton.Component, UniversalUI.DisabledButtonColor, UniversalUI.DisabledButtonColor * 1.2f);
                 NavButton.OnClick += () => { UIManager.TogglePanel(PanelType); };
 
                 var txtObj = navBtn.transform.Find("Text").gameObject;
@@ -248,18 +247,18 @@ namespace UnityExplorer.UI.Panels
             }
 
             // create core canvas 
-            uiRoot = UIFactory.CreatePanel(Name, UIManager.PanelHolder, out GameObject panelContent);
+            uiRoot = UIFactory.CreatePanel(Name, UIManager.PanelHolder);
             Rect = this.uiRoot.GetComponent<RectTransform>();
-            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.uiRoot, false, false, true, true, 0, 2, 2, 2, 2, TextAnchor.UpperLeft);
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.uiRoot, false, false, true, true, 2, 2, 2, 2, 2, TextAnchor.UpperLeft);
 
             int id = this.uiRoot.transform.GetInstanceID();
             transformToPanelDict.Add(id, this);
 
-            content = panelContent;
-            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.content, false, false, true, true, 2, 2, 2, 2, 2, TextAnchor.UpperLeft);
+            //content = panelContent;
+            //UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.content, false, false, true, true, 2, 2, 2, 2, 2, TextAnchor.UpperLeft);
 
             // Title bar
-            titleBar = UIFactory.CreateHorizontalGroup(content, "TitleBar", false, true, true, true, 2,
+            titleBar = UIFactory.CreateHorizontalGroup(uiRoot, "TitleBar", false, true, true, true, 2,
                 new Vector4(2, 2, 2, 2), new Color(0.06f, 0.06f, 0.06f));
             UIFactory.SetLayoutElement(titleBar, minHeight: 25, flexibleHeight: 0);
 
@@ -275,7 +274,7 @@ namespace UnityExplorer.UI.Panels
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(closeHolder, false, false, true, true, 3, childAlignment: TextAnchor.MiddleRight);
             var closeBtn = UIFactory.CreateButton(closeHolder, "CloseButton", "—");
             UIFactory.SetLayoutElement(closeBtn.Component.gameObject, minHeight: 25, minWidth: 25, flexibleWidth: 0);
-            RuntimeProvider.Instance.SetColorBlock(closeBtn.Component, new Color(0.33f, 0.32f, 0.31f));
+            RuntimeHelper.SetColorBlock(closeBtn.Component, new Color(0.33f, 0.32f, 0.31f));
 
             closeBtn.OnClick += () =>
             {
@@ -313,7 +312,7 @@ namespace UnityExplorer.UI.Panels
                 SetTransformDefaults();
             }
 
-            RuntimeProvider.Instance.StartCoroutine(LateSetupCoroutine());
+            RuntimeHelper.StartCoroutine(LateSetupCoroutine());
 
             // simple listener for saving enabled state
             this.OnToggleEnabled += (bool val) =>

@@ -8,6 +8,7 @@ using UnityExplorer.UI;
 using UniverseLib.UI.Models;
 using UnityExplorer.UI.Panels;
 using UniverseLib.UI;
+using UniverseLib.UI.ObjectPool;
 
 namespace UnityExplorer.Inspectors
 {

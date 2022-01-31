@@ -9,6 +9,8 @@ using UnityExplorer.CacheObject;
 using UnityExplorer.UI;
 using UniverseLib;
 using UniverseLib.UI;
+using UniverseLib.UI.Models;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.CacheObject.IValues
 {
@@ -55,7 +57,7 @@ namespace UnityExplorer.CacheObject.IValues
             }
         }
 
-        private static readonly Dictionary<string, StructInfo> typeSupportCache = new Dictionary<string, StructInfo>();
+        private static readonly Dictionary<string, StructInfo> typeSupportCache = new();
 
         private const BindingFlags INSTANCE_FLAGS = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
         private const string SYSTEM_VOID = "System.Void";

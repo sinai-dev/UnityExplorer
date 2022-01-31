@@ -11,6 +11,7 @@ using UnityExplorer.CSConsole;
 using UnityExplorer.UI.Widgets;
 using UniverseLib;
 using UniverseLib.UI;
+using UniverseLib.UI.Models;
 using UniverseLib.UI.Widgets;
 
 namespace UnityExplorer.UI.Panels
@@ -74,7 +75,7 @@ namespace UnityExplorer.UI.Panels
         {
             // Tools Row
 
-            var toolsRow = UIFactory.CreateHorizontalGroup(this.content, "ToggleRow", false, false, true, true, 5, new Vector4(8, 8, 10, 5),
+            var toolsRow = UIFactory.CreateHorizontalGroup(this.uiRoot, "ToggleRow", false, false, true, true, 5, new Vector4(8, 8, 10, 5),
                 default, TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(toolsRow, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
 
@@ -92,7 +93,7 @@ namespace UnityExplorer.UI.Panels
 
             // Help dropdown
 
-            var helpDrop = UIFactory.CreateDropdown(toolsRow, out var dropdown, "Help", 14, null);
+            var helpDrop = UIFactory.CreateDropdown(toolsRow, "HelpDropdown", out var dropdown, "Help", 14, null);
             UIFactory.SetLayoutElement(helpDrop, minHeight: 25, minWidth: 100);
             HelpDropdown = dropdown;
             HelpDropdown.onValueChanged.AddListener((int val) => { this.OnHelpDropdownChanged?.Invoke(val); });
@@ -123,7 +124,7 @@ namespace UnityExplorer.UI.Panels
 
             // Console Input
 
-            var inputArea = UIFactory.CreateUIObject("InputGroup", content);
+            var inputArea = UIFactory.CreateUIObject("InputGroup", uiRoot);
             UIFactory.SetLayoutElement(inputArea, flexibleWidth: 9999, flexibleHeight: 9999);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(inputArea, false, true, true, true);
             inputArea.AddComponent<Image>().color = Color.white;
@@ -190,7 +191,7 @@ namespace UnityExplorer.UI.Panels
             Input.PlaceholderText.font = UniversalUI.ConsoleFont;
             HighlightText.font = UniversalUI.ConsoleFont;
 
-            RuntimeProvider.Instance.StartCoroutine(DelayedLayoutSetup());
+            RuntimeHelper.StartCoroutine(DelayedLayoutSetup());
         }
 
         private IEnumerator DelayedLayoutSetup()
@@ -201,8 +202,8 @@ namespace UnityExplorer.UI.Panels
 
         public void SetInputLayout()
         {
-            Input.Rect.offsetMin = new Vector2(52, Input.Rect.offsetMin.y);
-            Input.Rect.offsetMax = new Vector2(2, Input.Rect.offsetMax.y);
+            Input.Transform.offsetMin = new Vector2(52, Input.Transform.offsetMin.y);
+            Input.Transform.offsetMax = new Vector2(2, Input.Transform.offsetMax.y);
         }
     }
 }

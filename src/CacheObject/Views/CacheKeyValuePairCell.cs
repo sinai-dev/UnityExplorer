@@ -9,6 +9,7 @@ using UnityExplorer.Inspectors;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Widgets;
 using UniverseLib.UI;
+using UniverseLib.UI.Models;
 
 namespace UnityExplorer.CacheObject.Views
 {

@@ -4,6 +4,8 @@ using System.Collections.Specialized;
 using UnityExplorer.CacheObject.IValues;
 using UniverseLib;
 using UniverseLib.UI;
+using UniverseLib.UI.Models;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.UI.Widgets.AutoComplete
 {

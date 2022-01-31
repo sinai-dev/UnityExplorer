@@ -10,7 +10,10 @@ using UnityExplorer.Config;
 using UnityExplorer.UI.Widgets;
 using UniverseLib;
 using UniverseLib.UI;
+using UniverseLib.UI.Models;
 using UniverseLib.UI.Widgets;
+using UniverseLib.UI.Widgets.ScrollView;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.UI.Panels
 {
@@ -141,7 +144,7 @@ namespace UnityExplorer.UI.Panels
             cell.Input.Component.textComponent.color = logColors[log.type];
 
             var color = index % 2 == 0 ? logEvenColor : logOddColor;
-            RuntimeProvider.Instance.SetColorBlock(cell.Input.Component, color);
+            RuntimeHelper.SetColorBlock(cell.Input.Component, color);
         }
 
         protected internal override void DoSetDefaultPosAndAnchors()
@@ -158,13 +161,13 @@ namespace UnityExplorer.UI.Panels
         {
             // Log scroll pool
 
-            logScrollPool = UIFactory.CreateScrollPool<ConsoleLogCell>(this.content, "Logs", out GameObject scrollObj,
+            logScrollPool = UIFactory.CreateScrollPool<ConsoleLogCell>(this.uiRoot, "Logs", out GameObject scrollObj,
                 out GameObject scrollContent, new Color(0.03f, 0.03f, 0.03f));
             UIFactory.SetLayoutElement(scrollObj, flexibleWidth: 9999, flexibleHeight: 9999);
 
             // Buttons and toggles
 
-            var optionsRow = UIFactory.CreateUIObject("OptionsRow", this.content);
+            var optionsRow = UIFactory.CreateUIObject("OptionsRow", this.uiRoot);
             UIFactory.SetLayoutElement(optionsRow, minHeight: 25, flexibleWidth: 9999);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(optionsRow, false, false, true, true, 5, 2, 2, 2, 2);
 
@@ -217,7 +220,7 @@ namespace UnityExplorer.UI.Panels
             Input = UIFactory.CreateInputField(UIRoot, "Input", "");
             //Input.Component.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             UIFactory.SetLayoutElement(Input.UIRoot, minHeight: 25, flexibleWidth: 9999);
-            RuntimeProvider.Instance.SetColorBlock(Input.Component, new Color(0.1f, 0.1f, 0.1f), new Color(0.13f, 0.13f, 0.13f),
+            RuntimeHelper.SetColorBlock(Input.Component, new Color(0.1f, 0.1f, 0.1f), new Color(0.13f, 0.13f, 0.13f),
                 new Color(0.07f, 0.07f, 0.07f));
             Input.Component.GetComponent<Image>().color = new Color(0.2f, 0.2f, 0.2f);
 

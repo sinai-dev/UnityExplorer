@@ -58,7 +58,7 @@ namespace UnityExplorer.UI.Panels
 
             // Inspect under mouse dropdown on title bar
 
-            var mouseDropdown = UIFactory.CreateDropdown(closeHolder, out MouseInspectDropdown, "Mouse Inspect", 14,
+            var mouseDropdown = UIFactory.CreateDropdown(closeHolder, "MouseInspectDropdown", out MouseInspectDropdown, "Mouse Inspect", 14,
                 InspectUnderMouse.OnDropdownSelect);
             UIFactory.SetLayoutElement(mouseDropdown, minHeight: 25, minWidth: 140);
             MouseInspectDropdown.options.Add(new Dropdown.OptionData("Mouse Inspect"));
@@ -76,14 +76,14 @@ namespace UnityExplorer.UI.Panels
 
             // this.UIRoot.GetComponent<Mask>().enabled = false;
 
-            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.content, true, true, true, true, 4, padLeft: 5, padRight: 5);
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.uiRoot, true, true, true, true, 4, padLeft: 5, padRight: 5);
 
-            this.NavbarHolder = UIFactory.CreateGridGroup(this.content, "Navbar", new Vector2(200, 22), new Vector2(4, 4),
+            this.NavbarHolder = UIFactory.CreateGridGroup(this.uiRoot, "Navbar", new Vector2(200, 22), new Vector2(4, 4),
                 new Color(0.05f, 0.05f, 0.05f));
             //UIFactory.SetLayoutElement(NavbarHolder, flexibleWidth: 9999, minHeight: 0, preferredHeight: 0, flexibleHeight: 9999);
             NavbarHolder.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-            this.ContentHolder = UIFactory.CreateVerticalGroup(this.content, "ContentHolder", true, true, true, true, 0, default,
+            this.ContentHolder = UIFactory.CreateVerticalGroup(this.uiRoot, "ContentHolder", true, true, true, true, 0, default,
                 new Color(0.1f, 0.1f, 0.1f));
             UIFactory.SetLayoutElement(ContentHolder, flexibleHeight: 9999);
             ContentRect = ContentHolder.GetComponent<RectTransform>();

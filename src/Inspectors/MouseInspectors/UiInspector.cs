@@ -58,7 +58,7 @@ namespace UnityExplorer.Inspectors.MouseInspectors
                     continue;
             
                 var list = new List<RaycastResult>();
-                RuntimeProvider.Instance.GraphicRaycast(gr, ped, list);
+                RuntimeHelper.GraphicRaycast(gr, ped, list);
                 if (list.Count > 0)
                 {
                     foreach (var hit in list)
@@ -77,7 +77,7 @@ namespace UnityExplorer.Inspectors.MouseInspectors
 
         private static void SetupUIRaycast()
         {
-            foreach (var obj in RuntimeProvider.Instance.FindObjectsOfTypeAll(typeof(Canvas)))
+            foreach (var obj in RuntimeHelper.FindObjectsOfTypeAll(typeof(Canvas)))
             {
                 var canvas = obj.TryCast<Canvas>();
                 if (!canvas || !canvas.enabled || !canvas.gameObject.activeInHierarchy)
@@ -91,7 +91,7 @@ namespace UnityExplorer.Inspectors.MouseInspectors
             }
 
             // recache Graphic Raycasters each time we start
-            var casters = RuntimeProvider.Instance.FindObjectsOfTypeAll(typeof(GraphicRaycaster));
+            var casters = RuntimeHelper.FindObjectsOfTypeAll(typeof(GraphicRaycaster));
             graphicRaycasters = new GraphicRaycaster[casters.Length];
             for (int i = 0; i < casters.Length; i++)
             {
@@ -99,7 +99,7 @@ namespace UnityExplorer.Inspectors.MouseInspectors
             }
 
             // enable raycastTarget on Graphics
-            foreach (var obj in RuntimeProvider.Instance.FindObjectsOfTypeAll(typeof(Graphic)))
+            foreach (var obj in RuntimeHelper.FindObjectsOfTypeAll(typeof(Graphic)))
             {
                 var graphic = obj.TryCast<Graphic>();
                 if (!graphic || !graphic.enabled || graphic.raycastTarget || !graphic.gameObject.activeInHierarchy)
@@ -110,7 +110,7 @@ namespace UnityExplorer.Inspectors.MouseInspectors
             }
 
             // enable blocksRaycasts on CanvasGroups
-            foreach (var obj in RuntimeProvider.Instance.FindObjectsOfTypeAll(typeof(CanvasGroup)))
+            foreach (var obj in RuntimeHelper.FindObjectsOfTypeAll(typeof(CanvasGroup)))
             {
                 var canvas = obj.TryCast<CanvasGroup>();
                 if (!canvas || !canvas.gameObject.activeInHierarchy || canvas.blocksRaycasts)
