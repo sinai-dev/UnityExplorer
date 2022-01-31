@@ -6,7 +6,12 @@ using UnityExplorer;
 using UnityExplorer.Config;
 using UnityExplorer.Loader.ML;
 
-[assembly: MelonPlatformDomain(MelonPlatformDomainAttribute.CompatibleDomains.UNIVERSAL)]
+#if CPP
+[assembly: MelonPlatformDomain(MelonPlatformDomainAttribute.CompatibleDomains.IL2CPP)]
+#else
+[assembly: MelonPlatformDomain(MelonPlatformDomainAttribute.CompatibleDomains.MONO)]
+#endif
+
 [assembly: MelonInfo(typeof(ExplorerMelonMod), ExplorerCore.NAME, ExplorerCore.VERSION, ExplorerCore.AUTHOR)]
 [assembly: MelonGame(null, null)]
 [assembly: MelonColor(ConsoleColor.DarkCyan)]
