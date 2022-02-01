@@ -324,6 +324,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ILRepack.targets" />
+    <None Include="nuget.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
