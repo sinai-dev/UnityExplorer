@@ -75,7 +75,7 @@ namespace UnityExplorer.UI.Panels
         {
             // Tools Row
 
-            var toolsRow = UIFactory.CreateHorizontalGroup(this.uiRoot, "ToggleRow", false, false, true, true, 5, new Vector4(8, 8, 10, 5),
+            var toolsRow = UIFactory.CreateHorizontalGroup(this.uiContent, "ToggleRow", false, false, true, true, 5, new Vector4(8, 8, 10, 5),
                 default, TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(toolsRow, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
 
@@ -124,7 +124,7 @@ namespace UnityExplorer.UI.Panels
 
             // Console Input
 
-            var inputArea = UIFactory.CreateUIObject("InputGroup", uiRoot);
+            var inputArea = UIFactory.CreateUIObject("InputGroup", uiContent);
             UIFactory.SetLayoutElement(inputArea, flexibleWidth: 9999, flexibleHeight: 9999);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(inputArea, false, true, true, true);
             inputArea.AddComponent<Image>().color = Color.white;

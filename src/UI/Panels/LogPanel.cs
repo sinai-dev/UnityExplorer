@@ -161,13 +161,13 @@ namespace UnityExplorer.UI.Panels
         {
             // Log scroll pool
 
-            logScrollPool = UIFactory.CreateScrollPool<ConsoleLogCell>(this.uiRoot, "Logs", out GameObject scrollObj,
+            logScrollPool = UIFactory.CreateScrollPool<ConsoleLogCell>(this.uiContent, "Logs", out GameObject scrollObj,
                 out GameObject scrollContent, new Color(0.03f, 0.03f, 0.03f));
             UIFactory.SetLayoutElement(scrollObj, flexibleWidth: 9999, flexibleHeight: 9999);
 
             // Buttons and toggles
 
-            var optionsRow = UIFactory.CreateUIObject("OptionsRow", this.uiRoot);
+            var optionsRow = UIFactory.CreateUIObject("OptionsRow", this.uiContent);
             UIFactory.SetLayoutElement(optionsRow, minHeight: 25, flexibleWidth: 9999);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(optionsRow, false, false, true, true, 5, 2, 2, 2, 2);
 

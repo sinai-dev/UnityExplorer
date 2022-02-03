@@ -99,17 +99,17 @@ namespace UnityExplorer.UI.Panels
         public override void ConstructPanelContent()
         {
             // Tab bar
-            var tabGroup = UIFactory.CreateHorizontalGroup(uiRoot, "TabBar", true, true, true, true, 2, new Vector4(2, 2, 2, 2));
+            var tabGroup = UIFactory.CreateHorizontalGroup(uiContent, "TabBar", true, true, true, true, 2, new Vector4(2, 2, 2, 2));
             UIFactory.SetLayoutElement(tabGroup, minHeight: 25, flexibleHeight: 0);
 
             // Scene Explorer
             SceneExplorer = new SceneExplorer(this);
-            SceneExplorer.ConstructUI(uiRoot);
+            SceneExplorer.ConstructUI(uiContent);
             tabPages.Add(SceneExplorer);
 
             // Object search
             ObjectSearch = new ObjectSearch(this);
-            ObjectSearch.ConstructUI(uiRoot);
+            ObjectSearch.ConstructUI(uiContent);
             tabPages.Add(ObjectSearch);
 
             // set up tabs

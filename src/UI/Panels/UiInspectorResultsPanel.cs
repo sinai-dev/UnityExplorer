@@ -61,7 +61,7 @@ namespace UnityExplorer.UI.Panels
         {
             dataHandler = new ButtonListHandler<GameObject, ButtonCell>(buttonScrollPool, GetEntries, SetCell, ShouldDisplayCell, OnCellClicked);
 
-            buttonScrollPool = UIFactory.CreateScrollPool<ButtonCell>(this.uiRoot, "ResultsList", out GameObject scrollObj,
+            buttonScrollPool = UIFactory.CreateScrollPool<ButtonCell>(this.uiContent, "ResultsList", out GameObject scrollObj,
                 out GameObject scrollContent);
 
             buttonScrollPool.Initialize(dataHandler);

@@ -177,10 +177,10 @@ namespace UnityExplorer.Inspectors
         public override void ConstructPanelContent()
         {
             // hide title bar
-            this.titleBar.SetActive(false);
+            this.TitleBar.SetActive(false);
             this.UIRoot.transform.SetParent(UIManager.UIRoot.transform, false);
 
-            var inspectContent = UIFactory.CreateVerticalGroup(this.uiRoot, "InspectContent", true, true, true, true, 3, new Vector4(2, 2, 2, 2));
+            var inspectContent = UIFactory.CreateVerticalGroup(this.uiContent, "InspectContent", true, true, true, true, 3, new Vector4(2, 2, 2, 2));
             UIFactory.SetLayoutElement(inspectContent, flexibleWidth: 9999, flexibleHeight: 9999);
 
             // Title text

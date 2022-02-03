@@ -54,7 +54,7 @@ namespace UnityExplorer.UI.Panels
 
         public override void ConstructPanelContent()
         {
-            var closeHolder = this.titleBar.transform.Find("CloseHolder").gameObject;
+            var closeHolder = this.TitleBar.transform.Find("CloseHolder").gameObject;
 
             // Inspect under mouse dropdown on title bar
 
@@ -76,14 +76,14 @@ namespace UnityExplorer.UI.Panels
 
             // this.UIRoot.GetComponent<Mask>().enabled = false;
 
-            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.uiRoot, true, true, true, true, 4, padLeft: 5, padRight: 5);
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.uiContent, true, true, true, true, 4, padLeft: 5, padRight: 5);
 
-            this.NavbarHolder = UIFactory.CreateGridGroup(this.uiRoot, "Navbar", new Vector2(200, 22), new Vector2(4, 4),
+            this.NavbarHolder = UIFactory.CreateGridGroup(this.uiContent, "Navbar", new Vector2(200, 22), new Vector2(4, 4),
                 new Color(0.05f, 0.05f, 0.05f));
             //UIFactory.SetLayoutElement(NavbarHolder, flexibleWidth: 9999, minHeight: 0, preferredHeight: 0, flexibleHeight: 9999);
             NavbarHolder.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-            this.ContentHolder = UIFactory.CreateVerticalGroup(this.uiRoot, "ContentHolder", true, true, true, true, 0, default,
+            this.ContentHolder = UIFactory.CreateVerticalGroup(this.uiContent, "ContentHolder", true, true, true, true, 0, default,
                 new Color(0.1f, 0.1f, 0.1f));
             UIFactory.SetLayoutElement(ContentHolder, flexibleHeight: 9999);
             ContentRect = ContentHolder.GetComponent<RectTransform>();

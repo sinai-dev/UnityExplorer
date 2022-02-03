@@ -89,7 +89,7 @@ namespace UnityExplorer.UI.Panels
 
             // Actual panel content
 
-            var firstRow = UIFactory.CreateHorizontalGroup(UIRoot, "FirstRow", false, false, true, true, 5, new(2,2,2,2), new(1,1,1,0));
+            var firstRow = UIFactory.CreateHorizontalGroup(uiContent, "FirstRow", false, false, true, true, 5, new(2,2,2,2), new(1,1,1,0));
             UIFactory.SetLayoutElement(firstRow, minHeight: 25, flexibleWidth: 999);
 
             // Title for "Current Paste:"
@@ -102,7 +102,7 @@ namespace UnityExplorer.UI.Panels
             clearButton.OnClick += () => Copy(null);
 
             // Current Paste info row
-            var currentPasteHolder = UIFactory.CreateHorizontalGroup(UIRoot, "SecondRow", false, false, true, true, 0, 
+            var currentPasteHolder = UIFactory.CreateHorizontalGroup(uiContent, "SecondRow", false, false, true, true, 0, 
                 new(2, 2, 2, 2), childAlignment: TextAnchor.UpperCenter);
 
             // Actual current paste info label

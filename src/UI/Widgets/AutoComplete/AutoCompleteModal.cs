@@ -305,13 +305,13 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         {
             dataHandler = new ButtonListHandler<Suggestion, ButtonCell>(scrollPool, GetEntries, SetCell, ShouldDisplay, OnCellClicked);
 
-            scrollPool = UIFactory.CreateScrollPool<ButtonCell>(this.uiRoot, "AutoCompleter", out GameObject scrollObj,
+            scrollPool = UIFactory.CreateScrollPool<ButtonCell>(this.uiContent, "AutoCompleter", out GameObject scrollObj,
                 out GameObject scrollContent);
             scrollPool.Initialize(dataHandler);
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(scrollContent, true, false, true, false);
 
-            navigationTipRow = UIFactory.CreateHorizontalGroup(this.uiRoot, "BottomRow", true, true, true, true, 0, new Vector4(2, 2, 2, 2));
+            navigationTipRow = UIFactory.CreateHorizontalGroup(this.uiContent, "BottomRow", true, true, true, true, 0, new Vector4(2, 2, 2, 2));
             UIFactory.SetLayoutElement(navigationTipRow, minHeight: 20, flexibleWidth: 9999);
             UIFactory.CreateLabel(navigationTipRow, "HelpText", "Up/Down to select, Enter to use, Esc to close",
                 TextAnchor.MiddleLeft, Color.grey, false, 13);

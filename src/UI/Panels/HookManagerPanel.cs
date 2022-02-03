@@ -83,7 +83,7 @@ namespace UnityExplorer.UI.Panels
         {
             // ~~~~~~~~~ Active hooks scroll pool
 
-            currentHooksPanel = UIFactory.CreateUIObject("CurrentHooksPanel", this.uiRoot);
+            currentHooksPanel = UIFactory.CreateUIObject("CurrentHooksPanel", this.uiContent);
             UIFactory.SetLayoutElement(currentHooksPanel, flexibleHeight: 9999, flexibleWidth: 9999);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(currentHooksPanel, true, true, true, true);
 
@@ -109,7 +109,7 @@ namespace UnityExplorer.UI.Panels
 
             // ~~~~~~~~~ Add hooks panel
 
-            addHooksPanel = UIFactory.CreateUIObject("AddHooksPanel", this.uiRoot);
+            addHooksPanel = UIFactory.CreateUIObject("AddHooksPanel", this.uiContent);
             UIFactory.SetLayoutElement(addHooksPanel, flexibleHeight: 9999, flexibleWidth: 9999);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(addHooksPanel, true, true, true, true);
 
@@ -136,7 +136,7 @@ namespace UnityExplorer.UI.Panels
 
             // ~~~~~~~~~ Hook source editor panel
 
-            editorPanel = UIFactory.CreateUIObject("HookSourceEditor", this.uiRoot);
+            editorPanel = UIFactory.CreateUIObject("HookSourceEditor", this.uiContent);
             UIFactory.SetLayoutElement(editorPanel, flexibleHeight: 9999, flexibleWidth: 9999);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(editorPanel, true, true, true, true);
 
