@@ -18,6 +18,7 @@ using UniverseLib.UI;
 using UniverseLib;
 using UniverseLib.UI.Models;
 using UniverseLib.Utility;
+using HarmonyLib;
 
 namespace UnityExplorer.CSConsole
 {
@@ -383,30 +384,59 @@ namespace UnityExplorer.CSConsole
             RuntimeHelper.StartCoroutine(SetCaretCoroutine(caretPosition));
         }
 
-        internal static PropertyInfo SelectionGuardProperty => selectionGuardPropInfo ?? GetSelectionGuardPropInfo();
+        internal static MemberInfo selectionGuardMemberInfo;
 
-        private static PropertyInfo GetSelectionGuardPropInfo()
+        internal static MemberInfo GetSelectionGuardMemberInfo()
         {
-            selectionGuardPropInfo = typeof(EventSystem).GetProperty("m_SelectionGuard");
-            if (selectionGuardPropInfo == null)
-                selectionGuardPropInfo = typeof(EventSystem).GetProperty("m_selectionGuard");
-            return selectionGuardPropInfo;
+            if (selectionGuardMemberInfo != null)
+                return selectionGuardMemberInfo;
+
+            if (AccessTools.Property(typeof(EventSystem), "m_SelectionGuard") is PropertyInfo pi_m_SelectionGuard)
+                return selectionGuardMemberInfo = pi_m_SelectionGuard;
+            
+            if (AccessTools.Property(typeof(EventSystem), "m_selectionGuard") is PropertyInfo pi_m_selectionGuard)
+                return selectionGuardMemberInfo = pi_m_selectionGuard;
+            
+            if (AccessTools.Field(typeof(EventSystem), "m_SelectionGuard") is FieldInfo fi_m_SelectionGuard)
+                return selectionGuardMemberInfo = fi_m_SelectionGuard;
+
+            return selectionGuardMemberInfo = AccessTools.Field(typeof(EventSystem), "m_selectionGuard");
         }
 
-        private static PropertyInfo selectionGuardPropInfo;
+        internal static void SetSelectionGuard(EventSystem instance, bool value)
+        {
+            var member = GetSelectionGuardMemberInfo();
+            if (member == null)
+                return;
+            if (member is PropertyInfo pi)
+            {
+                pi.SetValue(instance, value, null);
+                return;
+            }
+            var fi = member as FieldInfo;
+            fi.SetValue(instance, value);
+        }
 
         private static IEnumerator SetCaretCoroutine(int caretPosition)
         {
             var color = Input.Component.selectionColor;
             color.a = 0f;
             Input.Component.selectionColor = color;
-            try { EventSystem.current.SetSelectedGameObject(null, null); } catch { }
-            yield return null;
 
-            try { SelectionGuardProperty.SetValue(EventSystem.current, false, null); } catch { }
-            try { EventSystem.current.SetSelectedGameObject(Input.UIRoot, null); } catch { }
+            try { CursorUnlocker.CurrentEventSystem.m_CurrentSelected = null; } 
+            catch (Exception ex) { ExplorerCore.Log($"Failed removing selected object: {ex}"); }
+
+            yield return null; // ~~~~~~~ YIELD FRAME ~~~~~~~~~
+
+            try { SetSelectionGuard(CursorUnlocker.CurrentEventSystem, false); }
+            catch (Exception ex) { ExplorerCore.Log($"Failed setting selection guard: {ex}"); }
+
+            try { CursorUnlocker.CurrentEventSystem.SetSelectedGameObject(Input.GameObject, null); } 
+            catch (Exception ex) { ExplorerCore.Log($"Failed setting selected gameobject: {ex}"); }
+
+            yield return null; // ~~~~~~~ YIELD FRAME ~~~~~~~~~
+
             Input.Component.Select();
-            yield return null;
 
             Input.Component.caretPosition = caretPosition;
             Input.Component.selectionFocusPosition = caretPosition;
