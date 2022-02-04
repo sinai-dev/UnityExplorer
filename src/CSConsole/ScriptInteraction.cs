@@ -29,8 +29,11 @@ namespace UnityExplorer.CSConsole
         public static void Inspect(Type type)
             => InspectorManager.Inspect(type);
 
-        public static void Start(IEnumerator ienumerator) 
+        public static Coroutine Start(IEnumerator ienumerator) 
             => RuntimeHelper.StartCoroutine(ienumerator);
+
+        public static void Stop(Coroutine coro)
+            => RuntimeHelper.StopCoroutine(coro);
 
         public static void Copy(object obj) 
             => ClipboardPanel.Copy(obj);

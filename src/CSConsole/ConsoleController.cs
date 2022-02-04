@@ -19,6 +19,7 @@ using UniverseLib;
 using UniverseLib.UI.Models;
 using UniverseLib.Utility;
 using HarmonyLib;
+using UniverseLib.Runtime;
 
 namespace UnityExplorer.CSConsole
 {
@@ -61,6 +62,8 @@ namespace UnityExplorer.CSConsole
 
         public static void Init()
         {
+            InitEventSystemPropertyHandlers();
+
             // Make sure console is supported on this platform
             try
             {
@@ -384,37 +387,55 @@ namespace UnityExplorer.CSConsole
             RuntimeHelper.StartCoroutine(SetCaretCoroutine(caretPosition));
         }
 
-        internal static MemberInfo selectionGuardMemberInfo;
-
-        internal static MemberInfo GetSelectionGuardMemberInfo()
+        static void InitEventSystemPropertyHandlers()
         {
-            if (selectionGuardMemberInfo != null)
-                return selectionGuardMemberInfo;
+            try
+            {
+                foreach (var member in typeof(EventSystem).GetMembers(AccessTools.all))
+                {
+                    if (member.Name == "m_CurrentSelected")
+                    {
+                        Type backingType;
+                        if (member.MemberType == MemberTypes.Property)
+                            backingType = (member as PropertyInfo).PropertyType;
+                        else
+                            backingType = (member as FieldInfo).FieldType;
 
-            if (AccessTools.Property(typeof(EventSystem), "m_SelectionGuard") is PropertyInfo pi_m_SelectionGuard)
-                return selectionGuardMemberInfo = pi_m_SelectionGuard;
-            
-            if (AccessTools.Property(typeof(EventSystem), "m_selectionGuard") is PropertyInfo pi_m_selectionGuard)
-                return selectionGuardMemberInfo = pi_m_selectionGuard;
-            
-            if (AccessTools.Field(typeof(EventSystem), "m_SelectionGuard") is FieldInfo fi_m_SelectionGuard)
-                return selectionGuardMemberInfo = fi_m_SelectionGuard;
-
-            return selectionGuardMemberInfo = AccessTools.Field(typeof(EventSystem), "m_selectionGuard");
+                        usingEventSystemDictionaryMembers = ReflectionUtility.IsDictionary(backingType);
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ExplorerCore.LogWarning($"Exception checking EventSystem property backing type: {ex}");
+            }
         }
 
-        internal static void SetSelectionGuard(EventSystem instance, bool value)
+        static bool usingEventSystemDictionaryMembers;
+
+        static readonly AmbiguousMemberHandler<EventSystem, GameObject> m_CurrentSelected_Handler_Normal = new("m_CurrentSelected", "m_currentSelected");
+        static readonly AmbiguousMemberHandler<EventSystem, Dictionary<int, GameObject>> m_CurrentSelected_Handler_Dictionary = new("m_CurrentSelected", "m_currentSelected");
+
+        static readonly AmbiguousMemberHandler<EventSystem, bool> m_SelectionGuard_Handler_Normal = new("m_SelectionGuard", "m_selectionGuard");
+        static readonly AmbiguousMemberHandler<EventSystem, Dictionary<int, bool>> m_SelectionGuard_Handler_Dictionary = new("m_SelectionGuard", "m_selectionGuard");
+
+        static void SetCurrentSelectedGameObject(EventSystem instance, GameObject value)
         {
-            var member = GetSelectionGuardMemberInfo();
-            if (member == null)
-                return;
-            if (member is PropertyInfo pi)
-            {
-                pi.SetValue(instance, value, null);
-                return;
-            }
-            var fi = member as FieldInfo;
-            fi.SetValue(instance, value);
+            instance.SetSelectedGameObject(value);
+
+            if (usingEventSystemDictionaryMembers)
+                m_CurrentSelected_Handler_Dictionary.GetValue(instance)[0] = value;
+            else
+                m_CurrentSelected_Handler_Normal.SetValue(instance, value);
+        }
+
+        static void SetSelectionGuard(EventSystem instance, bool value)
+        {
+            if (usingEventSystemDictionaryMembers)
+                m_SelectionGuard_Handler_Dictionary.GetValue(instance)[0] = value;
+            else
+                m_SelectionGuard_Handler_Normal.SetValue(instance, value);
         }
 
         private static IEnumerator SetCaretCoroutine(int caretPosition)
@@ -423,7 +444,7 @@ namespace UnityExplorer.CSConsole
             color.a = 0f;
             Input.Component.selectionColor = color;
 
-            try { CursorUnlocker.CurrentEventSystem.m_CurrentSelected = null; } 
+            try { SetCurrentSelectedGameObject(CursorUnlocker.CurrentEventSystem, null); } 
             catch (Exception ex) { ExplorerCore.Log($"Failed removing selected object: {ex}"); }
 
             yield return null; // ~~~~~~~ YIELD FRAME ~~~~~~~~~
@@ -431,7 +452,7 @@ namespace UnityExplorer.CSConsole
             try { SetSelectionGuard(CursorUnlocker.CurrentEventSystem, false); }
             catch (Exception ex) { ExplorerCore.Log($"Failed setting selection guard: {ex}"); }
 
-            try { CursorUnlocker.CurrentEventSystem.SetSelectedGameObject(Input.GameObject, null); } 
+            try { SetCurrentSelectedGameObject(CursorUnlocker.CurrentEventSystem, Input.GameObject); } 
             catch (Exception ex) { ExplorerCore.Log($"Failed setting selected gameobject: {ex}"); }
 
             yield return null; // ~~~~~~~ YIELD FRAME ~~~~~~~~~
@@ -695,7 +716,8 @@ var x = 5;
  * Log(obj);          - prints a message to the console log
  * Inspect(obj);      - inspect the object with the Inspector
  * Inspect(someType); - inspect a Type with static reflection
- * Start(enumerator); - starts the IEnumerator as a Coroutine
+ * Start(enumerator); - Coroutine, starts the IEnumerator as a Coroutine, and returns the Coroutine.
+ * Stop(coroutine);   - stop the Coroutine ONLY if it was started with Start(ienumerator).
  * Copy(obj);         - copies the object to the UnityExplorer Clipboard
  * Paste();           - System.Object, the contents of the Clipboard.
  * GetUsing();        - prints the current using directives to the console log
