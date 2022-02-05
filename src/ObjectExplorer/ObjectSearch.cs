@@ -99,7 +99,13 @@ namespace UnityExplorer.ObjectExplorer
 
             nameInputRow.SetActive(context == SearchContext.UnityObject);
 
-            typeAutocompleter.BaseType = context == SearchContext.UnityObject ? typeof(UnityEngine.Object) : typeof(object);
+            if (context == SearchContext.Class)
+                typeAutocompleter.AllTypes = true;
+            else
+            {
+                typeAutocompleter.BaseType = context == SearchContext.UnityObject ? typeof(UnityEngine.Object) : typeof(object);
+                typeAutocompleter.AllTypes = false;
+            }
             typeAutocompleter.CacheTypes();
         }
 

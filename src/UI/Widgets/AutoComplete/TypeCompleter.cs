@@ -25,6 +25,8 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         public Type BaseType { get; set; }
         public Type[] GenericConstraints { get; set; }
+        public bool AllTypes { get; set; }
+
         private readonly bool allowAbstract;
         private readonly bool allowEnum;
 
@@ -58,7 +60,14 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         public void CacheTypes()
         {
-            allowedTypes = ReflectionUtility.GetImplementationsOf(BaseType, allowAbstract, allowEnum, false);
+            if (!AllTypes)
+                allowedTypes = ReflectionUtility.GetImplementationsOf(BaseType, allowAbstract, allowEnum, false);
+            else
+            {
+                allowedTypes = new();
+                foreach (var entry in ReflectionUtility.AllTypes)
+                    allowedTypes.Add(entry.Value as Type);
+            }
         }
 
         public void OnSuggestionClicked(Suggestion suggestion)
