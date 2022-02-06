@@ -11,13 +11,14 @@ using UnityExplorer.UI.Panels;
 using UnityExplorer.Runtime;
 using UniverseLib.Input;
 using UniverseLib.UI;
+using System.Reflection;
 
 namespace UnityExplorer
 {
     public static class ExplorerCore
     {
         public const string NAME = "UnityExplorer";
-        public const string VERSION = "4.5.5";
+        public const string VERSION = "4.5.6";
         public const string AUTHOR = "Sinai";
         public const string GUID = "com.sinai.unityexplorer";
 
