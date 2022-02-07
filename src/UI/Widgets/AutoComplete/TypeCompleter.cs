@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using UniverseLib;
 using UniverseLib.UI;
@@ -64,9 +65,10 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
                 allowedTypes = ReflectionUtility.GetImplementationsOf(BaseType, allowAbstract, allowEnum, false);
             else
             {
+                // TODO: Use direct reference. Will make AllTypes public in next release of UniverseLib
                 allowedTypes = new();
-                foreach (var entry in ReflectionUtility.AllTypes)
-                    allowedTypes.Add(entry.Value as Type);
+                foreach (var entry in (SortedDictionary<string, Type>)AccessTools.Field(typeof(ReflectionUtility), "AllTypes").GetValue(null))
+                    allowedTypes.Add(entry.Value);
             }
         }
 
