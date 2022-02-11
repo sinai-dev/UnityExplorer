@@ -65,9 +65,8 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
                 allowedTypes = ReflectionUtility.GetImplementationsOf(BaseType, allowAbstract, allowEnum, false);
             else
             {
-                // TODO: Use direct reference. Will make AllTypes public in next release of UniverseLib
                 allowedTypes = new();
-                foreach (var entry in (SortedDictionary<string, Type>)AccessTools.Field(typeof(ReflectionUtility), "AllTypes").GetValue(null))
+                foreach (var entry in ReflectionUtility.AllTypes))
                     allowedTypes.Add(entry.Value);
             }
         }
