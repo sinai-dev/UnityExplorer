@@ -66,7 +66,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             else
             {
                 allowedTypes = new();
-                foreach (var entry in ReflectionUtility.AllTypes))
+                foreach (var entry in ReflectionUtility.AllTypes)
                     allowedTypes.Add(entry.Value);
             }
         }
