@@ -259,6 +259,7 @@
     <Compile Include="CacheObject\Views\CacheListEntryCell.cs" />
     <Compile Include="CacheObject\Views\CacheMemberCell.cs" />
     <Compile Include="CacheObject\Views\CacheObjectCell.cs" />
+    <Compile Include="Runtime\UnityCrashPrevention.cs" />
     <Compile Include="UI\DisplayManager.cs" />
     <Compile Include="UI\Notification.cs" />
     <Compile Include="UI\Panels\ClipboardPanel.cs" />

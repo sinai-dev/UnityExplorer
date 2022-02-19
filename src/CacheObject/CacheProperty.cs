@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using UnityEngine;
 using UnityExplorer.Inspectors;
+using UnityExplorer.Runtime;
 
 namespace UnityExplorer.CacheObject
 {
@@ -28,6 +30,8 @@ namespace UnityExplorer.CacheObject
         {
             try
             {
+                UnityCrashPrevention.CheckPropertyInfoEvaluation(this);
+
                 object ret;
                 if (HasArguments)
                     ret = PropertyInfo.GetValue(DeclaringInstance, this.Evaluator.TryParseArguments());

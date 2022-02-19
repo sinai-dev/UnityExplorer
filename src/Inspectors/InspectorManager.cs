@@ -18,7 +18,7 @@ namespace UnityExplorer
 {
     public static class InspectorManager
     {
-        public static readonly List<InspectorBase> Inspectors = new List<InspectorBase>();
+        public static readonly List<InspectorBase> Inspectors = new();
 
         public static InspectorBase ActiveInspector { get; private set; }
         private static InspectorBase lastActiveInspector;
@@ -94,17 +94,17 @@ namespace UnityExplorer
         }
 
         private static void CreateInspector<T>(object target, bool staticReflection = false,
-            CacheObjectBase sourceCache = null) where T : InspectorBase
+            CacheObjectBase parentObject = null) where T : InspectorBase
         {
             var inspector = Pool<T>.Borrow();
             Inspectors.Add(inspector);
             inspector.Target = target;
 
-            if (sourceCache != null && sourceCache.CanWrite)
+            if (parentObject != null && parentObject.CanWrite)
             {
                 // only set parent cache object if we are inspecting a struct, otherwise there is no point.
                 if (target.GetType().IsValueType && inspector is ReflectionInspector ri)
-                    ri.ParentCacheObject = sourceCache;
+                    ri.ParentCacheObject = parentObject;
             }
 
             UIManager.SetPanelActive(UIManager.Panels.Inspector, true);

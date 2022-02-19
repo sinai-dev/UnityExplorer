@@ -21,7 +21,7 @@ namespace UnityExplorer.CacheObject
     {
         public abstract Type DeclaringType { get; }
         public string NameForFiltering { get; protected set; }
-        public object DeclaringInstance => IsStatic ? null : (m_declaringInstance ?? (m_declaringInstance = Owner.Target.TryCast(DeclaringType)));
+        public object DeclaringInstance => IsStatic ? null : (m_declaringInstance ??= Owner.Target.TryCast(DeclaringType));
         private object m_declaringInstance;
 
         public abstract bool IsStatic { get; }
@@ -94,8 +94,8 @@ namespace UnityExplorer.CacheObject
             base.SetValueState(cell, args);
         }
 
-        private static readonly Color evalEnabledColor = new Color(0.15f, 0.25f, 0.15f);
-        private static readonly Color evalDisabledColor = new Color(0.15f, 0.15f, 0.15f);
+        private static readonly Color evalEnabledColor = new(0.15f, 0.25f, 0.15f);
+        private static readonly Color evalDisabledColor = new(0.15f, 0.15f, 0.15f);
 
         protected override bool TryAutoEvaluateIfUnitialized(CacheObjectCell objectcell)
         {
@@ -242,7 +242,7 @@ namespace UnityExplorer.CacheObject
 
                 var sig = GetSig(member);
 
-                //ExplorerCore.Log($"Trying to cache member {sig}... ({member.MemberType})");
+                // ExplorerCore.Log($"Trying to cache member {sig}... ({member.MemberType})");
 
                 CacheMember cached;
                 Type returnType;
