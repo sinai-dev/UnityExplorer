@@ -30,8 +30,6 @@ namespace UnityExplorer.CacheObject
         {
             try
             {
-                UnityCrashPrevention.CheckPropertyInfoEvaluation(this);
-
                 object ret;
                 if (HasArguments)
                     ret = PropertyInfo.GetValue(DeclaringInstance, this.Evaluator.TryParseArguments());
