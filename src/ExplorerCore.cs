@@ -46,6 +46,7 @@ namespace UnityExplorer
             ConfigManager.Init(Loader.ConfigHandler);
             UERuntimeHelper.Init();
             ExplorerBehaviour.Setup();
+            UnityCrashPrevention.Init();
 
             UniverseLib.Universe.Init(ConfigManager.Startup_Delay_Time.Value, LateInit, Log, new()
             {
@@ -68,7 +69,7 @@ namespace UnityExplorer
 
             UIManager.InitUI();
 
-            Log($"{NAME} {VERSION} initialized.");
+            Log($"{NAME} {VERSION} initialized for {UniverseLib.Universe.Context}.");
 
             //InspectorManager.Inspect(typeof(Tests.TestClass));
         }
