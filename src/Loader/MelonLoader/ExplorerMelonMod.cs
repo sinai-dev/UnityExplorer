@@ -31,9 +31,9 @@ namespace UnityExplorer
         public ConfigHandler ConfigHandler => _configHandler;
         public MelonLoaderConfigHandler _configHandler;
 
-        public Action<object> OnLogMessage => MelonLogger.Msg;
-        public Action<object> OnLogWarning => MelonLogger.Warning;
-        public Action<object> OnLogError   => MelonLogger.Error;
+        public Action<object> OnLogMessage => LoggerInstance.Msg;
+        public Action<object> OnLogWarning => LoggerInstance.Warning;
+        public Action<object> OnLogError   => LoggerInstance.Error;
 
         public override void OnApplicationStart()
         {
