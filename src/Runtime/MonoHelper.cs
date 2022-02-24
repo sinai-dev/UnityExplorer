@@ -1,5 +1,4 @@
 ﻿#if MONO
-using System;
 using UnityEngine;
 
 namespace UnityExplorer.Runtime

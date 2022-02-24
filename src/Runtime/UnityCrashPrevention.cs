@@ -25,10 +25,10 @@ namespace UnityExplorer.Runtime
 
         // In Unity 2020 they introduced "Canvas.renderingDisplaySize".
         // If you try to get the value on a Canvas which has a renderMode value of WorldSpace and no worldCamera set,
-        // the game will Crash when Unity tries to read from a null ptr (I think).
+        // the game will Crash (I think from Unity trying to read from null ptr).
         [HarmonyPatch(typeof(Canvas), "renderingDisplaySize", MethodType.Getter)]
         [HarmonyPrefix]
-        internal static void Prefix(Canvas __instance)
+        internal static void Prefix_Canvas_renderingDisplaySize(Canvas __instance)
         {
             if (__instance.renderMode == RenderMode.WorldSpace && !__instance.worldCamera)
                 throw new InvalidOperationException(
