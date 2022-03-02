@@ -27,7 +27,7 @@ namespace UnityExplorer.ObjectExplorer
             Parent = parent;
 
             SceneHandler.OnInspectedSceneChanged += SceneHandler_OnInspectedSceneChanged;
-            SceneHandler.OnLoadedScenesChanged += SceneHandler_OnLoadedScenesChanged;
+            SceneHandler.OnLoadedScenesUpdated += SceneHandler_OnLoadedScenesUpdated;
         }
 
         public override GameObject UIRoot => uiRoot;
@@ -87,7 +87,7 @@ namespace UnityExplorer.ObjectExplorer
             Tree.JumpAndExpandToTransform(transform);
         }
 
-        private void OnDropdownChanged(int value)
+        private void OnSceneSelectionDropdownChanged(int value)
         {
             if (value < 0 || SceneHandler.LoadedScenes.Count <= value)
                 return;
@@ -101,7 +101,7 @@ namespace UnityExplorer.ObjectExplorer
         private void SceneHandler_OnInspectedSceneChanged(Scene scene)
         {
             if (!sceneToDropdownOption.ContainsKey(scene))
-                PopulateSceneDropdown();
+                PopulateSceneDropdown(SceneHandler.LoadedScenes);
 
             if (sceneToDropdownOption.ContainsKey(scene))
             {
@@ -122,17 +122,17 @@ namespace UnityExplorer.ObjectExplorer
                 refreshRow.SetActive(!scene.IsValid());
         }
 
-        private void SceneHandler_OnLoadedScenesChanged(List<Scene> loadedScenes)
+        private void SceneHandler_OnLoadedScenesUpdated(List<Scene> loadedScenes)
         {
-            PopulateSceneDropdown();
+            PopulateSceneDropdown(loadedScenes);
         }
 
-        private void PopulateSceneDropdown()
+        private void PopulateSceneDropdown(List<Scene> loadedScenes)
         {
             sceneToDropdownOption.Clear();
             sceneDropdown.options.Clear();
 
-            foreach (var scene in SceneHandler.LoadedScenes)
+            foreach (var scene in loadedScenes)
             {
                 if (sceneToDropdownOption.ContainsKey(scene))
                     continue;
@@ -198,11 +198,11 @@ namespace UnityExplorer.ObjectExplorer
             var dropLabel = UIFactory.CreateLabel(dropRow, "SelectorLabel", "Scene:", TextAnchor.MiddleLeft, Color.cyan, false, 15);
             UIFactory.SetLayoutElement(dropLabel.gameObject, minHeight: 25, minWidth: 60, flexibleWidth: 0);
 
-            var dropdownObj = UIFactory.CreateDropdown(dropRow, "SceneDropdown", out sceneDropdown, "<notset>", 13, OnDropdownChanged);
+            var dropdownObj = UIFactory.CreateDropdown(dropRow, "SceneDropdown", out sceneDropdown, "<notset>", 13, OnSceneSelectionDropdownChanged);
             UIFactory.SetLayoutElement(dropdownObj, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
 
             SceneHandler.Update();
-            PopulateSceneDropdown();
+            PopulateSceneDropdown(SceneHandler.LoadedScenes);
             sceneDropdown.captionText.text = sceneToDropdownOption.First().Value.text;
 
             // Filter row

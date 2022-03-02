@@ -17,10 +17,11 @@ namespace UnityExplorer.ObjectExplorer
             get => selectedScene;
             internal set
             {
-                if (selectedScene != null && selectedScene == value)
+                if (selectedScene.HasValue && selectedScene == value)
                     return;
                 selectedScene = value;
                 OnInspectedSceneChanged?.Invoke((Scene)selectedScene);
+                ExplorerCore.Log($"Set selected scene to {value?.name}");
             }
         }
         private static Scene? selectedScene;
@@ -30,7 +31,7 @@ namespace UnityExplorer.ObjectExplorer
 
         /// <summary>All currently loaded Scenes.</summary>
         public static List<Scene> LoadedScenes { get; private set; } = new();
-        private static HashSet<Scene> previousLoadedScenes;
+        //private static HashSet<Scene> previousLoadedScenes;
 
         /// <summary>The names of all scenes in the build settings, if they could be retrieved.</summary>
         public static List<string> AllSceneNames { get; private set; } = new();
@@ -39,7 +40,7 @@ namespace UnityExplorer.ObjectExplorer
         public static event Action<Scene> OnInspectedSceneChanged;
 
         /// <summary>Invoked whenever the list of currently loaded Scenes changes. The argument contains all loaded scenes after the change.</summary>
-        public static event Action<List<Scene>> OnLoadedScenesChanged;
+        public static event Action<List<Scene>> OnLoadedScenesUpdated;
 
         /// <summary>Generally will be 2, unless DontDestroyExists == false, then this will be 1.</summary>
         internal static int DefaultSceneCount => 1 + (DontDestroyExists ? 1 : 0);
@@ -84,22 +85,19 @@ namespace UnityExplorer.ObjectExplorer
 
         internal static void Update()
         {
-            // check if the loaded scenes changed. always confirm DontDestroy / HideAndDontSave
-            int confirmedCount = DefaultSceneCount;
-            bool inspectedExists = (SelectedScene.HasValue && SelectedScene.Value.handle == -12) 
-                                   || (SelectedScene.HasValue && SelectedScene.Value.handle == -1);
+            // Inspected scene will exist if it's DontDestroyOnLoad or HideAndDontSave
+            bool inspectedExists = 
+                SelectedScene.HasValue 
+                && ((DontDestroyExists && SelectedScene.Value.handle == -12) 
+                    || SelectedScene.Value.handle == -1);
 
             LoadedScenes.Clear();
 
             for (int i = 0; i < SceneManager.sceneCount; i++)
             {
                 Scene scene = SceneManager.GetSceneAt(i);
-                if (scene == default || !scene.isLoaded)
+                if (scene == default || !scene.isLoaded || !scene.IsValid())
                     continue;
-
-                // If no changes yet, ensure the previous list contained the scene
-                if (previousLoadedScenes != null && previousLoadedScenes.Contains(scene))
-                    confirmedCount++;
 
                 // If we have not yet confirmed inspectedExists, check if this scene is our currently inspected one.
                 if (!inspectedExists && scene == SelectedScene)
@@ -112,17 +110,12 @@ namespace UnityExplorer.ObjectExplorer
                 LoadedScenes.Add(new Scene { m_Handle = -12 });
             LoadedScenes.Add(new Scene { m_Handle = -1 });
 
-            bool anyChange = confirmedCount != LoadedScenes.Count;
-
-            previousLoadedScenes = new HashSet<Scene>(LoadedScenes);
-
             // Default to first scene if none selected or previous selection no longer exists.
             if (!inspectedExists)
                 SelectedScene = LoadedScenes.First();
 
             // Notify on the list changing at all
-            if (anyChange)
-                OnLoadedScenesChanged?.Invoke(LoadedScenes);
+            OnLoadedScenesUpdated?.Invoke(LoadedScenes);
 
             // Finally, update the root objects list.
             if (SelectedScene != null && ((Scene)SelectedScene).IsValid())
