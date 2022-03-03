@@ -32,6 +32,8 @@ namespace UnityExplorer.Config
         public static ConfigElement<bool> Hide_On_Startup;
         public static ConfigElement<float> Startup_Delay_Time;
         public static ConfigElement<string> Reflection_Signature_Blacklist;
+        public static ConfigElement<KeyCode> World_MouseInspect_Keybind;
+        public static ConfigElement<KeyCode> UI_MouseInspect_Keybind;
 
         // internal configs
         internal static InternalConfigHandler InternalHandler { get; private set; }
@@ -93,13 +95,18 @@ namespace UnityExplorer.Config
                 "Should UnityExplorer be hidden on startup?",
                 false);
 
+            World_MouseInspect_Keybind = new("World Mouse-Inspect Keybind",
+                "Optional keybind to being a World-mode Mouse Inspect.",
+                KeyCode.None);
+
+            UI_MouseInspect_Keybind = new("UI Mouse-Inspect Keybind", 
+                "Optional keybind to begin a UI_mode Mouse Inspect.",
+                KeyCode.None);
+
             Force_Unlock_Mouse = new ConfigElement<bool>("Force Unlock Mouse",
                 "Force the Cursor to be unlocked (visible) when the UnityExplorer menu is open.",
                 true);
-            Force_Unlock_Mouse.OnValueChanged += (bool value) =>
-            {
-                UniverseLib.Config.ConfigManager.Force_Unlock_Mouse = value;
-            };
+            Force_Unlock_Mouse.OnValueChanged += (bool value) => UniverseLib.Config.ConfigManager.Force_Unlock_Mouse = value;
 
             Force_Unlock_Toggle = new ConfigElement<KeyCode>("Force Unlock Toggle Key",
                 "The keybind to toggle the 'Force Unlock Mouse' setting. Only usable when UnityExplorer is open.",
@@ -108,10 +115,7 @@ namespace UnityExplorer.Config
             Disable_EventSystem_Override = new ConfigElement<bool>("Disable EventSystem override",
                 "If enabled, UnityExplorer will not override the EventSystem from the game.\n<b>May require restart to take effect.</b>",
                 false);
-            Disable_EventSystem_Override.OnValueChanged += (bool value) => 
-            {
-                UniverseLib.Config.ConfigManager.Disable_EventSystem_Override = value;
-            };
+            Disable_EventSystem_Override.OnValueChanged += (bool value) => UniverseLib.Config.ConfigManager.Disable_EventSystem_Override = value;
 
             Log_Unity_Debug = new ConfigElement<bool>("Log Unity Debug",
                 "Should UnityEngine.Debug.Log messages be printed to UnityExplorer's log?",

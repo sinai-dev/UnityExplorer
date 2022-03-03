@@ -73,7 +73,7 @@ namespace UnityExplorer.UI
                     return;
 
                 UniversalUI.SetUIActive(ExplorerCore.GUID, value);
-                UniversalUI.SetUIActive(InspectUnderMouse.UIBaseGUID, value);
+                UniversalUI.SetUIActive(MouseInspector.UIBaseGUID, value);
             }
         }
 
@@ -106,7 +106,7 @@ namespace UnityExplorer.UI
             UIPanels.Add(Panels.ConsoleLog, new LogPanel());
             UIPanels.Add(Panels.Options, new OptionsPanel());
             UIPanels.Add(Panels.UIInspectorResults, new UiInspectorResultsPanel());
-            UIPanels.Add(Panels.MouseInspector, new InspectUnderMouse());
+            UIPanels.Add(Panels.MouseInspector, new MouseInspector());
 
             foreach (var panel in UIPanels.Values)
                 panel.ConstructUI();
@@ -135,12 +135,9 @@ namespace UnityExplorer.UI
             if (!UIRoot)
                 return;
 
-            // if doing Mouse Inspect, update that and return.
-            if (InspectUnderMouse.Inspecting)
-            {
-                InspectUnderMouse.Instance.UpdateInspect();
+            // If we are doing a Mouse Inspect, we don't need to update anything else.
+            if (MouseInspector.Instance.TryUpdate())
                 return;
-            }
 
             // Update Notification modal
             Notification.Update();

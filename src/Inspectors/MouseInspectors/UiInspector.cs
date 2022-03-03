@@ -26,7 +26,7 @@ namespace UnityExplorer.Inspectors.MouseInspectors
         public override void OnBeginMouseInspect()
         {
             SetupUIRaycast();
-            InspectUnderMouse.Instance.objPathLabel.text = "";
+            MouseInspector.Instance.objPathLabel.text = "";
         }
 
         public override void ClearHitData()
@@ -70,9 +70,9 @@ namespace UnityExplorer.Inspectors.MouseInspectors
             }
             
             if (currentHitObjects.Any())
-                InspectUnderMouse.Instance.objNameLabel.text = $"Click to view UI Objects under mouse: {currentHitObjects.Count}";
+                MouseInspector.Instance.objNameLabel.text = $"Click to view UI Objects under mouse: {currentHitObjects.Count}";
             else
-                InspectUnderMouse.Instance.objNameLabel.text = $"No UI objects under mouse.";
+                MouseInspector.Instance.objNameLabel.text = $"No UI objects under mouse.";
         }
 
         private static void SetupUIRaycast()

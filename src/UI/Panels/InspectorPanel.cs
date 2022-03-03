@@ -59,7 +59,7 @@ namespace UnityExplorer.UI.Panels
             // Inspect under mouse dropdown on title bar
 
             var mouseDropdown = UIFactory.CreateDropdown(closeHolder, "MouseInspectDropdown", out MouseInspectDropdown, "Mouse Inspect", 14,
-                InspectUnderMouse.OnDropdownSelect);
+                MouseInspector.OnDropdownSelect);
             UIFactory.SetLayoutElement(mouseDropdown, minHeight: 25, minWidth: 140);
             MouseInspectDropdown.options.Add(new Dropdown.OptionData("Mouse Inspect"));
             MouseInspectDropdown.options.Add(new Dropdown.OptionData("World"));

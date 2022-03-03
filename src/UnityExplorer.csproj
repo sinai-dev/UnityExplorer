@@ -246,7 +246,7 @@
     <Compile Include="Inspectors\GameObjectWidgets\ComponentCell.cs" />
     <Compile Include="Inspectors\GameObjectWidgets\ComponentList.cs" />
     <Compile Include="Inspectors\GameObjectWidgets\GameObjectControls.cs" />
-    <Compile Include="Inspectors\InspectUnderMouse.cs" />
+    <Compile Include="Inspectors\MouseInspector.cs" />
     <Compile Include="CSConsole\ConsoleController.cs" />
     <Compile Include="CacheObject\CacheField.cs" />
     <Compile Include="CacheObject\CacheKeyValuePair.cs" />

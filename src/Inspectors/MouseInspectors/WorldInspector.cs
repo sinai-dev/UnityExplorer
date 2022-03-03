@@ -41,7 +41,7 @@ namespace UnityExplorer.Inspectors.MouseInspectors
             if (!MainCamera)
             {
                 ExplorerCore.LogWarning("No Main Camera was found, unable to inspect world!");
-                InspectUnderMouse.Instance.StopInspect();
+                MouseInspector.Instance.StopInspect();
                 return;
             }
 
@@ -51,7 +51,7 @@ namespace UnityExplorer.Inspectors.MouseInspectors
             if (hit.transform)
                 OnHitGameObject(hit.transform.gameObject);
             else if (lastHitObject)
-                InspectUnderMouse.Instance.ClearHitData();
+                MouseInspector.Instance.ClearHitData();
         }
 
         internal void OnHitGameObject(GameObject obj)
@@ -59,8 +59,8 @@ namespace UnityExplorer.Inspectors.MouseInspectors
             if (obj != lastHitObject)
             {
                 lastHitObject = obj;
-                InspectUnderMouse.Instance.objNameLabel.text = $"<b>Click to Inspect:</b> <color=cyan>{obj.name}</color>";
-                InspectUnderMouse.Instance.objPathLabel.text = $"Path: {obj.transform.GetTransformPath(true)}";
+                MouseInspector.Instance.objNameLabel.text = $"<b>Click to Inspect:</b> <color=cyan>{obj.name}</color>";
+                MouseInspector.Instance.objPathLabel.text = $"Path: {obj.transform.GetTransformPath(true)}";
             }
         }
 

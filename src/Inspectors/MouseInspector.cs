@@ -13,6 +13,7 @@ using UnityExplorer.UI.Panels;
 using UniverseLib;
 using UniverseLib.UI;
 using UniverseLib.Utility;
+using UnityExplorer.Config;
 
 namespace UnityExplorer.Inspectors
 {
@@ -22,9 +23,9 @@ namespace UnityExplorer.Inspectors
         UI
     }
 
-    public class InspectUnderMouse : UIPanel
+    public class MouseInspector : UIPanel
     {
-        public static InspectUnderMouse Instance { get; private set; }
+        public static MouseInspector Instance { get; private set; }
 
         private readonly WorldInspector worldInspector;
         private readonly UiInspector uiInspector;
@@ -58,7 +59,7 @@ namespace UnityExplorer.Inspectors
         internal Text objPathLabel;
         internal Text mousePosLabel;
 
-        public InspectUnderMouse() 
+        public MouseInspector() 
         {
             Instance = this;
             worldInspector = new WorldInspector();
@@ -115,6 +116,26 @@ namespace UnityExplorer.Inspectors
         }
 
         private static float timeOfLastRaycast;
+
+        public bool TryUpdate()
+        {
+            if (ConfigManager.World_MouseInspect_Keybind.Value != KeyCode.None)
+            {
+                if (InputManager.GetKeyDown(ConfigManager.World_MouseInspect_Keybind.Value))
+                    Instance.StartInspect(MouseInspectMode.World);
+            }
+
+            if (ConfigManager.World_MouseInspect_Keybind.Value != KeyCode.None)
+            {
+                if (InputManager.GetKeyDown(ConfigManager.World_MouseInspect_Keybind.Value))
+                    Instance.StartInspect(MouseInspectMode.World);
+            }
+            
+            if (Inspecting)
+                UpdateInspect();
+
+            return Inspecting;
+        }
 
         public void UpdateInspect()
         {
