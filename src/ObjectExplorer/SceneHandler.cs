@@ -21,7 +21,6 @@ namespace UnityExplorer.ObjectExplorer
                     return;
                 selectedScene = value;
                 OnInspectedSceneChanged?.Invoke((Scene)selectedScene);
-                ExplorerCore.Log($"Set selected scene to {value?.name}");
             }
         }
         private static Scene? selectedScene;

@@ -152,16 +152,16 @@ namespace UnityExplorer.Tests
         public static Il2CppReferenceArray<Il2CppSystem.Object> IL2CPP_ReferenceArray;
         public static Il2CppSystem.Collections.IDictionary IL2CPP_IDict;
         public static Il2CppSystem.Collections.IList IL2CPP_IList;
-        public static Dictionary<Il2CppSystem.String, Il2CppSystem.Object> CppBoxedDict;
+        public static Dictionary<Il2CppSystem.Object, Il2CppSystem.Object> IL2CPP_BoxedDict;
 
         public static Il2CppSystem.Collections.Generic.HashSet<string> IL2CPP_HashSet;
         public static Il2CppSystem.Collections.Generic.Dictionary<string, string> IL2CPP_Dict;
         public static Il2CppSystem.Collections.Hashtable IL2CPP_HashTable;
-        public static Il2CppSystem.Object cppBoxedInt;
-        public static Il2CppSystem.Int32 cppInt;
-        public static Il2CppSystem.Decimal cppDecimal;
-        public static Il2CppSystem.Object cppDecimalBoxed;
-        public static Il2CppSystem.Object cppVector3Boxed;
+        public static Il2CppSystem.Object IL2CPP_BoxedInt;
+        public static Il2CppSystem.Int32 IL2CPP_Int;
+        public static Il2CppSystem.Decimal IL2CPP_Decimal;
+        public static Il2CppSystem.Object IL2CPP_DecimalBoxed;
+        public static Il2CppSystem.Object IL2CPP_Vector3Boxed;
         public static string IL2CPP_systemString = "Test";
         public static Il2CppSystem.Object IL2CPP_objectString = "string boxed as cpp object";
         public static Il2CppSystem.String IL2CPP_il2cppString = "string boxed as cpp string";
@@ -203,11 +203,11 @@ namespace UnityExplorer.Tests
             IL2CPP_HashSet.Add("two");
 
             ExplorerCore.Log($"IL2CPP 7: Dictionary of Il2Cpp String and Il2Cpp Object");
-            CppBoxedDict = new Dictionary<Il2CppSystem.String, Il2CppSystem.Object>();
-            CppBoxedDict.Add("1", new Il2CppSystem.Int32 { m_value = 1 }.BoxIl2CppObject());
-            CppBoxedDict.Add("2", new Il2CppSystem.Int32 { m_value = 2 }.BoxIl2CppObject());
-            CppBoxedDict.Add("3", new Il2CppSystem.Int32 { m_value = 3 }.BoxIl2CppObject());
-            CppBoxedDict.Add("4", new Il2CppSystem.Int32 { m_value = 4 }.BoxIl2CppObject());
+            IL2CPP_BoxedDict = new();
+            IL2CPP_BoxedDict[(Il2CppSystem.String)"one"] = new Il2CppSystem.Int32 { m_value = 1 }.BoxIl2CppObject();
+            IL2CPP_BoxedDict[(Il2CppSystem.String)"two"] = new Il2CppSystem.Int32 { m_value = 2 }.BoxIl2CppObject();
+            IL2CPP_BoxedDict[(Il2CppSystem.String)"three"] = new Il2CppSystem.Int32 { m_value = 3 }.BoxIl2CppObject();
+            IL2CPP_BoxedDict[(Il2CppSystem.String)"four"] = new Il2CppSystem.Int32 { m_value = 4 }.BoxIl2CppObject();
 
             ExplorerCore.Log($"IL2CPP 8: List of boxed Il2Cpp Objects");
             IL2CPP_listOfBoxedObjects = new List<Il2CppSystem.Object>();
@@ -248,11 +248,11 @@ namespace UnityExplorer.Tests
             IL2CPP_ReferenceArray[2] = (Il2CppSystem.String)"whats up";
 
             ExplorerCore.Log($"IL2CPP 11: Misc il2cpp members");
-            cppBoxedInt = new Il2CppSystem.Int32() { m_value = 5 }.BoxIl2CppObject();
-            cppInt = new Il2CppSystem.Int32 { m_value = 420 };
-            cppDecimal = new Il2CppSystem.Decimal(1f);
-            cppDecimalBoxed = new Il2CppSystem.Decimal(1f).BoxIl2CppObject();
-            cppVector3Boxed = Vector3.down.BoxIl2CppObject();
+            IL2CPP_BoxedInt = new Il2CppSystem.Int32() { m_value = 5 }.BoxIl2CppObject();
+            IL2CPP_Int = new Il2CppSystem.Int32 { m_value = 420 };
+            IL2CPP_Decimal = new Il2CppSystem.Decimal(1f);
+            IL2CPP_DecimalBoxed = new Il2CppSystem.Decimal(1f).BoxIl2CppObject();
+            IL2CPP_Vector3Boxed = Vector3.down.BoxIl2CppObject();
 
             ExplorerCore.Log($"Finished Init_Il2Cpp");
         }
