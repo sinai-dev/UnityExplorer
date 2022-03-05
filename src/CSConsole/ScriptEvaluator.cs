@@ -51,13 +51,8 @@ namespace UnityExplorer.CSConsole
             ReferenceAssembly(asm);
         }
 
-        private static CompilerContext context;
-
         private static CompilerContext BuildContext(TextWriter tw)
         {
-            if (context != null)
-                return context;
-
             _reportPrinter = new StreamReportPrinter(tw);
 
             var settings = new CompilerSettings
@@ -70,7 +65,7 @@ namespace UnityExplorer.CSConsole
                 EnhancedWarnings = false
             };
 
-            return context = new CompilerContext(settings, _reportPrinter);
+            return new CompilerContext(settings, _reportPrinter);
         }
 
         private static void ImportAppdomainAssemblies(Action<Assembly> import)
