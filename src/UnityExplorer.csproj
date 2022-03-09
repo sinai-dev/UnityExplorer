@@ -175,13 +175,13 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="UniverseLib.Mono">
-      <HintPath>packages\UniverseLib.1.2.14\lib\net35\UniverseLib.Mono.dll</HintPath>
+      <HintPath>packages\UniverseLib.1.2.15\lib\net35\UniverseLib.Mono.dll</HintPath>
     </Reference>
   </ItemGroup>
   <!-- Il2Cpp refs -->
   <ItemGroup Condition="'$(IsCpp)'=='true'">
     <Reference Include="UniverseLib.IL2CPP">
-      <HintPath>packages\UniverseLib.1.2.14\lib\net472\UniverseLib.IL2CPP.dll</HintPath>
+      <HintPath>packages\UniverseLib.1.2.15\lib\net472\UniverseLib.IL2CPP.dll</HintPath>
     </Reference>
     <Reference Include="UnhollowerBaseLib, Version=0.4.22.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\Il2CppAssemblyUnhollower.BaseLib.0.4.22\lib\net472\UnhollowerBaseLib.dll</HintPath>
