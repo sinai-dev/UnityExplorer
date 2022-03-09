@@ -133,7 +133,7 @@ namespace UnityExplorer.Inspectors
             currentBaseTabText = $"{prefix} {SignatureHighlighter.Parse(TargetType, false)}";
             Tab.TabText.text = currentBaseTabText;
             NameText.text = SignatureHighlighter.Parse(TargetType, true);
-            HiddenNameText.Text = TargetType.FullName;
+            HiddenNameText.Text = SignatureHighlighter.RemoveHighlighting(NameText.text);
 
             string asmText;
             if (TargetType.Assembly is AssemblyBuilder || string.IsNullOrEmpty(TargetType.Assembly.Location))

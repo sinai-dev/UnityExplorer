@@ -37,7 +37,8 @@ namespace UnityExplorer.CacheObject
             this.NameLabelText = this is CacheMethod 
                 ? SignatureHighlighter.HighlightMethod(member as MethodInfo) 
                 : SignatureHighlighter.Parse(member.DeclaringType, false, member);
-            this.NameForFiltering = $"{member.DeclaringType.Name}.{member.Name}";
+
+            this.NameForFiltering = SignatureHighlighter.RemoveHighlighting(NameLabelText);
             this.NameLabelTextRaw = NameForFiltering;
         }
 
@@ -164,25 +165,7 @@ namespace UnityExplorer.CacheObject
             }
         }
 
-
         #region Cache Member Util
-
-        //public static bool CanParseArgs(ParameterInfo[] parameters)
-        //{
-        //    foreach (var param in parameters)
-        //    {
-        //        var pType = param.ParameterType;
-        //
-        //        if (pType.IsByRef && pType.HasElementType)
-        //            pType = pType.GetElementType();
-        //
-        //        if (pType != null && ParseUtility.CanParse(pType))
-        //            continue;
-        //        else
-        //            return false;
-        //    }
-        //    return true;
-        //}
 
         public static List<CacheMember> GetCacheMembers(object inspectorTarget, Type _type, ReflectionInspector _inspector)
         {
