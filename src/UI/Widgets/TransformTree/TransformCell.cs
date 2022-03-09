@@ -13,6 +13,7 @@ using UniverseLib.UI;
 using UniverseLib.UI.Models;
 using UniverseLib.UI.Widgets;
 using UniverseLib.UI.Widgets.ScrollView;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.UI.Widgets
 {
@@ -36,6 +37,7 @@ namespace UnityExplorer.UI.Widgets
         public ButtonRef ExpandButton;
         public ButtonRef NameButton;
         public Toggle EnabledToggle;
+        public InputFieldRef SiblingIndex;
 
         public LayoutElement spacer;
 
@@ -76,6 +78,9 @@ namespace UnityExplorer.UI.Widgets
                 NameButton.ButtonText.color = cached.Value.gameObject.activeSelf ? Color.white : Color.grey;
 
                 EnabledToggle.Set(cached.Value.gameObject.activeSelf, false);
+
+                if (!SiblingIndex.Component.isFocused)
+                    SiblingIndex.Text = cached.Value.GetSiblingIndex().ToString();
 
                 int childCount = cached.Value.childCount;
                 if (childCount > 0)
@@ -118,6 +123,17 @@ namespace UnityExplorer.UI.Widgets
             OnEnableToggled?.Invoke(cachedTransform);
         }
 
+        private void OnSiblingIndexEndEdit(string input)
+        {
+            if (this.cachedTransform == null || !this.cachedTransform.Value)
+                return;
+
+            if (int.TryParse(input.Trim(), out int index))
+                this.cachedTransform.Value.SetSiblingIndex(index);
+            
+            this.SiblingIndex.Text = this.cachedTransform.Value.GetSiblingIndex().ToString();
+        }
+
         public GameObject CreateContent(GameObject parent)
         {
             UIRoot = UIFactory.CreateUIObject("TransformCell", parent);
@@ -152,10 +168,22 @@ namespace UnityExplorer.UI.Widgets
             nameLabel.horizontalOverflow = HorizontalWrapMode.Overflow;
             nameLabel.alignment = TextAnchor.MiddleLeft;
 
-            Color normal = new Color(0.11f, 0.11f, 0.11f);
-            Color highlight = new Color(0.25f, 0.25f, 0.25f);
-            Color pressed = new Color(0.05f, 0.05f, 0.05f);
-            Color disabled = new Color(1, 1, 1, 0);
+            // Sibling index input
+
+            SiblingIndex = UIFactory.CreateInputField(this.UIRoot, "SiblingIndexInput", string.Empty);
+            SiblingIndex.Component.textComponent.fontSize = 11;
+            SiblingIndex.Component.textComponent.alignment = TextAnchor.MiddleRight;
+            var siblingImage = SiblingIndex.GameObject.GetComponent<Image>();
+            siblingImage.color = new(0f, 0f, 0f, 0.25f);
+            UIFactory.SetLayoutElement(SiblingIndex.GameObject, 35, 20, 0, 0);
+            SiblingIndex.Component.GetOnEndEdit().AddListener(OnSiblingIndexEndEdit);
+
+            // Setup selectables
+
+            Color normal = new(0.11f, 0.11f, 0.11f);
+            Color highlight = new(0.25f, 0.25f, 0.25f);
+            Color pressed = new(0.05f, 0.05f, 0.05f);
+            Color disabled = new(1, 1, 1, 0);
             RuntimeHelper.SetColorBlock(ExpandButton.Component, normal, highlight, pressed, disabled);
             RuntimeHelper.SetColorBlock(NameButton.Component, normal, highlight, pressed, disabled);
 

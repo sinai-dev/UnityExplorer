@@ -17,6 +17,7 @@ namespace UnityExplorer.UI.Widgets
         public int ChildCount { get; internal set; }
         public string Name { get; internal set; }
         public bool Enabled { get; internal set; }
+        public int SiblingIndex { get; internal set; }
 
         public bool Expanded => Tree.IsCellExpanded(InstanceID);
 
@@ -26,27 +27,32 @@ namespace UnityExplorer.UI.Widgets
             Value = transform;
             Parent = parent;
             InstanceID = transform.GetInstanceID();
+            SiblingIndex = transform.GetSiblingIndex();
             Update(transform, depth);
         }
 
         public bool Update(Transform transform, int depth)
         {
-            bool ret = false;
+            bool changed = false;
 
             if (Value != transform
                 || depth != Depth
                 || ChildCount != transform.childCount
                 || Name != transform.name
-                || Enabled != transform.gameObject.activeSelf)
+                || Enabled != transform.gameObject.activeSelf
+                || SiblingIndex != transform.GetSiblingIndex())
             {
+                changed = true;
+
                 Value = transform;
                 Depth = depth;
                 ChildCount = transform.childCount;
                 Name = transform.name;
                 Enabled = transform.gameObject.activeSelf;
-                ret = true;
+                SiblingIndex = transform.GetSiblingIndex();
             }
-            return ret;
+
+            return changed;
         }
     }
 }
