@@ -64,7 +64,7 @@ namespace UnityExplorer.ObjectExplorer
         public void UpdateTree()
         {
             SceneHandler.Update();
-            Tree.RefreshData(true);
+            Tree.RefreshData(true, false, false);
         }
 
         public void JumpToTransform(Transform transform)
@@ -94,7 +94,7 @@ namespace UnityExplorer.ObjectExplorer
 
             SceneHandler.SelectedScene = SceneHandler.LoadedScenes[value];
             SceneHandler.Update();
-            Tree.RefreshData(true);
+            Tree.RefreshData(true, true, true);
             OnSelectedSceneChanged(SceneHandler.SelectedScene.Value);
         }
 
@@ -158,7 +158,7 @@ namespace UnityExplorer.ObjectExplorer
             }
 
             Tree.CurrentFilter = input;
-            Tree.RefreshData(true, true);
+            Tree.RefreshData(true, false, true);
         }
 
         private void TryLoadScene(LoadSceneMode mode, Dropdown allSceneDrop)
@@ -239,6 +239,17 @@ namespace UnityExplorer.ObjectExplorer
 
             refreshRow.SetActive(false);
 
+            // tree labels row
+
+            var labelsRow = UIFactory.CreateHorizontalGroup(toolbar, "LabelsRow", true, true, true, true, 2, new Vector4(2, 2, 2, 2));
+            UIFactory.SetLayoutElement(labelsRow, minHeight: 30, flexibleHeight: 0);
+
+            var nameLabel = UIFactory.CreateLabel(labelsRow, "NameLabel", "Name", TextAnchor.MiddleLeft, color: Color.grey);
+            UIFactory.SetLayoutElement(nameLabel.gameObject, flexibleWidth: 9999, minHeight: 25);
+
+            var indexLabel = UIFactory.CreateLabel(labelsRow, "IndexLabel", "Sibling Index", TextAnchor.MiddleLeft, fontSize: 12, color: Color.grey);
+            UIFactory.SetLayoutElement(indexLabel.gameObject, minWidth: 100, flexibleWidth: 0, minHeight: 25);
+
             // Transform Tree
 
             var scrollPool = UIFactory.CreateScrollPool<TransformCell>(uiRoot, "TransformTree", out GameObject scrollObj,
@@ -248,7 +259,7 @@ namespace UnityExplorer.ObjectExplorer
 
             Tree = new TransformTree(scrollPool, GetRootEntries);
             Tree.Init();
-            Tree.RefreshData(true, true);
+            Tree.RefreshData(true, true, true);
             //scrollPool.Viewport.GetComponent<Mask>().enabled = false;
             //UIRoot.GetComponent<Mask>().enabled = false;
 

@@ -82,7 +82,7 @@ namespace UnityExplorer.Inspectors
             this.Target = newTarget;
             GOControls.UpdateGameObjectInfo(true, true);
             GOControls.UpdateTransformControlValues(true);
-            TransformTree.RefreshData(true, false);
+            TransformTree.RefreshData(true, false, true);
             UpdateComponents();
         }
 
@@ -109,7 +109,7 @@ namespace UnityExplorer.Inspectors
 
                 GOControls.UpdateGameObjectInfo(false, false);
 
-                TransformTree.RefreshData(true, false);
+                TransformTree.RefreshData(true, false, false);
                 UpdateComponents();
             }
         }
@@ -220,7 +220,7 @@ namespace UnityExplorer.Inspectors
             var newObject = new GameObject(input);
             newObject.transform.parent = GOTarget.transform;
 
-            TransformTree.RefreshData(true, false);
+            TransformTree.RefreshData(true, false, true);
         }
 
         private void OnAddComponentClicked(string input)
