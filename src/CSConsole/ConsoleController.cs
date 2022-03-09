@@ -414,11 +414,15 @@ namespace UnityExplorer.CSConsole
 
         static bool usingEventSystemDictionaryMembers;
 
-        static readonly AmbiguousMemberHandler<EventSystem, GameObject> m_CurrentSelected_Handler_Normal = new("m_CurrentSelected", "m_currentSelected");
-        static readonly AmbiguousMemberHandler<EventSystem, Dictionary<int, GameObject>> m_CurrentSelected_Handler_Dictionary = new("m_CurrentSelected", "m_currentSelected");
+        static readonly AmbiguousMemberHandler<EventSystem, GameObject> m_CurrentSelected_Handler_Normal 
+            = new(true, true, "m_CurrentSelected", "m_currentSelected");
+        static readonly AmbiguousMemberHandler<EventSystem, Dictionary<int, GameObject>> m_CurrentSelected_Handler_Dictionary 
+            = new(true, true, "m_CurrentSelected", "m_currentSelected");
 
-        static readonly AmbiguousMemberHandler<EventSystem, bool> m_SelectionGuard_Handler_Normal = new("m_SelectionGuard", "m_selectionGuard");
-        static readonly AmbiguousMemberHandler<EventSystem, Dictionary<int, bool>> m_SelectionGuard_Handler_Dictionary = new("m_SelectionGuard", "m_selectionGuard");
+        static readonly AmbiguousMemberHandler<EventSystem, bool> m_SelectionGuard_Handler_Normal 
+            = new(true, true, "m_SelectionGuard", "m_selectionGuard");
+        static readonly AmbiguousMemberHandler<EventSystem, Dictionary<int, bool>> m_SelectionGuard_Handler_Dictionary 
+            = new(true, true, "m_SelectionGuard", "m_selectionGuard");
 
         static void SetCurrentSelectedGameObject(EventSystem instance, GameObject value)
         {
