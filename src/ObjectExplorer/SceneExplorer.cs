@@ -64,7 +64,7 @@ namespace UnityExplorer.ObjectExplorer
         public void UpdateTree()
         {
             SceneHandler.Update();
-            Tree.RefreshData(true, false, false);
+            Tree.RefreshData(true, false, false, false);
         }
 
         public void JumpToTransform(Transform transform)
@@ -94,7 +94,7 @@ namespace UnityExplorer.ObjectExplorer
 
             SceneHandler.SelectedScene = SceneHandler.LoadedScenes[value];
             SceneHandler.Update();
-            Tree.RefreshData(true, true, true);
+            Tree.RefreshData(true, true, true, false);
             OnSelectedSceneChanged(SceneHandler.SelectedScene.Value);
         }
 
@@ -158,7 +158,7 @@ namespace UnityExplorer.ObjectExplorer
             }
 
             Tree.CurrentFilter = input;
-            Tree.RefreshData(true, false, true);
+            Tree.RefreshData(true, false, true, false);
         }
 
         private void TryLoadScene(LoadSceneMode mode, Dropdown allSceneDrop)
@@ -259,7 +259,7 @@ namespace UnityExplorer.ObjectExplorer
 
             Tree = new TransformTree(scrollPool, GetRootEntries);
             Tree.Init();
-            Tree.RefreshData(true, true, true);
+            Tree.RefreshData(true, true, true, false);
             //scrollPool.Viewport.GetComponent<Mask>().enabled = false;
             //UIRoot.GetComponent<Mask>().enabled = false;
 

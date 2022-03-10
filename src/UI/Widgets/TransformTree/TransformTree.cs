@@ -17,6 +17,13 @@ namespace UnityExplorer.UI.Widgets
 
         public ScrollPool<TransformCell> ScrollPool;
 
+        // IMPORTANT CAVEAT WITH OrderedDictionary:
+        // While the performance is mostly good, there are two methods we should NEVER use:
+        // - Remove(object)
+        // - set_Item[object]
+        // These two methods have extremely bad performance due to using IndexOfKey(), which iterates the whole dictionary.
+        // Currently we do not use either of these methods, so everything should be constant time hash lookups.
+        // We DO make use of get_Item[object], get_Item[index], Add, Insert and RemoveAt, which OrderedDictionary perfectly meets our needs for.
         /// <summary>
         /// Key: UnityEngine.Transform instance ID<br/>
         /// Value: CachedTransform
@@ -27,13 +34,19 @@ namespace UnityExplorer.UI.Widgets
         private readonly HashSet<int> expandedInstanceIDs = new();
         private readonly HashSet<int> autoExpandedIDs = new();
 
+        // state for Traverse parse
         private readonly HashSet<int> visited = new();
-        private bool needRefresh;
+        private bool needRefreshUI;
         private int displayIndex;
         int prevDisplayIndex;
 
+        private Coroutine refreshCoroutine;
+        private readonly Stopwatch traversedThisFrame = new();
+
+        // ScrollPool item count. PrevDisplayIndex is the highest index + 1 from our last traverse.
         public int ItemCount => prevDisplayIndex;
 
+        // Search filter
         public bool Filtering => !string.IsNullOrEmpty(currentFilter);
         private bool wasFiltering;
 
@@ -54,20 +67,30 @@ namespace UnityExplorer.UI.Widgets
         }
         private string currentFilter;
 
-        private Coroutine refreshCoroutine;
-        private readonly Stopwatch traversedThisFrame = new();
-
         public TransformTree(ScrollPool<TransformCell> scrollPool, Func<IEnumerable<GameObject>> getRootEntriesMethod)
         {
             ScrollPool = scrollPool;
             GetRootEntriesMethod = getRootEntriesMethod;
         }
 
+        // Initialize and reset
+
+        // Must be called externally from owner of this TransformTree
         public void Init()
         {
             ScrollPool.Initialize(this);
         }
 
+        // Called to completely reset the tree, ie. switching inspected GameObject
+        public void Rebuild()
+        {
+            autoExpandedIDs.Clear();
+            expandedInstanceIDs.Clear();
+
+            RefreshData(true, true, true, false);
+        }
+
+        // Called to completely wipe our data (ie, GameObject inspector returning to pool)
         public void Clear()
         {
             this.cachedTransforms.Clear();
@@ -75,14 +98,21 @@ namespace UnityExplorer.UI.Widgets
             autoExpandedIDs.Clear();
             expandedInstanceIDs.Clear();
             this.ScrollPool.Refresh(true, true);
+            if (refreshCoroutine != null)
+            {
+                RuntimeHelper.StopCoroutine(refreshCoroutine);
+                refreshCoroutine = null;
+            }
         }
 
-        public bool IsCellExpanded(int instanceID)
+        // Checks if the given Instance ID is expanded or not
+        public bool IsTransformExpanded(int instanceID)
         {
             return Filtering ? autoExpandedIDs.Contains(instanceID)
                              : expandedInstanceIDs.Contains(instanceID);
         }
 
+        // Jumps to a specific Transform in the tree and highlights it.
         public void JumpAndExpandToTransform(Transform transform)
         {
             // make sure all parents of the object are expanded
@@ -96,8 +126,9 @@ namespace UnityExplorer.UI.Widgets
                 parent = parent.parent;
             }
 
-            // Refresh cached transforms (no UI rebuild yet)
-            RefreshData(false, false, false);
+            // Refresh cached transforms (no UI rebuild yet).
+            // Stop existing coroutine and do it oneshot.
+            RefreshData(false, false, true, true);
 
             int transformID = transform.GetInstanceID();
 
@@ -130,15 +161,9 @@ namespace UnityExplorer.UI.Widgets
             button.OnDeselect(null);
         }
 
-        public void Rebuild()
-        {
-            autoExpandedIDs.Clear();
-            expandedInstanceIDs.Clear();
-
-            RefreshData(true, true, true);
-        }
-
-        public void RefreshData(bool andRefreshUI, bool jumpToTop, bool stopExistingCoroutine)
+        // Perform a Traverse and optionally refresh the ScrollPool as well.
+        // If oneShot, then this happens instantly with no yield.
+        public void RefreshData(bool andRefreshUI, bool jumpToTop, bool stopExistingCoroutine, bool oneShot)
         {
             if (refreshCoroutine != null)
             {
@@ -153,25 +178,29 @@ namespace UnityExplorer.UI.Widgets
 
             visited.Clear();
             displayIndex = 0;
-            needRefresh = false;
+            needRefreshUI = false;
             traversedThisFrame.Reset();
             traversedThisFrame.Start();
 
             IEnumerable<GameObject> rootObjects = GetRootEntriesMethod.Invoke();
 
-            refreshCoroutine = RuntimeHelper.StartCoroutine(RefreshCoroutine(rootObjects, andRefreshUI, jumpToTop));
+            refreshCoroutine = RuntimeHelper.StartCoroutine(RefreshCoroutine(rootObjects, andRefreshUI, jumpToTop, oneShot));
         }
 
-        private IEnumerator RefreshCoroutine(IEnumerable<GameObject> rootObjects, bool andRefreshUI, bool jumpToTop)
+        // Coroutine for batched updates, max 2000 gameobjects per frame so FPS doesn't get tanked when there is like 100k gameobjects.
+        // if "oneShot", then this will NOT be batched (if we need an immediate full update).
+        IEnumerator RefreshCoroutine(IEnumerable<GameObject> rootObjects, bool andRefreshUI, bool jumpToTop, bool oneShot)
         {
-            var thisCoro = refreshCoroutine;
             foreach (var gameObj in rootObjects)
             {
                 if (gameObj)
                 {
-                    var enumerator = Traverse(gameObj.transform);
+                    var enumerator = Traverse(gameObj.transform, null, 0, oneShot);
                     while (enumerator.MoveNext())
-                        yield return enumerator.Current;
+                    {
+                        if (!oneShot)
+                            yield return enumerator.Current;
+                    }
                 }
             }
 
@@ -182,17 +211,20 @@ namespace UnityExplorer.UI.Widgets
                 if (!visited.Contains(cached.InstanceID))
                 {
                     cachedTransforms.RemoveAt(i);
-                    needRefresh = true;
+                    needRefreshUI = true;
                 }
             }
 
-            if (andRefreshUI && needRefresh)
+            if (andRefreshUI && needRefreshUI)
                 ScrollPool.Refresh(true, jumpToTop);
 
             prevDisplayIndex = displayIndex;
-        }
+            refreshCoroutine = null;
+        }   
 
-        private IEnumerator Traverse(Transform transform, CachedTransform parent = null, int depth = 0)
+        // Recursive method to check a Transform and its children (if expanded).
+        // Parent and depth can be null/default.
+        private IEnumerator Traverse(Transform transform, CachedTransform parent, int depth, bool oneShot)
         {
             // Let's only tank 2ms of each frame (60->53fps)
             if (traversedThisFrame.ElapsedMilliseconds > 2)
@@ -227,7 +259,7 @@ namespace UnityExplorer.UI.Widgets
                 int prevSiblingIdx = cached.SiblingIndex;
                 if (cached.Update(transform, depth))
                 {
-                    needRefresh = true;
+                    needRefreshUI = true;
 
                     // If the sibling index changed, we need to shuffle it in our cached transforms list.
                     if (prevSiblingIdx != cached.SiblingIndex)
@@ -242,7 +274,7 @@ namespace UnityExplorer.UI.Widgets
             }
             else
             {
-                needRefresh = true;
+                needRefreshUI = true;
                 cached = new CachedTransform(this, transform, depth, parent);
                 if (cachedTransforms.Count <= displayIndex)
                     cachedTransforms.Add(instanceID, cached);
@@ -252,13 +284,16 @@ namespace UnityExplorer.UI.Widgets
 
             displayIndex++;
 
-            if (IsCellExpanded(instanceID) && cached.Value.childCount > 0)
+            if (IsTransformExpanded(instanceID) && cached.Value.childCount > 0)
             {
                 for (int i = 0; i < transform.childCount; i++)
                 {
-                    var enumerator = Traverse(transform.GetChild(i), cached, depth + 1);
+                    var enumerator = Traverse(transform.GetChild(i), cached, depth + 1, oneShot);
                     while (enumerator.MoveNext())
-                        yield return enumerator.Current;
+                    {
+                        if (!oneShot)
+                            yield return enumerator.Current;
+                    }
                 }
             }
         }
@@ -316,14 +351,14 @@ namespace UnityExplorer.UI.Widgets
             else
                 expandedInstanceIDs.Add(instanceID);
 
-            RefreshData(true, false, true);
+            RefreshData(true, false, true, false);
         }
 
         public void OnCellEnableToggled(CachedTransform cache)
         {
             cache.Value.gameObject.SetActive(!cache.Value.gameObject.activeSelf);
 
-            RefreshData(true, false, true);
+            RefreshData(true, false, true, false);
         }
     }
 }

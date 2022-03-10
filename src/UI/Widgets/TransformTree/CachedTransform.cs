@@ -19,7 +19,7 @@ namespace UnityExplorer.UI.Widgets
         public bool Enabled { get; internal set; }
         public int SiblingIndex { get; internal set; }
 
-        public bool Expanded => Tree.IsCellExpanded(InstanceID);
+        public bool Expanded => Tree.IsTransformExpanded(InstanceID);
 
         public CachedTransform(TransformTree tree, Transform transform, int depth, CachedTransform parent = null)
         {
