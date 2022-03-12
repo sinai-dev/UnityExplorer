@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ using UnityEngine.UI;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
 using UniverseLib;
+using UniverseLib.Input;
 
 namespace UnityExplorer.Inspectors.MouseInspectors
 {
@@ -38,6 +40,12 @@ namespace UnityExplorer.Inspectors.MouseInspectors
         {
             LastHitObjects.Clear();
             LastHitObjects.AddRange(currentHitObjects);
+            RuntimeHelper.StartCoroutine(SetPanelActiveCoro());
+        }
+
+        IEnumerator SetPanelActiveCoro()
+        {
+            yield return null;
             var panel = UIManager.GetPanel<UiInspectorResultsPanel>(UIManager.Panels.UIInspectorResults);
             panel.SetActive(true);
             panel.ShowResults();

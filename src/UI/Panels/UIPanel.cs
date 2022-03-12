@@ -108,18 +108,18 @@ namespace UnityExplorer.UI.Panels
 
         public override void SetActive(bool active)
         {
-            if (this.Enabled == active)
-                return;
-
-            base.SetActive(active);
-
-            if (!ApplyingSaveData)
-                SaveInternalData();
-
-            if (NavButtonWanted)
+            if (this.Enabled != active)
             {
-                var color = active ? UniversalUI.EnabledButtonColor : UniversalUI.DisabledButtonColor;
-                RuntimeHelper.SetColorBlock(NavButton.Component, color, color * 1.2f);
+                base.SetActive(active);
+
+                if (!ApplyingSaveData)
+                    SaveInternalData();
+
+                if (NavButtonWanted)
+                {
+                    var color = active ? UniversalUI.EnabledButtonColor : UniversalUI.DisabledButtonColor;
+                    RuntimeHelper.SetColorBlock(NavButton.Component, color, color * 1.2f);
+                }
             }
 
             if (!active)
