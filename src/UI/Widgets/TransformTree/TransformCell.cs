@@ -79,8 +79,14 @@ namespace UnityExplorer.UI.Widgets
 
                 EnabledToggle.Set(cached.Value.gameObject.activeSelf, false);
 
-                if (!SiblingIndex.Component.isFocused)
-                    SiblingIndex.Text = cached.Value.GetSiblingIndex().ToString();
+                if (!cached.Value.parent)
+                    SiblingIndex.GameObject.SetActive(false);
+                else
+                {
+                    SiblingIndex.GameObject.SetActive(true);
+                    if (!SiblingIndex.Component.isFocused)
+                        SiblingIndex.Text = cached.Value.GetSiblingIndex().ToString();
+                }
 
                 int childCount = cached.Value.childCount;
                 if (childCount > 0)
@@ -102,6 +108,8 @@ namespace UnityExplorer.UI.Widgets
             {
                 NameButton.ButtonText.text = $"[Destroyed]";
                 NameButton.ButtonText.color = Color.red;
+
+                SiblingIndex.GameObject.SetActive(false);
             }
         }
 
