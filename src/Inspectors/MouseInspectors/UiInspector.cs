@@ -39,7 +39,7 @@ namespace UnityExplorer.Inspectors.MouseInspectors
             LastHitObjects.Clear();
             LastHitObjects.AddRange(currentHitObjects);
             var panel = UIManager.GetPanel<UiInspectorResultsPanel>(UIManager.Panels.UIInspectorResults);
-            panel.SetActive(true);
+            UIManager.SetPanelActive(panel, true);
             panel.ShowResults();
         }
 
