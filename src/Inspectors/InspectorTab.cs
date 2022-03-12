@@ -43,9 +43,10 @@ namespace UnityExplorer.Inspectors
             TabButton = UIFactory.CreateButton(UIRoot, "TabButton", "");
             UIFactory.SetLayoutElement(TabButton.Component.gameObject, minWidth: 173, flexibleWidth: 0);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(TabButton.Component.gameObject, false, false, true, true, 0, 0, 0, 3);
+            TabButton.GameObject.AddComponent<Mask>();
 
-            TabText = TabButton.Component.GetComponentInChildren<Text>();
-            UIFactory.SetLayoutElement(TabText.gameObject, minHeight: 25, minWidth: 173, flexibleWidth: 0);
+            TabText = TabButton.ButtonText;
+            UIFactory.SetLayoutElement(TabText.gameObject, minHeight: 25, minWidth: 150, flexibleWidth: 0);
             TabText.alignment = TextAnchor.MiddleLeft;
             TabText.fontSize = 12;
             TabText.horizontalOverflow = HorizontalWrapMode.Overflow;
