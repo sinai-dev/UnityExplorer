@@ -184,26 +184,21 @@ namespace UnityExplorer.UI
             SetPanelActive(panel, !uiPanel.Enabled);
         }
 
-        public static void SetPanelActive(Panels panel, bool active)
+        public static void SetPanelActive(Panels panelType, bool active)
         {
-            var obj = GetPanel(panel);
-            SetPanelActive(obj, active);
+            GetPanel(panelType)
+                .SetActive(active);
         }
 
         public static void SetPanelActive(UIPanel panel, bool active)
         {
             panel.SetActive(active);
-            if (active)
-            {
-                panel.UIRoot.transform.SetAsLastSibling();
-                UIPanel.InvokeOnPanelsReordered();
-            }
         }
 
         internal static void SetPanelActive(Transform transform, bool value)
         {
             if (UIPanel.transformToPanelDict.TryGetValue(transform.GetInstanceID(), out UIPanel panel))
-                SetPanelActive(panel, value);
+                panel.SetActive(value);
         }
 
         // navbar

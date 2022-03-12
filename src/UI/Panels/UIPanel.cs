@@ -124,6 +124,11 @@ namespace UnityExplorer.UI.Panels
 
             if (!active)
                 this.Dragger.WasDragging = false;
+            else
+            {
+                this.UIRoot.transform.SetAsLastSibling();
+                InvokeOnPanelsReordered();
+            }
         }
 
         public override void Destroy()
