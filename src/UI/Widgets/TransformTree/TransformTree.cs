@@ -351,14 +351,14 @@ namespace UnityExplorer.UI.Widgets
             else
                 expandedInstanceIDs.Add(instanceID);
 
-            RefreshData(true, false, true, false);
+            RefreshData(true, false, true, true);
         }
 
         public void OnCellEnableToggled(CachedTransform cache)
         {
             cache.Value.gameObject.SetActive(!cache.Value.gameObject.activeSelf);
 
-            RefreshData(true, false, true, false);
+            RefreshData(true, false, true, true);
         }
     }
 }
