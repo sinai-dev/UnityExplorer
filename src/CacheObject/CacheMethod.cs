@@ -11,12 +11,17 @@ namespace UnityExplorer.CacheObject
 {
     public class CacheMethod : CacheMember
     {
-        public MethodInfo MethodInfo { get; internal set; }
+        public MethodInfo MethodInfo { get; }
         public override Type DeclaringType => MethodInfo.DeclaringType;
         public override bool CanWrite => false;
         public override bool IsStatic => MethodInfo.IsStatic;
 
         public override bool ShouldAutoEvaluate => false;
+
+        public CacheMethod (MethodInfo mi)
+        {
+            this.MethodInfo = mi;
+        }
 
         public override void SetInspectorOwner(ReflectionInspector inspector, MemberInfo member)
         {

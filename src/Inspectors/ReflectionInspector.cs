@@ -46,8 +46,9 @@ namespace UnityExplorer.Inspectors
             None = 0,
             Property = 1,
             Field = 2,
-            Method = 4,
-            All = 7
+            Constructor = 4,
+            Method = 8,
+            All = Property | Field | Method | Constructor,
         }
 
         // UI
@@ -153,7 +154,7 @@ namespace UnityExplorer.Inspectors
 
             this.filterInputField.Text = "";
 
-            SetFilter("", StaticOnly ? BindingFlags.Static : BindingFlags.Instance);
+            SetFilter("", StaticOnly ? BindingFlags.Static : BindingFlags.Default);
             scopeFilterButtons[BindingFlags.Default].Component.gameObject.SetActive(!StaticOnly);
             scopeFilterButtons[BindingFlags.Instance].Component.gameObject.SetActive(!StaticOnly);
 
@@ -462,6 +463,7 @@ namespace UnityExplorer.Inspectors
             AddMemberTypeToggle(rowObj, MemberTypes.Property, 90);
             AddMemberTypeToggle(rowObj, MemberTypes.Field, 70);
             AddMemberTypeToggle(rowObj, MemberTypes.Method, 90);
+            AddMemberTypeToggle(rowObj, MemberTypes.Constructor, 110);
         }
 
         private void AddScopeFilterButton(GameObject parent, BindingFlags flags, bool setAsActive = false)
@@ -480,25 +482,26 @@ namespace UnityExplorer.Inspectors
         {
             var toggleObj = UIFactory.CreateToggle(parent, "Toggle_" + type, out Toggle toggle, out Text toggleText);
             UIFactory.SetLayoutElement(toggleObj, minHeight: 25, minWidth: width);
-            var color = type switch
+            string color = type switch
             {
                 MemberTypes.Method => SignatureHighlighter.METHOD_INSTANCE,
                 MemberTypes.Field => SignatureHighlighter.FIELD_INSTANCE,
                 MemberTypes.Property => SignatureHighlighter.PROP_INSTANCE,
+                MemberTypes.Constructor => SignatureHighlighter.CLASS_INSTANCE,
                 _ => throw new NotImplementedException()
             };
             toggleText.text = $"<color={color}>{type}</color>";
 
             toggle.graphic.TryCast<Image>().color = color.ToColor() * 0.65f;
 
-            MemberFlags flag;
-            switch (type)
+            MemberFlags flag = type switch
             {
-                case MemberTypes.Method: flag = MemberFlags.Method; break;
-                case MemberTypes.Property: flag = MemberFlags.Property; break;
-                case MemberTypes.Field: flag = MemberFlags.Field; break;
-                default: return;
-            }
+                MemberTypes.Method => MemberFlags.Method,
+                MemberTypes.Property => MemberFlags.Property,
+                MemberTypes.Field => MemberFlags.Field,
+                MemberTypes.Constructor => MemberFlags.Constructor,
+                _ => throw new NotImplementedException()
+            };
 
             toggle.onValueChanged.AddListener((bool val) => { OnMemberTypeToggled(flag, val); });
 

@@ -19,6 +19,11 @@ namespace UnityExplorer.CacheObject
 
         public override bool ShouldAutoEvaluate => !HasArguments;
 
+        public CacheProperty(PropertyInfo pi)
+        {
+            this.PropertyInfo = pi;
+        }
+
         public override void SetInspectorOwner(ReflectionInspector inspector, MemberInfo member)
         {
             base.SetInspectorOwner(inspector, member);

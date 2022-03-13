@@ -12,6 +12,7 @@ using UniverseLib.UI;
 using UniverseLib;
 using UnityExplorer.CacheObject;
 using UniverseLib.UI.ObjectPool;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.UI.Widgets
 {
@@ -76,6 +77,9 @@ namespace UnityExplorer.UI.Widgets
 
         public object[] TryParseArguments()
         {
+            if (!parameters.Any())
+                return ArgumentUtility.EmptyArgs;
+
             object[] outArgs = new object[parameters.Length];
 
             for (int i = 0; i < parameters.Length; i++)

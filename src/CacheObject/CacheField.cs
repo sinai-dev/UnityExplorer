@@ -17,6 +17,11 @@ namespace UnityExplorer.CacheObject
 
         public override bool ShouldAutoEvaluate => true;
 
+        public CacheField(FieldInfo fi)
+        {
+            this.FieldInfo = fi;
+        }
+
         public override void SetInspectorOwner(ReflectionInspector inspector, MemberInfo member)
         {
             base.SetInspectorOwner(inspector, member);

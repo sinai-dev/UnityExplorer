@@ -14,6 +14,8 @@ using UniverseLib.UI;
 using UnityExplorer.UI.Widgets;
 using UniverseLib.Utility;
 using UniverseLib.UI.ObjectPool;
+using System.Collections;
+using HarmonyLib;
 
 namespace UnityExplorer.CacheObject
 {
@@ -34,9 +36,12 @@ namespace UnityExplorer.CacheObject
         public virtual void SetInspectorOwner(ReflectionInspector inspector, MemberInfo member)
         {
             this.Owner = inspector;
-            this.NameLabelText = this is CacheMethod 
-                ? SignatureHighlighter.HighlightMethod(member as MethodInfo) 
-                : SignatureHighlighter.Parse(member.DeclaringType, false, member);
+            this.NameLabelText = this switch
+            {
+                CacheMethod => SignatureHighlighter.HighlightMethod(member as MethodInfo),
+                CacheConstructor => SignatureHighlighter.HighlightConstructor(member as ConstructorInfo),
+                _ => SignatureHighlighter.Parse(member.DeclaringType, false, member),
+            };
 
             this.NameForFiltering = SignatureHighlighter.RemoveHighlighting(NameLabelText);
             this.NameLabelTextRaw = NameForFiltering;
@@ -167,56 +172,61 @@ namespace UnityExplorer.CacheObject
 
         #region Cache Member Util
 
-        public static List<CacheMember> GetCacheMembers(object inspectorTarget, Type _type, ReflectionInspector _inspector)
+        public static List<CacheMember> GetCacheMembers(object inspectorTarget, Type type, ReflectionInspector inspector)
         {
-            var list = new List<CacheMember>();
-            var cachedSigs = new HashSet<string>();
+            //var list = new List<CacheMember>();
+            HashSet<string> cachedSigs = new();
+            List<CacheMember> props = new();
+            List<CacheMember> fields = new();
+            List<CacheMember> ctors = new();
+            List<CacheMember> methods = new();
 
-            var types = ReflectionUtility.GetAllBaseTypes(_type);
+            var types = ReflectionUtility.GetAllBaseTypes(type);
 
             var flags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
-            if (!_inspector.StaticOnly)
+            if (!inspector.StaticOnly)
                 flags |= BindingFlags.Instance;
 
-            var infos = new List<MemberInfo>();
+            // Get non-static constructors of the main type.
+            // There's no reason to get the static cctor, it will be invoked when we inspect the class.
+            // Also no point getting ctors on inherited types.
+            foreach (var ctor in type.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+                TryCacheMember(ctor, ctors, cachedSigs, type, inspector);
 
             foreach (var declaringType in types)
             {
                 var target = inspectorTarget;
-                if (!_inspector.StaticOnly)
+                if (!inspector.StaticOnly)
                     target = target.TryCast(declaringType);
 
-                infos.Clear();
-                infos.AddRange(declaringType.GetProperties(flags));
-                infos.AddRange(declaringType.GetFields(flags));
-                infos.AddRange(declaringType.GetMethods(flags));
+                foreach (var prop in declaringType.GetProperties(flags))
+                    if (prop.DeclaringType == declaringType)
+                        TryCacheMember(prop, props, cachedSigs, declaringType, inspector);
 
-                foreach (var member in infos)
-                {
-                    if (member.DeclaringType != declaringType)
-                        continue;
-                    TryCacheMember(member, list, cachedSigs, declaringType, _inspector);
-                }
+                foreach (var field in declaringType.GetFields(flags))
+                    if (field.DeclaringType == declaringType)
+                        TryCacheMember(field, fields, cachedSigs, declaringType, inspector);
+
+                foreach (var method in declaringType.GetMethods(flags))
+                    if (method.DeclaringType == declaringType)
+                        TryCacheMember(method, methods, cachedSigs, declaringType, inspector);
+
             }
 
-            var typeList = types.ToList();
-
             var sorted = new List<CacheMember>();
-            sorted.AddRange(list.Where(it => it is CacheProperty)
-                             .OrderBy(it => typeList.IndexOf(it.DeclaringType))
-                             .ThenBy(it => it.NameForFiltering));
-            sorted.AddRange(list.Where(it => it is CacheField)
-                             .OrderBy(it => typeList.IndexOf(it.DeclaringType))
-                             .ThenBy(it => it.NameForFiltering));
-            sorted.AddRange(list.Where(it => it is CacheMethod)
-                             .OrderBy(it => typeList.IndexOf(it.DeclaringType))
-                             .ThenBy(it => it.NameForFiltering));
-
+            sorted.AddRange(props.OrderBy(it => Array.IndexOf(types, it.DeclaringType))
+                                 .ThenBy(it => it.NameForFiltering));
+            sorted.AddRange(fields.OrderBy(it => Array.IndexOf(types, it.DeclaringType))
+                                 .ThenBy(it => it.NameForFiltering));
+            sorted.AddRange(ctors.OrderBy(it => Array.IndexOf(types, it.DeclaringType))
+                                 .ThenBy(it => it.NameForFiltering));
+            sorted.AddRange(methods.OrderBy(it => Array.IndexOf(types, it.DeclaringType))
+                                 .ThenBy(it => it.NameForFiltering));
             return sorted;
         }
 
-        private static void TryCacheMember(MemberInfo member, List<CacheMember> list, HashSet<string> cachedSigs,
-            Type declaringType, ReflectionInspector _inspector, bool ignorePropertyMethodInfos = true)
+        private static void TryCacheMember(MemberInfo member, IList list, HashSet<string> cachedSigs,
+            Type declaringType, ReflectionInspector inspector, bool ignorePropertyMethodInfos = true)
         {
             try
             {
@@ -231,6 +241,17 @@ namespace UnityExplorer.CacheObject
                 Type returnType;
                 switch (member.MemberType)
                 {
+                    case MemberTypes.Constructor:
+                        {
+                            var ci = member as ConstructorInfo;
+                            sig += GetArgumentString(ci.GetParameters());
+                            if (cachedSigs.Contains(sig))
+                                return;
+                            cached = new CacheConstructor(ci);
+                            returnType = ci.DeclaringType;
+                        }
+                        break;
+
                     case MemberTypes.Method:
                         {
                             var mi = member as MethodInfo;
@@ -238,15 +259,11 @@ namespace UnityExplorer.CacheObject
                                 && (mi.Name.StartsWith("get_") || mi.Name.StartsWith("set_")))
                                 return;
 
-                            //var args = mi.GetParameters();
-                            //if (!CanParseArgs(args))
-                            //    return;
-
                             sig += GetArgumentString(mi.GetParameters());
                             if (cachedSigs.Contains(sig))
                                 return;
 
-                            cached = new CacheMethod() { MethodInfo = mi };
+                            cached = new CacheMethod(mi);
                             returnType = mi.ReturnType;
                             break;
                         }
@@ -255,16 +272,12 @@ namespace UnityExplorer.CacheObject
                         {
                             var pi = member as PropertyInfo;
 
-                            //var args = pi.GetIndexParameters();
-                            //if (!CanParseArgs(args))
-                            //    return;
-
                             if (!pi.CanRead && pi.CanWrite)
                             {
                                 // write-only property, cache the set method instead.
                                 var setMethod = pi.GetSetMethod(true);
                                 if (setMethod != null)
-                                    TryCacheMember(setMethod, list, cachedSigs, declaringType, _inspector, false);
+                                    TryCacheMember(setMethod, list, cachedSigs, declaringType, inspector, false);
                                 return;
                             }
 
@@ -272,7 +285,7 @@ namespace UnityExplorer.CacheObject
                             if (cachedSigs.Contains(sig))
                                 return;
 
-                            cached = new CacheProperty() { PropertyInfo = pi };
+                            cached = new CacheProperty(pi);
                             returnType = pi.PropertyType;
                             break;
                         }
@@ -280,7 +293,7 @@ namespace UnityExplorer.CacheObject
                     case MemberTypes.Field:
                         {
                             var fi = member as FieldInfo;
-                            cached = new CacheField() { FieldInfo = fi };
+                            cached = new CacheField(fi);
                             returnType = fi.FieldType;
                             break;
                         }
@@ -291,7 +304,7 @@ namespace UnityExplorer.CacheObject
                 cachedSigs.Add(sig);
 
                 cached.SetFallbackType(returnType);
-                cached.SetInspectorOwner(_inspector, member);
+                cached.SetInspectorOwner(inspector, member);
 
                 list.Add(cached);
             }
