@@ -313,7 +313,7 @@
     <Compile Include="UI\Panels\ObjectExplorerPanel.cs" />
     <Compile Include="UI\UIManager.cs" />
     <Compile Include="UI\Panels\PanelDragger.cs" />
-    <Compile Include="UI\Widgets\AutoComplete\AutoCompleteModal.cs" />
+    <Compile Include="UI\Panels\AutoCompleteModal.cs" />
     <Compile Include="UI\Widgets\AutoComplete\TypeCompleter.cs" />
     <Compile Include="ObjectExplorer\ObjectSearch.cs" />
     <Compile Include="ObjectExplorer\SceneExplorer.cs" />

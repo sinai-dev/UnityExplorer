@@ -30,13 +30,13 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         public override int MinWidth => -1;
         public override int MinHeight => -1;
 
-        public override bool CanDragAndResize => false;
+        public override bool CanDragAndResize => true;
         public override bool ShouldSaveActiveState => false;
         public override bool NavButtonWanted => false;
 
         public static ISuggestionProvider CurrentHandler { get; private set; }
 
-        public static ButtonListHandler<Suggestion, ButtonCell> dataHandler;
+        public static ButtonListHandler<Suggestion, ButtonCell> buttonListDataHandler;
         public static ScrollPool<ButtonCell> scrollPool;
         private static GameObject navigationTipRow;
 
@@ -82,7 +82,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             {
                 base.UIRoot.SetActive(true);
                 base.UIRoot.transform.SetAsLastSibling();
-                dataHandler.RefreshData();
+                buttonListDataHandler.RefreshData();
                 scrollPool.Refresh(true, true);
             }
         }
@@ -303,11 +303,14 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         public override void ConstructPanelContent()
         {
-            dataHandler = new ButtonListHandler<Suggestion, ButtonCell>(scrollPool, GetEntries, SetCell, ShouldDisplay, OnCellClicked);
+            // hide the titlebar
+            this.TitleBar.gameObject.SetActive(false);
+
+            buttonListDataHandler = new ButtonListHandler<Suggestion, ButtonCell>(scrollPool, GetEntries, SetCell, ShouldDisplay, OnCellClicked);
 
             scrollPool = UIFactory.CreateScrollPool<ButtonCell>(this.uiContent, "AutoCompleter", out GameObject scrollObj,
                 out GameObject scrollContent);
-            scrollPool.Initialize(dataHandler);
+            scrollPool.Initialize(buttonListDataHandler);
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(scrollContent, true, false, true, false);
 
