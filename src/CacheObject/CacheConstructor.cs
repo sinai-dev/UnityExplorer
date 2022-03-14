@@ -11,8 +11,9 @@ namespace UnityExplorer.CacheObject
     public class CacheConstructor : CacheMember
     {
         public ConstructorInfo CtorInfo { get; }
+        readonly Type typeForStructConstructor;
 
-        public override Type DeclaringType => CtorInfo.DeclaringType;
+        public override Type DeclaringType => typeForStructConstructor ?? CtorInfo.DeclaringType;
         public override bool IsStatic => true;
         public override bool ShouldAutoEvaluate => false;
         public override bool CanWrite => false;
@@ -22,8 +23,27 @@ namespace UnityExplorer.CacheObject
             this.CtorInfo = ci;
         }
 
+        public CacheConstructor(Type typeForStructConstructor)
+        {
+            this.typeForStructConstructor = typeForStructConstructor;
+        }
+
         public override void SetInspectorOwner(ReflectionInspector inspector, MemberInfo member)
         {
+            // if is parameterless struct ctor
+            if (typeForStructConstructor != null)
+            {
+                this.Owner = inspector;
+
+                // eg. Vector3.Vector3()
+                this.NameLabelText = SignatureHighlighter.Parse(typeForStructConstructor, false);
+                NameLabelText += $".{NameLabelText}()";
+
+                this.NameForFiltering = SignatureHighlighter.RemoveHighlighting(NameLabelText);
+                this.NameLabelTextRaw = NameForFiltering;
+                return;
+            }
+
             base.SetInspectorOwner(inspector, member);
 
             Arguments = CtorInfo.GetParameters();
