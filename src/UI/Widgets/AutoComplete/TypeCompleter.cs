@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UniverseLib;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
@@ -67,7 +68,17 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             {
                 allowedTypes = new();
                 foreach (var entry in ReflectionUtility.AllTypes)
-                    allowedTypes.Add(entry.Value);
+                {
+                    // skip <PrivateImplementationDetails> and <AnonymousClass> classes
+                    var type = entry.Value;
+                    if (type.FullName.Contains("PrivateImplementationDetails")
+                             || type.FullName.Contains("DisplayClass")
+                             || type.FullName.Contains('<'))
+                    {
+                        continue;
+                    }
+                    allowedTypes.Add(type);
+                }
             }
         }
 
