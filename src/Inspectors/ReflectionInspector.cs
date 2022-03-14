@@ -262,7 +262,8 @@ namespace UnityExplorer.Inspectors
 
                 if ((member is CacheMethod && !MemberFilter.HasFlag(MemberFlags.Method))
                     || (member is CacheField && !MemberFilter.HasFlag(MemberFlags.Field))
-                    || (member is CacheProperty && !MemberFilter.HasFlag(MemberFlags.Property)))
+                    || (member is CacheProperty && !MemberFilter.HasFlag(MemberFlags.Property))
+                    || (member is CacheConstructor && !MemberFilter.HasFlag(MemberFlags.Constructor)))
                     continue;
 
                 if (!string.IsNullOrEmpty(NameFilter) && !member.NameForFiltering.ContainsIgnoreCase(NameFilter))
