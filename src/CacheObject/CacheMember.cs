@@ -187,11 +187,23 @@ namespace UnityExplorer.CacheObject
             if (!inspector.StaticOnly)
                 flags |= BindingFlags.Instance;
 
-            // Get non-static constructors of the main type.
-            // There's no reason to get the static cctor, it will be invoked when we inspect the class.
-            // Also no point getting ctors on inherited types.
-            foreach (var ctor in type.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-                TryCacheMember(ctor, ctors, cachedSigs, type, inspector);
+            if (!type.IsAbstract)
+            {
+                // Get non-static constructors of the main type.
+                // There's no reason to get the static cctor, it will be invoked when we inspect the class.
+                // Also no point getting ctors on inherited types.
+                foreach (var ctor in type.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+                    TryCacheMember(ctor, ctors, cachedSigs, type, inspector);
+
+                // structs always have a parameterless constructor
+                if (type.IsValueType)
+                {
+                    CacheConstructor cached = new(type);
+                    cached.SetFallbackType(type);
+                    cached.SetInspectorOwner(inspector, null);
+                    ctors.Add(cached);
+                }
+            }
 
             foreach (var declaringType in types)
             {
