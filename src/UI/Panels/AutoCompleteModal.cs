@@ -294,11 +294,28 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         // UI Construction
 
+        const float MIN_X = 0.42f;
+        const float MAX_Y = 0.6f;
+
         protected internal override void DoSetDefaultPosAndAnchors()
         {
             Rect.pivot = new Vector2(0f, 1f);
-            Rect.anchorMin = new Vector2(0.42f, 0.4f);
-            Rect.anchorMax = new Vector2(0.68f, 0.6f);
+            Rect.anchorMin = new Vector2(MIN_X, 0.4f);
+            Rect.anchorMax = new Vector2(0.68f, MAX_Y);
+        }
+
+        public override void OnFinishResize(RectTransform panel)
+        {
+            float xDiff = panel.anchorMin.x - MIN_X;
+            float yDiff = panel.anchorMax.y - MAX_Y;
+
+            if (xDiff != 0 || yDiff != 0)
+            {
+                panel.anchorMin = new(MIN_X, panel.anchorMin.y - yDiff);
+                panel.anchorMax = new(panel.anchorMax.x - xDiff, MAX_Y);
+            }
+
+            base.OnFinishResize(panel);
         }
 
         public override void ConstructPanelContent()
