@@ -29,8 +29,11 @@ namespace UnityExplorer.CacheObject.IValues
         private EnumCompleter enumCompleter;
 
         private GameObject toggleHolder;
-        private readonly List<Toggle> flagToggles = new List<Toggle>();
-        private readonly List<Text> flagTexts = new List<Text>();
+        private readonly List<Toggle> flagToggles = new();
+        private readonly List<Text> flagTexts = new();
+
+        public CachedEnumValue ValueAtIndex(int idx) => (CachedEnumValue)CurrentValues[idx];
+        public CachedEnumValue ValueAtKey(object key) => (CachedEnumValue)CurrentValues[key];
 
         // Setting value from owner
         public override void SetValue(object value)
@@ -70,13 +73,8 @@ namespace UnityExplorer.CacheObject.IValues
         {
             try
             {
-                var split = value.ToString().Split(',');
-                var set = new HashSet<string>();
-                foreach (var s in split)
-                    set.Add(s.Trim());
-
                 for (int i = 0; i < CurrentValues.Count; i++)
-                    flagToggles[i].isOn = set.Contains(ValueAtIdx(i).Name);
+                    flagToggles[i].isOn = (value as Enum).HasFlag(ValueAtIndex(i).ActualValue as Enum);
             }
             catch (Exception ex)
             {
@@ -116,7 +114,7 @@ namespace UnityExplorer.CacheObject.IValues
                 for (int i = 0; i < CurrentValues.Count; i++)
                 {
                     if (flagToggles[i].isOn)
-                        values.Add(ValueAtIdx(i).Name);
+                        values.Add(ValueAtIndex(i).Name);
                 }
 
                 CurrentOwner.SetUserValue(Enum.Parse(EnumType, string.Join(", ", values.ToArray())));
@@ -166,9 +164,6 @@ namespace UnityExplorer.CacheObject.IValues
             return UIRoot;
         }
 
-        public CachedEnumValue ValueAtIdx(int idx) => (CachedEnumValue)CurrentValues[idx];
-        public CachedEnumValue ValueAtKey(object key) => (CachedEnumValue)CurrentValues[key];
-
         private void SetupTogglesForEnumType()
         {
             toggleHolder.SetActive(true);
@@ -191,7 +186,7 @@ namespace UnityExplorer.CacheObject.IValues
                     AddToggleRow();
 
                 flagToggles[i].isOn = false;
-                flagTexts[i].text = ValueAtIdx(i).Name;
+                flagTexts[i].text = ValueAtIndex(i).Name;
             }
         }
 
