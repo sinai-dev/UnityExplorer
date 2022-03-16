@@ -30,9 +30,11 @@ namespace UnityExplorer.CacheObject
 
         public override void SetInspectorOwner(ReflectionInspector inspector, MemberInfo member)
         {
+            Type ctorReturnType;
             // if is parameterless struct ctor
             if (typeForStructConstructor != null)
             {
+                ctorReturnType = typeForStructConstructor;
                 this.Owner = inspector;
 
                 // eg. Vector3.Vector3()
@@ -43,12 +45,16 @@ namespace UnityExplorer.CacheObject
                 this.NameLabelTextRaw = NameForFiltering;
                 return;
             }
+            else
+            {
+                base.SetInspectorOwner(inspector, member);
 
-            base.SetInspectorOwner(inspector, member);
-
-            Arguments = CtorInfo.GetParameters();
-            if (CtorInfo.DeclaringType.IsGenericTypeDefinition)
-                GenericArguments = CtorInfo.DeclaringType.GetGenericArguments();
+                Arguments = CtorInfo.GetParameters();
+                ctorReturnType = CtorInfo.DeclaringType;
+            }
+            
+            if (ctorReturnType.IsGenericTypeDefinition)
+                GenericArguments = ctorReturnType.GetGenericArguments();
         }
 
         protected override object TryEvaluate()
