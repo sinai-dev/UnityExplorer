@@ -15,7 +15,6 @@ namespace UnityExplorer.UI.Widgets
         public Component ComponentRef;
         public ReflectionInspector ParentInspector;
 
-        protected GameObject unityObjectRow;
         protected ButtonRef gameObjectButton;
         protected InputFieldRef nameInput;
         protected InputFieldRef instanceIdInput;
@@ -33,6 +32,8 @@ namespace UnityExplorer.UI.Widgets
 
             if (targetType == typeof(Texture2D))
                 ret = Pool<Texture2DWidget>.Borrow();
+            else if (targetType == typeof(AudioClip))
+                ret = Pool<AudioClipWidget>.Borrow();
             else
                 ret = Pool<UnityObjectWidget>.Borrow();
 
@@ -42,7 +43,7 @@ namespace UnityExplorer.UI.Widgets
 
         public virtual void OnBorrowed(object target, Type targetType, ReflectionInspector inspector)
         {
-            this.ParentInspector = inspector;
+            this.ParentInspector = inspector ?? throw new ArgumentNullException(nameof(inspector));
 
             if (!this.UIRoot)
                 CreateContent(inspector.UIRoot);
@@ -52,7 +53,7 @@ namespace UnityExplorer.UI.Widgets
             this.UIRoot.transform.SetSiblingIndex(inspector.UIRoot.transform.childCount - 2);
 
             UnityObjectRef = (UnityEngine.Object)target.TryCast(typeof(UnityEngine.Object));
-            unityObjectRow.SetActive(true);
+            UIRoot.SetActive(true);
 
             nameInput.Text = UnityObjectRef.name;
             instanceIdInput.Text = UnityObjectRef.GetInstanceID().ToString();
@@ -101,31 +102,29 @@ namespace UnityExplorer.UI.Widgets
 
         public virtual GameObject CreateContent(GameObject uiRoot)
         {
-            unityObjectRow = UIFactory.CreateUIObject("UnityObjectRow", uiRoot);
-            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(unityObjectRow, false, false, true, true, 5);
-            UIFactory.SetLayoutElement(unityObjectRow, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
+            UIRoot = UIFactory.CreateUIObject("UnityObjectRow", uiRoot);
+            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(UIRoot, false, false, true, true, 5);
+            UIFactory.SetLayoutElement(UIRoot, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
 
-            UIRoot = unityObjectRow;
-
-            var nameLabel = UIFactory.CreateLabel(unityObjectRow, "NameLabel", "Name:", TextAnchor.MiddleLeft, Color.grey);
+            var nameLabel = UIFactory.CreateLabel(UIRoot, "NameLabel", "Name:", TextAnchor.MiddleLeft, Color.grey);
             UIFactory.SetLayoutElement(nameLabel.gameObject, minHeight: 25, minWidth: 45, flexibleWidth: 0);
 
-            nameInput = UIFactory.CreateInputField(unityObjectRow, "NameInput", "untitled");
+            nameInput = UIFactory.CreateInputField(UIRoot, "NameInput", "untitled");
             UIFactory.SetLayoutElement(nameInput.UIRoot, minHeight: 25, minWidth: 100, flexibleWidth: 1000);
             nameInput.Component.readOnly = true;
 
-            gameObjectButton = UIFactory.CreateButton(unityObjectRow, "GameObjectButton", "Inspect GameObject", new Color(0.2f, 0.2f, 0.2f));
+            gameObjectButton = UIFactory.CreateButton(UIRoot, "GameObjectButton", "Inspect GameObject", new Color(0.2f, 0.2f, 0.2f));
             UIFactory.SetLayoutElement(gameObjectButton.Component.gameObject, minHeight: 25, minWidth: 160);
             gameObjectButton.OnClick += OnGameObjectButtonClicked;
 
-            var instanceLabel = UIFactory.CreateLabel(unityObjectRow, "InstanceLabel", "Instance ID:", TextAnchor.MiddleRight, Color.grey);
+            var instanceLabel = UIFactory.CreateLabel(UIRoot, "InstanceLabel", "Instance ID:", TextAnchor.MiddleRight, Color.grey);
             UIFactory.SetLayoutElement(instanceLabel.gameObject, minHeight: 25, minWidth: 100, flexibleWidth: 0);
 
-            instanceIdInput = UIFactory.CreateInputField(unityObjectRow, "InstanceIDInput", "ERROR");
+            instanceIdInput = UIFactory.CreateInputField(UIRoot, "InstanceIDInput", "ERROR");
             UIFactory.SetLayoutElement(instanceIdInput.UIRoot, minHeight: 25, minWidth: 100, flexibleWidth: 0);
             instanceIdInput.Component.readOnly = true;
 
-            unityObjectRow.SetActive(false);
+            UIRoot.SetActive(false);
 
             return UIRoot;
         }

@@ -199,6 +199,10 @@
       <HintPath>..\lib\unhollowed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>..\lib\unhollowed\UnityEngine.AudioModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\lib\unhollowed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
@@ -324,6 +328,7 @@
     <Compile Include="UI\Widgets\TransformTree\CachedTransform.cs" />
     <Compile Include="UI\Widgets\TransformTree\TransformCell.cs" />
     <Compile Include="UI\Widgets\TransformTree\TransformTree.cs" />
+    <Compile Include="UI\Widgets\UnityObjects\AudioClipWidget.cs" />
     <Compile Include="UI\Widgets\UnityObjects\Texture2DWidget.cs" />
     <Compile Include="UI\Widgets\UnityObjects\UnityObjectWidget.cs" />
   </ItemGroup>
