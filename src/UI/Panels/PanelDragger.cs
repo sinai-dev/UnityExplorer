@@ -471,6 +471,9 @@ namespace UnityExplorer.UI.Panels
             {
                 var text = UIFactory.CreateLabel(UIManager.UIRoot, "ResizeCursor", "↔", TextAnchor.MiddleCenter, Color.white, true, 35);
                 resizeCursorObj = text.gameObject;
+                var outline = text.gameObject.AddComponent<Outline>();
+                outline.effectColor = Color.black;
+                outline.effectDistance = new(1, 1);
 
                 RectTransform rect = resizeCursorObj.GetComponent<RectTransform>();
                 rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 64);
