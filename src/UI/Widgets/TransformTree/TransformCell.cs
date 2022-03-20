@@ -153,7 +153,7 @@ namespace UnityExplorer.UI.Widgets
             Rect.sizeDelta = new Vector2(25, 25);
             UIFactory.SetLayoutElement(UIRoot, minWidth: 100, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
 
-            var spacerObj = UIFactory.CreateUIObject("Spacer", UIRoot, new Vector2(0, 0));
+            GameObject spacerObj = UIFactory.CreateUIObject("Spacer", UIRoot, new Vector2(0, 0));
             UIFactory.SetLayoutElement(spacerObj, minWidth: 0, flexibleWidth: 0, minHeight: 0, flexibleHeight: 0);
             this.spacer = spacerObj.GetComponent<LayoutElement>();
 
@@ -164,15 +164,20 @@ namespace UnityExplorer.UI.Widgets
 
             // Enabled toggle
 
-            var toggleObj = UIFactory.CreateToggle(UIRoot, "BehaviourToggle", out EnabledToggle, out var behavText, default, 17, 17);
+            GameObject toggleObj = UIFactory.CreateToggle(UIRoot, "BehaviourToggle", out EnabledToggle, out Text behavText, default, 17, 17);
             UIFactory.SetLayoutElement(toggleObj, minHeight: 17, flexibleHeight: 0, minWidth: 17);
             EnabledToggle.onValueChanged.AddListener(OnEnableClicked);
 
             // Name button
 
-            NameButton = UIFactory.CreateButton(this.UIRoot, "NameButton", "Name", null);
+            GameObject nameBtnHolder = UIFactory.CreateHorizontalGroup(this.UIRoot, "NameButtonHolder", 
+                false, false, true, true, childAlignment: TextAnchor.MiddleLeft);
+            UIFactory.SetLayoutElement(nameBtnHolder, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
+            nameBtnHolder.AddComponent<Mask>().showMaskGraphic = false;
+
+            NameButton = UIFactory.CreateButton(nameBtnHolder, "NameButton", "Name", null);
             UIFactory.SetLayoutElement(NameButton.Component.gameObject, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
-            var nameLabel = NameButton.Component.GetComponentInChildren<Text>();
+            Text nameLabel = NameButton.Component.GetComponentInChildren<Text>();
             nameLabel.horizontalOverflow = HorizontalWrapMode.Overflow;
             nameLabel.alignment = TextAnchor.MiddleLeft;
 
@@ -181,7 +186,7 @@ namespace UnityExplorer.UI.Widgets
             SiblingIndex = UIFactory.CreateInputField(this.UIRoot, "SiblingIndexInput", string.Empty);
             SiblingIndex.Component.textComponent.fontSize = 11;
             SiblingIndex.Component.textComponent.alignment = TextAnchor.MiddleRight;
-            var siblingImage = SiblingIndex.GameObject.GetComponent<Image>();
+            Image siblingImage = SiblingIndex.GameObject.GetComponent<Image>();
             siblingImage.color = new(0f, 0f, 0f, 0.25f);
             UIFactory.SetLayoutElement(SiblingIndex.GameObject, 35, 20, 0, 0);
             SiblingIndex.Component.GetOnEndEdit().AddListener(OnSiblingIndexEndEdit);
