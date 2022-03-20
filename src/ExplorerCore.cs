@@ -1,24 +1,18 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityExplorer.Config;
-using UnityExplorer.UI;
 using UnityExplorer.ObjectExplorer;
-using UnityExplorer.UI.Panels;
 using UnityExplorer.Runtime;
+using UnityExplorer.UI;
+using UnityExplorer.UI.Panels;
 using UniverseLib.Input;
-using UniverseLib.UI;
-using System.Reflection;
 
 namespace UnityExplorer
 {
     public static class ExplorerCore
     {
         public const string NAME = "UnityExplorer";
-        public const string VERSION = "4.5.12";
+        public const string VERSION = "4.6.0";
         public const string AUTHOR = "Sinai";
         public const string GUID = "com.sinai.unityexplorer";
 
