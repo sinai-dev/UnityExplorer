@@ -226,6 +226,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CacheObject\CacheConstructor.cs" />
+    <Compile Include="CacheObject\CacheMemberFactory.cs" />
     <Compile Include="Hooks\HookCell.cs" />
     <Compile Include="Hooks\HookInstance.cs" />
     <Compile Include="Hooks\HookManager.cs" />
@@ -323,6 +324,8 @@
     <Compile Include="UI\Widgets\TransformTree\CachedTransform.cs" />
     <Compile Include="UI\Widgets\TransformTree\TransformCell.cs" />
     <Compile Include="UI\Widgets\TransformTree\TransformTree.cs" />
+    <Compile Include="UI\Widgets\UnityObjects\Texture2DWidget.cs" />
+    <Compile Include="UI\Widgets\UnityObjects\UnityObjectWidget.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ILRepack.targets" />

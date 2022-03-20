@@ -2,29 +2,34 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.Config;
-using UnityExplorer.Runtime;
 using UnityExplorer.CacheObject;
 using UnityExplorer.CacheObject.Views;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets;
-using UnityExplorer.UI;
-using UniverseLib.UI.Widgets;
-using UniverseLib.UI;
 using UniverseLib;
-using UniverseLib.Runtime;
+using UniverseLib.UI;
 using UniverseLib.UI.Models;
+using UniverseLib.UI.ObjectPool;
 using UniverseLib.UI.Widgets.ScrollView;
 using UniverseLib.Utility;
 
 namespace UnityExplorer.Inspectors
 {
+    [Flags]
+    public enum MemberFilter
+    {
+        None = 0,
+        Property = 1,
+        Field = 2,
+        Constructor = 4,
+        Method = 8,
+        All = Property | Field | Method | Constructor,
+    }
+
     public class ReflectionInspector : InspectorBase, ICellPoolDataSource<CacheMemberCell>, ICacheObjectController
     {
         public CacheObjectBase ParentCacheObject { get; set; }
@@ -32,44 +37,52 @@ namespace UnityExplorer.Inspectors
         public bool StaticOnly { get; internal set; }
         public bool CanWrite => true;
 
+        public bool AutoUpdateWanted => autoUpdateToggle.isOn;
+
         private List<CacheMember> members = new();
         private readonly List<CacheMember> filteredMembers = new();
 
-        public bool AutoUpdateWanted => autoUpdateToggle.isOn;
+        private BindingFlags scopeFlagsFilter;
+        private string nameFilter;
 
-        private BindingFlags FlagsFilter;
-        private string NameFilter;
+        private MemberFilter MemberFilter = MemberFilter.All;
 
-        private MemberFlags MemberFilter = MemberFlags.All;
-        private enum MemberFlags
-        {
-            None = 0,
-            Property = 1,
-            Field = 2,
-            Constructor = 4,
-            Method = 8,
-            All = Property | Field | Method | Constructor,
-        }
+        // Updating
+
+        private bool refreshWanted;
+        private string lastNameFilter;
+        private BindingFlags lastFlagsFilter;
+        private MemberFilter lastMemberFilter = MemberFilter.All;
+        private float timeOfLastAutoUpdate;
 
         // UI
 
+        internal GameObject mainContentHolder;
+        private static int LeftGroupWidth { get; set; }
+        private static int RightGroupWidth { get; set; }
+
         public ScrollPool<CacheMemberCell> MemberScrollPool { get; private set; }
+        public int ItemCount => filteredMembers.Count;
+
+        public UnityObjectWidget UnityWidget;
 
         public InputFieldRef HiddenNameText;
         public Text NameText;
         public Text AssemblyText;
         private Toggle autoUpdateToggle;
 
-        private string currentBaseTabText;
-
-        private readonly Color disabledButtonColor = new(0.24f, 0.24f, 0.24f);
-        private readonly Color enabledButtonColor = new(0.2f, 0.27f, 0.2f);
+        internal string currentBaseTabText;
 
         private readonly Dictionary<BindingFlags, ButtonRef> scopeFilterButtons = new();
         private readonly List<Toggle> memberTypeToggles = new();
         private InputFieldRef filterInputField;
 
-        // Setup / return
+        // const
+
+        private readonly Color disabledButtonColor = new(0.24f, 0.24f, 0.24f);
+        private readonly Color enabledButtonColor = new(0.2f, 0.27f, 0.2f);
+
+        // Setup
 
         public override void OnBorrowedFromPool(object target)
         {
@@ -105,10 +118,12 @@ namespace UnityExplorer.Inspectors
 
             autoUpdateToggle.isOn = false;
 
-            UnityObjectRef = null;
-            ComponentRef = null;
-            TextureRef = null;
-            CleanupTextureViewer();
+            if (UnityWidget != null)
+            {
+                UnityWidget.OnReturnToPool();
+                Pool.Return(UnityWidget.GetType(), UnityWidget);
+                this.UnityWidget = null;
+            }
 
             base.OnReturnToPool();
         }
@@ -143,18 +158,19 @@ namespace UnityExplorer.Inspectors
                 asmText = Path.GetFileName(TargetType.Assembly.Location);
             AssemblyText.text = $"<color=grey>Assembly:</color> {asmText}";
 
-            // unity helpers
-            SetUnityTargets();
+            // Unity object helper widget
+
+            this.UnityWidget = UnityObjectWidget.GetUnityWidget(target, TargetType, this);
 
             // Get cache members
 
-            this.members = CacheMember.GetCacheMembers(Target, TargetType, this);
+            this.members = CacheMemberFactory.GetCacheMembers(Target, TargetType, this);
 
             // reset filters
 
-            this.filterInputField.Text = "";
+            this.filterInputField.Text = string.Empty;
 
-            SetFilter("", StaticOnly ? BindingFlags.Static : BindingFlags.Default);
+            SetFilter(string.Empty, StaticOnly ? BindingFlags.Static : BindingFlags.Default);
             scopeFilterButtons[BindingFlags.Default].Component.gameObject.SetActive(!StaticOnly);
             scopeFilterButtons[BindingFlags.Instance].Component.gameObject.SetActive(!StaticOnly);
 
@@ -165,12 +181,6 @@ namespace UnityExplorer.Inspectors
         }
 
         // Updating
-
-        private bool refreshWanted;
-        private string lastNameFilter;
-        private BindingFlags lastFlagsFilter;
-        private MemberFlags lastMemberFilter = MemberFlags.All;
-        private float timeOfLastAutoUpdate;
 
         public override void Update()
         {
@@ -184,10 +194,10 @@ namespace UnityExplorer.Inspectors
             }
 
             // check filter changes or force-refresh
-            if (refreshWanted || NameFilter != lastNameFilter || FlagsFilter != lastFlagsFilter || lastMemberFilter != MemberFilter)
+            if (refreshWanted || nameFilter != lastNameFilter || scopeFlagsFilter != lastFlagsFilter || lastMemberFilter != MemberFilter)
             {
-                lastNameFilter = NameFilter;
-                lastFlagsFilter = FlagsFilter;
+                lastNameFilter = nameFilter;
+                lastFlagsFilter = scopeFlagsFilter;
                 lastMemberFilter = MemberFilter;
 
                 FilterMembers();
@@ -200,11 +210,8 @@ namespace UnityExplorer.Inspectors
             {
                 timeOfLastAutoUpdate = Time.realtimeSinceStartup;
 
-                if (this.UnityObjectRef)
-                {
-                    nameInput.Text = UnityObjectRef.name;
-                    this.Tab.TabText.text = $"{currentBaseTabText} \"{UnityObjectRef.name}\"";
-                }
+                if (this.UnityWidget != null)
+                    UnityWidget.Update();
 
                 if (AutoUpdateWanted)
                     UpdateDisplayedMembers();
@@ -218,26 +225,26 @@ namespace UnityExplorer.Inspectors
 
         // Filtering
 
-        public void SetFilter(string filter) => SetFilter(filter, FlagsFilter);
+        public void SetFilter(string name) => SetFilter(name, scopeFlagsFilter);
 
-        public void SetFilter(BindingFlags flagsFilter) => SetFilter(NameFilter, flagsFilter);
+        public void SetFilter(BindingFlags flags) => SetFilter(nameFilter, flags);
 
-        public void SetFilter(string nameFilter, BindingFlags flagsFilter)
+        public void SetFilter(string name, BindingFlags flags)
         {
-            this.NameFilter = nameFilter;
+            this.nameFilter = name;
 
-            if (flagsFilter != FlagsFilter)
+            if (flags != scopeFlagsFilter)
             {
-                var btn = scopeFilterButtons[FlagsFilter].Component;
+                var btn = scopeFilterButtons[scopeFlagsFilter].Component;
                 RuntimeHelper.SetColorBlock(btn, disabledButtonColor, disabledButtonColor * 1.3f);
 
-                this.FlagsFilter = flagsFilter;
-                btn = scopeFilterButtons[FlagsFilter].Component;
+                this.scopeFlagsFilter = flags;
+                btn = scopeFilterButtons[scopeFlagsFilter].Component;
                 RuntimeHelper.SetColorBlock(btn, enabledButtonColor, enabledButtonColor * 1.3f);
             }
         }
 
-        private void OnMemberTypeToggled(MemberFlags flag, bool val)
+        private void OnMemberTypeToggled(MemberFilter flag, bool val)
         {
             if (!val)
                 MemberFilter &= ~flag;
@@ -253,20 +260,20 @@ namespace UnityExplorer.Inspectors
             {
                 var member = members[i];
 
-                if (FlagsFilter != BindingFlags.Default)
+                if (scopeFlagsFilter != BindingFlags.Default)
                 {
-                    if (FlagsFilter == BindingFlags.Instance && member.IsStatic
-                        || FlagsFilter == BindingFlags.Static && !member.IsStatic)
+                    if (scopeFlagsFilter == BindingFlags.Instance && member.IsStatic
+                        || scopeFlagsFilter == BindingFlags.Static && !member.IsStatic)
                         continue;
                 }
 
-                if ((member is CacheMethod && !MemberFilter.HasFlag(MemberFlags.Method))
-                    || (member is CacheField && !MemberFilter.HasFlag(MemberFlags.Field))
-                    || (member is CacheProperty && !MemberFilter.HasFlag(MemberFlags.Property))
-                    || (member is CacheConstructor && !MemberFilter.HasFlag(MemberFlags.Constructor)))
+                if ((member is CacheMethod && !MemberFilter.HasFlag(MemberFilter.Method))
+                    || (member is CacheField && !MemberFilter.HasFlag(MemberFilter.Field))
+                    || (member is CacheProperty && !MemberFilter.HasFlag(MemberFilter.Property))
+                    || (member is CacheConstructor && !MemberFilter.HasFlag(MemberFilter.Constructor)))
                     continue;
 
-                if (!string.IsNullOrEmpty(NameFilter) && !member.NameForFiltering.ContainsIgnoreCase(NameFilter))
+                if (!string.IsNullOrEmpty(nameFilter) && !member.NameForFiltering.ContainsIgnoreCase(nameFilter))
                     continue;
 
                 filteredMembers.Add(member);
@@ -295,8 +302,6 @@ namespace UnityExplorer.Inspectors
 
         // Member cells
 
-        public int ItemCount => filteredMembers.Count;
-
         public void OnCellBorrowed(CacheMemberCell cell) { } // not needed
 
         public void SetCell(CacheMemberCell cell, int index)
@@ -305,9 +310,6 @@ namespace UnityExplorer.Inspectors
         }
 
         // Cell layout (fake table alignment)
-
-        private static int LeftGroupWidth { get; set; }
-        private static int RightGroupWidth { get; set; }
 
         internal void SetLayouts()
         {
@@ -338,8 +340,6 @@ namespace UnityExplorer.Inspectors
         }
 
         // UI Construction
-
-        private GameObject mainContentHolder;
 
         public override GameObject CreateContent(GameObject parent)
         {
@@ -380,8 +380,6 @@ namespace UnityExplorer.Inspectors
 
             AssemblyText = UIFactory.CreateLabel(UIRoot, "AssemblyLabel", "not set", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(AssemblyText.gameObject, minHeight: 25, flexibleWidth: 9999);
-
-            ConstructUnityObjectRow();
 
             mainContentHolder = UIFactory.CreateVerticalGroup(UIRoot, "MemberHolder", false, false, true, true, 5, new Vector4(2, 2, 2, 2),
                 new Color(0.12f, 0.12f, 0.12f));
@@ -495,12 +493,12 @@ namespace UnityExplorer.Inspectors
 
             toggle.graphic.TryCast<Image>().color = color.ToColor() * 0.65f;
 
-            MemberFlags flag = type switch
+            MemberFilter flag = type switch
             {
-                MemberTypes.Method => MemberFlags.Method,
-                MemberTypes.Property => MemberFlags.Property,
-                MemberTypes.Field => MemberFlags.Field,
-                MemberTypes.Constructor => MemberFlags.Constructor,
+                MemberTypes.Method => MemberFilter.Method,
+                MemberTypes.Property => MemberFilter.Property,
+                MemberTypes.Field => MemberFilter.Field,
+                MemberTypes.Constructor => MemberFilter.Constructor,
                 _ => throw new NotImplementedException()
             };
 
@@ -508,237 +506,5 @@ namespace UnityExplorer.Inspectors
 
             memberTypeToggles.Add(toggle);
         }
-
-
-        // Todo should probably put this in a separate class or maybe as a widget
-
-        #region UNITY OBJECT SPECIFIC
-
-        // Unity object helpers
-
-        private UnityEngine.Object UnityObjectRef;
-        private Component ComponentRef;
-        private Texture2D TextureRef;
-        private bool TextureViewerWanted;
-        private GameObject unityObjectRow;
-        private ButtonRef gameObjectButton;
-        private InputFieldRef nameInput;
-        private InputFieldRef instanceIdInput;
-        private ButtonRef textureButton;
-        private GameObject textureViewer;
-
-        private void SetUnityTargets()
-        {
-            if (StaticOnly || !typeof(UnityEngine.Object).IsAssignableFrom(TargetType))
-            {
-                unityObjectRow.SetActive(false);
-                textureViewer.SetActive(false);
-                return;
-            }
-
-            UnityObjectRef = (UnityEngine.Object)Target.TryCast(typeof(UnityEngine.Object));
-            unityObjectRow.SetActive(true);
-
-            nameInput.Text = UnityObjectRef.name;
-            instanceIdInput.Text = UnityObjectRef.GetInstanceID().ToString();
-
-            if (typeof(Component).IsAssignableFrom(TargetType))
-            {
-                ComponentRef = (Component)Target.TryCast(typeof(Component));
-                gameObjectButton.Component.gameObject.SetActive(true);
-            }
-            else
-                gameObjectButton.Component.gameObject.SetActive(false);
-
-            if (typeof(Texture2D).IsAssignableFrom(TargetType))
-            {
-                TextureRef = (Texture2D)Target.TryCast(typeof(Texture2D));
-                textureButton.Component.gameObject.SetActive(true);
-            }
-            else
-                textureButton.Component.gameObject.SetActive(false);
-        }
-
-        private void OnGameObjectButtonClicked()
-        {
-            if (!ComponentRef)
-            {
-                ExplorerCore.LogWarning("Component reference is null or destroyed!");
-                return;
-            }
-
-            InspectorManager.Inspect(ComponentRef.gameObject);
-        }
-
-        private void ToggleTextureViewer()
-        {
-            if (TextureViewerWanted)
-            {
-                // disable
-                TextureViewerWanted = false;
-                textureViewer.SetActive(false);
-                mainContentHolder.SetActive(true);
-                textureButton.ButtonText.text = "View Texture";
-            }
-            else
-            {
-                if (!textureImage.sprite)
-                {
-                    // First show, need to create sprite for displaying texture
-                    SetTextureViewer();
-                }
-
-                // enable
-                TextureViewerWanted = true;
-                textureViewer.SetActive(true);
-                mainContentHolder.gameObject.SetActive(false);
-                textureButton.ButtonText.text = "Hide Texture";
-            }
-        }
-
-        // UI construction
-
-        private void ConstructUnityObjectRow()
-        {
-            unityObjectRow = UIFactory.CreateUIObject("UnityObjectRow", UIRoot);
-            UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(unityObjectRow, false, false, true, true, 5);
-            UIFactory.SetLayoutElement(unityObjectRow, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
-
-            textureButton = UIFactory.CreateButton(unityObjectRow, "TextureButton", "View Texture", new Color(0.2f, 0.2f, 0.2f));
-            UIFactory.SetLayoutElement(textureButton.Component.gameObject, minHeight: 25, minWidth: 150);
-            textureButton.OnClick += ToggleTextureViewer;
-
-            var nameLabel = UIFactory.CreateLabel(unityObjectRow, "NameLabel", "Name:", TextAnchor.MiddleLeft, Color.grey);
-            UIFactory.SetLayoutElement(nameLabel.gameObject, minHeight: 25, minWidth: 45, flexibleWidth: 0);
-
-            nameInput = UIFactory.CreateInputField(unityObjectRow, "NameInput", "untitled");
-            UIFactory.SetLayoutElement(nameInput.UIRoot, minHeight: 25, minWidth: 100, flexibleWidth: 1000);
-            nameInput.Component.readOnly = true;
-
-            gameObjectButton = UIFactory.CreateButton(unityObjectRow, "GameObjectButton", "Inspect GameObject", new Color(0.2f, 0.2f, 0.2f));
-            UIFactory.SetLayoutElement(gameObjectButton.Component.gameObject, minHeight: 25, minWidth: 160);
-            gameObjectButton.OnClick += OnGameObjectButtonClicked;
-
-            var instanceLabel = UIFactory.CreateLabel(unityObjectRow, "InstanceLabel", "Instance ID:", TextAnchor.MiddleRight, Color.grey);
-            UIFactory.SetLayoutElement(instanceLabel.gameObject, minHeight: 25, minWidth: 100, flexibleWidth: 0);
-
-            instanceIdInput = UIFactory.CreateInputField(unityObjectRow, "InstanceIDInput", "ERROR");
-            UIFactory.SetLayoutElement(instanceIdInput.UIRoot, minHeight: 25, minWidth: 100, flexibleWidth: 0);
-            instanceIdInput.Component.readOnly = true;
-
-            unityObjectRow.SetActive(false);
-
-            ConstructTextureHelper();
-        }
-
-        // Texture viewer helper
-
-        private InputFieldRef textureSavePathInput;
-        private Image textureImage;
-        private LayoutElement textureImageLayout;
-
-        private void CleanupTextureViewer()
-        {
-            if (textureImage.sprite)
-                GameObject.Destroy(textureImage.sprite);
-
-            if (TextureViewerWanted)
-                ToggleTextureViewer();
-        }
-
-        private void ConstructTextureHelper()
-        {
-            textureViewer = UIFactory.CreateVerticalGroup(UIRoot, "TextureViewer", false, false, true, true, 2, new Vector4(5, 5, 5, 5),
-                new Color(0.1f, 0.1f, 0.1f));
-            UIFactory.SetLayoutElement(textureViewer, flexibleWidth: 9999, flexibleHeight: 9999);
-
-            // Save helper
-
-            var saveRowObj = UIFactory.CreateHorizontalGroup(textureViewer, "SaveRow", false, false, true, true, 2, new Vector4(2, 2, 2, 2),
-                new Color(0.1f, 0.1f, 0.1f));
-
-            var saveBtn = UIFactory.CreateButton(saveRowObj, "SaveButton", "Save .PNG", new Color(0.2f, 0.25f, 0.2f));
-            UIFactory.SetLayoutElement(saveBtn.Component.gameObject, minHeight: 25, minWidth: 100, flexibleWidth: 0);
-            saveBtn.OnClick += OnSaveTextureClicked;
-
-            textureSavePathInput = UIFactory.CreateInputField(saveRowObj, "SaveInput", "...");
-            UIFactory.SetLayoutElement(textureSavePathInput.UIRoot, minHeight: 25, minWidth: 100, flexibleWidth: 9999);
-
-            // Actual texture viewer
-
-            var imageViewport = UIFactory.CreateVerticalGroup(textureViewer, "Viewport", false, false, true, true);
-            imageViewport.GetComponent<Image>().color = Color.white;
-            imageViewport.AddComponent<Mask>().showMaskGraphic = false;
-
-            var imageObj = UIFactory.CreateUIObject("Image", imageViewport);
-            var fitter = imageObj.AddComponent<ContentSizeFitter>();
-            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-            textureImage = imageObj.AddComponent<Image>();
-            textureImageLayout = UIFactory.SetLayoutElement(imageObj, flexibleWidth: 1, flexibleHeight: 1);
-
-            textureViewer.SetActive(false);
-        }
-
-        private void SetTextureViewer()
-        {
-            if (!this.TextureRef)
-                return;
-
-            var name = TextureRef.name;
-            if (string.IsNullOrEmpty(name))
-                name = "untitled";
-
-            textureSavePathInput.Text = Path.Combine(ConfigManager.Default_Output_Path.Value, $"{name}.png");
-
-            var sprite = TextureHelper.CreateSprite(TextureRef);
-            textureImage.sprite = sprite;
-
-            textureImageLayout.preferredHeight = sprite.rect.height;
-            // not really working, its always stretched horizontally for some reason.
-            textureImageLayout.preferredWidth = sprite.rect.width;
-        }
-
-        private void OnSaveTextureClicked()
-        {
-            if (!TextureRef)
-            {
-                ExplorerCore.LogWarning("Ref Texture is null, maybe it was destroyed?");
-                return;
-            }
-
-            if (string.IsNullOrEmpty(textureSavePathInput.Text))
-            {
-                ExplorerCore.LogWarning("Save path cannot be empty!");
-                return;
-            }
-
-            var path = textureSavePathInput.Text;
-            if (!path.EndsWith(".png", StringComparison.InvariantCultureIgnoreCase))
-            {
-                ExplorerCore.LogWarning("Desired save path must end with '.png'!");
-                return;
-            }
-
-            path = IOUtility.EnsureValidFilePath(path);
-
-            if (File.Exists(path))
-                File.Delete(path);
-
-            var tex = TextureRef;
-
-            if (!TextureHelper.IsReadable(tex))
-                tex = TextureHelper.ForceReadTexture(tex);
-
-            byte[] data = TextureHelper.EncodeToPNG(tex);
-            File.WriteAllBytes(path, data);
-
-            if (tex != TextureRef)
-            {
-                // cleanup temp texture if we had to force-read it.
-                GameObject.Destroy(tex);
-            }
-        }
-
-        #endregion
     }
 }
