@@ -51,6 +51,12 @@ The standalone release can be used with any injector or loader of your choice, b
 3. Create an instance of Unity Explorer with `UnityExplorer.ExplorerStandalone.CreateInstance();`
 4. Optionally subscribe to the `ExplorerStandalone.OnLog` event to handle logging if you wish
 
+## Unity Editor
+
+1. Download the [`UnityExplorer.Editor`](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.Editor.zip) release.
+2. Install the package, either by using the Package Manager and importing the `package.json` file, or by manually dragging the folder into your `Assets` folder.
+3. Drag the `Runtime/UnityExplorer` prefab into your scene, or create a GameObject and add the `Explorer Editor Behaviour` script to it.
+
 # Common issues and solutions
 
 Although UnityExplorer should work out of the box for most Unity games, in some cases you may need to tweak the settings for it to work properly.

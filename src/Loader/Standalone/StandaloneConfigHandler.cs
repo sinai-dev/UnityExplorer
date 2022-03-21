@@ -9,7 +9,7 @@ using UnityEngine;
 using Tomlet;
 using Tomlet.Models;
 
-namespace UnityExplorer.Loader.STANDALONE
+namespace UnityExplorer.Loader.Standalone
 {
     public class StandaloneConfigHandler : ConfigHandler
     {
