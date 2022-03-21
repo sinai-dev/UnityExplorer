@@ -22,6 +22,7 @@ namespace UnityExplorer.UI.Widgets
         static AudioSource Source;
         static AudioClipWidget CurrentlyPlaying;
         static Coroutine CurrentlyPlayingCoroutine;
+        static readonly string zeroLengthString = GetLengthString(0f);
 
         public AudioClip RefAudioClip;
         private string fullLengthText;
@@ -112,7 +113,6 @@ namespace UnityExplorer.UI.Widgets
                 sb.Append($"{ts.Hours}:");
 
             sb.Append($"{ts.Minutes:00}:");
-
             sb.Append($"{ts.Seconds:00}:");
             sb.Append($"{ts.Milliseconds:000}");
 
@@ -121,7 +121,7 @@ namespace UnityExplorer.UI.Widgets
 
         private void ResetProgressLabel()
         {
-            this.progressLabel.text = $"{GetLengthString(0f)} / {fullLengthText}";
+            this.progressLabel.text = $"{zeroLengthString} / {fullLengthText}";
         }
 
         private void OnPlayStopClicked()
@@ -152,8 +152,7 @@ namespace UnityExplorer.UI.Widgets
             AudioPlayerObject = new GameObject("UnityExplorer.AudioPlayer");
             UnityEngine.Object.DontDestroyOnLoad(AudioPlayerObject);
             AudioPlayerObject.hideFlags = HideFlags.HideAndDontSave;
-            AudioPlayerObject.transform.position = new(int.MinValue, int.MinValue);
-
+            AudioPlayerObject.transform.position = new(int.MinValue, int.MinValue); // move it as far away as possible
 #if CPP
             Source = AudioPlayerObject.AddComponent(UnhollowerRuntimeLib.Il2CppType.Of<AudioSource>()).TryCast<AudioSource>();
 #else
@@ -305,6 +304,7 @@ namespace UnityExplorer.UI.Widgets
     public static class SavWav
     {
         public const int HEADER_SIZE = 44;
+        public const float RESCALE_FACTOR = 32767; // to convert float to Int16
 
         public static void Save(AudioClip clip, string filepath)
         {
@@ -335,17 +335,17 @@ namespace UnityExplorer.UI.Widgets
             clip.GetData(samples, 0);
 #endif
 
+            int len = samples.Length;
+
             // converting in 2 float[] steps to Int16[], then Int16[] to Byte[]
-            short[] intData = new short[samples.Length];
+            short[] intData = new short[len];
 
             // bytesData array is twice the size of dataSource array because a float converted in Int16 is 2 bytes.
-            byte[] bytesData = new byte[samples.Length * 2];
+            byte[] bytesData = new byte[len * 2];
 
-            float rescaleFactor = 32767; // to convert float to Int16
-
-            for (int i = 0; i < samples.Length; i++)
+            for (int i = 0; i < len; i++)
             {
-                intData[i] = (short)(samples[i] * rescaleFactor);
+                intData[i] = (short)(samples[i] * RESCALE_FACTOR);
                 byte[] byteArr = BitConverter.GetBytes(intData[i]);
                 byteArr.CopyTo(bytesData, i * 2);
             }
