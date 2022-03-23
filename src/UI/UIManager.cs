@@ -88,7 +88,7 @@ namespace UnityExplorer.UI
 
             DisplayManager.Init();
 
-            var display = DisplayManager.ActiveDisplay;
+            Display display = DisplayManager.ActiveDisplay;
             lastScreenWidth = display.renderingWidth;
             lastScreenHeight = display.renderingHeight;
 
