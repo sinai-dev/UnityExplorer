@@ -26,7 +26,7 @@ namespace UnityExplorer.ObjectExplorer
         private static Scene? selectedScene;
 
         /// <summary>The GameObjects in the currently inspected scene.</summary>
-        public static GameObject[] CurrentRootObjects { get; private set; } = new GameObject[0];
+        public static IEnumerable<GameObject> CurrentRootObjects { get; private set; } = new GameObject[0];
 
         /// <summary>All currently loaded Scenes.</summary>
         public static List<Scene> LoadedScenes { get; private set; } = new();
@@ -129,7 +129,7 @@ namespace UnityExplorer.ObjectExplorer
                     if (go.transform.parent == null && !go.scene.IsValid())
                         objects.Add(go);
                 }
-                CurrentRootObjects = objects.ToArray();
+                CurrentRootObjects = objects;
             }
         }
     }
