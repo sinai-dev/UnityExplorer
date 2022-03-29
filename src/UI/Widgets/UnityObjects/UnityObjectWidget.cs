@@ -28,17 +28,16 @@ namespace UnityExplorer.UI.Widgets
             if (!typeof(UnityEngine.Object).IsAssignableFrom(targetType))
                 return null;
 
-            UnityObjectWidget ret;
+            UnityObjectWidget widget = target switch
+            {
+                Texture2D => Pool<Texture2DWidget>.Borrow(),
+                AudioClip => Pool<AudioClipWidget>.Borrow(),
+                _ => Pool<UnityObjectWidget>.Borrow()
+            };
 
-            if (targetType == typeof(Texture2D))
-                ret = Pool<Texture2DWidget>.Borrow();
-            else if (targetType == typeof(AudioClip))
-                ret = Pool<AudioClipWidget>.Borrow();
-            else
-                ret = Pool<UnityObjectWidget>.Borrow();
+            widget.OnBorrowed(target, targetType, inspector);
 
-            ret.OnBorrowed(target, targetType, inspector);
-            return ret;
+            return widget;
         }
 
         public virtual void OnBorrowed(object target, Type targetType, ReflectionInspector inspector)
