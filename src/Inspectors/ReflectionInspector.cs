@@ -164,7 +164,7 @@ namespace UnityExplorer.Inspectors
 
             // Get cache members
 
-            this.members = CacheMemberFactory.GetCacheMembers(Target, TargetType, this);
+            this.members = CacheMemberFactory.GetCacheMembers(TargetType, this);
 
             // reset filters
 

@@ -1,10 +1,12 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using UnityEngine;
 using UnityExplorer.Config;
 using UnityExplorer.ObjectExplorer;
 using UnityExplorer.Runtime;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
+using UniverseLib;
 using UniverseLib.Input;
 
 namespace UnityExplorer
@@ -26,23 +28,20 @@ namespace UnityExplorer
         public static void Init(IExplorerLoader loader)
         {
             if (Loader != null)
-            {
-                LogWarning("UnityExplorer is already loaded!");
-                return;
-            }
+                throw new Exception("UnityExplorer is already loaded.");
+
             Loader = loader;
 
             Log($"{NAME} {VERSION} initializing...");
 
-            if (!Directory.Exists(Loader.ExplorerFolder))
-                Directory.CreateDirectory(Loader.ExplorerFolder);
-
+            Directory.CreateDirectory(Loader.ExplorerFolder);
             ConfigManager.Init(Loader.ConfigHandler);
+
             UERuntimeHelper.Init();
             ExplorerBehaviour.Setup();
             UnityCrashPrevention.Init();
 
-            UniverseLib.Universe.Init(ConfigManager.Startup_Delay_Time.Value, LateInit, Log, new()
+            Universe.Init(ConfigManager.Startup_Delay_Time.Value, LateInit, Log, new()
             {
                 Disable_EventSystem_Override = ConfigManager.Disable_EventSystem_Override.Value,
                 Force_Unlock_Mouse = ConfigManager.Force_Unlock_Mouse.Value,
@@ -53,7 +52,7 @@ namespace UnityExplorer
         // Do a delayed setup so that objects aren't destroyed instantly.
         // This can happen for a multitude of reasons.
         // Default delay is 1 second which is usually enough.
-        private static void LateInit()
+        static void LateInit()
         {
             Log($"Setting up late core features...");
 
@@ -63,21 +62,18 @@ namespace UnityExplorer
 
             UIManager.InitUI();
 
-            Log($"{NAME} {VERSION} initialized for {UniverseLib.Universe.Context}.");
+            Log($"{NAME} {VERSION} ({Universe.Context}) initialized.");
 
             //InspectorManager.Inspect(typeof(Tests.TestClass));
         }
 
-        /// <summary>
-        /// Should be called once per frame.
-        /// </summary>
-        public static void Update()
+        internal static void Update()
         {
-            UIManager.Update();
-
             // check master toggle
             if (InputManager.GetKeyDown(ConfigManager.Master_Toggle.Value))
                 UIManager.ShowMenu = !UIManager.ShowMenu;
+
+            UIManager.Update();
         }
 
         #region LOGGING

@@ -24,6 +24,8 @@ namespace UnityExplorer.Tests
 #endif
         }
 
+        #region MONO
+
         public static object LiterallyAnything = null;
 
         // Test enumerables
@@ -90,12 +92,12 @@ namespace UnityExplorer.Tests
             ExplorerCore.Log($"Test3 {typeof(T).FullName}");
         }
 
-        public static void TestArgumentParse(string _string, 
-                                             int integer, 
-                                             Color color, 
-                                             CameraClearFlags flags, 
-                                             Vector3 vector, 
-                                             Quaternion quaternion, 
+        public static void TestArgumentParse(string _string,
+                                             int integer,
+                                             Color color,
+                                             CameraClearFlags flags,
+                                             Vector3 vector,
+                                             Quaternion quaternion,
                                              object obj,
                                              Type type,
                                              GameObject go)
@@ -145,6 +147,8 @@ namespace UnityExplorer.Tests
             ExplorerCore.Log("Finished TestClass Init_Mono");
         }
 
+        #endregion
+
 #if CPP
         public static Il2CppSystem.Collections.Generic.Dictionary<string, string> IL2CPP_Dict;
         public static Il2CppSystem.Collections.Generic.HashSet<string> IL2CPP_HashSet;
@@ -156,7 +160,7 @@ namespace UnityExplorer.Tests
         public static Il2CppSystem.Collections.IDictionary IL2CPP_IDict;
         public static Il2CppSystem.Collections.IList IL2CPP_IList;
         public static Dictionary<Il2CppSystem.Object, Il2CppSystem.Object> IL2CPP_BoxedDict;
-        
+
         public static Il2CppSystem.Object IL2CPP_BoxedInt;
         public static Il2CppSystem.Int32 IL2CPP_Int;
         public static Il2CppSystem.Decimal IL2CPP_Decimal;
@@ -185,31 +189,31 @@ namespace UnityExplorer.Tests
             IL2CPP_HashTable.Add("key1", "value1");
             IL2CPP_HashTable.Add("key2", "value2");
             IL2CPP_HashTable.Add("key3", "value3");
-            
+
             ExplorerCore.Log($"IL2CPP 3: Il2Cpp IDictionary");
             var dict2 = new Il2CppSystem.Collections.Generic.Dictionary<string, string>();
             dict2.Add("key1", "value1");
             IL2CPP_IDict = dict2.TryCast<Il2CppSystem.Collections.IDictionary>();
-            
+
             ExplorerCore.Log($"IL2CPP 4: Il2Cpp List of Il2Cpp Object");
             var list = new Il2CppSystem.Collections.Generic.List<Il2CppSystem.Object>(5);
             list.Add("one");
             list.Add("two");
             IL2CPP_IList = list.TryCast<Il2CppSystem.Collections.IList>();
-            
+
             ExplorerCore.Log($"IL2CPP 5: Il2Cpp List of strings");
             IL2CPP_ListString = new Il2CppSystem.Collections.Generic.List<string>();
             IL2CPP_ListString.Add("hello,");
             IL2CPP_ListString.Add("world!");
-            
-            
+
+
             ExplorerCore.Log($"IL2CPP 7: Dictionary of Il2Cpp String and Il2Cpp Object");
             IL2CPP_BoxedDict = new();
             IL2CPP_BoxedDict[(Il2CppSystem.String)"one"] = new Il2CppSystem.Int32 { m_value = 1 }.BoxIl2CppObject();
             IL2CPP_BoxedDict[(Il2CppSystem.String)"two"] = new Il2CppSystem.Int32 { m_value = 2 }.BoxIl2CppObject();
             IL2CPP_BoxedDict[(Il2CppSystem.String)"three"] = new Il2CppSystem.Int32 { m_value = 3 }.BoxIl2CppObject();
             IL2CPP_BoxedDict[(Il2CppSystem.String)"four"] = new Il2CppSystem.Int32 { m_value = 4 }.BoxIl2CppObject();
-            
+
             ExplorerCore.Log($"IL2CPP 8: List of boxed Il2Cpp Objects");
             IL2CPP_listOfBoxedObjects = new List<Il2CppSystem.Object>();
             IL2CPP_listOfBoxedObjects.Add((Il2CppSystem.String)"boxedString");
@@ -224,16 +228,16 @@ namespace UnityExplorer.Tests
                     var boxedEnum = Il2CppSystem.Enum.Parse(cppType, "Color");
                     IL2CPP_listOfBoxedObjects.Add(boxedEnum);
                 }
-            
+
                 var structBox = Vector3.one.BoxIl2CppObject();
                 IL2CPP_listOfBoxedObjects.Add(structBox);
-            
+
             }
             catch (Exception ex)
             {
                 ExplorerCore.LogWarning($"Boxed enum test fail: {ex}");
             }
-            
+
             ExplorerCore.Log($"IL2CPP 9: Il2Cpp struct array of ints");
             IL2CPP_structArray = new UnhollowerBaseLib.Il2CppStructArray<int>(5);
             IL2CPP_structArray[0] = 0;
@@ -241,13 +245,13 @@ namespace UnityExplorer.Tests
             IL2CPP_structArray[2] = 2;
             IL2CPP_structArray[3] = 3;
             IL2CPP_structArray[4] = 4;
-            
+
             ExplorerCore.Log($"IL2CPP 10: Il2Cpp reference array of boxed objects");
             IL2CPP_ReferenceArray = new UnhollowerBaseLib.Il2CppReferenceArray<Il2CppSystem.Object>(3);
             IL2CPP_ReferenceArray[0] = new Il2CppSystem.Int32 { m_value = 5 }.BoxIl2CppObject();
             IL2CPP_ReferenceArray[1] = null;
             IL2CPP_ReferenceArray[2] = (Il2CppSystem.String)"whats up";
-            
+
             ExplorerCore.Log($"IL2CPP 11: Misc il2cpp members");
             IL2CPP_BoxedInt = new Il2CppSystem.Int32() { m_value = 5 }.BoxIl2CppObject();
             IL2CPP_Int = new Il2CppSystem.Int32 { m_value = 420 };
@@ -257,6 +261,7 @@ namespace UnityExplorer.Tests
 
             ExplorerCore.Log($"Finished Init_Il2Cpp");
         }
+
 #endif
     }
 }

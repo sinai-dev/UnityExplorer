@@ -14,7 +14,7 @@ namespace UnityExplorer.CacheObject
 {
     public static class CacheMemberFactory
     {
-        public static List<CacheMember> GetCacheMembers(object inspectorTarget, Type type, ReflectionInspector inspector)
+        public static List<CacheMember> GetCacheMembers(Type type, ReflectionInspector inspector)
         {
             //var list = new List<CacheMember>();
             HashSet<string> cachedSigs = new();
@@ -49,10 +49,6 @@ namespace UnityExplorer.CacheObject
 
             foreach (var declaringType in types)
             {
-                var target = inspectorTarget;
-                if (!inspector.StaticOnly)
-                    target = target.TryCast(declaringType);
-
                 foreach (var prop in declaringType.GetProperties(flags))
                     if (prop.DeclaringType == declaringType)
                         TryCacheMember(prop, props, cachedSigs, declaringType, inspector);
@@ -79,13 +75,9 @@ namespace UnityExplorer.CacheObject
             return sorted;
         }
 
-        static void TryCacheMember(
-            MemberInfo member, 
-            IList list, 
-            HashSet<string> cachedSigs,
-            Type declaringType, 
-            ReflectionInspector inspector, 
-            bool ignorePropertyMethodInfos = true)
+        static void TryCacheMember<T>(MemberInfo member, List<T> list, HashSet<string> cachedSigs, 
+            Type declaringType, ReflectionInspector inspector, bool ignorePropertyMethodInfos = true) 
+            where T : CacheMember
         {
             try
             {
@@ -94,7 +86,9 @@ namespace UnityExplorer.CacheObject
 
                 string sig = member switch
                 {
+                    // method or constructor
                     MethodBase mb => mb.FullDescription(),
+                    // property or field
                     PropertyInfo or FieldInfo => $"{member.DeclaringType.FullDescription()}.{member.Name}",
                     _ => throw new NotImplementedException(),
                 };
@@ -164,32 +158,13 @@ namespace UnityExplorer.CacheObject
                 cached.SetFallbackType(returnType);
                 cached.SetInspectorOwner(inspector, member);
 
-                list.Add(cached);
+                list.Add((T)cached);
             }
             catch (Exception e)
             {
                 ExplorerCore.LogWarning($"Exception caching member {member.DeclaringType.FullName}.{member.Name}!");
-                ExplorerCore.Log(e.ToString());
+                ExplorerCore.Log(e);
             }
         }
-
-        //internal static string GetSig(MemberInfo member) => $"{member.DeclaringType.Name}.{member.Name}";
-        //
-        //internal static string GetArgumentString(ParameterInfo[] args)
-        //{
-        //    var sb = new StringBuilder();
-        //    sb.Append(' ');
-        //    sb.Append('(');
-        //    foreach (var param in args)
-        //    {
-        //        sb.Append(param.ParameterType.Name);
-        //        sb.Append(' ');
-        //        sb.Append(param.Name);
-        //        sb.Append(',');
-        //        sb.Append(' ');
-        //    }
-        //    sb.Append(')');
-        //    return sb.ToString();
-        //}
     }
 }
