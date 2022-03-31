@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using UnityEngine;
+using UnityExplorer.CacheObject;
 using UnityExplorer.Config;
 using UnityExplorer.ObjectExplorer;
 using UnityExplorer.Runtime;
@@ -14,7 +15,7 @@ namespace UnityExplorer
     public static class ExplorerCore
     {
         public const string NAME = "UnityExplorer";
-        public const string VERSION = "4.6.1";
+        public const string VERSION = "4.6.2";
         public const string AUTHOR = "Sinai";
         public const string GUID = "com.sinai.unityexplorer";
 
