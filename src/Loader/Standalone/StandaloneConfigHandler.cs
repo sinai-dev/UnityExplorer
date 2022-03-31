@@ -73,7 +73,11 @@ namespace UnityExplorer.Loader.Standalone
                 return bool.Parse(value);
             else if (elementType == typeof(int))
                 return int.Parse(value);
-            else 
+            else if (elementType == typeof(float))
+                return float.Parse(value);
+            else if (elementType.IsEnum)
+                return Enum.Parse(elementType, value);
+            else
                 return value;
         }
 
