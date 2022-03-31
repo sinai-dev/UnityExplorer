@@ -45,7 +45,7 @@
 
 The standalone release can be used with any injector or loader of your choice, but it requires you to load the dependencies manually.
 
-1. Ensure the required libs are loaded - UniverseLib, HarmonyX and MonoMod
+1. Ensure the required libs are loaded - UniverseLib, HarmonyX and MonoMod. Take them from the [`UnityExplorer.Editor`](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.Editor.zip) release if you need them.
 2. For IL2CPP, load Il2CppAssemblyUnhollower and start an [Il2CppAssemblyUnhollower runtime](https://github.com/knah/Il2CppAssemblyUnhollower#required-external-setup)
 2. Load the UnityExplorer DLL
 3. Create an instance of Unity Explorer with `UnityExplorer.ExplorerStandalone.CreateInstance();`
