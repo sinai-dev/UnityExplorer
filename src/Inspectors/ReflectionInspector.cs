@@ -160,7 +160,8 @@ namespace UnityExplorer.Inspectors
 
             // Unity object helper widget
 
-            this.UnityWidget = UnityObjectWidget.GetUnityWidget(target, TargetType, this);
+            if (!StaticOnly)
+                this.UnityWidget = UnityObjectWidget.GetUnityWidget(target, TargetType, this);
 
             // Get cache members
 

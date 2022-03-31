@@ -51,7 +51,7 @@ namespace UnityExplorer.UI.Widgets
 
             this.UIRoot.transform.SetSiblingIndex(inspector.UIRoot.transform.childCount - 2);
 
-            UnityObjectRef = (UnityEngine.Object)target.TryCast(typeof(UnityEngine.Object));
+            UnityObjectRef = target.TryCast<UnityEngine.Object>();
             UIRoot.SetActive(true);
 
             nameInput.Text = UnityObjectRef.name;
