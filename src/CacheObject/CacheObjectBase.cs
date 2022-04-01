@@ -57,7 +57,6 @@ namespace UnityExplorer.CacheObject
         public abstract bool ShouldAutoEvaluate { get; }
         public abstract bool HasArguments { get; }
         public abstract bool CanWrite { get; }
-        public bool HadException { get; protected set; }
         public Exception LastException { get; protected set; }
 
         public virtual void SetFallbackType(Type fallbackType)
@@ -106,8 +105,8 @@ namespace UnityExplorer.CacheObject
             if (CellView != null)
                 SetDataToCell(CellView);
 
-            // If the owner's parent CacheObject is set, we are setting the value of an inspected struct.
-            // Set the inspector target as the value back to that parent cacheobject.
+            // If the owner's ParentCacheObject is set, we are setting the value of an inspected struct.
+            // Set the inspector target as the value back to that parent.
             if (Owner.ParentCacheObject != null)
                 Owner.ParentCacheObject.SetUserValue(Owner.Target);
         }
@@ -137,7 +136,7 @@ namespace UnityExplorer.CacheObject
         {
             var prevState = State;
 
-            if (HadException)
+            if (LastException != null)
             {
                 LastValueWasNull = true;
                 LastValueType = FallbackType;
@@ -158,7 +157,7 @@ namespace UnityExplorer.CacheObject
             {
                 // If we changed states (always needs IValue change)
                 // or if the value is null, and the fallback type isnt string (we always want to edit strings).
-                if (State != prevState || (State != ValueState.String && Value.IsNullOrDestroyed()))
+                if (State != prevState || (State != ValueState.String && State != ValueState.Exception && Value.IsNullOrDestroyed()))
                 {
                     // need to return IValue
                     ReleaseIValue();
@@ -206,7 +205,7 @@ namespace UnityExplorer.CacheObject
                     return $"<i>{NOT_YET_EVAL} ({SignatureHighlighter.Parse(FallbackType, true)})</i>";
 
                 case ValueState.Exception:
-                    return $"<i><color=red>{LastException.ReflectionExToString()}</color></i>";
+                    return $"<i><color=#eb4034>{LastException.ReflectionExToString()}</color></i>";
 
                 // bool and number dont want the label for the value at all
                 case ValueState.Boolean:
@@ -291,36 +290,36 @@ namespace UnityExplorer.CacheObject
             switch (State)
             {
                 case ValueState.Exception:
-                    SetValueState(cell, ValueStateArgs.Default);
+                    SetValueState(cell, new(true, subContentButtonActive: true));
                     break;
                 case ValueState.Boolean:
-                    SetValueState(cell, new ValueStateArgs(false, toggleActive: true, applyActive: CanWrite));
+                    SetValueState(cell, new(false, toggleActive: true, applyActive: CanWrite));
                     break;
                 case ValueState.Number:
-                    SetValueState(cell, new ValueStateArgs(false, typeLabelActive: true, inputActive: true, applyActive: CanWrite));
+                    SetValueState(cell, new(false, typeLabelActive: true, inputActive: true, applyActive: CanWrite));
                     break;
                 case ValueState.String:
                     if (LastValueWasNull)
-                        SetValueState(cell, new ValueStateArgs(true, subContentButtonActive: true));
+                        SetValueState(cell, new(true, subContentButtonActive: true));
                     else
-                        SetValueState(cell, new ValueStateArgs(true, false, SignatureHighlighter.StringOrange, subContentButtonActive: true));
+                        SetValueState(cell, new(true, false, SignatureHighlighter.StringOrange, subContentButtonActive: true));
                     break;
                 case ValueState.Enum:
-                    SetValueState(cell, new ValueStateArgs(true, subContentButtonActive: CanWrite));
+                    SetValueState(cell, new(true, subContentButtonActive: CanWrite));
                     break;
                 case ValueState.Color:
                 case ValueState.ValueStruct:
                     if (ParseUtility.CanParse(LastValueType))
-                        SetValueState(cell, new ValueStateArgs(false, false, null, true, false, true, CanWrite, true, true));
+                        SetValueState(cell, new(false, false, null, true, false, true, CanWrite, true, true));
                     else
-                        SetValueState(cell, new ValueStateArgs(true, inspectActive: true, subContentButtonActive: true));
+                        SetValueState(cell, new(true, inspectActive: true, subContentButtonActive: true));
                     break;
                 case ValueState.Collection:
                 case ValueState.Dictionary:
-                    SetValueState(cell, new ValueStateArgs(true, inspectActive: !LastValueWasNull, subContentButtonActive: !LastValueWasNull));
+                    SetValueState(cell, new(true, inspectActive: !LastValueWasNull, subContentButtonActive: !LastValueWasNull));
                     break;
                 case ValueState.Unsupported:
-                    SetValueState(cell, new ValueStateArgs(true, inspectActive: !LastValueWasNull));
+                    SetValueState(cell, new (true, inspectActive: !LastValueWasNull));
                     break;
             }
 
@@ -368,8 +367,10 @@ namespace UnityExplorer.CacheObject
             if (cell.InspectButton != null)
                 cell.InspectButton.Component.gameObject.SetActive(args.inspectActive && !LastValueWasNull);
 
-            // allow IValue for null strings though
-            cell.SubContentButton.Component.gameObject.SetActive(args.subContentButtonActive && (!LastValueWasNull || State == ValueState.String));
+            // set subcontent button if needed, and for null strings and exceptions
+            cell.SubContentButton.Component.gameObject.SetActive(
+                args.subContentButtonActive 
+                && (!LastValueWasNull || State == ValueState.String || State == ValueState.Exception));
         }
 
         // CacheObjectCell Apply
@@ -401,7 +402,7 @@ namespace UnityExplorer.CacheObject
         {
             if (this.IValue == null)
             {
-                var ivalueType = InteractiveValue.GetIValueTypeForState(State);
+                Type ivalueType = InteractiveValue.GetIValueTypeForState(State);
 
                 if (ivalueType == null)
                     return;
@@ -455,6 +456,7 @@ namespace UnityExplorer.CacheObject
                 {
                     inactiveIValueHolder = new GameObject("Temp_IValue_Holder");
                     GameObject.DontDestroyOnLoad(inactiveIValueHolder);
+                    inactiveIValueHolder.hideFlags = HideFlags.HideAndDontSave;
                     inactiveIValueHolder.transform.parent = UniversalUI.PoolHolder.transform;
                     inactiveIValueHolder.SetActive(false);
                 }
@@ -467,9 +469,20 @@ namespace UnityExplorer.CacheObject
 
         public struct ValueStateArgs
         {
-            public ValueStateArgs(bool valueActive = true, bool valueRichText = true, Color? valueColor = null,
-                bool typeLabelActive = false, bool toggleActive = false, bool inputActive = false, bool applyActive = false,
-                bool inspectActive = false, bool subContentButtonActive = false)
+            public static ValueStateArgs Default { get; } = new(true);
+
+            public Color valueColor;
+            public bool valueActive, valueRichText, typeLabelActive, toggleActive, inputActive, applyActive, inspectActive, subContentButtonActive;
+
+            public ValueStateArgs(bool valueActive = true, 
+                bool valueRichText = true, 
+                Color? valueColor = null,
+                bool typeLabelActive = false, 
+                bool toggleActive = false, 
+                bool inputActive = false, 
+                bool applyActive = false,
+                bool inspectActive = false,
+                bool subContentButtonActive = false)
             {
                 this.valueActive = valueActive;
                 this.valueRichText = valueRichText;
@@ -481,14 +494,6 @@ namespace UnityExplorer.CacheObject
                 this.inspectActive = inspectActive;
                 this.subContentButtonActive = subContentButtonActive;
             }
-
-            public static ValueStateArgs Default => _default;
-            private static ValueStateArgs _default = new ValueStateArgs(true);
-
-            public bool valueActive, valueRichText, typeLabelActive, toggleActive,
-                inputActive, applyActive, inspectActive, subContentButtonActive;
-
-            public Color valueColor;
         }
     }
 }

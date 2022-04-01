@@ -31,8 +31,9 @@ namespace UnityExplorer.CacheObject.IValues
         {
             base.OnBorrowed(owner);
 
-            inputField.Component.readOnly = !owner.CanWrite;
-            ApplyButton.Component.gameObject.SetActive(owner.CanWrite);
+            bool canWrite = owner.CanWrite && owner.State != ValueState.Exception;
+            inputField.Component.readOnly = !canWrite;
+            ApplyButton.Component.gameObject.SetActive(canWrite);
 
             SaveFilePath.Text = Path.Combine(ConfigManager.Default_Output_Path.Value, "untitled.txt");
         }
@@ -47,6 +48,9 @@ namespace UnityExplorer.CacheObject.IValues
 
         public override void SetValue(object value)
         {
+            if (CurrentOwner.State == ValueState.Exception)
+                value = CurrentOwner.LastException.ToString();
+
             RealValue = value as string;
             SaveFileRow.SetActive(IsStringTooLong(RealValue));
 

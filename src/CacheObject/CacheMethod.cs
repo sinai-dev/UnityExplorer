@@ -45,13 +45,11 @@ namespace UnityExplorer.CacheObject
                     ret = methodInfo.Invoke(DeclaringInstance, Evaluator.TryParseArguments());
                 else 
                     ret = methodInfo.Invoke(DeclaringInstance, ArgumentUtility.EmptyArgs);
-                HadException = false;
                 LastException = null;
                 return ret;
             }
             catch (Exception ex)
             {
-                HadException = true;
                 LastException = ex;
                 return null;
             }

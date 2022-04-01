@@ -72,13 +72,11 @@ namespace UnityExplorer.CacheObject
                 else
                     ret = Activator.CreateInstance(returnType, ArgumentUtility.EmptyArgs);
 
-                HadException = false;
                 LastException = null;
                 return ret;
             }
             catch (Exception ex)
             {
-                HadException = true;
                 LastException = ex;
                 return null;
             }

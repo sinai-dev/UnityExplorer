@@ -40,13 +40,11 @@ namespace UnityExplorer.CacheObject
                     ret = PropertyInfo.GetValue(DeclaringInstance, this.Evaluator.TryParseArguments());
                 else
                     ret = PropertyInfo.GetValue(DeclaringInstance, null);
-                HadException = false;
                 LastException = null;
                 return ret;
             }
             catch (Exception ex)
             {
-                HadException = true;
                 LastException = ex;
                 return null;
             }

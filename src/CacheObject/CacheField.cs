@@ -32,13 +32,11 @@ namespace UnityExplorer.CacheObject
             try
             {
                 var ret = FieldInfo.GetValue(DeclaringInstance);
-                HadException = false;
                 LastException = null;
                 return ret;
             }
             catch (Exception ex)
             {
-                HadException = true;
                 LastException = ex;
                 return null;
             }

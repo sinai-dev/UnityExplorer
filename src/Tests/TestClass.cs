@@ -28,6 +28,8 @@ namespace UnityExplorer.Tests
 
         public static object LiterallyAnything = null;
 
+        public static string Exception => throw new Exception("This is a test.");
+
         // Test enumerables
         public static int[,,] MultiDimensionalArray = new int[45, 45, 45];
         public static List<object> ListOfInts;

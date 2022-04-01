@@ -16,22 +16,16 @@ namespace UnityExplorer.CacheObject.IValues
     {
         public static Type GetIValueTypeForState(ValueState state)
         {
-            switch (state)
+            return state switch
             {
-                case ValueState.String:
-                    return typeof(InteractiveString);
-                case ValueState.Enum:
-                    return typeof(InteractiveEnum);
-                case ValueState.Collection:
-                    return typeof(InteractiveList);
-                case ValueState.Dictionary:
-                    return typeof(InteractiveDictionary);
-                case ValueState.ValueStruct:
-                    return typeof(InteractiveValueStruct);
-                case ValueState.Color:
-                    return typeof(InteractiveColor);
-                default: return null;
-            }
+                ValueState.Exception or ValueState.String => typeof(InteractiveString),
+                ValueState.Enum => typeof(InteractiveEnum),
+                ValueState.Collection => typeof(InteractiveList),
+                ValueState.Dictionary => typeof(InteractiveDictionary),
+                ValueState.ValueStruct => typeof(InteractiveValueStruct),
+                ValueState.Color => typeof(InteractiveColor),
+                _ => null,
+            };
         }
 
         public GameObject UIRoot { get; set; }
@@ -39,28 +33,28 @@ namespace UnityExplorer.CacheObject.IValues
 
         public virtual bool CanWrite => this.CurrentOwner.CanWrite;
 
-        public CacheObjectBase CurrentOwner => m_owner;
-        private CacheObjectBase m_owner;
+        public CacheObjectBase CurrentOwner => owner;
+        private CacheObjectBase owner;
 
         public bool PendingValueWanted;
 
         public virtual void OnBorrowed(CacheObjectBase owner)
         {
-            if (this.m_owner != null)
+            if (this.owner != null)
             {
                 ExplorerCore.LogWarning("Setting an IValue's owner but there is already one set. Maybe it wasn't cleaned up?");
                 ReleaseFromOwner();
             }
 
-            this.m_owner = owner;
+            this.owner = owner;
         }
 
         public virtual void ReleaseFromOwner()
         {
-            if (this.m_owner == null)
+            if (this.owner == null)
                 return;
 
-            this.m_owner = null;
+            this.owner = null;
         }
 
         public abstract void SetValue(object value);
