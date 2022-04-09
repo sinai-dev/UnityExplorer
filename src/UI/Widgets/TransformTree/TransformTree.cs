@@ -22,8 +22,8 @@ namespace UnityExplorer.UI.Widgets
         // - Remove(object)
         // - set_Item[object]
         // These two methods have extremely bad performance due to using IndexOfKey(), which iterates the whole dictionary.
-        // Currently we do not use either of these methods, so everything should be constant time hash lookups.
-        // We DO make use of get_Item[object], get_Item[index], Add, Insert and RemoveAt, which OrderedDictionary perfectly meets our needs for.
+        // Currently we do not use either of these methods, so everything should be constant time lookups.
+        // We DO make use of get_Item[object], get_Item[index], Add, Insert, Contains and RemoveAt, which OrderedDictionary meets our needs for.
         /// <summary>
         /// Key: UnityEngine.Transform instance ID<br/>
         /// Value: CachedTransform
@@ -182,25 +182,25 @@ namespace UnityExplorer.UI.Widgets
             traversedThisFrame.Reset();
             traversedThisFrame.Start();
 
-            IEnumerable<GameObject> rootObjects = GetRootEntriesMethod.Invoke();
-
-            refreshCoroutine = RuntimeHelper.StartCoroutine(RefreshCoroutine(rootObjects, andRefreshUI, jumpToTop, oneShot));
+            refreshCoroutine = RuntimeHelper.StartCoroutine(RefreshCoroutine(andRefreshUI, jumpToTop, oneShot));
         }
 
-        // Coroutine for batched updates, max 2000 gameobjects per frame so FPS doesn't get tanked when there is like 100k gameobjects.
-        // if "oneShot", then this will NOT be batched (if we need an immediate full update).
-        IEnumerator RefreshCoroutine(IEnumerable<GameObject> rootObjects, bool andRefreshUI, bool jumpToTop, bool oneShot)
+        IEnumerator RefreshCoroutine(bool andRefreshUI, bool jumpToTop, bool oneShot)
         {
+            // Instead of doing string.IsNullOrEmpty(CurrentFilter) many times, let's just do it once per update.
+            bool filtering = Filtering;
+
+            IEnumerable<GameObject> rootObjects = GetRootEntriesMethod();
             foreach (var gameObj in rootObjects)
             {
-                if (gameObj)
+                if (!gameObj)
+                    continue;
+
+                IEnumerator enumerator = Traverse(gameObj.transform, null, 0, oneShot, filtering);
+                while (enumerator.MoveNext())
                 {
-                    var enumerator = Traverse(gameObj.transform, null, 0, oneShot);
-                    while (enumerator.MoveNext())
-                    {
-                        if (!oneShot)
-                            yield return enumerator.Current;
-                    }
+                    if (!oneShot)
+                        yield return enumerator.Current;
                 }
             }
 
@@ -224,7 +224,7 @@ namespace UnityExplorer.UI.Widgets
 
         // Recursive method to check a Transform and its children (if expanded).
         // Parent and depth can be null/default.
-        private IEnumerator Traverse(Transform transform, CachedTransform parent, int depth, bool oneShot)
+        private IEnumerator Traverse(Transform transform, CachedTransform parent, int depth, bool oneShot, bool filtering)
         {
             // Let's only tank 2ms of each frame (60->53fps)
             if (traversedThisFrame.ElapsedMilliseconds > 2)
@@ -236,21 +236,20 @@ namespace UnityExplorer.UI.Widgets
 
             int instanceID = transform.GetInstanceID();
 
+            // Unlikely, but since this method is async it could theoretically happen in extremely rare circumstances
             if (visited.Contains(instanceID))
                 yield break;
 
-            if (Filtering)
+            if (filtering)
             {
                 if (!FilterHierarchy(transform))
                     yield break;
 
-                visited.Add(instanceID);
-
                 if (!autoExpandedIDs.Contains(instanceID))
                     autoExpandedIDs.Add(instanceID);
             }
-            else
-                visited.Add(instanceID);
+
+            visited.Add(instanceID);
 
             CachedTransform cached;
             if (cachedTransforms.Contains(instanceID))
@@ -286,9 +285,11 @@ namespace UnityExplorer.UI.Widgets
 
             if (IsTransformExpanded(instanceID) && cached.Value.childCount > 0)
             {
+                ExplorerCore.Log($"Traversing expanded transform {cached.Value.name} ({cached.InstanceID})");
+
                 for (int i = 0; i < transform.childCount; i++)
                 {
-                    var enumerator = Traverse(transform.GetChild(i), cached, depth + 1, oneShot);
+                    var enumerator = Traverse(transform.GetChild(i), cached, depth + 1, oneShot, filtering);
                     while (enumerator.MoveNext())
                     {
                         if (!oneShot)
@@ -317,7 +318,7 @@ namespace UnityExplorer.UI.Widgets
         {
             if (index < cachedTransforms.Count)
             {
-                cell.ConfigureCell((CachedTransform)cachedTransforms[index], index);
+                cell.ConfigureCell((CachedTransform)cachedTransforms[index]);
                 if (Filtering)
                 {
                     if (cell.cachedTransform.Name.ContainsIgnoreCase(currentFilter))
@@ -345,6 +346,8 @@ namespace UnityExplorer.UI.Widgets
 
         public void OnCellExpandToggled(CachedTransform cache)
         {
+            ExplorerCore.Log($"OnCellExpandToggled: {cache.Value.name} ({cache.InstanceID})");
+
             var instanceID = cache.InstanceID;
             if (expandedInstanceIDs.Contains(instanceID))
                 expandedInstanceIDs.Remove(instanceID);

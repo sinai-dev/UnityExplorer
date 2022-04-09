@@ -10,7 +10,7 @@ namespace UnityExplorer.UI.Widgets
     {
         public TransformTree Tree { get; }
         public Transform Value { get; private set; }
-        public int InstanceID { get; private set; }
+        public int InstanceID { get; }
         public CachedTransform Parent { get; internal set; }
 
         public int Depth { get; internal set; }
@@ -23,10 +23,11 @@ namespace UnityExplorer.UI.Widgets
 
         public CachedTransform(TransformTree tree, Transform transform, int depth, CachedTransform parent = null)
         {
+            InstanceID = transform.GetInstanceID();
+
             Tree = tree;
             Value = transform;
             Parent = parent;
-            InstanceID = transform.GetInstanceID();
             SiblingIndex = transform.GetSiblingIndex();
             Update(transform, depth);
         }

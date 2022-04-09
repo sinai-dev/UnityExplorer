@@ -9,12 +9,13 @@ using UnhollowerRuntimeLib;
 
 namespace UnityExplorer
 {
-    // Handles all Behaviour update calls for UnityExplorer (Update, FixedUpdate, OnPostRender).
-    // Basically just a wrapper which calls the corresponding methods in ExplorerCore.
-
     public class ExplorerBehaviour : MonoBehaviour
     {
         internal static ExplorerBehaviour Instance { get; private set; }
+
+#if CPP
+        public ExplorerBehaviour(IntPtr ptr) : base(ptr) { }
+#endif
 
         internal static void Setup()
         {
@@ -22,15 +23,11 @@ namespace UnityExplorer
             ClassInjector.RegisterTypeInIl2Cpp<ExplorerBehaviour>();
 #endif
 
-            var obj = new GameObject("ExplorerBehaviour");
-            GameObject.DontDestroyOnLoad(obj);
-            obj.hideFlags |= HideFlags.HideAndDontSave;
+            GameObject obj = new("ExplorerBehaviour");
+            DontDestroyOnLoad(obj);
+            obj.hideFlags = HideFlags.HideAndDontSave;
             Instance = obj.AddComponent<ExplorerBehaviour>();
         }
-
-#if CPP
-        public ExplorerBehaviour(IntPtr ptr) : base(ptr) { }
-#endif
 
         internal void Update()
         {

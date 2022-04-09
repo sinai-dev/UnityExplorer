@@ -29,7 +29,6 @@ namespace UnityExplorer.UI.Widgets
         public Action<GameObject> OnGameObjectClicked;
 
         public CachedTransform cachedTransform;
-        public int cellIndex;
 
         public GameObject UIRoot { get; set; }
         public RectTransform Rect { get; set; }
@@ -53,7 +52,7 @@ namespace UnityExplorer.UI.Widgets
             UIRoot.SetActive(false);
         }
 
-        public void ConfigureCell(CachedTransform cached, int cellIndex)
+        public void ConfigureCell(CachedTransform cached)
         {
             if (cached == null)
             {
@@ -64,7 +63,6 @@ namespace UnityExplorer.UI.Widgets
             if (!Enabled)
                 Enable();
 
-            this.cellIndex = cellIndex;
             cachedTransform = cached;
 
             spacer.minWidth = cached.Depth * 15;
