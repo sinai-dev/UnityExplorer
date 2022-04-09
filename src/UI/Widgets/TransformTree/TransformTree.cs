@@ -207,6 +207,13 @@ namespace UnityExplorer.UI.Widgets
             // Prune displayed transforms that we didnt visit in that traverse
             for (int i = cachedTransforms.Count - 1; i >= 0; i--)
             {
+                if (traversedThisFrame.ElapsedMilliseconds > 2)
+                {
+                    yield return null;
+                    traversedThisFrame.Reset();
+                    traversedThisFrame.Start();
+                }
+
                 var cached = (CachedTransform)cachedTransforms[i];
                 if (!visited.Contains(cached.InstanceID))
                 {
@@ -226,7 +233,6 @@ namespace UnityExplorer.UI.Widgets
         // Parent and depth can be null/default.
         private IEnumerator Traverse(Transform transform, CachedTransform parent, int depth, bool oneShot, bool filtering)
         {
-            // Let's only tank 2ms of each frame (60->53fps)
             if (traversedThisFrame.ElapsedMilliseconds > 2)
             {
                 yield return null;
@@ -285,8 +291,6 @@ namespace UnityExplorer.UI.Widgets
 
             if (IsTransformExpanded(instanceID) && cached.Value.childCount > 0)
             {
-                ExplorerCore.Log($"Traversing expanded transform {cached.Value.name} ({cached.InstanceID})");
-
                 for (int i = 0; i < transform.childCount; i++)
                 {
                     var enumerator = Traverse(transform.GetChild(i), cached, depth + 1, oneShot, filtering);
@@ -346,8 +350,6 @@ namespace UnityExplorer.UI.Widgets
 
         public void OnCellExpandToggled(CachedTransform cache)
         {
-            ExplorerCore.Log($"OnCellExpandToggled: {cache.Value.name} ({cache.InstanceID})");
-
             var instanceID = cache.InstanceID;
             if (expandedInstanceIDs.Contains(instanceID))
                 expandedInstanceIDs.Remove(instanceID);
