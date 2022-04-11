@@ -26,7 +26,7 @@ jobs:
         
       # Run build script
       - run: |
-        ./build.ps1        
+         ./build.ps1        
           
       #  Upload artifacts
       
