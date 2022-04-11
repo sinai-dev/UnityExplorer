@@ -73,8 +73,6 @@ namespace UnityExplorer
             // check master toggle
             if (InputManager.GetKeyDown(ConfigManager.Master_Toggle.Value))
                 UIManager.ShowMenu = !UIManager.ShowMenu;
-
-            UIManager.Update();
         }
 
         #region LOGGING
