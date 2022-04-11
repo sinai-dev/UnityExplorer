@@ -105,7 +105,7 @@ namespace UnityExplorer.UI
             UIPanels.Add(Panels.Clipboard, new ClipboardPanel());
             UIPanels.Add(Panels.ConsoleLog, new LogPanel());
             UIPanels.Add(Panels.Options, new OptionsPanel());
-            UIPanels.Add(Panels.UIInspectorResults, new UiInspectorResultsPanel());
+            UIPanels.Add(Panels.UIInspectorResults, new MouseInspectorResultsPanel());
             UIPanels.Add(Panels.MouseInspector, new MouseInspector());
 
             foreach (var panel in UIPanels.Values)

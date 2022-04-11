@@ -15,8 +15,8 @@ namespace UnityExplorer.Hooks
     {
         // Static 
 
-        private static readonly StringBuilder evalOutput = new StringBuilder();
-        private static readonly ScriptEvaluator scriptEvaluator = new ScriptEvaluator(new StringWriter(evalOutput));
+        private static readonly StringBuilder evalOutput = new();
+        private static readonly ScriptEvaluator scriptEvaluator = new(new StringWriter(evalOutput));
 
         static HookInstance()
         {

@@ -106,7 +106,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             {
                 GetSuggestions(value);
 
-                AutoCompleteModal.Instance.TakeOwnership(this);
+                AutoCompleteModal.TakeOwnership(this);
                 AutoCompleteModal.Instance.SetSuggestions(suggestions);
             }
         }

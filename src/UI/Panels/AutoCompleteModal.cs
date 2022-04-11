@@ -14,6 +14,7 @@ using UniverseLib.UI;
 using UniverseLib.UI.Widgets.ButtonList;
 using UniverseLib.UI.Widgets.ScrollView;
 using UniverseLib.Utility;
+using UniverseLib.UI.Models;
 
 namespace UnityExplorer.UI.Widgets.AutoComplete
 {
@@ -53,7 +54,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             OnClickedOutsidePanels += AutoCompleter_OnClickedOutsidePanels;
         }
 
-        public void TakeOwnership(ISuggestionProvider provider)
+        public static void TakeOwnership(ISuggestionProvider provider)
         {
             CurrentHandler = provider;
             navigationTipRow.SetActive(provider.AllowNavigation);
@@ -152,7 +153,8 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
                 return;
 
             SelectedIndex = index;
-            scrollPool.Refresh(true, false);
+
+            scrollPool.JumpToIndex(index, null);
         }
 
         // Internal update
@@ -173,8 +175,8 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         // Setting autocomplete cell buttons
 
-        private readonly Color selectedSuggestionColor = new Color(45 / 255f, 75 / 255f, 80 / 255f);
-        private readonly Color inactiveSuggestionColor = new Color(0.11f, 0.11f, 0.11f);
+        private readonly Color selectedSuggestionColor = new(45 / 255f, 75 / 255f, 80 / 255f);
+        private readonly Color inactiveSuggestionColor = new(0.11f, 0.11f, 0.11f);
 
         private List<Suggestion> GetEntries() => Suggestions;
 
@@ -201,21 +203,6 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
             if (CurrentHandler.AllowNavigation && index == SelectedIndex && setFirstCell)
             {
-                float diff = 0f;
-                // if cell is too far down
-                if (cell.Rect.MinY() > scrollPool.Viewport.MinY())
-                    diff = cell.Rect.MinY() - scrollPool.Viewport.MinY();
-                // if cell is too far up
-                else if (cell.Rect.MaxY() < scrollPool.Viewport.MaxY())
-                    diff = cell.Rect.MaxY() - scrollPool.Viewport.MaxY();
-
-                if (diff != 0.0f)
-                {
-                    var pos = scrollPool.Content.anchoredPosition;
-                    pos.y -= diff;
-                    scrollPool.Content.anchoredPosition = pos;
-                }
-
                 RuntimeHelper.SetColorBlock(cell.Button.Component, selectedSuggestionColor);
             }
             else
@@ -234,9 +221,9 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             if (CurrentHandler == null)
                 return;
 
-            var input = CurrentHandler.InputField;
+            InputFieldRef input = CurrentHandler.InputField;
 
-            if (input.Component.caretPosition == lastCaretPosition && input.UIRoot.transform.position == lastInputPosition)
+            if (!input.Component.isFocused || input.Component.caretPosition == lastCaretPosition && input.UIRoot.transform.position == lastInputPosition)
                 return;
             lastInputPosition = input.UIRoot.transform.position;
             lastCaretPosition = input.Component.caretPosition;
@@ -257,9 +244,6 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             else
             {
                 uiRoot.transform.position = input.Transform.position + new Vector3(-(input.Transform.rect.width / 2) + 10, -20, 0);
-                //var textGen = input.Component.textComponent.cachedTextGenerator;
-                //var pos = input.UIRoot.transform.TransformPoint(textGen.characters[0].cursorPos);
-                //uiRoot.transform.position = new Vector3(pos.x + 10, pos.y - 20, 0);
             }
 
             this.Dragger.OnEndResize();

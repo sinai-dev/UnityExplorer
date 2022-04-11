@@ -23,9 +23,9 @@ namespace UnityExplorer.CacheObject
             List<CacheMember> ctors = new();
             List<CacheMember> methods = new();
 
-            var types = ReflectionUtility.GetAllBaseTypes(type);
+            Type[] types = ReflectionUtility.GetAllBaseTypes(type);
 
-            var flags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
+            BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
             if (!inspector.StaticOnly)
                 flags |= BindingFlags.Instance;
 
@@ -34,7 +34,7 @@ namespace UnityExplorer.CacheObject
                 // Get non-static constructors of the main type.
                 // There's no reason to get the static cctor, it will be invoked when we inspect the class.
                 // Also no point getting ctors on inherited types.
-                foreach (var ctor in type.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+                foreach (ConstructorInfo ctor in type.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
                     TryCacheMember(ctor, ctors, cachedSigs, type, inspector);
 
                 // structs always have a parameterless constructor
@@ -47,23 +47,23 @@ namespace UnityExplorer.CacheObject
                 }
             }
 
-            foreach (var declaringType in types)
+            foreach (Type declaringType in types)
             {
-                foreach (var prop in declaringType.GetProperties(flags))
+                foreach (PropertyInfo prop in declaringType.GetProperties(flags))
                     if (prop.DeclaringType == declaringType)
                         TryCacheMember(prop, props, cachedSigs, declaringType, inspector);
 
-                foreach (var field in declaringType.GetFields(flags))
+                foreach (FieldInfo field in declaringType.GetFields(flags))
                     if (field.DeclaringType == declaringType)
                         TryCacheMember(field, fields, cachedSigs, declaringType, inspector);
 
-                foreach (var method in declaringType.GetMethods(flags))
+                foreach (MethodInfo method in declaringType.GetMethods(flags))
                     if (method.DeclaringType == declaringType)
                         TryCacheMember(method, methods, cachedSigs, declaringType, inspector);
 
             }
 
-            var sorted = new List<CacheMember>();
+            List<CacheMember> sorted = new();
             sorted.AddRange(props.OrderBy(it => Array.IndexOf(types, it.DeclaringType))
                                  .ThenBy(it => it.NameForFiltering));
             sorted.AddRange(fields.OrderBy(it => Array.IndexOf(types, it.DeclaringType))
@@ -86,9 +86,7 @@ namespace UnityExplorer.CacheObject
 
                 string sig = member switch
                 {
-                    // method or constructor
-                    MethodBase mb => mb.FullDescription(),
-                    // property or field
+                    MethodBase mb => mb.FullDescription(), // (method or constructor)
                     PropertyInfo or FieldInfo => $"{member.DeclaringType.FullDescription()}.{member.Name}",
                     _ => throw new NotImplementedException(),
                 };
@@ -105,7 +103,7 @@ namespace UnityExplorer.CacheObject
                 {
                     case MemberTypes.Constructor:
                         {
-                            var ci = member as ConstructorInfo;
+                            ConstructorInfo ci = member as ConstructorInfo;
                             cached = new CacheConstructor(ci);
                             returnType = ci.DeclaringType;
                         }
@@ -113,7 +111,7 @@ namespace UnityExplorer.CacheObject
 
                     case MemberTypes.Method:
                         {
-                            var mi = member as MethodInfo;
+                            MethodInfo mi = member as MethodInfo;
                             if (ignorePropertyMethodInfos
                                 && (mi.Name.StartsWith("get_") || mi.Name.StartsWith("set_")))
                                 return;
@@ -125,12 +123,12 @@ namespace UnityExplorer.CacheObject
 
                     case MemberTypes.Property:
                         {
-                            var pi = member as PropertyInfo;
+                            PropertyInfo pi = member as PropertyInfo;
 
                             if (!pi.CanRead && pi.CanWrite)
                             {
                                 // write-only property, cache the set method instead.
-                                var setMethod = pi.GetSetMethod(true);
+                                MethodInfo setMethod = pi.GetSetMethod(true);
                                 if (setMethod != null)
                                     TryCacheMember(setMethod, list, cachedSigs, declaringType, inspector, false);
                                 return;
@@ -143,7 +141,7 @@ namespace UnityExplorer.CacheObject
 
                     case MemberTypes.Field:
                         {
-                            var fi = member as FieldInfo;
+                            FieldInfo fi = member as FieldInfo;
                             cached = new CacheField(fi);
                             returnType = fi.FieldType;
                             break;

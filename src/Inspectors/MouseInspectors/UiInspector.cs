@@ -46,7 +46,7 @@ namespace UnityExplorer.Inspectors.MouseInspectors
         IEnumerator SetPanelActiveCoro()
         {
             yield return null;
-            var panel = UIManager.GetPanel<UiInspectorResultsPanel>(UIManager.Panels.UIInspectorResults);
+            var panel = UIManager.GetPanel<MouseInspectorResultsPanel>(UIManager.Panels.UIInspectorResults);
             panel.SetActive(true);
             panel.ShowResults();
         }

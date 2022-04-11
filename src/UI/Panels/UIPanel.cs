@@ -37,18 +37,18 @@ namespace UnityExplorer.UI.Panels
                 && (InputManager.GetMouseButtonDown(0) || InputManager.GetMouseButtonDown(1)))
             {
                 int count = UIManager.PanelHolder.transform.childCount;
-                var mousePos = DisplayManager.MousePosition;
+                Vector3 mousePos = DisplayManager.MousePosition;
                 bool clickedInAny = false;
 
                 for (int i = count - 1; i >= 0; i--)
                 {
                     // make sure this is a real recognized panel
-                    var transform = UIManager.PanelHolder.transform.GetChild(i);
+                    Transform transform = UIManager.PanelHolder.transform.GetChild(i);
                     if (!transformToPanelDict.TryGetValue(transform.GetInstanceID(), out UIPanel panel))
                         continue;
 
                     // check if our mouse is clicking inside the panel
-                    var pos = panel.Rect.InverseTransformPoint(mousePos);
+                    Vector3 pos = panel.Rect.InverseTransformPoint(mousePos);
                     if (!panel.Enabled || !panel.Rect.rect.Contains(pos))
                         continue;
 

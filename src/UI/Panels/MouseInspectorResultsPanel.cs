@@ -14,7 +14,7 @@ using UniverseLib.Utility;
 
 namespace UnityExplorer.UI.Panels
 {
-    public class UiInspectorResultsPanel : UIPanel
+    public class MouseInspectorResultsPanel : UIPanel
     {
         public override UIManager.Panels PanelType => UIManager.Panels.UIInspectorResults;
 

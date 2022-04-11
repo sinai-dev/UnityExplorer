@@ -111,7 +111,7 @@ namespace UnityExplorer.CSConsole
 
             if (suggestions.Any())
             {
-                AutoCompleteModal.Instance.TakeOwnership(this);
+                AutoCompleteModal.TakeOwnership(this);
                 AutoCompleteModal.Instance.SetSuggestions(suggestions);
             }
             else
