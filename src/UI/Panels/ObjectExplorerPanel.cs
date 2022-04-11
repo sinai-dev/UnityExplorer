@@ -1,19 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
-using System.Text;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
-using UnityExplorer.Config;
-using UniverseLib.UI.Models;
 using UnityExplorer.ObjectExplorer;
-using UnityExplorer.UI.Widgets;
-using UniverseLib.UI;
 using UniverseLib;
+using UniverseLib.UI;
+using UniverseLib.UI.Models;
 
 namespace UnityExplorer.UI.Panels
 {
@@ -31,18 +23,18 @@ namespace UnityExplorer.UI.Panels
         public override bool ShouldSaveActiveState => true;
 
         public int SelectedTab = 0;
-        private readonly List<UIModel> tabPages = new List<UIModel>();
-        private readonly List<ButtonRef> tabButtons = new List<ButtonRef>();
+        private readonly List<UIModel> tabPages = new();
+        private readonly List<ButtonRef> tabButtons = new();
 
         public void SetTab(int tabIndex)
         {
             if (SelectedTab != -1)
                 DisableTab(SelectedTab);
 
-            var content = tabPages[tabIndex];
+            UIModel content = tabPages[tabIndex];
             content.SetActive(true);
 
-            var button = tabButtons[tabIndex];
+            ButtonRef button = tabButtons[tabIndex];
             RuntimeHelper.SetColorBlock(button.Component, UniversalUI.EnabledButtonColor, UniversalUI.EnabledButtonColor * 1.2f);
 
             SelectedTab = tabIndex;
@@ -99,7 +91,7 @@ namespace UnityExplorer.UI.Panels
         public override void ConstructPanelContent()
         {
             // Tab bar
-            var tabGroup = UIFactory.CreateHorizontalGroup(uiContent, "TabBar", true, true, true, true, 2, new Vector4(2, 2, 2, 2));
+            GameObject tabGroup = UIFactory.CreateHorizontalGroup(uiContent, "TabBar", true, true, true, true, 2, new Vector4(2, 2, 2, 2));
             UIFactory.SetLayoutElement(tabGroup, minHeight: 25, flexibleHeight: 0);
 
             // Scene Explorer
@@ -122,7 +114,7 @@ namespace UnityExplorer.UI.Panels
 
         private void AddTabButton(GameObject tabGroup, string label)
         {
-            var button = UIFactory.CreateButton(tabGroup, $"Button_{label}", label);
+            ButtonRef button = UIFactory.CreateButton(tabGroup, $"Button_{label}", label);
 
             int idx = tabButtons.Count;
             //button.onClick.AddListener(() => { SetTab(idx); });

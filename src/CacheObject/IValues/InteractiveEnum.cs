@@ -2,13 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.CacheObject;
-using UnityExplorer.UI;
 using UnityExplorer.UI.Widgets.AutoComplete;
-using UniverseLib;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
 using UniverseLib.Utility;
@@ -110,7 +106,7 @@ namespace UnityExplorer.CacheObject.IValues
         {
             try
             {
-                List<string> values = new List<string>();
+                List<string> values = new();
                 for (int i = 0; i < CurrentValues.Count; i++)
                 {
                     if (flagToggles[i].isOn)
@@ -138,11 +134,11 @@ namespace UnityExplorer.CacheObject.IValues
                 new Color(0.06f, 0.06f, 0.06f));
             UIFactory.SetLayoutElement(UIRoot, minHeight: 25, flexibleHeight: 9999, flexibleWidth: 9999);
 
-            var hori = UIFactory.CreateUIObject("Hori", UIRoot);
+            GameObject hori = UIFactory.CreateUIObject("Hori", UIRoot);
             UIFactory.SetLayoutElement(hori, minHeight: 25, flexibleWidth: 9999);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(hori, false, false, true, true, 2);
 
-            var applyButton = UIFactory.CreateButton(hori, "ApplyButton", "Apply", new Color(0.2f, 0.27f, 0.2f));
+            ButtonRef applyButton = UIFactory.CreateButton(hori, "ApplyButton", "Apply", new Color(0.2f, 0.27f, 0.2f));
             UIFactory.SetLayoutElement(applyButton.Component.gameObject, minHeight: 25, minWidth: 100);
             applyButton.OnClick += OnApplyClicked;
 
@@ -192,11 +188,11 @@ namespace UnityExplorer.CacheObject.IValues
 
         private void AddToggleRow()
         {
-            var row = UIFactory.CreateUIObject("ToggleRow", toggleHolder);
+            GameObject row = UIFactory.CreateUIObject("ToggleRow", toggleHolder);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(row, false, false, true, true, 2);
             UIFactory.SetLayoutElement(row, minHeight: 25, flexibleWidth: 9999);
 
-            var toggleObj = UIFactory.CreateToggle(row, "ToggleObj", out Toggle toggle, out Text toggleText);
+            GameObject toggleObj = UIFactory.CreateToggle(row, "ToggleObj", out Toggle toggle, out Text toggleText);
             UIFactory.SetLayoutElement(toggleObj, minHeight: 25, flexibleWidth: 9999);
 
             flagToggles.Add(toggle);
@@ -205,7 +201,7 @@ namespace UnityExplorer.CacheObject.IValues
 
         #region Enum cache 
 
-        internal static readonly Dictionary<string, OrderedDictionary> enumCache = new Dictionary<string, OrderedDictionary>();
+        internal static readonly Dictionary<string, OrderedDictionary> enumCache = new();
 
         internal static OrderedDictionary GetEnumValues(Type enumType)
         {
@@ -213,13 +209,13 @@ namespace UnityExplorer.CacheObject.IValues
 
             if (!enumCache.ContainsKey(enumType.AssemblyQualifiedName))
             {
-                var dict = new OrderedDictionary();
-                var addedNames = new HashSet<string>();
+                OrderedDictionary dict = new();
+                HashSet<string> addedNames = new();
 
                 int i = 0;
-                foreach (var value in Enum.GetValues(enumType))
+                foreach (object value in Enum.GetValues(enumType))
                 {
-                    var name = value.ToString();
+                    string name = value.ToString();
                     if (addedNames.Contains(name))
                         continue;
                     addedNames.Add(name);

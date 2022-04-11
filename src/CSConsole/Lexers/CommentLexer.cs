@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace UnityExplorer.CSConsole.Lexers
 {
@@ -13,7 +11,7 @@ namespace UnityExplorer.CSConsole.Lexers
         }
 
         // forest green
-        protected override Color HighlightColor => new Color(0.34f, 0.65f, 0.29f, 1.0f);
+        protected override Color HighlightColor => new(0.34f, 0.65f, 0.29f, 1.0f);
 
         public override bool TryMatchCurrent(LexerBuilder lexer)
         {

@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using UnityEngine;
 using UnityExplorer.CSConsole.Lexers;
-using UnityExplorer.UI;
 using UnityExplorer.UI.Widgets.AutoComplete;
 using UniverseLib;
-using UniverseLib.UI;
 using UniverseLib.UI.Models;
 using UniverseLib.Utility;
 
@@ -29,10 +26,23 @@ namespace UnityExplorer.CSConsole
 
         private readonly HashSet<char> delimiters = new()
         {
-            '{', '}', ',', ';', '<', '>', '(', ')', '[', ']', '=', '|', '&', '?'
+            '{',
+            '}',
+            ',',
+            ';',
+            '<',
+            '>',
+            '(',
+            ')',
+            '[',
+            ']',
+            '=',
+            '|',
+            '&',
+            '?'
         };
 
-        private readonly List<Suggestion> suggestions = new List<Suggestion>();
+        private readonly List<Suggestion> suggestions = new();
 
         public void CheckAutocompletes()
         {
@@ -83,7 +93,7 @@ namespace UnityExplorer.CSConsole
 
             // Get manual namespace completions
 
-            foreach (var ns in ReflectionUtility.AllNamespaces)
+            foreach (string ns in ReflectionUtility.AllNamespaces)
             {
                 if (ns.StartsWith(input))
                 {
@@ -97,7 +107,7 @@ namespace UnityExplorer.CSConsole
 
             // Get manual keyword completions
 
-            foreach (var kw in KeywordLexer.keywords)
+            foreach (string kw in KeywordLexer.keywords)
             {
                 if (kw.StartsWith(input))// && kw.Length > input.Length)
                 {
@@ -121,11 +131,11 @@ namespace UnityExplorer.CSConsole
         }
 
 
-        private readonly Dictionary<string, string> namespaceHighlights = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> namespaceHighlights = new();
 
-        private readonly Dictionary<string, string> keywordHighlights = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> keywordHighlights = new();
 
-        private readonly StringBuilder highlightBuilder = new StringBuilder();
+        private readonly StringBuilder highlightBuilder = new();
         private const string OPEN_HIGHLIGHT = "<color=cyan>";
 
         private string GetHighlightString(string prefix, string completion)

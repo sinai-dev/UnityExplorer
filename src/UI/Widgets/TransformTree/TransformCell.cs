@@ -1,17 +1,9 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
+﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.Inspectors;
-using UnityExplorer.UI.Widgets;
 using UniverseLib;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
-using UniverseLib.UI.Widgets;
 using UniverseLib.UI.Widgets.ScrollView;
 using UniverseLib.Utility;
 
@@ -136,7 +128,7 @@ namespace UnityExplorer.UI.Widgets
 
             if (int.TryParse(input.Trim(), out int index))
                 this.cachedTransform.Value.SetSiblingIndex(index);
-            
+
             this.SiblingIndex.Text = this.cachedTransform.Value.GetSiblingIndex().ToString();
         }
 
@@ -168,7 +160,7 @@ namespace UnityExplorer.UI.Widgets
 
             // Name button
 
-            GameObject nameBtnHolder = UIFactory.CreateHorizontalGroup(this.UIRoot, "NameButtonHolder", 
+            GameObject nameBtnHolder = UIFactory.CreateHorizontalGroup(this.UIRoot, "NameButtonHolder",
                 false, false, true, true, childAlignment: TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(nameBtnHolder, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
             nameBtnHolder.AddComponent<Mask>().showMaskGraphic = false;

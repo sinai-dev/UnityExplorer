@@ -2,19 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UniverseLib.Input;
-using UnityExplorer.Runtime;
-using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
-using UniverseLib.UI.Widgets;
 using UniverseLib;
+using UniverseLib.Input;
 using UniverseLib.UI;
+using UniverseLib.UI.Models;
 using UniverseLib.UI.Widgets.ButtonList;
 using UniverseLib.UI.Widgets.ScrollView;
 using UniverseLib.Utility;
-using UniverseLib.UI.Models;
 
 namespace UnityExplorer.UI.Widgets.AutoComplete
 {
@@ -184,7 +180,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         private void OnCellClicked(int dataIndex)
         {
-            var suggestion = Suggestions[dataIndex];
+            Suggestion suggestion = Suggestions[dataIndex];
             CurrentHandler.OnSuggestionClicked(suggestion);
         }
 
@@ -198,7 +194,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
                 return;
             }
 
-            var suggestion = Suggestions[index];
+            Suggestion suggestion = Suggestions[index];
             cell.Button.ButtonText.text = suggestion.DisplayText;
 
             if (CurrentHandler.AllowNavigation && index == SelectedIndex && setFirstCell)
@@ -230,7 +226,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
             if (CurrentHandler.AnchorToCaretPosition)
             {
-                var textGen = input.Component.cachedInputTextGenerator;
+                TextGenerator textGen = input.Component.cachedInputTextGenerator;
                 int caretIdx = Math.Max(0, Math.Min(textGen.characterCount - 1, input.Component.caretPosition));
 
                 // normalize the caret horizontal position

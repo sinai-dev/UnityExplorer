@@ -1,17 +1,14 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Config;
-using UniverseLib.Input;
-using UnityExplorer.UI.Widgets;
-using UniverseLib.UI.Models;
-using UniverseLib.UI;
 using UniverseLib;
-using System.Collections;
+using UniverseLib.Input;
+using UniverseLib.UI;
+using UniverseLib.UI.Models;
 
 namespace UnityExplorer.UI.Panels
 {
@@ -33,7 +30,7 @@ namespace UnityExplorer.UI.Panels
                 return;
 
             // if the user is clicking
-            if (DisplayManager.MouseInTargetDisplay 
+            if (DisplayManager.MouseInTargetDisplay
                 && (InputManager.GetMouseButtonDown(0) || InputManager.GetMouseButtonDown(1)))
             {
                 int count = UIManager.PanelHolder.transform.childCount;
@@ -117,7 +114,7 @@ namespace UnityExplorer.UI.Panels
 
                 if (NavButtonWanted)
                 {
-                    var color = active ? UniversalUI.EnabledButtonColor : UniversalUI.DisabledButtonColor;
+                    Color color = active ? UniversalUI.EnabledButtonColor : UniversalUI.DisabledButtonColor;
                     RuntimeHelper.SetColorBlock(NavButton.Component, color, color * 1.2f);
                 }
             }
@@ -156,11 +153,11 @@ namespace UnityExplorer.UI.Panels
 
         public static void EnsureValidPosition(RectTransform panel)
         {
-            var pos = panel.localPosition;
+            Vector3 pos = panel.localPosition;
 
             // Prevent panel going oustide screen bounds
-            var halfW = DisplayManager.Width * 0.5f;
-            var halfH = DisplayManager.Height * 0.5f;
+            float halfW = DisplayManager.Width * 0.5f;
+            float halfH = DisplayManager.Height * 0.5f;
 
             pos.x = Math.Max(-halfW - panel.rect.width + 50, Math.Min(pos.x, halfW - 50));
             pos.y = Math.Max(-halfH + 50, Math.Min(pos.y, halfH));
@@ -186,11 +183,11 @@ namespace UnityExplorer.UI.Panels
         {
             try
             {
-                return string.Join("|", new string[] 
-                { 
-                    $"{ShouldSaveActiveState && Enabled}", 
-                    Rect.RectAnchorsToString(), 
-                    Rect.RectPositionToString() 
+                return string.Join("|", new string[]
+                {
+                    $"{ShouldSaveActiveState && Enabled}",
+                    Rect.RectAnchorsToString(),
+                    Rect.RectPositionToString()
                 });
             }
             catch (Exception ex)
@@ -211,7 +208,7 @@ namespace UnityExplorer.UI.Panels
             if (string.IsNullOrEmpty(data))
                 return;
 
-            var split = data.Split('|');
+            string[] split = data.Split('|');
 
             try
             {
@@ -240,7 +237,7 @@ namespace UnityExplorer.UI.Panels
                 // create navbar button
 
                 NavButton = UIFactory.CreateButton(UIManager.NavbarTabButtonHolder, $"Button_{PanelType}", Name);
-                var navBtn = NavButton.Component.gameObject;
+                GameObject navBtn = NavButton.Component.gameObject;
                 navBtn.AddComponent<ContentSizeFitter>().horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
                 UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(navBtn, false, true, true, true, 0, 0, 0, 5, 5, TextAnchor.MiddleCenter);
                 UIFactory.SetLayoutElement(navBtn, minWidth: 80);
@@ -248,7 +245,7 @@ namespace UnityExplorer.UI.Panels
                 RuntimeHelper.SetColorBlock(NavButton.Component, UniversalUI.DisabledButtonColor, UniversalUI.DisabledButtonColor * 1.2f);
                 NavButton.OnClick += () => { UIManager.TogglePanel(PanelType); };
 
-                var txtObj = navBtn.transform.Find("Text").gameObject;
+                GameObject txtObj = navBtn.transform.Find("Text").gameObject;
                 txtObj.AddComponent<ContentSizeFitter>().horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
             }
 
@@ -269,15 +266,15 @@ namespace UnityExplorer.UI.Panels
 
             // Title text
 
-            var titleTxt = UIFactory.CreateLabel(TitleBar, "TitleBar", Name, TextAnchor.MiddleLeft);
+            Text titleTxt = UIFactory.CreateLabel(TitleBar, "TitleBar", Name, TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(titleTxt.gameObject, minWidth: 250, minHeight: 25, flexibleHeight: 0);
 
             // close button
 
-            var closeHolder = UIFactory.CreateUIObject("CloseHolder", TitleBar);
+            GameObject closeHolder = UIFactory.CreateUIObject("CloseHolder", TitleBar);
             UIFactory.SetLayoutElement(closeHolder, minHeight: 25, flexibleHeight: 0, minWidth: 30, flexibleWidth: 9999);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(closeHolder, false, false, true, true, 3, childAlignment: TextAnchor.MiddleRight);
-            var closeBtn = UIFactory.CreateButton(closeHolder, "CloseButton", "—");
+            ButtonRef closeBtn = UIFactory.CreateButton(closeHolder, "CloseButton", "—");
             UIFactory.SetLayoutElement(closeBtn.Component.gameObject, minHeight: 25, minWidth: 25, flexibleWidth: 0);
             RuntimeHelper.SetColorBlock(closeBtn.Component, new Color(0.33f, 0.32f, 0.31f));
 
@@ -372,7 +369,7 @@ namespace UnityExplorer.UI.Panels
                 // outdated save data, not worth recovering just reset it.
                 throw new Exception("invalid save data, resetting.");
 
-            var split = stringAnchors.Split(',');
+            string[] split = stringAnchors.Split(',');
 
             if (split.Length != 4)
                 throw new Exception($"stringAnchors split is unexpected length: {split.Length}");
@@ -407,7 +404,7 @@ namespace UnityExplorer.UI.Panels
                 // outdated save data, not worth recovering just reset it.
                 throw new Exception("invalid save data, resetting.");
 
-            var split = stringPosition.Split(',');
+            string[] split = stringPosition.Split(',');
 
             if (split.Length != 2)
                 throw new Exception($"stringPosition split is unexpected length: {split.Length}");

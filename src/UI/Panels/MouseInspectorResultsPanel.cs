@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityExplorer.Inspectors.MouseInspectors;
-using UnityExplorer.UI.Widgets;
-using UniverseLib;
 using UniverseLib.UI;
-using UniverseLib.UI.Widgets;
 using UniverseLib.UI.Widgets.ButtonList;
 using UniverseLib.UI.Widgets.ScrollView;
 using UniverseLib.Utility;
@@ -53,7 +47,7 @@ namespace UnityExplorer.UI.Panels
             if (index >= UiInspector.LastHitObjects.Count)
                 return;
 
-            var obj = UiInspector.LastHitObjects[index];
+            GameObject obj = UiInspector.LastHitObjects[index];
             cell.Button.ButtonText.text = $"<color=cyan>{obj.name}</color> ({obj.transform.GetTransformPath(true)})";
         }
 

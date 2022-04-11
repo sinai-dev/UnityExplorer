@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.CacheObject;
-using UnityExplorer.UI;
 using UniverseLib;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
@@ -31,7 +28,7 @@ namespace UnityExplorer.CacheObject.IValues
 
             public void SetValue(object instance, string input, int fieldIndex)
             {
-                var field = Fields[fieldIndex];
+                FieldInfo field = Fields[fieldIndex];
 
                 object val;
                 if (field.FieldType == typeof(string))
@@ -51,8 +48,8 @@ namespace UnityExplorer.CacheObject.IValues
 
             public string GetValue(object instance, int fieldIndex)
             {
-                var field = Fields[fieldIndex];
-                var value = field.GetValue(instance);
+                FieldInfo field = Fields[fieldIndex];
+                object value = field.GetValue(instance);
                 return ParseUtility.ToStringForInput(value, field.FieldType);
             }
         }
@@ -67,12 +64,12 @@ namespace UnityExplorer.CacheObject.IValues
             if (!type.IsValueType || string.IsNullOrEmpty(type.AssemblyQualifiedName) || type.FullName == SYSTEM_VOID)
                 return false;
 
-            if (typeSupportCache.TryGetValue(type.AssemblyQualifiedName, out var info))
+            if (typeSupportCache.TryGetValue(type.AssemblyQualifiedName, out StructInfo info))
                 return info.IsSupported;
 
-            var supported = false;
+            bool supported = false;
 
-            var fields = type.GetFields(INSTANCE_FLAGS);
+            FieldInfo[] fields = type.GetFields(INSTANCE_FLAGS);
             if (fields.Length > 0)
             {
                 if (fields.Any(it => !ParseUtility.CanParse(it.FieldType)))
@@ -100,9 +97,9 @@ namespace UnityExplorer.CacheObject.IValues
         private Type lastStructType;
 
         private ButtonRef applyButton;
-        private readonly List<GameObject> fieldRows = new List<GameObject>();
-        private readonly List<InputFieldRef> inputFields = new List<InputFieldRef>();
-        private readonly List<Text> labels = new List<Text>();
+        private readonly List<GameObject> fieldRows = new();
+        private readonly List<InputFieldRef> inputFields = new();
+        private readonly List<Text> labels = new();
 
         public override void OnBorrowed(CacheObjectBase owner)
         {
@@ -117,7 +114,7 @@ namespace UnityExplorer.CacheObject.IValues
         {
             RefInstance = value;
 
-            var type = RefInstance.GetType();
+            Type type = RefInstance.GetType();
 
             if (type != lastStructType)
             {
@@ -177,21 +174,21 @@ namespace UnityExplorer.CacheObject.IValues
 
         private void AddEditorRow()
         {
-            var row = UIFactory.CreateUIObject("HoriGroup", UIRoot);
+            GameObject row = UIFactory.CreateUIObject("HoriGroup", UIRoot);
             //row.AddComponent<ContentSizeFitter>().horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
             UIFactory.SetLayoutElement(row, minHeight: 25, flexibleWidth: 9999);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(row, false, false, true, true, 8, childAlignment: TextAnchor.MiddleLeft);
 
             fieldRows.Add(row);
 
-            var label = UIFactory.CreateLabel(row, "Label", "notset", TextAnchor.MiddleLeft);
+            Text label = UIFactory.CreateLabel(row, "Label", "notset", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(label.gameObject, minHeight: 25, minWidth: 50, flexibleWidth: 0);
             label.horizontalOverflow = HorizontalWrapMode.Wrap;
             labels.Add(label);
 
-            var input = UIFactory.CreateInputField(row, "InputField", "...");
+            InputFieldRef input = UIFactory.CreateInputField(row, "InputField", "...");
             UIFactory.SetLayoutElement(input.UIRoot, minHeight: 25, minWidth: 200);
-            var fitter = input.UIRoot.AddComponent<ContentSizeFitter>();
+            ContentSizeFitter fitter = input.UIRoot.AddComponent<ContentSizeFitter>();
             fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
             input.Component.lineType = InputField.LineType.MultiLineNewline;

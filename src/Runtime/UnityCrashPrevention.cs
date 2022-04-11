@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using UnityEngine;
-using UnityExplorer.CacheObject;
 
 namespace UnityExplorer.Runtime
 {
     internal static class UnityCrashPrevention
     {
-        static readonly HarmonyLib.Harmony harmony = new ($"{ExplorerCore.GUID}.crashprevention");
+        static readonly HarmonyLib.Harmony harmony = new($"{ExplorerCore.GUID}.crashprevention");
 
         internal static void Init()
         {
@@ -27,7 +25,7 @@ namespace UnityExplorer.Runtime
             try
             {
                 harmony.Patch(
-                    HarmonyLib.AccessTools.Method(typeof(T), orig, argTypes), 
+                    HarmonyLib.AccessTools.Method(typeof(T), orig, argTypes),
                     new HarmonyLib.HarmonyMethod(HarmonyLib.AccessTools.Method(typeof(UnityCrashPrevention), prefix)));
             }
             catch //(Exception ex)

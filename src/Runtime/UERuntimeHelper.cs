@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 using UnityExplorer.Config;
 using UniverseLib;
 
@@ -20,7 +14,7 @@ namespace UnityExplorer.Runtime
         public static UERuntimeHelper Instance;
 
         public static void Init()
-        { 
+        {
 #if CPP
             Instance = new Il2CppHelper();
 #else
@@ -50,10 +44,10 @@ namespace UnityExplorer.Runtime
 
                 try
                 {
-                    var sigs = blacklist.Split(';');
-                    foreach (var sig in sigs)
+                    string[] sigs = blacklist.Split(';');
+                    foreach (string sig in sigs)
                     {
-                        var s = sig.Trim();
+                        string s = sig.Trim();
                         if (string.IsNullOrEmpty(s))
                             continue;
                         if (!currentBlacklist.Contains(s))
@@ -65,7 +59,7 @@ namespace UnityExplorer.Runtime
                     ExplorerCore.LogWarning($"Exception parsing blacklist string: {ex.ReflectionExToString()}");
                 }
 
-                foreach (var sig in Instance.DefaultReflectionBlacklist)
+                foreach (string sig in Instance.DefaultReflectionBlacklist)
                 {
                     if (!currentBlacklist.Contains(sig))
                         currentBlacklist.Add(sig);
@@ -84,7 +78,7 @@ namespace UnityExplorer.Runtime
             if (string.IsNullOrEmpty(member.DeclaringType?.Namespace))
                 return false;
 
-            var sig = $"{member.DeclaringType.FullName}.{member.Name}";
+            string sig = $"{member.DeclaringType.FullName}.{member.Name}";
 
             return currentBlacklist.Contains(sig);
         }

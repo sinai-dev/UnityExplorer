@@ -1,19 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.CacheObject;
 using UnityExplorer.CacheObject.Views;
-using UnityExplorer.Inspectors;
-using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
-using UnityExplorer.UI.Widgets;
 using UniverseLib;
 using UniverseLib.UI;
-using UniverseLib.UI.Widgets;
 using UniverseLib.UI.Widgets.ScrollView;
 using UniverseLib.Utility;
 
@@ -32,7 +25,7 @@ namespace UnityExplorer.CacheObject.IValues
         public IDictionary RefIDictionary;
 
         public int ItemCount => cachedEntries.Count;
-        private readonly List<CacheKeyValuePair> cachedEntries = new List<CacheKeyValuePair>();
+        private readonly List<CacheKeyValuePair> cachedEntries = new();
 
         public ScrollPool<CacheKeyValuePairCell> DictScrollPool { get; private set; }
 
@@ -61,7 +54,7 @@ namespace UnityExplorer.CacheObject.IValues
         {
             RefIDictionary = null;
 
-            foreach (var entry in cachedEntries)
+            foreach (CacheKeyValuePair entry in cachedEntries)
             {
                 entry.UnlinkFromView();
                 entry.ReleasePooledObjects();
@@ -80,7 +73,7 @@ namespace UnityExplorer.CacheObject.IValues
             }
             else
             {
-                var type = value.GetActualType();
+                Type type = value.GetActualType();
                 ReflectionUtility.TryGetEntryTypes(type, out KeysType, out ValuesType);
 
                 CacheEntries(value);
@@ -124,7 +117,7 @@ namespace UnityExplorer.CacheObject.IValues
                 {
                     for (int i = cachedEntries.Count - 1; i >= idx; i--)
                     {
-                        var cache = cachedEntries[i];
+                        CacheKeyValuePair cache = cachedEntries[i];
                         if (cache.CellView != null)
                             cache.UnlinkFromView();
 
@@ -153,7 +146,7 @@ namespace UnityExplorer.CacheObject.IValues
 
                 RefIDictionary[key] = value;
 
-                var entry = cachedEntries[keyIndex];
+                CacheKeyValuePair entry = cachedEntries[keyIndex];
                 entry.SetValueFromSource(value);
                 if (entry.CellView != null)
                     entry.SetDataToCell(entry.CellView);
@@ -177,12 +170,12 @@ namespace UnityExplorer.CacheObject.IValues
 
         public override void SetLayout()
         {
-            var minHeight = 5f;
+            float minHeight = 5f;
 
             KeyTitleLayout.minWidth = AdjustedWidth * 0.44f;
             ValueTitleLayout.minWidth = AdjustedWidth * 0.55f;
 
-            foreach (var cell in DictScrollPool.CellPool)
+            foreach (CacheKeyValuePairCell cell in DictScrollPool.CellPool)
             {
                 SetCellLayout(cell);
                 if (cell.Enabled)
@@ -194,7 +187,7 @@ namespace UnityExplorer.CacheObject.IValues
 
         private void SetCellLayout(CacheObjectCell objcell)
         {
-            var cell = objcell as CacheKeyValuePairCell;
+            CacheKeyValuePairCell cell = objcell as CacheKeyValuePairCell;
             cell.KeyGroupLayout.minWidth = cell.AdjustedWidth * 0.44f;
             cell.RightGroupLayout.minWidth = cell.AdjustedWidth * 0.55f;
 
@@ -221,15 +214,15 @@ namespace UnityExplorer.CacheObject.IValues
 
             // key / value titles
 
-            var titleGroup = UIFactory.CreateUIObject("TitleGroup", UIRoot);
+            GameObject titleGroup = UIFactory.CreateUIObject("TitleGroup", UIRoot);
             UIFactory.SetLayoutElement(titleGroup, minHeight: 25, flexibleWidth: 9999, flexibleHeight: 0);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(titleGroup, false, true, true, true, padLeft: 65, padRight: 0, childAlignment: TextAnchor.LowerLeft);
 
-            var keyTitle = UIFactory.CreateLabel(titleGroup, "KeyTitle", "Keys", TextAnchor.MiddleLeft);
+            Text keyTitle = UIFactory.CreateLabel(titleGroup, "KeyTitle", "Keys", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(keyTitle.gameObject, minWidth: 100, flexibleWidth: 0);
             KeyTitleLayout = keyTitle.GetComponent<LayoutElement>();
 
-            var valueTitle = UIFactory.CreateLabel(titleGroup, "ValueTitle", "Values", TextAnchor.MiddleLeft);
+            Text valueTitle = UIFactory.CreateLabel(titleGroup, "ValueTitle", "Values", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(valueTitle.gameObject, minWidth: 100, flexibleWidth: 0);
             ValueTitleLayout = valueTitle.GetComponent<LayoutElement>();
 

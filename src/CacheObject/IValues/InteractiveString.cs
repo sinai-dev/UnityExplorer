@@ -1,16 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Config;
-using UnityExplorer.CacheObject;
-using UnityExplorer.UI.Widgets;
-using UnityExplorer.UI;
 using UniverseLib.UI;
-using UniverseLib;
 using UniverseLib.UI.Models;
 using UniverseLib.Utility;
 
@@ -88,7 +80,7 @@ namespace UnityExplorer.CacheObject.IValues
                 return;
             }
 
-            var path = IOUtility.EnsureValidFilePath(SaveFilePath.Text);
+            string path = IOUtility.EnsureValidFilePath(SaveFilePath.Text);
 
             if (File.Exists(path))
                 File.Delete(path);
@@ -110,10 +102,10 @@ namespace UnityExplorer.CacheObject.IValues
             UIFactory.CreateLabel(SaveFileRow, "Info", "<color=red>String is too long! Save to file if you want to see the full string.</color>",
                 TextAnchor.MiddleLeft);
 
-            var horizRow = UIFactory.CreateUIObject("Horiz", SaveFileRow);
+            GameObject horizRow = UIFactory.CreateUIObject("Horiz", SaveFileRow);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(horizRow, false, false, true, true, 4);
 
-            var saveButton = UIFactory.CreateButton(horizRow, "SaveButton", "Save file");
+            ButtonRef saveButton = UIFactory.CreateButton(horizRow, "SaveButton", "Save file");
             UIFactory.SetLayoutElement(saveButton.Component.gameObject, minHeight: 25, minWidth: 100, flexibleWidth: 0);
             saveButton.OnClick += OnSaveFileClicked;
 

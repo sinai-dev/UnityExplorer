@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 using UniverseLib;
 using UniverseLib.UI.Widgets.ButtonList;
@@ -45,12 +43,12 @@ namespace UnityExplorer.Inspectors
 
         private void OnComponentClicked(int index)
         {
-            var entries = GetEntries();
+            List<Component> entries = GetEntries();
 
             if (index < 0 || index >= entries.Count)
                 return;
 
-            var comp = entries[index];
+            Component comp = entries[index];
             if (comp)
                 InspectorManager.Inspect(comp);
         }
@@ -59,8 +57,8 @@ namespace UnityExplorer.Inspectors
         {
             try
             {
-                var entries = GetEntries();
-                var comp = entries[index];
+                List<Component> entries = GetEntries();
+                Component comp = entries[index];
 
                 if (comp.TryCast<Behaviour>() is Behaviour behaviour)
                     behaviour.enabled = value;
@@ -75,8 +73,8 @@ namespace UnityExplorer.Inspectors
         {
             try
             {
-                var entries = GetEntries();
-                var comp = entries[index];
+                List<Component> entries = GetEntries();
+                Component comp = entries[index];
 
                 GameObject.DestroyImmediate(comp);
 
@@ -88,16 +86,16 @@ namespace UnityExplorer.Inspectors
             }
         }
 
-        private static readonly Dictionary<string, string> compToStringCache = new Dictionary<string, string>();
+        private static readonly Dictionary<string, string> compToStringCache = new();
 
         // Called from ButtonListHandler.SetCell, will be valid
         private void SetComponentCell(ComponentCell cell, int index)
         {
-            var entries = GetEntries();
+            List<Component> entries = GetEntries();
             cell.Enable();
 
-            var comp = entries[index];
-            var type = comp.GetActualType();
+            Component comp = entries[index];
+            Type type = comp.GetActualType();
 
             if (!compToStringCache.ContainsKey(type.AssemblyQualifiedName))
                 compToStringCache.Add(type.AssemblyQualifiedName, SignatureHighlighter.Parse(type, true));

@@ -1,11 +1,10 @@
-﻿using System;
-using System.CodeDom.Compiler;
+﻿using HarmonyLib;
+using Mono.CSharp;
+using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using HarmonyLib;
-using Mono.CSharp;
 using UnityExplorer.CSConsole;
 using UniverseLib;
 
@@ -66,7 +65,7 @@ namespace UnityExplorer.Hooks
 
                 // Dynamically compile the patch method
 
-                var codeBuilder = new StringBuilder();
+                StringBuilder codeBuilder = new();
 
                 codeBuilder.AppendLine($"public class DynamicPatch_{DateTime.Now.Ticks}");
                 codeBuilder.AppendLine("{");
@@ -80,11 +79,11 @@ namespace UnityExplorer.Hooks
 
                 // TODO: Publicize MCS to avoid this reflection
                 // Get the most recent Patch type in the source file
-                var typeContainer = ((CompilationSourceFile)fi_sourceFile.GetValue(scriptEvaluator))
+                TypeContainer typeContainer = ((CompilationSourceFile)fi_sourceFile.GetValue(scriptEvaluator))
                     .Containers
                     .Last(it => it.MemberName.Name.StartsWith("DynamicPatch_"));
                 // Get the TypeSpec from the TypeDefinition, then get its "MetaInfo" (System.Type)
-                var patchClass = ((TypeSpec)pi_Definition.GetValue((Class)typeContainer, null)).GetMetaInfo();
+                Type patchClass = ((TypeSpec)pi_Definition.GetValue((Class)typeContainer, null)).GetMetaInfo();
 
                 // Create the harmony patches as defined
 
@@ -115,7 +114,7 @@ namespace UnityExplorer.Hooks
 
         private string GenerateDefaultPatchSourceCode(MethodInfo targetMethod)
         {
-            var codeBuilder = new StringBuilder();
+            StringBuilder codeBuilder = new();
             // Arguments 
 
             codeBuilder.Append("public static void Postfix(System.Reflection.MethodBase __originalMethod");
@@ -126,10 +125,10 @@ namespace UnityExplorer.Hooks
             if (targetMethod.ReturnType != typeof(void))
                 codeBuilder.Append($", {targetMethod.ReturnType.FullName} __result");
 
-            var parameters = targetMethod.GetParameters();
+            ParameterInfo[] parameters = targetMethod.GetParameters();
 
             int paramIdx = 0;
-            foreach (var param in parameters)
+            foreach (ParameterInfo param in parameters)
             {
                 codeBuilder.Append($", {param.ParameterType.FullDescription().Replace("&", "")} __{paramIdx}");
                 paramIdx++;
@@ -145,14 +144,14 @@ namespace UnityExplorer.Hooks
 
             // Log message 
 
-            var logMessage = new StringBuilder();
+            StringBuilder logMessage = new();
             logMessage.Append($"Patch called: {shortSignature}\\n");
 
             if (!targetMethod.IsStatic)
                 logMessage.Append("__instance: {__instance.ToString()}\\n");
 
             paramIdx = 0;
-            foreach (var param in parameters)
+            foreach (ParameterInfo param in parameters)
             {
                 logMessage.Append($"Parameter {paramIdx} {param.Name}: ");
                 Type pType = param.ParameterType;

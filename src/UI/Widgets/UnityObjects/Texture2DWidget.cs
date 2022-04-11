@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Config;
@@ -223,15 +220,15 @@ namespace UnityExplorer.UI.Widgets
 
             // Actual texture viewer
 
-            GameObject imageViewport = UIFactory.CreateVerticalGroup(textureViewerRoot, "ImageViewport", false, false, true, true, 
-                bgColor: new(1,1,1,0), childAlignment: TextAnchor.MiddleCenter);
+            GameObject imageViewport = UIFactory.CreateVerticalGroup(textureViewerRoot, "ImageViewport", false, false, true, true,
+                bgColor: new(1, 1, 1, 0), childAlignment: TextAnchor.MiddleCenter);
             UIFactory.SetLayoutElement(imageViewport, flexibleWidth: 9999, flexibleHeight: 9999);
 
             GameObject imageHolder = UIFactory.CreateUIObject("ImageHolder", imageViewport);
             imageLayout = UIFactory.SetLayoutElement(imageHolder, 1, 1, 0, 0);
 
-            var actualImageObj = UIFactory.CreateUIObject("ActualImage", imageHolder);
-            var actualRect = actualImageObj.GetComponent<RectTransform>();
+            GameObject actualImageObj = UIFactory.CreateUIObject("ActualImage", imageHolder);
+            RectTransform actualRect = actualImageObj.GetComponent<RectTransform>();
             actualRect.anchorMin = new(0, 0);
             actualRect.anchorMax = new(1, 1);
             image = actualImageObj.AddComponent<Image>();

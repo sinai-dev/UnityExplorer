@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 using UnityExplorer.UI;
 
@@ -98,7 +94,7 @@ namespace UnityExplorer.Config
                 "Optional keybind to being a World-mode Mouse Inspect.",
                 KeyCode.None);
 
-            UI_MouseInspect_Keybind = new("UI Mouse-Inspect Keybind", 
+            UI_MouseInspect_Keybind = new("UI Mouse-Inspect Keybind",
                 "Optional keybind to begin a UI_mode Mouse Inspect.",
                 KeyCode.None);
 

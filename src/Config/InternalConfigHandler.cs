@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using UnityEngine;
-using UnityExplorer.UI;
 using Tomlet;
 using Tomlet.Models;
+using UnityExplorer.UI;
 
 namespace UnityExplorer.Config
 {
@@ -49,9 +46,9 @@ namespace UnityExplorer.Config
                     return false;
 
                 TomlDocument document = TomlParser.ParseFile(CONFIG_PATH);
-                foreach (var key in document.Keys)
+                foreach (string key in document.Keys)
                 {
-                    var panelKey = (UIManager.Panels)Enum.Parse(typeof(UIManager.Panels), key);
+                    UIManager.Panels panelKey = (UIManager.Panels)Enum.Parse(typeof(UIManager.Panels), key);
                     ConfigManager.GetPanelSaveData(panelKey).Value = document.GetString(key);
                 }
 
@@ -69,8 +66,8 @@ namespace UnityExplorer.Config
             if (UIManager.Initializing)
                 return;
 
-            var tomlDocument = TomlDocument.CreateEmpty();
-            foreach (var entry in ConfigManager.InternalConfigs)
+            TomlDocument tomlDocument = TomlDocument.CreateEmpty();
+            foreach (KeyValuePair<string, IConfigElement> entry in ConfigManager.InternalConfigs)
                 tomlDocument.Put(entry.Key, entry.Value.BoxedValue as string, false);
 
             File.WriteAllText(CONFIG_PATH, tomlDocument.SerializedValue);

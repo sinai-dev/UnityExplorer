@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityExplorer.Runtime;
 using UniverseLib;
-using UniverseLib.Input;
 using UniverseLib.Utility;
 
 namespace UnityExplorer.ObjectExplorer
@@ -50,7 +47,7 @@ namespace UnityExplorer.ObjectExplorer
 
         internal static List<object> UnityObjectSearch(string input, string customTypeInput, ChildFilter childFilter, SceneFilter sceneFilter)
         {
-            var results = new List<object>();
+            List<object> results = new();
 
             Type searchType = null;
             if (!string.IsNullOrEmpty(customTypeInput))
@@ -69,7 +66,7 @@ namespace UnityExplorer.ObjectExplorer
             if (searchType == null)
                 searchType = typeof(UnityEngine.Object);
 
-            var allObjects = RuntimeHelper.FindObjectsOfTypeAll(searchType);
+            UnityEngine.Object[] allObjects = RuntimeHelper.FindObjectsOfTypeAll(searchType);
 
             // perform filter comparers
 
@@ -79,14 +76,14 @@ namespace UnityExplorer.ObjectExplorer
 
             bool shouldFilterGOs = searchType == typeof(GameObject) || typeof(Component).IsAssignableFrom(searchType);
 
-            foreach (var obj in allObjects)
+            foreach (UnityEngine.Object obj in allObjects)
             {
                 // name check
                 if (!string.IsNullOrEmpty(nameFilter) && !obj.name.ContainsIgnoreCase(nameFilter))
                     continue;
 
                 GameObject go = null;
-                var type = obj.GetActualType();
+                Type type = obj.GetActualType();
 
                 if (type == typeof(GameObject))
                     go = obj.TryCast<GameObject>();
@@ -130,15 +127,15 @@ namespace UnityExplorer.ObjectExplorer
 
         internal static List<object> ClassSearch(string input)
         {
-            var list = new List<object>();
+            List<object> list = new();
 
-            var nameFilter = "";
+            string nameFilter = "";
             if (!string.IsNullOrEmpty(input))
                 nameFilter = input;
 
-            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+            foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
             {
-                foreach (var type in asm.TryGetTypes())
+                foreach (Type type in asm.TryGetTypes())
                 {
                     if (!string.IsNullOrEmpty(nameFilter) && !type.FullName.ContainsIgnoreCase(nameFilter))
                         continue;
@@ -165,30 +162,30 @@ namespace UnityExplorer.ObjectExplorer
 
         internal static List<object> InstanceSearch(string input)
         {
-            var instances = new List<object>();
+            List<object> instances = new();
 
-            var nameFilter = "";
+            string nameFilter = "";
             if (!string.IsNullOrEmpty(input))
                 nameFilter = input;
 
-            var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
-            
-            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+            BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
+
+            foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
             {
                 // Search all non-static, non-enum classes.
-                foreach (var type in asm.TryGetTypes().Where(it => !(it.IsSealed && it.IsAbstract) && !it.IsEnum))
+                foreach (Type type in asm.TryGetTypes().Where(it => !(it.IsSealed && it.IsAbstract) && !it.IsEnum))
                 {
                     try
                     {
                         if (!string.IsNullOrEmpty(nameFilter) && !type.FullName.ContainsIgnoreCase(nameFilter))
                             continue;
-            
+
                         ReflectionUtility.FindSingleton(instanceNames, type, flags, instances);
                     }
                     catch { }
                 }
             }
-            
+
             return instances;
         }
 

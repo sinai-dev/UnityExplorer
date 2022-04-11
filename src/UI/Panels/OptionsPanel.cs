@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityExplorer.Config;
 using UnityExplorer.CacheObject;
 using UnityExplorer.CacheObject.Views;
-using UnityExplorer.UI.Widgets;
-using UniverseLib.UI.Widgets;
+using UnityExplorer.Config;
 using UniverseLib.UI;
 using UniverseLib.UI.Widgets.ScrollView;
 
@@ -26,7 +21,7 @@ namespace UnityExplorer.UI.Panels
         public override bool ShowByDefault => false;
 
         // Entry holders
-        private readonly List<CacheConfigEntry> configEntries = new List<CacheConfigEntry>();
+        private readonly List<CacheConfigEntry> configEntries = new();
 
         // ICacheObjectController
         public CacheObjectBase ParentCacheObject => null;
@@ -39,10 +34,12 @@ namespace UnityExplorer.UI.Panels
 
         public OptionsPanel()
         {
-            foreach (var entry in ConfigManager.ConfigElements)
+            foreach (KeyValuePair<string, IConfigElement> entry in ConfigManager.ConfigElements)
             {
-                var cache = new CacheConfigEntry(entry.Value);
-                cache.Owner = this;
+                CacheConfigEntry cache = new(entry.Value)
+                {
+                    Owner = this
+                };
                 configEntries.Add(cache);
             }
         }
@@ -71,18 +68,18 @@ namespace UnityExplorer.UI.Panels
         {
             // Save button
 
-            var saveBtn = UIFactory.CreateButton(this.uiContent, "Save", "Save Options", new Color(0.2f, 0.3f, 0.2f));
+            UniverseLib.UI.Models.ButtonRef saveBtn = UIFactory.CreateButton(this.uiContent, "Save", "Save Options", new Color(0.2f, 0.3f, 0.2f));
             UIFactory.SetLayoutElement(saveBtn.Component.gameObject, flexibleWidth: 9999, minHeight: 30, flexibleHeight: 0);
             saveBtn.OnClick += ConfigManager.Handler.SaveConfig;
 
             // Config entries
 
-            var scrollPool = UIFactory.CreateScrollPool<ConfigEntryCell>(this.uiContent, "ConfigEntries", out GameObject scrollObj,
+            ScrollPool<ConfigEntryCell> scrollPool = UIFactory.CreateScrollPool<ConfigEntryCell>(this.uiContent, "ConfigEntries", out GameObject scrollObj,
                 out GameObject scrollContent);
 
             scrollPool.Initialize(this);
 
-            foreach (var config in configEntries)
+            foreach (CacheConfigEntry config in configEntries)
                 config.UpdateValueFromSource();
         }
     }

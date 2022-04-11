@@ -107,7 +107,7 @@ namespace UnityExplorer.Inspectors
 
         public override void OnReturnToPool()
         {
-            foreach (var member in members)
+            foreach (CacheMember member in members)
             {
                 member.UnlinkFromView();
                 member.ReleasePooledObjects();
@@ -175,7 +175,7 @@ namespace UnityExplorer.Inspectors
             scopeFilterButtons[BindingFlags.Default].Component.gameObject.SetActive(!StaticOnly);
             scopeFilterButtons[BindingFlags.Instance].Component.gameObject.SetActive(!StaticOnly);
 
-            foreach (var toggle in memberTypeToggles)
+            foreach (Toggle toggle in memberTypeToggles)
                 toggle.isOn = true;
 
             refreshWanted = true;
@@ -236,7 +236,7 @@ namespace UnityExplorer.Inspectors
 
             if (flags != scopeFlagsFilter)
             {
-                var btn = scopeFilterButtons[scopeFlagsFilter].Component;
+                Button btn = scopeFilterButtons[scopeFlagsFilter].Component;
                 RuntimeHelper.SetColorBlock(btn, disabledButtonColor, disabledButtonColor * 1.3f);
 
                 this.scopeFlagsFilter = flags;
@@ -259,7 +259,7 @@ namespace UnityExplorer.Inspectors
 
             for (int i = 0; i < members.Count; i++)
             {
-                var member = members[i];
+                CacheMember member = members[i];
 
                 if (scopeFlagsFilter != BindingFlags.Default)
                 {
@@ -284,11 +284,11 @@ namespace UnityExplorer.Inspectors
         private void UpdateDisplayedMembers()
         {
             bool shouldRefresh = false;
-            foreach (var cell in MemberScrollPool.CellPool)
+            foreach (CacheMemberCell cell in MemberScrollPool.CellPool)
             {
                 if (!cell.Enabled || cell.Occupant == null)
                     continue;
-                var member = cell.MemberOccupant;
+                CacheMember member = cell.MemberOccupant;
                 if (member.ShouldAutoEvaluate)
                 {
                     shouldRefresh = true;
@@ -316,7 +316,7 @@ namespace UnityExplorer.Inspectors
         {
             CalculateLayouts();
 
-            foreach (var cell in MemberScrollPool.CellPool)
+            foreach (CacheMemberCell cell in MemberScrollPool.CellPool)
                 SetCellLayout(cell);
         }
 
@@ -349,21 +349,21 @@ namespace UnityExplorer.Inspectors
 
             // Class name, assembly
 
-            var topRow = UIFactory.CreateHorizontalGroup(UIRoot, "TopRow", false, false, true, true, 4, default, new(1, 1, 1, 0), TextAnchor.MiddleLeft);
+            GameObject topRow = UIFactory.CreateHorizontalGroup(UIRoot, "TopRow", false, false, true, true, 4, default, new(1, 1, 1, 0), TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(topRow, minHeight: 25, flexibleWidth: 9999);
 
-            var titleHolder = UIFactory.CreateUIObject("TitleHolder", topRow);
+            GameObject titleHolder = UIFactory.CreateUIObject("TitleHolder", topRow);
             UIFactory.SetLayoutElement(titleHolder, minHeight: 35, flexibleHeight: 0, flexibleWidth: 9999);
 
             NameText = UIFactory.CreateLabel(titleHolder, "VisibleTitle", "NotSet", TextAnchor.MiddleLeft);
-            var namerect = NameText.GetComponent<RectTransform>();
+            RectTransform namerect = NameText.GetComponent<RectTransform>();
             namerect.anchorMin = new Vector2(0, 0);
             namerect.anchorMax = new Vector2(1, 1);
             NameText.fontSize = 17;
             UIFactory.SetLayoutElement(NameText.gameObject, minHeight: 35, flexibleHeight: 0, minWidth: 300, flexibleWidth: 9999);
 
             HiddenNameText = UIFactory.CreateInputField(titleHolder, "Title", "not set");
-            var hiddenrect = HiddenNameText.Component.gameObject.GetComponent<RectTransform>();
+            RectTransform hiddenrect = HiddenNameText.Component.gameObject.GetComponent<RectTransform>();
             hiddenrect.anchorMin = new Vector2(0, 0);
             hiddenrect.anchorMax = new Vector2(1, 1);
             HiddenNameText.Component.readOnly = true;
@@ -374,7 +374,7 @@ namespace UnityExplorer.Inspectors
             HiddenNameText.Component.textComponent.color = Color.clear;
             UIFactory.SetLayoutElement(HiddenNameText.Component.gameObject, minHeight: 35, flexibleHeight: 0, flexibleWidth: 9999);
 
-            var copyButton = UIFactory.CreateButton(topRow, "CopyButton", "Copy to Clipboard", new Color(0.2f, 0.2f, 0.2f, 1));
+            ButtonRef copyButton = UIFactory.CreateButton(topRow, "CopyButton", "Copy to Clipboard", new Color(0.2f, 0.2f, 0.2f, 1));
             copyButton.ButtonText.color = Color.yellow;
             UIFactory.SetLayoutElement(copyButton.Component.gameObject, minHeight: 25, minWidth: 120, flexibleWidth: 0);
             copyButton.OnClick += OnCopyClicked;
@@ -392,7 +392,7 @@ namespace UnityExplorer.Inspectors
 
             // Member scroll pool
 
-            var memberBorder = UIFactory.CreateVerticalGroup(mainContentHolder, "ScrollPoolHolder", false, false, true, true, padding: new Vector4(2, 2, 2, 2),
+            GameObject memberBorder = UIFactory.CreateVerticalGroup(mainContentHolder, "ScrollPoolHolder", false, false, true, true, padding: new Vector4(2, 2, 2, 2),
                 bgColor: new Color(0.05f, 0.05f, 0.05f));
             UIFactory.SetLayoutElement(memberBorder, flexibleWidth: 9999, flexibleHeight: 9999);
 
@@ -413,27 +413,27 @@ namespace UnityExplorer.Inspectors
 
         private void ConstructFirstRow(GameObject parent)
         {
-            var rowObj = UIFactory.CreateUIObject("FirstRow", parent);
+            GameObject rowObj = UIFactory.CreateUIObject("FirstRow", parent);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(rowObj, true, true, true, true, 5, 2, 2, 2, 2);
             UIFactory.SetLayoutElement(rowObj, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
 
-            var nameLabel = UIFactory.CreateLabel(rowObj, "NameFilterLabel", "Filter names:", TextAnchor.MiddleLeft, Color.grey);
+            Text nameLabel = UIFactory.CreateLabel(rowObj, "NameFilterLabel", "Filter names:", TextAnchor.MiddleLeft, Color.grey);
             UIFactory.SetLayoutElement(nameLabel.gameObject, minHeight: 25, minWidth: 90, flexibleWidth: 0);
 
             filterInputField = UIFactory.CreateInputField(rowObj, "NameFilterInput", "...");
             UIFactory.SetLayoutElement(filterInputField.UIRoot, minHeight: 25, flexibleWidth: 300);
             filterInputField.OnValueChanged += (string val) => { SetFilter(val); };
 
-            var spacer = UIFactory.CreateUIObject("Spacer", rowObj);
+            GameObject spacer = UIFactory.CreateUIObject("Spacer", rowObj);
             UIFactory.SetLayoutElement(spacer, minWidth: 25);
 
             // Update button and toggle
 
-            var updateButton = UIFactory.CreateButton(rowObj, "UpdateButton", "Update displayed values", new Color(0.22f, 0.28f, 0.22f));
+            ButtonRef updateButton = UIFactory.CreateButton(rowObj, "UpdateButton", "Update displayed values", new Color(0.22f, 0.28f, 0.22f));
             UIFactory.SetLayoutElement(updateButton.Component.gameObject, minHeight: 25, minWidth: 175, flexibleWidth: 0);
             updateButton.OnClick += UpdateClicked;
 
-            var toggleObj = UIFactory.CreateToggle(rowObj, "AutoUpdateToggle", out autoUpdateToggle, out Text toggleText);
+            GameObject toggleObj = UIFactory.CreateToggle(rowObj, "AutoUpdateToggle", out autoUpdateToggle, out Text toggleText);
             UIFactory.SetLayoutElement(toggleObj, minWidth: 125, minHeight: 25);
             autoUpdateToggle.isOn = false;
             toggleText.text = "Auto-update";
@@ -443,19 +443,19 @@ namespace UnityExplorer.Inspectors
 
         private void ConstructSecondRow(GameObject parent)
         {
-            var rowObj = UIFactory.CreateUIObject("SecondRow", parent);
+            GameObject rowObj = UIFactory.CreateUIObject("SecondRow", parent);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(rowObj, false, false, true, true, 5, 2, 2, 2, 2);
             UIFactory.SetLayoutElement(rowObj, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
 
             // Scope buttons
 
-            var scopeLabel = UIFactory.CreateLabel(rowObj, "ScopeLabel", "Scope:", TextAnchor.MiddleLeft, Color.grey);
+            Text scopeLabel = UIFactory.CreateLabel(rowObj, "ScopeLabel", "Scope:", TextAnchor.MiddleLeft, Color.grey);
             UIFactory.SetLayoutElement(scopeLabel.gameObject, minHeight: 25, minWidth: 60, flexibleWidth: 0);
             AddScopeFilterButton(rowObj, BindingFlags.Default, true);
             AddScopeFilterButton(rowObj, BindingFlags.Instance);
             AddScopeFilterButton(rowObj, BindingFlags.Static);
 
-            var spacer = UIFactory.CreateUIObject("Spacer", rowObj);
+            GameObject spacer = UIFactory.CreateUIObject("Spacer", rowObj);
             UIFactory.SetLayoutElement(spacer, minWidth: 15);
 
             // Member type toggles
@@ -469,9 +469,9 @@ namespace UnityExplorer.Inspectors
         private void AddScopeFilterButton(GameObject parent, BindingFlags flags, bool setAsActive = false)
         {
             string lbl = flags == BindingFlags.Default ? "All" : flags.ToString();
-            var color = setAsActive ? enabledButtonColor : disabledButtonColor;
+            Color color = setAsActive ? enabledButtonColor : disabledButtonColor;
 
-            var button = UIFactory.CreateButton(parent, "Filter_" + flags, lbl, color);
+            ButtonRef button = UIFactory.CreateButton(parent, "Filter_" + flags, lbl, color);
             UIFactory.SetLayoutElement(button.Component.gameObject, minHeight: 25, flexibleHeight: 0, minWidth: 70, flexibleWidth: 0);
             scopeFilterButtons.Add(flags, button);
 
@@ -480,7 +480,7 @@ namespace UnityExplorer.Inspectors
 
         private void AddMemberTypeToggle(GameObject parent, MemberTypes type, int width)
         {
-            var toggleObj = UIFactory.CreateToggle(parent, "Toggle_" + type, out Toggle toggle, out Text toggleText);
+            GameObject toggleObj = UIFactory.CreateToggle(parent, "Toggle_" + type, out Toggle toggle, out Text toggleText);
             UIFactory.SetLayoutElement(toggleObj, minHeight: 25, minWidth: width);
             string color = type switch
             {

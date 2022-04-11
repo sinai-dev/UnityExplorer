@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using UnityExplorer.CacheObject.IValues;
-using UniverseLib;
-using UniverseLib.UI;
 using UniverseLib.UI.Models;
 using UniverseLib.Utility;
 
@@ -30,8 +28,8 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         public InputFieldRef InputField { get; }
         public bool AnchorToCaretPosition => false;
 
-        private readonly List<Suggestion> suggestions = new List<Suggestion>();
-        private readonly HashSet<string> suggestedValues = new HashSet<string>();
+        private readonly List<Suggestion> suggestions = new();
+        private readonly HashSet<string> suggestedValues = new();
 
         private OrderedDictionary enumValues;
 
@@ -58,7 +56,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         private string GetLastSplitInput(string fullInput)
         {
             string ret = fullInput;
-            
+
             int lastSplit = fullInput.LastIndexOf(',');
             if (lastSplit >= 0)
             {
@@ -139,13 +137,13 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
             for (int i = 0; i < this.enumValues.Count; i++)
             {
-                var enumValue = (CachedEnumValue)enumValues[i];
+                CachedEnumValue enumValue = (CachedEnumValue)enumValues[i];
                 if (enumValue.Name.ContainsIgnoreCase(value))
                     AddSuggestion(enumValue.Name);
             }
         }
 
-        internal static readonly Dictionary<string, string> sharedValueToLabel = new Dictionary<string, string>(4096);
+        internal static readonly Dictionary<string, string> sharedValueToLabel = new(4096);
 
         void AddSuggestion(string value)
         {

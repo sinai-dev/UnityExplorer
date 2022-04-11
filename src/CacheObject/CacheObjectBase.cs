@@ -1,20 +1,12 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityExplorer.Runtime;
 using UnityExplorer.CacheObject.IValues;
 using UnityExplorer.CacheObject.Views;
-using UniverseLib.UI.Models;
-using UnityExplorer.UI;
 using UniverseLib;
 using UniverseLib.UI;
-using UniverseLib.Utility;
 using UniverseLib.UI.ObjectPool;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.CacheObject
 {
@@ -134,7 +126,7 @@ namespace UnityExplorer.CacheObject
 
         protected virtual void ProcessOnEvaluate()
         {
-            var prevState = State;
+            ValueState prevState = State;
 
             if (LastException != null)
             {
@@ -319,7 +311,7 @@ namespace UnityExplorer.CacheObject
                     SetValueState(cell, new(true, inspectActive: !LastValueWasNull, subContentButtonActive: !LastValueWasNull));
                     break;
                 case ValueState.Unsupported:
-                    SetValueState(cell, new (true, inspectActive: !LastValueWasNull));
+                    SetValueState(cell, new(true, inspectActive: !LastValueWasNull));
                     break;
             }
 
@@ -369,7 +361,7 @@ namespace UnityExplorer.CacheObject
 
             // set subcontent button if needed, and for null strings and exceptions
             cell.SubContentButton.Component.gameObject.SetActive(
-                args.subContentButtonActive 
+                args.subContentButtonActive
                 && (!LastValueWasNull || State == ValueState.String || State == ValueState.Exception));
         }
 
@@ -474,12 +466,12 @@ namespace UnityExplorer.CacheObject
             public Color valueColor;
             public bool valueActive, valueRichText, typeLabelActive, toggleActive, inputActive, applyActive, inspectActive, subContentButtonActive;
 
-            public ValueStateArgs(bool valueActive = true, 
-                bool valueRichText = true, 
+            public ValueStateArgs(bool valueActive = true,
+                bool valueRichText = true,
                 Color? valueColor = null,
-                bool typeLabelActive = false, 
-                bool toggleActive = false, 
-                bool inputActive = false, 
+                bool typeLabelActive = false,
+                bool toggleActive = false,
+                bool inputActive = false,
                 bool applyActive = false,
                 bool inspectActive = false,
                 bool subContentButtonActive = false)

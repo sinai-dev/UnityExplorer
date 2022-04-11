@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UniverseLib;
@@ -65,11 +63,11 @@ namespace UnityExplorer.ObjectExplorer
                 if (sceneUtil == null)
                     throw new Exception("This version of Unity does not ship with the 'SceneUtility' class, or it was not unstripped.");
 
-                var method = sceneUtil.GetMethod("GetScenePathByBuildIndex", ReflectionUtility.FLAGS);
+                System.Reflection.MethodInfo method = sceneUtil.GetMethod("GetScenePathByBuildIndex", ReflectionUtility.FLAGS);
                 int sceneCount = SceneManager.sceneCountInBuildSettings;
                 for (int i = 0; i < sceneCount; i++)
                 {
-                    var scenePath = (string)method.Invoke(null, new object[] { i });
+                    string scenePath = (string)method.Invoke(null, new object[] { i });
                     AllSceneNames.Add(scenePath);
                 }
 
@@ -85,9 +83,9 @@ namespace UnityExplorer.ObjectExplorer
         internal static void Update()
         {
             // Inspected scene will exist if it's DontDestroyOnLoad or HideAndDontSave
-            bool inspectedExists = 
-                SelectedScene.HasValue 
-                && ((DontDestroyExists && SelectedScene.Value.handle == -12) 
+            bool inspectedExists =
+                SelectedScene.HasValue
+                && ((DontDestroyExists && SelectedScene.Value.handle == -12)
                     || SelectedScene.Value.handle == -1);
 
             LoadedScenes.Clear();
@@ -121,11 +119,11 @@ namespace UnityExplorer.ObjectExplorer
                 CurrentRootObjects = RuntimeHelper.GetRootGameObjects((Scene)SelectedScene);
             else
             {
-                var allObjects = RuntimeHelper.FindObjectsOfTypeAll(typeof(GameObject));
-                var objects = new List<GameObject>();
-                foreach (var obj in allObjects)
+                UnityEngine.Object[] allObjects = RuntimeHelper.FindObjectsOfTypeAll(typeof(GameObject));
+                List<GameObject> objects = new();
+                foreach (UnityEngine.Object obj in allObjects)
                 {
-                    var go = obj.TryCast<GameObject>();
+                    GameObject go = obj.TryCast<GameObject>();
                     if (go.transform.parent == null && !go.scene.IsValid())
                         objects.Add(go);
                 }

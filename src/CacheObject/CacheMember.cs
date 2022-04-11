@@ -1,21 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using UnityEngine;
-using UnityExplorer.Runtime;
 using UnityExplorer.CacheObject.Views;
 using UnityExplorer.Inspectors;
-using UniverseLib.UI.Models;
-using UnityExplorer.UI;
-using UniverseLib;
-using UniverseLib.UI;
 using UnityExplorer.UI.Widgets;
-using UniverseLib.Utility;
+using UniverseLib;
 using UniverseLib.UI.ObjectPool;
-using System.Collections;
-using HarmonyLib;
+using UniverseLib.Utility;
 
 namespace UnityExplorer.CacheObject
 {
@@ -105,7 +96,7 @@ namespace UnityExplorer.CacheObject
 
         protected override bool TryAutoEvaluateIfUnitialized(CacheObjectCell objectcell)
         {
-            var cell = objectcell as CacheMemberCell;
+            CacheMemberCell cell = objectcell as CacheMemberCell;
 
             cell.EvaluateHolder.SetActive(!ShouldAutoEvaluate);
             if (!ShouldAutoEvaluate)

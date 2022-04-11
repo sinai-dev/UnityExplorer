@@ -10,8 +10,6 @@ using UniverseLib;
 using UniverseLib.Input;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
-using UniverseLib.UI.ObjectPool;
-using UniverseLib.UI.Widgets;
 using UniverseLib.UI.Widgets.ScrollView;
 using UniverseLib.Utility;
 
@@ -108,7 +106,7 @@ namespace UnityExplorer.UI
             UIPanels.Add(Panels.UIInspectorResults, new MouseInspectorResultsPanel());
             UIPanels.Add(Panels.MouseInspector, new MouseInspector());
 
-            foreach (var panel in UIPanels.Values)
+            foreach (UIPanel panel in UIPanels.Values)
                 panel.ConstructUI();
 
             // Call some initialize methods
@@ -122,7 +120,7 @@ namespace UnityExplorer.UI
             ShowMenu = !ConfigManager.Hide_On_Startup.Value;
 
             // Failsafe fix, in some games all dropdowns displayed values are blank on startup for some reason.
-            foreach (var dropdown in UIRoot.GetComponentsInChildren<Dropdown>(true))
+            foreach (Dropdown dropdown in UIRoot.GetComponentsInChildren<Dropdown>(true))
                 dropdown.RefreshShownValue();
 
             Initializing = false;
@@ -167,7 +165,7 @@ namespace UnityExplorer.UI
             }
 
             // check screen dimension change
-            var display = DisplayManager.ActiveDisplay;
+            Display display = DisplayManager.ActiveDisplay;
             if (display.renderingWidth != lastScreenWidth || display.renderingHeight != lastScreenHeight)
                 OnScreenDimensionsChanged();
         }
@@ -180,7 +178,7 @@ namespace UnityExplorer.UI
 
         public static void TogglePanel(Panels panel)
         {
-            var uiPanel = GetPanel(panel);
+            UIPanel uiPanel = GetPanel(panel);
             SetPanelActive(panel, !uiPanel.Enabled);
         }
 
@@ -227,11 +225,11 @@ namespace UnityExplorer.UI
 
         private static void OnScreenDimensionsChanged()
         {
-            var display = DisplayManager.ActiveDisplay;
+            Display display = DisplayManager.ActiveDisplay;
             lastScreenWidth = display.renderingWidth;
             lastScreenHeight = display.renderingHeight;
 
-            foreach (var panel in UIPanels)
+            foreach (KeyValuePair<Panels, UIPanel> panel in UIPanels)
             {
                 panel.Value.EnsureValidSize();
                 UIPanel.EnsureValidPosition(panel.Value.Rect);
@@ -292,7 +290,7 @@ namespace UnityExplorer.UI
             PanelHolder = new GameObject("PanelHolder");
             PanelHolder.transform.SetParent(UIRoot.transform, false);
             PanelHolder.layer = 5;
-            var rect = PanelHolder.AddComponent<RectTransform>();
+            RectTransform rect = PanelHolder.AddComponent<RectTransform>();
             rect.sizeDelta = Vector2.zero;
             rect.anchoredPosition = Vector2.zero;
             rect.pivot = new Vector2(0.5f, 0.5f);
@@ -303,7 +301,7 @@ namespace UnityExplorer.UI
 
         private static void CreateTopNavBar()
         {
-            var navbarPanel = UIFactory.CreateUIObject("MainNavbar", UIRoot);
+            GameObject navbarPanel = UIFactory.CreateUIObject("MainNavbar", UIRoot);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(navbarPanel, false, false, true, true, 5, 4, 4, 4, 4, TextAnchor.MiddleCenter);
             navbarPanel.AddComponent<Image>().color = new Color(0.1f, 0.1f, 0.1f);
             NavBarRect = navbarPanel.GetComponent<RectTransform>();
@@ -320,7 +318,7 @@ namespace UnityExplorer.UI
             // UnityExplorer title
 
             string titleTxt = $"{ExplorerCore.NAME} <i><color=grey>{ExplorerCore.VERSION}</color></i>";
-            var title = UIFactory.CreateLabel(navbarPanel, "Title", titleTxt, TextAnchor.MiddleLeft, default, true, 17);
+            Text title = UIFactory.CreateLabel(navbarPanel, "Title", titleTxt, TextAnchor.MiddleLeft, default, true, 17);
             UIFactory.SetLayoutElement(title.gameObject, minWidth: 170, flexibleWidth: 0);
 
             // panel tabs
@@ -331,7 +329,7 @@ namespace UnityExplorer.UI
 
             // Time controls
 
-            var timeLabel = UIFactory.CreateLabel(navbarPanel, "TimeLabel", "Time:", TextAnchor.MiddleRight, Color.grey);
+            Text timeLabel = UIFactory.CreateLabel(navbarPanel, "TimeLabel", "Time:", TextAnchor.MiddleRight, Color.grey);
             UIFactory.SetLayoutElement(timeLabel.gameObject, minHeight: 25, minWidth: 50);
 
             timeInput = UIFactory.CreateInputField(navbarPanel, "TimeInput", "timeScale");

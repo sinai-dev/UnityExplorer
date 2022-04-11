@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections;
+﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using UnityExplorer.Inspectors;
 using UnityExplorer.Runtime;
 using UniverseLib;
-using HarmonyLib;
-using HarmonyLib.Tools;
 
 namespace UnityExplorer.CacheObject
 {
@@ -75,8 +72,8 @@ namespace UnityExplorer.CacheObject
             return sorted;
         }
 
-        static void TryCacheMember<T>(MemberInfo member, List<T> list, HashSet<string> cachedSigs, 
-            Type declaringType, ReflectionInspector inspector, bool ignorePropertyMethodInfos = true) 
+        static void TryCacheMember<T>(MemberInfo member, List<T> list, HashSet<string> cachedSigs,
+            Type declaringType, ReflectionInspector inspector, bool ignorePropertyMethodInfos = true)
             where T : CacheMember
         {
             try

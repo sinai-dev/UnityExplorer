@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.UI;
-using UniverseLib;
 using UniverseLib.UI;
 using UniverseLib.Utility;
+using UniverseLib;
 
 namespace UnityExplorer.CacheObject.Views
 {
@@ -32,7 +27,7 @@ namespace UnityExplorer.CacheObject.Views
 
             // horizontal group
 
-            var horiGroup = UIFactory.CreateUIObject("RightHoriGroup", UIRoot);
+            GameObject horiGroup = UIFactory.CreateUIObject("RightHoriGroup", UIRoot);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(horiGroup, false, false, true, true, 4, childAlignment: TextAnchor.UpperLeft);
             UIFactory.SetLayoutElement(horiGroup, minHeight: 25, minWidth: 200, flexibleWidth: 9999, flexibleHeight: 800);
 
@@ -48,7 +43,7 @@ namespace UnityExplorer.CacheObject.Views
 
             // Bool and number value interaction
 
-            var toggleObj = UIFactory.CreateToggle(horiGroup, "Toggle", out Toggle, out ToggleText);
+            GameObject toggleObj = UIFactory.CreateToggle(horiGroup, "Toggle", out Toggle, out ToggleText);
             UIFactory.SetLayoutElement(toggleObj, minWidth: 70, minHeight: 25, flexibleWidth: 0, flexibleHeight: 0);
             ToggleText.color = SignatureHighlighter.KeywordBlue;
             Toggle.onValueChanged.AddListener(ToggleClicked);
@@ -77,7 +72,7 @@ namespace UnityExplorer.CacheObject.Views
             SubContentHolder.SetActive(false);
 
             // Bottom separator
-            var separator = UIFactory.CreateUIObject("BottomSeperator", UIRoot);
+            GameObject separator = UIFactory.CreateUIObject("BottomSeperator", UIRoot);
             UIFactory.SetLayoutElement(separator, minHeight: 1, flexibleHeight: 0, flexibleWidth: 9999);
             separator.AddComponent<Image>().color = Color.black;
 

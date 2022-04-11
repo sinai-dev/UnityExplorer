@@ -8,7 +8,7 @@ namespace UnityExplorer.CSConsole.Lexers
         public override IEnumerable<char> Delimiters => new[] { '"', '\'', };
 
         // orange
-        protected override Color HighlightColor => new Color(0.79f, 0.52f, 0.32f, 1.0f);
+        protected override Color HighlightColor => new(0.79f, 0.52f, 0.32f, 1.0f);
 
         public override bool TryMatchCurrent(LexerBuilder lexer)
         {

@@ -1,18 +1,14 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using HarmonyLib;
 using UnityEngine;
-using UnityExplorer.Runtime;
 using UnityExplorer.CSConsole;
+using UnityExplorer.Runtime;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
-using UnityExplorer.UI.Widgets;
 using UniverseLib;
-using UniverseLib.UI.Widgets;
 using UniverseLib.UI.Widgets.ScrollView;
 using UniverseLib.Utility;
 
@@ -32,22 +28,22 @@ namespace UnityExplorer.Hooks
         public int ItemCount => isAddingMethods ? filteredEligableMethods.Count : currentHooks.Count;
 
         // current hooks
-        private readonly HashSet<string> hookedSignatures = new HashSet<string>();
-        private readonly OrderedDictionary currentHooks = new OrderedDictionary();
+        private readonly HashSet<string> hookedSignatures = new();
+        private readonly OrderedDictionary currentHooks = new();
 
         // adding hooks
-        private readonly List<MethodInfo> currentAddEligableMethods = new List<MethodInfo>();
-        private readonly List<MethodInfo> filteredEligableMethods = new List<MethodInfo>();
+        private readonly List<MethodInfo> currentAddEligableMethods = new();
+        private readonly List<MethodInfo> filteredEligableMethods = new();
 
         // hook editor
-        private readonly LexerBuilder Lexer = new LexerBuilder();
+        private readonly LexerBuilder Lexer = new();
         private HookInstance currentEditedHook;
 
         // ~~~~~~~~~~~ Main Current Hooks window ~~~~~~~~~~~
 
         public void EnableOrDisableHookClicked(int index)
         {
-            var hook = (HookInstance)currentHooks[index];
+            HookInstance hook = (HookInstance)currentHooks[index];
             hook.TogglePatch();
 
             Panel.HooksScrollPool.Refresh(true, false);
@@ -55,7 +51,7 @@ namespace UnityExplorer.Hooks
 
         public void DeleteHookClicked(int index)
         {
-            var hook = (HookInstance)currentHooks[index];
+            HookInstance hook = (HookInstance)currentHooks[index];
             hook.Unpatch();
             currentHooks.RemoveAt(index);
             hookedSignatures.Remove(hook.TargetMethod.FullDescription());
@@ -66,7 +62,7 @@ namespace UnityExplorer.Hooks
         public void EditPatchClicked(int index)
         {
             Panel.SetPage(HookManagerPanel.Pages.HookSourceEditor);
-            var hook = (HookInstance)currentHooks[index];
+            HookInstance hook = (HookInstance)currentHooks[index];
             currentEditedHook = hook;
             Panel.EditorInput.Text = hook.PatchSourceCode;
         }
@@ -84,7 +80,7 @@ namespace UnityExplorer.Hooks
             }
 
             cell.CurrentDisplayedIndex = index;
-            var hook = (HookInstance)this.currentHooks[index];
+            HookInstance hook = (HookInstance)this.currentHooks[index];
 
             cell.MethodNameLabel.text = SignatureHighlighter.HighlightMethod(hook.TargetMethod);
 
@@ -97,7 +93,7 @@ namespace UnityExplorer.Hooks
 
         public void OnClassSelectedForHooks(string typeFullName)
         {
-            var type = ReflectionUtility.GetTypeByName(typeFullName);
+            Type type = ReflectionUtility.GetTypeByName(typeFullName);
             if (type == null)
             {
                 ExplorerCore.LogWarning($"Could not find any type by name {typeFullName}!");
@@ -109,7 +105,7 @@ namespace UnityExplorer.Hooks
             Panel.ResetMethodFilter();
             filteredEligableMethods.Clear();
             currentAddEligableMethods.Clear();
-            foreach (var method in type.GetMethods(ReflectionUtility.FLAGS))
+            foreach (MethodInfo method in type.GetMethods(ReflectionUtility.FLAGS))
             {
                 if (method.IsGenericMethod || UERuntimeHelper.IsBlacklisted(method))
                     continue;
@@ -140,11 +136,11 @@ namespace UnityExplorer.Hooks
 
         public void AddHook(MethodInfo method)
         {
-            var sig = method.FullDescription();
+            string sig = method.FullDescription();
             if (hookedSignatures.Contains(sig))
                 return;
 
-            var hook = new HookInstance(method);
+            HookInstance hook = new(method);
             if (hook.Enabled)
             {
                 hookedSignatures.Add(sig);
@@ -160,7 +156,7 @@ namespace UnityExplorer.Hooks
                 filteredEligableMethods.AddRange(currentAddEligableMethods);
             else
             {
-                foreach (var method in currentAddEligableMethods)
+                foreach (MethodInfo method in currentAddEligableMethods)
                 {
                     if (method.Name.ContainsIgnoreCase(input))
                         filteredEligableMethods.Add(method);
@@ -183,11 +179,11 @@ namespace UnityExplorer.Hooks
             }
 
             cell.CurrentDisplayedIndex = index;
-            var method = this.filteredEligableMethods[index];
+            MethodInfo method = this.filteredEligableMethods[index];
 
             cell.MethodNameLabel.text = SignatureHighlighter.HighlightMethod(method);
 
-            var sig = method.FullDescription();
+            string sig = method.FullDescription();
             if (hookedSignatures.Contains(sig))
             {
                 cell.HookButton.Component.gameObject.SetActive(false);
@@ -216,7 +212,7 @@ namespace UnityExplorer.Hooks
 
         public void EditorInputSave()
         {
-            var input = Panel.EditorInput.Text;
+            string input = Panel.EditorInput.Text;
             bool wasEnabled = currentEditedHook.Enabled;
             if (currentEditedHook.CompileAndGenerateProcessor(input))
             {

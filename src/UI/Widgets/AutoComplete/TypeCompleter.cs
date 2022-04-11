@@ -1,9 +1,7 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UniverseLib;
-using UniverseLib.UI;
 using UniverseLib.UI.Models;
 using UniverseLib.Utility;
 
@@ -67,10 +65,10 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             else
             {
                 allowedTypes = new();
-                foreach (var entry in ReflectionUtility.AllTypes)
+                foreach (KeyValuePair<string, Type> entry in ReflectionUtility.AllTypes)
                 {
                     // skip <PrivateImplementationDetails> and <AnonymousClass> classes
-                    var type = entry.Value;
+                    Type type = entry.Value;
                     if (type.FullName.Contains("PrivateImplementationDetails")
                              || type.FullName.Contains("DisplayClass")
                              || type.FullName.Contains('<'))
@@ -126,7 +124,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             if (ReflectionUtility.GetTypeByName(value) is Type t && allowedTypes.Contains(t))
                 AddSuggestion(t);
 
-            foreach (var entry in allowedTypes)
+            foreach (Type entry in allowedTypes)
             {
                 if (entry.FullName.ContainsIgnoreCase(value))
                     AddSuggestion(entry);

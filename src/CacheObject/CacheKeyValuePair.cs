@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityExplorer.CacheObject.IValues;
 using UnityExplorer.CacheObject.Views;
 using UniverseLib;
@@ -41,7 +38,7 @@ namespace UnityExplorer.CacheObject
             this.DictKey = key;
             this.DisplayedKey = key.TryCast();
 
-            var type = DisplayedKey.GetType();
+            Type type = DisplayedKey.GetType();
             if (ParseUtility.CanParse(type))
             {
                 KeyInputWanted = true;
@@ -60,7 +57,7 @@ namespace UnityExplorer.CacheObject
         {
             base.SetDataToCell(cell);
 
-            var kvpCell = cell as CacheKeyValuePairCell;
+            CacheKeyValuePairCell kvpCell = cell as CacheKeyValuePairCell;
 
             kvpCell.NameLabel.text = $"{DictIndex}:";
             kvpCell.HiddenNameLabel.Text = "";

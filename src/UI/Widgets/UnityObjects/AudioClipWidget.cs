@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
@@ -273,7 +271,7 @@ namespace UnityExplorer.UI.Widgets
         }
     }
 
-#region SavWav
+    #region SavWav
 
     //	Copyright (c) 2012 Calvin Rien
     //        http://the.darktable.com
@@ -404,6 +402,6 @@ namespace UnityExplorer.UI.Widgets
             stream.Seek(0, SeekOrigin.Begin);
         }
 
-#endregion
+        #endregion
     }
 }

@@ -3,15 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Config;
-using UnityExplorer.UI.Widgets;
 using UniverseLib;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
-using UniverseLib.UI.Widgets;
 using UniverseLib.UI.Widgets.ScrollView;
 using UniverseLib.Utility;
 
@@ -29,7 +26,7 @@ namespace UnityExplorer.UI.Panels
             public LogInfo(string message, LogType type) { this.message = message; this.type = type; }
         }
 
-        private static readonly List<LogInfo> Logs = new List<LogInfo>();
+        private static readonly List<LogInfo> Logs = new();
         private static string CurrentStreamPath;
 
         public override string Name => "Log";
@@ -67,16 +64,16 @@ namespace UnityExplorer.UI.Panels
 
         private void SetupIO()
         {
-            var fileName = $"UnityExplorer {DateTime.Now:u}.txt";
+            string fileName = $"UnityExplorer {DateTime.Now:u}.txt";
             fileName = IOUtility.EnsureValidFilename(fileName);
-            var path = Path.Combine(ExplorerCore.ExplorerFolder, "Logs");
+            string path = Path.Combine(ExplorerCore.ExplorerFolder, "Logs");
             CurrentStreamPath = IOUtility.EnsureValidFilePath(Path.Combine(path, fileName));
 
             // clean old log(s)
-            var files = Directory.GetFiles(path);
+            string[] files = Directory.GetFiles(path);
             if (files.Length >= 10)
             {
-                var sorted = files.ToList();
+                List<string> sorted = files.ToList();
                 // sort by 'datetime.ToString("u")' will put the oldest ones first
                 sorted.Sort();
                 for (int i = 0; i < files.Length - 9; i++)
@@ -113,7 +110,7 @@ namespace UnityExplorer.UI.Panels
 
         // Cell pool
 
-        private static readonly Dictionary<LogType, Color> logColors = new Dictionary<LogType, Color>
+        private static readonly Dictionary<LogType, Color> logColors = new()
         {
             { LogType.Log,       Color.white },
             { LogType.Warning,   Color.yellow },
@@ -122,8 +119,8 @@ namespace UnityExplorer.UI.Panels
             { LogType.Exception, Color.red },
         };
 
-        private readonly Color logEvenColor = new Color(0.34f, 0.34f, 0.34f);
-        private readonly Color logOddColor = new Color(0.28f, 0.28f, 0.28f);
+        private readonly Color logEvenColor = new(0.34f, 0.34f, 0.34f);
+        private readonly Color logOddColor = new(0.28f, 0.28f, 0.28f);
 
         public void OnCellBorrowed(ConsoleLogCell cell) { }
 
@@ -138,12 +135,12 @@ namespace UnityExplorer.UI.Panels
             // Logs are displayed in reverse order (newest at top)
             index = Logs.Count - index - 1;
 
-            var log = Logs[index];
+            LogInfo log = Logs[index];
             cell.IndexLabel.text = $"{index}:";
             cell.Input.Text = log.message;
             cell.Input.Component.textComponent.color = logColors[log.type];
 
-            var color = index % 2 == 0 ? logEvenColor : logOddColor;
+            Color color = index % 2 == 0 ? logEvenColor : logOddColor;
             RuntimeHelper.SetColorBlock(cell.Input.Component, color);
         }
 
@@ -167,21 +164,21 @@ namespace UnityExplorer.UI.Panels
 
             // Buttons and toggles
 
-            var optionsRow = UIFactory.CreateUIObject("OptionsRow", this.uiContent);
+            GameObject optionsRow = UIFactory.CreateUIObject("OptionsRow", this.uiContent);
             UIFactory.SetLayoutElement(optionsRow, minHeight: 25, flexibleWidth: 9999);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(optionsRow, false, false, true, true, 5, 2, 2, 2, 2);
 
-            var clearButton = UIFactory.CreateButton(optionsRow, "ClearButton", "Clear", new Color(0.2f, 0.2f, 0.2f));
+            ButtonRef clearButton = UIFactory.CreateButton(optionsRow, "ClearButton", "Clear", new Color(0.2f, 0.2f, 0.2f));
             UIFactory.SetLayoutElement(clearButton.Component.gameObject, minHeight: 23, flexibleHeight: 0, minWidth: 60);
             clearButton.OnClick += ClearLogs;
             clearButton.Component.transform.SetSiblingIndex(1);
 
-            var fileButton = UIFactory.CreateButton(optionsRow, "FileButton", "Open Log File", new Color(0.2f, 0.2f, 0.2f));
+            ButtonRef fileButton = UIFactory.CreateButton(optionsRow, "FileButton", "Open Log File", new Color(0.2f, 0.2f, 0.2f));
             UIFactory.SetLayoutElement(fileButton.Component.gameObject, minHeight: 23, flexibleHeight: 0, minWidth: 100);
             fileButton.OnClick += OpenLogFile;
             fileButton.Component.transform.SetSiblingIndex(2);
 
-            var unityToggle = UIFactory.CreateToggle(optionsRow, "UnityLogToggle", out var toggle, out var toggleText);
+            GameObject unityToggle = UIFactory.CreateToggle(optionsRow, "UnityLogToggle", out Toggle toggle, out Text toggleText);
             UIFactory.SetLayoutElement(unityToggle, minHeight: 25, minWidth: 150);
             toggleText.text = "Log Unity Debug?";
             toggle.isOn = ConfigManager.Log_Unity_Debug.Value;

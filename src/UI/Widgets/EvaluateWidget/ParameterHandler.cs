@@ -1,11 +1,8 @@
 ﻿using HarmonyLib;
 using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.CacheObject.IValues;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets.AutoComplete;
 using UniverseLib;
@@ -38,7 +35,7 @@ namespace UnityExplorer.UI.Widgets
             if (paramType.IsByRef)
                 paramType = paramType.GetElementType();
 
-            this.argNameLabel.text = 
+            this.argNameLabel.text =
                 $"{SignatureHighlighter.Parse(paramType, false)} <color={SignatureHighlighter.LOCAL_ARG}>{paramInfo.Name}</color>";
 
             if (ParseUtility.CanParse(paramType) || typeof(Type).IsAssignableFrom(paramType))
@@ -105,7 +102,7 @@ namespace UnityExplorer.UI.Widgets
             if (usingBasicLabel)
                 return basicValue;
 
-            var input = this.inputField.Text;
+            string input = this.inputField.Text;
 
             if (typeof(Type).IsAssignableFrom(paramType))
                 return ReflectionUtility.GetTypeByName(input);

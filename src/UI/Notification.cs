@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
-using UniverseLib.Input;
 using UniverseLib.UI;
 
 namespace UnityExplorer.UI
@@ -48,7 +43,7 @@ namespace UnityExplorer.UI
             popupLabel = UIFactory.CreateLabel(UIManager.UIRoot, "ClipboardNotification", "", TextAnchor.MiddleCenter);
             popupLabel.rectTransform.sizeDelta = new(500, 100);
             popupLabel.gameObject.AddComponent<Outline>();
-            var popupGroup = popupLabel.gameObject.AddComponent<CanvasGroup>();
+            CanvasGroup popupGroup = popupLabel.gameObject.AddComponent<CanvasGroup>();
             popupGroup.blocksRaycasts = false;
         }
     }

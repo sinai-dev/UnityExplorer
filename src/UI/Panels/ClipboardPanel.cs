@@ -1,17 +1,8 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.CacheObject;
-using UnityExplorer.CacheObject.Views;
-using UnityExplorer.Config;
 using UniverseLib;
-using UniverseLib.Input;
 using UniverseLib.UI;
-using UniverseLib.UI.Widgets;
 using UniverseLib.Utility;
 
 namespace UnityExplorer.UI.Panels
@@ -41,14 +32,14 @@ namespace UnityExplorer.UI.Panels
         public static bool TryPaste(Type targetType, out object paste)
         {
             paste = Current;
-            var pasteType = Current?.GetActualType();
+            Type pasteType = Current?.GetActualType();
 
             if (Current != null && !targetType.IsAssignableFrom(pasteType))
             {
                 Notification.ShowMessage($"Cannot assign '{pasteType.Name}' to '{targetType.Name}'!");
                 return false;
             }
-            
+
             Notification.ShowMessage("Pasted!");
             return true;
         }
@@ -74,7 +65,7 @@ namespace UnityExplorer.UI.Panels
 
             InspectorManager.Inspect(Current);
         }
-        
+
         protected internal override void DoSetDefaultPosAndAnchors()
         {
             this.Rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, MinWidth);
@@ -89,20 +80,20 @@ namespace UnityExplorer.UI.Panels
 
             // Actual panel content
 
-            var firstRow = UIFactory.CreateHorizontalGroup(uiContent, "FirstRow", false, false, true, true, 5, new(2,2,2,2), new(1,1,1,0));
+            GameObject firstRow = UIFactory.CreateHorizontalGroup(uiContent, "FirstRow", false, false, true, true, 5, new(2, 2, 2, 2), new(1, 1, 1, 0));
             UIFactory.SetLayoutElement(firstRow, minHeight: 25, flexibleWidth: 999);
 
             // Title for "Current Paste:"
-            var currentPasteTitle = UIFactory.CreateLabel(firstRow, "CurrentPasteTitle", "Current paste:", TextAnchor.MiddleLeft, color: Color.grey);
+            Text currentPasteTitle = UIFactory.CreateLabel(firstRow, "CurrentPasteTitle", "Current paste:", TextAnchor.MiddleLeft, color: Color.grey);
             UIFactory.SetLayoutElement(currentPasteTitle.gameObject, minHeight: 25, minWidth: 100, flexibleWidth: 999);
 
             // Clear clipboard button
-            var clearButton = UIFactory.CreateButton(firstRow, "ClearPasteButton", "Clear Clipboard");
+            UniverseLib.UI.Models.ButtonRef clearButton = UIFactory.CreateButton(firstRow, "ClearPasteButton", "Clear Clipboard");
             UIFactory.SetLayoutElement(clearButton.Component.gameObject, minWidth: 120, minHeight: 25, flexibleWidth: 0);
             clearButton.OnClick += () => Copy(null);
 
             // Current Paste info row
-            var currentPasteHolder = UIFactory.CreateHorizontalGroup(uiContent, "SecondRow", false, false, true, true, 0, 
+            GameObject currentPasteHolder = UIFactory.CreateHorizontalGroup(uiContent, "SecondRow", false, false, true, true, 0,
                 new(2, 2, 2, 2), childAlignment: TextAnchor.UpperCenter);
 
             // Actual current paste info label
@@ -111,7 +102,7 @@ namespace UnityExplorer.UI.Panels
             UpdateCurrentPasteInfo();
 
             // Inspect button
-            var inspectButton = UIFactory.CreateButton(currentPasteHolder, "InspectButton", "Inspect");
+            UniverseLib.UI.Models.ButtonRef inspectButton = UIFactory.CreateButton(currentPasteHolder, "InspectButton", "Inspect");
             UIFactory.SetLayoutElement(inspectButton.Component.gameObject, minHeight: 25, flexibleHeight: 0, minWidth: 80, flexibleWidth: 0);
             inspectButton.OnClick += InspectClipboard;
         }

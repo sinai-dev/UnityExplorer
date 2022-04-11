@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.Config;
 using UnityExplorer.Inspectors;
 using UniverseLib.UI;
 
@@ -54,11 +48,11 @@ namespace UnityExplorer.UI.Panels
 
         public override void ConstructPanelContent()
         {
-            var closeHolder = this.TitleBar.transform.Find("CloseHolder").gameObject;
+            GameObject closeHolder = this.TitleBar.transform.Find("CloseHolder").gameObject;
 
             // Inspect under mouse dropdown on title bar
 
-            var mouseDropdown = UIFactory.CreateDropdown(closeHolder, "MouseInspectDropdown", out MouseInspectDropdown, "Mouse Inspect", 14,
+            GameObject mouseDropdown = UIFactory.CreateDropdown(closeHolder, "MouseInspectDropdown", out MouseInspectDropdown, "Mouse Inspect", 14,
                 MouseInspector.OnDropdownSelect);
             UIFactory.SetLayoutElement(mouseDropdown, minHeight: 25, minWidth: 140);
             MouseInspectDropdown.options.Add(new Dropdown.OptionData("Mouse Inspect"));
@@ -68,7 +62,7 @@ namespace UnityExplorer.UI.Panels
 
             // add close all button to titlebar
 
-            var closeAllBtn = UIFactory.CreateButton(closeHolder.gameObject, "CloseAllBtn", "Close All",
+            UniverseLib.UI.Models.ButtonRef closeAllBtn = UIFactory.CreateButton(closeHolder.gameObject, "CloseAllBtn", "Close All",
                 new Color(0.3f, 0.2f, 0.2f));
             UIFactory.SetLayoutElement(closeAllBtn.Component.gameObject, minHeight: 25, minWidth: 80);
             closeAllBtn.Component.transform.SetSiblingIndex(closeAllBtn.Component.transform.GetSiblingIndex() - 1);

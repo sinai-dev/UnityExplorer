@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.UI.Widgets.AutoComplete;
 using UniverseLib.UI;
@@ -41,8 +37,10 @@ namespace UnityExplorer.UI.Widgets
             inputField.Component.lineType = InputField.LineType.MultiLineNewline;
             inputField.UIRoot.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-            typeCompleter = new TypeCompleter(typeof(object), this.inputField);
-            typeCompleter.Enabled = false;
+            typeCompleter = new TypeCompleter(typeof(object), this.inputField)
+            {
+                Enabled = false
+            };
 
             CreateSpecialContent();
 

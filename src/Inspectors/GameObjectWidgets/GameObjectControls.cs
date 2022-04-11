@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UniverseLib.Input;
 using UnityExplorer.UI;
-using UniverseLib.UI;
-using UniverseLib;
 using UnityExplorer.UI.Panels;
+using UniverseLib;
+using UniverseLib.Input;
+using UniverseLib.UI;
 using UniverseLib.UI.Models;
 using UniverseLib.Utility;
 
@@ -176,14 +175,14 @@ namespace UnityExplorer.Inspectors
                 else
                 {
                     // look for inactive objects
-                    var name = input.Split('/').Last();
-                    var allObjects = RuntimeHelper.FindObjectsOfTypeAll(typeof(GameObject));
-                    var shortList = new List<GameObject>();
-                    foreach (var obj in allObjects)
+                    string name = input.Split('/').Last();
+                    UnityEngine.Object[] allObjects = RuntimeHelper.FindObjectsOfTypeAll(typeof(GameObject));
+                    List<GameObject> shortList = new();
+                    foreach (UnityEngine.Object obj in allObjects)
                         if (obj.name == name) shortList.Add(obj.TryCast<GameObject>());
-                    foreach (var go in shortList)
+                    foreach (GameObject go in shortList)
                     {
-                        var path = go.transform.GetTransformPath(true);
+                        string path = go.transform.GetTransformPath(true);
                         if (path.EndsWith("/"))
                             path = path.Remove(path.Length - 1);
                         if (path == input)
@@ -245,7 +244,7 @@ namespace UnityExplorer.Inspectors
 
         private void OnExploreButtonClicked()
         {
-            var panel = UIManager.GetPanel<UI.Panels.ObjectExplorerPanel>(UIManager.Panels.ObjectExplorer);
+            ObjectExplorerPanel panel = UIManager.GetPanel<UI.Panels.ObjectExplorerPanel>(UIManager.Panels.ObjectExplorer);
             panel.SceneExplorer.JumpToTransform(this.Parent.GOTarget.transform);
         }
 
@@ -259,7 +258,7 @@ namespace UnityExplorer.Inspectors
         {
             try
             {
-                var enumVal = hideFlagsValues[FlagsDropdown.options[value].text];
+                HideFlags enumVal = hideFlagsValues[FlagsDropdown.options[value].text];
                 GOTarget.hideFlags = enumVal;
 
                 UpdateGameObjectInfo(false, true);
@@ -278,7 +277,7 @@ namespace UnityExplorer.Inspectors
 
         private void OnInstantiateClicked()
         {
-            var clone = GameObject.Instantiate(this.GOTarget);
+            GameObject clone = GameObject.Instantiate(this.GOTarget);
             InspectorManager.Inspect(clone);
         }
 
@@ -322,7 +321,7 @@ namespace UnityExplorer.Inspectors
 
         public void UpdateTransformControlValues(bool force)
         {
-            var transform = GOTarget.transform;
+            Transform transform = GOTarget.transform;
             if (force || (!PositionControl.Input.Component.isFocused && lastPosValue != transform.position))
             {
                 PositionControl.Input.Text = ParseUtility.ToStringForInput(transform.position, typeof(Vector3));
@@ -404,7 +403,7 @@ namespace UnityExplorer.Inspectors
                 return;
             }
 
-            var transform = GOTarget.transform;
+            Transform transform = GOTarget.transform;
 
             Vector3 vector = Vector2.zero;
             switch (currentSlidingVectorControl.parentControl.Type)
@@ -453,14 +452,14 @@ namespace UnityExplorer.Inspectors
 
         private void ConstructTopInfo()
         {
-            var topInfoHolder = UIFactory.CreateVerticalGroup(Parent.Content, "TopInfoHolder", false, false, true, true, 3,
+            GameObject topInfoHolder = UIFactory.CreateVerticalGroup(Parent.Content, "TopInfoHolder", false, false, true, true, 3,
                 new Vector4(3, 3, 3, 3), new Color(0.1f, 0.1f, 0.1f), TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(topInfoHolder, minHeight: 100, flexibleWidth: 9999);
             topInfoHolder.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             // first row (parent, path)
 
-            var firstRow = UIFactory.CreateUIObject("ParentRow", topInfoHolder);
+            GameObject firstRow = UIFactory.CreateUIObject("ParentRow", topInfoHolder);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(firstRow, false, false, true, true, 5, 0, 0, 0, 0, default);
             UIFactory.SetLayoutElement(firstRow, minHeight: 25, flexibleWidth: 9999);
 
@@ -475,7 +474,7 @@ namespace UnityExplorer.Inspectors
             UIFactory.SetLayoutElement(PathInput.UIRoot, minHeight: 25, minWidth: 100, flexibleWidth: 9999);
             PathInput.Component.lineType = InputField.LineType.MultiLineSubmit;
 
-            var copyButton = UIFactory.CreateButton(firstRow, "CopyButton", "Copy to Clipboard", new Color(0.2f, 0.2f, 0.2f, 1));
+            ButtonRef copyButton = UIFactory.CreateButton(firstRow, "CopyButton", "Copy to Clipboard", new Color(0.2f, 0.2f, 0.2f, 1));
             copyButton.ButtonText.color = Color.yellow;
             UIFactory.SetLayoutElement(copyButton.Component.gameObject, minHeight: 25, minWidth: 120);
             copyButton.OnClick += OnCopyClicked;
@@ -488,10 +487,10 @@ namespace UnityExplorer.Inspectors
 
             // Title and update row
 
-            var titleRow = UIFactory.CreateUIObject("TitleRow", topInfoHolder);
+            GameObject titleRow = UIFactory.CreateUIObject("TitleRow", topInfoHolder);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(titleRow, false, false, true, true, 5);
 
-            var titleLabel = UIFactory.CreateLabel(titleRow, "Title", SignatureHighlighter.Parse(typeof(GameObject), false),
+            Text titleLabel = UIFactory.CreateLabel(titleRow, "Title", SignatureHighlighter.Parse(typeof(GameObject), false),
                 TextAnchor.MiddleLeft, fontSize: 17);
             UIFactory.SetLayoutElement(titleLabel.gameObject, minHeight: 30, minWidth: 100);
 
@@ -504,25 +503,25 @@ namespace UnityExplorer.Inspectors
 
             // second row (toggles, instanceID, tag, buttons)
 
-            var secondRow = UIFactory.CreateUIObject("ParentRow", topInfoHolder);
+            GameObject secondRow = UIFactory.CreateUIObject("ParentRow", topInfoHolder);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(secondRow, false, false, true, true, 5, 0, 0, 0, 0, default);
             UIFactory.SetLayoutElement(secondRow, minHeight: 25, flexibleWidth: 9999);
 
             // activeSelf
-            var activeToggleObj = UIFactory.CreateToggle(secondRow, "ActiveSelf", out ActiveSelfToggle, out ActiveSelfText);
+            GameObject activeToggleObj = UIFactory.CreateToggle(secondRow, "ActiveSelf", out ActiveSelfToggle, out ActiveSelfText);
             UIFactory.SetLayoutElement(activeToggleObj, minHeight: 25, minWidth: 100);
             ActiveSelfText.text = "ActiveSelf";
             ActiveSelfToggle.onValueChanged.AddListener(OnActiveSelfToggled);
 
             // isStatic
-            var isStaticObj = UIFactory.CreateToggle(secondRow, "IsStatic", out IsStaticToggle, out Text staticText);
+            GameObject isStaticObj = UIFactory.CreateToggle(secondRow, "IsStatic", out IsStaticToggle, out Text staticText);
             UIFactory.SetLayoutElement(isStaticObj, minHeight: 25, minWidth: 80);
             staticText.text = "IsStatic";
             staticText.color = Color.grey;
             IsStaticToggle.interactable = false;
 
             // InstanceID
-            var instanceIdLabel = UIFactory.CreateLabel(secondRow, "InstanceIDLabel", "Instance ID:", TextAnchor.MiddleRight, Color.grey);
+            Text instanceIdLabel = UIFactory.CreateLabel(secondRow, "InstanceIDLabel", "Instance ID:", TextAnchor.MiddleRight, Color.grey);
             UIFactory.SetLayoutElement(instanceIdLabel.gameObject, minHeight: 25, minWidth: 90);
 
             InstanceIDInput = UIFactory.CreateInputField(secondRow, "InstanceIDInput", "error");
@@ -531,7 +530,7 @@ namespace UnityExplorer.Inspectors
             InstanceIDInput.Component.readOnly = true;
 
             //Tag
-            var tagLabel = UIFactory.CreateLabel(secondRow, "TagLabel", "Tag:", TextAnchor.MiddleRight, Color.grey);
+            Text tagLabel = UIFactory.CreateLabel(secondRow, "TagLabel", "Tag:", TextAnchor.MiddleRight, Color.grey);
             UIFactory.SetLayoutElement(tagLabel.gameObject, minHeight: 25, minWidth: 40);
 
             TagInput = UIFactory.CreateInputField(secondRow, "TagInput", "none");
@@ -540,29 +539,29 @@ namespace UnityExplorer.Inspectors
             TagInput.Component.GetOnEndEdit().AddListener((string val) => { OnTagEndEdit(val); });
 
             // Instantiate
-            var instantiateBtn = UIFactory.CreateButton(secondRow, "InstantiateBtn", "Instantiate", new Color(0.2f, 0.2f, 0.2f));
+            ButtonRef instantiateBtn = UIFactory.CreateButton(secondRow, "InstantiateBtn", "Instantiate", new Color(0.2f, 0.2f, 0.2f));
             UIFactory.SetLayoutElement(instantiateBtn.Component.gameObject, minHeight: 25, minWidth: 120);
             instantiateBtn.OnClick += OnInstantiateClicked;
 
             // Destroy
-            var destroyBtn = UIFactory.CreateButton(secondRow, "DestroyBtn", "Destroy", new Color(0.3f, 0.2f, 0.2f));
+            ButtonRef destroyBtn = UIFactory.CreateButton(secondRow, "DestroyBtn", "Destroy", new Color(0.3f, 0.2f, 0.2f));
             UIFactory.SetLayoutElement(destroyBtn.Component.gameObject, minHeight: 25, minWidth: 80);
             destroyBtn.OnClick += OnDestroyClicked;
 
             // third row (scene, layer, flags)
 
-            var thirdrow = UIFactory.CreateUIObject("ParentRow", topInfoHolder);
+            GameObject thirdrow = UIFactory.CreateUIObject("ParentRow", topInfoHolder);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(thirdrow, false, false, true, true, 5, 0, 0, 0, 0, default);
             UIFactory.SetLayoutElement(thirdrow, minHeight: 25, flexibleWidth: 9999);
 
             // Inspect in Explorer button
-            var explorerBtn = UIFactory.CreateButton(thirdrow, "ExploreBtn", "Show in Explorer", new Color(0.15f, 0.15f, 0.15f));
+            ButtonRef explorerBtn = UIFactory.CreateButton(thirdrow, "ExploreBtn", "Show in Explorer", new Color(0.15f, 0.15f, 0.15f));
             UIFactory.SetLayoutElement(explorerBtn.Component.gameObject, minHeight: 25, minWidth: 100);
             explorerBtn.ButtonText.fontSize = 12;
             explorerBtn.OnClick += OnExploreButtonClicked;
 
             // Scene
-            var sceneLabel = UIFactory.CreateLabel(thirdrow, "SceneLabel", "Scene:", TextAnchor.MiddleLeft, Color.grey);
+            Text sceneLabel = UIFactory.CreateLabel(thirdrow, "SceneLabel", "Scene:", TextAnchor.MiddleLeft, Color.grey);
             UIFactory.SetLayoutElement(sceneLabel.gameObject, minHeight: 25, minWidth: 50);
 
             SceneInput = UIFactory.CreateInputField(thirdrow, "SceneInput", "untitled");
@@ -571,29 +570,29 @@ namespace UnityExplorer.Inspectors
             SceneInput.Component.textComponent.color = new Color(0.7f, 0.7f, 0.7f);
 
             // Layer
-            var layerLabel = UIFactory.CreateLabel(thirdrow, "LayerLabel", "Layer:", TextAnchor.MiddleLeft, Color.grey);
+            Text layerLabel = UIFactory.CreateLabel(thirdrow, "LayerLabel", "Layer:", TextAnchor.MiddleLeft, Color.grey);
             UIFactory.SetLayoutElement(layerLabel.gameObject, minHeight: 25, minWidth: 50);
 
-            var layerDrop = UIFactory.CreateDropdown(thirdrow, "LayerDropdown", out LayerDropdown, "0", 14, OnLayerDropdownChanged);
+            GameObject layerDrop = UIFactory.CreateDropdown(thirdrow, "LayerDropdown", out LayerDropdown, "0", 14, OnLayerDropdownChanged);
             UIFactory.SetLayoutElement(layerDrop, minHeight: 25, minWidth: 110, flexibleWidth: 999);
             LayerDropdown.captionText.color = SignatureHighlighter.EnumGreen;
             if (layerToNames == null)
                 GetLayerNames();
-            foreach (var name in layerToNames)
+            foreach (string name in layerToNames)
                 LayerDropdown.options.Add(new Dropdown.OptionData(name));
             LayerDropdown.value = 0;
             LayerDropdown.RefreshShownValue();
 
             // Flags
-            var flagsLabel = UIFactory.CreateLabel(thirdrow, "FlagsLabel", "Flags:", TextAnchor.MiddleRight, Color.grey);
+            Text flagsLabel = UIFactory.CreateLabel(thirdrow, "FlagsLabel", "Flags:", TextAnchor.MiddleRight, Color.grey);
             UIFactory.SetLayoutElement(flagsLabel.gameObject, minHeight: 25, minWidth: 50);
 
-            var flagsDrop = UIFactory.CreateDropdown(thirdrow, "FlagsDropdown", out FlagsDropdown, "None", 14, OnFlagsDropdownChanged);
+            GameObject flagsDrop = UIFactory.CreateDropdown(thirdrow, "FlagsDropdown", out FlagsDropdown, "None", 14, OnFlagsDropdownChanged);
             FlagsDropdown.captionText.color = SignatureHighlighter.EnumGreen;
             UIFactory.SetLayoutElement(flagsDrop, minHeight: 25, minWidth: 135, flexibleWidth: 999);
             if (hideFlagsValues == null)
                 GetHideFlagNames();
-            foreach (var name in hideFlagsValues.Keys)
+            foreach (string name in hideFlagsValues.Keys)
                 FlagsDropdown.options.Add(new Dropdown.OptionData(name));
             FlagsDropdown.value = 0;
             FlagsDropdown.RefreshShownValue();
@@ -606,7 +605,7 @@ namespace UnityExplorer.Inspectors
             layerToNames = new List<string>();
             for (int i = 0; i < 32; i++)
             {
-                var name = RuntimeHelper.LayerToName(i);
+                string name = RuntimeHelper.LayerToName(i);
                 if (string.IsNullOrEmpty(name))
                     name = i.ToString();
                 layerToNames.Add(name);
@@ -619,7 +618,7 @@ namespace UnityExplorer.Inspectors
         {
             hideFlagsValues = new Dictionary<string, HideFlags>();
 
-            var names = Enum.GetValues(typeof(HideFlags));
+            Array names = Enum.GetValues(typeof(HideFlags));
             foreach (HideFlags value in names)
             {
                 hideFlagsValues.Add(value.ToString(), value);
@@ -633,7 +632,7 @@ namespace UnityExplorer.Inspectors
 
         private void ConstructTransformControls()
         {
-            var transformGroup = UIFactory.CreateVerticalGroup(Parent.Content, "TransformControls", false, false, true, true, 2,
+            GameObject transformGroup = UIFactory.CreateVerticalGroup(Parent.Content, "TransformControls", false, false, true, true, 2,
                 new Vector4(2, 2, 0, 0), new Color(0.1f, 0.1f, 0.1f));
             UIFactory.SetLayoutElement(transformGroup, minHeight: 100, flexibleWidth: 9999);
             //transformGroup.SetActive(false);
@@ -650,19 +649,19 @@ namespace UnityExplorer.Inspectors
 
         private TransformControl AddTransformRow(GameObject transformGroup, string title, TransformType type)
         {
-            var rowObj = UIFactory.CreateUIObject("Row_" + title, transformGroup);
+            GameObject rowObj = UIFactory.CreateUIObject("Row_" + title, transformGroup);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(rowObj, false, false, true, true, 5, 0, 0, 0, 0, default);
             UIFactory.SetLayoutElement(rowObj, minHeight: 25, flexibleWidth: 9999);
 
-            var titleLabel = UIFactory.CreateLabel(rowObj, "PositionLabel", title, TextAnchor.MiddleRight, Color.grey);
+            Text titleLabel = UIFactory.CreateLabel(rowObj, "PositionLabel", title, TextAnchor.MiddleRight, Color.grey);
             UIFactory.SetLayoutElement(titleLabel.gameObject, minHeight: 25, minWidth: 110);
 
-            var inputField = UIFactory.CreateInputField(rowObj, "InputField", "...");
+            InputFieldRef inputField = UIFactory.CreateInputField(rowObj, "InputField", "...");
             UIFactory.SetLayoutElement(inputField.Component.gameObject, minHeight: 25, minWidth: 100, flexibleWidth: 999);
 
             inputField.Component.GetOnEndEdit().AddListener((string value) => { OnTransformInputEndEdit(type, value); });
 
-            var control = new TransformControl(type, inputField);
+            TransformControl control = new(type, inputField);
 
             AddVectorAxisSlider(rowObj, "X", 0, control);
             AddVectorAxisSlider(rowObj, "Y", 1, control);
@@ -673,16 +672,16 @@ namespace UnityExplorer.Inspectors
 
         private VectorSlider AddVectorAxisSlider(GameObject parent, string title, int axis, TransformControl control)
         {
-            var label = UIFactory.CreateLabel(parent, "Label_" + title, title + ":", TextAnchor.MiddleRight, Color.grey);
+            Text label = UIFactory.CreateLabel(parent, "Label_" + title, title + ":", TextAnchor.MiddleRight, Color.grey);
             UIFactory.SetLayoutElement(label.gameObject, minHeight: 25, minWidth: 30);
 
-            var sliderObj = UIFactory.CreateSlider(parent, "Slider_" + title, out var slider);
+            GameObject sliderObj = UIFactory.CreateSlider(parent, "Slider_" + title, out Slider slider);
             UIFactory.SetLayoutElement(sliderObj, minHeight: 25, minWidth: 120, flexibleWidth: 0);
             slider.m_FillImage.color = Color.clear;
 
             slider.minValue = -1;
             slider.maxValue = 1;
-            var sliderControl = new VectorSlider(axis, slider, control);
+            VectorSlider sliderControl = new(axis, slider, control);
 
             slider.onValueChanged.AddListener((float val) =>
             {

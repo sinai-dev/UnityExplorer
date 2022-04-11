@@ -7,9 +7,9 @@ namespace UnityExplorer.CSConsole.Lexers
     public class KeywordLexer : Lexer
     {
         // system blue
-        protected override Color HighlightColor => new Color(0.33f, 0.61f, 0.83f, 1.0f);
+        protected override Color HighlightColor => new(0.33f, 0.61f, 0.83f, 1.0f);
 
-        public static readonly HashSet<string> keywords = new HashSet<string>
+        public static readonly HashSet<string> keywords = new()
         {
 // reserved keywords
 "abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked", "class", "const", "continue",
@@ -28,15 +28,15 @@ namespace UnityExplorer.CSConsole.Lexers
 
         public override bool TryMatchCurrent(LexerBuilder lexer)
         {
-            var prev = lexer.Previous;
-            var first = lexer.Current;
+            char prev = lexer.Previous;
+            char first = lexer.Current;
 
             // check for keywords
             if (lexer.IsDelimiter(prev, true) && char.IsLetter(first))
             {
                 // can be a keyword...
 
-                var sb = new StringBuilder();
+                StringBuilder sb = new();
                 sb.Append(lexer.Current);
                 while (!lexer.EndOfInput && char.IsLetter(lexer.PeekNext()))
                     sb.Append(lexer.Current);

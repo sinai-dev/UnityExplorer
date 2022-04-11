@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections;
 using UnityEngine;
 using UnityExplorer.Config;
 using UniverseLib;
@@ -45,7 +41,7 @@ namespace UnityExplorer.UI
                     ConfigManager.Target_Display.Value = 0;
 
                 return;
-            } 
+            }
 
             ActiveDisplayIndex = display;
             ActiveDisplay.Activate();
@@ -72,7 +68,7 @@ namespace UnityExplorer.UI
             yield return null;
             yield return null;
 
-            foreach (var panel in UIManager.UIPanels.Values)
+            foreach (Panels.UIPanel panel in UIManager.UIPanels.Values)
             {
                 panel.EnsureValidSize();
                 panel.EnsureValidPosition();

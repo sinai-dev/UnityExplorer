@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UniverseLib.UI.Models;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets.AutoComplete;
-using UniverseLib.UI;
 using UniverseLib;
+using UniverseLib.UI;
+using UniverseLib.UI.Models;
 using UniverseLib.UI.Widgets.ButtonList;
 using UniverseLib.UI.Widgets.ScrollView;
 using UniverseLib.Utility;
@@ -73,7 +72,7 @@ namespace UnityExplorer.ObjectExplorer
                 //var type = ReflectionUtility.GetTypeByName(desiredTypeInput);
                 if (ReflectionUtility.GetTypeByName(desiredTypeInput) is Type cachedType)
                 {
-                    var type = cachedType;
+                    Type type = cachedType;
                     lastTypeCanHaveGameObject = typeof(Component).IsAssignableFrom(type) || type == typeof(GameObject);
                     sceneFilterRow.SetActive(lastTypeCanHaveGameObject);
                     childFilterRow.SetActive(lastTypeCanHaveGameObject);
@@ -135,7 +134,7 @@ namespace UnityExplorer.ObjectExplorer
                 string text;
                 if (context == SearchContext.Class)
                 {
-                    var type = currentResults[index] as Type;
+                    Type type = currentResults[index] as Type;
                     text = $"{SignatureHighlighter.Parse(type, true)} <color=grey><i>({type.Assembly.GetName().Name})</i></color>";
                 }
                 else
@@ -164,14 +163,14 @@ namespace UnityExplorer.ObjectExplorer
 
             // Search context row
 
-            var contextGroup = UIFactory.CreateHorizontalGroup(uiRoot, "SearchContextRow", false, true, true, true, 2, new Vector4(2, 2, 2, 2));
+            GameObject contextGroup = UIFactory.CreateHorizontalGroup(uiRoot, "SearchContextRow", false, true, true, true, 2, new Vector4(2, 2, 2, 2));
             UIFactory.SetLayoutElement(contextGroup, minHeight: 25, flexibleHeight: 0);
 
-            var contextLbl = UIFactory.CreateLabel(contextGroup, "SearchContextLabel", "Searching for:", TextAnchor.MiddleLeft);
+            Text contextLbl = UIFactory.CreateLabel(contextGroup, "SearchContextLabel", "Searching for:", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(contextLbl.gameObject, minWidth: 110, flexibleWidth: 0);
 
-            var contextDropObj = UIFactory.CreateDropdown(contextGroup, "ContextDropdown", out Dropdown contextDrop, null, 14, OnContextDropdownChanged);
-            foreach (var name in Enum.GetNames(typeof(SearchContext)))
+            GameObject contextDropObj = UIFactory.CreateDropdown(contextGroup, "ContextDropdown", out Dropdown contextDrop, null, 14, OnContextDropdownChanged);
+            foreach (string name in Enum.GetNames(typeof(SearchContext)))
                 contextDrop.options.Add(new Dropdown.OptionData(name));
             UIFactory.SetLayoutElement(contextDropObj, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
 
@@ -180,10 +179,10 @@ namespace UnityExplorer.ObjectExplorer
             classInputRow = UIFactory.CreateHorizontalGroup(uiRoot, "ClassRow", false, true, true, true, 2, new Vector4(2, 2, 2, 2));
             UIFactory.SetLayoutElement(classInputRow, minHeight: 25, flexibleHeight: 0);
 
-            var unityClassLbl = UIFactory.CreateLabel(classInputRow, "ClassLabel", "Class filter:", TextAnchor.MiddleLeft);
+            Text unityClassLbl = UIFactory.CreateLabel(classInputRow, "ClassLabel", "Class filter:", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(unityClassLbl.gameObject, minWidth: 110, flexibleWidth: 0);
 
-            var classInputField = UIFactory.CreateInputField(classInputRow, "ClassInput", "...");
+            InputFieldRef classInputField = UIFactory.CreateInputField(classInputRow, "ClassInput", "...");
             UIFactory.SetLayoutElement(classInputField.UIRoot, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
 
             typeAutocompleter = new TypeCompleter(typeof(UnityEngine.Object), classInputField);
@@ -196,11 +195,11 @@ namespace UnityExplorer.ObjectExplorer
             childFilterRow = UIFactory.CreateHorizontalGroup(uiRoot, "ChildFilterRow", false, true, true, true, 2, new Vector4(2, 2, 2, 2));
             UIFactory.SetLayoutElement(childFilterRow, minHeight: 25, flexibleHeight: 0);
 
-            var childLbl = UIFactory.CreateLabel(childFilterRow, "ChildLabel", "Child filter:", TextAnchor.MiddleLeft);
+            Text childLbl = UIFactory.CreateLabel(childFilterRow, "ChildLabel", "Child filter:", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(childLbl.gameObject, minWidth: 110, flexibleWidth: 0);
 
-            var childDropObj = UIFactory.CreateDropdown(childFilterRow, "ChildFilterDropdown", out Dropdown childDrop, null, 14, OnChildFilterDropChanged);
-            foreach (var name in Enum.GetNames(typeof(ChildFilter)))
+            GameObject childDropObj = UIFactory.CreateDropdown(childFilterRow, "ChildFilterDropdown", out Dropdown childDrop, null, 14, OnChildFilterDropChanged);
+            foreach (string name in Enum.GetNames(typeof(ChildFilter)))
                 childDrop.options.Add(new Dropdown.OptionData(name));
             UIFactory.SetLayoutElement(childDropObj, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
 
@@ -211,11 +210,11 @@ namespace UnityExplorer.ObjectExplorer
             sceneFilterRow = UIFactory.CreateHorizontalGroup(uiRoot, "SceneFilterRow", false, true, true, true, 2, new Vector4(2, 2, 2, 2));
             UIFactory.SetLayoutElement(sceneFilterRow, minHeight: 25, flexibleHeight: 0);
 
-            var sceneLbl = UIFactory.CreateLabel(sceneFilterRow, "SceneLabel", "Scene filter:", TextAnchor.MiddleLeft);
+            Text sceneLbl = UIFactory.CreateLabel(sceneFilterRow, "SceneLabel", "Scene filter:", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(sceneLbl.gameObject, minWidth: 110, flexibleWidth: 0);
 
-            var sceneDropObj = UIFactory.CreateDropdown(sceneFilterRow, "SceneFilterDropdown", out Dropdown sceneDrop, null, 14, OnSceneFilterDropChanged);
-            foreach (var name in Enum.GetNames(typeof(SceneFilter)))
+            GameObject sceneDropObj = UIFactory.CreateDropdown(sceneFilterRow, "SceneFilterDropdown", out Dropdown sceneDrop, null, 14, OnSceneFilterDropChanged);
+            foreach (string name in Enum.GetNames(typeof(SceneFilter)))
             {
                 if (!SceneHandler.DontDestroyExists && name == "DontDestroyOnLoad")
                     continue;
@@ -230,7 +229,7 @@ namespace UnityExplorer.ObjectExplorer
             nameInputRow = UIFactory.CreateHorizontalGroup(uiRoot, "NameRow", true, true, true, true, 2, new Vector4(2, 2, 2, 2));
             UIFactory.SetLayoutElement(nameInputRow, minHeight: 25, flexibleHeight: 0);
 
-            var nameLbl = UIFactory.CreateLabel(nameInputRow, "NameFilterLabel", "Name contains:", TextAnchor.MiddleLeft);
+            Text nameLbl = UIFactory.CreateLabel(nameInputRow, "NameFilterLabel", "Name contains:", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(nameLbl.gameObject, minWidth: 110, flexibleWidth: 0);
 
             nameInputField = UIFactory.CreateInputField(nameInputRow, "NameFilterInput", "...");
@@ -238,13 +237,13 @@ namespace UnityExplorer.ObjectExplorer
 
             // Search button
 
-            var searchButton = UIFactory.CreateButton(uiRoot, "SearchButton", "Search");
+            ButtonRef searchButton = UIFactory.CreateButton(uiRoot, "SearchButton", "Search");
             UIFactory.SetLayoutElement(searchButton.Component.gameObject, minHeight: 25, flexibleHeight: 0);
             searchButton.OnClick += DoSearch;
 
             // Results count label
 
-            var resultsCountRow = UIFactory.CreateHorizontalGroup(uiRoot, "ResultsCountRow", true, true, true, true);
+            GameObject resultsCountRow = UIFactory.CreateHorizontalGroup(uiRoot, "ResultsCountRow", true, true, true, true);
             UIFactory.SetLayoutElement(resultsCountRow, minHeight: 25, flexibleHeight: 0);
 
             resultsLabel = UIFactory.CreateLabel(resultsCountRow, "ResultsLabel", "0 results", TextAnchor.MiddleCenter);

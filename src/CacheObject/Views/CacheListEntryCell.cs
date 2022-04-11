@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.CacheObject.IValues;
 
@@ -13,12 +9,12 @@ namespace UnityExplorer.CacheObject.Views
         public Image Image { get; private set; }
         public InteractiveList ListOwner => Occupant.Owner as InteractiveList;
 
-        public static Color EvenColor = new Color(0.12f, 0.12f, 0.12f);
-        public static Color OddColor = new Color(0.1f, 0.1f, 0.1f);
+        public static Color EvenColor = new(0.12f, 0.12f, 0.12f);
+        public static Color OddColor = new(0.1f, 0.1f, 0.1f);
 
         public override GameObject CreateContent(GameObject parent)
         {
-            var root = base.CreateContent(parent);
+            GameObject root = base.CreateContent(parent);
 
             Image = root.AddComponent<Image>();
 

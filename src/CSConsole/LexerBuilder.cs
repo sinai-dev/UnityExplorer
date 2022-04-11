@@ -1,12 +1,7 @@
-﻿using Mono.CSharp;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using UnityEngine;
-using UnityEngine.UI;
 using UnityExplorer.CSConsole.Lexers;
-using UniverseLib;
 using UniverseLib.Utility;
 
 namespace UnityExplorer.CSConsole
@@ -25,14 +20,14 @@ namespace UnityExplorer.CSConsole
         #region Core and initialization
 
         public const char WHITESPACE = ' ';
-        public readonly HashSet<char> IndentOpenChars = new HashSet<char> { '{', '(' };
-        public readonly HashSet<char> IndentCloseChars = new HashSet<char> { '}', ')' };
+        public readonly HashSet<char> IndentOpenChars = new() { '{', '(' };
+        public readonly HashSet<char> IndentCloseChars = new() { '}', ')' };
 
         private readonly Lexer[] lexers;
-        private readonly HashSet<char> delimiters = new HashSet<char>();
+        private readonly HashSet<char> delimiters = new();
 
-        private readonly StringLexer stringLexer = new StringLexer();
-        private readonly CommentLexer commentLexer = new CommentLexer();
+        private readonly StringLexer stringLexer = new();
+        private readonly CommentLexer commentLexer = new();
 
         public LexerBuilder()
         {
@@ -45,7 +40,7 @@ namespace UnityExplorer.CSConsole
                 new KeywordLexer(),
             };
 
-            foreach (var matcher in lexers)
+            foreach (Lexer matcher in lexers)
             {
                 foreach (char c in matcher.Delimiters)
                 {
@@ -97,13 +92,13 @@ namespace UnityExplorer.CSConsole
             currentStartIdx = startIdx;
             currentEndIdx = endIdx;
 
-            var sb = new StringBuilder();
+            StringBuilder sb = new();
 
             for (int i = 0; i < leadingLines; i++)
                 sb.Append('\n');
 
             int lastUnhighlighted = startIdx;
-            foreach (var match in GetMatches())
+            foreach (MatchInfo match in GetMatches())
             {
                 // append non-highlighted text between last match and this
                 for (int i = lastUnhighlighted; i < match.startIndex; i++)
@@ -130,7 +125,7 @@ namespace UnityExplorer.CSConsole
                 }
 
                 // check caretIdx to determine inStringOrComment state
-                if (caretIdx >= match.startIndex && (caretIdx <= (matchEndIdx+1) || (caretIdx >= input.Length && matchEndIdx >= input.Length - 1)))
+                if (caretIdx >= match.startIndex && (caretIdx <= (matchEndIdx + 1) || (caretIdx >= input.Length && matchEndIdx >= input.Length - 1)))
                     caretInStringOrComment = match.isStringOrComment;
             }
 
@@ -158,7 +153,7 @@ namespace UnityExplorer.CSConsole
                 bool anyMatch = false;
                 int startIndex = CommittedIndex + 1;
 
-                foreach (var lexer in lexers)
+                foreach (Lexer lexer in lexers)
                 {
                     if (lexer.TryMatchCurrent(this))
                     {

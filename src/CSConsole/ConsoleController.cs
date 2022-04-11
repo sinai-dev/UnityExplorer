@@ -1,4 +1,6 @@
-﻿using System;
+﻿using HarmonyLib;
+using Mono.CSharp;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -8,18 +10,14 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UniverseLib.Input;
-using UnityExplorer.CSConsole;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets.AutoComplete;
-using UniverseLib.UI;
 using UniverseLib;
+using UniverseLib.Input;
+using UniverseLib.Runtime;
 using UniverseLib.UI.Models;
 using UniverseLib.Utility;
-using HarmonyLib;
-using UniverseLib.Runtime;
-using Mono.CSharp;
 
 namespace UnityExplorer.CSConsole
 {
@@ -99,11 +97,11 @@ namespace UnityExplorer.CSConsole
                 if (!Directory.Exists(ScriptsFolder))
                     Directory.CreateDirectory(ScriptsFolder);
 
-                var startupPath = Path.Combine(ScriptsFolder, "startup.cs");
+                string startupPath = Path.Combine(ScriptsFolder, "startup.cs");
                 if (File.Exists(startupPath))
                 {
                     ExplorerCore.Log($"Executing startup script from '{startupPath}'...");
-                    var text = File.ReadAllText(startupPath);
+                    string text = File.ReadAllText(startupPath);
                     Input.Text = text;
                     Evaluate();
                 }
@@ -153,7 +151,7 @@ namespace UnityExplorer.CSConsole
 
             if (Evaluator != null)
                 Evaluator.Dispose();
-            
+
             GenerateTextWriter();
             Evaluator = new ScriptEvaluator(evaluatorStringWriter)
             {
@@ -161,7 +159,7 @@ namespace UnityExplorer.CSConsole
             };
 
             usingDirectives = new HashSet<string>();
-            foreach (var use in DefaultUsing)
+            foreach (string use in DefaultUsing)
                 AddUsing(use);
 
             if (logSuccess)
@@ -200,7 +198,7 @@ namespace UnityExplorer.CSConsole
             {
                 // Compile the code. If it returned a CompiledMethod, it is REPL.
                 CompiledMethod repl = Evaluator.Compile(input);
-                
+
                 if (repl != null)
                 {
                     // Valid REPL, we have a delegate to the evaluation.
@@ -208,7 +206,7 @@ namespace UnityExplorer.CSConsole
                     {
                         object ret = null;
                         repl.Invoke(ref ret);
-                        var result = ret?.ToString();
+                        string result = ret?.ToString();
                         if (!string.IsNullOrEmpty(result))
                             ExplorerCore.Log($"Invoked REPL, result: {ret}");
                         else
@@ -222,13 +220,13 @@ namespace UnityExplorer.CSConsole
                 else
                 {
                     // The compiled code was not REPL, so it was a using directive or it defined classes.
-                
+
                     string output = Evaluator._textWriter.ToString();
-                    var outputSplit = output.Split('\n');
+                    string[] outputSplit = output.Split('\n');
                     if (outputSplit.Length >= 2)
                         output = outputSplit[outputSplit.Length - 2];
                     evaluatorOutput.Clear();
-                
+
                     if (ScriptEvaluator._reportPrinter.ErrorsCount > 0)
                         throw new FormatException($"Unable to compile the code. Evaluator's last output was:\r\n{output}");
                     else if (!supressLog)
@@ -286,7 +284,7 @@ namespace UnityExplorer.CSConsole
                     DoAutoIndent();
             }
 
-            var inStringOrComment = HighlightVisibleInput();
+            bool inStringOrComment = HighlightVisibleInput();
 
             if (!settingCaretCoroutine)
             {
@@ -359,12 +357,12 @@ namespace UnityExplorer.CSConsole
             // If caret moved, ensure caret is visible in the viewport
             if (caretMoved)
             {
-                var charInfo = Input.TextGenerator.characters[LastCaretPosition];
-                var charTop = charInfo.cursorPos.y;
-                var charBot = charTop - CSCONSOLE_LINEHEIGHT;
+                UICharInfo charInfo = Input.TextGenerator.characters[LastCaretPosition];
+                float charTop = charInfo.cursorPos.y;
+                float charBot = charTop - CSCONSOLE_LINEHEIGHT;
 
-                var viewportMin = Input.Transform.rect.height - Input.Transform.anchoredPosition.y - (Input.Transform.rect.height * 0.5f);
-                var viewportMax = viewportMin - Panel.InputScroller.ViewportRect.rect.height;
+                float viewportMin = Input.Transform.rect.height - Input.Transform.anchoredPosition.y - (Input.Transform.rect.height * 0.5f);
+                float viewportMax = viewportMin - Panel.InputScroller.ViewportRect.rect.height;
 
                 float diff = 0f;
                 if (charTop > viewportMin)
@@ -374,7 +372,7 @@ namespace UnityExplorer.CSConsole
 
                 if (Math.Abs(diff) > 1)
                 {
-                    var rect = Input.Transform;
+                    RectTransform rect = Input.Transform;
                     rect.anchoredPosition = new Vector2(rect.anchoredPosition.x, rect.anchoredPosition.y - diff);
                 }
             }
@@ -391,7 +389,7 @@ namespace UnityExplorer.CSConsole
         {
             try
             {
-                foreach (var member in typeof(EventSystem).GetMembers(AccessTools.all))
+                foreach (MemberInfo member in typeof(EventSystem).GetMembers(AccessTools.all))
                 {
                     if (member.Name == "m_CurrentSelected")
                     {
@@ -414,14 +412,14 @@ namespace UnityExplorer.CSConsole
 
         static bool usingEventSystemDictionaryMembers;
 
-        static readonly AmbiguousMemberHandler<EventSystem, GameObject> m_CurrentSelected_Handler_Normal 
+        static readonly AmbiguousMemberHandler<EventSystem, GameObject> m_CurrentSelected_Handler_Normal
             = new(true, true, "m_CurrentSelected", "m_currentSelected");
-        static readonly AmbiguousMemberHandler<EventSystem, Dictionary<int, GameObject>> m_CurrentSelected_Handler_Dictionary 
+        static readonly AmbiguousMemberHandler<EventSystem, Dictionary<int, GameObject>> m_CurrentSelected_Handler_Dictionary
             = new(true, true, "m_CurrentSelected", "m_currentSelected");
 
-        static readonly AmbiguousMemberHandler<EventSystem, bool> m_SelectionGuard_Handler_Normal 
+        static readonly AmbiguousMemberHandler<EventSystem, bool> m_SelectionGuard_Handler_Normal
             = new(true, true, "m_SelectionGuard", "m_selectionGuard");
-        static readonly AmbiguousMemberHandler<EventSystem, Dictionary<int, bool>> m_SelectionGuard_Handler_Dictionary 
+        static readonly AmbiguousMemberHandler<EventSystem, Dictionary<int, bool>> m_SelectionGuard_Handler_Dictionary
             = new(true, true, "m_SelectionGuard", "m_selectionGuard");
 
         static void SetCurrentSelectedGameObject(EventSystem instance, GameObject value)
@@ -444,11 +442,11 @@ namespace UnityExplorer.CSConsole
 
         private static IEnumerator SetCaretCoroutine(int caretPosition)
         {
-            var color = Input.Component.selectionColor;
+            Color color = Input.Component.selectionColor;
             color.a = 0f;
             Input.Component.selectionColor = color;
 
-            try { SetCurrentSelectedGameObject(CursorUnlocker.CurrentEventSystem, null); } 
+            try { SetCurrentSelectedGameObject(CursorUnlocker.CurrentEventSystem, null); }
             catch (Exception ex) { ExplorerCore.Log($"Failed removing selected object: {ex}"); }
 
             yield return null; // ~~~~~~~ YIELD FRAME ~~~~~~~~~
@@ -456,7 +454,7 @@ namespace UnityExplorer.CSConsole
             try { SetSelectionGuard(CursorUnlocker.CurrentEventSystem, false); }
             catch (Exception ex) { ExplorerCore.Log($"Failed setting selection guard: {ex}"); }
 
-            try { SetCurrentSelectedGameObject(CursorUnlocker.CurrentEventSystem, Input.GameObject); } 
+            try { SetCurrentSelectedGameObject(CursorUnlocker.CurrentEventSystem, Input.GameObject); }
             catch (Exception ex) { ExplorerCore.Log($"Failed setting selected gameobject: {ex}"); }
 
             yield return null; // ~~~~~~~ YIELD FRAME ~~~~~~~~~
@@ -495,12 +493,12 @@ namespace UnityExplorer.CSConsole
 
             // the top and bottom position of the viewport in relation to the text height
             // they need the half-height adjustment to normalize against the 'line.topY' value.
-            var viewportMin = Input.Transform.rect.height - Input.Transform.anchoredPosition.y - (Input.Transform.rect.height * 0.5f);
-            var viewportMax = viewportMin - Panel.InputScroller.ViewportRect.rect.height;
+            float viewportMin = Input.Transform.rect.height - Input.Transform.anchoredPosition.y - (Input.Transform.rect.height * 0.5f);
+            float viewportMax = viewportMin - Panel.InputScroller.ViewportRect.rect.height;
 
             for (int i = 0; i < Input.TextGenerator.lineCount; i++)
             {
-                var line = Input.TextGenerator.lines[i];
+                UILineInfo line = Input.TextGenerator.lines[i];
                 // if not set the top line yet, and top of line is below the viewport top
                 if (topLine == -1 && line.topY <= viewportMin)
                     topLine = i;
@@ -534,7 +532,7 @@ namespace UnityExplorer.CSConsole
             realStartLine++;
             char lastPrev = '\n';
 
-            var sb = new StringBuilder();
+            StringBuilder sb = new();
 
             // append leading new lines for spacing (no point rendering line numbers we cant see)
             for (int i = 0; i < topLine; i++)
@@ -676,7 +674,7 @@ Doorstop example:
 
         public static void SetupHelpInteraction()
         {
-            var drop = Panel.HelpDropdown;
+            Dropdown drop = Panel.HelpDropdown;
 
             helpDict.Add("Help", "");
             helpDict.Add("Usings", HELP_USINGS);
@@ -684,7 +682,7 @@ Doorstop example:
             helpDict.Add("Classes", HELP_CLASSES);
             helpDict.Add("Coroutines", HELP_COROUTINES);
 
-            foreach (var opt in helpDict)
+            foreach (KeyValuePair<string, string> opt in helpDict)
                 drop.options.Add(new Dropdown.OptionData(opt.Key));
         }
 
@@ -693,7 +691,7 @@ Doorstop example:
             if (index == 0)
                 return;
 
-            var helpText = helpDict.ElementAt(index);
+            KeyValuePair<string, string> helpText = helpDict.ElementAt(index);
 
             Input.Text = helpText.Value;
 

@@ -1,14 +1,8 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityExplorer.Config;
 using UnityExplorer.CSConsole;
-using UnityExplorer.UI.Widgets;
 using UniverseLib;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
@@ -75,32 +69,32 @@ namespace UnityExplorer.UI.Panels
         {
             // Tools Row
 
-            var toolsRow = UIFactory.CreateHorizontalGroup(this.uiContent, "ToggleRow", false, false, true, true, 5, new Vector4(8, 8, 10, 5),
+            GameObject toolsRow = UIFactory.CreateHorizontalGroup(this.uiContent, "ToggleRow", false, false, true, true, 5, new Vector4(8, 8, 10, 5),
                 default, TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(toolsRow, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
 
             // Buttons
 
-            var compileButton = UIFactory.CreateButton(toolsRow, "CompileButton", "Compile", new Color(0.33f, 0.5f, 0.33f));
+            ButtonRef compileButton = UIFactory.CreateButton(toolsRow, "CompileButton", "Compile", new Color(0.33f, 0.5f, 0.33f));
             UIFactory.SetLayoutElement(compileButton.Component.gameObject, minHeight: 28, minWidth: 130, flexibleHeight: 0);
             compileButton.ButtonText.fontSize = 15;
             compileButton.OnClick += () => { OnCompileClicked?.Invoke(); };
 
-            var resetButton = UIFactory.CreateButton(toolsRow, "ResetButton", "Reset", new Color(0.33f, 0.33f, 0.33f));
+            ButtonRef resetButton = UIFactory.CreateButton(toolsRow, "ResetButton", "Reset", new Color(0.33f, 0.33f, 0.33f));
             UIFactory.SetLayoutElement(resetButton.Component.gameObject, minHeight: 28, minWidth: 80, flexibleHeight: 0);
             resetButton.ButtonText.fontSize = 15;
             resetButton.OnClick += () => { OnResetClicked?.Invoke(); };
 
             // Help dropdown
 
-            var helpDrop = UIFactory.CreateDropdown(toolsRow, "HelpDropdown", out var dropdown, "Help", 14, null);
+            GameObject helpDrop = UIFactory.CreateDropdown(toolsRow, "HelpDropdown", out Dropdown dropdown, "Help", 14, null);
             UIFactory.SetLayoutElement(helpDrop, minHeight: 25, minWidth: 100);
             HelpDropdown = dropdown;
             HelpDropdown.onValueChanged.AddListener((int val) => { this.OnHelpDropdownChanged?.Invoke(val); });
 
             // Enable Ctrl+R toggle
 
-            var ctrlRToggleObj = UIFactory.CreateToggle(toolsRow, "CtrlRToggle", out var CtrlRToggle, out Text ctrlRToggleText);
+            GameObject ctrlRToggleObj = UIFactory.CreateToggle(toolsRow, "CtrlRToggle", out Toggle CtrlRToggle, out Text ctrlRToggleText);
             UIFactory.SetLayoutElement(ctrlRToggleObj, minWidth: 150, flexibleWidth: 0, minHeight: 25);
             ctrlRToggleText.alignment = TextAnchor.UpperLeft;
             ctrlRToggleText.text = "Compile on Ctrl+R";
@@ -108,7 +102,7 @@ namespace UnityExplorer.UI.Panels
 
             // Enable Suggestions toggle
 
-            var suggestToggleObj = UIFactory.CreateToggle(toolsRow, "SuggestionToggle", out var SuggestionsToggle, out Text suggestToggleText);
+            GameObject suggestToggleObj = UIFactory.CreateToggle(toolsRow, "SuggestionToggle", out Toggle SuggestionsToggle, out Text suggestToggleText);
             UIFactory.SetLayoutElement(suggestToggleObj, minWidth: 120, flexibleWidth: 0, minHeight: 25);
             suggestToggleText.alignment = TextAnchor.UpperLeft;
             suggestToggleText.text = "Suggestions";
@@ -116,7 +110,7 @@ namespace UnityExplorer.UI.Panels
 
             // Enable Auto-indent toggle
 
-            var autoIndentToggleObj = UIFactory.CreateToggle(toolsRow, "IndentToggle", out var AutoIndentToggle, out Text autoIndentToggleText);
+            GameObject autoIndentToggleObj = UIFactory.CreateToggle(toolsRow, "IndentToggle", out Toggle AutoIndentToggle, out Text autoIndentToggleText);
             UIFactory.SetLayoutElement(autoIndentToggleObj, minWidth: 120, flexibleWidth: 0, minHeight: 25);
             autoIndentToggleText.alignment = TextAnchor.UpperLeft;
             autoIndentToggleText.text = "Auto-indent";
@@ -124,7 +118,7 @@ namespace UnityExplorer.UI.Panels
 
             // Console Input
 
-            var inputArea = UIFactory.CreateUIObject("InputGroup", uiContent);
+            GameObject inputArea = UIFactory.CreateUIObject("InputGroup", uiContent);
             UIFactory.SetLayoutElement(inputArea, flexibleWidth: 9999, flexibleHeight: 9999);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(inputArea, false, true, true, true);
             inputArea.AddComponent<Image>().color = Color.white;
@@ -132,8 +126,8 @@ namespace UnityExplorer.UI.Panels
 
             // line numbers
 
-            var linesHolder = UIFactory.CreateUIObject("LinesHolder", inputArea);
-            var linesRect = linesHolder.GetComponent<RectTransform>();
+            GameObject linesHolder = UIFactory.CreateUIObject("LinesHolder", inputArea);
+            RectTransform linesRect = linesHolder.GetComponent<RectTransform>();
             linesRect.pivot = new Vector2(0, 1);
             linesRect.anchorMin = new Vector2(0, 0);
             linesRect.anchorMax = new Vector2(0, 1);
@@ -149,8 +143,8 @@ namespace UnityExplorer.UI.Panels
 
             int fontSize = 16;
 
-            var inputObj = UIFactory.CreateScrollInputField(inputArea, "ConsoleInput", ConsoleController.STARTUP_TEXT, 
-                out var inputScroller, fontSize);
+            GameObject inputObj = UIFactory.CreateScrollInputField(inputArea, "ConsoleInput", ConsoleController.STARTUP_TEXT,
+                out InputFieldScroller inputScroller, fontSize);
             InputScroller = inputScroller;
             ConsoleController.defaultInputFieldAlpha = Input.Component.selectionColor.a;
             Input.OnValueChanged += InvokeOnValueChanged;
@@ -173,8 +167,8 @@ namespace UnityExplorer.UI.Panels
             Input.PlaceholderText.fontSize = fontSize;
 
             // Lexer highlight text overlay
-            var highlightTextObj = UIFactory.CreateUIObject("HighlightText", InputText.gameObject);
-            var highlightTextRect = highlightTextObj.GetComponent<RectTransform>();
+            GameObject highlightTextObj = UIFactory.CreateUIObject("HighlightText", InputText.gameObject);
+            RectTransform highlightTextRect = highlightTextObj.GetComponent<RectTransform>();
             highlightTextRect.pivot = new Vector2(0, 1);
             highlightTextRect.anchorMin = Vector2.zero;
             highlightTextRect.anchorMax = Vector2.one;

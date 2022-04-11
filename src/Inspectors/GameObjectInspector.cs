@@ -2,18 +2,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UniverseLib.Input;
-using UnityExplorer.UI;
-using UniverseLib.UI.Models;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets;
 using UnityExplorer.UI.Widgets.AutoComplete;
-using UniverseLib.UI.Widgets;
-using UniverseLib.UI;
 using UniverseLib;
+using UniverseLib.UI;
+using UniverseLib.UI.Models;
+using UniverseLib.UI.Widgets;
 using UniverseLib.UI.Widgets.ScrollView;
 using UniverseLib.Utility;
 
@@ -29,7 +26,7 @@ namespace UnityExplorer.Inspectors
 
         public TransformTree TransformTree;
         private ScrollPool<TransformCell> transformScroll;
-        private readonly List<GameObject> cachedChildren = new List<GameObject>();
+        private readonly List<GameObject> cachedChildren = new();
 
         public ComponentList ComponentList;
         private ScrollPool<ComponentCell> componentScroll;
@@ -127,10 +124,10 @@ namespace UnityExplorer.Inspectors
             return cachedChildren;
         }
 
-        private readonly List<Component> componentEntries = new List<Component>();
-        private readonly HashSet<int> compInstanceIDs = new HashSet<int>();
-        private readonly List<Behaviour> behaviourEntries = new List<Behaviour>();
-        private readonly List<bool> behaviourEnabledStates = new List<bool>();
+        private readonly List<Component> componentEntries = new();
+        private readonly HashSet<int> compInstanceIDs = new();
+        private readonly List<Behaviour> behaviourEntries = new();
+        private readonly List<bool> behaviourEnabledStates = new();
 
         // ComponentList.GetRootEntriesMethod
         private List<Component> GetComponentEntries() => GOTarget ? componentEntries : Enumerable.Empty<Component>().ToList();
@@ -149,13 +146,13 @@ namespace UnityExplorer.Inspectors
             }
 
             // Check if we actually need to refresh the component cells or not.
-            var comps = GOTarget.GetComponents<Component>();
-            var behaviours = GOTarget.GetComponents<Behaviour>();
+            IEnumerable<Component> comps = GOTarget.GetComponents<Component>();
+            IEnumerable<Behaviour> behaviours = GOTarget.GetComponents<Behaviour>();
 
             bool needRefresh = false;
 
             int count = 0;
-            foreach (var comp in comps)
+            foreach (Component comp in comps)
             {
                 if (!comp)
                     continue;
@@ -173,7 +170,7 @@ namespace UnityExplorer.Inspectors
                 else
                 {
                     count = 0;
-                    foreach (var behaviour in behaviours)
+                    foreach (Behaviour behaviour in behaviours)
                     {
                         if (!behaviour)
                             continue;
@@ -194,7 +191,7 @@ namespace UnityExplorer.Inspectors
 
             componentEntries.Clear();
             compInstanceIDs.Clear();
-            foreach (var comp in comps)
+            foreach (Component comp in comps)
             {
                 if (!comp) continue;
                 componentEntries.Add(comp);
@@ -203,7 +200,7 @@ namespace UnityExplorer.Inspectors
 
             behaviourEntries.Clear();
             behaviourEnabledStates.Clear();
-            foreach (var behaviour in behaviours)
+            foreach (Behaviour behaviour in behaviours)
             {
                 if (!behaviour) continue;
                 behaviourEntries.Add(behaviour);
@@ -217,7 +214,7 @@ namespace UnityExplorer.Inspectors
 
         private void OnAddChildClicked(string input)
         {
-            var newObject = new GameObject(input);
+            GameObject newObject = new(input);
             newObject.transform.parent = GOTarget.transform;
 
             TransformTree.RefreshData(true, false, true, false);
@@ -250,7 +247,7 @@ namespace UnityExplorer.Inspectors
             UIRoot = UIFactory.CreateVerticalGroup(parent, "GameObjectInspector", true, false, true, true, 5,
                 new Vector4(4, 4, 4, 4), new Color(0.065f, 0.065f, 0.065f));
 
-            var scrollObj = UIFactory.CreateScrollView(UIRoot, "GameObjectInspector", out Content, out var scrollbar,
+            GameObject scrollObj = UIFactory.CreateScrollView(UIRoot, "GameObjectInspector", out Content, out AutoSliderScrollbar scrollbar,
                 new Color(0.065f, 0.065f, 0.065f));
             UIFactory.SetLayoutElement(scrollObj, minHeight: 250, preferredHeight: 300, flexibleHeight: 0, flexibleWidth: 9999);
 
@@ -268,27 +265,27 @@ namespace UnityExplorer.Inspectors
 
         private void ConstructLists()
         {
-            var listHolder = UIFactory.CreateUIObject("ListHolders", UIRoot);
+            GameObject listHolder = UIFactory.CreateUIObject("ListHolders", UIRoot);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(listHolder, false, true, true, true, 8, 2, 2, 2, 2);
             UIFactory.SetLayoutElement(listHolder, minHeight: 150, flexibleWidth: 9999, flexibleHeight: 9999);
 
             // Left group (Children)
 
-            var leftGroup = UIFactory.CreateUIObject("ChildrenGroup", listHolder);
+            GameObject leftGroup = UIFactory.CreateUIObject("ChildrenGroup", listHolder);
             UIFactory.SetLayoutElement(leftGroup, flexibleWidth: 9999, flexibleHeight: 9999);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(leftGroup, false, false, true, true, 2);
 
-            var childrenLabel = UIFactory.CreateLabel(leftGroup, "ChildListTitle", "Children", TextAnchor.MiddleCenter, default, false, 16);
+            Text childrenLabel = UIFactory.CreateLabel(leftGroup, "ChildListTitle", "Children", TextAnchor.MiddleCenter, default, false, 16);
             UIFactory.SetLayoutElement(childrenLabel.gameObject, flexibleWidth: 9999);
 
             // Add Child
-            var addChildRow = UIFactory.CreateUIObject("AddChildRow", leftGroup);
+            GameObject addChildRow = UIFactory.CreateUIObject("AddChildRow", leftGroup);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(addChildRow, false, false, true, true, 2);
 
             addChildInput = UIFactory.CreateInputField(addChildRow, "AddChildInput", "Enter a name...");
             UIFactory.SetLayoutElement(addChildInput.Component.gameObject, minHeight: 25, preferredWidth: 9999);
 
-            var addChildButton = UIFactory.CreateButton(addChildRow, "AddChildButton", "Add Child");
+            ButtonRef addChildButton = UIFactory.CreateButton(addChildRow, "AddChildButton", "Add Child");
             UIFactory.SetLayoutElement(addChildButton.Component.gameObject, minHeight: 25, minWidth: 80);
             addChildButton.OnClick += () => { OnAddChildClicked(addChildInput.Text); };
 
@@ -305,21 +302,21 @@ namespace UnityExplorer.Inspectors
 
             // Right group (Components)
 
-            var rightGroup = UIFactory.CreateUIObject("ComponentGroup", listHolder);
+            GameObject rightGroup = UIFactory.CreateUIObject("ComponentGroup", listHolder);
             UIFactory.SetLayoutElement(rightGroup, flexibleWidth: 9999, flexibleHeight: 9999);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(rightGroup, false, false, true, true, 2);
 
-            var compLabel = UIFactory.CreateLabel(rightGroup, "CompListTitle", "Components", TextAnchor.MiddleCenter, default, false, 16);
+            Text compLabel = UIFactory.CreateLabel(rightGroup, "CompListTitle", "Components", TextAnchor.MiddleCenter, default, false, 16);
             UIFactory.SetLayoutElement(compLabel.gameObject, flexibleWidth: 9999);
 
             // Add Comp
-            var addCompRow = UIFactory.CreateUIObject("AddCompRow", rightGroup);
+            GameObject addCompRow = UIFactory.CreateUIObject("AddCompRow", rightGroup);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(addCompRow, false, false, true, true, 2);
 
             addCompInput = UIFactory.CreateInputField(addCompRow, "AddCompInput", "Enter a Component type...");
             UIFactory.SetLayoutElement(addCompInput.Component.gameObject, minHeight: 25, preferredWidth: 9999);
 
-            var addCompButton = UIFactory.CreateButton(addCompRow, "AddCompButton", "Add Comp");
+            ButtonRef addCompButton = UIFactory.CreateButton(addCompRow, "AddCompButton", "Add Comp");
             UIFactory.SetLayoutElement(addCompButton.Component.gameObject, minHeight: 25, minWidth: 80);
             addCompButton.OnClick += () => { OnAddComponentClicked(addCompInput.Text); };
 
@@ -333,8 +330,10 @@ namespace UnityExplorer.Inspectors
             UIFactory.SetLayoutElement(compObj, flexibleHeight: 9999);
             UIFactory.SetLayoutElement(compContent, flexibleHeight: 9999);
 
-            ComponentList = new ComponentList(componentScroll, GetComponentEntries);
-            ComponentList.Parent = this;
+            ComponentList = new ComponentList(componentScroll, GetComponentEntries)
+            {
+                Parent = this
+            };
             componentScroll.Initialize(ComponentList);
         }
 

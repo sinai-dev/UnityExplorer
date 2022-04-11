@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityExplorer.CacheObject.IValues;
+﻿using UnityExplorer.CacheObject.IValues;
 using UnityExplorer.CacheObject.Views;
 
 namespace UnityExplorer.CacheObject
@@ -25,7 +21,7 @@ namespace UnityExplorer.CacheObject
         {
             base.SetDataToCell(cell);
 
-            var listCell = cell as CacheListEntryCell;
+            CacheListEntryCell listCell = cell as CacheListEntryCell;
 
             listCell.NameLabel.text = $"{ListIndex}:";
             listCell.HiddenNameLabel.Text = "";

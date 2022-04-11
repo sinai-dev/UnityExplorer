@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.CacheObject;
-using UnityExplorer.UI;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
 using UniverseLib;
@@ -32,9 +27,9 @@ namespace UnityExplorer.CacheObject.IValues
 
             applyButton.Component.gameObject.SetActive(owner.CanWrite);
 
-            foreach (var slider in sliders)
+            foreach (Slider slider in sliders)
                 slider.interactable = owner.CanWrite;
-            foreach (var input in inputs)
+            foreach (InputFieldRef input in inputs)
                 input.Component.readOnly = !owner.CanWrite;
         }
 
@@ -54,7 +49,7 @@ namespace UnityExplorer.CacheObject.IValues
                 inputs[1].Text = c32.g.ToString();
                 inputs[2].Text = c32.b.ToString();
                 inputs[3].Text = c32.a.ToString();
-                foreach (var slider in sliders)
+                foreach (Slider slider in sliders)
                     slider.maxValue = 255;
             }
             else
@@ -65,7 +60,7 @@ namespace UnityExplorer.CacheObject.IValues
                 inputs[1].Text = EditedColor.g.ToString();
                 inputs[2].Text = EditedColor.b.ToString();
                 inputs[3].Text = EditedColor.a.ToString();
-                foreach (var slider in sliders)
+                foreach (Slider slider in sliders)
                     slider.maxValue = 1;
             }
 
@@ -156,12 +151,12 @@ namespace UnityExplorer.CacheObject.IValues
 
             // hori group
 
-            var horiGroup = UIFactory.CreateHorizontalGroup(UIRoot, "ColorEditor", false, false, true, true, 5,
+            GameObject horiGroup = UIFactory.CreateHorizontalGroup(UIRoot, "ColorEditor", false, false, true, true, 5,
                 default, new Color(1, 1, 1, 0), TextAnchor.MiddleLeft);
 
             // sliders / inputs
 
-            var grid = UIFactory.CreateGridGroup(horiGroup, "Grid", new Vector2(140, 25), new Vector2(2, 2), new Color(1, 1, 1, 0));
+            GameObject grid = UIFactory.CreateGridGroup(horiGroup, "Grid", new Vector2(140, 25), new Vector2(2, 2), new Color(1, 1, 1, 0));
             UIFactory.SetLayoutElement(grid, minWidth: 580, minHeight: 25, flexibleWidth: 0);
 
             for (int i = 0; i < 4; i++)
@@ -175,7 +170,7 @@ namespace UnityExplorer.CacheObject.IValues
 
             // image of color
 
-            var imgObj = UIFactory.CreateUIObject("ColorImageHelper", horiGroup);
+            GameObject imgObj = UIFactory.CreateUIObject("ColorImageHelper", horiGroup);
             UIFactory.SetLayoutElement(imgObj, minHeight: 25, minWidth: 50, flexibleWidth: 50);
             colorImage = imgObj.AddComponent<Image>();
 
@@ -184,18 +179,18 @@ namespace UnityExplorer.CacheObject.IValues
 
         internal void AddEditorRow(int index, GameObject groupObj)
         {
-            var row = UIFactory.CreateHorizontalGroup(groupObj, "EditorRow_" + fieldNames[index],
+            GameObject row = UIFactory.CreateHorizontalGroup(groupObj, "EditorRow_" + fieldNames[index],
                 false, true, true, true, 5, default, new Color(1, 1, 1, 0));
 
-            var label = UIFactory.CreateLabel(row, "RowLabel", $"{fieldNames[index]}:", TextAnchor.MiddleRight, Color.cyan);
+            Text label = UIFactory.CreateLabel(row, "RowLabel", $"{fieldNames[index]}:", TextAnchor.MiddleRight, Color.cyan);
             UIFactory.SetLayoutElement(label.gameObject, minWidth: 17, flexibleWidth: 0, minHeight: 25);
 
-            var input = UIFactory.CreateInputField(row, "Input", "...");
+            InputFieldRef input = UIFactory.CreateInputField(row, "Input", "...");
             UIFactory.SetLayoutElement(input.UIRoot, minWidth: 40, minHeight: 25, flexibleHeight: 0);
             inputs[index] = input;
             input.OnValueChanged += (string val) => { OnInputChanged(val, index); };
 
-            var sliderObj = UIFactory.CreateSlider(row, "Slider", out Slider slider);
+            GameObject sliderObj = UIFactory.CreateSlider(row, "Slider", out Slider slider);
             sliders[index] = slider;
             UIFactory.SetLayoutElement(sliderObj, minHeight: 25, minWidth: 70, flexibleWidth: 999, flexibleHeight: 0);
             slider.minValue = 0;

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
-using UniverseLib;
+﻿using UnityEngine;
 using UniverseLib.Utility;
 
 namespace UnityExplorer.Inspectors.MouseInspectors
@@ -45,7 +40,7 @@ namespace UnityExplorer.Inspectors.MouseInspectors
                 return;
             }
 
-            var ray = MainCamera.ScreenPointToRay(mousePos);
+            Ray ray = MainCamera.ScreenPointToRay(mousePos);
             Physics.Raycast(ray, out RaycastHit hit, 1000f);
 
             if (hit.transform)

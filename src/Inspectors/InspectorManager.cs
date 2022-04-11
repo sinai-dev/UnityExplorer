@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityExplorer.UI;
 using UnityExplorer.CacheObject;
 using UnityExplorer.Inspectors;
-using UniverseLib.UI.Models;
+using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
 using UniverseLib;
-using UniverseLib.UI;
 using UniverseLib.UI.ObjectPool;
 using UniverseLib.Utility;
 
@@ -50,7 +46,7 @@ namespace UnityExplorer
 
         private static bool TryFocusActiveInspector(object target)
         {
-            foreach (var inspector in Inspectors)
+            foreach (InspectorBase inspector in Inspectors)
             {
                 if (inspector.Target.ReferenceEqual(target))
                 {
@@ -96,7 +92,7 @@ namespace UnityExplorer
         private static void CreateInspector<T>(object target, bool staticReflection = false,
             CacheObjectBase parentObject = null) where T : InspectorBase
         {
-            var inspector = Pool<T>.Borrow();
+            T inspector = Pool<T>.Borrow();
             Inspectors.Add(inspector);
             inspector.Target = target;
 
@@ -164,7 +160,7 @@ namespace UnityExplorer
         {
             PanelWidth = width;
 
-            foreach (var obj in Inspectors)
+            foreach (InspectorBase obj in Inspectors)
             {
                 if (obj is ReflectionInspector inspector)
                 {

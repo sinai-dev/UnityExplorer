@@ -2,8 +2,6 @@
 using BepInEx.Configuration;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityExplorer.Config;
 
 namespace UnityExplorer.Loader.BIE
@@ -21,7 +19,7 @@ namespace UnityExplorer.Loader.BIE
 
         public override void RegisterConfigElement<T>(ConfigElement<T> config)
         {
-            var entry = Config.Bind(CTG_NAME, config.Name, config.Value, config.Description);
+            ConfigEntry<T> entry = Config.Bind(CTG_NAME, config.Name, config.Value, config.Description);
 
             entry.SettingChanged += (object o, EventArgs e) =>
             {
@@ -47,13 +45,13 @@ namespace UnityExplorer.Loader.BIE
 
         public override void LoadConfig()
         {
-            foreach (var entry in ConfigManager.ConfigElements)
+            foreach (KeyValuePair<string, IConfigElement> entry in ConfigManager.ConfigElements)
             {
-                var key = entry.Key;
-                var def = new ConfigDefinition(CTG_NAME, key);
+                string key = entry.Key;
+                ConfigDefinition def = new(CTG_NAME, key);
                 if (Config.ContainsKey(def) && Config[def] is ConfigEntryBase configEntry)
                 {
-                    var config = entry.Value;
+                    IConfigElement config = entry.Value;
                     config.BoxedValue = configEntry.BoxedValue;
                 }
             }

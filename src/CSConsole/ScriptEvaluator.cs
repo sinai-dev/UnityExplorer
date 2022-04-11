@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Text;
 
 // Thanks to ManlyMarco for this
 
@@ -13,7 +12,10 @@ namespace UnityExplorer.CSConsole
     {
         private static readonly HashSet<string> StdLib = new(StringComparer.InvariantCultureIgnoreCase)
         {
-            "mscorlib", "System.Core", "System", "System.Xml"
+            "mscorlib",
+            "System.Core",
+            "System",
+            "System.Xml"
         };
 
         internal TextWriter _textWriter;
@@ -45,7 +47,7 @@ namespace UnityExplorer.CSConsole
 
         private void Reference(Assembly asm)
         {
-            var name = asm.GetName().Name;
+            string name = asm.GetName().Name;
             if (name == "completions")
                 return;
             ReferenceAssembly(asm);
@@ -55,7 +57,7 @@ namespace UnityExplorer.CSConsole
         {
             _reportPrinter = new StreamReportPrinter(tw);
 
-            var settings = new CompilerSettings
+            CompilerSettings settings = new()
             {
                 Version = LanguageVersion.Experimental,
                 GenerateDebugInfo = false,

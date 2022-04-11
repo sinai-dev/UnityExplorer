@@ -116,7 +116,7 @@ namespace UnityExplorer.UI.Widgets
         public void JumpAndExpandToTransform(Transform transform)
         {
             // make sure all parents of the object are expanded
-            var parent = transform.parent;
+            Transform parent = transform.parent;
             while (parent)
             {
                 int pid = parent.GetInstanceID();
@@ -136,7 +136,7 @@ namespace UnityExplorer.UI.Widgets
             int idx;
             for (idx = 0; idx < cachedTransforms.Count; idx++)
             {
-                var cache = (CachedTransform)cachedTransforms[idx];
+                CachedTransform cache = (CachedTransform)cachedTransforms[idx];
                 if (cache.InstanceID == transformID)
                     break;
             }
@@ -151,7 +151,7 @@ namespace UnityExplorer.UI.Widgets
 
         private IEnumerator HighlightCellCoroutine(TransformCell cell)
         {
-            var button = cell.NameButton.Component;
+            UnityEngine.UI.Button button = cell.NameButton.Component;
             button.StartColorTween(new Color(0.2f, 0.3f, 0.2f), false);
 
             float start = Time.realtimeSinceStartup;
@@ -191,7 +191,7 @@ namespace UnityExplorer.UI.Widgets
             bool filtering = Filtering;
 
             IEnumerable<GameObject> rootObjects = GetRootEntriesMethod();
-            foreach (var gameObj in rootObjects)
+            foreach (GameObject gameObj in rootObjects)
             {
                 if (!gameObj)
                     continue;
@@ -214,7 +214,7 @@ namespace UnityExplorer.UI.Widgets
                     traversedThisFrame.Start();
                 }
 
-                var cached = (CachedTransform)cachedTransforms[i];
+                CachedTransform cached = (CachedTransform)cachedTransforms[i];
                 if (!visited.Contains(cached.InstanceID))
                 {
                     cachedTransforms.RemoveAt(i);
@@ -227,7 +227,7 @@ namespace UnityExplorer.UI.Widgets
 
             prevDisplayIndex = displayIndex;
             refreshCoroutine = null;
-        }   
+        }
 
         // Recursive method to check a Transform and its children (if expanded).
         // Parent and depth can be null/default.
@@ -293,7 +293,7 @@ namespace UnityExplorer.UI.Widgets
             {
                 for (int i = 0; i < transform.childCount; i++)
                 {
-                    var enumerator = Traverse(transform.GetChild(i), cached, depth + 1, oneShot, filtering);
+                    IEnumerator enumerator = Traverse(transform.GetChild(i), cached, depth + 1, oneShot, filtering);
                     while (enumerator.MoveNext())
                     {
                         if (!oneShot)
@@ -350,7 +350,7 @@ namespace UnityExplorer.UI.Widgets
 
         public void OnCellExpandToggled(CachedTransform cache)
         {
-            var instanceID = cache.InstanceID;
+            int instanceID = cache.InstanceID;
             if (expandedInstanceIDs.Contains(instanceID))
                 expandedInstanceIDs.Remove(instanceID);
             else

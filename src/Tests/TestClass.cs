@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using UnityEngine;
-using UnityExplorer.UI;
-using UnityExplorer.CacheObject.IValues;
 #if CPP
 using UnhollowerRuntimeLib;
 using UnhollowerBaseLib;
@@ -74,7 +70,7 @@ namespace UnityExplorer.Tests
         {
             get
             {
-                var list = new List<object>();
+                List<object> list = new();
                 int count = UnityEngine.Random.Range(0, 100);
                 for (int i = 0; i < count; i++)
                     list.Add(GetRandomObject());
@@ -209,12 +205,12 @@ namespace UnityExplorer.Tests
             IL2CPP_HashTable.Add("key3", "value3");
 
             ExplorerCore.Log($"IL2CPP 3: Il2Cpp IDictionary");
-            var dict2 = new Il2CppSystem.Collections.Generic.Dictionary<string, string>();
+            Il2CppSystem.Collections.Generic.Dictionary<string, string> dict2 = new Il2CppSystem.Collections.Generic.Dictionary<string, string>();
             dict2.Add("key1", "value1");
             IL2CPP_IDict = dict2.TryCast<Il2CppSystem.Collections.IDictionary>();
 
             ExplorerCore.Log($"IL2CPP 4: Il2Cpp List of Il2Cpp Object");
-            var list = new Il2CppSystem.Collections.Generic.List<Il2CppSystem.Object>(5);
+            Il2CppSystem.Collections.Generic.List<Il2CppSystem.Object> list = new Il2CppSystem.Collections.Generic.List<Il2CppSystem.Object>(5);
             list.Add("one");
             list.Add("two");
             IL2CPP_IList = list.TryCast<Il2CppSystem.Collections.IList>();
@@ -240,14 +236,14 @@ namespace UnityExplorer.Tests
             // boxed enum test
             try
             {
-                var cppType = Il2CppType.Of<CameraClearFlags>();
+                Il2CppSystem.Type cppType = Il2CppType.Of<CameraClearFlags>();
                 if (cppType != null)
                 {
-                    var boxedEnum = Il2CppSystem.Enum.Parse(cppType, "Color");
+                    Il2CppSystem.Object boxedEnum = Il2CppSystem.Enum.Parse(cppType, "Color");
                     IL2CPP_listOfBoxedObjects.Add(boxedEnum);
                 }
 
-                var structBox = Vector3.one.BoxIl2CppObject();
+                Il2CppSystem.Object structBox = Vector3.one.BoxIl2CppObject();
                 IL2CPP_listOfBoxedObjects.Add(structBox);
 
             }

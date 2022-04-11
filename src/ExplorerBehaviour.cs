@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 #if CPP
 using UnhollowerRuntimeLib;
 #endif
@@ -14,7 +10,7 @@ namespace UnityExplorer
         internal static ExplorerBehaviour Instance { get; private set; }
 
 #if CPP
-        public ExplorerBehaviour(IntPtr ptr) : base(ptr) { }
+        public ExplorerBehaviour(System.IntPtr ptr) : base(ptr) { }
 #endif
 
         internal static void Setup()

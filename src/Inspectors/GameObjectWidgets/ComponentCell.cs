@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UniverseLib;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
 using UniverseLib.UI.Widgets.ButtonList;
+using UniverseLib;
 
 namespace UnityExplorer.Inspectors
 {
@@ -31,7 +28,7 @@ namespace UnityExplorer.Inspectors
 
         public override GameObject CreateContent(GameObject parent)
         {
-            var root = base.CreateContent(parent);
+            GameObject root = base.CreateContent(parent);
 
             // Add mask to button so text doesnt overlap on Close button
             //this.Button.Component.gameObject.AddComponent<Mask>().showMaskGraphic = true;
@@ -39,7 +36,7 @@ namespace UnityExplorer.Inspectors
 
             // Behaviour toggle
 
-            var toggleObj = UIFactory.CreateToggle(UIRoot, "BehaviourToggle", out BehaviourToggle, out var behavText);
+            GameObject toggleObj = UIFactory.CreateToggle(UIRoot, "BehaviourToggle", out BehaviourToggle, out Text behavText);
             UIFactory.SetLayoutElement(toggleObj, minHeight: 25, minWidth: 25);
             BehaviourToggle.onValueChanged.AddListener(BehaviourToggled);
             // put at first object

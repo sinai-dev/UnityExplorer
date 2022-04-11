@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.UI;
-using UniverseLib.UI.Models;
-using UnityExplorer.UI.Widgets.AutoComplete;
-using UniverseLib.UI;
-using UniverseLib;
 using UnityExplorer.CacheObject;
+using UniverseLib.UI;
+using UniverseLib.UI.Models;
 using UniverseLib.UI.ObjectPool;
 using UniverseLib.Utility;
 
@@ -48,14 +43,14 @@ namespace UnityExplorer.UI.Widgets
 
         public void OnReturnToPool()
         {
-            foreach (var widget in paramHandlers)
+            foreach (ParameterHandler widget in paramHandlers)
             {
                 widget.OnReturned();
                 Pool<ParameterHandler>.Return(widget);
             }
             paramHandlers = null;
 
-            foreach (var widget in genericHandlers)
+            foreach (GenericArgumentHandler widget in genericHandlers)
             {
                 widget.OnReturned();
                 Pool<GenericArgumentHandler>.Return(widget);
@@ -111,9 +106,9 @@ namespace UnityExplorer.UI.Widgets
         {
             for (int i = 0; i < genericArguments.Length; i++)
             {
-                var type = genericArguments[i];
+                Type type = genericArguments[i];
 
-                var holder = genericHandlers[i] = Pool<GenericArgumentHandler>.Borrow();
+                GenericArgumentHandler holder = genericHandlers[i] = Pool<GenericArgumentHandler>.Borrow();
                 holder.UIRoot.transform.SetParent(this.genericArgumentsHolder.transform, false);
                 holder.OnBorrowed(this, type);
             }
@@ -123,9 +118,9 @@ namespace UnityExplorer.UI.Widgets
         {
             for (int i = 0; i < parameters.Length; i++)
             {
-                var param = parameters[i];
+                ParameterInfo param = parameters[i];
 
-                var holder = paramHandlers[i] = Pool<ParameterHandler>.Borrow();
+                ParameterHandler holder = paramHandlers[i] = Pool<ParameterHandler>.Borrow();
                 holder.UIRoot.transform.SetParent(this.parametersHolder.transform, false);
                 holder.OnBorrowed(this, param);
             }
@@ -142,7 +137,7 @@ namespace UnityExplorer.UI.Widgets
             // generic args
             this.genericArgumentsHolder = UIFactory.CreateUIObject("GenericHolder", UIRoot);
             UIFactory.SetLayoutElement(genericArgumentsHolder, flexibleWidth: 1000);
-            var genericsTitle = UIFactory.CreateLabel(genericArgumentsHolder, "GenericsTitle", "Generic Arguments", TextAnchor.MiddleLeft);
+            Text genericsTitle = UIFactory.CreateLabel(genericArgumentsHolder, "GenericsTitle", "Generic Arguments", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(genericsTitle.gameObject, minHeight: 25, flexibleWidth: 1000);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(genericArgumentsHolder, false, false, true, true, 3);
             UIFactory.SetLayoutElement(genericArgumentsHolder, minHeight: 25, flexibleHeight: 750, minWidth: 50, flexibleWidth: 9999);
@@ -151,14 +146,14 @@ namespace UnityExplorer.UI.Widgets
             // args
             this.parametersHolder = UIFactory.CreateUIObject("ArgHolder", UIRoot);
             UIFactory.SetLayoutElement(parametersHolder, flexibleWidth: 1000);
-            var argsTitle = UIFactory.CreateLabel(parametersHolder, "ArgsTitle", "Arguments", TextAnchor.MiddleLeft);
+            Text argsTitle = UIFactory.CreateLabel(parametersHolder, "ArgsTitle", "Arguments", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(argsTitle.gameObject, minHeight: 25, flexibleWidth: 1000);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(parametersHolder, false, false, true, true, 3);
             UIFactory.SetLayoutElement(parametersHolder, minHeight: 25, flexibleHeight: 750, minWidth: 50, flexibleWidth: 9999);
             //argHolder.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             // evaluate button
-            var evalButton = UIFactory.CreateButton(UIRoot, "EvaluateButton", "Evaluate", new Color(0.2f, 0.2f, 0.2f));
+            ButtonRef evalButton = UIFactory.CreateButton(UIRoot, "EvaluateButton", "Evaluate", new Color(0.2f, 0.2f, 0.2f));
             UIFactory.SetLayoutElement(evalButton.Component.gameObject, minHeight: 25, minWidth: 150, flexibleWidth: 0);
             evalButton.OnClick += () =>
             {

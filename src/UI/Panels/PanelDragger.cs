@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using UniverseLib.Input;
-using UniverseLib.UI.Models;
 using UnityExplorer.UI.Widgets.AutoComplete;
+using UniverseLib.Input;
 using UniverseLib.UI;
-using UniverseLib;
 using UniverseLib.Utility;
 
 namespace UnityExplorer.UI.Panels
@@ -46,7 +41,7 @@ namespace UnityExplorer.UI.Panels
             wasAnyDragging = false;
             Resizing = false;
 
-            foreach (var instance in Instances)
+            foreach (PanelDragger instance in Instances)
             {
                 instance.WasDragging = false;
                 instance.WasResizing = false;
@@ -60,7 +55,7 @@ namespace UnityExplorer.UI.Panels
             // move AutoCompleter to bottom
             if (AutoCompleteModal.Instance != null)
             {
-                var idx = Instances.IndexOf(AutoCompleteModal.Instance.Dragger);
+                int idx = Instances.IndexOf(AutoCompleteModal.Instance.Dragger);
                 Instances.RemoveAt(idx);
                 Instances.Insert(0, AutoCompleteModal.Instance.Dragger);
             }
@@ -82,10 +77,10 @@ namespace UnityExplorer.UI.Panels
             else
                 state = MouseState.NotPressed;
 
-            var mousePos = DisplayManager.MousePosition;
+            Vector3 mousePos = DisplayManager.MousePosition;
 
             handledInstanceThisFrame = false;
-            foreach (var instance in Instances)
+            foreach (PanelDragger instance in Instances)
             {
                 if (!instance.Panel.gameObject.activeSelf)
                     continue;
@@ -97,7 +92,7 @@ namespace UnityExplorer.UI.Panels
 
             if (wasAnyDragging && state == MouseState.NotPressed)
             {
-                foreach (var instance in Instances)
+                foreach (PanelDragger instance in Instances)
                     instance.WasDragging = false;
                 wasAnyDragging = false;
             }
@@ -243,7 +238,7 @@ namespace UnityExplorer.UI.Panels
 
         public void OnDrag()
         {
-            var mousePos = DisplayManager.MousePosition;
+            Vector3 mousePos = DisplayManager.MousePosition;
 
             Vector2 diff = (Vector2)mousePos - lastDragPosition;
             lastDragPosition = mousePos;
@@ -266,10 +261,10 @@ namespace UnityExplorer.UI.Panels
 
         private readonly Dictionary<ResizeTypes, Rect> m_resizeMask = new()
         {
-            { ResizeTypes.Top,      default },
-            { ResizeTypes.Left,     default },
-            { ResizeTypes.Right,    default },
-            { ResizeTypes.Bottom,   default },
+            { ResizeTypes.Top, default },
+            { ResizeTypes.Left, default },
+            { ResizeTypes.Right, default },
+            { ResizeTypes.Bottom, default },
         };
 
         [Flags]
@@ -438,8 +433,8 @@ namespace UnityExplorer.UI.Panels
             else if (currentResizeType.HasFlag(ResizeTypes.Bottom))
                 anchorMin.y -= diffY;
 
-            var prevMin = Panel.anchorMin;
-            var prevMax = Panel.anchorMax;
+            Vector2 prevMin = Panel.anchorMin;
+            Vector2 prevMax = Panel.anchorMax;
 
             Panel.anchorMin = new Vector2(anchorMin.x, anchorMin.y);
             Panel.anchorMax = new Vector2(anchorMax.x, anchorMax.y);
@@ -469,9 +464,9 @@ namespace UnityExplorer.UI.Panels
         {
             try
             {
-                var text = UIFactory.CreateLabel(UIManager.UIRoot, "ResizeCursor", "↔", TextAnchor.MiddleCenter, Color.white, true, 35);
+                Text text = UIFactory.CreateLabel(UIManager.UIRoot, "ResizeCursor", "↔", TextAnchor.MiddleCenter, Color.white, true, 35);
                 resizeCursorObj = text.gameObject;
-                var outline = text.gameObject.AddComponent<Outline>();
+                Outline outline = text.gameObject.AddComponent<Outline>();
                 outline.effectColor = Color.black;
                 outline.effectDistance = new(1, 1);
 

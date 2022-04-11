@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using UnityExplorer.Inspectors;
 
 namespace UnityExplorer.CacheObject
@@ -31,7 +28,7 @@ namespace UnityExplorer.CacheObject
         {
             try
             {
-                var ret = FieldInfo.GetValue(DeclaringInstance);
+                object ret = FieldInfo.GetValue(DeclaringInstance);
                 LastException = null;
                 return ret;
             }

@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.CacheObject.IValues;
-using UnityExplorer.Inspectors;
-using UnityExplorer.UI;
-using UnityExplorer.UI.Widgets;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
 
@@ -24,8 +17,8 @@ namespace UnityExplorer.CacheObject.Views
         public InputFieldRef KeyInputField;
         public Text KeyInputTypeLabel;
 
-        public static Color EvenColor = new Color(0.07f, 0.07f, 0.07f);
-        public static Color OddColor = new Color(0.063f, 0.063f, 0.063f);
+        public static Color EvenColor = new(0.07f, 0.07f, 0.07f);
+        public static Color OddColor = new(0.063f, 0.063f, 0.063f);
 
         public int AdjustedWidth => (int)Rect.rect.width - 70;
 
@@ -40,7 +33,7 @@ namespace UnityExplorer.CacheObject.Views
 
         public override GameObject CreateContent(GameObject parent)
         {
-            var root = base.CreateContent(parent);
+            GameObject root = base.CreateContent(parent);
 
             Image = root.AddComponent<Image>();
 
@@ -53,7 +46,7 @@ namespace UnityExplorer.CacheObject.Views
             this.RightGroupLayout.minWidth = AdjustedWidth * 0.55f;
 
             // Key area
-            var keyGroup = UIFactory.CreateUIObject("KeyHolder", root.transform.Find("HoriGroup").gameObject);
+            GameObject keyGroup = UIFactory.CreateUIObject("KeyHolder", root.transform.Find("HoriGroup").gameObject);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(keyGroup, false, false, true, true, 2, 0, 0, 4, 4, childAlignment: TextAnchor.MiddleLeft);
             KeyGroupLayout = UIFactory.SetLayoutElement(keyGroup, minHeight: 30, minWidth: (int)(AdjustedWidth * 0.44f), flexibleWidth: 0);
 

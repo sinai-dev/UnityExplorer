@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.UI.Panels;
 using UniverseLib;
@@ -116,7 +112,7 @@ namespace UnityExplorer.CacheObject.Views
             UIFactory.SetLayoutElement(UIRoot, minWidth: 100, flexibleWidth: 9999, minHeight: 30, flexibleHeight: 600);
             UIRoot.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-            var horiRow = UIFactory.CreateUIObject("HoriGroup", UIRoot);
+            GameObject horiRow = UIFactory.CreateUIObject("HoriGroup", UIRoot);
             UIFactory.SetLayoutElement(horiRow, minHeight: 29, flexibleHeight: 150, flexibleWidth: 9999);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(horiRow, false, false, true, true, 5, 2, childAlignment: TextAnchor.UpperLeft);
             horiRow.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
@@ -129,7 +125,7 @@ namespace UnityExplorer.CacheObject.Views
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(NameLabel.gameObject, true, true, true, true);
 
             HiddenNameLabel = UIFactory.CreateInputField(NameLabel.gameObject, "HiddenNameLabel", "");
-            var hiddenRect = HiddenNameLabel.Component.GetComponent<RectTransform>();
+            RectTransform hiddenRect = HiddenNameLabel.Component.GetComponent<RectTransform>();
             hiddenRect.anchorMin = Vector2.zero;
             hiddenRect.anchorMax = Vector2.one;
             HiddenNameLabel.Component.readOnly = true;
@@ -150,7 +146,7 @@ namespace UnityExplorer.CacheObject.Views
 
             // Right horizontal group
 
-            var rightHoriGroup = UIFactory.CreateUIObject("RightHoriGroup", RightGroupContent);
+            GameObject rightHoriGroup = UIFactory.CreateUIObject("RightHoriGroup", RightGroupContent);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(rightHoriGroup, false, false, true, true, 4, childAlignment: TextAnchor.UpperLeft);
             UIFactory.SetLayoutElement(rightHoriGroup, minHeight: 25, minWidth: 200, flexibleWidth: 9999, flexibleHeight: 800);
 
@@ -166,7 +162,7 @@ namespace UnityExplorer.CacheObject.Views
 
             // Bool and number value interaction
 
-            var toggleObj = UIFactory.CreateToggle(rightHoriGroup, "Toggle", out Toggle, out ToggleText);
+            GameObject toggleObj = UIFactory.CreateToggle(rightHoriGroup, "Toggle", out Toggle, out ToggleText);
             UIFactory.SetLayoutElement(toggleObj, minWidth: 70, minHeight: 25, flexibleWidth: 0, flexibleHeight: 0);
             ToggleText.color = SignatureHighlighter.KeywordBlue;
             Toggle.onValueChanged.AddListener(ToggleClicked);
@@ -194,8 +190,8 @@ namespace UnityExplorer.CacheObject.Views
 
             // Copy and Paste buttons
 
-            var buttonHolder = UIFactory.CreateHorizontalGroup(rightHoriGroup, "CopyPasteButtons", false, false, true, true, 4, 
-                bgColor: new(1,1,1,0), childAlignment: TextAnchor.MiddleLeft);
+            GameObject buttonHolder = UIFactory.CreateHorizontalGroup(rightHoriGroup, "CopyPasteButtons", false, false, true, true, 4,
+                bgColor: new(1, 1, 1, 0), childAlignment: TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(buttonHolder, minWidth: 60, flexibleWidth: 0);
 
             CopyButton = UIFactory.CreateButton(buttonHolder, "CopyButton", "Copy", new Color(0.13f, 0.13f, 0.13f, 1f));
@@ -219,7 +215,7 @@ namespace UnityExplorer.CacheObject.Views
             SubContentHolder.SetActive(false);
 
             // Bottom separator
-            var separator = UIFactory.CreateUIObject("BottomSeperator", UIRoot);
+            GameObject separator = UIFactory.CreateUIObject("BottomSeperator", UIRoot);
             UIFactory.SetLayoutElement(separator, minHeight: 1, flexibleHeight: 0, flexibleWidth: 9999);
             separator.AddComponent<Image>().color = Color.black;
 

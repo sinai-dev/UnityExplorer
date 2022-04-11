@@ -105,7 +105,7 @@ namespace UnityExplorer.UI.Widgets
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(UIRoot, false, false, true, true, 5);
             UIFactory.SetLayoutElement(UIRoot, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
 
-            var nameLabel = UIFactory.CreateLabel(UIRoot, "NameLabel", "Name:", TextAnchor.MiddleLeft, Color.grey);
+            Text nameLabel = UIFactory.CreateLabel(UIRoot, "NameLabel", "Name:", TextAnchor.MiddleLeft, Color.grey);
             UIFactory.SetLayoutElement(nameLabel.gameObject, minHeight: 25, minWidth: 45, flexibleWidth: 0);
 
             nameInput = UIFactory.CreateInputField(UIRoot, "NameInput", "untitled");
@@ -116,7 +116,7 @@ namespace UnityExplorer.UI.Widgets
             UIFactory.SetLayoutElement(gameObjectButton.Component.gameObject, minHeight: 25, minWidth: 160);
             gameObjectButton.OnClick += OnGameObjectButtonClicked;
 
-            var instanceLabel = UIFactory.CreateLabel(UIRoot, "InstanceLabel", "Instance ID:", TextAnchor.MiddleRight, Color.grey);
+            Text instanceLabel = UIFactory.CreateLabel(UIRoot, "InstanceLabel", "Instance ID:", TextAnchor.MiddleRight, Color.grey);
             UIFactory.SetLayoutElement(instanceLabel.gameObject, minHeight: 25, minWidth: 100, flexibleWidth: 0);
 
             instanceIdInput = UIFactory.CreateInputField(UIRoot, "InstanceIDInput", "ERROR");

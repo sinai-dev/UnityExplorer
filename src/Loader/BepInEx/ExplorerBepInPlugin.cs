@@ -3,14 +3,8 @@ using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityExplorer.Config;
-using UniverseLib.Input;
 using UnityExplorer.Loader.BIE;
 #if CPP
 using BepInEx.IL2CPP;
@@ -45,7 +39,7 @@ namespace UnityExplorer
 
         public Harmony HarmonyInstance => s_harmony;
         private static readonly Harmony s_harmony = new(ExplorerCore.GUID);
-        
+
         public string ExplorerFolderName => ExplorerCore.DEFAULT_EXPLORER_FOLDER_NAME;
         public string ExplorerFolderDestination => Paths.PluginPath;
 

@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityExplorer.CacheObject;
 using UnityExplorer.CacheObject.Views;
 
 namespace UnityExplorer.CacheObject
@@ -33,7 +29,7 @@ namespace UnityExplorer.CacheObject
                 return;
             }
 
-            var entry = (CacheObjectBase)cachedEntries[index];
+            CacheObjectBase entry = (CacheObjectBase)cachedEntries[index];
 
             if (entry.CellView != null && entry.CellView != cell)
                 entry.UnlinkFromView();

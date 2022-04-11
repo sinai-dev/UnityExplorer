@@ -1,19 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
-using UnityEngine.EventSystems;
+﻿using UnityEngine;
 using UnityEngine.UI;
-using UniverseLib.Input;
-using UnityExplorer.Runtime;
+using UnityExplorer.Config;
 using UnityExplorer.Inspectors.MouseInspectors;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
-using UniverseLib;
+using UniverseLib.Input;
 using UniverseLib.UI;
 using UniverseLib.Utility;
-using UnityExplorer.Config;
 
 namespace UnityExplorer.Inspectors
 {
@@ -59,7 +52,7 @@ namespace UnityExplorer.Inspectors
         internal Text objPathLabel;
         internal Text mousePosLabel;
 
-        public MouseInspector() 
+        public MouseInspector()
         {
             Instance = this;
             worldInspector = new WorldInspector();
@@ -108,7 +101,7 @@ namespace UnityExplorer.Inspectors
             UIManager.NavBarRect.gameObject.SetActive(true);
             UIManager.PanelHolder.SetActive(true);
 
-            var drop = InspectorPanel.Instance.MouseInspectDropdown;
+            Dropdown drop = InspectorPanel.Instance.MouseInspectDropdown;
             if (drop.transform.Find("Dropdown List") is Transform list)
                 drop.DestroyDropdownList(list.gameObject);
 
@@ -130,7 +123,7 @@ namespace UnityExplorer.Inspectors
                 if (InputManager.GetKeyDown(ConfigManager.World_MouseInspect_Keybind.Value))
                     Instance.StartInspect(MouseInspectMode.World);
             }
-            
+
             if (Inspecting)
                 UpdateInspect();
 
@@ -152,7 +145,7 @@ namespace UnityExplorer.Inspectors
                 return;
             }
 
-            var mousePos = InputManager.MousePosition;
+            Vector3 mousePos = InputManager.MousePosition;
             if (mousePos != lastMousePos)
                 UpdatePosition(mousePos);
 
@@ -181,7 +174,7 @@ namespace UnityExplorer.Inspectors
                 mousePos.y -= 10;
 
             // calculate and set our UI position
-            var inversePos = inspectorUIBase.RootObject.transform.InverseTransformPoint(mousePos);
+            Vector3 inversePos = inspectorUIBase.RootObject.transform.InverseTransformPoint(mousePos);
             UIRoot.transform.localPosition = new Vector3(inversePos.x, inversePos.y, 0);
         }
 
@@ -201,14 +194,14 @@ namespace UnityExplorer.Inspectors
             this.TitleBar.SetActive(false);
             this.UIRoot.transform.SetParent(UIManager.UIRoot.transform, false);
 
-            var inspectContent = UIFactory.CreateVerticalGroup(this.uiContent, "InspectContent", true, true, true, true, 3, new Vector4(2, 2, 2, 2));
+            GameObject inspectContent = UIFactory.CreateVerticalGroup(this.uiContent, "InspectContent", true, true, true, true, 3, new Vector4(2, 2, 2, 2));
             UIFactory.SetLayoutElement(inspectContent, flexibleWidth: 9999, flexibleHeight: 9999);
 
             // Title text
 
-            var title = UIFactory.CreateLabel(inspectContent, 
+            Text title = UIFactory.CreateLabel(inspectContent,
                 "InspectLabel",
-                "<b>Mouse Inspector</b> (press <b>ESC</b> to cancel)", 
+                "<b>Mouse Inspector</b> (press <b>ESC</b> to cancel)",
                 TextAnchor.MiddleCenter);
             UIFactory.SetLayoutElement(title.gameObject, flexibleWidth: 9999);
 

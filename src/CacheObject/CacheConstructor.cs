@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using UnityExplorer.Inspectors;
 using UniverseLib.Utility;
 
@@ -52,7 +49,7 @@ namespace UnityExplorer.CacheObject
                 Arguments = CtorInfo.GetParameters();
                 ctorReturnType = CtorInfo.DeclaringType;
             }
-            
+
             if (ctorReturnType.IsGenericTypeDefinition)
                 GenericArguments = ctorReturnType.GetGenericArguments();
         }

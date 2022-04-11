@@ -5,15 +5,10 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.CacheObject;
 using UnityExplorer.CacheObject.Views;
-using UnityExplorer.Inspectors;
-using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
-using UnityExplorer.UI.Widgets;
 using UniverseLib;
 using UniverseLib.UI;
-using UniverseLib.UI.Widgets;
 using UniverseLib.UI.Widgets.ScrollView;
 using UniverseLib.Utility;
 
@@ -60,7 +55,7 @@ namespace UnityExplorer.CacheObject.IValues
         {
             RefIList = null;
 
-            foreach (var entry in cachedEntries)
+            foreach (CacheListEntry entry in cachedEntries)
             {
                 entry.UnlinkFromView();
                 entry.ReleasePooledObjects();
@@ -73,9 +68,9 @@ namespace UnityExplorer.CacheObject.IValues
 
         public override void SetLayout()
         {
-            var minHeight = 5f;
+            float minHeight = 5f;
 
-            foreach (var cell in ListScrollPool.CellPool)
+            foreach (CacheListEntryCell cell in ListScrollPool.CellPool)
             {
                 if (cell.Enabled)
                     minHeight += cell.Rect.rect.height;
@@ -102,7 +97,7 @@ namespace UnityExplorer.CacheObject.IValues
             }
             else
             {
-                var type = value.GetActualType();
+                Type type = value.GetActualType();
                 ReflectionUtility.TryGetEntryType(type, out EntryType);
 
                 CacheEntries(value);
@@ -132,7 +127,7 @@ namespace UnityExplorer.CacheObject.IValues
 
                 while (enumerator.MoveNext())
                 {
-                    var entry = enumerator.Current;
+                    object entry = enumerator.Current;
 
                     // If list count increased, create new cache entries
                     CacheListEntry cache;
@@ -155,7 +150,7 @@ namespace UnityExplorer.CacheObject.IValues
                 {
                     for (int i = cachedEntries.Count - 1; i >= idx; i--)
                     {
-                        var cache = cachedEntries[i];
+                        CacheListEntry cache = cachedEntries[i];
                         if (cache.CellView != null)
                             cache.UnlinkFromView();
 
@@ -174,7 +169,7 @@ namespace UnityExplorer.CacheObject.IValues
         {
             try
             {
-                var type = value.GetType();
+                Type type = value.GetType();
                 if (type.GetInterfaces().Any(it => it.IsGenericType && it.GetGenericTypeDefinition() == typeof(IList<>)))
                     IsWritableGenericIList = !(bool)type.GetProperty("IsReadOnly").GetValue(value, null);
                 else
@@ -184,7 +179,7 @@ namespace UnityExplorer.CacheObject.IValues
                 {
                     // Find the "this[int index]" property.
                     // It might be a private implementation.
-                    foreach (var prop in type.GetProperties(ReflectionUtility.FLAGS))
+                    foreach (PropertyInfo prop in type.GetProperties(ReflectionUtility.FLAGS))
                     {
                         if ((prop.Name == "Item"
                                 || (prop.Name.StartsWith("System.Collections.Generic.IList<") && prop.Name.EndsWith(">.Item")))
@@ -226,7 +221,7 @@ namespace UnityExplorer.CacheObject.IValues
                     genericIndexer.SetValue(CurrentOwner.Value, value, new object[] { index });
                 }
 
-                var entry = cachedEntries[index];
+                CacheListEntry entry = cachedEntries[index];
                 entry.SetValueFromSource(value);
 
                 if (entry.CellView != null)

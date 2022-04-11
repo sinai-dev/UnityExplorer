@@ -1,29 +1,26 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
 using UniverseLib;
-using UniverseLib.Input;
 
 namespace UnityExplorer.Inspectors.MouseInspectors
 {
     public class UiInspector : MouseInspectorBase
     {
-        public static readonly List<GameObject> LastHitObjects = new List<GameObject>();
+        public static readonly List<GameObject> LastHitObjects = new();
 
         private static GraphicRaycaster[] graphicRaycasters;
 
-        private static readonly List<GameObject> currentHitObjects = new List<GameObject>();
+        private static readonly List<GameObject> currentHitObjects = new();
 
-        private static readonly List<Graphic> wasDisabledGraphics = new List<Graphic>();
-        private static readonly List<CanvasGroup> wasDisabledCanvasGroups = new List<CanvasGroup>();
-        private static readonly List<GameObject> objectsAddedCastersTo = new List<GameObject>();
+        private static readonly List<Graphic> wasDisabledGraphics = new();
+        private static readonly List<CanvasGroup> wasDisabledCanvasGroups = new();
+        private static readonly List<GameObject> objectsAddedCastersTo = new();
 
         public override void OnBeginMouseInspect()
         {
@@ -46,7 +43,7 @@ namespace UnityExplorer.Inspectors.MouseInspectors
         IEnumerator SetPanelActiveCoro()
         {
             yield return null;
-            var panel = UIManager.GetPanel<MouseInspectorResultsPanel>(UIManager.Panels.UIInspectorResults);
+            MouseInspectorResultsPanel panel = UIManager.GetPanel<MouseInspectorResultsPanel>(UIManager.Panels.UIInspectorResults);
             panel.SetActive(true);
             panel.ShowResults();
         }
@@ -55,28 +52,28 @@ namespace UnityExplorer.Inspectors.MouseInspectors
         {
             currentHitObjects.Clear();
 
-            var ped = new PointerEventData(null)
+            PointerEventData ped = new(null)
             {
                 position = mousePos
             };
 
-            foreach (var gr in graphicRaycasters)
+            foreach (GraphicRaycaster gr in graphicRaycasters)
             {
                 if (!gr || !gr.canvas)
                     continue;
-            
-                var list = new List<RaycastResult>();
+
+                List<RaycastResult> list = new();
                 RuntimeHelper.GraphicRaycast(gr, ped, list);
                 if (list.Count > 0)
                 {
-                    foreach (var hit in list)
+                    foreach (RaycastResult hit in list)
                     {
                         if (hit.gameObject)
                             currentHitObjects.Add(hit.gameObject);
                     }
                 }
             }
-            
+
             if (currentHitObjects.Any())
                 MouseInspector.Instance.objNameLabel.text = $"Click to view UI Objects under mouse: {currentHitObjects.Count}";
             else
@@ -85,9 +82,9 @@ namespace UnityExplorer.Inspectors.MouseInspectors
 
         private static void SetupUIRaycast()
         {
-            foreach (var obj in RuntimeHelper.FindObjectsOfTypeAll(typeof(Canvas)))
+            foreach (UnityEngine.Object obj in RuntimeHelper.FindObjectsOfTypeAll(typeof(Canvas)))
             {
-                var canvas = obj.TryCast<Canvas>();
+                Canvas canvas = obj.TryCast<Canvas>();
                 if (!canvas || !canvas.enabled || !canvas.gameObject.activeInHierarchy)
                     continue;
                 if (!canvas.GetComponent<GraphicRaycaster>())
@@ -99,7 +96,7 @@ namespace UnityExplorer.Inspectors.MouseInspectors
             }
 
             // recache Graphic Raycasters each time we start
-            var casters = RuntimeHelper.FindObjectsOfTypeAll(typeof(GraphicRaycaster));
+            UnityEngine.Object[] casters = RuntimeHelper.FindObjectsOfTypeAll(typeof(GraphicRaycaster));
             graphicRaycasters = new GraphicRaycaster[casters.Length];
             for (int i = 0; i < casters.Length; i++)
             {
@@ -107,9 +104,9 @@ namespace UnityExplorer.Inspectors.MouseInspectors
             }
 
             // enable raycastTarget on Graphics
-            foreach (var obj in RuntimeHelper.FindObjectsOfTypeAll(typeof(Graphic)))
+            foreach (UnityEngine.Object obj in RuntimeHelper.FindObjectsOfTypeAll(typeof(Graphic)))
             {
-                var graphic = obj.TryCast<Graphic>();
+                Graphic graphic = obj.TryCast<Graphic>();
                 if (!graphic || !graphic.enabled || graphic.raycastTarget || !graphic.gameObject.activeInHierarchy)
                     continue;
                 graphic.raycastTarget = true;
@@ -118,9 +115,9 @@ namespace UnityExplorer.Inspectors.MouseInspectors
             }
 
             // enable blocksRaycasts on CanvasGroups
-            foreach (var obj in RuntimeHelper.FindObjectsOfTypeAll(typeof(CanvasGroup)))
+            foreach (UnityEngine.Object obj in RuntimeHelper.FindObjectsOfTypeAll(typeof(CanvasGroup)))
             {
-                var canvas = obj.TryCast<CanvasGroup>();
+                CanvasGroup canvas = obj.TryCast<CanvasGroup>();
                 if (!canvas || !canvas.gameObject.activeInHierarchy || canvas.blocksRaycasts)
                     continue;
                 canvas.blocksRaycasts = true;
@@ -131,16 +128,16 @@ namespace UnityExplorer.Inspectors.MouseInspectors
 
         public override void OnEndInspect()
         {
-            foreach (var obj in objectsAddedCastersTo)
+            foreach (GameObject obj in objectsAddedCastersTo)
             {
                 if (obj.GetComponent<GraphicRaycaster>() is GraphicRaycaster raycaster)
                     GameObject.Destroy(raycaster);
             }
 
-            foreach (var graphic in wasDisabledGraphics)
+            foreach (Graphic graphic in wasDisabledGraphics)
                 graphic.raycastTarget = false;
 
-            foreach (var canvas in wasDisabledCanvasGroups)
+            foreach (CanvasGroup canvas in wasDisabledCanvasGroups)
                 canvas.blocksRaycasts = false;
 
             objectsAddedCastersTo.Clear();

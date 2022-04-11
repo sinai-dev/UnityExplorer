@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
-using UnityExplorer.Config;
 using UnityExplorer.Hooks;
-using UnityExplorer.UI.Widgets;
 using UnityExplorer.UI.Widgets.AutoComplete;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
@@ -87,7 +81,7 @@ namespace UnityExplorer.UI.Panels
             UIFactory.SetLayoutElement(currentHooksPanel, flexibleHeight: 9999, flexibleWidth: 9999);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(currentHooksPanel, true, true, true, true);
 
-            var addRow = UIFactory.CreateHorizontalGroup(currentHooksPanel, "AddRow", false, true, true, true, 4,
+            GameObject addRow = UIFactory.CreateHorizontalGroup(currentHooksPanel, "AddRow", false, true, true, true, 4,
                 new Vector4(2, 2, 2, 2), new Color(0.2f, 0.2f, 0.2f));
             UIFactory.SetLayoutElement(addRow, minHeight: 30, flexibleWidth: 9999);
 
@@ -95,14 +89,14 @@ namespace UnityExplorer.UI.Panels
             UIFactory.SetLayoutElement(classSelectorInputField.Component.gameObject, flexibleWidth: 9999);
             new TypeCompleter(typeof(object), classSelectorInputField, true, false);
 
-            var addButton = UIFactory.CreateButton(addRow, "AddButton", "Add Hooks");
+            ButtonRef addButton = UIFactory.CreateButton(addRow, "AddButton", "Add Hooks");
             UIFactory.SetLayoutElement(addButton.Component.gameObject, minWidth: 100, minHeight: 25);
             addButton.OnClick += OnClassInputAddClicked;
 
-            var hooksLabel = UIFactory.CreateLabel(currentHooksPanel, "HooksLabel", "Current Hooks", TextAnchor.MiddleCenter);
+            Text hooksLabel = UIFactory.CreateLabel(currentHooksPanel, "HooksLabel", "Current Hooks", TextAnchor.MiddleCenter);
             UIFactory.SetLayoutElement(hooksLabel.gameObject, minHeight: 30, flexibleWidth: 9999);
 
-            HooksScrollPool = UIFactory.CreateScrollPool<HookCell>(currentHooksPanel, "HooksScrollPool", 
+            HooksScrollPool = UIFactory.CreateScrollPool<HookCell>(currentHooksPanel, "HooksScrollPool",
                 out GameObject hooksScroll, out GameObject hooksContent);
             UIFactory.SetLayoutElement(hooksScroll, flexibleHeight: 9999);
             HooksScrollPool.Initialize(HookManager.Instance);
@@ -116,10 +110,10 @@ namespace UnityExplorer.UI.Panels
             addHooksLabel = UIFactory.CreateLabel(addHooksPanel, "AddLabel", "NOT SET", TextAnchor.MiddleCenter);
             UIFactory.SetLayoutElement(addHooksLabel.gameObject, minHeight: 30, minWidth: 100, flexibleWidth: 9999);
 
-            var buttonRow = UIFactory.CreateHorizontalGroup(addHooksPanel, "ButtonRow", false, false, true, true, 5);
+            GameObject buttonRow = UIFactory.CreateHorizontalGroup(addHooksPanel, "ButtonRow", false, false, true, true, 5);
             UIFactory.SetLayoutElement(buttonRow, minHeight: 25, flexibleWidth: 9999);
 
-            var doneButton = UIFactory.CreateButton(buttonRow, "DoneButton", "Done", new Color(0.2f, 0.3f, 0.2f));
+            ButtonRef doneButton = UIFactory.CreateButton(buttonRow, "DoneButton", "Done", new Color(0.2f, 0.3f, 0.2f));
             UIFactory.SetLayoutElement(doneButton.Component.gameObject, minHeight: 25, flexibleWidth: 9999);
             doneButton.OnClick += HookManager.Instance.DoneAddingHooks;
 
@@ -140,26 +134,26 @@ namespace UnityExplorer.UI.Panels
             UIFactory.SetLayoutElement(editorPanel, flexibleHeight: 9999, flexibleWidth: 9999);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(editorPanel, true, true, true, true);
 
-            var editorLabel = UIFactory.CreateLabel(editorPanel, 
-                "EditorLabel", 
+            Text editorLabel = UIFactory.CreateLabel(editorPanel,
+                "EditorLabel",
                 "Edit Harmony patch source as desired. Accepted method names are Prefix, Postfix, Finalizer and Transpiler (can define multiple).\n\n" +
-                "Hooks are temporary! Please copy the source into your IDE to avoid losing work if you wish to keep it!", 
+                "Hooks are temporary! Please copy the source into your IDE to avoid losing work if you wish to keep it!",
                 TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(editorLabel.gameObject, minHeight: 25, flexibleWidth: 9999);
 
-            var editorButtonRow = UIFactory.CreateHorizontalGroup(editorPanel, "ButtonRow", false, false, true, true, 5);
+            GameObject editorButtonRow = UIFactory.CreateHorizontalGroup(editorPanel, "ButtonRow", false, false, true, true, 5);
             UIFactory.SetLayoutElement(editorButtonRow, minHeight: 25, flexibleWidth: 9999);
 
-            var editorSaveButton = UIFactory.CreateButton(editorButtonRow, "DoneButton", "Save and Return", new Color(0.2f, 0.3f, 0.2f));
+            ButtonRef editorSaveButton = UIFactory.CreateButton(editorButtonRow, "DoneButton", "Save and Return", new Color(0.2f, 0.3f, 0.2f));
             UIFactory.SetLayoutElement(editorSaveButton.Component.gameObject, minHeight: 25, flexibleWidth: 9999);
             editorSaveButton.OnClick += HookManager.Instance.EditorInputSave;
 
-            var editorDoneButton = UIFactory.CreateButton(editorButtonRow, "DoneButton", "Cancel and Return", new Color(0.2f, 0.2f, 0.2f));
+            ButtonRef editorDoneButton = UIFactory.CreateButton(editorButtonRow, "DoneButton", "Cancel and Return", new Color(0.2f, 0.2f, 0.2f));
             UIFactory.SetLayoutElement(editorDoneButton.Component.gameObject, minHeight: 25, flexibleWidth: 9999);
             editorDoneButton.OnClick += HookManager.Instance.EditorInputCancel;
 
             int fontSize = 16;
-            var inputObj = UIFactory.CreateScrollInputField(editorPanel, "EditorInput", "", out var inputScroller, fontSize);
+            GameObject inputObj = UIFactory.CreateScrollInputField(editorPanel, "EditorInput", "", out InputFieldScroller inputScroller, fontSize);
             EditorInputScroller = inputScroller;
             EditorInput.OnValueChanged += HookManager.Instance.OnEditorInputChanged;
 
@@ -171,8 +165,8 @@ namespace UnityExplorer.UI.Panels
             EditorInput.PlaceholderText.fontSize = fontSize;
 
             // Lexer highlight text overlay
-            var highlightTextObj = UIFactory.CreateUIObject("HighlightText", EditorInputText.gameObject);
-            var highlightTextRect = highlightTextObj.GetComponent<RectTransform>();
+            GameObject highlightTextObj = UIFactory.CreateUIObject("HighlightText", EditorInputText.gameObject);
+            RectTransform highlightTextRect = highlightTextObj.GetComponent<RectTransform>();
             highlightTextRect.pivot = new Vector2(0, 1);
             highlightTextRect.anchorMin = Vector2.zero;
             highlightTextRect.anchorMax = Vector2.one;

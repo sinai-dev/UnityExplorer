@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using UnityExplorer.Inspectors;
-using UniverseLib;
 using UniverseLib.Utility;
 
 namespace UnityExplorer.CacheObject
@@ -18,7 +14,7 @@ namespace UnityExplorer.CacheObject
 
         public override bool ShouldAutoEvaluate => false;
 
-        public CacheMethod (MethodInfo mi)
+        public CacheMethod(MethodInfo mi)
         {
             this.MethodInfo = mi;
         }
@@ -36,14 +32,14 @@ namespace UnityExplorer.CacheObject
         {
             try
             {
-                var methodInfo = MethodInfo;
+                MethodInfo methodInfo = MethodInfo;
                 if (methodInfo.IsGenericMethod)
                     methodInfo = MethodInfo.MakeGenericMethod(Evaluator.TryParseGenericArguments());
 
                 object ret;
                 if (HasArguments)
                     ret = methodInfo.Invoke(DeclaringInstance, Evaluator.TryParseArguments());
-                else 
+                else
                     ret = methodInfo.Invoke(DeclaringInstance, ArgumentUtility.EmptyArgs);
                 LastException = null;
                 return ret;

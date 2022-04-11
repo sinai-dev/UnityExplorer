@@ -5,7 +5,7 @@ namespace UnityExplorer.CSConsole.Lexers
     public class NumberLexer : Lexer
     {
         // Maroon
-        protected override Color HighlightColor => new Color(0.58f, 0.33f, 0.33f, 1.0f);
+        protected override Color HighlightColor => new(0.58f, 0.33f, 0.33f, 1.0f);
 
         private bool IsNumeric(char c) => char.IsNumber(c) || c == '.';
 

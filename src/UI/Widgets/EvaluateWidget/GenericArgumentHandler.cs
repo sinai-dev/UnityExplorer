@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using UniverseLib;
 using UniverseLib.Utility;
@@ -20,10 +18,10 @@ namespace UnityExplorer.UI.Widgets
             typeCompleter.BaseType = genericType;
             typeCompleter.CacheTypes();
 
-            var constraints = genericType.GetGenericParameterConstraints();
+            Type[] constraints = genericType.GetGenericParameterConstraints();
             typeCompleter.GenericConstraints = constraints;
 
-            var sb = new StringBuilder($"<color={SignatureHighlighter.CONST}>{genericType.Name}</color>");
+            StringBuilder sb = new($"<color={SignatureHighlighter.CONST}>{genericType.Name}</color>");
 
             for (int j = 0; j < constraints.Length; j++)
             {
