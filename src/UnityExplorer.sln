@@ -1,51 +1,38 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30128.74
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32328.378
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mcs", "..\lib\mcs-unity\mcs\mcs.csproj", "{E4989E4C-0875-4528-9031-08E2C0E70103}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityExplorer", "UnityExplorer.csproj", "{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnityExplorer", "UnityExplorer.csproj", "{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release_BIE_Cpp|Any CPU = Release_BIE_Cpp|Any CPU
 		Release_BIE5_Mono|Any CPU = Release_BIE5_Mono|Any CPU
 		Release_BIE6_Mono|Any CPU = Release_BIE6_Mono|Any CPU
-		Release_ML_Cpp|Any CPU = Release_ML_Cpp|Any CPU
+		Release_ML_Cpp_net472|Any CPU = Release_ML_Cpp_net472|Any CPU
+		Release_ML_Cpp_net6|Any CPU = Release_ML_Cpp_net6|Any CPU
 		Release_ML_Mono|Any CPU = Release_ML_Mono|Any CPU
 		Release_STANDALONE_Cpp|Any CPU = Release_STANDALONE_Cpp|Any CPU
 		Release_STANDALONE_Mono|Any CPU = Release_STANDALONE_Mono|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_BIE_Cpp|Any CPU.ActiveCfg = Release|Any CPU
-		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_BIE_Cpp|Any CPU.Build.0 = Release|Any CPU
-		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_BIE5_Mono|Any CPU.ActiveCfg = Release|Any CPU
-		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_BIE5_Mono|Any CPU.Build.0 = Release|Any CPU
-		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_BIE6_Mono|Any CPU.ActiveCfg = Release|Any CPU
-		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_BIE6_Mono|Any CPU.Build.0 = Release|Any CPU
-		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_ML_Cpp|Any CPU.ActiveCfg = Release|Any CPU
-		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_ML_Cpp|Any CPU.Build.0 = Release|Any CPU
-		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_ML_Mono|Any CPU.ActiveCfg = Release|Any CPU
-		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_ML_Mono|Any CPU.Build.0 = Release|Any CPU
-		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_STANDALONE_Cpp|Any CPU.ActiveCfg = Release|Any CPU
-		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_STANDALONE_Cpp|Any CPU.Build.0 = Release|Any CPU
-		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_STANDALONE_Mono|Any CPU.ActiveCfg = Release|Any CPU
-		{E4989E4C-0875-4528-9031-08E2C0E70103}.Release_STANDALONE_Mono|Any CPU.Build.0 = Release|Any CPU
-		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE_Cpp|Any CPU.ActiveCfg = Release_BIE_Cpp|Any CPU
-		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE_Cpp|Any CPU.Build.0 = Release_BIE_Cpp|Any CPU
-		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE5_Mono|Any CPU.ActiveCfg = Release_BIE5_Mono|Any CPU
-		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE5_Mono|Any CPU.Build.0 = Release_BIE5_Mono|Any CPU
-		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE6_Mono|Any CPU.ActiveCfg = Release_BIE6_Mono|Any CPU
-		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE6_Mono|Any CPU.Build.0 = Release_BIE6_Mono|Any CPU
-		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_ML_Cpp|Any CPU.ActiveCfg = Release_ML_Cpp|Any CPU
-		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_ML_Cpp|Any CPU.Build.0 = Release_ML_Cpp|Any CPU
-		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_ML_Mono|Any CPU.ActiveCfg = Release_ML_Mono|Any CPU
-		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_ML_Mono|Any CPU.Build.0 = Release_ML_Mono|Any CPU
-		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_STANDALONE_Cpp|Any CPU.ActiveCfg = Release_STANDALONE_Cpp|Any CPU
-		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_STANDALONE_Cpp|Any CPU.Build.0 = Release_STANDALONE_Cpp|Any CPU
-		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_STANDALONE_Mono|Any CPU.ActiveCfg = Release_STANDALONE_Mono|Any CPU
-		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_STANDALONE_Mono|Any CPU.Build.0 = Release_STANDALONE_Mono|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE_Cpp|Any CPU.ActiveCfg = BIE_Cpp|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE_Cpp|Any CPU.Build.0 = BIE_Cpp|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE5_Mono|Any CPU.ActiveCfg = BIE5_Mono|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE5_Mono|Any CPU.Build.0 = BIE5_Mono|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE6_Mono|Any CPU.ActiveCfg = BIE6_Mono|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE6_Mono|Any CPU.Build.0 = BIE6_Mono|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_ML_Cpp_net472|Any CPU.ActiveCfg = ML_Cpp_net472|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_ML_Cpp_net472|Any CPU.Build.0 = ML_Cpp_net472|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_ML_Cpp_net6|Any CPU.ActiveCfg = ML_Cpp_net6|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_ML_Cpp_net6|Any CPU.Build.0 = ML_Cpp_net6|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_ML_Mono|Any CPU.ActiveCfg = ML_Mono|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_ML_Mono|Any CPU.Build.0 = ML_Mono|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_STANDALONE_Cpp|Any CPU.ActiveCfg = STANDALONE_Cpp|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_STANDALONE_Cpp|Any CPU.Build.0 = STANDALONE_Cpp|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_STANDALONE_Mono|Any CPU.ActiveCfg = STANDALONE_Mono|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_STANDALONE_Mono|Any CPU.Build.0 = STANDALONE_Mono|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
