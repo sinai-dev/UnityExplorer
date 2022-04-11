@@ -89,9 +89,9 @@ Compress-Archive -Path $Path\* -CompressionLevel Fastest -DestinationPath $Path\
 
 # Editor (mono)
 $Path1 = "Release\UnityExplorer.Standalone.Mono"
-$Path2 = "Release\_UnityExplorer.Editor\Runtime"
+$Path2 = "UnityEditorPackage\Runtime"
 Copy-Item $Path1\UnityExplorer.STANDALONE.Mono.dll -Destination $Path2
 Copy-Item $Path1\mcs.dll -Destination $Path2
 Copy-Item $Path1\Tomlet.dll -Destination $Path2
 Copy-Item $Path1\UniverseLib.Mono.dll -Destination $Path2
-Compress-Archive -Path Release\_UnityExplorer.Editor\* -CompressionLevel Fastest -DestinationPath Release\UnityExplorer.Editor.zip -Force
+Compress-Archive -Path UnityEditorPackage\* -CompressionLevel Fastest -DestinationPath Release\UnityExplorer.Editor.zip -Force

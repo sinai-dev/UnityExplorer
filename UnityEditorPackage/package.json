@@ -1,0 +1,19 @@
+{
+  "name": "com.sinai-dev.unityexplorer",
+  "version": "4.7.0",
+  "displayName": "UnityExplorer",
+  "description": "An in-game UI for exploring, debugging and modifying Unity games.",
+  "unity": "2017.1",
+  "documentationUrl": "https://github.com/sinai-dev/UnityExplorer",
+  "changelogUrl": "https://github.com/sinai-dev/UnityExplorer/releases",
+  "licensesUrl": "https://github.com/sinai-dev/UnityExplorer/blob/master/LICENSE",
+  "keywords": [
+    "inspector",
+    "debug",
+    "runtime"
+  ],
+  "author": {
+    "name": "Sinai",
+    "url": "https://github.com/sinai-dev"
+  }
+}
