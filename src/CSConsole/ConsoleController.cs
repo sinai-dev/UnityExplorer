@@ -1,5 +1,4 @@
-﻿using Mono.CSharp;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -20,6 +19,7 @@ using UniverseLib.UI.Models;
 using UniverseLib.Utility;
 using HarmonyLib;
 using UniverseLib.Runtime;
+using Mono.CSharp;
 
 namespace UnityExplorer.CSConsole
 {
@@ -44,7 +44,7 @@ namespace UnityExplorer.CSConsole
         public static bool EnableAutoIndent { get; private set; } = true;
         public static bool EnableSuggestions { get; private set; } = true;
 
-        internal static string ScriptsFolder => Path.Combine(ExplorerCore.Loader.ExplorerFolder, "Scripts");
+        internal static string ScriptsFolder => Path.Combine(ExplorerCore.ExplorerFolder, "Scripts");
 
         internal static readonly string[] DefaultUsing = new string[]
         {
@@ -68,7 +68,7 @@ namespace UnityExplorer.CSConsole
             try
             {
                 ResetConsole(false);
-                // ensure the compiler is supported (if this fails then SRE is probably stubbed)
+                // ensure the compiler is supported (if this fails then SRE is probably stripped)
                 Evaluator.Compile("0 == 0");
             }
             catch (Exception ex)
@@ -153,7 +153,7 @@ namespace UnityExplorer.CSConsole
 
             if (Evaluator != null)
                 Evaluator.Dispose();
-
+            
             GenerateTextWriter();
             Evaluator = new ScriptEvaluator(evaluatorStringWriter)
             {
@@ -165,7 +165,7 @@ namespace UnityExplorer.CSConsole
                 AddUsing(use);
 
             if (logSuccess)
-                ExplorerCore.Log($"C# Console reset. Using directives:\r\n{Evaluator.GetUsing()}");
+                ExplorerCore.Log($"C# Console reset");//. Using directives:\r\n{Evaluator.GetUsing()}");
         }
 
         public static void AddUsing(string assemblyName)
@@ -200,7 +200,7 @@ namespace UnityExplorer.CSConsole
             {
                 // Compile the code. If it returned a CompiledMethod, it is REPL.
                 CompiledMethod repl = Evaluator.Compile(input);
-
+                
                 if (repl != null)
                 {
                     // Valid REPL, we have a delegate to the evaluation.
@@ -222,13 +222,13 @@ namespace UnityExplorer.CSConsole
                 else
                 {
                     // The compiled code was not REPL, so it was a using directive or it defined classes.
-
+                
                     string output = Evaluator._textWriter.ToString();
                     var outputSplit = output.Split('\n');
                     if (outputSplit.Length >= 2)
                         output = outputSplit[outputSplit.Length - 2];
                     evaluatorOutput.Clear();
-
+                
                     if (ScriptEvaluator._reportPrinter.ErrorsCount > 0)
                         throw new FormatException($"Unable to compile the code. Evaluator's last output was:\r\n{output}");
                     else if (!supressLog)
@@ -641,22 +641,34 @@ namespace UnityExplorer.CSConsole
 
             if (ex is NotSupportedException)
             {
-                Input.Text = $@"The C# Console has been disabled because System.Reflection.Emit threw an exception: {ex.ReflectionExToString()}
+                Input.Text = $@"The C# Console has been disabled because System.Reflection.Emit threw a NotSupportedException.
 
-If the game was built with Unity's stubbed netstandard 2.0 runtime, you can fix this with UnityDoorstop:
-    * Download the Unity Editor version that the game uses
-    * Navigate to the folder:
-      - Editor\Data\PlaybackEngines\windowsstandalonesupport\Variations\mono\Managed
-      - or, Editor\Data\MonoBleedingEdge\lib\mono\4.5
-    * Copy the mscorlib.dll and System.Reflection.Emit DLLs from the folder
-    * Make a subfolder in the folder that contains doorstop_config.ini
-    * Put the DLLs inside the subfolder
-    * Set the 'dllSearchPathOverride' in doorstop_config.ini to the subfolder name";
+Easy, dirty fix: (will likely break on game updates)
+    * Download the corlibs for the game's Unity version from here: https://unity.bepinex.dev/corlibs/
+    * Unzip and copy mscorlib.dll (and System.Reflection.Emit DLLs, if present) from the folder
+    * Paste and overwrite the files into <Game>_Data/Managed/
+
+With UnityDoorstop: (BepInEx only, or if you use UnityDoorstop + Standalone release):
+    * Download the corlibs for the game's Unity version from here: https://unity.bepinex.dev/corlibs/
+    * Unzip and copy mscorlib.dll (and System.Reflection.Emit DLLs, if present) from the folder
+    * Find the folder which contains doorstop_config.ini (the game folder, or your r2modman/ThunderstoreModManager profile folder)
+    * Make a subfolder called 'corlibs' inside this folder.
+    * Paste the DLLs inside the corlibs folder.
+    * In doorstop_config.ini, set 'dllSearchPathOverride=corlibs'.
+
+Doorstop example:
+- <Game>\
+    - <Game>_Data\...
+    - BepInEx\...
+    - corlibs\
+        - mscorlib.dll
+    - doorstop_config.ini (with dllSearchPathOverride=corlibs)
+    - <Game>.exe
+    - winhttp.dll";
             }
             else
             {
-                Input.Text = $@"The C# Console has been disabled because of an unknown error.
-{ex}";
+                Input.Text = $"The C# Console has been disabled. {ex}";
             }
         }
 
