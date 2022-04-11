@@ -45,7 +45,7 @@ namespace UnityExplorer.ObjectExplorer
         internal static int DefaultSceneCount => 1 + (DontDestroyExists ? 1 : 0);
 
         /// <summary>Whether or not we are currently inspecting the "HideAndDontSave" asset scene.</summary>
-        public static bool InspectingAssetScene => SelectedScene.HasValue && SelectedScene.Value == default;
+        public static bool InspectingAssetScene => SelectedScene.HasValue && SelectedScene.Value.handle == -1;
 
         /// <summary>Whether or not we successfuly retrieved the names of the scenes in the build settings.</summary>
         public static bool WasAbleToGetScenesInBuild { get; private set; }
