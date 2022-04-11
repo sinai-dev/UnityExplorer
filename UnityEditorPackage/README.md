@@ -62,9 +62,7 @@ The inspector is used to see detailed information on objects of any type and man
 ### Settings
 
 * You can change the settings via the "Options" tab of the menu, or directly from the config file.
-  * BepInEx: `BepInEx\config\com.sinai.unityexplorer.cfg`
-  * MelonLoader: `UserData\MelonPreferences.cfg`
-  * Standalone `{DLL_location}\UnityExplorer\config.cfg`
+  * <AssetsFolder>/sinai-dev-UnityExplorer~/config.cfg
 
 # Acknowledgments
 

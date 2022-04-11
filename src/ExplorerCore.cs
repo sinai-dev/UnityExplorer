@@ -15,7 +15,7 @@ namespace UnityExplorer
     public static class ExplorerCore
     {
         public const string NAME = "UnityExplorer";
-        public const string VERSION = "4.7.0";
+        public const string VERSION = "4.7.1";
         public const string AUTHOR = "Sinai";
         public const string GUID = "com.sinai.unityexplorer";
 
@@ -74,8 +74,6 @@ namespace UnityExplorer
             // check master toggle
             if (InputManager.GetKeyDown(ConfigManager.Master_Toggle.Value))
                 UIManager.ShowMenu = !UIManager.ShowMenu;
-
-            UIManager.Update();
         }
 
         // Can be removed eventually. For migration from <4.7.0
