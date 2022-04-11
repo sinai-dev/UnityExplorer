@@ -17,7 +17,7 @@ namespace UnityExplorer.Loader.Standalone
 
         public override void Init()
         {
-            CONFIG_PATH = Path.Combine(ExplorerCore.Loader.ExplorerFolder, "config.cfg");
+            CONFIG_PATH = Path.Combine(ExplorerCore.ExplorerFolder, "config.cfg");
         }
 
         public override void LoadConfig()
@@ -92,8 +92,8 @@ namespace UnityExplorer.Loader.Standalone
             foreach (var config in ConfigManager.ConfigElements)
                 document.Put(config.Key, config.Value.BoxedValue.ToString());
 
-            if (!Directory.Exists(ExplorerCore.Loader.ExplorerFolder))
-                Directory.CreateDirectory(ExplorerCore.Loader.ExplorerFolder);
+            if (!Directory.Exists(ExplorerCore.ExplorerFolder))
+                Directory.CreateDirectory(ExplorerCore.ExplorerFolder);
 
             File.WriteAllText(CONFIG_PATH, document.SerializedValue);
         }

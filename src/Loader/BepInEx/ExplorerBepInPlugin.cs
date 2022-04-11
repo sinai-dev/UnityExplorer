@@ -44,9 +44,10 @@ namespace UnityExplorer
         private BepInExConfigHandler _configHandler;
 
         public Harmony HarmonyInstance => s_harmony;
-        private static readonly Harmony s_harmony = new Harmony(ExplorerCore.GUID);
-
-        public string ExplorerFolder => Path.Combine(Paths.PluginPath, ExplorerCore.NAME);
+        private static readonly Harmony s_harmony = new(ExplorerCore.GUID);
+        
+        public string ExplorerFolderName => ExplorerCore.DEFAULT_EXPLORER_FOLDER_NAME;
+        public string ExplorerFolderDestination => Paths.PluginPath;
 
         public Action<object> OnLogMessage => LogSource.LogMessage;
         public Action<object> OnLogWarning => LogSource.LogWarning;

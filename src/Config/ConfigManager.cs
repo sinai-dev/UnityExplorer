@@ -123,7 +123,7 @@ namespace UnityExplorer.Config
 
             Default_Output_Path = new ConfigElement<string>("Default Output Path",
                 "The default output path when exporting things from UnityExplorer.",
-                Path.Combine(ExplorerCore.Loader.ExplorerFolder, "Output"));
+                Path.Combine(ExplorerCore.ExplorerFolder, "Output"));
 
             Startup_Delay_Time = new ConfigElement<float>("Startup Delay Time",
                 "The delay on startup before the UI is created.",

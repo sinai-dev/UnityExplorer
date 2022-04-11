@@ -16,7 +16,7 @@ namespace UnityExplorer.Config
 
         public override void Init()
         {
-            CONFIG_PATH = Path.Combine(ExplorerCore.Loader.ExplorerFolder, "data.cfg");
+            CONFIG_PATH = Path.Combine(ExplorerCore.ExplorerFolder, "data.cfg");
         }
 
         public override void LoadConfig()

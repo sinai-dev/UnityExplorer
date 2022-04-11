@@ -10,6 +10,8 @@ namespace UnityExplorer.Loader.Standalone
 {
     public class ExplorerEditorLoader : ExplorerStandalone
     {
+        public new string ExplorerFolderName => $"{ExplorerCore.DEFAULT_EXPLORER_FOLDER_NAME}~";
+
         public static void Initialize()
         {
             Instance = new ExplorerEditorLoader();
@@ -33,8 +35,8 @@ namespace UnityExplorer.Loader.Standalone
 
         protected override void CheckExplorerFolder()
         {
-            if (explorerFolder == null)
-                explorerFolder = Path.Combine(Application.dataPath, "UnityExplorer~");
+            if (explorerFolderDest == null)
+                explorerFolderDest = Application.dataPath;
         }
     }
 }

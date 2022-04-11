@@ -8,7 +8,8 @@ namespace UnityExplorer
 {
     public interface IExplorerLoader
     {
-        string ExplorerFolder { get; }
+        string ExplorerFolderDestination { get; }
+        string ExplorerFolderName { get; }
         string UnhollowedModulesFolder { get; }
 
         ConfigHandler ConfigHandler { get; }

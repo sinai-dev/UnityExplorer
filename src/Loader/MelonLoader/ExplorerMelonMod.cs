@@ -20,9 +20,8 @@ namespace UnityExplorer
 {
     public class ExplorerMelonMod : MelonMod, IExplorerLoader
     {
-        public static ExplorerMelonMod Instance;
-
-        public string ExplorerFolder => Path.Combine(MelonHandler.ModsDirectory, ExplorerCore.NAME);
+        public string ExplorerFolderName => ExplorerCore.DEFAULT_EXPLORER_FOLDER_NAME;
+        public string ExplorerFolderDestination => MelonHandler.ModsDirectory;
 
         public string UnhollowedModulesFolder => Path.Combine(
             Path.GetDirectoryName(MelonHandler.ModsDirectory),
@@ -37,9 +36,7 @@ namespace UnityExplorer
 
         public override void OnApplicationStart()
         {
-            Instance = this;
             _configHandler = new MelonLoaderConfigHandler();
-
             ExplorerCore.Init(this);
         }
     }

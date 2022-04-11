@@ -29,15 +29,16 @@ namespace UnityExplorer
         public ConfigHandler ConfigHandler => configHandler;
         internal StandaloneConfigHandler configHandler;
 
-        public string ExplorerFolder
+        public string ExplorerFolderName => ExplorerCore.DEFAULT_EXPLORER_FOLDER_NAME;
+        public string ExplorerFolderDestination
         {
             get
             {
                 CheckExplorerFolder();
-                return explorerFolder;
+                return explorerFolderDest;
             }
         }
-        protected static string explorerFolder;
+        protected static string explorerFolderDest;
         
         Action<object> IExplorerLoader.OnLogMessage => (object log) => { OnLog?.Invoke(log?.ToString() ?? "", LogType.Log); };
         Action<object> IExplorerLoader.OnLogWarning => (object log) => { OnLog?.Invoke(log?.ToString() ?? "", LogType.Warning); };
@@ -45,14 +46,14 @@ namespace UnityExplorer
 
         /// <summary>
         /// Call this to initialize UnityExplorer without adding a log listener or Unhollowed modules path.
-        /// The default Unhollowed path "UnityExplorer\Modules\" will be used.
+        /// The default Unhollowed path "sinai-dev-UnityExplorer\Modules\" will be used.
         /// </summary>
         /// <returns>The new (or active, if one exists) instance of ExplorerStandalone.</returns>
         public static ExplorerStandalone CreateInstance() => CreateInstance(null, null);
 
         /// <summary>
         /// Call this to initialize UnityExplorer and add a listener for UnityExplorer's log messages, without specifying an Unhollowed modules path.
-        /// The default Unhollowed path "UnityExplorer\Modules\" will be used.
+        /// The default Unhollowed path "sinai-dev-UnityExplorer\Modules\" will be used.
         /// </summary>
         /// <param name="logListener">Your log listener to handle UnityExplorer logs.</param>
         /// <returns>The new (or active, if one exists) instance of ExplorerStandalone.</returns>
@@ -77,7 +78,7 @@ namespace UnityExplorer
                 OnLog += logListener;
 
             if (string.IsNullOrEmpty(unhollowedModulesPath) || !Directory.Exists(unhollowedModulesPath))
-                instance.unhollowedPath = Path.Combine(instance.ExplorerFolder, "Modules");
+                instance.unhollowedPath = Path.Combine(ExplorerCore.ExplorerFolder, "Modules");
             else
                 instance.unhollowedPath = unhollowedModulesPath;
 
@@ -94,16 +95,10 @@ namespace UnityExplorer
 
         protected virtual void CheckExplorerFolder()
         {
-            if (explorerFolder == null)
+            if (explorerFolderDest == null)
             {
-                explorerFolder =
-                    Path.Combine(
-                        Path.GetDirectoryName(
-                            Uri.UnescapeDataString(new Uri(Assembly.GetExecutingAssembly().CodeBase).AbsolutePath)),
-                        "UnityExplorer");
-
-                if (!Directory.Exists(explorerFolder))
-                    Directory.CreateDirectory(explorerFolder);
+                string assemblyLocation = Uri.UnescapeDataString(new Uri(typeof(ExplorerCore).Assembly.CodeBase).AbsolutePath);
+                explorerFolderDest = Path.GetDirectoryName(assemblyLocation);
             }
         }
     }

@@ -69,7 +69,7 @@ namespace UnityExplorer.UI.Panels
         {
             var fileName = $"UnityExplorer {DateTime.Now:u}.txt";
             fileName = IOUtility.EnsureValidFilename(fileName);
-            var path = Path.Combine(ExplorerCore.Loader.ExplorerFolder, "Logs");
+            var path = Path.Combine(ExplorerCore.ExplorerFolder, "Logs");
             CurrentStreamPath = IOUtility.EnsureValidFilePath(Path.Combine(path, fileName));
 
             // clean old log(s)
