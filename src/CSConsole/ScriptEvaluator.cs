@@ -11,7 +11,7 @@ namespace UnityExplorer.CSConsole
 {
     public class ScriptEvaluator : Evaluator, IDisposable
     {
-        private static readonly HashSet<string> StdLib = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase)
+        private static readonly HashSet<string> StdLib = new(StringComparer.InvariantCultureIgnoreCase)
         {
             "mscorlib", "System.Core", "System", "System.Xml"
         };
@@ -23,7 +23,7 @@ namespace UnityExplorer.CSConsole
         {
             _textWriter = tw;
 
-            ImportAppdomainAssemblies(Reference);
+            ImportAppdomainAssemblies();
             AppDomain.CurrentDomain.AssemblyLoad += OnAssemblyLoad;
         }
 
@@ -68,7 +68,7 @@ namespace UnityExplorer.CSConsole
             return new CompilerContext(settings, _reportPrinter);
         }
 
-        private static void ImportAppdomainAssemblies(Action<Assembly> import)
+        private void ImportAppdomainAssemblies()
         {
             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
@@ -76,7 +76,14 @@ namespace UnityExplorer.CSConsole
                 if (StdLib.Contains(name))
                     continue;
 
-                import(assembly);
+                try
+                {
+                    Reference(assembly);
+                }
+                catch // (Exception ex)
+                {
+                    //ExplorerCore.LogWarning($"Excepting referencing '{name}': {ex.GetType()}.{ex.Message}");
+                }
             }
         }
     }
