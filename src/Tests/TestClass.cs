@@ -28,7 +28,23 @@ namespace UnityExplorer.Tests
 
         public static object LiterallyAnything = null;
 
-        public static string Exception => throw new Exception("This is a test.");
+        public static string Exception
+        {
+            get
+            {
+                if (!shouldThrow)
+                {
+                    shouldThrow = true;
+                    throw new Exception("This is a test.");
+                }
+                else
+                {
+                    shouldThrow = false;
+                    return "No exception";
+                }
+            }
+        }
+        static bool shouldThrow;
 
         // Test enumerables
         public static int[,,] MultiDimensionalArray = new int[45, 45, 45];

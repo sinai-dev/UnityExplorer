@@ -96,23 +96,6 @@ namespace UnityExplorer.CacheObject
 
         // Updating and applying values
 
-        public void SetUserValue(object value)
-        {
-            value = value.TryCast(FallbackType);
-
-            TrySetUserValue(value);
-
-            if (CellView != null)
-                SetDataToCell(CellView);
-
-            // If the owner's ParentCacheObject is set, we are setting the value of an inspected struct.
-            // Set the inspector target as the value back to that parent.
-            if (Owner.ParentCacheObject != null)
-                Owner.ParentCacheObject.SetUserValue(Owner.Target);
-        }
-
-        public abstract void TrySetUserValue(object value);
-
         // The only method which sets the CacheObjectBase.Value
         public virtual void SetValueFromSource(object value)
         {
@@ -131,6 +114,23 @@ namespace UnityExplorer.CacheObject
                     IValue.PendingValueWanted = true;
             }
         }
+
+        public void SetUserValue(object value)
+        {
+            value = value.TryCast(FallbackType);
+
+            TrySetUserValue(value);
+
+            if (CellView != null)
+                SetDataToCell(CellView);
+
+            // If the owner's ParentCacheObject is set, we are setting the value of an inspected struct.
+            // Set the inspector target as the value back to that parent.
+            if (Owner.ParentCacheObject != null)
+                Owner.ParentCacheObject.SetUserValue(Owner.Target);
+        }
+
+        public abstract void TrySetUserValue(object value);
 
         protected virtual void ProcessOnEvaluate()
         {
@@ -171,7 +171,7 @@ namespace UnityExplorer.CacheObject
 
         public ValueState GetStateForType(Type type)
         {
-            if (LastValueType == type)
+            if (LastValueType == type && (State != ValueState.Exception || LastException != null))
                 return State;
 
             LastValueType = type;
