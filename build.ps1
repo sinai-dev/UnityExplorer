@@ -95,5 +95,3 @@ Copy-Item $Path1\mcs.dll -Destination $Path2
 Copy-Item $Path1\Tomlet.dll -Destination $Path2
 Copy-Item $Path1\UniverseLib.Mono.dll -Destination $Path2
 Compress-Archive -Path Release\_UnityExplorer.Editor\* -CompressionLevel Fastest -DestinationPath Release\UnityExplorer.Editor.zip -Force
-
-pause

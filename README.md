@@ -22,26 +22,31 @@
 
 | Release | IL2CPP | Mono |
 | ------- | ------ | ---- |
-| BIE 6.X | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx.Il2Cpp.zip) | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx6.Mono.zip) |
+| BIE 6.X | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx.IL2CPP.zip) | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx6.Mono.zip) |
 | BIE 5.X | ✖️ n/a | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.BepInEx5.Mono.zip) |
 
-1. Take the `UnityExplorer.BIE.[version].dll` and the `UniverseLib.[version].dll` files and put them in `BepInEx\plugins\`
+1. Unzip the release file into a folder
+2. Take the `plugins/sinai-dev-UnityExplorer` folder and place it in `BepInEx/plugins/`
+3. ⚠️ **Important**: For IL2CPP games, you must set `Il2CppDumperType = Cpp2IL` in the `BepInEx.cfg` file.
 
-<i>Note: BepInEx 6 is obtainable via [BepisBuilds](https://builds.bepis.io/projects/bepinex_be)</i>
+<i>Note: BepInEx 6 is obtainable via [builds.bepinex.dev](https://builds.bepinex.dev/projects/bepinex_be)</i>
 
 ## MelonLoader
 
-| Release | IL2CPP | Mono |
-| ------- | ------ | ---- |
-| ML 0.4+ | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.MelonLoader.Il2Cpp.zip) | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.MelonLoader.Mono.zip) | 
+| Release    | IL2CPP | Mono |
+| ---------- | ------ | ---- |
+| ML 0.4/0.5 | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.MelonLoader.IL2CPP.zip) | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.MelonLoader.Mono.zip) | 
+| ML 0.6     | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.MelonLoader.IL2CPP.net6preview.zip) | ✖️ |
 
-1. Take the `UnityExplorer.ML.[version].dll` file and put them in the `Mods\` folder created by MelonLoader, and then put the `UniverseLib.[version].dll` file in the `UserLibs\` folder.
+1. Unzip the release file into a folder
+2. Copy the DLL inside the `Mods` folder into your MelonLoader `Mods` folder
+3. Copy all of the DLLs inside the `UserLibs` folder into your MelonLoader `UserLibs` folder
 
 ## Standalone
 
 | IL2CPP | Mono |
 | ------ | ---- |
-| ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.Standalone.Il2Cpp.zip) | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.Standalone.Mono.zip) | 
+| ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.Standalone.IL2CPP.zip) | ✅ [link](https://github.com/sinai-dev/UnityExplorer/releases/latest/download/UnityExplorer.Standalone.Mono.zip) | 
 
 The standalone release can be used with any injector or loader of your choice, but it requires you to load the dependencies manually.
 
@@ -64,7 +69,7 @@ Although UnityExplorer should work out of the box for most Unity games, in some 
 To adjust the settings, open the config file:
 * BepInEx: `BepInEx\config\com.sinai.unityexplorer.cfg`
 * MelonLoader: `UserData\MelonPreferences.cfg`
-* Standalone: `UnityExplorer\config.cfg`
+* Standalone: `sinai-dev-UnityExplorer\config.cfg`
 
 Try adjusting the following settings and see if it fixes your issues:
 * `Startup_Delay_Time` - increase to 5-10 seconds (or more as needed), can fix issues with UnityExplorer being destroyed or corrupted during startup.
@@ -105,7 +110,7 @@ The inspector is used to see detailed information on objects of any type and man
 ### C# Console
 
 * The C# Console uses the `Mono.CSharp.Evaluator` to define temporary classes or run immediate REPL code.
-* You can execute a script automatically on startup by naming it `startup.cs` and placing it in the `UnityExplorer\Scripts\` folder (this folder will be created where you placed the DLL file).
+* You can execute a script automatically on startup by naming it `startup.cs` and placing it in the `sinai-dev-UnityExplorer\Scripts\` folder (this folder will be created where you placed the DLL file).
 * See the "Help" dropdown in the C# console menu for more detailed information.
 
 ### Hook Manager
@@ -133,20 +138,13 @@ The inspector is used to see detailed information on objects of any type and man
 * You can change the settings via the "Options" tab of the menu, or directly from the config file.
   * BepInEx: `BepInEx\config\com.sinai.unityexplorer.cfg`
   * MelonLoader: `UserData\MelonPreferences.cfg`
-  * Standalone `{DLL_location}\UnityExplorer\config.cfg`
+  * Standalone `{DLL_location}\sinai-dev-UnityExplorer\config.cfg`
 
 # Building
 
-0. Clone the repository and run `git submodule update --init --recursive` to get the submodules.
-1. Open the `src\UnityExplorer.sln` project.
-2. Build `mcs` (Release/AnyCPU, you may need to run `nuget restore mcs.sln`)
-3. Build the UnityExplorer release(s) you want to use, either by selecting the config as the Active Config, or batch-building.
+1. Run the `build.ps1` powershell script to build UnityExplorer. Releases are found in the `Release` folder.
 
-If you fork the repository on GitHub you can build using the [dotnet workflow](https://github.com/sinai-dev/UnityExplorer/blob/master/.github/workflows/dotnet.yml):
-
-0. Click on the Actions tab and enable workflows in your repository
-1. Click on the "Build UnityExplorer" workflow, then click "Run Workflow" and run it manually, or make a new commit to trigger the workflow.
-2. Take the artifact from the completed run.
+Building individual configurations from your IDE is fine, though note that the intial build process builds into `Release/<version>/...` instead of the subfolders that the powershell script uses. Batch building is not currently supported with the project.
 
 # Acknowledgments
 
