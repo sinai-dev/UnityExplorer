@@ -41,16 +41,16 @@ namespace UnityExplorer
             Directory.CreateDirectory(ExplorerFolder);
             ConfigManager.Init(Loader.ConfigHandler);
 
-            UERuntimeHelper.Init();
-            ExplorerBehaviour.Setup();
-            UnityCrashPrevention.Init();
-
             Universe.Init(ConfigManager.Startup_Delay_Time.Value, LateInit, Log, new()
             {
                 Disable_EventSystem_Override = ConfigManager.Disable_EventSystem_Override.Value,
                 Force_Unlock_Mouse = ConfigManager.Force_Unlock_Mouse.Value,
                 Unhollowed_Modules_Folder = loader.UnhollowedModulesFolder
             });
+
+            UERuntimeHelper.Init();
+            ExplorerBehaviour.Setup();
+            UnityCrashPrevention.Init();
         }
 
         // Do a delayed setup so that objects aren't destroyed instantly.

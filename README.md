@@ -27,7 +27,6 @@
 
 1. Unzip the release file into a folder
 2. Take the `plugins/sinai-dev-UnityExplorer` folder and place it in `BepInEx/plugins/`
-3. ⚠️ **Important**: For IL2CPP games, you must set `Il2CppDumperType = Cpp2IL` in the `BepInEx.cfg` file.
 
 <i>Note: BepInEx 6 is obtainable via [builds.bepinex.dev](https://builds.bepinex.dev/projects/bepinex_be)</i>
 

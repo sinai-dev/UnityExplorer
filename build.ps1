@@ -1,11 +1,11 @@
 # MelonLoader IL2CPP (net6)
 dotnet build src\UnityExplorer.sln -c Release_ML_Cpp_net6
 # (cleanup and move files)
-$Path = "Release\UnityExplorer.MelonLoader.Il2Cpp.0.6"
-Remove-Item $Path\UnityExplorer.ML.IL2CPP.deps.json
+$Path = "Release\UnityExplorer.MelonLoader.IL2CPP.net6preview"
+Remove-Item $Path\UnityExplorer.ML.IL2CPP.net6preview.deps.json
 Remove-Item $Path\Tomlet.dll
 New-Item -Path "$Path" -Name "Mods" -ItemType "directory" -Force
-Move-Item -Path $Path\UnityExplorer.ML.IL2CPP.dll -Destination $Path\Mods -Force
+Move-Item -Path $Path\UnityExplorer.ML.IL2CPP.net6preview.dll -Destination $Path\Mods -Force
 New-Item -Path "$Path" -Name "UserLibs" -ItemType "directory" -Force
 Move-Item -Path $Path\mcs.dll -Destination $Path\UserLibs -Force
 Move-Item -Path $Path\UniverseLib.IL2CPP.dll -Destination $Path\UserLibs -Force
@@ -15,7 +15,7 @@ Compress-Archive -Path $Path\* -CompressionLevel Fastest -DestinationPath $Path\
 # MelonLoader IL2CPP (net472)
 dotnet build src\UnityExplorer.sln -c Release_ML_Cpp_net472
 # (cleanup and move files)
-$Path = "Release\UnityExplorer.MelonLoader.Il2Cpp.0.5"
+$Path = "Release\UnityExplorer.MelonLoader.IL2CPP"
 Remove-Item $Path\Tomlet.dll
 New-Item -Path "$Path" -Name "Mods" -ItemType "directory" -Force
 Move-Item -Path $Path\UnityExplorer.ML.IL2CPP.dll -Destination $Path\Mods -Force
@@ -41,7 +41,7 @@ Compress-Archive -Path $Path\* -CompressionLevel Fastest -DestinationPath $Path\
 # BepInEx IL2CPP
 dotnet build src\UnityExplorer.sln -c Release_BIE_Cpp
 # (cleanup and move files)
-$Path = "Release\UnityExplorer.BepInEx.Il2Cpp"
+$Path = "Release\UnityExplorer.BepInEx.IL2CPP"
 New-Item -Path "$Path" -Name "plugins" -ItemType "directory" -Force
 New-Item -Path "$Path" -Name "plugins\sinai-dev-UnityExplorer" -ItemType "directory" -Force
 Move-Item -Path $Path\UnityExplorer.BIE.IL2CPP.dll -Destination $Path\plugins\sinai-dev-UnityExplorer -Force
@@ -84,7 +84,7 @@ Compress-Archive -Path $Path\* -CompressionLevel Fastest -DestinationPath $Path\
 
 # Standalone IL2CPP
 dotnet build src\UnityExplorer.sln -c Release_STANDALONE_Cpp
-$Path = "Release\UnityExplorer.Standalone.Il2Cpp"
+$Path = "Release\UnityExplorer.Standalone.IL2CPP"
 Compress-Archive -Path $Path\* -CompressionLevel Fastest -DestinationPath $Path\..\UnityExplorer.Standalone.IL2CPP.zip -Force
 
 # Editor (mono)
