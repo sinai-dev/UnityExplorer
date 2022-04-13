@@ -9,7 +9,7 @@ using UniverseLib.UI.Widgets.ScrollView;
 
 namespace UnityExplorer.UI.Panels
 {
-    public class HookManagerPanel : UIPanel
+    public class HookManagerPanel : UEPanel
     {
         public enum Pages
         {
@@ -21,9 +21,12 @@ namespace UnityExplorer.UI.Panels
         public override UIManager.Panels PanelType => UIManager.Panels.HookManager;
 
         public override string Name => "Hooks";
+        public override bool ShowByDefault => false;
+
         public override int MinWidth => 500;
         public override int MinHeight => 600;
-        public override bool ShowByDefault => false;
+        public override Vector2 DefaultAnchorMin => new(0.5f, 0.5f);
+        public override Vector2 DefaultAnchorMax => new(0.5f, 0.5f);
 
         public Pages CurrentPage { get; private set; } = Pages.CurrentHooks;
 
@@ -37,10 +40,15 @@ namespace UnityExplorer.UI.Panels
         private InputFieldRef AddHooksMethodFilterInput;
 
         private GameObject editorPanel;
+
         public InputFieldScroller EditorInputScroller { get; private set; }
         public InputFieldRef EditorInput => EditorInputScroller.InputField;
         public Text EditorInputText { get; private set; }
         public Text EditorHighlightText { get; private set; }
+
+        public HookManagerPanel(UIBase owner) : base(owner)
+        {
+        }
 
         private void OnClassInputAddClicked()
         {
@@ -73,11 +81,19 @@ namespace UnityExplorer.UI.Panels
 
         public void ResetMethodFilter() => AddHooksMethodFilterInput.Text = string.Empty;
 
-        public override void ConstructPanelContent()
+        public override void SetDefaultSizeAndPosition()
+        {
+            base.SetDefaultSizeAndPosition();
+
+            this.Rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, MinWidth);
+            this.Rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, MinHeight);
+        }
+
+        protected override void ConstructPanelContent()
         {
             // ~~~~~~~~~ Active hooks scroll pool
 
-            currentHooksPanel = UIFactory.CreateUIObject("CurrentHooksPanel", this.uiContent);
+            currentHooksPanel = UIFactory.CreateUIObject("CurrentHooksPanel", this.ContentRoot);
             UIFactory.SetLayoutElement(currentHooksPanel, flexibleHeight: 9999, flexibleWidth: 9999);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(currentHooksPanel, true, true, true, true);
 
@@ -103,7 +119,7 @@ namespace UnityExplorer.UI.Panels
 
             // ~~~~~~~~~ Add hooks panel
 
-            addHooksPanel = UIFactory.CreateUIObject("AddHooksPanel", this.uiContent);
+            addHooksPanel = UIFactory.CreateUIObject("AddHooksPanel", this.ContentRoot);
             UIFactory.SetLayoutElement(addHooksPanel, flexibleHeight: 9999, flexibleWidth: 9999);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(addHooksPanel, true, true, true, true);
 
@@ -130,7 +146,7 @@ namespace UnityExplorer.UI.Panels
 
             // ~~~~~~~~~ Hook source editor panel
 
-            editorPanel = UIFactory.CreateUIObject("HookSourceEditor", this.uiContent);
+            editorPanel = UIFactory.CreateUIObject("HookSourceEditor", this.ContentRoot);
             UIFactory.SetLayoutElement(editorPanel, flexibleHeight: 9999, flexibleWidth: 9999);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(editorPanel, true, true, true, true);
 
@@ -184,14 +200,6 @@ namespace UnityExplorer.UI.Panels
             EditorHighlightText.font = UniversalUI.ConsoleFont;
 
             editorPanel.SetActive(false);
-        }
-
-        protected internal override void DoSetDefaultPosAndAnchors()
-        {
-            this.Rect.anchorMin = new Vector2(0.5f, 0.5f);
-            this.Rect.anchorMax = new Vector2(0.5f, 0.5f);
-            this.Rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, MinWidth);
-            this.Rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, MinHeight);
         }
     }
 }

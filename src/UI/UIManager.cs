@@ -10,6 +10,7 @@ using UniverseLib;
 using UniverseLib.Input;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
+using UniverseLib.UI.Panels;
 using UniverseLib.UI.Widgets.ScrollView;
 using UniverseLib.Utility;
 
@@ -46,8 +47,7 @@ namespace UnityExplorer.UI
         public static RectTransform UIRootRect { get; private set; }
         public static Canvas UICanvas { get; private set; }
 
-        internal static GameObject PanelHolder { get; private set; }
-        internal static readonly Dictionary<Panels, UIPanel> UIPanels = new();
+        internal static readonly Dictionary<Panels, UEPanel> UIPanels = new();
 
         public static RectTransform NavBarRect;
         public static GameObject NavbarTabButtonHolder;
@@ -79,7 +79,7 @@ namespace UnityExplorer.UI
 
         internal static void InitUI()
         {
-            UiBase = UniversalUI.RegisterUI(ExplorerCore.GUID, Update);
+            UiBase = UniversalUI.RegisterUI<ExplorerUIBase>(ExplorerCore.GUID, Update);
 
             UIRootRect = UIRoot.GetComponent<RectTransform>();
             UICanvas = UIRoot.GetComponent<Canvas>();
@@ -91,30 +91,23 @@ namespace UnityExplorer.UI
             lastScreenHeight = display.renderingHeight;
 
             // Create UI.
-            CreatePanelHolder();
             CreateTopNavBar();
             // This could be automated with Assembly.GetTypes(),
             // but the order is important and I'd have to write something to handle the order.
-            UIPanels.Add(Panels.AutoCompleter, new AutoCompleteModal());
-            UIPanels.Add(Panels.ObjectExplorer, new ObjectExplorerPanel());
-            UIPanels.Add(Panels.Inspector, new InspectorPanel());
-            UIPanels.Add(Panels.CSConsole, new CSConsolePanel());
-            UIPanels.Add(Panels.HookManager, new HookManagerPanel());
-            UIPanels.Add(Panels.Clipboard, new ClipboardPanel());
-            UIPanels.Add(Panels.ConsoleLog, new LogPanel());
-            UIPanels.Add(Panels.Options, new OptionsPanel());
-            UIPanels.Add(Panels.UIInspectorResults, new MouseInspectorResultsPanel());
-            UIPanels.Add(Panels.MouseInspector, new MouseInspector());
-
-            foreach (UIPanel panel in UIPanels.Values)
-                panel.ConstructUI();
+            UIPanels.Add(Panels.AutoCompleter, new AutoCompleteModal(UiBase));
+            UIPanels.Add(Panels.ObjectExplorer, new ObjectExplorerPanel(UiBase));
+            UIPanels.Add(Panels.Inspector, new InspectorPanel(UiBase));
+            UIPanels.Add(Panels.CSConsole, new CSConsolePanel(UiBase));
+            UIPanels.Add(Panels.HookManager, new HookManagerPanel(UiBase));
+            UIPanels.Add(Panels.Clipboard, new ClipboardPanel(UiBase));
+            UIPanels.Add(Panels.ConsoleLog, new LogPanel(UiBase));
+            UIPanels.Add(Panels.Options, new OptionsPanel(UiBase));
+            UIPanels.Add(Panels.UIInspectorResults, new MouseInspectorResultsPanel(UiBase));
+            UIPanels.Add(Panels.MouseInspector, new MouseInspector(UiBase));
 
             // Call some initialize methods
             Notification.Init();
             ConsoleController.Init();
-
-            // Add this listener to prevent ScrollPool doing anything while we are resizing panels
-            ScrollPool<ICell>.writingLockedListeners.Add(() => !PanelDragger.Resizing);
 
             // Set default menu visibility
             ShowMenu = !ConfigManager.Hide_On_Startup.Value;
@@ -144,10 +137,6 @@ namespace UnityExplorer.UI
             if (InputManager.GetKeyDown(ConfigManager.Force_Unlock_Toggle.Value))
                 UniverseLib.Config.ConfigManager.Force_Unlock_Mouse = !UniverseLib.Config.ConfigManager.Force_Unlock_Mouse;
 
-            // update focused panel
-            UIPanel.UpdateFocus();
-            PanelDragger.UpdateInstances();
-
             // update the timescale value
             if (!timeInput.Component.isFocused && lastTimeScale != Time.timeScale)
             {
@@ -172,31 +161,24 @@ namespace UnityExplorer.UI
 
         // Panels
 
-        public static UIPanel GetPanel(Panels panel) => UIPanels[panel];
+        public static UEPanel GetPanel(Panels panel) => UIPanels[panel];
 
-        public static T GetPanel<T>(Panels panel) where T : UIPanel => (T)UIPanels[panel];
+        public static T GetPanel<T>(Panels panel) where T : UEPanel => (T)UIPanels[panel];
 
         public static void TogglePanel(Panels panel)
         {
-            UIPanel uiPanel = GetPanel(panel);
+            UEPanel uiPanel = GetPanel(panel);
             SetPanelActive(panel, !uiPanel.Enabled);
         }
 
         public static void SetPanelActive(Panels panelType, bool active)
         {
-            GetPanel(panelType)
-                .SetActive(active);
+            GetPanel(panelType).SetActive(active);
         }
 
-        public static void SetPanelActive(UIPanel panel, bool active)
+        public static void SetPanelActive(UEPanel panel, bool active)
         {
             panel.SetActive(active);
-        }
-
-        internal static void SetPanelActive(Transform transform, bool value)
-        {
-            if (UIPanel.transformToPanelDict.TryGetValue(transform.GetInstanceID(), out UIPanel panel))
-                panel.SetActive(value);
         }
 
         // navbar
@@ -229,10 +211,10 @@ namespace UnityExplorer.UI
             lastScreenWidth = display.renderingWidth;
             lastScreenHeight = display.renderingHeight;
 
-            foreach (KeyValuePair<Panels, UIPanel> panel in UIPanels)
+            foreach (KeyValuePair<Panels, UEPanel> panel in UIPanels)
             {
                 panel.Value.EnsureValidSize();
-                UIPanel.EnsureValidPosition(panel.Value.Rect);
+                panel.Value.EnsureValidPosition();
                 panel.Value.Dragger.OnEndResize();
             }
         }
@@ -284,20 +266,6 @@ namespace UnityExplorer.UI
         }
 
         // UI Construction
-
-        private static void CreatePanelHolder()
-        {
-            PanelHolder = new GameObject("PanelHolder");
-            PanelHolder.transform.SetParent(UIRoot.transform, false);
-            PanelHolder.layer = 5;
-            RectTransform rect = PanelHolder.AddComponent<RectTransform>();
-            rect.sizeDelta = Vector2.zero;
-            rect.anchoredPosition = Vector2.zero;
-            rect.pivot = new Vector2(0.5f, 0.5f);
-            rect.anchorMin = Vector2.zero;
-            rect.anchorMax = Vector2.one;
-            PanelHolder.transform.SetAsFirstSibling();
-        }
 
         private static void CreateTopNavBar()
         {

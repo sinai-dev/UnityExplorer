@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.UI.Panels;
+using UnityExplorer.UI.Widgets.AutoComplete;
 using UniverseLib;
 using UniverseLib.Input;
 using UniverseLib.UI;
@@ -12,20 +13,25 @@ using UniverseLib.UI.Widgets.ButtonList;
 using UniverseLib.UI.Widgets.ScrollView;
 using UniverseLib.Utility;
 
-namespace UnityExplorer.UI.Widgets.AutoComplete
+namespace UnityExplorer.UI.Panels
 {
     // Shared modal panel for "AutoComplete" suggestions.
     // A data source implements ISuggestionProvider and uses TakeOwnership and ReleaseOwnership
     // for control, and SetSuggestions to set the actual suggestion data.
 
-    public class AutoCompleteModal : UIPanel
+    public class AutoCompleteModal : UEPanel
     {
         public static AutoCompleteModal Instance => UIManager.GetPanel<AutoCompleteModal>(UIManager.Panels.AutoCompleter);
 
         public override string Name => "AutoCompleter";
         public override UIManager.Panels PanelType => UIManager.Panels.AutoCompleter;
-        public override int MinWidth => -1;
-        public override int MinHeight => -1;
+
+        public override int MinWidth => 100;
+        public override int MinHeight => 25;
+        public override Vector2 DefaultAnchorMin => new(MIN_X, 0.4f);
+        public override Vector2 DefaultAnchorMax => new(0.68f, MAX_Y);
+        const float MIN_X = 0.42f;
+        const float MAX_Y = 0.6f;
 
         public override bool CanDragAndResize => true;
         public override bool ShouldSaveActiveState => false;
@@ -44,10 +50,10 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
         public static bool Suggesting(ISuggestionProvider handler) => CurrentHandler == handler && Instance.UIRoot.activeSelf;
 
-        public AutoCompleteModal()
+        public AutoCompleteModal(UIBase owner) : base(owner)
         {
-            OnPanelsReordered += UIPanel_OnPanelsReordered;
-            OnClickedOutsidePanels += AutoCompleter_OnClickedOutsidePanels;
+            UIManager.UiBase.Panels.OnPanelsReordered += UIPanel_OnPanelsReordered;
+            UIManager.UiBase.Panels.OnClickedOutsidePanels += AutoCompleter_OnClickedOutsidePanels;
         }
 
         public static void TakeOwnership(ISuggestionProvider provider)
@@ -263,7 +269,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             if (!this.UIRoot || !this.UIRoot.activeInHierarchy)
                 return;
 
-            if (this.UIRoot.transform.GetSiblingIndex() != UIManager.PanelHolder.transform.childCount - 1)
+            if (this.UIRoot.transform.GetSiblingIndex() != UIManager.UiBase.Panels.PanelHolder.transform.childCount - 1)
             {
                 if (CurrentHandler != null)
                     ReleaseOwnership(CurrentHandler);
@@ -272,46 +278,36 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             }
         }
 
-        // UI Construction
-
-        const float MIN_X = 0.42f;
-        const float MAX_Y = 0.6f;
-
-        protected internal override void DoSetDefaultPosAndAnchors()
+        public override void OnFinishResize()
         {
-            Rect.pivot = new Vector2(0f, 1f);
-            Rect.anchorMin = new Vector2(MIN_X, 0.4f);
-            Rect.anchorMax = new Vector2(0.68f, MAX_Y);
-        }
-
-        public override void OnFinishResize(RectTransform panel)
-        {
-            float xDiff = panel.anchorMin.x - MIN_X;
-            float yDiff = panel.anchorMax.y - MAX_Y;
+            float xDiff = Rect.anchorMin.x - MIN_X;
+            float yDiff = Rect.anchorMax.y - MAX_Y;
 
             if (xDiff != 0 || yDiff != 0)
             {
-                panel.anchorMin = new(MIN_X, panel.anchorMin.y - yDiff);
-                panel.anchorMax = new(panel.anchorMax.x - xDiff, MAX_Y);
+                Rect.anchorMin = new(MIN_X, Rect.anchorMin.y - yDiff);
+                Rect.anchorMax = new(Rect.anchorMax.x - xDiff, MAX_Y);
             }
 
-            base.OnFinishResize(panel);
+            base.OnFinishResize();
         }
 
-        public override void ConstructPanelContent()
+        // UI Construction
+
+        protected override void ConstructPanelContent()
         {
             // hide the titlebar
             this.TitleBar.gameObject.SetActive(false);
 
             buttonListDataHandler = new ButtonListHandler<Suggestion, ButtonCell>(scrollPool, GetEntries, SetCell, ShouldDisplay, OnCellClicked);
 
-            scrollPool = UIFactory.CreateScrollPool<ButtonCell>(this.uiContent, "AutoCompleter", out GameObject scrollObj,
+            scrollPool = UIFactory.CreateScrollPool<ButtonCell>(this.ContentRoot, "AutoCompleter", out GameObject scrollObj,
                 out GameObject scrollContent);
             scrollPool.Initialize(buttonListDataHandler);
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(scrollContent, true, false, true, false);
 
-            navigationTipRow = UIFactory.CreateHorizontalGroup(this.uiContent, "BottomRow", true, true, true, true, 0, new Vector4(2, 2, 2, 2));
+            navigationTipRow = UIFactory.CreateHorizontalGroup(this.ContentRoot, "BottomRow", true, true, true, true, 0, new Vector4(2, 2, 2, 2));
             UIFactory.SetLayoutElement(navigationTipRow, minHeight: 20, flexibleWidth: 9999);
             UIFactory.CreateLabel(navigationTipRow, "HelpText", "Up/Down to select, Enter to use, Esc to close",
                 TextAnchor.MiddleLeft, Color.grey, false, 13);

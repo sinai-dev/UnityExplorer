@@ -9,12 +9,15 @@ using UniverseLib.UI.Models;
 
 namespace UnityExplorer.UI.Panels
 {
-    public class ObjectExplorerPanel : UIPanel
+    public class ObjectExplorerPanel : UEPanel
     {
         public override string Name => "Object Explorer";
         public override UIManager.Panels PanelType => UIManager.Panels.ObjectExplorer;
+
         public override int MinWidth => 350;
         public override int MinHeight => 200;
+        public override Vector2 DefaultAnchorMin => new(0.125f, 0.175f);
+        public override Vector2 DefaultAnchorMax => new(0.325f, 0.925f);
 
         public SceneExplorer SceneExplorer;
         public ObjectSearch ObjectSearch;
@@ -25,6 +28,10 @@ namespace UnityExplorer.UI.Panels
         public int SelectedTab = 0;
         private readonly List<UIModel> tabPages = new();
         private readonly List<ButtonRef> tabButtons = new();
+
+        public ObjectExplorerPanel(UIBase owner) : base(owner)
+        {
+        }
 
         public void SetTab(int tabIndex)
         {
@@ -80,28 +87,20 @@ namespace UnityExplorer.UI.Panels
             SetTab(SelectedTab);
         }
 
-        protected internal override void DoSetDefaultPosAndAnchors()
-        {
-            Rect.localPosition = Vector2.zero;
-            Rect.pivot = new Vector2(0f, 1f);
-            Rect.anchorMin = new Vector2(0.125f, 0.175f);
-            Rect.anchorMax = new Vector2(0.325f, 0.925f);
-        }
-
-        public override void ConstructPanelContent()
+        protected override void ConstructPanelContent()
         {
             // Tab bar
-            GameObject tabGroup = UIFactory.CreateHorizontalGroup(uiContent, "TabBar", true, true, true, true, 2, new Vector4(2, 2, 2, 2));
+            GameObject tabGroup = UIFactory.CreateHorizontalGroup(ContentRoot, "TabBar", true, true, true, true, 2, new Vector4(2, 2, 2, 2));
             UIFactory.SetLayoutElement(tabGroup, minHeight: 25, flexibleHeight: 0);
 
             // Scene Explorer
             SceneExplorer = new SceneExplorer(this);
-            SceneExplorer.ConstructUI(uiContent);
+            SceneExplorer.ConstructUI(ContentRoot);
             tabPages.Add(SceneExplorer);
 
             // Object search
             ObjectSearch = new ObjectSearch(this);
-            ObjectSearch.ConstructUI(uiContent);
+            ObjectSearch.ConstructUI(ContentRoot);
             tabPages.Add(ObjectSearch);
 
             // set up tabs
@@ -109,7 +108,7 @@ namespace UnityExplorer.UI.Panels
             AddTabButton(tabGroup, "Object Search");
 
             // default active state: Active
-            UIManager.SetPanelActive(PanelType, true);
+            this.SetActive(true);
         }
 
         private void AddTabButton(GameObject tabGroup, string label)

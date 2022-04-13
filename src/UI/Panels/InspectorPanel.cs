@@ -5,17 +5,18 @@ using UniverseLib.UI;
 
 namespace UnityExplorer.UI.Panels
 {
-    public class InspectorPanel : UIPanel
+    public class InspectorPanel : UEPanel
     {
         public static InspectorPanel Instance { get; private set; }
-
-        public InspectorPanel() { Instance = this; }
 
         public override string Name => "Inspector";
         public override UIManager.Panels PanelType => UIManager.Panels.Inspector;
         public override bool ShouldSaveActiveState => false;
+
         public override int MinWidth => 810;
         public override int MinHeight => 350;
+        public override Vector2 DefaultAnchorMin => new(0.35f, 0.175f);
+        public override Vector2 DefaultAnchorMax => new(0.8f, 0.925f);
 
         public GameObject NavbarHolder;
         public Dropdown MouseInspectDropdown;
@@ -25,28 +26,25 @@ namespace UnityExplorer.UI.Panels
         public static float CurrentPanelWidth => Instance.Rect.rect.width;
         public static float CurrentPanelHeight => Instance.Rect.rect.height;
 
+        public InspectorPanel(UIBase owner) : base(owner)
+        {
+            Instance = this;
+        }
+
         public override void Update()
         {
             InspectorManager.Update();
         }
 
-        public override void OnFinishResize(RectTransform panel)
+        public override void OnFinishResize()
         {
-            base.OnFinishResize(panel);
+            base.OnFinishResize();
 
             InspectorManager.PanelWidth = this.Rect.rect.width;
-            InspectorManager.OnPanelResized(panel.rect.width);
+            InspectorManager.OnPanelResized(Rect.rect.width);
         }
 
-        protected internal override void DoSetDefaultPosAndAnchors()
-        {
-            Rect.localPosition = Vector2.zero;
-            Rect.pivot = new Vector2(0f, 1f);
-            Rect.anchorMin = new Vector2(0.35f, 0.175f);
-            Rect.anchorMax = new Vector2(0.8f, 0.925f);
-        }
-
-        public override void ConstructPanelContent()
+        protected override void ConstructPanelContent()
         {
             GameObject closeHolder = this.TitleBar.transform.Find("CloseHolder").gameObject;
 
@@ -70,19 +68,19 @@ namespace UnityExplorer.UI.Panels
 
             // this.UIRoot.GetComponent<Mask>().enabled = false;
 
-            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.uiContent, true, true, true, true, 4, padLeft: 5, padRight: 5);
+            UIFactory.SetLayoutGroup<VerticalLayoutGroup>(this.ContentRoot, true, true, true, true, 4, padLeft: 5, padRight: 5);
 
-            this.NavbarHolder = UIFactory.CreateGridGroup(this.uiContent, "Navbar", new Vector2(200, 22), new Vector2(4, 4),
+            this.NavbarHolder = UIFactory.CreateGridGroup(this.ContentRoot, "Navbar", new Vector2(200, 22), new Vector2(4, 4),
                 new Color(0.05f, 0.05f, 0.05f));
             //UIFactory.SetLayoutElement(NavbarHolder, flexibleWidth: 9999, minHeight: 0, preferredHeight: 0, flexibleHeight: 9999);
             NavbarHolder.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-            this.ContentHolder = UIFactory.CreateVerticalGroup(this.uiContent, "ContentHolder", true, true, true, true, 0, default,
+            this.ContentHolder = UIFactory.CreateVerticalGroup(this.ContentRoot, "ContentHolder", true, true, true, true, 0, default,
                 new Color(0.1f, 0.1f, 0.1f));
             UIFactory.SetLayoutElement(ContentHolder, flexibleHeight: 9999);
             ContentRect = ContentHolder.GetComponent<RectTransform>();
 
-            UIManager.SetPanelActive(PanelType, false);
+            this.SetActive(false);
         }
     }
 }

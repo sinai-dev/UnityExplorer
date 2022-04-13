@@ -7,20 +7,28 @@ using UniverseLib.Utility;
 
 namespace UnityExplorer.UI.Panels
 {
-    public class ClipboardPanel : UIPanel
+    public class ClipboardPanel : UEPanel
     {
         public static object Current { get; private set; }
 
-        public override UIManager.Panels PanelType => UIManager.Panels.Clipboard;
         public override string Name => "Clipboard";
+        public override UIManager.Panels PanelType => UIManager.Panels.Clipboard;
+
         public override int MinWidth => 500;
         public override int MinHeight => 95;
+        public override Vector2 DefaultAnchorMin => new(0.1f, 0.05f);
+        public override Vector2 DefaultAnchorMax => new(0.4f, 0.15f);
+
         public override bool CanDragAndResize => true;
         public override bool NavButtonWanted => true;
         public override bool ShouldSaveActiveState => true;
         public override bool ShowByDefault => true;
 
         private static Text CurrentPasteLabel;
+
+        public ClipboardPanel(UIBase owner) : base(owner)
+        {
+        }
 
         public static void Copy(object obj)
         {
@@ -66,21 +74,21 @@ namespace UnityExplorer.UI.Panels
             InspectorManager.Inspect(Current);
         }
 
-        protected internal override void DoSetDefaultPosAndAnchors()
+        public override void SetDefaultSizeAndPosition()
         {
+            base.SetDefaultSizeAndPosition();
+
             this.Rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, MinWidth);
             this.Rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, MinHeight);
-            this.Rect.anchorMin = new Vector2(0.1f, 0.05f);
-            this.Rect.anchorMax = new Vector2(0.4f, 0.15f);
         }
 
-        public override void ConstructPanelContent()
+        protected override void ConstructPanelContent()
         {
             this.UIRoot.GetComponent<Image>().color = new(0.1f, 0.1f, 0.1f);
 
             // Actual panel content
 
-            GameObject firstRow = UIFactory.CreateHorizontalGroup(uiContent, "FirstRow", false, false, true, true, 5, new(2, 2, 2, 2), new(1, 1, 1, 0));
+            GameObject firstRow = UIFactory.CreateHorizontalGroup(ContentRoot, "FirstRow", false, false, true, true, 5, new(2, 2, 2, 2), new(1, 1, 1, 0));
             UIFactory.SetLayoutElement(firstRow, minHeight: 25, flexibleWidth: 999);
 
             // Title for "Current Paste:"
@@ -93,7 +101,7 @@ namespace UnityExplorer.UI.Panels
             clearButton.OnClick += () => Copy(null);
 
             // Current Paste info row
-            GameObject currentPasteHolder = UIFactory.CreateHorizontalGroup(uiContent, "SecondRow", false, false, true, true, 0,
+            GameObject currentPasteHolder = UIFactory.CreateHorizontalGroup(ContentRoot, "SecondRow", false, false, true, true, 0,
                 new(2, 2, 2, 2), childAlignment: TextAnchor.UpperCenter);
 
             // Actual current paste info label

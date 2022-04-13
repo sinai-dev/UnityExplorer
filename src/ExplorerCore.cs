@@ -14,7 +14,7 @@ namespace UnityExplorer
     public static class ExplorerCore
     {
         public const string NAME = "UnityExplorer";
-        public const string VERSION = "4.7.1";
+        public const string VERSION = "4.7.2";
         public const string AUTHOR = "Sinai";
         public const string GUID = "com.sinai.unityexplorer";
 
@@ -57,8 +57,6 @@ namespace UnityExplorer
         // Default delay is 1 second which is usually enough.
         static void LateInit()
         {
-            Log($"Setting up late core features...");
-
             SceneHandler.Init();
 
             Log($"Creating UI...");
@@ -66,6 +64,8 @@ namespace UnityExplorer
             UIManager.InitUI();
 
             Log($"{NAME} {VERSION} ({Universe.Context}) initialized.");
+
+            // InspectorManager.Inspect(typeof(Tests.TestClass));
         }
 
         internal static void Update()

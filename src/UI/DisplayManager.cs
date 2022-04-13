@@ -68,7 +68,7 @@ namespace UnityExplorer.UI
             yield return null;
             yield return null;
 
-            foreach (Panels.UIPanel panel in UIManager.UIPanels.Values)
+            foreach (Panels.UEPanel panel in UIManager.UIPanels.Values)
             {
                 panel.EnsureValidSize();
                 panel.EnsureValidPosition();

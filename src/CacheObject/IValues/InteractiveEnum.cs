@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets.AutoComplete;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;

@@ -10,12 +10,15 @@ using UniverseLib.UI.Widgets;
 
 namespace UnityExplorer.UI.Panels
 {
-    public class CSConsolePanel : UIPanel
+    public class CSConsolePanel : UEPanel
     {
         public override string Name => "C# Console";
         public override UIManager.Panels PanelType => UIManager.Panels.CSConsole;
+
         public override int MinWidth => 750;
         public override int MinHeight => 300;
+        public override Vector2 DefaultAnchorMin => new(0.4f, 0.175f);
+        public override Vector2 DefaultAnchorMax => new(0.85f, 0.925f);
 
         public InputFieldScroller InputScroller { get; private set; }
         public InputFieldRef Input => InputScroller.InputField;
@@ -35,6 +38,10 @@ namespace UnityExplorer.UI.Panels
         public Action<bool> OnAutoIndentToggled;
         public Action OnPanelResized;
 
+        public CSConsolePanel(UIBase owner) : base(owner)
+        {
+        }
+
         private void InvokeOnValueChanged(string value)
         {
             if (value.Length == UniversalUI.MAX_INPUTFIELD_CHARS)
@@ -52,24 +59,16 @@ namespace UnityExplorer.UI.Panels
 
         // UI Construction
 
-        public override void OnFinishResize(RectTransform panel)
+        public override void OnFinishResize()
         {
             OnPanelResized?.Invoke();
         }
 
-        protected internal override void DoSetDefaultPosAndAnchors()
-        {
-            Rect.localPosition = Vector2.zero;
-            Rect.pivot = new Vector2(0f, 1f);
-            Rect.anchorMin = new Vector2(0.4f, 0.175f);
-            Rect.anchorMax = new Vector2(0.85f, 0.925f);
-        }
-
-        public override void ConstructPanelContent()
+        protected override void ConstructPanelContent()
         {
             // Tools Row
 
-            GameObject toolsRow = UIFactory.CreateHorizontalGroup(this.uiContent, "ToggleRow", false, false, true, true, 5, new Vector4(8, 8, 10, 5),
+            GameObject toolsRow = UIFactory.CreateHorizontalGroup(this.ContentRoot, "ToggleRow", false, false, true, true, 5, new Vector4(8, 8, 10, 5),
                 default, TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(toolsRow, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
 
@@ -118,7 +117,7 @@ namespace UnityExplorer.UI.Panels
 
             // Console Input
 
-            GameObject inputArea = UIFactory.CreateUIObject("InputGroup", uiContent);
+            GameObject inputArea = UIFactory.CreateUIObject("InputGroup", ContentRoot);
             UIFactory.SetLayoutElement(inputArea, flexibleWidth: 9999, flexibleHeight: 9999);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(inputArea, false, true, true, true);
             inputArea.AddComponent<Image>().color = Color.white;

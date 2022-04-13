@@ -268,9 +268,9 @@ namespace UnityExplorer.CacheObject
 
             if (cell.CopyButton != null)
             {
-                bool hasEvaluated = State != ValueState.NotEvaluated && State != ValueState.Exception;
-                cell.CopyButton.Component.gameObject.SetActive(hasEvaluated);
-                cell.PasteButton.Component.gameObject.SetActive(hasEvaluated && this.CanWrite);
+                bool canCopy = State != ValueState.NotEvaluated && State != ValueState.Exception;
+                cell.CopyButton.Component.gameObject.SetActive(canCopy);
+                cell.PasteButton.Component.gameObject.SetActive(canCopy && this.CanWrite);
             }
 
             if (!evaluated)

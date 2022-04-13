@@ -6,6 +6,7 @@ using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
 using UniverseLib.Input;
 using UniverseLib.UI;
+using UniverseLib.UI.Panels;
 using UniverseLib.Utility;
 
 namespace UnityExplorer.Inspectors
@@ -16,7 +17,7 @@ namespace UnityExplorer.Inspectors
         UI
     }
 
-    public class MouseInspector : UIPanel
+    public class MouseInspector : UEPanel
     {
         public static MouseInspector Instance { get; private set; }
 
@@ -43,6 +44,9 @@ namespace UnityExplorer.Inspectors
         public override UIManager.Panels PanelType => UIManager.Panels.MouseInspector;
         public override int MinWidth => -1;
         public override int MinHeight => -1;
+        public override Vector2 DefaultAnchorMin => Vector2.zero;
+        public override Vector2 DefaultAnchorMax => Vector2.zero;
+
         public override bool CanDragAndResize => false;
         public override bool NavButtonWanted => false;
         public override bool ShouldSaveActiveState => false;
@@ -52,7 +56,7 @@ namespace UnityExplorer.Inspectors
         internal Text objPathLabel;
         internal Text mousePosLabel;
 
-        public MouseInspector()
+        public MouseInspector(UIBase owner) : base(owner)
         {
             Instance = this;
             worldInspector = new WorldInspector();
@@ -77,11 +81,12 @@ namespace UnityExplorer.Inspectors
 
             CurrentInspector.OnBeginMouseInspect();
 
-            PanelDragger.ForceEnd();
+            PanelManager.ForceEndResize();
             UIManager.NavBarRect.gameObject.SetActive(false);
-            UIManager.PanelHolder.SetActive(false);
+            UIManager.UiBase.Panels.PanelHolder.SetActive(false);
+            UIManager.UiBase.SetOnTop();
 
-            UIRoot.SetActive(true);
+            SetActive(true);
         }
 
         internal void ClearHitData()
@@ -99,7 +104,7 @@ namespace UnityExplorer.Inspectors
             Inspecting = false;
 
             UIManager.NavBarRect.gameObject.SetActive(true);
-            UIManager.PanelHolder.SetActive(true);
+            UIManager.UiBase.Panels.PanelHolder.SetActive(true);
 
             Dropdown drop = InspectorPanel.Instance.MouseInspectDropdown;
             if (drop.transform.Find("Dropdown List") is Transform list)
@@ -180,21 +185,23 @@ namespace UnityExplorer.Inspectors
 
         // UI Construction
 
-        protected internal override void DoSetDefaultPosAndAnchors()
+        public override void SetDefaultSizeAndPosition()
         {
+            base.SetDefaultSizeAndPosition();
+
             Rect.anchorMin = Vector2.zero;
             Rect.anchorMax = Vector2.zero;
             Rect.pivot = new Vector2(0.5f, 1);
             Rect.sizeDelta = new Vector2(700, 150);
         }
 
-        public override void ConstructPanelContent()
+        protected override void ConstructPanelContent()
         {
             // hide title bar
             this.TitleBar.SetActive(false);
             this.UIRoot.transform.SetParent(UIManager.UIRoot.transform, false);
 
-            GameObject inspectContent = UIFactory.CreateVerticalGroup(this.uiContent, "InspectContent", true, true, true, true, 3, new Vector4(2, 2, 2, 2));
+            GameObject inspectContent = UIFactory.CreateVerticalGroup(this.ContentRoot, "InspectContent", true, true, true, true, 3, new Vector4(2, 2, 2, 2));
             UIFactory.SetLayoutElement(inspectContent, flexibleWidth: 9999, flexibleHeight: 9999);
 
             // Title text

@@ -16,7 +16,7 @@ namespace UnityExplorer.UI.Panels
 {
     // TODO move the logic out of this class into a LogUtil class (also move ExplorerCore.Log into that)
 
-    public class LogPanel : UIPanel, ICellPoolDataSource<ConsoleLogCell>
+    public class LogPanel : UEPanel, ICellPoolDataSource<ConsoleLogCell>
     {
         public struct LogInfo
         {
@@ -34,6 +34,9 @@ namespace UnityExplorer.UI.Panels
 
         public override int MinWidth => 350;
         public override int MinHeight => 75;
+        public override Vector2 DefaultAnchorMin => new(0.5f, 0.03f);
+        public override Vector2 DefaultAnchorMax => new(0.9f, 0.2f);
+
         public override bool ShouldSaveActiveState => true;
         public override bool ShowByDefault => true;
 
@@ -41,7 +44,7 @@ namespace UnityExplorer.UI.Panels
 
         private static ScrollPool<ConsoleLogCell> logScrollPool;
 
-        public LogPanel()
+        public LogPanel(UIBase owner) : base(owner)
         {
             SetupIO();
         }
@@ -144,27 +147,19 @@ namespace UnityExplorer.UI.Panels
             RuntimeHelper.SetColorBlock(cell.Input.Component, color);
         }
 
-        protected internal override void DoSetDefaultPosAndAnchors()
-        {
-            Rect.localPosition = Vector2.zero;
-            Rect.pivot = new Vector2(0f, 1f);
-            Rect.anchorMin = new Vector2(0.5f, 0.03f);
-            Rect.anchorMax = new Vector2(0.9f, 0.2f);
-        }
-
         // UI Construction
 
-        public override void ConstructPanelContent()
+        protected override void ConstructPanelContent()
         {
             // Log scroll pool
 
-            logScrollPool = UIFactory.CreateScrollPool<ConsoleLogCell>(this.uiContent, "Logs", out GameObject scrollObj,
+            logScrollPool = UIFactory.CreateScrollPool<ConsoleLogCell>(this.ContentRoot, "Logs", out GameObject scrollObj,
                 out GameObject scrollContent, new Color(0.03f, 0.03f, 0.03f));
             UIFactory.SetLayoutElement(scrollObj, flexibleWidth: 9999, flexibleHeight: 9999);
 
             // Buttons and toggles
 
-            GameObject optionsRow = UIFactory.CreateUIObject("OptionsRow", this.uiContent);
+            GameObject optionsRow = UIFactory.CreateUIObject("OptionsRow", this.ContentRoot);
             UIFactory.SetLayoutElement(optionsRow, minHeight: 25, flexibleWidth: 9999);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(optionsRow, false, false, true, true, 5, 2, 2, 2, 2);
 

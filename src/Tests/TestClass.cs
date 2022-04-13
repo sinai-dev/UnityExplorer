@@ -237,7 +237,7 @@ namespace UnityExplorer.Tests
             try
             {
                 Il2CppSystem.Type cppType = Il2CppType.Of<CameraClearFlags>();
-                if (cppType != null)
+                if (cppType is not null)
                 {
                     Il2CppSystem.Object boxedEnum = Il2CppSystem.Enum.Parse(cppType, "Color");
                     IL2CPP_listOfBoxedObjects.Add(boxedEnum);

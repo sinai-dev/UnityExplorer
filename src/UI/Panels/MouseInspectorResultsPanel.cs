@@ -8,7 +8,7 @@ using UniverseLib.Utility;
 
 namespace UnityExplorer.UI.Panels
 {
-    public class MouseInspectorResultsPanel : UIPanel
+    public class MouseInspectorResultsPanel : UEPanel
     {
         public override UIManager.Panels PanelType => UIManager.Panels.UIInspectorResults;
 
@@ -16,6 +16,9 @@ namespace UnityExplorer.UI.Panels
 
         public override int MinWidth => 500;
         public override int MinHeight => 500;
+        public override Vector2 DefaultAnchorMin => new(0.5f, 0.5f);
+        public override Vector2 DefaultAnchorMax => new(0.5f, 0.5f);
+        
         public override bool CanDragAndResize => true;
         public override bool NavButtonWanted => false;
         public override bool ShouldSaveActiveState => false;
@@ -23,6 +26,10 @@ namespace UnityExplorer.UI.Panels
 
         private ButtonListHandler<GameObject, ButtonCell> dataHandler;
         private ScrollPool<ButtonCell> buttonScrollPool;
+
+        public MouseInspectorResultsPanel(UIBase owner) : base(owner)
+        {
+        }
 
         public void ShowResults()
         {
@@ -51,23 +58,23 @@ namespace UnityExplorer.UI.Panels
             cell.Button.ButtonText.text = $"<color=cyan>{obj.name}</color> ({obj.transform.GetTransformPath(true)})";
         }
 
-        public override void ConstructPanelContent()
+        public override void SetDefaultSizeAndPosition()
+        {
+            base.SetDefaultSizeAndPosition();
+
+            this.Rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 500f);
+            this.Rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 500f);
+        }
+
+        protected override void ConstructPanelContent()
         {
             dataHandler = new ButtonListHandler<GameObject, ButtonCell>(buttonScrollPool, GetEntries, SetCell, ShouldDisplayCell, OnCellClicked);
 
-            buttonScrollPool = UIFactory.CreateScrollPool<ButtonCell>(this.uiContent, "ResultsList", out GameObject scrollObj,
+            buttonScrollPool = UIFactory.CreateScrollPool<ButtonCell>(this.ContentRoot, "ResultsList", out GameObject scrollObj,
                 out GameObject scrollContent);
 
             buttonScrollPool.Initialize(dataHandler);
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
-        }
-
-        protected internal override void DoSetDefaultPosAndAnchors()
-        {
-            this.Rect.anchorMin = new Vector2(0.5f, 0.5f);
-            this.Rect.anchorMax = new Vector2(0.5f, 0.5f);
-            this.Rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 500f);
-            this.Rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 500f);
         }
     }
 }

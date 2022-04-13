@@ -103,7 +103,7 @@ namespace UnityExplorer.UI.Widgets
             image.sprite = sprite;
         }
 
-        private void OnInspectorFinishResize(RectTransform _)
+        private void OnInspectorFinishResize()
         {
             SetImageSize();
         }

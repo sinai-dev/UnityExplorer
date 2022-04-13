@@ -9,13 +9,15 @@ using UniverseLib.UI.Widgets.ScrollView;
 
 namespace UnityExplorer.UI.Panels
 {
-    public class OptionsPanel : UIPanel, ICacheObjectController, ICellPoolDataSource<ConfigEntryCell>
+    public class OptionsPanel : UEPanel, ICacheObjectController, ICellPoolDataSource<ConfigEntryCell>
     {
         public override string Name => "Options";
         public override UIManager.Panels PanelType => UIManager.Panels.Options;
 
         public override int MinWidth => 600;
         public override int MinHeight => 200;
+        public override Vector2 DefaultAnchorMin => new(0.5f, 0.1f);
+        public override Vector2 DefaultAnchorMax => new(0.5f, 0.85f);
 
         public override bool ShouldSaveActiveState => false;
         public override bool ShowByDefault => false;
@@ -32,7 +34,7 @@ namespace UnityExplorer.UI.Panels
         // ICellPoolDataSource
         public int ItemCount => configEntries.Count;
 
-        public OptionsPanel()
+        public OptionsPanel(UIBase owner) : base(owner)
         {
             foreach (KeyValuePair<string, IConfigElement> entry in ConfigManager.ConfigElements)
             {
@@ -42,6 +44,9 @@ namespace UnityExplorer.UI.Panels
                 };
                 configEntries.Add(cache);
             }
+
+            foreach (CacheConfigEntry config in configEntries)
+                config.UpdateValueFromSource();
         }
 
         public void OnCellBorrowed(ConfigEntryCell cell)
@@ -55,32 +60,30 @@ namespace UnityExplorer.UI.Panels
 
         // UI Construction
 
-        protected internal override void DoSetDefaultPosAndAnchors()
+        public override void SetDefaultSizeAndPosition()
         {
-            Rect.localPosition = Vector2.zero;
-            Rect.pivot = new Vector2(0f, 1f);
-            Rect.anchorMin = new Vector2(0.5f, 0.1f);
-            Rect.anchorMax = new Vector2(0.5f, 0.85f);
+            base.SetDefaultSizeAndPosition();
+
             Rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 600f);
         }
 
-        public override void ConstructPanelContent()
+        protected override void ConstructPanelContent()
         {
             // Save button
 
-            UniverseLib.UI.Models.ButtonRef saveBtn = UIFactory.CreateButton(this.uiContent, "Save", "Save Options", new Color(0.2f, 0.3f, 0.2f));
+            UniverseLib.UI.Models.ButtonRef saveBtn = UIFactory.CreateButton(this.ContentRoot, "Save", "Save Options", new Color(0.2f, 0.3f, 0.2f));
             UIFactory.SetLayoutElement(saveBtn.Component.gameObject, flexibleWidth: 9999, minHeight: 30, flexibleHeight: 0);
             saveBtn.OnClick += ConfigManager.Handler.SaveConfig;
 
             // Config entries
 
-            ScrollPool<ConfigEntryCell> scrollPool = UIFactory.CreateScrollPool<ConfigEntryCell>(this.uiContent, "ConfigEntries", out GameObject scrollObj,
+            ScrollPool<ConfigEntryCell> scrollPool = UIFactory.CreateScrollPool<ConfigEntryCell>(
+                this.ContentRoot, 
+                "ConfigEntries", 
+                out GameObject scrollObj,
                 out GameObject scrollContent);
 
             scrollPool.Initialize(this);
-
-            foreach (CacheConfigEntry config in configEntries)
-                config.UpdateValueFromSource();
         }
     }
 }
