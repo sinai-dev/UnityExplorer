@@ -77,6 +77,10 @@ namespace UnityExplorer.Config
                 "The key to enable or disable UnityExplorer's menu and features.",
                 KeyCode.F7);
 
+            Hide_On_Startup = new ConfigElement<bool>("Hide On Startup",
+                "Should UnityExplorer be hidden on startup?",
+                false);
+
             Target_Display = new ConfigElement<int>("Target Display",
                 "The monitor index for UnityExplorer to use, if you have multiple. 0 is the default display, 1 is secondary, etc. " +
                 "Restart recommended when changing this setting. Make sure your extra monitors are the same resolution as your primary monitor.",
@@ -86,16 +90,12 @@ namespace UnityExplorer.Config
                 "The vertical anchor of the main UnityExplorer Navbar, in case you want to move it.",
                 UIManager.VerticalAnchor.Top);
 
-            Hide_On_Startup = new ConfigElement<bool>("Hide On Startup",
-                "Should UnityExplorer be hidden on startup?",
-                false);
-
             World_MouseInspect_Keybind = new("World Mouse-Inspect Keybind",
                 "Optional keybind to being a World-mode Mouse Inspect.",
                 KeyCode.None);
 
             UI_MouseInspect_Keybind = new("UI Mouse-Inspect Keybind",
-                "Optional keybind to begin a UI_mode Mouse Inspect.",
+                "Optional keybind to begin a UI-mode Mouse Inspect.",
                 KeyCode.None);
 
             Force_Unlock_Mouse = new ConfigElement<bool>("Force Unlock Mouse",
