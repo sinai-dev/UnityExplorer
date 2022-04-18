@@ -74,7 +74,7 @@ namespace UnityExplorer.Inspectors
             InspectorManager.ReleaseInspector(this);
         }
 
-        public void ChangeTarget(GameObject newTarget)
+        public void OnTransformCellClicked(GameObject newTarget)
         {
             this.Target = newTarget;
             GOControls.UpdateGameObjectInfo(true, true);
@@ -293,12 +293,8 @@ namespace UnityExplorer.Inspectors
 
             transformScroll = UIFactory.CreateScrollPool<TransformCell>(leftGroup, "TransformTree", out GameObject transformObj,
                 out GameObject transformContent, new Color(0.11f, 0.11f, 0.11f));
-            UIFactory.SetLayoutElement(transformObj, flexibleHeight: 9999);
-            UIFactory.SetLayoutElement(transformContent, flexibleHeight: 9999);
 
-            TransformTree = new TransformTree(transformScroll, GetTransformEntries);
-            TransformTree.Init();
-            TransformTree.OnClickOverrideHandler = ChangeTarget;
+            TransformTree = new TransformTree(transformScroll, GetTransformEntries, OnTransformCellClicked);
 
             // Right group (Components)
 

@@ -148,7 +148,7 @@ namespace UnityExplorer.Inspectors
         {
             if (this.GOTarget && this.GOTarget.transform.parent)
             {
-                Parent.ChangeTarget(this.GOTarget.transform.parent.gameObject);
+                Parent.OnTransformCellClicked(this.GOTarget.transform.parent.gameObject);
             }
         }
 

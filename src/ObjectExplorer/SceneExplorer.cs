@@ -13,6 +13,7 @@ using UniverseLib;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
 using UniverseLib.Utility;
+using UniverseLib.UI.Widgets;
 
 namespace UnityExplorer.ObjectExplorer
 {
@@ -156,7 +157,7 @@ namespace UnityExplorer.ObjectExplorer
         {
             if ((!string.IsNullOrEmpty(input) && !Tree.Filtering) || (string.IsNullOrEmpty(input) && Tree.Filtering))
             {
-                Tree.cachedTransforms.Clear();
+                Tree.Clear();
             }
 
             Tree.CurrentFilter = input;
@@ -259,8 +260,7 @@ namespace UnityExplorer.ObjectExplorer
             UIFactory.SetLayoutElement(scrollObj, flexibleHeight: 9999);
             UIFactory.SetLayoutElement(scrollContent, flexibleHeight: 9999);
 
-            Tree = new TransformTree(scrollPool, GetRootEntries);
-            Tree.Init();
+            Tree = new TransformTree(scrollPool, GetRootEntries, OnCellClicked);
             Tree.RefreshData(true, true, true, false);
             //scrollPool.Viewport.GetComponent<Mask>().enabled = false;
             //UIRoot.GetComponent<Mask>().enabled = false;
@@ -271,6 +271,8 @@ namespace UnityExplorer.ObjectExplorer
 
             RuntimeHelper.StartCoroutine(TempFixCoro());
         }
+
+        void OnCellClicked(GameObject obj) => InspectorManager.Inspect(obj);
 
         // To "fix" a strange FPS drop issue with MelonLoader.
         private IEnumerator TempFixCoro()
