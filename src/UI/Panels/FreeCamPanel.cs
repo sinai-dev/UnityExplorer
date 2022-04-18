@@ -29,19 +29,20 @@ namespace UnityExplorer.UI.Panels
         public override bool NavButtonWanted => true;
         public override bool ShouldSaveActiveState => true;
 
-        bool inFreeCamMode;
-        Camera ourCamera;
-        Camera lastMainCamera;
-        Vector3 lastCameraMainPos;
-        Quaternion lastCameraMainRot;
+        internal static bool inFreeCamMode;
+        internal static Camera ourCamera;
+        internal static Camera lastMainCamera;
+        internal static Vector3 lastCameraMainPos;
+        internal static Quaternion lastCameraMainRot;
 
-        float desiredMoveSpeed = 10f;
-        Vector3 previousMousePosition;
+        internal static float desiredMoveSpeed = 10f;
+        internal static Vector3 previousMousePosition;
+        internal static Vector3 lastSetCameraPosition;
 
-        ButtonRef toggleButton;
-        InputFieldRef positionInput;
-        InputFieldRef moveSpeedInput;
-        ButtonRef inspectButton;
+        static ButtonRef startStopButton;
+        static InputFieldRef positionInput;
+        static InputFieldRef moveSpeedInput;
+        static ButtonRef inspectButton;
 
         void BeginFreecam()
         {
@@ -66,6 +67,7 @@ namespace UnityExplorer.UI.Panels
                 ourCamera.gameObject.tag = "MainCamera";
                 GameObject.DontDestroyOnLoad(ourCamera.gameObject);
                 ourCamera.gameObject.hideFlags = HideFlags.HideAndDontSave;
+                ourCamera.gameObject.AddComponent<FreeCamBehaviour>();
             }
 
             ourCamera.gameObject.SetActive(true);
@@ -92,61 +94,15 @@ namespace UnityExplorer.UI.Panels
         {
             if (inFreeCamMode)
             {
-                RuntimeHelper.SetColorBlockAuto(toggleButton.Component, new(0.4f, 0.2f, 0.2f));
-                toggleButton.ButtonText.text = "End Freecam";
+                RuntimeHelper.SetColorBlockAuto(startStopButton.Component, new(0.4f, 0.2f, 0.2f));
+                startStopButton.ButtonText.text = "End Freecam";
             }
             else
             {
-                RuntimeHelper.SetColorBlockAuto(toggleButton.Component, new(0.2f, 0.4f, 0.2f));
-                toggleButton.ButtonText.text = "Begin Freecam";
+                RuntimeHelper.SetColorBlockAuto(startStopButton.Component, new(0.2f, 0.4f, 0.2f));
+                startStopButton.ButtonText.text = "Begin Freecam";
             }
         }
-
-        public override void Update()
-        {
-            if (inFreeCamMode)
-            {
-                Transform transform = ourCamera.transform;
-
-                float moveSpeed = desiredMoveSpeed * Time.deltaTime;
-
-                if (InputManager.GetKey(KeyCode.LeftShift) || InputManager.GetKey(KeyCode.RightShift))
-                    moveSpeed *= 10f;
-
-                if (InputManager.GetKey(KeyCode.LeftArrow) || InputManager.GetKey(KeyCode.A))
-                    transform.position += transform.right * -1 * moveSpeed;
-
-                if (InputManager.GetKey(KeyCode.RightArrow) || InputManager.GetKey(KeyCode.D))
-                    transform.position += transform.right * moveSpeed;
-
-                if (InputManager.GetKey(KeyCode.UpArrow) || InputManager.GetKey(KeyCode.W))
-                    transform.position += transform.forward * moveSpeed;
-
-                if (InputManager.GetKey(KeyCode.DownArrow) || InputManager.GetKey(KeyCode.S))
-                    transform.position += transform.forward * -1 * moveSpeed;
-
-                if (InputManager.GetKey(KeyCode.Space) || InputManager.GetKey(KeyCode.PageUp))
-                    transform.position += transform.up * moveSpeed;
-
-                if (InputManager.GetKey(KeyCode.LeftControl) || InputManager.GetKey(KeyCode.PageDown))
-                    transform.position += transform.up * -1 * moveSpeed;
-
-                if (InputManager.GetMouseButton(1))
-                {
-                    Vector3 mouseDelta = InputManager.MousePosition - previousMousePosition;
-
-                    float newRotationX = transform.localEulerAngles.y + mouseDelta.x * 0.3f;
-                    float newRotationY = transform.localEulerAngles.x - mouseDelta.y * 0.3f;
-                    transform.localEulerAngles = new Vector3(newRotationY, newRotationX, 0f);
-                }
-
-                UpdatePositionInput();
-
-                previousMousePosition = InputManager.MousePosition;
-            }
-        }
-
-        Vector3 lastSetCameraPosition;
 
         void SetCameraPosition(Vector3 pos)
         {
@@ -157,7 +113,7 @@ namespace UnityExplorer.UI.Panels
             lastSetCameraPosition = pos;
         }
 
-        void UpdatePositionInput()
+        internal static void UpdatePositionInput()
         {
             if (!ourCamera)
                 return;
@@ -168,18 +124,6 @@ namespace UnityExplorer.UI.Panels
 
         protected override void ConstructPanelContent()
         {
-            toggleButton = UIFactory.CreateButton(ContentRoot, "ToggleButton", "Freecam");
-            UIFactory.SetLayoutElement(toggleButton.GameObject, minWidth: 150, minHeight: 25, flexibleWidth: 9999);
-            toggleButton.OnClick += ToggleButton_OnClick;
-            SetToggleButtonState();
-
-            AddSpacer(5);
-            AddInputField("Position", "Camera Pos:", "eg. 0 0 0", out positionInput, PositionInput_OnEndEdit);
-
-            AddSpacer(5);
-            AddInputField("MoveSpeed", "Move Speed:", "Default: 1", out moveSpeedInput, MoveSpeedInput_OnEndEdit);
-            moveSpeedInput.Text = desiredMoveSpeed.ToString();
-
             string instructions = @"Controls:
 - WASD/Arrows: Movement
 - Space/PgUp: Move up
@@ -187,11 +131,27 @@ namespace UnityExplorer.UI.Panels
 - Right Mouse Button: Free look
 - Left Shift: Super speed";
 
-            AddSpacer(5);
             Text instructionsText = UIFactory.CreateLabel(ContentRoot, "Instructions", instructions, TextAnchor.UpperLeft);
             UIFactory.SetLayoutElement(instructionsText.gameObject, flexibleWidth: 9999, flexibleHeight: 9999);
 
             AddSpacer(5);
+
+            startStopButton = UIFactory.CreateButton(ContentRoot, "ToggleButton", "Freecam");
+            UIFactory.SetLayoutElement(startStopButton.GameObject, minWidth: 150, minHeight: 25, flexibleWidth: 9999);
+            startStopButton.OnClick += ToggleButton_OnClick;
+            SetToggleButtonState();
+
+            AddSpacer(5);
+
+            AddInputField("Position", "Camera Pos:", "eg. 0 0 0", out positionInput, PositionInput_OnEndEdit);
+
+            AddSpacer(5);
+
+            AddInputField("MoveSpeed", "Move Speed:", "Default: 1", out moveSpeedInput, MoveSpeedInput_OnEndEdit);
+            moveSpeedInput.Text = desiredMoveSpeed.ToString();
+
+            AddSpacer(5);
+
             inspectButton = UIFactory.CreateButton(ContentRoot, "InspectButton", "Inspect Free Camera");
             UIFactory.SetLayoutElement(inspectButton.GameObject, flexibleWidth: 9999, minHeight: 25);
             inspectButton.OnClick += () => { InspectorManager.Inspect(ourCamera); };
@@ -258,6 +218,62 @@ namespace UnityExplorer.UI.Panels
             }
 
             desiredMoveSpeed = parsed;
+        }
+    }
+
+    internal class FreeCamBehaviour : MonoBehaviour
+    {
+#if CPP
+        static FreeCamBehaviour()
+        {
+            UnhollowerRuntimeLib.ClassInjector.RegisterTypeInIl2Cpp<FreeCamBehaviour>();
+        }
+
+        public FreeCamBehaviour(IntPtr ptr) : base(ptr) { }
+#endif
+
+        internal void Update()
+        {
+            if (FreeCamPanel.inFreeCamMode)
+            {
+                Transform transform = FreeCamPanel.ourCamera.transform;
+
+                float moveSpeed = FreeCamPanel.desiredMoveSpeed * Time.deltaTime;
+
+                if (InputManager.GetKey(KeyCode.LeftShift) || InputManager.GetKey(KeyCode.RightShift))
+                    moveSpeed *= 10f;
+
+                if (InputManager.GetKey(KeyCode.LeftArrow) || InputManager.GetKey(KeyCode.A))
+                    transform.position += transform.right * -1 * moveSpeed;
+
+                if (InputManager.GetKey(KeyCode.RightArrow) || InputManager.GetKey(KeyCode.D))
+                    transform.position += transform.right * moveSpeed;
+
+                if (InputManager.GetKey(KeyCode.UpArrow) || InputManager.GetKey(KeyCode.W))
+                    transform.position += transform.forward * moveSpeed;
+
+                if (InputManager.GetKey(KeyCode.DownArrow) || InputManager.GetKey(KeyCode.S))
+                    transform.position += transform.forward * -1 * moveSpeed;
+
+                if (InputManager.GetKey(KeyCode.Space) || InputManager.GetKey(KeyCode.PageUp))
+                    transform.position += transform.up * moveSpeed;
+
+                if (InputManager.GetKey(KeyCode.LeftControl) || InputManager.GetKey(KeyCode.PageDown))
+                    transform.position += transform.up * -1 * moveSpeed;
+
+                if (InputManager.GetMouseButton(1))
+                {
+                    Vector3 mouseDelta = InputManager.MousePosition - FreeCamPanel.previousMousePosition;
+
+                    float newRotationX = transform.localEulerAngles.y + mouseDelta.x * 0.3f;
+                    float newRotationY = transform.localEulerAngles.x - mouseDelta.y * 0.3f;
+                    transform.localEulerAngles = new Vector3(newRotationY, newRotationX, 0f);
+                }
+
+                FreeCamPanel.UpdatePositionInput();
+
+                FreeCamPanel.previousMousePosition = InputManager.MousePosition;
+            }
         }
     }
 }
