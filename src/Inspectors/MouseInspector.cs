@@ -17,7 +17,7 @@ namespace UnityExplorer.Inspectors
         UI
     }
 
-    public class MouseInspector : UEPanel
+    public class MouseInspector : PanelBase
     {
         public static MouseInspector Instance { get; private set; }
 
@@ -38,19 +38,15 @@ namespace UnityExplorer.Inspectors
 
         // UIPanel
         internal static readonly string UIBaseGUID = $"{ExplorerCore.GUID}.MouseInspector";
-        private UIBase inspectorUIBase;
+        internal static UIBase inspectorUIBase;
 
         public override string Name => "Inspect Under Mouse";
-        public override UIManager.Panels PanelType => UIManager.Panels.MouseInspector;
         public override int MinWidth => -1;
         public override int MinHeight => -1;
         public override Vector2 DefaultAnchorMin => Vector2.zero;
         public override Vector2 DefaultAnchorMax => Vector2.zero;
 
         public override bool CanDragAndResize => false;
-        public override bool NavButtonWanted => false;
-        public override bool ShouldSaveActiveState => false;
-        public override bool ShowByDefault => false;
 
         internal Text objNameLabel;
         internal Text objPathLabel;
@@ -225,11 +221,10 @@ namespace UnityExplorer.Inspectors
 
             UIRoot.SetActive(false);
 
-            // Create a new canvas for this panel to live on.
-            // It needs to always be shown on the main display, other panels can move displays.
-
-            inspectorUIBase = UniversalUI.RegisterUI(UIBaseGUID, null);
-            UIRoot.transform.SetParent(inspectorUIBase.RootObject.transform);
+            //// Create a new canvas for this panel to live on.
+            //// It needs to always be shown on the main display, other panels can move displays.
+            //
+            //UIRoot.transform.SetParent(inspectorUIBase.RootObject.transform);
         }
     }
 }
