@@ -75,13 +75,14 @@ namespace UnityExplorer.UI.Panels
 
         public void SaveInternalData()
         {
-            if (UIManager.Initializing)
+            if (UIManager.Initializing || ApplyingSaveData)
                 return;
 
             SetSaveDataToConfigValue();
         }
 
-        private void SetSaveDataToConfigValue() => ConfigManager.GetPanelSaveData(this.PanelType).Value = this.ToSaveData();
+        private void SetSaveDataToConfigValue() 
+            => ConfigManager.GetPanelSaveData(this.PanelType).Value = this.ToSaveData();
 
         public virtual string ToSaveData()
         {
@@ -156,9 +157,10 @@ namespace UnityExplorer.UI.Panels
 
         protected override void LateConstructUI()
         {
+            ApplyingSaveData = true;
+
             base.LateConstructUI();
 
-            ApplyingSaveData = true;
             // apply panel save data or revert to default
             try
             {
@@ -177,6 +179,8 @@ namespace UnityExplorer.UI.Panels
             };
 
             ApplyingSaveData = false;
+
+            Dragger.OnEndResize();
         }
     }
 
