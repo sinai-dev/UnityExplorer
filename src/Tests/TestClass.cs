@@ -174,6 +174,7 @@ namespace UnityExplorer.Tests
         public static Il2CppSystem.Collections.IDictionary IL2CPP_IDict;
         public static Il2CppSystem.Collections.IList IL2CPP_IList;
         public static Dictionary<Il2CppSystem.Object, Il2CppSystem.Object> IL2CPP_BoxedDict;
+        public static Il2CppSystem.Array IL2CPP_NonGenericArray;
 
         public static Il2CppSystem.Object IL2CPP_BoxedInt;
         public static Il2CppSystem.Int32 IL2CPP_Int;
@@ -187,6 +188,9 @@ namespace UnityExplorer.Tests
 
         private static void Init_IL2CPP()
         {
+            ExplorerCore.Log("IL2CPP 0: Non-generic array");
+            IL2CPP_NonGenericArray = new Il2CppStructArray<int>(5).TryCast<Il2CppSystem.Array>();
+
             ExplorerCore.Log($"IL2CPP 1: Il2Cpp Dictionary<string, string>");
             IL2CPP_Dict = new Il2CppSystem.Collections.Generic.Dictionary<string, string>();
             IL2CPP_Dict.Add("key1", "value1");
