@@ -48,6 +48,9 @@ namespace UnityExplorer.Config
                 TomlDocument document = TomlParser.ParseFile(CONFIG_PATH);
                 foreach (string key in document.Keys)
                 {
+                    if (!Enum.IsDefined(typeof(UIManager.Panels), key))
+                        continue;
+
                     UIManager.Panels panelKey = (UIManager.Panels)Enum.Parse(typeof(UIManager.Panels), key);
                     ConfigManager.GetPanelSaveData(panelKey).Value = document.GetString(key);
                 }

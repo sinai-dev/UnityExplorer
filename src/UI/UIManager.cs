@@ -26,10 +26,11 @@ namespace UnityExplorer.UI
             Options,
             ConsoleLog,
             AutoCompleter,
-            MouseInspector,
+            //MouseInspector,
             UIInspectorResults,
             HookManager,
-            Clipboard
+            Clipboard,
+            Freecam
         }
 
         public enum VerticalAnchor
@@ -99,11 +100,14 @@ namespace UnityExplorer.UI
             UIPanels.Add(Panels.Inspector, new InspectorPanel(UiBase));
             UIPanels.Add(Panels.CSConsole, new CSConsolePanel(UiBase));
             UIPanels.Add(Panels.HookManager, new HookManagerPanel(UiBase));
+            UIPanels.Add(Panels.Freecam, new FreeCamPanel(UiBase));
             UIPanels.Add(Panels.Clipboard, new ClipboardPanel(UiBase));
             UIPanels.Add(Panels.ConsoleLog, new LogPanel(UiBase));
             UIPanels.Add(Panels.Options, new OptionsPanel(UiBase));
             UIPanels.Add(Panels.UIInspectorResults, new MouseInspectorResultsPanel(UiBase));
-            UIPanels.Add(Panels.MouseInspector, new MouseInspector(UiBase));
+
+            MouseInspector.inspectorUIBase = UniversalUI.RegisterUI(MouseInspector.UIBaseGUID, null);
+            new MouseInspector(MouseInspector.inspectorUIBase);
 
             // Call some initialize methods
             Notification.Init();
@@ -285,9 +289,9 @@ namespace UnityExplorer.UI
 
             // UnityExplorer title
 
-            string titleTxt = $"{ExplorerCore.NAME} <i><color=grey>{ExplorerCore.VERSION}</color></i>";
-            Text title = UIFactory.CreateLabel(navbarPanel, "Title", titleTxt, TextAnchor.MiddleLeft, default, true, 17);
-            UIFactory.SetLayoutElement(title.gameObject, minWidth: 170, flexibleWidth: 0);
+            string titleTxt = $"UE <i><color=grey>{ExplorerCore.VERSION}</color></i>";
+            Text title = UIFactory.CreateLabel(navbarPanel, "Title", titleTxt, TextAnchor.MiddleCenter, default, true, 14);
+            UIFactory.SetLayoutElement(title.gameObject, minWidth: 75, flexibleWidth: 0);
 
             // panel tabs
 
