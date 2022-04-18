@@ -124,18 +124,6 @@ namespace UnityExplorer.UI.Panels
 
         protected override void ConstructPanelContent()
         {
-            string instructions = @"Controls:
-- WASD/Arrows: Movement
-- Space/PgUp: Move up
-- LeftControl/PgDown: Move down
-- Right Mouse Button: Free look
-- Left Shift: Super speed";
-
-            Text instructionsText = UIFactory.CreateLabel(ContentRoot, "Instructions", instructions, TextAnchor.UpperLeft);
-            UIFactory.SetLayoutElement(instructionsText.gameObject, flexibleWidth: 9999, flexibleHeight: 9999);
-
-            AddSpacer(5);
-
             startStopButton = UIFactory.CreateButton(ContentRoot, "ToggleButton", "Freecam");
             UIFactory.SetLayoutElement(startStopButton.GameObject, minWidth: 150, minHeight: 25, flexibleWidth: 9999);
             startStopButton.OnClick += ToggleButton_OnClick;
@@ -149,6 +137,18 @@ namespace UnityExplorer.UI.Panels
 
             AddInputField("MoveSpeed", "Move Speed:", "Default: 1", out moveSpeedInput, MoveSpeedInput_OnEndEdit);
             moveSpeedInput.Text = desiredMoveSpeed.ToString();
+
+            AddSpacer(5);
+
+            string instructions = @"Controls:
+- WASD/Arrows: Movement
+- Space/PgUp: Move up
+- LeftControl/PgDown: Move down
+- Right Mouse Button: Free look
+- Left Shift: Super speed";
+
+            Text instructionsText = UIFactory.CreateLabel(ContentRoot, "Instructions", instructions, TextAnchor.UpperLeft);
+            UIFactory.SetLayoutElement(instructionsText.gameObject, flexibleWidth: 9999, flexibleHeight: 9999);
 
             AddSpacer(5);
 
