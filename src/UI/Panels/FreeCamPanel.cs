@@ -182,7 +182,7 @@ namespace UnityExplorer.UI.Panels
 
         void ToggleButton_OnClick()
         {
-            InputManager.SetSelectedEventSystemGameObject(null);
+            EventSystemHelper.SetSelectedGameObject(null);
 
             if (inFreeCamMode)
                 EndFreecam();
@@ -194,7 +194,7 @@ namespace UnityExplorer.UI.Panels
 
         private void PositionInput_OnEndEdit(string input)
         {
-            InputManager.SetSelectedEventSystemGameObject(null);
+            EventSystemHelper.SetSelectedGameObject(null);
 
             if (!ParseUtility.TryParse(input, out Vector3 parsed, out Exception parseEx))
             {
@@ -208,7 +208,7 @@ namespace UnityExplorer.UI.Panels
 
         private void MoveSpeedInput_OnEndEdit(string input)
         {
-            InputManager.SetSelectedEventSystemGameObject(null);
+            EventSystemHelper.SetSelectedGameObject(null);
 
             if (!ParseUtility.TryParse(input, out float parsed, out Exception parseEx))
             {

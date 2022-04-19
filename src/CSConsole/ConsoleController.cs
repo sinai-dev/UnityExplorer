@@ -61,8 +61,6 @@ namespace UnityExplorer.CSConsole
 
         public static void Init()
         {
-            InitEventSystemPropertyHandlers();
-
             // Make sure console is supported on this platform
             try
             {
@@ -386,77 +384,17 @@ namespace UnityExplorer.CSConsole
             RuntimeHelper.StartCoroutine(SetCaretCoroutine(caretPosition));
         }
 
-        static void InitEventSystemPropertyHandlers()
-        {
-            try
-            {
-                foreach (MemberInfo member in typeof(EventSystem).GetMembers(AccessTools.all))
-                {
-                    if (member.Name == "m_CurrentSelected")
-                    {
-                        Type backingType;
-                        if (member.MemberType == MemberTypes.Property)
-                            backingType = (member as PropertyInfo).PropertyType;
-                        else
-                            backingType = (member as FieldInfo).FieldType;
-
-                        usingEventSystemDictionaryMembers = ReflectionUtility.IsDictionary(backingType);
-                        break;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                ExplorerCore.LogWarning($"Exception checking EventSystem property backing type: {ex}");
-            }
-        }
-
-        static bool usingEventSystemDictionaryMembers;
-
-        static readonly AmbiguousMemberHandler<EventSystem, GameObject> m_CurrentSelected_Handler_Normal
-            = new(true, true, "m_CurrentSelected", "m_currentSelected");
-        static readonly AmbiguousMemberHandler<EventSystem, Dictionary<int, GameObject>> m_CurrentSelected_Handler_Dictionary
-            = new(true, true, "m_CurrentSelected", "m_currentSelected");
-
-        static readonly AmbiguousMemberHandler<EventSystem, bool> m_SelectionGuard_Handler_Normal
-            = new(true, true, "m_SelectionGuard", "m_selectionGuard");
-        static readonly AmbiguousMemberHandler<EventSystem, Dictionary<int, bool>> m_SelectionGuard_Handler_Dictionary
-            = new(true, true, "m_SelectionGuard", "m_selectionGuard");
-
-        static void SetCurrentSelectedGameObject(EventSystem instance, GameObject value)
-        {
-            instance.SetSelectedGameObject(value);
-
-            if (usingEventSystemDictionaryMembers)
-                m_CurrentSelected_Handler_Dictionary.GetValue(instance)[0] = value;
-            else
-                m_CurrentSelected_Handler_Normal.SetValue(instance, value);
-        }
-
-        static void SetSelectionGuard(EventSystem instance, bool value)
-        {
-            if (usingEventSystemDictionaryMembers)
-                m_SelectionGuard_Handler_Dictionary.GetValue(instance)[0] = value;
-            else
-                m_SelectionGuard_Handler_Normal.SetValue(instance, value);
-        }
-
         private static IEnumerator SetCaretCoroutine(int caretPosition)
         {
             Color color = Input.Component.selectionColor;
             color.a = 0f;
             Input.Component.selectionColor = color;
 
-            try { SetCurrentSelectedGameObject(CursorUnlocker.CurrentEventSystem, null); }
-            catch (Exception ex) { ExplorerCore.Log($"Failed removing selected object: {ex}"); }
+            EventSystemHelper.SetSelectedGameObject(null);
 
             yield return null; // ~~~~~~~ YIELD FRAME ~~~~~~~~~
 
-            try { SetSelectionGuard(CursorUnlocker.CurrentEventSystem, false); }
-            catch (Exception ex) { ExplorerCore.Log($"Failed setting selection guard: {ex}"); }
-
-            try { SetCurrentSelectedGameObject(CursorUnlocker.CurrentEventSystem, Input.GameObject); }
-            catch (Exception ex) { ExplorerCore.Log($"Failed setting selected gameobject: {ex}"); }
+            EventSystemHelper.SetSelectedGameObject(null);
 
             yield return null; // ~~~~~~~ YIELD FRAME ~~~~~~~~~
 
