@@ -294,6 +294,8 @@ namespace UnityExplorer.UI.Panels
                 ourCamera.transform.position = (Vector3)currentUserCameraPosition;
                 ourCamera.transform.rotation = (Quaternion)currentUserCameraRotation;
             }
+
+            positionInput.Text = ParseUtility.ToStringForInput<Vector3>(originalCameraPosition);
         }
 
         void PositionInput_OnEndEdit(string input)
