@@ -28,30 +28,52 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         public Type[] GenericConstraints { get; set; }
         public bool AllTypes { get; set; }
 
-        private readonly bool allowAbstract;
-        private readonly bool allowEnum;
-
         public InputFieldRef InputField { get; }
         public bool AnchorToCaretPosition => false;
 
-        private readonly List<Suggestion> suggestions = new();
-        private readonly HashSet<string> suggestedNames = new();
+        readonly bool allowAbstract;
+        readonly bool allowEnum;
+        readonly bool allowGeneric;
 
         private HashSet<Type> allowedTypes;
+        private HashSet<Type> allAllowedTypes;
 
+        readonly List<Suggestion> suggestions = new();
+        readonly HashSet<string> suggestedNames = new();
         private string chosenSuggestion;
 
         bool ISuggestionProvider.AllowNavigation => false;
 
-        public TypeCompleter(Type baseType, InputFieldRef inputField) : this(baseType, inputField, true, true) { }
+        static readonly Dictionary<string, Type> shorthandToType = new()
+        {
+            { "object", typeof(object) },
+            { "string", typeof(string) },
+            { "bool", typeof(bool) },
+            { "byte", typeof(byte) },
+            { "sbyte", typeof(sbyte) },
+            { "char", typeof(char) },
+            { "decimal", typeof(decimal) },
+            { "double", typeof(double) },
+            { "float", typeof(float) },
+            { "int", typeof(int) },
+            { "uint", typeof(uint) },
+            { "long", typeof(long) },
+            { "ulong", typeof(ulong) },
+            { "short", typeof(short) },
+            { "ushort", typeof(ushort) },
+            { "void", typeof(void) },
+        };
 
-        public TypeCompleter(Type baseType, InputFieldRef inputField, bool allowAbstract, bool allowEnum)
+        public TypeCompleter(Type baseType, InputFieldRef inputField) : this(baseType, inputField, true, true, true) { }
+
+        public TypeCompleter(Type baseType, InputFieldRef inputField, bool allowAbstract, bool allowEnum, bool allowGeneric)
         {
             BaseType = baseType;
             InputField = inputField;
 
             this.allowAbstract = allowAbstract;
             this.allowEnum = allowEnum;
+            this.allowGeneric = allowGeneric;
 
             inputField.OnValueChanged += OnInputFieldChanged;
 
@@ -62,10 +84,16 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         public void CacheTypes()
         {
             if (!AllTypes)
-                allowedTypes = ReflectionUtility.GetImplementationsOf(BaseType, allowAbstract, allowEnum, false);
+                allowedTypes = ReflectionUtility.GetImplementationsOf(BaseType, allowAbstract, allowGeneric, allowEnum);
             else
+                allowedTypes = GetAllAllowedTypes();
+        }
+
+        HashSet<Type> GetAllAllowedTypes()
+        {
+            if (allAllowedTypes == null)
             {
-                allowedTypes = new();
+                allAllowedTypes = new();
                 foreach (KeyValuePair<string, Type> entry in ReflectionUtility.AllTypes)
                 {
                     // skip <PrivateImplementationDetails> and <AnonymousClass> classes
@@ -76,9 +104,11 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
                     {
                         continue;
                     }
-                    allowedTypes.Add(type);
+                    allAllowedTypes.Add(type);
                 }
             }
+
+            return allAllowedTypes;
         }
 
         public void OnSuggestionClicked(Suggestion suggestion)
@@ -110,24 +140,37 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             }
         }
 
-        private void GetSuggestions(string value)
+        private void GetSuggestions(string input)
         {
             suggestions.Clear();
             suggestedNames.Clear();
 
-            if (BaseType == null)
+            if (!AllTypes && BaseType == null)
             {
                 ExplorerCore.LogWarning("Autocompleter Base type is null!");
                 return;
             }
 
+            // shorthand types all inherit from System.Object
+            if (AllTypes || BaseType == typeof(object))
+            {
+                if (shorthandToType.TryGetValue(input, out Type shorthand))
+                    AddSuggestion(shorthand);
+
+                foreach (KeyValuePair<string, Type> entry in shorthandToType)
+                {
+                    if (entry.Key.StartsWith(input, StringComparison.InvariantCultureIgnoreCase))
+                        AddSuggestion(entry.Value);
+                }
+            }
+
             // Check for exact match first
-            if (ReflectionUtility.GetTypeByName(value) is Type t && allowedTypes.Contains(t))
+            if (ReflectionUtility.GetTypeByName(input) is Type t && allowedTypes.Contains(t))
                 AddSuggestion(t);
 
             foreach (Type entry in allowedTypes)
             {
-                if (entry.FullName.ContainsIgnoreCase(value))
+                if (entry.FullName.ContainsIgnoreCase(input))
                     AddSuggestion(entry);
             }
         }
