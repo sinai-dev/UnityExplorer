@@ -333,7 +333,7 @@ namespace UnityExplorer.Inspectors
             addCompButton.OnClick += () => { OnAddComponentClicked(addCompInput.Text); };
 
             // comp autocompleter
-            new TypeCompleter(typeof(Component), addCompInput);
+            new TypeCompleter(typeof(Component), addCompInput, false, false, false);
 
             // Component List
 
