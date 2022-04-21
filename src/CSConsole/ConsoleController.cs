@@ -390,15 +390,10 @@ namespace UnityExplorer.CSConsole
             color.a = 0f;
             Input.Component.selectionColor = color;
 
-            EventSystemHelper.SetSelectedGameObject(null);
-
-            yield return null; // ~~~~~~~ YIELD FRAME ~~~~~~~~~
-
-            EventSystemHelper.SetSelectedGameObject(null);
-
-            yield return null; // ~~~~~~~ YIELD FRAME ~~~~~~~~~
-
+            EventSystemHelper.SetSelectionGuard(false);
             Input.Component.Select();
+
+            yield return null; // ~~~~~~~ YIELD FRAME ~~~~~~~~~
 
             Input.Component.caretPosition = caretPosition;
             Input.Component.selectionFocusPosition = caretPosition;
