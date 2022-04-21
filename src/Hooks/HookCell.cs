@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityExplorer.UI.Panels;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
 using UniverseLib.UI.Widgets.ScrollView;
@@ -24,17 +25,18 @@ namespace UnityExplorer.Hooks
 
         private void OnToggleActiveClicked()
         {
-            HookManager.Instance.EnableOrDisableHookClicked(CurrentDisplayedIndex);
+            HookList.EnableOrDisableHookClicked(CurrentDisplayedIndex);
         }
 
         private void OnDeleteClicked()
         {
-            HookManager.Instance.DeleteHookClicked(CurrentDisplayedIndex);
+            HookList.DeleteHookClicked(CurrentDisplayedIndex);
+            HookCreator.AddHooksScrollPool.Refresh(true, false);
         }
 
         private void OnEditPatchClicked()
         {
-            HookManager.Instance.EditPatchClicked(CurrentDisplayedIndex);
+            HookList.EditPatchClicked(CurrentDisplayedIndex);
         }
 
         public GameObject CreateContent(GameObject parent)
@@ -48,17 +50,17 @@ namespace UnityExplorer.Hooks
             MethodNameLabel = UIFactory.CreateLabel(UIRoot, "MethodName", "NOT SET", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(MethodNameLabel.gameObject, minHeight: 25, flexibleWidth: 9999);
 
-            ToggleActiveButton = UIFactory.CreateButton(UIRoot, "ToggleActiveBtn", "Enabled", new Color(0.15f, 0.2f, 0.15f));
-            UIFactory.SetLayoutElement(ToggleActiveButton.Component.gameObject, minHeight: 25, minWidth: 100);
+            ToggleActiveButton = UIFactory.CreateButton(UIRoot, "ToggleActiveBtn", "On", new Color(0.15f, 0.2f, 0.15f));
+            UIFactory.SetLayoutElement(ToggleActiveButton.Component.gameObject, minHeight: 25, minWidth: 35);
             ToggleActiveButton.OnClick += OnToggleActiveClicked;
 
-            DeleteButton = UIFactory.CreateButton(UIRoot, "DeleteButton", "Delete", new Color(0.2f, 0.15f, 0.15f));
-            UIFactory.SetLayoutElement(DeleteButton.Component.gameObject, minHeight: 25, minWidth: 100);
-            DeleteButton.OnClick += OnDeleteClicked;
-
-            EditPatchButton = UIFactory.CreateButton(UIRoot, "EditButton", "Edit Hook Source", new Color(0.15f, 0.15f, 0.15f));
-            UIFactory.SetLayoutElement(EditPatchButton.Component.gameObject, minHeight: 25, minWidth: 150);
+            EditPatchButton = UIFactory.CreateButton(UIRoot, "EditButton", "Edit", new Color(0.15f, 0.15f, 0.15f));
+            UIFactory.SetLayoutElement(EditPatchButton.Component.gameObject, minHeight: 25, minWidth: 35);
             EditPatchButton.OnClick += OnEditPatchClicked;
+
+            DeleteButton = UIFactory.CreateButton(UIRoot, "DeleteButton", "X", new Color(0.2f, 0.15f, 0.15f));
+            UIFactory.SetLayoutElement(DeleteButton.Component.gameObject, minHeight: 25, minWidth: 35);
+            DeleteButton.OnClick += OnDeleteClicked;
 
             return UIRoot;
         }

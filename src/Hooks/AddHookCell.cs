@@ -16,14 +16,13 @@ namespace UnityExplorer.Hooks
         public float DefaultHeight => 30;
 
         public Text MethodNameLabel;
-        public Text HookedLabel;
         public ButtonRef HookButton;
 
         public int CurrentDisplayedIndex;
 
         private void OnHookClicked()
         {
-            HookManager.Instance.AddHookClicked(CurrentDisplayedIndex);
+            HookCreator.AddHookClicked(CurrentDisplayedIndex);
         }
 
         public void Enable()
@@ -43,9 +42,6 @@ namespace UnityExplorer.Hooks
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(UIRoot, false, false, true, true, 5, childAlignment: TextAnchor.UpperLeft);
             UIFactory.SetLayoutElement(UIRoot, minWidth: 100, flexibleWidth: 9999, minHeight: 30, flexibleHeight: 600);
             UIRoot.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-            HookedLabel = UIFactory.CreateLabel(UIRoot, "HookedLabel", "✓", TextAnchor.MiddleCenter, Color.green);
-            UIFactory.SetLayoutElement(HookedLabel.gameObject, minHeight: 25, minWidth: 100);
 
             HookButton = UIFactory.CreateButton(UIRoot, "HookButton", "Hook", new Color(0.2f, 0.25f, 0.2f));
             UIFactory.SetLayoutElement(HookButton.Component.gameObject, minHeight: 25, minWidth: 100);
