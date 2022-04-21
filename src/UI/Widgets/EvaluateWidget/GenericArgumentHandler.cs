@@ -9,9 +9,8 @@ namespace UnityExplorer.UI.Widgets
     {
         private Type genericType;
 
-        public void OnBorrowed(EvaluateWidget evaluator, Type genericConstraint)
+        public void OnBorrowed(Type genericConstraint)
         {
-            this.evaluator = evaluator;
             this.genericType = genericConstraint;
 
             typeCompleter.Enabled = true;
@@ -39,7 +38,6 @@ namespace UnityExplorer.UI.Widgets
 
         public void OnReturned()
         {
-            this.evaluator = null;
             this.genericType = null;
 
             this.typeCompleter.Enabled = false;

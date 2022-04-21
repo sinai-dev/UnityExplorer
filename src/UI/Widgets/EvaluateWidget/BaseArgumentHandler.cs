@@ -9,8 +9,6 @@ namespace UnityExplorer.UI.Widgets
 {
     public abstract class BaseArgumentHandler : IPooledObject
     {
-        protected EvaluateWidget evaluator;
-
         internal Text argNameLabel;
         internal InputFieldRef inputField;
         internal TypeCompleter typeCompleter;

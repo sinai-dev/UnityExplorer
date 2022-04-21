@@ -26,9 +26,8 @@ namespace UnityExplorer.UI.Widgets
         private Text basicLabel;
         private ButtonRef pasteButton;
 
-        public void OnBorrowed(EvaluateWidget evaluator, ParameterInfo paramInfo)
+        public void OnBorrowed(ParameterInfo paramInfo)
         {
-            this.evaluator = evaluator;
             this.paramInfo = paramInfo;
 
             this.paramType = paramInfo.ParameterType;
@@ -85,7 +84,6 @@ namespace UnityExplorer.UI.Widgets
 
         public void OnReturned()
         {
-            this.evaluator = null;
             this.paramInfo = null;
 
             this.enumCompleter.Enabled = false;

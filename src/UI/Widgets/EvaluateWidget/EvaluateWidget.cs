@@ -110,7 +110,7 @@ namespace UnityExplorer.UI.Widgets
 
                 GenericArgumentHandler holder = genericHandlers[i] = Pool<GenericArgumentHandler>.Borrow();
                 holder.UIRoot.transform.SetParent(this.genericArgumentsHolder.transform, false);
-                holder.OnBorrowed(this, type);
+                holder.OnBorrowed(type);
             }
         }
 
@@ -122,7 +122,7 @@ namespace UnityExplorer.UI.Widgets
 
                 ParameterHandler holder = paramHandlers[i] = Pool<ParameterHandler>.Borrow();
                 holder.UIRoot.transform.SetParent(this.parametersHolder.transform, false);
-                holder.OnBorrowed(this, param);
+                holder.OnBorrowed(param);
             }
         }
 
