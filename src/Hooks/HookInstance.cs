@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using Mono.CSharp;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -20,6 +21,7 @@ namespace UnityExplorer.Hooks
         static HookInstance()
         {
             scriptEvaluator.Run("using System;");
+            scriptEvaluator.Run("using System.Text;");
             scriptEvaluator.Run("using System.Reflection;");
             scriptEvaluator.Run("using System.Collections;");
             scriptEvaluator.Run("using System.Collections.Generic;");
@@ -39,10 +41,12 @@ namespace UnityExplorer.Hooks
         private MethodInfo finalizer;
         private MethodInfo transpiler;
 
+        private static readonly HashSet<string> namespaceUsings = new();
+
         public HookInstance(MethodInfo targetMethod)
         {
             this.TargetMethod = targetMethod;
-            this.shortSignature = $"{targetMethod.DeclaringType.Name}.{targetMethod.Name}";
+            this.shortSignature = TargetMethod.FullDescription();
 
             GenerateDefaultPatchSourceCode(targetMethod);
 
@@ -59,13 +63,17 @@ namespace UnityExplorer.Hooks
         {
             Unpatch();
 
+            StringBuilder codeBuilder = new();
+            namespaceUsings.Clear();
+
             try
             {
                 patchProcessor = ExplorerCore.Harmony.CreateProcessor(TargetMethod);
 
                 // Dynamically compile the patch method
 
-                StringBuilder codeBuilder = new();
+                foreach (string ns in namespaceUsings)
+                    codeBuilder.AppendLine($"using {ns};");
 
                 codeBuilder.AppendLine($"public class DynamicPatch_{DateTime.Now.Ticks}");
                 codeBuilder.AppendLine("{");
@@ -108,6 +116,9 @@ namespace UnityExplorer.Hooks
             catch (Exception ex)
             {
                 ExplorerCore.LogWarning($"Exception creating patch processor for target method {TargetMethod.FullDescription()}!\r\n{ex}");
+
+                ExplorerCore.Log(codeBuilder.ToString());
+
                 return false;
             }
         }
@@ -115,15 +126,19 @@ namespace UnityExplorer.Hooks
         private string GenerateDefaultPatchSourceCode(MethodInfo targetMethod)
         {
             StringBuilder codeBuilder = new();
-            // Arguments 
 
-            codeBuilder.Append("public static void Postfix(System.Reflection.MethodBase __originalMethod");
+            codeBuilder.Append("public static void Postfix("); // System.Reflection.MethodBase __originalMethod
 
-            if (!targetMethod.IsStatic)
-                codeBuilder.Append($", {targetMethod.DeclaringType.FullName} __instance");
+            bool isStatic = targetMethod.IsStatic;
+            if (!isStatic)
+                codeBuilder.Append($"{targetMethod.DeclaringType.FullDescription()} __instance");
 
             if (targetMethod.ReturnType != typeof(void))
-                codeBuilder.Append($", {targetMethod.ReturnType.FullName} __result");
+            {
+                if (!isStatic)
+                    codeBuilder.Append(", ");
+                codeBuilder.Append($"{targetMethod.ReturnType.FullDescription()} __result");
+            }
 
             ParameterInfo[] parameters = targetMethod.GetParameters();
 
@@ -139,42 +154,39 @@ namespace UnityExplorer.Hooks
             // Patch body
 
             codeBuilder.AppendLine("{");
-
             codeBuilder.AppendLine("    try {");
-
-            // Log message 
-
-            StringBuilder logMessage = new();
-            logMessage.Append($"Patch called: {shortSignature}\\n");
+            codeBuilder.AppendLine("       StringBuilder sb = new StringBuilder();");
+            codeBuilder.AppendLine($"       sb.AppendLine(\"---- Patched called ----\");");
+            codeBuilder.AppendLine($"       sb.AppendLine(\"{shortSignature}\");");
 
             if (!targetMethod.IsStatic)
-                logMessage.Append("__instance: {__instance.ToString()}\\n");
+                codeBuilder.AppendLine($"       sb.Append(\"- __instance: \").AppendLine(__instance.ToString());");
 
             paramIdx = 0;
             foreach (ParameterInfo param in parameters)
             {
-                logMessage.Append($"Parameter {paramIdx} {param.Name}: ");
+                codeBuilder.Append($"       sb.Append(\"- Parameter {paramIdx} '{param.Name}': \")");
+
                 Type pType = param.ParameterType;
                 if (pType.IsByRef) pType = pType.GetElementType();
                 if (pType.IsValueType)
-                    logMessage.Append($"{{__{paramIdx}.ToString()}}");
+                    codeBuilder.AppendLine($".AppendLine(__{paramIdx}.ToString());");
                 else
-                    logMessage.Append($"{{__{paramIdx}?.ToString() ?? \"null\"}}");
-                logMessage.Append("\\n");
+                    codeBuilder.AppendLine($".AppendLine(__{paramIdx}?.ToString() ?? \"null\");");
+
                 paramIdx++;
             }
 
             if (targetMethod.ReturnType != typeof(void))
             {
-                logMessage.Append("Return value: ");
+                codeBuilder.Append("       sb.Append(\"- Return value: \")");
                 if (targetMethod.ReturnType.IsValueType)
-                    logMessage.Append("{__result.ToString()}");
+                    codeBuilder.AppendLine(".AppendLine(__result.ToString());");
                 else
-                    logMessage.Append("{__result?.ToString() ?? \"null\"}");
-                logMessage.Append("\\n");
+                    codeBuilder.AppendLine(".AppendLine(__result?.ToString() ?? \"null\");");
             }
 
-            codeBuilder.AppendLine($"        UnityExplorer.ExplorerCore.Log($\"{logMessage}\");");
+            codeBuilder.AppendLine($"       UnityExplorer.ExplorerCore.Log(sb.ToString());");
             codeBuilder.AppendLine("    }");
             codeBuilder.AppendLine("    catch (System.Exception ex) {");
             codeBuilder.AppendLine($"        UnityExplorer.ExplorerCore.LogWarning($\"Exception in patch of {shortSignature}:\\n{{ex}}\");");
