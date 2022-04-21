@@ -14,8 +14,6 @@ using UniverseLib.Utility;
 
 namespace UnityExplorer.UI.Panels
 {
-    // TODO move the logic out of this class into a LogUtil class (also move ExplorerCore.Log into that)
-
     public class LogPanel : UEPanel, ICellPoolDataSource<ConsoleLogCell>
     {
         public struct LogInfo
