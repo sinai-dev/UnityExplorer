@@ -71,7 +71,7 @@ namespace UnityExplorer.UI.Widgets
                 textureViewerRoot.SetActive(false);
                 toggleButton.ButtonText.text = "View Texture";
 
-                ParentInspector.mainContentHolder.SetActive(true);
+                ParentInspector.ContentRoot.SetActive(true);
             }
             else
             {
@@ -85,7 +85,7 @@ namespace UnityExplorer.UI.Widgets
                 textureViewerRoot.SetActive(true);
                 toggleButton.ButtonText.text = "Hide Texture";
 
-                ParentInspector.mainContentHolder.gameObject.SetActive(false);
+                ParentInspector.ContentRoot.gameObject.SetActive(false);
             }
         }
 

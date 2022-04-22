@@ -80,7 +80,7 @@ namespace UnityExplorer.UI.Widgets
             if (this.UnityObjectRef)
             {
                 nameInput.Text = UnityObjectRef.name;
-                ParentInspector.Tab.TabText.text = $"{ParentInspector.currentBaseTabText} \"{UnityObjectRef.name}\"";
+                ParentInspector.Tab.TabText.text = $"{ParentInspector.TabButtonText} \"{UnityObjectRef.name}\"";
             }
         }
 
