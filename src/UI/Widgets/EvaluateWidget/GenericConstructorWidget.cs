@@ -34,7 +34,7 @@ namespace UnityExplorer.UI.Widgets
 
         public void Show(Action<Type[]> onSubmit, Action onCancel, MethodInfo genericMethodDefinition)
         {
-            Title.text = $"Setting generic arguments for {SignatureHighlighter.HighlightMethod(genericMethodDefinition)}...";
+            Title.text = $"Setting generic arguments for {SignatureHighlighter.ParseMethod(genericMethodDefinition)}...";
 
             OnShow(onSubmit, onCancel, genericMethodDefinition.GetGenericArguments());
         }

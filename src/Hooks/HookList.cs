@@ -67,7 +67,7 @@ namespace UnityExplorer.Hooks
             cell.CurrentDisplayedIndex = index;
             HookInstance hook = (HookInstance)currentHooks[index];
 
-            cell.MethodNameLabel.text = SignatureHighlighter.HighlightMethod(hook.TargetMethod);
+            cell.MethodNameLabel.text = SignatureHighlighter.ParseMethod(hook.TargetMethod);
 
             cell.ToggleActiveButton.ButtonText.text = hook.Enabled ? "On" : "Off";
             RuntimeHelper.SetColorBlockAuto(cell.ToggleActiveButton.Component,

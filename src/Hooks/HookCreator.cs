@@ -82,7 +82,7 @@ namespace UnityExplorer.Hooks
                 if (UERuntimeHelper.IsBlacklisted(method))
                     continue;
                 currentAddEligableMethods.Add(method);
-                currentEligableNamesForFiltering.Add(SignatureHighlighter.RemoveHighlighting(SignatureHighlighter.HighlightMethod(method)));
+                currentEligableNamesForFiltering.Add(SignatureHighlighter.RemoveHighlighting(SignatureHighlighter.ParseMethod(method)));
                 filteredEligableMethods.Add(method);
             }
 
@@ -201,7 +201,7 @@ namespace UnityExplorer.Hooks
             cell.CurrentDisplayedIndex = index;
             MethodInfo method = filteredEligableMethods[index];
 
-            cell.MethodNameLabel.text = SignatureHighlighter.HighlightMethod(method);
+            cell.MethodNameLabel.text = SignatureHighlighter.ParseMethod(method);
         }
 
         // ~~~~~~~~ Hook source editor ~~~~~~~~

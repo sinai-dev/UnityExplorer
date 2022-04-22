@@ -29,8 +29,8 @@ namespace UnityExplorer.CacheObject
             this.Owner = inspector;
             this.NameLabelText = this switch
             {
-                CacheMethod => SignatureHighlighter.HighlightMethod(member as MethodInfo),
-                CacheConstructor => SignatureHighlighter.HighlightConstructor(member as ConstructorInfo),
+                CacheMethod => SignatureHighlighter.ParseMethod(member as MethodInfo),
+                CacheConstructor => SignatureHighlighter.ParseConstructor(member as ConstructorInfo),
                 _ => SignatureHighlighter.Parse(member.DeclaringType, false, member),
             };
 
