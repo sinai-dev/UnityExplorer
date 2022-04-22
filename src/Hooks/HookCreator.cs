@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using UnityExplorer.CSConsole;
 using UnityExplorer.Runtime;
 using UnityExplorer.UI.Panels;
+using UnityExplorer.UI.Widgets;
 using UnityExplorer.UI.Widgets.AutoComplete;
 using UniverseLib;
 using UniverseLib.UI;
@@ -23,6 +24,7 @@ namespace UnityExplorer.Hooks
 
         static readonly List<MethodInfo> currentAddEligableMethods = new();
         static readonly List<MethodInfo> filteredEligableMethods = new();
+        static readonly List<string> currentEligableNamesForFiltering = new();
 
         // hook editor
         static readonly LexerBuilder Lexer = new();
@@ -58,7 +60,8 @@ namespace UnityExplorer.Hooks
             if (type.IsGenericType)
             {
                 pendingGenericDefinition = type;
-                GenericHookHandler.Show(OnGenericClassChosen, OnGenericClassCancel, type);
+                HookManagerPanel.genericArgsHandler.Show(OnGenericClassChosen, OnGenericClassCancel, type);
+                HookManagerPanel.Instance.SetPage(HookManagerPanel.Pages.GenericArgsSelector);
                 return;    
             }
 
@@ -73,11 +76,13 @@ namespace UnityExplorer.Hooks
 
             filteredEligableMethods.Clear();
             currentAddEligableMethods.Clear();
+            currentEligableNamesForFiltering.Clear();
             foreach (MethodInfo method in type.GetMethods(ReflectionUtility.FLAGS))
             {
                 if (UERuntimeHelper.IsBlacklisted(method))
                     continue;
                 currentAddEligableMethods.Add(method);
+                currentEligableNamesForFiltering.Add(SignatureHighlighter.RemoveHighlighting(SignatureHighlighter.HighlightMethod(method)));
                 filteredEligableMethods.Add(method);
             }
 
@@ -119,7 +124,8 @@ namespace UnityExplorer.Hooks
             else if (method.IsGenericMethod)
             {
                 pendingGenericMethod = method;
-                GenericHookHandler.Show(OnGenericMethodChosen, OnGenericMethodCancel, method);
+                HookManagerPanel.genericArgsHandler.Show(OnGenericMethodChosen, OnGenericMethodCancel, method);
+                HookManagerPanel.Instance.SetPage(HookManagerPanel.Pages.GenericArgsSelector);
                 return;
             }
 
@@ -168,10 +174,12 @@ namespace UnityExplorer.Hooks
                 filteredEligableMethods.AddRange(currentAddEligableMethods);
             else
             {
-                foreach (MethodInfo method in currentAddEligableMethods)
+                for (int i = 0; i < currentAddEligableMethods.Count; i++)
                 {
-                    if (method.Name.ContainsIgnoreCase(input))
-                        filteredEligableMethods.Add(method);
+                    MethodInfo eligable = currentAddEligableMethods[i];
+                    string sig = currentEligableNamesForFiltering[i];
+                    if (sig.ContainsIgnoreCase(input))
+                        filteredEligableMethods.Add(eligable);
                 }
             }
 
@@ -245,7 +253,8 @@ namespace UnityExplorer.Hooks
 
             ClassSelectorInputField = UIFactory.CreateInputField(addRow, "ClassInput", "Enter a class to add hooks to...");
             UIFactory.SetLayoutElement(ClassSelectorInputField.Component.gameObject, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
-            new TypeCompleter(typeof(object), ClassSelectorInputField, true, false, Universe.Context != UniverseLib.Runtime.RuntimeContext.IL2CPP);
+            TypeCompleter completer = new(typeof(object), ClassSelectorInputField, true, false, Universe.Context != UniverseLib.Runtime.RuntimeContext.IL2CPP);
+            //completer.AllTypes = true;
 
             ButtonRef addButton = UIFactory.CreateButton(addRow, "AddButton", "View Methods");
             UIFactory.SetLayoutElement(addButton.Component.gameObject, minWidth: 110, minHeight: 25);
