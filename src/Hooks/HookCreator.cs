@@ -253,7 +253,7 @@ namespace UnityExplorer.Hooks
 
             ClassSelectorInputField = UIFactory.CreateInputField(addRow, "ClassInput", "Enter a class to add hooks to...");
             UIFactory.SetLayoutElement(ClassSelectorInputField.Component.gameObject, flexibleWidth: 9999, minHeight: 25, flexibleHeight: 0);
-            TypeCompleter completer = new(typeof(object), ClassSelectorInputField, true, false, Universe.Context != UniverseLib.Runtime.RuntimeContext.IL2CPP);
+            TypeCompleter completer = new(typeof(object), ClassSelectorInputField, true, false, true);
             //completer.AllTypes = true;
 
             ButtonRef addButton = UIFactory.CreateButton(addRow, "AddButton", "View Methods");
