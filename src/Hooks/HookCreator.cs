@@ -20,11 +20,11 @@ namespace UnityExplorer.Hooks
 {
     public class HookCreator : ICellPoolDataSource<AddHookCell>
     {
-        public int ItemCount => filteredEligableMethods.Count;
+        public int ItemCount => filteredEligibleMethods.Count;
 
-        static readonly List<MethodInfo> currentAddEligableMethods = new();
-        static readonly List<MethodInfo> filteredEligableMethods = new();
-        static readonly List<string> currentEligableNamesForFiltering = new();
+        static readonly List<MethodInfo> currentAddEligibleMethods = new();
+        static readonly List<MethodInfo> filteredEligibleMethods = new();
+        static readonly List<string> currentEligibleNamesForFiltering = new();
 
         // hook editor
         static readonly LexerBuilder Lexer = new();
@@ -74,16 +74,16 @@ namespace UnityExplorer.Hooks
 
             AddHooksMethodFilterInput.Text = string.Empty;
 
-            filteredEligableMethods.Clear();
-            currentAddEligableMethods.Clear();
-            currentEligableNamesForFiltering.Clear();
+            filteredEligibleMethods.Clear();
+            currentAddEligibleMethods.Clear();
+            currentEligibleNamesForFiltering.Clear();
             foreach (MethodInfo method in type.GetMethods(ReflectionUtility.FLAGS))
             {
                 if (UERuntimeHelper.IsBlacklisted(method))
                     continue;
-                currentAddEligableMethods.Add(method);
-                currentEligableNamesForFiltering.Add(SignatureHighlighter.RemoveHighlighting(SignatureHighlighter.ParseMethod(method)));
-                filteredEligableMethods.Add(method);
+                currentAddEligibleMethods.Add(method);
+                currentEligibleNamesForFiltering.Add(SignatureHighlighter.RemoveHighlighting(SignatureHighlighter.ParseMethod(method)));
+                filteredEligibleMethods.Add(method);
             }
 
             AddHooksScrollPool.Refresh(true, true);
@@ -112,10 +112,10 @@ namespace UnityExplorer.Hooks
 
         public static void AddHookClicked(int index)
         {
-            if (index >= filteredEligableMethods.Count)
+            if (index >= filteredEligibleMethods.Count)
                 return;
 
-            MethodInfo method = filteredEligableMethods[index];
+            MethodInfo method = filteredEligibleMethods[index];
             if (!method.IsGenericMethod && HookList.hookedSignatures.Contains(method.FullDescription()))
             {
                 ExplorerCore.Log($"Non-generic methods can only be hooked once.");
@@ -129,7 +129,7 @@ namespace UnityExplorer.Hooks
                 return;
             }
 
-            AddHook(filteredEligableMethods[index]);
+            AddHook(filteredEligibleMethods[index]);
         }
 
         static void OnGenericMethodChosen(Type[] arguments)
@@ -168,38 +168,38 @@ namespace UnityExplorer.Hooks
 
         public void OnAddHookFilterInputChanged(string input)
         {
-            filteredEligableMethods.Clear();
+            filteredEligibleMethods.Clear();
 
             if (string.IsNullOrEmpty(input))
-                filteredEligableMethods.AddRange(currentAddEligableMethods);
+                filteredEligibleMethods.AddRange(currentAddEligibleMethods);
             else
             {
-                for (int i = 0; i < currentAddEligableMethods.Count; i++)
+                for (int i = 0; i < currentAddEligibleMethods.Count; i++)
                 {
-                    MethodInfo eligable = currentAddEligableMethods[i];
-                    string sig = currentEligableNamesForFiltering[i];
+                    MethodInfo eligible = currentAddEligibleMethods[i];
+                    string sig = currentEligibleNamesForFiltering[i];
                     if (sig.ContainsIgnoreCase(input))
-                        filteredEligableMethods.Add(eligable);
+                        filteredEligibleMethods.Add(eligible);
                 }
             }
 
             AddHooksScrollPool.Refresh(true, true);
         }
 
-        // Set eligable method cell
+        // Set eligible method cell
 
         public void OnCellBorrowed(AddHookCell cell) { }
 
         public void SetCell(AddHookCell cell, int index)
         {
-            if (index >= filteredEligableMethods.Count)
+            if (index >= filteredEligibleMethods.Count)
             {
                 cell.Disable();
                 return;
             }
 
             cell.CurrentDisplayedIndex = index;
-            MethodInfo method = filteredEligableMethods[index];
+            MethodInfo method = filteredEligibleMethods[index];
 
             cell.MethodNameLabel.text = SignatureHighlighter.ParseMethod(method);
         }
