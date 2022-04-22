@@ -36,7 +36,6 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
         readonly bool allowGeneric;
 
         private HashSet<Type> allowedTypes;
-        private HashSet<Type> allAllowedTypes;
 
         readonly List<Suggestion> suggestions = new();
         readonly HashSet<string> suggestedNames = new();
@@ -77,7 +76,7 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
 
             inputField.OnValueChanged += OnInputFieldChanged;
 
-            if (BaseType != null)
+            if (BaseType != null || AllTypes)
                 CacheTypes();
         }
 
@@ -87,25 +86,51 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
                 allowedTypes = ReflectionUtility.GetImplementationsOf(BaseType, allowAbstract, allowGeneric, allowEnum);
             else
                 allowedTypes = GetAllAllowedTypes();
+
+            // Check generic parameter constraints
+            if (GenericConstraints != null && GenericConstraints.Any())
+            {
+                List<Type> typesToRemove = new();
+                foreach (Type type in allowedTypes)
+                {
+                    bool allowed = true;
+                    foreach (Type constraint in GenericConstraints)
+                    {
+                        if (!constraint.IsAssignableFrom(type))
+                        {
+                            allowed = false;
+                            break;
+                        }
+                    }
+                    if (!allowed)
+                        typesToRemove.Add(type);
+                }
+
+                foreach (Type type in typesToRemove)
+                    allowedTypes.Remove(type);
+            }
         }
 
         HashSet<Type> GetAllAllowedTypes()
         {
-            if (allAllowedTypes == null)
+            HashSet<Type> allAllowedTypes = new();
+            foreach (KeyValuePair<string, Type> entry in ReflectionUtility.AllTypes)
             {
-                allAllowedTypes = new();
-                foreach (KeyValuePair<string, Type> entry in ReflectionUtility.AllTypes)
+                Type type = entry.Value;
+
+                if ((!allowAbstract && type.IsAbstract)
+                    || (!allowGeneric && type.IsGenericType)
+                    || (!allowEnum && type.IsEnum))
+                    continue;
+
+                // skip <PrivateImplementationDetails> and <AnonymousClass> classes
+                if (type.FullName.Contains("PrivateImplementationDetails")
+                     || type.FullName.Contains("DisplayClass")
+                     || type.FullName.Contains('<'))
                 {
-                    // skip <PrivateImplementationDetails> and <AnonymousClass> classes
-                    Type type = entry.Value;
-                    if (type.FullName.Contains("PrivateImplementationDetails")
-                             || type.FullName.Contains("DisplayClass")
-                             || type.FullName.Contains('<'))
-                    {
-                        continue;
-                    }
-                    allAllowedTypes.Add(type);
+                    continue;
                 }
+                allAllowedTypes.Add(type);
             }
 
             return allAllowedTypes;
@@ -152,16 +177,13 @@ namespace UnityExplorer.UI.Widgets.AutoComplete
             }
 
             // shorthand types all inherit from System.Object
-            if (AllTypes || BaseType == typeof(object))
-            {
-                if (shorthandToType.TryGetValue(input, out Type shorthand))
-                    AddSuggestion(shorthand);
+            if (shorthandToType.TryGetValue(input, out Type shorthand) && allowedTypes.Contains(shorthand))
+                AddSuggestion(shorthand);
 
-                foreach (KeyValuePair<string, Type> entry in shorthandToType)
-                {
-                    if (entry.Key.StartsWith(input, StringComparison.InvariantCultureIgnoreCase))
-                        AddSuggestion(entry.Value);
-                }
+            foreach (KeyValuePair<string, Type> entry in shorthandToType)
+            {
+                if (allowedTypes.Contains(entry.Value) && entry.Key.StartsWith(input, StringComparison.InvariantCultureIgnoreCase))
+                    AddSuggestion(entry.Value);
             }
 
             // Check for exact match first
