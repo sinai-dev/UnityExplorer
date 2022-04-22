@@ -115,7 +115,7 @@ The inspector is used to see detailed information on objects of any type and man
 ### Hook Manager
 
 * The Hooks panel allows you to hook methods at the click of a button for debugging purposes.
-  * Simply enter any class (generic types not yet supported) and hook the methods you want from the menu. 
+  * Simply enter any class and hook the methods you want from the menu. 
   * You can edit the source code of the generated hook with the "Edit Hook Source" button. Accepted method names are `Prefix` (which can return `bool` or `void`), `Postfix`, `Finalizer` (which can return `Exception` or `void`), and `Transpiler` (which must return `IEnumerable<HarmonyLib.CodeInstruction>`). You can define multiple patches if you wish.
 
 ### Mouse-Inspect
@@ -123,6 +123,13 @@ The inspector is used to see detailed information on objects of any type and man
 * The "Mouse Inspect" dropdown in the "Inspector" panel allows you to inspect objects under the mouse.
   * <b>World</b>: uses Physics.Raycast to look for Colliders
   * <b>UI</b>: uses GraphicRaycasters to find UI objects
+
+### Freecam
+
+* UnityExplorer provides a basic Free Camera which you can control with your keyboard and mouse.
+* Unlike all other features of UnityExplorer, you can still use Freecam while UnityExplorer's menu is hidden.
+* Supports using the game's main Camera or a separate custom Camera.
+* See the Freecam panel for further instructions and details.
 
 ### Clipboard
 
