@@ -79,7 +79,7 @@ namespace UnityExplorer.Hooks
         internal void ConstructUI(GameObject leftGroup)
         {
             UIRoot = UIFactory.CreateUIObject("CurrentHooksPanel", leftGroup);
-            UIFactory.SetLayoutElement(UIRoot, flexibleHeight: 9999, flexibleWidth: 9999);
+            UIFactory.SetLayoutElement(UIRoot, preferredHeight: 150, flexibleHeight: 0, flexibleWidth: 9999);
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(UIRoot, true, true, true, true);
 
             Text hooksLabel = UIFactory.CreateLabel(UIRoot, "HooksLabel", "Current Hooks", TextAnchor.MiddleCenter);
