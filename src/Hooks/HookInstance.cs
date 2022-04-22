@@ -15,8 +15,9 @@ namespace UnityExplorer.Hooks
     {
         // Static 
 
-        private static readonly StringBuilder evalOutput = new();
-        private static readonly ScriptEvaluator scriptEvaluator = new(new StringWriter(evalOutput));
+        //static readonly StringBuilder evalOutput = new();
+        static readonly StringBuilder evaluatorOutput;
+        static readonly ScriptEvaluator scriptEvaluator = new(new StringWriter(evaluatorOutput = new StringBuilder()));
 
         static HookInstance()
         {
@@ -41,8 +42,6 @@ namespace UnityExplorer.Hooks
         private MethodInfo finalizer;
         private MethodInfo transpiler;
 
-        private static readonly HashSet<string> namespaceUsings = new();
-
         public HookInstance(MethodInfo targetMethod)
         {
             this.TargetMethod = targetMethod;
@@ -64,7 +63,6 @@ namespace UnityExplorer.Hooks
             Unpatch();
 
             StringBuilder codeBuilder = new();
-            namespaceUsings.Clear();
 
             try
             {
@@ -72,10 +70,7 @@ namespace UnityExplorer.Hooks
 
                 // Dynamically compile the patch method
 
-                foreach (string ns in namespaceUsings)
-                    codeBuilder.AppendLine($"using {ns};");
-
-                codeBuilder.AppendLine($"public class DynamicPatch_{DateTime.Now.Ticks}");
+                codeBuilder.AppendLine($"static class DynamicPatch_{DateTime.Now.Ticks}");
                 codeBuilder.AppendLine("{");
                 codeBuilder.AppendLine(patchSource);
                 codeBuilder.AppendLine("}");
@@ -115,29 +110,51 @@ namespace UnityExplorer.Hooks
             }
             catch (Exception ex)
             {
-                ExplorerCore.LogWarning($"Exception creating patch processor for target method {TargetMethod.FullDescription()}!\r\n{ex}");
+                if (ex is FormatException)
+                {
+                    string output = scriptEvaluator._textWriter.ToString();
+                    string[] outputSplit = output.Split('\n');
+                    if (outputSplit.Length >= 2)
+                        output = outputSplit[outputSplit.Length - 2];
+                    evaluatorOutput.Clear();
 
-                ExplorerCore.Log(codeBuilder.ToString());
+                    if (ScriptEvaluator._reportPrinter.ErrorsCount > 0)
+                        ExplorerCore.LogWarning($"Unable to compile the code. Evaluator's last output was:\r\n{output}");
+                    else
+                        ExplorerCore.LogWarning($"Exception generating patch source code: {ex}");
+                }
+                else
+                    ExplorerCore.LogWarning($"Exception generating patch source code: {ex}");
+
+                // ExplorerCore.Log(codeBuilder.ToString());
 
                 return false;
             }
+        }
+
+        static string FullDescriptionClean(Type type)
+        {
+            string description = type.FullDescription().Replace("+", ".");
+            if (description.EndsWith("&"))
+                description = $"ref {description.Substring(0, description.Length - 1)}";
+            return description;
         }
 
         private string GenerateDefaultPatchSourceCode(MethodInfo targetMethod)
         {
             StringBuilder codeBuilder = new();
 
-            codeBuilder.Append("public static void Postfix("); // System.Reflection.MethodBase __originalMethod
+            codeBuilder.Append("static void Postfix("); // System.Reflection.MethodBase __originalMethod
 
             bool isStatic = targetMethod.IsStatic;
             if (!isStatic)
-                codeBuilder.Append($"{targetMethod.DeclaringType.FullDescription()} __instance");
+                codeBuilder.Append($"{FullDescriptionClean(targetMethod.DeclaringType)} __instance");
 
             if (targetMethod.ReturnType != typeof(void))
             {
                 if (!isStatic)
                     codeBuilder.Append(", ");
-                codeBuilder.Append($"{targetMethod.ReturnType.FullDescription()} __result");
+                codeBuilder.Append($"{FullDescriptionClean(targetMethod.ReturnType)} __result");
             }
 
             ParameterInfo[] parameters = targetMethod.GetParameters();
@@ -145,7 +162,7 @@ namespace UnityExplorer.Hooks
             int paramIdx = 0;
             foreach (ParameterInfo param in parameters)
             {
-                codeBuilder.Append($", {param.ParameterType.FullDescription().Replace("&", "")} __{paramIdx}");
+                codeBuilder.Append($", {FullDescriptionClean(param.ParameterType)} __{paramIdx}");
                 paramIdx++;
             }
 
