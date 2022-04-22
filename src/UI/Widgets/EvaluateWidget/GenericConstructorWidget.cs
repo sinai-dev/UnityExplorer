@@ -6,53 +6,48 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.UI.Panels;
-using UnityExplorer.UI.Widgets;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
 using UniverseLib.UI.ObjectPool;
 using UniverseLib.Utility;
 
-namespace UnityExplorer.Hooks
+namespace UnityExplorer.UI.Widgets
 {
-    public class GenericHookHandler
+    public class GenericConstructorWidget
     {
-        static GenericArgumentHandler[] handlers;
+        GenericArgumentHandler[] handlers;
 
-        static Type[] currentGenericParameters;
-        static Action<Type[]> currentOnSubmit;
-        static Action currentOnCancel;
+        Type[] currentGenericParameters;
+        Action<Type[]> currentOnSubmit;
+        Action currentOnCancel;
 
-        static Text Title;
-        static GameObject ArgsHolder;
+        public GameObject UIRoot;
+        Text Title;
+        GameObject ArgsHolder;
 
-        // UI
-        internal static GameObject UIRoot;
-
-        public static void Show(Action<Type[]> onSubmit, Action onCancel, Type genericTypeDefinition)
+        public void Show(Action<Type[]> onSubmit, Action onCancel, Type genericTypeDefinition)
         {
             Title.text = $"Setting generic arguments for {SignatureHighlighter.Parse(genericTypeDefinition, false)}...";
 
             OnShow(onSubmit, onCancel, genericTypeDefinition.GetGenericArguments());
         }
 
-        public static void Show(Action<Type[]> onSubmit, Action onCancel, MethodInfo genericMethodDefinition)
+        public void Show(Action<Type[]> onSubmit, Action onCancel, MethodInfo genericMethodDefinition)
         {
             Title.text = $"Setting generic arguments for {SignatureHighlighter.HighlightMethod(genericMethodDefinition)}...";
 
             OnShow(onSubmit, onCancel, genericMethodDefinition.GetGenericArguments());
         }
 
-        static void OnShow(Action<Type[]> onSubmit, Action onCancel, Type[] genericParameters)
+        void OnShow(Action<Type[]> onSubmit, Action onCancel, Type[] genericParameters)
         {
-            HookManagerPanel.Instance.SetPage(HookManagerPanel.Pages.GenericArgsSelector);
-
             currentOnSubmit = onSubmit;
             currentOnCancel = onCancel;
 
             SetGenericParameters(genericParameters);
         }
 
-        static void SetGenericParameters(Type[] genericParameters)
+        void SetGenericParameters(Type[] genericParameters)
         {
             currentGenericParameters = genericParameters;
 
@@ -67,15 +62,20 @@ namespace UnityExplorer.Hooks
             }
         }
 
-        public static void TrySubmit()
+        public void TrySubmit()
         {
             Type[] args = new Type[currentGenericParameters.Length];
 
             for (int i = 0; i < args.Length; i++)
             {
                 GenericArgumentHandler handler = handlers[i];
-                Type arg = handler.Evaluate();
-                if (arg == null)
+                Type arg;
+                try
+                {
+                    arg = handler.Evaluate();
+                    if (arg == null) throw new Exception();
+                }
+                catch
                 {
                     ExplorerCore.LogWarning($"Generic argument '{handler.inputField.Text}' is not a valid type.");
                     return;
@@ -87,21 +87,24 @@ namespace UnityExplorer.Hooks
             currentOnSubmit(args);
         }
 
-        public static void Cancel()
+        public void Cancel()
         {
             OnClose();
 
-            currentOnCancel();
+            currentOnCancel?.Invoke();
         }
 
-        static void OnClose()
+        void OnClose()
         {
-            foreach (GenericArgumentHandler widget in handlers)
+            if (handlers != null)
             {
-                widget.OnReturned();
-                Pool<GenericArgumentHandler>.Return(widget);
+                foreach (GenericArgumentHandler widget in handlers)
+                {
+                    widget.OnReturned();
+                    Pool<GenericArgumentHandler>.Return(widget);
+                }
+                handlers = null;
             }
-            handlers = null;
         }
 
         // UI Construction
