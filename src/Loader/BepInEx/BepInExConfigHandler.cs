@@ -59,7 +59,7 @@ namespace UnityExplorer.Loader.BIE
 
         public override void SaveConfig()
         {
-            // not required
+            Config.Save();
         }
     }
 }
