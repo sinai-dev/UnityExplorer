@@ -1,6 +1,8 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.UI.Panels;
+using UniverseLib;
 using UniverseLib.UI.ObjectPool;
 
 namespace UnityExplorer.Inspectors
@@ -9,6 +11,7 @@ namespace UnityExplorer.Inspectors
     {
         public bool IsActive { get; internal set; }
         public object Target { get; set; }
+        public Type TargetType { get; protected set; }
 
         public InspectorTab Tab { get; internal set; }
 
@@ -24,6 +27,8 @@ namespace UnityExplorer.Inspectors
         public virtual void OnBorrowedFromPool(object target)
         {
             this.Target = target;
+            this.TargetType = target is Type type ? type : target.GetActualType();
+
             Tab = Pool<InspectorTab>.Borrow();
             Tab.UIRoot.transform.SetParent(InspectorPanel.Instance.NavbarHolder.transform, false);
 

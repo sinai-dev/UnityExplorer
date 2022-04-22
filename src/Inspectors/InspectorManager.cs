@@ -23,7 +23,7 @@ namespace UnityExplorer
 
         public static event Action OnInspectedTabsChanged;
 
-        public static void Inspect(object obj, CacheObjectBase sourceCache = null)
+        public static void Inspect(object obj, CacheObjectBase parent = null)
         {
             if (obj.IsNullOrDestroyed())
                 return;
@@ -36,19 +36,34 @@ namespace UnityExplorer
             if (obj is GameObject)
                 CreateInspector<GameObjectInspector>(obj);
             else
-                CreateInspector<ReflectionInspector>(obj, false, sourceCache);
+                CreateInspector<ReflectionInspector>(obj, false, parent);
         }
 
         public static void Inspect(Type type)
         {
+            if (TryFocusActiveInspector(type))
+                return;
+
             CreateInspector<ReflectionInspector>(type, true);
         }
 
-        private static bool TryFocusActiveInspector(object target)
+        static bool TryFocusActiveInspector(object target)
         {
             foreach (InspectorBase inspector in Inspectors)
             {
-                if (inspector.Target.ReferenceEqual(target))
+                bool shouldFocus = false;
+
+                if (target is Type targetAsType)
+                {
+                    if (inspector.TargetType.FullName == targetAsType.FullName)
+                        shouldFocus = true;
+                }
+                else if(inspector.Target.ReferenceEqual(target))
+                {
+                    shouldFocus = true;
+                }
+
+                if (shouldFocus)
                 {
                     UIManager.SetPanelActive(UIManager.Panels.Inspector, true);
                     SetInspectorActive(inspector);
@@ -76,7 +91,7 @@ namespace UnityExplorer
             }
         }
 
-        internal static void CloseAllTabs()
+        public static void CloseAllTabs()
         {
             if (Inspectors.Any())
             {
@@ -89,18 +104,17 @@ namespace UnityExplorer
             UIManager.SetPanelActive(UIManager.Panels.Inspector, false);
         }
 
-        private static void CreateInspector<T>(object target, bool staticReflection = false,
-            CacheObjectBase parentObject = null) where T : InspectorBase
+        static void CreateInspector<T>(object target, bool staticReflection = false, CacheObjectBase parent = null) where T : InspectorBase
         {
             T inspector = Pool<T>.Borrow();
             Inspectors.Add(inspector);
             inspector.Target = target;
 
-            if (parentObject != null && parentObject.CanWrite)
+            if (parent != null && parent.CanWrite)
             {
                 // only set parent cache object if we are inspecting a struct, otherwise there is no point.
                 if (target.GetType().IsValueType && inspector is ReflectionInspector ri)
-                    ri.ParentCacheObject = parentObject;
+                    ri.ParentCacheObject = parent;
             }
 
             UIManager.SetPanelActive(UIManager.Panels.Inspector, true);
@@ -115,7 +129,7 @@ namespace UnityExplorer
             OnInspectedTabsChanged?.Invoke();
         }
 
-        internal static void ReleaseInspector<T>(T inspector) where T : InspectorBase
+        public static void ReleaseInspector<T>(T inspector) where T : InspectorBase
         {
             if (lastActiveInspector == inspector)
                 lastActiveInspector = null;
