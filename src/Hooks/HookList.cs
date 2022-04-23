@@ -47,6 +47,9 @@ namespace UnityExplorer.Hooks
 
         public static void EditPatchClicked(int index)
         {
+            if (HookCreator.PendingGeneric)
+                HookManagerPanel.genericArgsHandler.Cancel();
+
             HookManagerPanel.Instance.SetPage(HookManagerPanel.Pages.HookSourceEditor);
             HookInstance hook = (HookInstance)currentHooks[index];
             HookCreator.SetEditedHook(hook);

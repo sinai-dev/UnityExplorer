@@ -39,6 +39,8 @@ namespace UnityExplorer.Hooks
         internal static Type pendingGenericDefinition;
         internal static MethodInfo pendingGenericMethod;
 
+        public static bool PendingGeneric => pendingGenericDefinition != null || pendingGenericMethod != null;
+
         // Hook Source Editor UI
         public static GameObject EditorRoot { get; private set; }
         public static Text EditingHookLabel { get; private set; }
