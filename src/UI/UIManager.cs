@@ -26,7 +26,6 @@ namespace UnityExplorer.UI
             Options,
             ConsoleLog,
             AutoCompleter,
-            //MouseInspector,
             UIInspectorResults,
             HookManager,
             Clipboard,

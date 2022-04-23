@@ -119,6 +119,8 @@ namespace UnityExplorer.UI.Panels
             {
                 Rect.SetAnchorsFromString(split[1]);
                 Rect.SetPositionFromString(split[2]);
+                this.EnsureValidSize();
+                this.EnsureValidPosition();
                 this.SetActive(bool.Parse(split[0]));
             }
             catch
