@@ -1,6 +1,6 @@
 {
   "name": "com.sinai-dev.unityexplorer",
-  "version": "4.7.7",
+  "version": "4.7.8",
   "displayName": "UnityExplorer",
   "description": "An in-game UI for exploring, debugging and modifying Unity games.",
   "unity": "2017.1",
