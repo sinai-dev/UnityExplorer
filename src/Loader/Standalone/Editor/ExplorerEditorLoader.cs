@@ -36,7 +36,7 @@ namespace UnityExplorer.Loader.Standalone
         protected override void CheckExplorerFolder()
         {
             if (explorerFolderDest == null)
-                explorerFolderDest = Application.dataPath;
+                explorerFolderDest = Path.GetDirectoryName(Application.dataPath);
         }
     }
 }
