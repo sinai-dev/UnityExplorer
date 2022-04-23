@@ -34,12 +34,15 @@ namespace UnityExplorer.ObjectExplorer
         private ScrollPool<ButtonCell> resultsScrollPool;
         private List<object> currentResults = new();
 
+        //public TypeCompleter typeAutocompleter;
+        public TypeCompleter unityObjectTypeCompleter;
+        public TypeCompleter allTypesCompleter;
+
         public override GameObject UIRoot => uiRoot;
         private GameObject uiRoot;
         private GameObject sceneFilterRow;
         private GameObject childFilterRow;
         private GameObject classInputRow;
-        public TypeCompleter typeAutocompleter;
         private GameObject nameInputRow;
         private InputFieldRef nameInputField;
         private Text resultsLabel;
@@ -98,14 +101,18 @@ namespace UnityExplorer.ObjectExplorer
 
             nameInputRow.SetActive(context == SearchContext.UnityObject);
 
-            if (context == SearchContext.Class)
-                typeAutocompleter.AllTypes = true;
-            else
+            switch (context)
             {
-                typeAutocompleter.BaseType = context == SearchContext.UnityObject ? typeof(UnityEngine.Object) : typeof(object);
-                typeAutocompleter.AllTypes = false;
+                case SearchContext.UnityObject:
+                    unityObjectTypeCompleter.Enabled = true;
+                    allTypesCompleter.Enabled = false;
+                    break;
+                case SearchContext.Singleton:
+                case SearchContext.Class:
+                    allTypesCompleter.Enabled = true;
+                    unityObjectTypeCompleter.Enabled = false;
+                    break;
             }
-            typeAutocompleter.CacheTypes();
         }
 
         private void OnSceneFilterDropChanged(int value) => sceneFilter = (SceneFilter)value;
@@ -185,7 +192,9 @@ namespace UnityExplorer.ObjectExplorer
             InputFieldRef classInputField = UIFactory.CreateInputField(classInputRow, "ClassInput", "...");
             UIFactory.SetLayoutElement(classInputField.UIRoot, minHeight: 25, flexibleHeight: 0, flexibleWidth: 9999);
 
-            typeAutocompleter = new TypeCompleter(typeof(UnityEngine.Object), classInputField);
+            unityObjectTypeCompleter = new(typeof(UnityEngine.Object), classInputField, true, false, true);
+            allTypesCompleter = new(null, classInputField, true, false, true);
+            allTypesCompleter.Enabled = false;
             classInputField.OnValueChanged += OnTypeInputChanged;
 
             //unityObjectClassRow.SetActive(false);
