@@ -1,4 +1,8 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Reflection;
+using UnityEngine;
+using UnityExplorer.UI;
+using UniverseLib;
 #if CPP
 using UnhollowerRuntimeLib;
 #endif
@@ -28,6 +32,40 @@ namespace UnityExplorer
         internal void Update()
         {
             ExplorerCore.Update();
+        }
+
+        // For editor, to clean up objects
+
+        internal void OnDestroy()
+        {
+            OnApplicationQuit();
+        }
+
+        internal bool quitting;
+
+        internal void OnApplicationQuit()
+        {
+            if (quitting) return;
+            quitting = true;
+
+            TryDestroy(UIManager.UIRoot?.transform.root.gameObject);
+
+            TryDestroy((typeof(Universe).Assembly.GetType("UniverseLib.UniversalBehaviour")
+                .GetProperty("Instance", BindingFlags.Static | BindingFlags.NonPublic)
+                .GetValue(null, null)
+                as Component).gameObject);
+
+            TryDestroy(this.gameObject);
+        }
+
+        internal void TryDestroy(GameObject obj)
+        {
+            try
+            {
+                if (obj)
+                    Destroy(obj);
+            }
+            catch { }
         }
     }
 }
