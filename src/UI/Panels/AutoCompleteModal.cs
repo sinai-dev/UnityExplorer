@@ -69,15 +69,22 @@ namespace UnityExplorer.UI.Panels
 
             if (CurrentHandler == provider)
             {
+                Suggestions.Clear();
                 CurrentHandler = null;
                 UIRoot.SetActive(false);
             }
         }
 
-        public void SetSuggestions(IEnumerable<Suggestion> suggestions)
+        public void SetSuggestions(List<Suggestion> suggestions, bool jumpToTop = false)
         {
-            Suggestions = suggestions as List<Suggestion> ?? suggestions.ToList();
-            SelectedIndex = 0;
+            Suggestions = suggestions;
+
+            if (jumpToTop)
+            {
+                SelectedIndex = 0;
+                if (scrollPool.DataSource.ItemCount > 0)
+                    scrollPool.JumpToIndex(0, null);
+            }
 
             if (!Suggestions.Any())
                 base.UIRoot.SetActive(false);
@@ -86,7 +93,7 @@ namespace UnityExplorer.UI.Panels
                 base.UIRoot.SetActive(true);
                 base.UIRoot.transform.SetAsLastSibling();
                 buttonListDataHandler.RefreshData();
-                scrollPool.Refresh(true, true);
+                scrollPool.Refresh(true, false);
             }
         }
 
@@ -194,6 +201,12 @@ namespace UnityExplorer.UI.Panels
 
         private void SetCell(ButtonCell cell, int index)
         {
+            if (CurrentHandler == null)
+            {
+                UIRoot.SetActive(false);
+                return;
+            }
+
             if (index < 0 || index >= Suggestions.Count)
             {
                 cell.Disable();
