@@ -15,22 +15,20 @@ namespace UnityExplorer.UI.Widgets
 
             typeCompleter.Enabled = true;
             typeCompleter.BaseType = this.genericArgument;
+            typeCompleter.CacheTypes();
 
             Type[] constraints = this.genericArgument.GetGenericParameterConstraints();
-            typeCompleter.GenericConstraints = constraints;
-
-            typeCompleter.CacheTypes();
 
             StringBuilder sb = new($"<color={SignatureHighlighter.CONST}>{this.genericArgument.Name}</color>");
 
-            for (int j = 0; j < constraints.Length; j++)
+            for (int i = 0; i < constraints.Length; i++)
             {
-                if (j == 0) sb.Append(' ').Append('(');
+                if (i == 0) sb.Append(' ').Append('(');
                 else sb.Append(',').Append(' ');
 
-                sb.Append(SignatureHighlighter.Parse(constraints[j], false));
+                sb.Append(SignatureHighlighter.Parse(constraints[i], false));
 
-                if (j + 1 == constraints.Length)
+                if (i + 1 == constraints.Length)
                     sb.Append(')');
             }
 

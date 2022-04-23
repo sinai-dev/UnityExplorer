@@ -135,7 +135,7 @@ namespace UnityExplorer.ObjectExplorer
 
             foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
             {
-                foreach (Type type in asm.TryGetTypes())
+                foreach (Type type in asm.GetTypes())
                 {
                     if (!string.IsNullOrEmpty(nameFilter) && !type.FullName.ContainsIgnoreCase(nameFilter))
                         continue;
@@ -173,7 +173,7 @@ namespace UnityExplorer.ObjectExplorer
             foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
             {
                 // Search all non-static, non-enum classes.
-                foreach (Type type in asm.TryGetTypes().Where(it => !(it.IsSealed && it.IsAbstract) && !it.IsEnum))
+                foreach (Type type in asm.GetTypes().Where(it => !(it.IsSealed && it.IsAbstract) && !it.IsEnum))
                 {
                     try
                     {
