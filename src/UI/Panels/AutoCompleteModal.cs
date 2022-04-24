@@ -75,7 +75,7 @@ namespace UnityExplorer.UI.Panels
             }
         }
 
-        public void SetSuggestions(List<Suggestion> suggestions, bool jumpToTop = false)
+        public void SetSuggestions(List<Suggestion> suggestions, bool jumpToTop = true)
         {
             Suggestions = suggestions;
 
@@ -93,7 +93,7 @@ namespace UnityExplorer.UI.Panels
                 base.UIRoot.SetActive(true);
                 base.UIRoot.transform.SetAsLastSibling();
                 buttonListDataHandler.RefreshData();
-                scrollPool.Refresh(true, false);
+                scrollPool.Refresh(true, jumpToTop);
             }
         }
 
@@ -238,13 +238,18 @@ namespace UnityExplorer.UI.Panels
 
             InputFieldRef input = CurrentHandler.InputField;
 
-            if (!input.Component.isFocused || input.Component.caretPosition == lastCaretPosition && input.UIRoot.transform.position == lastInputPosition)
-                return;
-            lastInputPosition = input.UIRoot.transform.position;
-            lastCaretPosition = input.Component.caretPosition;
+            //if (!input.Component.isFocused 
+            //    || (input.Component.caretPosition == lastCaretPosition && input.UIRoot.transform.position == lastInputPosition))
+            //    return;
 
+            if (input.Component.caretPosition == lastCaretPosition && input.UIRoot.transform.position == lastInputPosition)
+                return;
+            
             if (CurrentHandler.AnchorToCaretPosition)
             {
+                if (!input.Component.isFocused)
+                    return;
+
                 TextGenerator textGen = input.Component.cachedInputTextGenerator;
                 int caretIdx = Math.Max(0, Math.Min(textGen.characterCount - 1, input.Component.caretPosition));
 
@@ -260,6 +265,9 @@ namespace UnityExplorer.UI.Panels
             {
                 uiRoot.transform.position = input.Transform.position + new Vector3(-(input.Transform.rect.width / 2) + 10, -20, 0);
             }
+
+            lastInputPosition = input.UIRoot.transform.position;
+            lastCaretPosition = input.Component.caretPosition;
 
             this.Dragger.OnEndResize();
         }
