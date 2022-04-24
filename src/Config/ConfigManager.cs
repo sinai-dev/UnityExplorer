@@ -55,7 +55,7 @@ namespace UnityExplorer.Config
             InternalHandler.LoadConfig();
 
 #if STANDALONE
-            Loader.Standalone.ExplorerEditorBehaviour.Instance.LoadConfigs();
+            Loader.Standalone.ExplorerEditorBehaviour.Instance?.LoadConfigs();
 #endif
 
             //InitConsoleCallback();
