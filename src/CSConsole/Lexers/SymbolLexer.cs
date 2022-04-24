@@ -32,13 +32,7 @@ namespace UnityExplorer.CSConsole.Lexers
 
             if (IsSymbol(lexer.Current))
             {
-                do
-                {
-                    lexer.Commit();
-                    lexer.PeekNext();
-                }
-                while (IsSymbol(lexer.Current));
-
+                lexer.Commit();
                 return true;
             }
 

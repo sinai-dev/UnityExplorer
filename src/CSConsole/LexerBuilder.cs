@@ -17,8 +17,6 @@ namespace UnityExplorer.CSConsole
 
     public class LexerBuilder
     {
-        #region Core and initialization
-
         public const char WHITESPACE = ' ';
         public readonly HashSet<char> IndentOpenChars = new() { '{', '(' };
         public readonly HashSet<char> IndentCloseChars = new() { '}', ')' };
@@ -49,8 +47,6 @@ namespace UnityExplorer.CSConsole
                 }
             }
         }
-
-        #endregion
 
         /// <summary>The last committed index for a match or no-match. Starts at -1 for a new parse.</summary>
         public int CommittedIndex { get; private set; }
