@@ -440,7 +440,7 @@ namespace UnityExplorer.CSConsole
                 // depending on which one we are not at.
                 if (LastCaretPosition == nonWhitespaceStartIdx)
                     SetCaretPosition(thisline.startCharIdx);
-                else // jump to the next line start index - 1, ie. end of this line
+                else 
                     SetCaretPosition(nonWhitespaceStartIdx);
             }
             else
@@ -448,7 +448,7 @@ namespace UnityExplorer.CSConsole
                 // If there is no next line, jump to the end of this line (+1, to the invisible next character position)
                 if (nextLine.startCharIdx <= 0)
                     SetCaretPosition(Input.Text.Length);
-                else
+                else // jump to the next line start index - 1, ie. end of this line
                     SetCaretPosition(nextLine.startCharIdx - 1);
             }
         }
