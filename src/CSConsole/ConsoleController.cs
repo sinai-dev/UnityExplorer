@@ -416,7 +416,7 @@ namespace UnityExplorer.CSConsole
         {
             // Determine the current and next line
             UILineInfo thisline = default;
-            UILineInfo nextLine = default;
+            UILineInfo? nextLine = null;
             for (int i = 0; i < Input.Component.cachedInputTextGenerator.lineCount; i++)
             {
                 UILineInfo line = Input.Component.cachedInputTextGenerator.lines[i];
@@ -431,25 +431,26 @@ namespace UnityExplorer.CSConsole
 
             if (toStart)
             {
-                // Determine where the non-whitespace text begins
-                int nonWhitespaceStartIdx = thisline.startCharIdx;
-                while (char.IsWhiteSpace(Input.Text[nonWhitespaceStartIdx]))
-                    nonWhitespaceStartIdx++;
+                // Determine where the indented text begins
+                int endOfLine = nextLine == null ? Input.Text.Length : nextLine.Value.startCharIdx;
+                int indentedStart = thisline.startCharIdx;
+                while (indentedStart < endOfLine - 1 && char.IsWhiteSpace(Input.Text[indentedStart]))
+                    indentedStart++;
 
                 // Jump to either the true start or the non-whitespace position,
                 // depending on which one we are not at.
-                if (LastCaretPosition == nonWhitespaceStartIdx)
+                if (LastCaretPosition == indentedStart)
                     SetCaretPosition(thisline.startCharIdx);
                 else 
-                    SetCaretPosition(nonWhitespaceStartIdx);
+                    SetCaretPosition(indentedStart);
             }
             else
             {
                 // If there is no next line, jump to the end of this line (+1, to the invisible next character position)
-                if (nextLine.startCharIdx <= 0)
+                if (nextLine == null)
                     SetCaretPosition(Input.Text.Length);
                 else // jump to the next line start index - 1, ie. end of this line
-                    SetCaretPosition(nextLine.startCharIdx - 1);
+                    SetCaretPosition(nextLine.Value.startCharIdx - 1);
             }
         }
 
