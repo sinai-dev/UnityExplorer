@@ -23,28 +23,33 @@ namespace UnityExplorer.CSConsole
 {
     public static class ConsoleController
     {
-        public static ScriptEvaluator Evaluator;
-        public static LexerBuilder Lexer;
-        public static CSAutoCompleter Completer;
+        public static ScriptEvaluator Evaluator { get; private set; }
+        public static LexerBuilder Lexer { get; private set; }
+        public static CSAutoCompleter Completer { get; private set; }
 
-        private static HashSet<string> usingDirectives;
-        private static StringBuilder evaluatorOutput;
-        private static StringWriter evaluatorStringWriter;
-
-        public static CSConsolePanel Panel => UIManager.GetPanel<CSConsolePanel>(UIManager.Panels.CSConsole);
-        public static InputFieldRef Input => Panel.Input;
-
+        public static bool SRENotSupported { get; private set; }
         public static int LastCaretPosition { get; private set; }
-        internal static float defaultInputFieldAlpha;
+        public static float DefaultInputFieldAlpha { get; set; }
 
-        // Todo save as config?
         public static bool EnableCtrlRShortcut { get; private set; } = true;
         public static bool EnableAutoIndent { get; private set; } = true;
         public static bool EnableSuggestions { get; private set; } = true;
 
-        internal static string ScriptsFolder => Path.Combine(ExplorerCore.ExplorerFolder, "Scripts");
+        public static CSConsolePanel Panel => UIManager.GetPanel<CSConsolePanel>(UIManager.Panels.CSConsole);
+        public static InputFieldRef Input => Panel.Input;
 
-        internal static readonly string[] DefaultUsing = new string[]
+        public static string ScriptsFolder => Path.Combine(ExplorerCore.ExplorerFolder, "Scripts");
+
+        static HashSet<string> usingDirectives;
+        static StringBuilder evaluatorOutput;
+        static StringWriter evaluatorStringWriter;
+        static float timeOfLastCtrlR;
+
+        static bool settingCaretCoroutine;
+        static string previousInput;
+        static int previousContentLength = 0;
+
+        static readonly string[] DefaultUsing = new string[]
         {
             "System",
             "System.Linq",
@@ -59,9 +64,10 @@ namespace UnityExplorer.CSConsole
 #endif
         };
 
+        const int CSCONSOLE_LINEHEIGHT = 18;
+
         public static void Init()
         {
-            // Make sure console is supported on this platform
             try
             {
                 ResetConsole(false);
@@ -111,31 +117,10 @@ namespace UnityExplorer.CSConsole
             }
         }
 
-        #region UI Listeners and options
-
-        // TODO save
-
-        private static void OnToggleAutoIndent(bool value)
-        {
-            EnableAutoIndent = value;
-        }
-
-        private static void OnToggleCtrlRShortcut(bool value)
-        {
-            EnableCtrlRShortcut = value;
-        }
-
-        private static void OnToggleSuggestions(bool value)
-        {
-            EnableSuggestions = value;
-        }
-
-        #endregion
-
 
         #region Evaluating
 
-        private static void GenerateTextWriter()
+        static void GenerateTextWriter()
         {
             evaluatorOutput = new StringBuilder();
             evaluatorStringWriter = new StringWriter(evaluatorOutput);
@@ -247,16 +232,45 @@ namespace UnityExplorer.CSConsole
         #endregion
 
 
-        // Updating and event listeners
+        #region Update loop and event listeners
 
-        private static bool settingCaretCoroutine;
+        public static void Update()
+        {
+            if (SRENotSupported)
+                return;
 
-        private static void OnInputScrolled() => HighlightVisibleInput();
+            if (InputManager.GetKeyDown(KeyCode.Home))
+                JumpToStartOrEndOfLine(true);
+            else if (InputManager.GetKeyDown(KeyCode.End))
+                JumpToStartOrEndOfLine(false);
 
-        private static string previousInput;
+            UpdateCaret(out bool caretMoved);
 
-        // Invoked at most once per frame
-        private static void OnInputChanged(string value)
+            if (!settingCaretCoroutine && EnableSuggestions)
+            {
+                if (AutoCompleteModal.CheckEscape(Completer))
+                {
+                    OnAutocompleteEscaped();
+                    return;
+                }
+
+                if (caretMoved)
+                    AutoCompleteModal.Instance.ReleaseOwnership(Completer);
+            }
+
+            if (EnableCtrlRShortcut
+                && (InputManager.GetKey(KeyCode.LeftControl) || InputManager.GetKey(KeyCode.RightControl))
+                && InputManager.GetKeyDown(KeyCode.R)
+                && timeOfLastCtrlR.OccuredEarlierThanDefault())
+            {
+                timeOfLastCtrlR = Time.realtimeSinceStartup;
+                Evaluate(Panel.Input.Text);
+            }
+        }
+
+        static void OnInputScrolled() => HighlightVisibleInput(out _);
+
+        static void OnInputChanged(string value)
         {
             if (SRENotSupported)
                 return;
@@ -283,7 +297,7 @@ namespace UnityExplorer.CSConsole
                     DoAutoIndent();
             }
 
-            bool inStringOrComment = HighlightVisibleInput();
+            HighlightVisibleInput(out bool inStringOrComment);
 
             if (!settingCaretCoroutine)
             {
@@ -299,40 +313,27 @@ namespace UnityExplorer.CSConsole
             UpdateCaret(out _);
         }
 
-        private static float timeOfLastCtrlR;
-
-        public static void Update()
+        static void OnToggleAutoIndent(bool value)
         {
-            if (SRENotSupported)
-                return;
-
-            UpdateCaret(out bool caretMoved);
-
-            if (!settingCaretCoroutine && EnableSuggestions)
-            {
-                if (AutoCompleteModal.CheckEscape(Completer))
-                {
-                    OnAutocompleteEscaped();
-                    return;
-                }
-
-                if (caretMoved)
-                    AutoCompleteModal.Instance.ReleaseOwnership(Completer);
-            }
-
-            if (EnableCtrlRShortcut
-                && (InputManager.GetKey(KeyCode.LeftControl) || InputManager.GetKey(KeyCode.RightControl))
-                && InputManager.GetKeyDown(KeyCode.R)
-                && timeOfLastCtrlR.OccuredEarlierThanDefault())
-            {
-                timeOfLastCtrlR = Time.realtimeSinceStartup;
-                Evaluate(Panel.Input.Text);
-            }
+            EnableAutoIndent = value;
         }
 
-        private const int CSCONSOLE_LINEHEIGHT = 18;
+        static void OnToggleCtrlRShortcut(bool value)
+        {
+            EnableCtrlRShortcut = value;
+        }
 
-        private static void UpdateCaret(out bool caretMoved)
+        static void OnToggleSuggestions(bool value)
+        {
+            EnableSuggestions = value;
+        }
+
+        #endregion
+
+
+        #region Caret position
+
+        static void UpdateCaret(out bool caretMoved)
         {
             int prevCaret = LastCaretPosition;
             caretMoved = false;
@@ -377,14 +378,18 @@ namespace UnityExplorer.CSConsole
             }
         }
 
-        private static void SetCaretPosition(int caretPosition)
+        public static void SetCaretPosition(int caretPosition)
         {
+            Input.Component.caretPosition = caretPosition;
+
+            // Fix to make sure we always really set the caret position.
+            // Yields a frame and fixes text-selection issues.
             settingCaretCoroutine = true;
             Input.Component.readOnly = true;
-            RuntimeHelper.StartCoroutine(SetCaretCoroutine(caretPosition));
+            RuntimeHelper.StartCoroutine(DoSetCaretCoroutine(caretPosition));
         }
 
-        private static IEnumerator SetCaretCoroutine(int caretPosition)
+        static IEnumerator DoSetCaretCoroutine(int caretPosition)
         {
             Color color = Input.Component.selectionColor;
             color.a = 0f;
@@ -399,25 +404,71 @@ namespace UnityExplorer.CSConsole
             Input.Component.selectionFocusPosition = caretPosition;
             LastCaretPosition = Input.Component.caretPosition;
 
-            color.a = defaultInputFieldAlpha;
+            color.a = DefaultInputFieldAlpha;
             Input.Component.selectionColor = color;
 
             Input.Component.readOnly = false;
             settingCaretCoroutine = false;
         }
 
+        // For Home and End keys
+        static void JumpToStartOrEndOfLine(bool toStart)
+        {
+            // Determine the current and next line
+            UILineInfo thisline = default;
+            UILineInfo nextLine = default;
+            for (int i = 0; i < Input.Component.cachedInputTextGenerator.lineCount; i++)
+            {
+                UILineInfo line = Input.Component.cachedInputTextGenerator.lines[i];
+
+                if (line.startCharIdx > LastCaretPosition)
+                {
+                    nextLine = line;
+                    break;
+                }
+                thisline = line;
+            }
+
+            if (toStart)
+            {
+                // Determine where the non-whitespace text begins
+                int nonWhitespaceStartIdx = thisline.startCharIdx;
+                while (char.IsWhiteSpace(Input.Text[nonWhitespaceStartIdx]))
+                    nonWhitespaceStartIdx++;
+
+                // Jump to either the true start or the non-whitespace position,
+                // depending on which one we are not at.
+                if (LastCaretPosition == nonWhitespaceStartIdx)
+                    SetCaretPosition(thisline.startCharIdx);
+                else // jump to the next line start index - 1, ie. end of this line
+                    SetCaretPosition(nonWhitespaceStartIdx);
+            }
+            else
+            {
+                // If there is no next line, jump to the end of this line (+1, to the invisible next character position)
+                if (nextLine.startCharIdx <= 0)
+                    SetCaretPosition(Input.Text.Length);
+                else
+                    SetCaretPosition(nextLine.startCharIdx - 1);
+            }
+        }
+
+        #endregion
+
+
         #region Lexer Highlighting
 
         /// <summary>
         /// Returns true if caret is inside string or comment, false otherwise
         /// </summary>
-        private static bool HighlightVisibleInput()
+        private static void HighlightVisibleInput(out bool inStringOrComment)
         {
+            inStringOrComment = false;
             if (string.IsNullOrEmpty(Input.Text))
             {
                 Panel.HighlightText.text = "";
                 Panel.LineNumberText.text = "1";
-                return false;
+                return;
             }
 
             // Calculate the visible lines
@@ -452,7 +503,7 @@ namespace UnityExplorer.CSConsole
 
             // Highlight the visible text with the LexerBuilder
 
-            Panel.HighlightText.text = Lexer.BuildHighlightedString(Input.Text, startIdx, endIdx, topLine, LastCaretPosition, out bool ret);
+            Panel.HighlightText.text = Lexer.BuildHighlightedString(Input.Text, startIdx, endIdx, topLine, LastCaretPosition, out inStringOrComment);
 
             // Set the line numbers
 
@@ -490,7 +541,7 @@ namespace UnityExplorer.CSConsole
 
             Panel.LineNumberText.text = sb.ToString();
 
-            return ret;
+            return;
         }
 
         #endregion
@@ -530,13 +581,11 @@ namespace UnityExplorer.CSConsole
 
         #region Auto indenting
 
-        private static int prevContentLen = 0;
-
         private static void DoAutoIndent()
         {
-            if (Input.Text.Length > prevContentLen)
+            if (Input.Text.Length > previousContentLength)
             {
-                int inc = Input.Text.Length - prevContentLen;
+                int inc = Input.Text.Length - previousContentLength;
 
                 if (inc == 1)
                 {
@@ -555,15 +604,13 @@ namespace UnityExplorer.CSConsole
                 }
             }
 
-            prevContentLen = Input.Text.Length;
+            previousContentLength = Input.Text.Length;
         }
 
         #endregion
 
 
         #region "Help" interaction
-
-        private static bool SRENotSupported;
 
         private static void DisableConsole(Exception ex)
         {

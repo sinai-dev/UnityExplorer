@@ -145,7 +145,7 @@ namespace UnityExplorer.UI.Panels
             GameObject inputObj = UIFactory.CreateScrollInputField(inputArea, "ConsoleInput", ConsoleController.STARTUP_TEXT,
                 out InputFieldScroller inputScroller, fontSize);
             InputScroller = inputScroller;
-            ConsoleController.defaultInputFieldAlpha = Input.Component.selectionColor.a;
+            ConsoleController.DefaultInputFieldAlpha = Input.Component.selectionColor.a;
             Input.OnValueChanged += InvokeOnValueChanged;
 
             // move line number text with input field
