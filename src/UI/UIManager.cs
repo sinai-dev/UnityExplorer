@@ -112,14 +112,14 @@ namespace UnityExplorer.UI
             Notification.Init();
             ConsoleController.Init();
 
-            // Set default menu visibility
-            ShowMenu = !ConfigManager.Hide_On_Startup.Value;
-
             // Failsafe fix, in some games all dropdowns displayed values are blank on startup for some reason.
             foreach (Dropdown dropdown in UIRoot.GetComponentsInChildren<Dropdown>(true))
                 dropdown.RefreshShownValue();
 
             Initializing = false;
+
+            if (ConfigManager.Hide_On_Startup.Value)
+                ShowMenu = false;
         }
 
         // Main UI Update loop
