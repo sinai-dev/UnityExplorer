@@ -79,11 +79,11 @@
     <!-- il2cpp nuget -->
     <ItemGroup Condition="'$(Configuration)'=='ML_Cpp_net6' or '$(Configuration)'=='ML_Cpp_net472' or '$(Configuration)'=='STANDALONE_Cpp' or '$(Configuration)'=='BIE_Cpp'">
         <PackageReference Include="Il2CppAssemblyUnhollower.BaseLib" Version="0.4.22" IncludeAssets="compile" />
-        <PackageReference Include="UniverseLib.IL2CPP" Version="1.3.11" />
+        <PackageReference Include="UniverseLib.IL2CPP" Version="1.3.12" />
     </ItemGroup>
     <!-- mono nuget -->
     <ItemGroup Condition="'$(Configuration)'=='BIE6_Mono' or '$(Configuration)'=='BIE5_Mono' or '$(Configuration)'=='ML_Mono' or '$(Configuration)'=='STANDALONE_Mono'">
-        <PackageReference Include="UniverseLib.Mono" Version="1.3.11" />
+        <PackageReference Include="UniverseLib.Mono" Version="1.3.12" />
     </ItemGroup>
 
     <!-- ~~~~~ ASSEMBLY REFERENCES ~~~~~ -->
