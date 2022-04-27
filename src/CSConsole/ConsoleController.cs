@@ -239,10 +239,13 @@ namespace UnityExplorer.CSConsole
             if (SRENotSupported)
                 return;
 
-            if (InputManager.GetKeyDown(KeyCode.Home))
-                JumpToStartOrEndOfLine(true);
-            else if (InputManager.GetKeyDown(KeyCode.End))
-                JumpToStartOrEndOfLine(false);
+            if (!InputManager.GetKey(KeyCode.LeftControl) && !InputManager.GetKey(KeyCode.RightControl))
+            {
+                if (InputManager.GetKeyDown(KeyCode.Home))
+                    JumpToStartOrEndOfLine(true);
+                else if (InputManager.GetKeyDown(KeyCode.End))
+                    JumpToStartOrEndOfLine(false);
+            }
 
             UpdateCaret(out bool caretMoved);
 
