@@ -18,6 +18,12 @@
 
 ⚡ Thunderstore releases: [BepInEx Mono](https://thunderstore.io/package/sinai-dev/UnityExplorer) | [BepInEx IL2CPP](https://gtfo.thunderstore.io/package/sinai-dev/UnityExplorer_IL2CPP) | [MelonLoader IL2CPP](https://boneworks.thunderstore.io/package/sinai-dev/UnityExplorer_IL2CPP_ML)
 
+## Release schedule
+
+Releases will be posted at most once per week, generally on weekends. 
+
+Nightly builds can be found [here](https://github.com/sinai-dev/UnityExplorer/actions).
+
 ## BepInEx
 
 | Release | IL2CPP | Mono |
