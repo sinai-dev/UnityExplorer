@@ -6,7 +6,7 @@ using UniverseLib.UI.Models;
 using UniverseLib.UI.Widgets.ButtonList;
 using UniverseLib;
 
-namespace UnityExplorer.Inspectors
+namespace UnityExplorer.UI.Widgets
 {
     public class ComponentCell : ButtonCell
     {

@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityExplorer.Inspectors;
 using UniverseLib;
 using UniverseLib.UI.Widgets.ButtonList;
 using UniverseLib.UI.Widgets.ScrollView;
 using UniverseLib.Utility;
 
-namespace UnityExplorer.Inspectors
+namespace UnityExplorer.UI.Widgets
 {
     public class ComponentList : ButtonListHandler<Component, ComponentCell>
     {

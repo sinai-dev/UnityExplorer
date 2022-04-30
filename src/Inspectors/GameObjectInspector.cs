@@ -18,11 +18,11 @@ namespace UnityExplorer.Inspectors
 {
     public class GameObjectInspector : InspectorBase
     {
-        public GameObject GOTarget => Target as GameObject;
+        public new GameObject Target => base.Target as GameObject;
 
         public GameObject Content;
 
-        public GameObjectControls GOControls;
+        public GameObjectControls Controls;
 
         public TransformTree TransformTree;
         private ScrollPool<TransformCell> transformScroll;
@@ -38,10 +38,10 @@ namespace UnityExplorer.Inspectors
         {
             base.OnBorrowedFromPool(target);
 
-            Target = target as GameObject;
+            base.Target = target as GameObject;
 
-            GOControls.UpdateGameObjectInfo(true, true);
-            GOControls.UpdateTransformControlValues(true);
+            Controls.UpdateGameObjectInfo(true, true);
+            Controls.TransformControl.UpdateTransformControlValues(true);
 
             RuntimeHelper.StartCoroutine(InitCoroutine());
         }
@@ -76,9 +76,9 @@ namespace UnityExplorer.Inspectors
 
         public void OnTransformCellClicked(GameObject newTarget)
         {
-            this.Target = newTarget;
-            GOControls.UpdateGameObjectInfo(true, true);
-            GOControls.UpdateTransformControlValues(true);
+            base.Target = newTarget;
+            Controls.UpdateGameObjectInfo(true, true);
+            Controls.TransformControl.UpdateTransformControlValues(true);
             TransformTree.RefreshData(true, false, true, false);
             UpdateComponents();
         }
@@ -90,21 +90,21 @@ namespace UnityExplorer.Inspectors
             if (!this.IsActive)
                 return;
 
-            if (Target.IsNullOrDestroyed(false))
+            if (base.Target.IsNullOrDestroyed(false))
             {
                 InspectorManager.ReleaseInspector(this);
                 return;
             }
 
-            GOControls.UpdateVectorSlider();
-            GOControls.UpdateTransformControlValues(false);
+            Controls.UpdateVectorSlider();
+            Controls.TransformControl.UpdateTransformControlValues(false);
 
             // Slow update
             if (timeOfLastUpdate.OccuredEarlierThan(1))
             {
                 timeOfLastUpdate = Time.realtimeSinceStartup;
 
-                GOControls.UpdateGameObjectInfo(false, false);
+                Controls.UpdateGameObjectInfo(false, false);
 
                 TransformTree.RefreshData(true, false, false, false);
                 UpdateComponents();
@@ -115,12 +115,12 @@ namespace UnityExplorer.Inspectors
 
         private IEnumerable<GameObject> GetTransformEntries()
         {
-            if (!GOTarget)
+            if (!Target)
                 return Enumerable.Empty<GameObject>();
 
             cachedChildren.Clear();
-            for (int i = 0; i < GOTarget.transform.childCount; i++)
-                cachedChildren.Add(GOTarget.transform.GetChild(i).gameObject);
+            for (int i = 0; i < Target.transform.childCount; i++)
+                cachedChildren.Add(Target.transform.GetChild(i).gameObject);
             return cachedChildren;
         }
 
@@ -130,11 +130,11 @@ namespace UnityExplorer.Inspectors
         private readonly List<bool> behaviourEnabledStates = new();
 
         // ComponentList.GetRootEntriesMethod
-        private List<Component> GetComponentEntries() => GOTarget ? componentEntries : Enumerable.Empty<Component>().ToList();
+        private List<Component> GetComponentEntries() => Target ? componentEntries : Enumerable.Empty<Component>().ToList();
 
         public void UpdateComponents()
         {
-            if (!GOTarget)
+            if (!Target)
             {
                 componentEntries.Clear();
                 compInstanceIDs.Clear();
@@ -146,8 +146,8 @@ namespace UnityExplorer.Inspectors
             }
 
             // Check if we actually need to refresh the component cells or not.
-            IEnumerable<Component> comps = GOTarget.GetComponents<Component>();
-            IEnumerable<Behaviour> behaviours = GOTarget.GetComponents<Behaviour>();
+            IEnumerable<Component> comps = Target.GetComponents<Component>();
+            IEnumerable<Behaviour> behaviours = Target.GetComponents<Behaviour>();
 
             bool needRefresh = false;
 
@@ -231,7 +231,7 @@ namespace UnityExplorer.Inspectors
         private void OnAddChildClicked(string input)
         {
             GameObject newObject = new(input);
-            newObject.transform.parent = GOTarget.transform;
+            newObject.transform.parent = Target.transform;
 
             TransformTree.RefreshData(true, false, true, false);
         }
@@ -242,7 +242,7 @@ namespace UnityExplorer.Inspectors
             {
                 try
                 {
-                    RuntimeHelper.AddComponent<Component>(GOTarget, type);
+                    RuntimeHelper.AddComponent<Component>(Target, type);
                     UpdateComponents();
                 }
                 catch (Exception ex)
@@ -270,7 +270,7 @@ namespace UnityExplorer.Inspectors
             UIFactory.SetLayoutGroup<VerticalLayoutGroup>(Content, spacing: 3, padTop: 2, padBottom: 2, padLeft: 2, padRight: 2);
 
             // Construct GO Controls
-            GOControls = new GameObjectControls(this);
+            Controls = new GameObjectControls(this);
 
             ConstructLists();
 
