@@ -462,9 +462,6 @@ namespace UnityExplorer.CSConsole
 
         #region Lexer Highlighting
 
-        /// <summary>
-        /// Returns true if caret is inside string or comment, false otherwise
-        /// </summary>
         private static void HighlightVisibleInput(out bool inStringOrComment)
         {
             inStringOrComment = false;
