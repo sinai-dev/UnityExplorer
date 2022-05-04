@@ -33,7 +33,10 @@ namespace UnityExplorer.UI.Widgets
         {
             base.OnBorrowed(target, targetType, inspector);
 
-            TextureRef = target.TryCast<Texture2D>();
+            if (target.TryCast<Cubemap>() is Cubemap cubemap)
+                TextureRef = TextureHelper.UnwrapCubemap(cubemap);
+            else 
+                TextureRef = target.TryCast<Texture2D>();
 
             realWidth = TextureRef.width;
             realHeight = TextureRef.height;
@@ -175,18 +178,7 @@ namespace UnityExplorer.UI.Widgets
             if (File.Exists(path))
                 File.Delete(path);
 
-            Texture2D tex = TextureRef;
-            if (!TextureHelper.IsReadable(tex))
-                tex = TextureHelper.ForceReadTexture(tex);
-
-            byte[] data = TextureHelper.EncodeToPNG(tex);
-            File.WriteAllBytes(path, data);
-
-            if (tex != TextureRef)
-            {
-                // cleanup temp texture if we had to force-read it.
-                GameObject.Destroy(tex);
-            }
+            TextureHelper.SaveTextureAsPNG(TextureRef, path);
         }
 
         public override GameObject CreateContent(GameObject uiRoot)

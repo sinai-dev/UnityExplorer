@@ -30,7 +30,7 @@ namespace UnityExplorer.UI.Widgets
 
             UnityObjectWidget widget = target switch
             {
-                Texture2D => Pool<Texture2DWidget>.Borrow(),
+                Texture2D or Cubemap => Pool<Texture2DWidget>.Borrow(),
                 AudioClip => Pool<AudioClipWidget>.Borrow(),
                 _ => Pool<UnityObjectWidget>.Borrow()
             };
