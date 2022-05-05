@@ -33,7 +33,8 @@ namespace UnityExplorer.UI.Widgets
         Text ActiveSelfText;
         Toggle IsStaticToggle;
 
-        InputFieldRef SceneInput;
+        ButtonRef SceneButton;
+
         InputFieldRef InstanceIDInput;
         InputFieldRef TagInput;
 
@@ -100,7 +101,7 @@ namespace UnityExplorer.UI.Widgets
             if (force || Target.scene.handle != lastSceneHandle)
             {
                 lastSceneHandle = Target.scene.handle;
-                SceneInput.Text = Target.scene.IsValid() ? Target.scene.name : "None (Asset/Resource)";
+                SceneButton.ButtonText.text = Target.scene.IsValid() ? Target.scene.name : "None (Asset/Resource)";
             }
 
             if (force || (!TagInput.Component.isFocused && Target.tag != lastTag))
@@ -227,6 +228,11 @@ namespace UnityExplorer.UI.Widgets
             {
                 ExplorerCore.LogWarning($"Exception setting tag! {ex.ReflectionExToString()}");
             }
+        }
+        
+        void OnSceneButtonClicked()
+        {
+            InspectorManager.Inspect(Target.scene);
         }
 
         void OnExploreButtonClicked()
@@ -383,10 +389,9 @@ namespace UnityExplorer.UI.Widgets
             Text sceneLabel = UIFactory.CreateLabel(thirdrow, "SceneLabel", "Scene:", TextAnchor.MiddleLeft, Color.grey);
             UIFactory.SetLayoutElement(sceneLabel.gameObject, minHeight: 25, minWidth: 50);
 
-            SceneInput = UIFactory.CreateInputField(thirdrow, "SceneInput", "untitled");
-            UIFactory.SetLayoutElement(SceneInput.Component.gameObject, minHeight: 25, minWidth: 120, flexibleWidth: 999);
-            SceneInput.Component.readOnly = true;
-            SceneInput.Component.textComponent.color = new Color(0.7f, 0.7f, 0.7f);
+            SceneButton = UIFactory.CreateButton(thirdrow, "SceneButton", "untitled");
+            UIFactory.SetLayoutElement(SceneButton.Component.gameObject, minHeight: 25, minWidth: 120, flexibleWidth: 999);
+            SceneButton.OnClick += OnSceneButtonClicked;
 
             // Layer
             Text layerLabel = UIFactory.CreateLabel(thirdrow, "LayerLabel", "Layer:", TextAnchor.MiddleLeft, Color.grey);
