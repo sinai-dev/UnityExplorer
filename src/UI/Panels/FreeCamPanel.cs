@@ -171,6 +171,9 @@ namespace UnityExplorer.UI.Panels
             if (!ourCamera)
                 return;
 
+            if (positionInput.Component.isFocused)
+                return;
+
             lastSetCameraPosition = ourCamera.transform.position;
             positionInput.Text = ParseUtility.ToStringForInput<Vector3>(lastSetCameraPosition);
         }
