@@ -32,12 +32,12 @@ namespace UnityExplorer.UI.Widgets
         {
             base.OnBorrowed(target, targetType, inspector);
 
-            if (target is Cubemap cubemap)
+            if (target.TryCast<Cubemap>() is Cubemap cubemap)
             {
                 texture = TextureHelper.UnwrapCubemap(cubemap);
                 shouldDestroyTexture = true;
             }
-            else if (target is Sprite sprite)
+            else if (target.TryCast<Sprite>() is Sprite sprite)
             {
                 if (sprite.packingMode == SpritePackingMode.Tight)
                     texture = sprite.texture;
@@ -47,7 +47,7 @@ namespace UnityExplorer.UI.Widgets
                     shouldDestroyTexture = true;
                 }
             }
-            else if (target is Image image)
+            else if (target.TryCast<Image>() is Image image)
             {
                 if (image.sprite.packingMode == SpritePackingMode.Tight)
                     texture = image.sprite.texture;
@@ -58,7 +58,7 @@ namespace UnityExplorer.UI.Widgets
                 }
             }
             else
-                texture = target as Texture2D;
+                texture = target.TryCast<Texture2D>();
 
             if (textureViewerRoot)
                 textureViewerRoot.transform.SetParent(inspector.UIRoot.transform);

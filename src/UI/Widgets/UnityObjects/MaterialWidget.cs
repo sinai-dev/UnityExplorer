@@ -48,23 +48,25 @@ namespace UnityExplorer.UI.Widgets
         {
             base.OnBorrowed(target, targetType, inspector);
 
-            material = target as Material;
+            material = target.TryCast<Material>();
 
             if (material.mainTexture)
                 SetActiveTexture(material.mainTexture);
 
-            string[] propNames = mi_GetTexturePropertyNames.Invoke(material, ArgumentUtility.EmptyArgs) as string[];
-            foreach (string property in propNames)
+            if (mi_GetTexturePropertyNames.Invoke(material, ArgumentUtility.EmptyArgs) is IEnumerable<string> propNames)
             {
-                if (material.GetTexture(property) is Texture texture)
+                foreach (string property in propNames)
                 {
-                    if (texture.TryCast<Texture2D>() is null && texture.TryCast<Cubemap>() is null)
-                        continue;
+                    if (material.GetTexture(property) is Texture texture)
+                    {
+                        if (texture.TryCast<Texture2D>() is null && texture.TryCast<Cubemap>() is null)
+                            continue;
 
-                    textures.Add(property, texture);
+                        textures.Add(property, texture);
 
-                    if (!activeTexture)
-                        SetActiveTexture(texture);
+                        if (!activeTexture)
+                            SetActiveTexture(texture);
+                    }
                 }
             }
 
