@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Config;
@@ -15,15 +19,27 @@ using UniverseLib.Utility;
 
 namespace UnityExplorer.UI.Widgets
 {
-    public class Texture2DWidget : UnityObjectWidget
+    public class MaterialWidget : UnityObjectWidget
     {
-        Texture2D texture;
-        bool shouldDestroyTexture;
+        static MaterialWidget()
+        {
+            mi_GetTexturePropertyNames = typeof(Material).GetMethod("GetTexturePropertyNames", ArgumentUtility.EmptyTypes);
+            MaterialWidgetSupported = mi_GetTexturePropertyNames != null;
+        }
+
+        internal static bool MaterialWidgetSupported { get; }
+        static readonly MethodInfo mi_GetTexturePropertyNames;
+
+        Material material;
+        Texture2D activeTexture;
+        readonly Dictionary<string, Texture> textures = new();
+        readonly HashSet<Texture2D> texturesToDestroy = new();
 
         bool textureViewerWanted;
         ButtonRef toggleButton;
 
         GameObject textureViewerRoot;
+        Dropdown textureDropdown;
         InputFieldRef savePathInput;
         Image image;
         LayoutElement imageLayout;
@@ -32,49 +48,60 @@ namespace UnityExplorer.UI.Widgets
         {
             base.OnBorrowed(target, targetType, inspector);
 
-            if (target is Cubemap cubemap)
+            material = target as Material;
+
+            if (material.mainTexture)
+                SetActiveTexture(material.mainTexture);
+
+            string[] propNames = mi_GetTexturePropertyNames.Invoke(material, ArgumentUtility.EmptyArgs) as string[];
+            foreach (string property in propNames)
             {
-                texture = TextureHelper.UnwrapCubemap(cubemap);
-                shouldDestroyTexture = true;
-            }
-            else if (target is Sprite sprite)
-            {
-                if (sprite.packingMode == SpritePackingMode.Tight)
-                    texture = sprite.texture;
-                else
+                if (material.GetTexture(property) is Texture texture)
                 {
-                    texture = TextureHelper.CopyTexture(sprite.texture, sprite.textureRect);
-                    shouldDestroyTexture = true;
+                    if (texture.TryCast<Texture2D>() is null && texture.TryCast<Cubemap>() is null)
+                        continue;
+
+                    textures.Add(property, texture);
+
+                    if (!activeTexture)
+                        SetActiveTexture(texture);
                 }
             }
-            else if (target is Image image)
-            {
-                if (image.sprite.packingMode == SpritePackingMode.Tight)
-                    texture = image.sprite.texture;
-                else
-                {
-                    texture = TextureHelper.CopyTexture(image.sprite.texture, image.sprite.textureRect);
-                    shouldDestroyTexture = true;
-                }
-            }
-            else
-                texture = target as Texture2D;
 
             if (textureViewerRoot)
+            {
                 textureViewerRoot.transform.SetParent(inspector.UIRoot.transform);
+                RefreshTextureDropdown();
+            }
 
             InspectorPanel.Instance.Dragger.OnFinishResize += OnInspectorFinishResize;
+        }
+
+        void SetActiveTexture(Texture texture)
+        {
+            if (texture.TryCast<Texture2D>() is Texture2D tex2D)
+                activeTexture = tex2D;
+            else if (texture.TryCast<Cubemap>() is Cubemap cubemap)
+            {
+                activeTexture = TextureHelper.UnwrapCubemap(cubemap);
+                texturesToDestroy.Add(activeTexture);
+            }
         }
 
         public override void OnReturnToPool()
         {
             InspectorPanel.Instance.Dragger.OnFinishResize -= OnInspectorFinishResize;
 
-            if (shouldDestroyTexture)
-                UnityEngine.Object.Destroy(texture);
+            if (texturesToDestroy.Any())
+            {
+                foreach (Texture2D tex in texturesToDestroy)
+                    UnityEngine.Object.Destroy(tex);
+                texturesToDestroy.Clear();
+            }
 
-            texture = null;
-            shouldDestroyTexture = false;
+            material = null;
+            activeTexture = null;
+            textures.Clear();
 
             if (image.sprite)
                 UnityEngine.Object.Destroy(image.sprite);
@@ -93,40 +120,85 @@ namespace UnityExplorer.UI.Widgets
             if (textureViewerWanted)
             {
                 // disable
+
                 textureViewerWanted = false;
                 textureViewerRoot.SetActive(false);
-                toggleButton.ButtonText.text = "View Texture";
+                toggleButton.ButtonText.text = "View Material";
 
                 owner.ContentRoot.SetActive(true);
             }
             else
             {
                 // enable
+
                 if (!image.sprite)
-                    SetupTextureViewer();
+                {
+                    RefreshTextureViewer();
+                    RefreshTextureDropdown();
+                }
 
                 SetImageSize();
 
                 textureViewerWanted = true;
                 textureViewerRoot.SetActive(true);
-                toggleButton.ButtonText.text = "Hide Texture";
+                toggleButton.ButtonText.text = "Hide Material";
 
                 owner.ContentRoot.gameObject.SetActive(false);
             }
         }
 
-        void SetupTextureViewer()
+        void RefreshTextureViewer()
         {
-            if (!this.texture)
+            if (!this.activeTexture)
+            {
+                ExplorerCore.LogWarning($"Material has no active textures!");
+                savePathInput.Text = string.Empty;
                 return;
+            }
 
-            string name = texture.name;
+            if (image.sprite)
+                UnityEngine.Object.Destroy(image.sprite);
+
+            string name = activeTexture.name;
             if (string.IsNullOrEmpty(name))
                 name = "untitled";
             savePathInput.Text = Path.Combine(ConfigManager.Default_Output_Path.Value, $"{name}.png");
 
-            Sprite sprite = TextureHelper.CreateSprite(texture);
+            Sprite sprite = TextureHelper.CreateSprite(activeTexture);
             image.sprite = sprite;
+        }
+
+        void RefreshTextureDropdown()
+        {
+            if (!textureDropdown)
+                return;
+
+            textureDropdown.options.Clear();
+
+            foreach (string key in textures.Keys)
+                textureDropdown.options.Add(new(key));
+
+            int i = 0;
+            foreach (Texture value in textures.Values)
+            {
+                if (activeTexture.ReferenceEqual(value))
+                {
+                    textureDropdown.value = i;
+                    break;
+                }
+                i++;
+            }
+
+            textureDropdown.RefreshShownValue();
+        }
+
+        void OnTextureDropdownChanged(int value)
+        {
+            Texture tex = textures.ElementAt(value).Value;
+            if (activeTexture.ReferenceEqual(tex))
+                return;
+            SetActiveTexture(tex);
+            RefreshTextureViewer();
         }
 
         void OnInspectorFinishResize()
@@ -144,6 +216,9 @@ namespace UnityExplorer.UI.Widgets
 
         IEnumerator SetImageSizeCoro()
         {
+            if (!activeTexture)
+                yield break;
+
             // let unity rebuild layout etc
             yield return null;
 
@@ -153,34 +228,34 @@ namespace UnityExplorer.UI.Widgets
             float rectHeight = imageRect.rect.height - 196;
 
             // If our image is smaller than the viewport, just use 100% scaling
-            if (texture.width < rectWidth && texture.height < rectHeight)
+            if (activeTexture.width < rectWidth && activeTexture.height < rectHeight)
             {
-                imageLayout.minWidth = texture.width;
-                imageLayout.minHeight = texture.height;
+                imageLayout.minWidth = activeTexture.width;
+                imageLayout.minHeight = activeTexture.height;
             }
             else // we will need to scale down the image to fit
             {
                 // get the ratio of our viewport dimensions to width and height
-                float viewWidthRatio = (float)((decimal)rectWidth / (decimal)texture.width);
-                float viewHeightRatio = (float)((decimal)rectHeight / (decimal)texture.height);
+                float viewWidthRatio = (float)((decimal)rectWidth / (decimal)activeTexture.width);
+                float viewHeightRatio = (float)((decimal)rectHeight / (decimal)activeTexture.height);
 
                 // if width needs to be scaled more than height
                 if (viewWidthRatio < viewHeightRatio)
                 {
-                    imageLayout.minWidth = texture.width * viewWidthRatio;
-                    imageLayout.minHeight = texture.height * viewWidthRatio;
+                    imageLayout.minWidth = activeTexture.width * viewWidthRatio;
+                    imageLayout.minHeight = activeTexture.height * viewWidthRatio;
                 }
                 else // if height needs to be scaled more than width
                 {
-                    imageLayout.minWidth = texture.width * viewHeightRatio;
-                    imageLayout.minHeight = texture.height * viewHeightRatio;
+                    imageLayout.minWidth = activeTexture.width * viewHeightRatio;
+                    imageLayout.minHeight = activeTexture.height * viewHeightRatio;
                 }
             }
         }
 
         void OnSaveTextureClicked()
         {
-            if (!texture)
+            if (!activeTexture)
             {
                 ExplorerCore.LogWarning("Texture is null, maybe it was destroyed?");
                 return;
@@ -201,7 +276,7 @@ namespace UnityExplorer.UI.Widgets
             if (File.Exists(path))
                 File.Delete(path);
 
-            TextureHelper.SaveTextureAsPNG(texture, path);
+            TextureHelper.SaveTextureAsPNG(activeTexture, path);
         }
 
         public override GameObject CreateContent(GameObject uiRoot)
@@ -210,16 +285,27 @@ namespace UnityExplorer.UI.Widgets
 
             // Button
 
-            toggleButton = UIFactory.CreateButton(UIRoot, "TextureButton", "View Texture", new Color(0.2f, 0.3f, 0.2f));
+            toggleButton = UIFactory.CreateButton(UIRoot, "MaterialButton", "View Material", new Color(0.2f, 0.3f, 0.2f));
             toggleButton.Transform.SetSiblingIndex(0);
             UIFactory.SetLayoutElement(toggleButton.Component.gameObject, minHeight: 25, minWidth: 150);
             toggleButton.OnClick += ToggleTextureViewer;
 
             // Texture viewer
 
-            textureViewerRoot = UIFactory.CreateVerticalGroup(uiRoot, "TextureViewer", false, false, true, true, 2, new Vector4(5, 5, 5, 5),
+            textureViewerRoot = UIFactory.CreateVerticalGroup(uiRoot, "MaterialViewer", false, false, true, true, 2, new Vector4(5, 5, 5, 5),
                 new Color(0.1f, 0.1f, 0.1f), childAlignment: TextAnchor.UpperLeft);
             UIFactory.SetLayoutElement(textureViewerRoot, flexibleWidth: 9999, flexibleHeight: 9999);
+
+            // Buttons holder
+
+            GameObject dropdownRow = UIFactory.CreateHorizontalGroup(textureViewerRoot, "DropdownRow", false, true, true, true, 5, new(3, 3, 3, 3));
+            UIFactory.SetLayoutElement(dropdownRow, minHeight: 30, flexibleWidth: 9999);
+
+            Text dropdownLabel = UIFactory.CreateLabel(dropdownRow, "DropdownLabel", "Texture:");
+            UIFactory.SetLayoutElement(dropdownLabel.gameObject, minWidth: 75, minHeight: 25);
+
+            GameObject dropdownObj = UIFactory.CreateDropdown(dropdownRow, "TextureDropdown", out textureDropdown, "NOT SET", 13, OnTextureDropdownChanged);
+            UIFactory.SetLayoutElement(dropdownObj, minWidth: 350, minHeight: 25);
 
             // Save helper
 

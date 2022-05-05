@@ -22,18 +22,18 @@ namespace UnityExplorer.UI.Widgets
         static Coroutine CurrentlyPlayingCoroutine;
         static readonly string zeroLengthString = GetLengthString(0f);
 
-        public AudioClip RefAudioClip;
-        private string fullLengthText;
+        public AudioClip audioClip;
+        string fullLengthText;
 
-        private ButtonRef toggleButton;
-        private bool audioPlayerWanted;
+        ButtonRef toggleButton;
+        bool audioPlayerWanted;
 
-        private GameObject audioPlayerRoot;
-        private ButtonRef playStopButton;
-        private Text progressLabel;
-        private GameObject saveObjectRow;
-        private InputFieldRef savePathInput;
-        private GameObject cantSaveRow;
+        GameObject audioPlayerRoot;
+        ButtonRef playStopButton;
+        Text progressLabel;
+        GameObject saveObjectRow;
+        InputFieldRef savePathInput;
+        GameObject cantSaveRow;
 
         public override void OnBorrowed(object target, Type targetType, ReflectionInspector inspector)
         {
@@ -42,10 +42,10 @@ namespace UnityExplorer.UI.Widgets
             this.audioPlayerRoot.transform.SetParent(inspector.UIRoot.transform);
             this.audioPlayerRoot.transform.SetSiblingIndex(inspector.UIRoot.transform.childCount - 2);
 
-            RefAudioClip = target.TryCast<AudioClip>();
-            this.fullLengthText = GetLengthString(RefAudioClip.length);
+            audioClip = target.TryCast<AudioClip>();
+            this.fullLengthText = GetLengthString(audioClip.length);
 
-            if (RefAudioClip.loadType == AudioClipLoadType.DecompressOnLoad)
+            if (audioClip.loadType == AudioClipLoadType.DecompressOnLoad)
             {
                 cantSaveRow.SetActive(false);
                 saveObjectRow.SetActive(true);
@@ -62,7 +62,7 @@ namespace UnityExplorer.UI.Widgets
 
         public override void OnReturnToPool()
         {
-            RefAudioClip = null;
+            audioClip = null;
 
             if (audioPlayerWanted)
                 ToggleAudioWidget();
@@ -95,7 +95,7 @@ namespace UnityExplorer.UI.Widgets
 
         void SetDefaultSavePath()
         {
-            string name = RefAudioClip.name;
+            string name = audioClip.name;
             if (string.IsNullOrEmpty(name))
                 name = "untitled";
             savePathInput.Text = Path.Combine(ConfigManager.Default_Output_Path.Value, $"{name}.wav");
@@ -163,7 +163,7 @@ namespace UnityExplorer.UI.Widgets
         {
             playStopButton.ButtonText.text = "Stop Clip";
             CurrentlyPlaying = this;
-            Source.clip = this.RefAudioClip;
+            Source.clip = this.audioClip;
             Source.Play();
 
             while (Source.isPlaying)
@@ -191,7 +191,7 @@ namespace UnityExplorer.UI.Widgets
 
         public void OnSaveClipClicked()
         {
-            if (!RefAudioClip)
+            if (!audioClip)
             {
                 ExplorerCore.LogWarning("AudioClip is null, maybe it was destroyed?");
                 return;
@@ -212,7 +212,7 @@ namespace UnityExplorer.UI.Widgets
             if (File.Exists(path))
                 File.Delete(path);
 
-            SavWav.Save(RefAudioClip, path);
+            SavWav.Save(audioClip, path);
         }
 
         public override GameObject CreateContent(GameObject uiRoot)

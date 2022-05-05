@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.Inspectors;
@@ -11,9 +12,9 @@ namespace UnityExplorer.UI.Widgets
 {
     public class UnityObjectWidget : IPooledObject
     {
-        public UnityEngine.Object UnityObjectRef;
-        public Component ComponentRef;
-        public ReflectionInspector ParentInspector;
+        public UnityEngine.Object unityObject;
+        public Component component;
+        public ReflectionInspector owner;
 
         protected ButtonRef gameObjectButton;
         protected InputFieldRef nameInput;
@@ -31,7 +32,13 @@ namespace UnityExplorer.UI.Widgets
             UnityObjectWidget widget = target switch
             {
                 Texture2D or Cubemap => Pool<Texture2DWidget>.Borrow(),
+                Sprite s when s.texture => Pool<Texture2DWidget>.Borrow(),
+                Image i when i.sprite?.texture => Pool<Texture2DWidget>.Borrow(),
+
+                Material when MaterialWidget.MaterialWidgetSupported => Pool<MaterialWidget>.Borrow(),
+
                 AudioClip => Pool<AudioClipWidget>.Borrow(),
+
                 _ => Pool<UnityObjectWidget>.Borrow()
             };
 
@@ -42,7 +49,7 @@ namespace UnityExplorer.UI.Widgets
 
         public virtual void OnBorrowed(object target, Type targetType, ReflectionInspector inspector)
         {
-            this.ParentInspector = inspector ?? throw new ArgumentNullException(nameof(inspector));
+            this.owner = inspector;
 
             if (!this.UIRoot)
                 CreateContent(inspector.UIRoot);
@@ -51,15 +58,15 @@ namespace UnityExplorer.UI.Widgets
 
             this.UIRoot.transform.SetSiblingIndex(inspector.UIRoot.transform.childCount - 2);
 
-            UnityObjectRef = target.TryCast<UnityEngine.Object>();
+            unityObject = target.TryCast<UnityEngine.Object>();
             UIRoot.SetActive(true);
 
-            nameInput.Text = UnityObjectRef.name;
-            instanceIdInput.Text = UnityObjectRef.GetInstanceID().ToString();
+            nameInput.Text = unityObject.name;
+            instanceIdInput.Text = unityObject.GetInstanceID().ToString();
 
             if (typeof(Component).IsAssignableFrom(targetType))
             {
-                ComponentRef = (Component)target.TryCast(typeof(Component));
+                component = (Component)target.TryCast(typeof(Component));
                 gameObjectButton.Component.gameObject.SetActive(true);
             }
             else
@@ -68,19 +75,20 @@ namespace UnityExplorer.UI.Widgets
 
         public virtual void OnReturnToPool()
         {
-            UnityObjectRef = null;
-            ComponentRef = null;
-            ParentInspector = null;
+            unityObject = null;
+            component = null;
+            owner = null;
         }
 
         // Update
 
         public virtual void Update()
         {
-            if (this.UnityObjectRef)
+            if (this.unityObject)
             {
-                nameInput.Text = UnityObjectRef.name;
-                ParentInspector.Tab.TabText.text = $"{ParentInspector.TabButtonText} \"{UnityObjectRef.name}\"";
+                nameInput.Text = unityObject.name;
+                
+                owner.Tab.TabText.text = $"{owner.TabButtonText} \"{unityObject.name}\"";
             }
         }
 
@@ -88,13 +96,13 @@ namespace UnityExplorer.UI.Widgets
 
         private void OnGameObjectButtonClicked()
         {
-            if (!ComponentRef)
+            if (!component)
             {
                 ExplorerCore.LogWarning("Component reference is null or destroyed!");
                 return;
             }
 
-            InspectorManager.Inspect(ComponentRef.gameObject);
+            InspectorManager.Inspect(component.gameObject);
         }
 
         // UI construction
