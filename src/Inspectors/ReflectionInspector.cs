@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -8,6 +9,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityExplorer.CacheObject;
 using UnityExplorer.CacheObject.Views;
+using UnityExplorer.Config;
+using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets;
 using UniverseLib;
@@ -33,7 +36,6 @@ namespace UnityExplorer.Inspectors
     public class ReflectionInspector : InspectorBase, ICellPoolDataSource<CacheMemberCell>, ICacheObjectController
     {
         public CacheObjectBase ParentCacheObject { get; set; }
-        //public Type TargetType { get; private set; }
         public bool StaticOnly { get; internal set; }
         public bool CanWrite => true;
 
@@ -72,6 +74,8 @@ namespace UnityExplorer.Inspectors
         Text nameText;
         Text assemblyText;
         Toggle autoUpdateToggle;
+
+        ButtonRef dnSpyButton;
 
         ButtonRef makeGenericButton;
         GenericConstructorWidget genericConstructor;
@@ -155,9 +159,15 @@ namespace UnityExplorer.Inspectors
 
             string asmText;
             if (TargetType.Assembly is AssemblyBuilder || string.IsNullOrEmpty(TargetType.Assembly.Location))
+            {
                 asmText = $"{TargetType.Assembly.GetName().Name} <color=grey><i>(in memory)</i></color>";
+                dnSpyButton.GameObject.SetActive(false);
+            }
             else
+            {
                 asmText = Path.GetFileName(TargetType.Assembly.Location);
+                dnSpyButton.GameObject.SetActive(true);
+            }
             assemblyText.text = $"<color=grey>Assembly:</color> {asmText}";
 
             // Unity object helper widget
@@ -350,6 +360,25 @@ namespace UnityExplorer.Inspectors
             ClipboardPanel.Copy(this.Target ?? this.TargetType);
         }
 
+        void OnDnSpyButtonClicked()
+        {
+            string path = ConfigManager.DnSpy_Path.Value;
+            if (File.Exists(path) && path.EndsWith("dnspy.exe", StringComparison.OrdinalIgnoreCase))
+            {
+                Type type = TargetType;
+                // if constructed generic type, use the generic type definition
+                if (type.IsGenericType && !type.IsGenericTypeDefinition)
+                    type = type.GetGenericTypeDefinition();
+
+                string args = $"\"{type.Assembly.Location}\" --select T:{type.FullName}";
+                Process.Start(path, args);
+            }
+            else
+            {
+                Notification.ShowMessage($"Please set a valid dnSpy path in UnityExplorer Settings.");
+            }
+        }
+
         void OnMakeGenericClicked()
         {
             ContentRoot.SetActive(false);
@@ -425,10 +454,21 @@ namespace UnityExplorer.Inspectors
             UIFactory.SetLayoutElement(copyButton.Component.gameObject, minHeight: 25, minWidth: 120, flexibleWidth: 0);
             copyButton.OnClick += OnCopyClicked;
 
-            assemblyText = UIFactory.CreateLabel(UIRoot, "AssemblyLabel", "not set", TextAnchor.MiddleLeft);
+            // Assembly row
+
+            GameObject asmRow = UIFactory.CreateHorizontalGroup(UIRoot, "AssemblyRow", false, false, true, true, 5, default, new(1, 1, 1, 0));
+            UIFactory.SetLayoutElement(asmRow, flexibleWidth: 9999, minHeight: 25);
+
+            assemblyText = UIFactory.CreateLabel(asmRow, "AssemblyLabel", "not set", TextAnchor.MiddleLeft);
             UIFactory.SetLayoutElement(assemblyText.gameObject, minHeight: 25, flexibleWidth: 9999);
 
-            ContentRoot = UIFactory.CreateVerticalGroup(UIRoot, "MemberHolder", false, false, true, true, 5, new Vector4(2, 2, 2, 2),
+            dnSpyButton = UIFactory.CreateButton(asmRow, "DnSpyButton", "View in dnSpy");
+            UIFactory.SetLayoutElement(dnSpyButton.GameObject, minWidth: 120, minHeight: 25);
+            dnSpyButton.OnClick += OnDnSpyButtonClicked;
+
+            // Content 
+
+            ContentRoot = UIFactory.CreateVerticalGroup(UIRoot, "ContentRoot", false, false, true, true, 5, new Vector4(2, 2, 2, 2),
                 new Color(0.12f, 0.12f, 0.12f));
             UIFactory.SetLayoutElement(ContentRoot, flexibleWidth: 9999, flexibleHeight: 9999);
 

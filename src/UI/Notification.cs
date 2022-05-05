@@ -39,7 +39,6 @@ namespace UnityExplorer.UI
 
         private static void ConstructUI()
         {
-
             popupLabel = UIFactory.CreateLabel(UIManager.UIRoot, "ClipboardNotification", "", TextAnchor.MiddleCenter);
             popupLabel.rectTransform.sizeDelta = new(500, 100);
             popupLabel.gameObject.AddComponent<Outline>();
