@@ -110,7 +110,7 @@ The inspector is used to see detailed information on objects of any type and man
   * Automatic updating is not enabled by default, and you must press Apply for any changes you make to take effect.
   * Press the `▼` button to expand certain values such as strings, enums, lists, dictionaries, some structs, etc
   * Use the filters at the top to quickly find the members you are looking for
-  * For `Texture2D`, `Image, `Sprite` and `Material` objects, there is a `View Texture` button at the top of the inspector which lets you view the Texture(s) and save them as a PNG file. 
+  * For `Texture2D`, `Image`, `Sprite` and `Material` objects, there is a `View Texture` button at the top of the inspector which lets you view the Texture(s) and save them as a PNG file. 
   * For `AudioClip` objects there is a `Show Player` button which opens an audio player widget. For clips which are loaded as `DecompressOnLoad`, there is also a button to save them to a `.wav` file. 
 
 ### C# Console
