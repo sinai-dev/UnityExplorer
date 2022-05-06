@@ -158,11 +158,8 @@ namespace UnityExplorer.Hooks
             }
 
             HookInstance hook = new(method);
-            if (hook.Enabled)
-            {
-                HookList.hookedSignatures.Add(sig);
-                HookList.currentHooks.Add(sig, hook);
-            }
+            HookList.hookedSignatures.Add(sig);
+            HookList.currentHooks.Add(sig, hook);
 
             AddHooksScrollPool.Refresh(true, false);
             HookList.HooksScrollPool.Refresh(true, false);

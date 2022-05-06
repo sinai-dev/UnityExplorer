@@ -147,24 +147,25 @@ namespace UnityExplorer.Hooks
             codeBuilder.Append("static void Postfix("); // System.Reflection.MethodBase __originalMethod
 
             bool isStatic = targetMethod.IsStatic;
+
+            List<string> arguments = new();
+
             if (!isStatic)
-                codeBuilder.Append($"{FullDescriptionClean(targetMethod.DeclaringType)} __instance");
+                arguments.Add($"{FullDescriptionClean(targetMethod.DeclaringType)} __instance");
 
             if (targetMethod.ReturnType != typeof(void))
-            {
-                if (!isStatic)
-                    codeBuilder.Append(", ");
-                codeBuilder.Append($"{FullDescriptionClean(targetMethod.ReturnType)} __result");
-            }
+                arguments.Add($"{FullDescriptionClean(targetMethod.ReturnType)} __result");
 
             ParameterInfo[] parameters = targetMethod.GetParameters();
 
             int paramIdx = 0;
             foreach (ParameterInfo param in parameters)
             {
-                codeBuilder.Append($", {FullDescriptionClean(param.ParameterType)} __{paramIdx}");
+                arguments.Add($"{FullDescriptionClean(param.ParameterType)} __{paramIdx}");
                 paramIdx++;
             }
+
+            codeBuilder.Append(string.Join(", ", arguments.ToArray()));
 
             codeBuilder.Append(")\n");
 
@@ -173,7 +174,7 @@ namespace UnityExplorer.Hooks
             codeBuilder.AppendLine("{");
             codeBuilder.AppendLine("    try {");
             codeBuilder.AppendLine("       StringBuilder sb = new StringBuilder();");
-            codeBuilder.AppendLine($"       sb.AppendLine(\"---- Patched called ----\");");
+            codeBuilder.AppendLine($"       sb.AppendLine(\"--------------------\");");
             codeBuilder.AppendLine($"       sb.AppendLine(\"{shortSignature}\");");
 
             if (!targetMethod.IsStatic)
