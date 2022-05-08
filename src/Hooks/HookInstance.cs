@@ -15,7 +15,6 @@ namespace UnityExplorer.Hooks
     {
         // Static 
 
-        //static readonly StringBuilder evalOutput = new();
         static readonly StringBuilder evaluatorOutput;
         static readonly ScriptEvaluator scriptEvaluator = new(new StringWriter(evaluatorOutput = new StringBuilder()));
 
@@ -31,21 +30,22 @@ namespace UnityExplorer.Hooks
         // Instance
 
         public bool Enabled;
+
         public MethodInfo TargetMethod;
         public string PatchSourceCode;
 
-        private readonly string shortSignature;
-        private PatchProcessor patchProcessor;
+        readonly string signature;
+        PatchProcessor patchProcessor;
 
-        private MethodInfo postfix;
-        private MethodInfo prefix;
-        private MethodInfo finalizer;
-        private MethodInfo transpiler;
+        MethodInfo postfix;
+        MethodInfo prefix;
+        MethodInfo finalizer;
+        MethodInfo transpiler;
 
         public HookInstance(MethodInfo targetMethod)
         {
             this.TargetMethod = targetMethod;
-            this.shortSignature = TargetMethod.FullDescription();
+            this.signature = TargetMethod.FullDescription();
 
             GenerateDefaultPatchSourceCode(targetMethod);
 
@@ -144,7 +144,7 @@ namespace UnityExplorer.Hooks
         {
             StringBuilder codeBuilder = new();
 
-            codeBuilder.Append("static void Postfix("); // System.Reflection.MethodBase __originalMethod
+            codeBuilder.Append("static void Postfix(");
 
             bool isStatic = targetMethod.IsStatic;
 
@@ -175,7 +175,7 @@ namespace UnityExplorer.Hooks
             codeBuilder.AppendLine("    try {");
             codeBuilder.AppendLine("       StringBuilder sb = new StringBuilder();");
             codeBuilder.AppendLine($"       sb.AppendLine(\"--------------------\");");
-            codeBuilder.AppendLine($"       sb.AppendLine(\"{shortSignature}\");");
+            codeBuilder.AppendLine($"       sb.AppendLine(\"{signature}\");");
 
             if (!targetMethod.IsStatic)
                 codeBuilder.AppendLine($"       sb.Append(\"- __instance: \").AppendLine(__instance.ToString());");
@@ -207,14 +207,10 @@ namespace UnityExplorer.Hooks
             codeBuilder.AppendLine($"       UnityExplorer.ExplorerCore.Log(sb.ToString());");
             codeBuilder.AppendLine("    }");
             codeBuilder.AppendLine("    catch (System.Exception ex) {");
-            codeBuilder.AppendLine($"        UnityExplorer.ExplorerCore.LogWarning($\"Exception in patch of {shortSignature}:\\n{{ex}}\");");
+            codeBuilder.AppendLine($"        UnityExplorer.ExplorerCore.LogWarning($\"Exception in patch of {signature}:\\n{{ex}}\");");
             codeBuilder.AppendLine("    }");
 
-            // End patch body
-
             codeBuilder.AppendLine("}");
-
-            //ExplorerCore.Log(codeBuilder.ToString());
 
             return PatchSourceCode = codeBuilder.ToString();
         }
