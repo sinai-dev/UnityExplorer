@@ -5,6 +5,7 @@ using UnityExplorer.Config;
 using UnityExplorer.CSConsole;
 using UnityExplorer.Inspectors;
 using UnityExplorer.UI.Panels;
+using UnityExplorer.UI.Widgets;
 using UnityExplorer.UI.Widgets.AutoComplete;
 using UniverseLib;
 using UniverseLib.Input;
@@ -54,10 +55,7 @@ namespace UnityExplorer.UI
         private static readonly Vector2 NAVBAR_DIMENSIONS = new(1020f, 35f);
 
         private static ButtonRef closeBtn;
-        private static ButtonRef pauseBtn;
-        private static InputFieldRef timeInput;
-        private static bool pauseButtonPausing;
-        private static float lastTimeScale;
+        private static TimeScaleWidget timeScaleWidget;
 
         private static int lastScreenWidth;
         private static int lastScreenHeight;
@@ -141,20 +139,7 @@ namespace UnityExplorer.UI
                 UniverseLib.Config.ConfigManager.Force_Unlock_Mouse = !UniverseLib.Config.ConfigManager.Force_Unlock_Mouse;
 
             // update the timescale value
-            if (!timeInput.Component.isFocused && lastTimeScale != Time.timeScale)
-            {
-                if (pauseButtonPausing && Time.timeScale != 0.0f)
-                {
-                    pauseButtonPausing = false;
-                    OnPauseButtonToggled();
-                }
-
-                if (!pauseButtonPausing)
-                {
-                    timeInput.Text = Time.timeScale.ToString("F2");
-                    lastTimeScale = Time.timeScale;
-                }
-            }
+            timeScaleWidget.Update();
 
             // check screen dimension change
             Display display = DisplayManager.ActiveDisplay;
@@ -232,41 +217,7 @@ namespace UnityExplorer.UI
             closeBtn.ButtonText.text = val.ToString();
         }
 
-        // Time controls
-
-        private static void OnTimeInputEndEdit(string val)
-        {
-            if (pauseButtonPausing)
-                return;
-
-            if (float.TryParse(val, out float f))
-            {
-                Time.timeScale = f;
-                lastTimeScale = f;
-            }
-
-            timeInput.Text = Time.timeScale.ToString("F2");
-        }
-
-        private static void OnPauseButtonClicked()
-        {
-            pauseButtonPausing = !pauseButtonPausing;
-
-            Time.timeScale = pauseButtonPausing ? 0f : lastTimeScale;
-
-            OnPauseButtonToggled();
-        }
-
-        private static void OnPauseButtonToggled()
-        {
-            timeInput.Component.text = Time.timeScale.ToString("F2");
-            timeInput.Component.readOnly = pauseButtonPausing;
-            timeInput.Component.textComponent.color = pauseButtonPausing ? Color.grey : Color.white;
-
-            Color color = pauseButtonPausing ? new Color(0.3f, 0.3f, 0.2f) : new Color(0.2f, 0.2f, 0.2f);
-            RuntimeHelper.SetColorBlock(pauseBtn.Component, color, color * 1.2f, color * 0.7f);
-            pauseBtn.ButtonText.text = pauseButtonPausing ? "►" : "||";
-        }
+        
 
         // UI Construction
 
@@ -298,26 +249,17 @@ namespace UnityExplorer.UI
             UIFactory.SetLayoutElement(NavbarTabButtonHolder, minHeight: 25, flexibleHeight: 999, flexibleWidth: 999);
             UIFactory.SetLayoutGroup<HorizontalLayoutGroup>(NavbarTabButtonHolder, false, true, true, true, 4, 2, 2, 2, 2);
 
-            // Time controls
+            // Time scale widget
+            timeScaleWidget = new(navbarPanel);
 
-            Text timeLabel = UIFactory.CreateLabel(navbarPanel, "TimeLabel", "Time:", TextAnchor.MiddleRight, Color.grey);
-            UIFactory.SetLayoutElement(timeLabel.gameObject, minHeight: 25, minWidth: 50);
-
-            timeInput = UIFactory.CreateInputField(navbarPanel, "TimeInput", "timeScale");
-            UIFactory.SetLayoutElement(timeInput.Component.gameObject, minHeight: 25, minWidth: 40);
-            timeInput.Component.GetOnEndEdit().AddListener(OnTimeInputEndEdit);
-
-            timeInput.Text = string.Empty;
-            timeInput.Text = Time.timeScale.ToString();
-
-            pauseBtn = UIFactory.CreateButton(navbarPanel, "PauseButton", "||", new Color(0.2f, 0.2f, 0.2f));
-            UIFactory.SetLayoutElement(pauseBtn.Component.gameObject, minHeight: 25, minWidth: 25);
-            pauseBtn.OnClick += OnPauseButtonClicked;
+            //spacer
+            GameObject spacer = UIFactory.CreateUIObject("Spacer", navbarPanel);
+            UIFactory.SetLayoutElement(spacer, minWidth: 15);
 
             // Hide menu button
 
             closeBtn = UIFactory.CreateButton(navbarPanel, "CloseButton", ConfigManager.Master_Toggle.Value.ToString());
-            UIFactory.SetLayoutElement(closeBtn.Component.gameObject, minHeight: 25, minWidth: 80, flexibleWidth: 0);
+            UIFactory.SetLayoutElement(closeBtn.Component.gameObject, minHeight: 25, minWidth: 60, flexibleWidth: 0);
             RuntimeHelper.SetColorBlock(closeBtn.Component, new Color(0.63f, 0.32f, 0.31f),
                 new Color(0.81f, 0.25f, 0.2f), new Color(0.6f, 0.18f, 0.16f));
 
