@@ -236,6 +236,8 @@ namespace UnityExplorer.Hooks
                 CurrentEditedHook = null;
                 HookManagerPanel.Instance.SetPage(HookManagerPanel.Pages.ClassMethodSelector);
             }
+
+            HookList.HooksScrollPool.Refresh(true, false);
         }
 
         // UI Construction
