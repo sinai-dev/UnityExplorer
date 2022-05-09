@@ -113,17 +113,11 @@ namespace UnityExplorer.Inspectors
 
         public bool TryUpdate()
         {
-            if (ConfigManager.World_MouseInspect_Keybind.Value != KeyCode.None)
-            {
-                if (InputManager.GetKeyDown(ConfigManager.World_MouseInspect_Keybind.Value))
-                    Instance.StartInspect(MouseInspectMode.World);
-            }
+            if (InputManager.GetKeyDown(ConfigManager.World_MouseInspect_Keybind.Value))
+                Instance.StartInspect(MouseInspectMode.World);
 
-            if (ConfigManager.World_MouseInspect_Keybind.Value != KeyCode.None)
-            {
-                if (InputManager.GetKeyDown(ConfigManager.World_MouseInspect_Keybind.Value))
-                    Instance.StartInspect(MouseInspectMode.World);
-            }
+            if (InputManager.GetKeyDown(ConfigManager.UI_MouseInspect_Keybind.Value))
+                Instance.StartInspect(MouseInspectMode.UI);
 
             if (Inspecting)
                 UpdateInspect();
