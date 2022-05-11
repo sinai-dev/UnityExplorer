@@ -36,7 +36,7 @@ namespace UnityExplorer.UI.Widgets
         {
             // Fallback in case Time.timeScale patch failed for whatever reason
             if (locked)
-                Time.timeScale = desiredTime;
+                SetTimeScale(desiredTime);
 
             if (!timeInput.Component.isFocused)
                 timeInput.Text = Time.timeScale.ToString("F2");
