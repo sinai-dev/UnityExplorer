@@ -71,6 +71,17 @@ namespace UnityExplorer.UI.Panels
 
         // Save Data
 
+        bool setDefault = false;
+
+        public override void SetDefaultSizeAndPosition()
+        {
+            if (setDefault)
+                return;
+            setDefault = true;
+
+            base.SetDefaultSizeAndPosition();
+        }
+
         public bool ApplyingSaveData { get; set; }
 
         public void SaveInternalData()
