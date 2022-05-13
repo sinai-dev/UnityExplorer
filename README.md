@@ -90,6 +90,20 @@ If these fixes do not work, please create an issue in this repo and I'll do my b
   </a>
 </p>
 
+### Inspector API
+
+If you want to inspect an object or Type from outside the C# console, use the `InspectorManager` class:
+
+**To inspect an object:**
+```csharp
+UnityExplorer.InspectorManager.Inspect(theObject);
+```
+
+**To inspect a Type:**
+```cs
+UnityExplorer.InspectorManager.Inspect(typeof(SomeClass));
+```
+
 ### Object Explorer
 
 * Use the <b>Scene Explorer</b> tab to traverse the active scenes, as well as the DontDestroyOnLoad and HideAndDontSave objects.
