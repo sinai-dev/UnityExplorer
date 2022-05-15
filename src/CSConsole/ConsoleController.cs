@@ -56,6 +56,7 @@ namespace UnityExplorer.CSConsole
             "System.Text",
             "System.Collections",
             "System.Collections.Generic",
+            "System.Reflection",
             "UnityEngine",
             "UniverseLib",
 #if CPP
