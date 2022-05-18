@@ -97,7 +97,7 @@ namespace UnityExplorer.UI.Widgets
 
             try
             {
-                MethodInfo target = AccessTools.Method(typeof(Time), nameof(Time.timeScale));
+                MethodInfo target = typeof(Time).GetProperty("timeScale").GetSetMethod();
 #if CPP
                 if (UnhollowerBaseLib.UnhollowerUtils.GetIl2CppMethodInfoPointerFieldForGeneratedMethod(target) == null)
                     return;
