@@ -1,20 +1,12 @@
 ﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-using UnityEngine;
-using UnityEngine.UI;
 using UnityExplorer.CSConsole;
 using UnityExplorer.Runtime;
 using UnityExplorer.UI.Panels;
-using UnityExplorer.UI.Widgets;
 using UnityExplorer.UI.Widgets.AutoComplete;
-using UniverseLib;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
 using UniverseLib.UI.Widgets;
 using UniverseLib.UI.Widgets.ScrollView;
-using UniverseLib.Utility;
 
 namespace UnityExplorer.Hooks
 {

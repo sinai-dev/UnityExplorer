@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using UniverseLib.UI;
+﻿using UniverseLib.UI;
 
 namespace UnityExplorer.UI
 {

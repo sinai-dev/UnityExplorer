@@ -1,12 +1,17 @@
-﻿using System;
-using System.IO;
-using UnityEngine;
+﻿global using System;
+global using System.Collections.Generic;
+global using System.IO;
+global using System.Linq;
+global using System.Reflection;
+global using UnityEngine;
+global using UnityEngine.UI;
+global using UniverseLib;
+global using UniverseLib.Utility;
 using UnityExplorer.Config;
 using UnityExplorer.ObjectExplorer;
 using UnityExplorer.Runtime;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
-using UniverseLib;
 using UniverseLib.Input;
 
 namespace UnityExplorer

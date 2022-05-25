@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 using UnityExplorer.CSConsole.Lexers;
-using UniverseLib.Utility;
 
 namespace UnityExplorer.CSConsole
 {

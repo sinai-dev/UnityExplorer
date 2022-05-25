@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections;
-using System.IO;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using System.Collections;
 using UnityExplorer.Config;
 using UnityExplorer.Inspectors;
 using UnityExplorer.UI.Panels;
-using UniverseLib;
 using UniverseLib.Runtime;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
 using UniverseLib.UI.ObjectPool;
-using UniverseLib.Utility;
 
 namespace UnityExplorer.UI.Widgets
 {

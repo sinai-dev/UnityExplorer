@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using System.Collections;
 using UnityExplorer.CacheObject.Views;
 using UnityExplorer.UI.Panels;
-using UniverseLib;
 using UniverseLib.UI;
 using UniverseLib.UI.Widgets.ScrollView;
-using UniverseLib.Utility;
 
 namespace UnityExplorer.CacheObject.IValues
 {

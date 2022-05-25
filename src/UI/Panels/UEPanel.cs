@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Globalization;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using System.Globalization;
 using UnityExplorer.Config;
-using UniverseLib;
-using UniverseLib.Input;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
 using UniverseLib.UI.Panels;

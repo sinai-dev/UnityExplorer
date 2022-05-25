@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using UnityExplorer.CacheObject.IValues;
+﻿using UnityExplorer.CacheObject.IValues;
 
 namespace UnityExplorer.CacheObject.Views
 {

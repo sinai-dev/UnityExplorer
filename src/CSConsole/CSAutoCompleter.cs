@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using UnityExplorer.CSConsole.Lexers;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets.AutoComplete;
-using UniverseLib;
 using UniverseLib.UI.Models;
-using UniverseLib.Utility;
 
 namespace UnityExplorer.CSConsole
 {

@@ -1,9 +1,4 @@
-﻿using System;
-using UnityEngine;
-using UnityEngine.UI;
-using UniverseLib;
-using UniverseLib.UI;
-using UniverseLib.Utility;
+﻿using UniverseLib.UI;
 
 namespace UnityExplorer.UI.Panels
 {

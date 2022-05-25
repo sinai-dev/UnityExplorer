@@ -2,8 +2,6 @@
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-using System;
-using System.IO;
 using UnityExplorer.Config;
 using UnityExplorer.Loader.BIE;
 #if CPP

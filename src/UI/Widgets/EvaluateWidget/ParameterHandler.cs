@@ -1,14 +1,8 @@
 ﻿using HarmonyLib;
-using System;
-using System.Reflection;
-using UnityEngine;
-using UnityEngine.UI;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets.AutoComplete;
-using UniverseLib;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
-using UniverseLib.Utility;
 
 namespace UnityExplorer.UI.Widgets
 {

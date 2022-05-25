@@ -1,5 +1,4 @@
-﻿using System;
-using UnityExplorer.Config;
+﻿using UnityExplorer.Config;
 
 namespace UnityExplorer
 {

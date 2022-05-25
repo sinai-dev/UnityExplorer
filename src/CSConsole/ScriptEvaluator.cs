@@ -1,8 +1,4 @@
 ﻿using Mono.CSharp;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
 using UnityExplorer.Config;
 
 // Thanks to ManlyMarco for this

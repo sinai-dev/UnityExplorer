@@ -1,9 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-using UniverseLib.Utility;
-
-namespace UnityExplorer.CSConsole.Lexers
+﻿namespace UnityExplorer.CSConsole.Lexers
 {
     public abstract class Lexer
     {

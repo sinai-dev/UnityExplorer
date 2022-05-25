@@ -1,9 +1,5 @@
-﻿using System;
-using UnityEngine;
-using UnityEngine.UI;
-using UniverseLib.UI;
+﻿using UniverseLib.UI;
 using UniverseLib.UI.Models;
-using UniverseLib;
 
 namespace UnityExplorer.CacheObject.IValues
 {

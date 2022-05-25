@@ -1,10 +1,7 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
-using UnityExplorer.Inspectors.MouseInspectors;
+﻿using UnityExplorer.Inspectors.MouseInspectors;
 using UniverseLib.UI;
 using UniverseLib.UI.Widgets.ButtonList;
 using UniverseLib.UI.Widgets.ScrollView;
-using UniverseLib.Utility;
 
 namespace UnityExplorer.UI.Panels
 {

@@ -1,15 +1,8 @@
 ﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
-using UnityEngine;
-using UnityEngine.UI;
 using UnityExplorer.UI.Panels;
-using UniverseLib;
 using UniverseLib.UI;
-using UniverseLib.UI.Models;
 using UniverseLib.UI.Widgets.ScrollView;
-using UniverseLib.Utility;
 
 namespace UnityExplorer.Hooks
 {

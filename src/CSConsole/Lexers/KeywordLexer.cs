@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text;
-using UnityEngine;
+﻿using System.Text;
 
 namespace UnityExplorer.CSConsole.Lexers
 {

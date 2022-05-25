@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using UniverseLib.Utility;
-
-namespace UnityExplorer.Inspectors.MouseInspectors
+﻿namespace UnityExplorer.Inspectors.MouseInspectors
 {
     public class WorldInspector : MouseInspectorBase
     {

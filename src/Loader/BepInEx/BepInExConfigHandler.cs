@@ -1,7 +1,5 @@
 ﻿#if BIE
 using BepInEx.Configuration;
-using System;
-using System.Collections.Generic;
 using UnityExplorer.Config;
 
 namespace UnityExplorer.Loader.BIE

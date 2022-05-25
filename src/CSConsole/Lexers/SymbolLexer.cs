@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-
-namespace UnityExplorer.CSConsole.Lexers
+﻿namespace UnityExplorer.CSConsole.Lexers
 {
     public class SymbolLexer : Lexer
     {

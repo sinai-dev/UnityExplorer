@@ -1,13 +1,10 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using UnityExplorer.Config;
+﻿using UnityExplorer.Config;
 using UnityExplorer.Inspectors.MouseInspectors;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
 using UniverseLib.Input;
 using UniverseLib.UI;
 using UniverseLib.UI.Panels;
-using UniverseLib.Utility;
 
 namespace UnityExplorer.Inspectors
 {

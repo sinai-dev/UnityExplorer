@@ -1,24 +1,16 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.Diagnostics;
-using System.IO;
-using System.Reflection;
 using System.Reflection.Emit;
-using UnityEngine;
-using UnityEngine.UI;
 using UnityExplorer.CacheObject;
 using UnityExplorer.CacheObject.Views;
 using UnityExplorer.Config;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets;
-using UniverseLib;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
 using UniverseLib.UI.ObjectPool;
 using UniverseLib.UI.Widgets.ScrollView;
-using UniverseLib.Utility;
 
 namespace UnityExplorer.Inspectors
 {

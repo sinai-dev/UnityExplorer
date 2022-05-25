@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace UnityExplorer.CSConsole.Lexers
+﻿namespace UnityExplorer.CSConsole.Lexers
 {
     public class CommentLexer : Lexer
     {

@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityExplorer.UI.Widgets.AutoComplete;
-using UniverseLib.Input;
-using UniverseLib.UI;
-using UniverseLib.UI.Panels;
-using UniverseLib.Utility;
+﻿using UniverseLib.UI.Panels;
 
 namespace UnityExplorer.UI.Panels
 {

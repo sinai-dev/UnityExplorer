@@ -1,17 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityExplorer.UI.Panels;
-using UnityExplorer.UI.Widgets.AutoComplete;
-using UniverseLib;
+﻿using UnityExplorer.UI.Widgets.AutoComplete;
 using UniverseLib.Input;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
 using UniverseLib.UI.Widgets.ButtonList;
 using UniverseLib.UI.Widgets.ScrollView;
-using UniverseLib.Utility;
 
 namespace UnityExplorer.UI.Panels
 {

@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using System.Collections.Specialized;
 using UnityExplorer.UI.Panels;
 using UnityExplorer.UI.Widgets.AutoComplete;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
-using UniverseLib.Utility;
 
 namespace UnityExplorer.CacheObject.IValues
 {

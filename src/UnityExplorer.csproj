@@ -10,7 +10,7 @@
         <DebugSymbols>false</DebugSymbols>
         <DebugType>none</DebugType>
         <RootNamespace>UnityExplorer</RootNamespace>
-        <LangVersion>9.0</LangVersion>
+        <LangVersion>10.0</LangVersion>
         <Configurations>BIE_Cpp;BIE5_Mono;BIE6_Mono;ML_Cpp_net6;ML_Mono;STANDALONE_Mono;STANDALONE_Cpp;ML_Cpp_net472</Configurations>
     </PropertyGroup>
     <!-- ~~~~~ CONFIGURATIONS ~~~~~ -->

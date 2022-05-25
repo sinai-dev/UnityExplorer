@@ -1,12 +1,7 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
-using UniverseLib;
 
 namespace UnityExplorer.Inspectors.MouseInspectors
 {

@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace UnityExplorer.Inspectors.MouseInspectors
+﻿namespace UnityExplorer.Inspectors.MouseInspectors
 {
     public abstract class MouseInspectorBase
     {

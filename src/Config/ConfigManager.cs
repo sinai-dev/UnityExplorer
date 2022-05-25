@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using UnityEngine;
-using UnityExplorer.UI;
+﻿using UnityExplorer.UI;
 
 namespace UnityExplorer.Config
 {

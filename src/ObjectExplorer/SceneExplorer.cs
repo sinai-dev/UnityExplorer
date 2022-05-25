@@ -1,18 +1,9 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using UnityEngine;
+﻿using System.Collections;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
-using UnityExplorer.UI.Widgets;
-using UniverseLib;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
-using UniverseLib.Utility;
 using UniverseLib.UI.Widgets;
 
 namespace UnityExplorer.ObjectExplorer

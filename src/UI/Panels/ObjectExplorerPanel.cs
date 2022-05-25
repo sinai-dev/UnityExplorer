@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-using UnityExplorer.ObjectExplorer;
-using UniverseLib;
+﻿using UnityExplorer.ObjectExplorer;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
 

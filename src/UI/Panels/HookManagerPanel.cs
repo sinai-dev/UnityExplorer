@@ -1,14 +1,6 @@
-﻿using System;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityExplorer.Hooks;
+﻿using UnityExplorer.Hooks;
 using UnityExplorer.UI.Widgets;
-using UnityExplorer.UI.Widgets.AutoComplete;
-using UniverseLib;
 using UniverseLib.UI;
-using UniverseLib.UI.Models;
-using UniverseLib.UI.Widgets;
-using UniverseLib.UI.Widgets.ScrollView;
 
 namespace UnityExplorer.UI.Panels
 {

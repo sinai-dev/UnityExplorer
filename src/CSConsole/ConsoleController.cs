@@ -1,23 +1,10 @@
-﻿using HarmonyLib;
-using Mono.CSharp;
-using System;
+﻿using Mono.CSharp;
 using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Text;
-using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 using UnityExplorer.UI;
 using UnityExplorer.UI.Panels;
-using UnityExplorer.UI.Widgets.AutoComplete;
-using UniverseLib;
 using UniverseLib.Input;
-using UniverseLib.Runtime;
 using UniverseLib.UI.Models;
-using UniverseLib.Utility;
 
 namespace UnityExplorer.CSConsole
 {

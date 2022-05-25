@@ -1,8 +1,4 @@
-﻿using System;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityExplorer.UI.Panels;
-using UniverseLib;
+﻿using UnityExplorer.UI.Panels;
 using UniverseLib.UI.ObjectPool;
 
 namespace UnityExplorer.Inspectors

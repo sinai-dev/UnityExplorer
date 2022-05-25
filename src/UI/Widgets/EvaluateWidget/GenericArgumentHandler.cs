@@ -1,7 +1,4 @@
-﻿using System;
-using System.Text;
-using UniverseLib;
-using UniverseLib.Utility;
+﻿using System.Text;
 
 namespace UnityExplorer.UI.Widgets
 {

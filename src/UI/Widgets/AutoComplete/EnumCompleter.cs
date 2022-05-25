@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
+﻿using System.Collections.Specialized;
 using UnityExplorer.CacheObject.IValues;
 using UnityExplorer.UI.Panels;
 using UniverseLib.UI.Models;
-using UniverseLib.Utility;
 
 namespace UnityExplorer.UI.Widgets.AutoComplete
 {

@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityExplorer.Inspectors;
-using UniverseLib;
+﻿using UnityExplorer.Inspectors;
 using UniverseLib.UI.Widgets.ButtonList;
 using UniverseLib.UI.Widgets.ScrollView;
-using UniverseLib.Utility;
 
 namespace UnityExplorer.UI.Widgets
 {

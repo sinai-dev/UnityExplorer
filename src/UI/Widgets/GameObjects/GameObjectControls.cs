@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using UnityExplorer.Inspectors;
+﻿using UnityExplorer.Inspectors;
 
 namespace UnityExplorer.UI.Widgets
 {
