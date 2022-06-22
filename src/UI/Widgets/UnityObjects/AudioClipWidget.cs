@@ -5,6 +5,15 @@ using UnityExplorer.Inspectors;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
 using UniverseLib.UI.ObjectPool;
+#if CPP
+#if INTEROP
+using Il2CppInterop.Runtime;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
+#else
+using UnhollowerRuntimeLib;
+using UnhollowerBaseLib;
+#endif
+#endif
 
 namespace UnityExplorer.UI.Widgets
 {
@@ -146,7 +155,7 @@ namespace UnityExplorer.UI.Widgets
             AudioPlayerObject.hideFlags = HideFlags.HideAndDontSave;
             AudioPlayerObject.transform.position = new(int.MinValue, int.MinValue); // move it as far away as possible
 #if CPP
-            Source = AudioPlayerObject.AddComponent(UnhollowerRuntimeLib.Il2CppType.Of<AudioSource>()).TryCast<AudioSource>();
+            Source = AudioPlayerObject.AddComponent(Il2CppType.Of<AudioSource>()).TryCast<AudioSource>();
 #else
             Source = AudioPlayerObject.AddComponent<AudioSource>();
 #endif
@@ -265,7 +274,7 @@ namespace UnityExplorer.UI.Widgets
         }
     }
 
-    #region SavWav
+#region SavWav
 
     //	Copyright (c) 2012 Calvin Rien
     //        http://the.darktable.com
@@ -320,7 +329,7 @@ namespace UnityExplorer.UI.Widgets
         static void ConvertAndWrite(FileStream fileStream, AudioClip clip)
         {
 #if CPP
-            UnhollowerBaseLib.Il2CppStructArray<float> samples = new float[clip.samples * clip.channels];
+            Il2CppStructArray<float> samples = new float[clip.samples * clip.channels];
             AudioClip.GetData(clip, samples, clip.samples, 0);
 #else
             float[] samples = new float[clip.samples * clip.channels];
@@ -396,6 +405,6 @@ namespace UnityExplorer.UI.Widgets
             stream.Seek(0, SeekOrigin.Begin);
         }
 
-        #endregion
+#endregion
     }
 }

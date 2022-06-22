@@ -6,7 +6,6 @@ using UnityExplorer.Config;
 using UnityExplorer.Loader.BIE;
 #if CPP
 using BepInEx.IL2CPP;
-using UnhollowerRuntimeLib;
 #endif
 
 namespace UnityExplorer
@@ -29,8 +28,14 @@ namespace UnityExplorer
 #else
             => Log;
 #endif
-
-        public string UnhollowedModulesFolder => Path.Combine(Paths.BepInExRootPath, "unhollowed");
+        const string IL2CPP_LIBS_FOLDER =
+#if UNHOLLOWER
+            "unhollowed"
+#else
+            "interop"
+#endif
+            ;
+        public string UnhollowedModulesFolder => Path.Combine(Paths.BepInExRootPath, IL2CPP_LIBS_FOLDER);
 
         public ConfigHandler ConfigHandler => _configHandler;
         private BepInExConfigHandler _configHandler;

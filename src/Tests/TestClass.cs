@@ -1,7 +1,12 @@
 ﻿using System.Collections;
 #if CPP
+#if INTEROP
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using Il2CppInterop.Runtime;
+#else
 using UnhollowerRuntimeLib;
 using UnhollowerBaseLib;
+#endif
 #endif
 
 namespace UnityExplorer.Tests
@@ -253,7 +258,7 @@ namespace UnityExplorer.Tests
             }
 
             ExplorerCore.Log($"IL2CPP 9: Il2Cpp struct array of ints");
-            IL2CPP_structArray = new UnhollowerBaseLib.Il2CppStructArray<int>(5);
+            IL2CPP_structArray = new Il2CppStructArray<int>(5);
             IL2CPP_structArray[0] = 0;
             IL2CPP_structArray[1] = 1;
             IL2CPP_structArray[2] = 2;
@@ -261,7 +266,7 @@ namespace UnityExplorer.Tests
             IL2CPP_structArray[4] = 4;
 
             ExplorerCore.Log($"IL2CPP 10: Il2Cpp reference array of boxed objects");
-            IL2CPP_ReferenceArray = new UnhollowerBaseLib.Il2CppReferenceArray<Il2CppSystem.Object>(3);
+            IL2CPP_ReferenceArray = new Il2CppReferenceArray<Il2CppSystem.Object>(3);
             IL2CPP_ReferenceArray[0] = new Il2CppSystem.Int32 { m_value = 5 }.BoxIl2CppObject();
             IL2CPP_ReferenceArray[1] = null;
             IL2CPP_ReferenceArray[2] = (Il2CppSystem.String)"whats up";

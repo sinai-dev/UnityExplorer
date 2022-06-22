@@ -11,21 +11,21 @@
         <DebugType>none</DebugType>
         <RootNamespace>UnityExplorer</RootNamespace>
         <LangVersion>10.0</LangVersion>
-        <Configurations>BIE_Cpp;BIE5_Mono;BIE6_Mono;ML_Cpp_net6;ML_Mono;STANDALONE_Mono;STANDALONE_Cpp;ML_Cpp_net472</Configurations>
+        <Configurations>BIE_Cpp;BIE_Cpp_CoreCLR;BIE5_Mono;BIE6_Mono;ML_Cpp_net6;ML_Cpp_net472;ML_Mono;STANDALONE_Mono;STANDALONE_Cpp</Configurations>
     </PropertyGroup>
     <!-- ~~~~~ CONFIGURATIONS ~~~~~ -->
     <!-- ML IL2CPP net6 -->
     <PropertyGroup Condition="'$(Configuration)'=='ML_Cpp_net6'">
         <TargetFramework>net6</TargetFramework>
         <OutputPath>..\Release\UnityExplorer.MelonLoader.IL2CPP.net6preview\</OutputPath>
-        <DefineConstants>CPP,ML</DefineConstants>
+        <DefineConstants>CPP,ML,UNHOLLOWER</DefineConstants>
 		<AssemblyName>UnityExplorer.ML.IL2CPP.net6preview</AssemblyName>
     </PropertyGroup>
     <!-- ML IL2CPP net472 (TEMP) -->
     <PropertyGroup Condition="'$(Configuration)'=='ML_Cpp_net472'">
         <TargetFramework>net472</TargetFramework>
         <OutputPath>..\Release\UnityExplorer.MelonLoader.IL2CPP\</OutputPath>
-        <DefineConstants>CPP,ML</DefineConstants>
+        <DefineConstants>CPP,ML,UNHOLLOWER</DefineConstants>
         <AssemblyName>UnityExplorer.ML.IL2CPP</AssemblyName>
     </PropertyGroup>
     <!-- ML MONO -->
@@ -39,8 +39,15 @@
     <PropertyGroup Condition="'$(Configuration)'=='BIE_Cpp'">
         <TargetFramework>net472</TargetFramework>
         <OutputPath>..\Release\UnityExplorer.BepInEx.IL2CPP\</OutputPath>
-        <DefineConstants>CPP,BIE,BIE6</DefineConstants>
+        <DefineConstants>CPP,BIE,BIE6,UNHOLLOWER</DefineConstants>
         <AssemblyName>UnityExplorer.BIE.IL2CPP</AssemblyName>
+    </PropertyGroup>
+    <!-- BEPINEX IL2CPP CoreCLR -->
+    <PropertyGroup Condition="'$(Configuration)'=='BIE_Cpp_CoreCLR'">
+        <TargetFramework>net6</TargetFramework>
+        <OutputPath>..\Release\UnityExplorer.BepInEx.IL2CPP.CoreCLR\</OutputPath>
+        <DefineConstants>CPP,BIE,BIE6,INTEROP</DefineConstants>
+        <AssemblyName>UnityExplorer.BIE.IL2CPP.CoreCLR</AssemblyName>
     </PropertyGroup>
     <!-- BEPINEX 6 MONO -->
     <PropertyGroup Condition="'$(Configuration)'=='BIE6_Mono'">
@@ -56,18 +63,18 @@
         <DefineConstants>MONO,BIE,BIE5</DefineConstants>
         <AssemblyName>UnityExplorer.BIE5.Mono</AssemblyName>
     </PropertyGroup>
-    <!-- STANDALONE IL2CPP -->
+    <!-- STANDALONE Mono -->
     <PropertyGroup Condition="'$(Configuration)'=='STANDALONE_Mono'">
         <TargetFramework>net35</TargetFramework>
         <OutputPath>..\Release\UnityExplorer.Standalone.Mono\</OutputPath>
         <DefineConstants>MONO,STANDALONE</DefineConstants>
         <AssemblyName>UnityExplorer.STANDALONE.Mono</AssemblyName>
     </PropertyGroup>
-    <!-- STANDALONE MONO -->
+    <!-- STANDALONE Il2Cpp -->
     <PropertyGroup Condition="'$(Configuration)'=='STANDALONE_Cpp'">
         <TargetFramework>net472</TargetFramework>
         <OutputPath>..\Release\UnityExplorer.Standalone.IL2CPP\</OutputPath>
-        <DefineConstants>CPP,STANDALONE</DefineConstants>
+        <DefineConstants>CPP,STANDALONE,UNHOLLOWER</DefineConstants>
         <AssemblyName>UnityExplorer.STANDALONE.IL2CPP</AssemblyName>
     </PropertyGroup>
 
@@ -79,11 +86,16 @@
     <!-- il2cpp nuget -->
     <ItemGroup Condition="'$(Configuration)'=='ML_Cpp_net6' or '$(Configuration)'=='ML_Cpp_net472' or '$(Configuration)'=='STANDALONE_Cpp' or '$(Configuration)'=='BIE_Cpp'">
         <PackageReference Include="Il2CppAssemblyUnhollower.BaseLib" Version="0.4.22" />
-        <PackageReference Include="UniverseLib.IL2CPP" Version="1.4.3" />
+        <PackageReference Include="UniverseLib.IL2CPP.Unhollower" Version="1.5.1" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(Configuration)'=='BIE_Cpp_CoreCLR'">
+        <PackageReference Include="Il2CppInterop.Common" Version="1.0.0" />
+        <PackageReference Include="Il2CppInterop.Runtime" Version="1.0.0" />
+        <PackageReference Include="UniverseLib.IL2CPP.Interop" Version="1.5.1" />
     </ItemGroup>
     <!-- mono nuget -->
     <ItemGroup Condition="'$(Configuration)'=='BIE6_Mono' or '$(Configuration)'=='BIE5_Mono' or '$(Configuration)'=='ML_Mono' or '$(Configuration)'=='STANDALONE_Mono'">
-        <PackageReference Include="UniverseLib.Mono" Version="1.4.3" />
+        <PackageReference Include="UniverseLib.Mono" Version="1.5.1" />
     </ItemGroup>
 
     <!-- ~~~~~ ASSEMBLY REFERENCES ~~~~~ -->
@@ -134,7 +146,7 @@
         </Reference>
     </ItemGroup>
     <!-- BepInEx Il2Cpp -->
-    <ItemGroup Condition="'$(Configuration)'=='BIE_Cpp'">
+    <ItemGroup Condition="'$(Configuration)'=='BIE_Cpp' or '$(Configuration)'=='BIE_Cpp_CoreCLR'">
         <Reference Include="BepInEx">
             <HintPath>..\lib\net472\BepInEx.Core.dll</HintPath>
             <Private>False</Private>
@@ -155,7 +167,7 @@
             <Private>False</Private>
         </Reference>
     </ItemGroup>
-    <!-- Il2Cpp -->
+    <!-- Il2Cpp Unhollower -->
     <ItemGroup Condition="'$(Configuration)'=='ML_Cpp_net6' or '$(Configuration)'=='ML_Cpp_net472' or '$(Configuration)'=='STANDALONE_Cpp' or '$(Configuration)'=='BIE_Cpp'">
         <Reference Include="Il2Cppmscorlib">
             <HintPath>..\lib\unhollowed\Il2Cppmscorlib.dll</HintPath>
@@ -195,6 +207,49 @@
         </Reference>
         <Reference Include="UnityEngine.IMGUIModule">
             <HintPath>..\lib\unhollowed\UnityEngine.IMGUIModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+    </ItemGroup>
+    <!-- Il2Cpp Interop -->
+    <ItemGroup Condition="'$(Configuration)'=='BIE_Cpp_CoreCLR'">
+        <Reference Include="Il2Cppmscorlib">
+            <HintPath>..\lib\interop\Il2Cppmscorlib.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Il2CppSystem.Core">
+            <HintPath>..\lib\interop\Il2CppSystem.Core.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine">
+            <HintPath>..\lib\interop\UnityEngine.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.AudioModule">
+            <HintPath>..\lib\interop\UnityEngine.AudioModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+            <HintPath>..\lib\interop\UnityEngine.CoreModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.PhysicsModule">
+            <HintPath>..\lib\interop\UnityEngine.PhysicsModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.TextRenderingModule">
+            <HintPath>..\lib\interop\UnityEngine.TextRenderingModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+            <HintPath>..\lib\interop\UnityEngine.UI.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UIModule">
+            <HintPath>..\lib\interop\UnityEngine.UIModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.IMGUIModule">
+            <HintPath>..\lib\interop\UnityEngine.IMGUIModule.dll</HintPath>
             <Private>False</Private>
         </Reference>
     </ItemGroup>

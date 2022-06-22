@@ -1,6 +1,10 @@
 ﻿using UnityExplorer.UI;
 #if CPP
+#if UNHOLLOWER
 using UnhollowerRuntimeLib;
+#else
+using Il2CppInterop.Runtime.Injection;
+#endif
 #endif
 
 namespace UnityExplorer
