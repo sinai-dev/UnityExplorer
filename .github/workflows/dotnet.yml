@@ -35,6 +35,12 @@ jobs:
         with:
           name: UnityExplorer.BepInEx.IL2CPP.zip
           path: ./Release/UnityExplorer.BepInEx.IL2CPP/
+      
+      # BepInEx IL2CPP CoreCLR
+      - uses: actions/upload-artifact@v2
+        with:
+          name: UnityExplorer.BepInEx.IL2CPP.CoreCLR.zip
+          path: ./Release/UnityExplorer.BepInEx.IL2CPP.CoreCLR/
      
       # BepInEx 5 Mono
       - uses: actions/upload-artifact@v2
