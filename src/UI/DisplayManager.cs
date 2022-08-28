@@ -12,7 +12,7 @@ namespace UnityExplorer.UI
         public static int Width => ActiveDisplay.renderingWidth;
         public static int Height => ActiveDisplay.renderingHeight;
 
-        public static Vector3 MousePosition => Application.isEditor
+        public static Vector3 MousePosition => Application.isEditor || Application.platform == RuntimePlatform.LinuxPlayer
             ? InputManager.MousePosition
             : Display.RelativeMouseAt(InputManager.MousePosition);
 
