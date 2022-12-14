@@ -95,11 +95,16 @@
         <PackageReference Include="Il2CppAssemblyUnhollower.BaseLib" Version="0.4.22" />
         <PackageReference Include="UniverseLib.IL2CPP.Unhollower" Version="1.5.1" />
     </ItemGroup>
-    <ItemGroup Condition="'$(Configuration)'=='BIE_Cpp_CoreCLR' or '$(Configuration)'=='ML_Cpp_net6_interop'">
+    <ItemGroup Condition="'$(Configuration)'=='BIE_Cpp_CoreCLR'">
         <PackageReference Include="Il2CppInterop.Common" Version="1.0.0" />
         <PackageReference Include="Il2CppInterop.Runtime" Version="1.0.0" />
         <PackageReference Include="UniverseLib.IL2CPP.Interop" Version="1.5.1" />
     </ItemGroup>
+	<ItemGroup Condition="'$(Configuration)'=='ML_Cpp_net6_interop'">
+		<PackageReference Include="Il2CppInterop.Common" Version="1.0.0" />
+		<PackageReference Include="Il2CppInterop.Runtime" Version="1.0.0" />
+		<PackageReference Include="UniverseLib.IL2CPP.Interop.ML" Version="1.5.1" />
+	</ItemGroup>
     <!-- mono nuget -->
     <ItemGroup Condition="'$(Configuration)'=='BIE6_Mono' or '$(Configuration)'=='BIE5_Mono' or '$(Configuration)'=='ML_Mono' or '$(Configuration)'=='STANDALONE_Mono'">
         <PackageReference Include="UniverseLib.Mono" Version="1.5.1" />

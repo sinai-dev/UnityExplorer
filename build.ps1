@@ -33,7 +33,7 @@ Remove-Item $Path/Microsoft.Extensions.Logging.Abstractions.dll
 New-Item -Path "$Path" -Name "Mods" -ItemType "directory" -Force
 Move-Item -Path $Path/UnityExplorer.ML.IL2CPP.net6preview.interop.dll -Destination $Path/Mods -Force
 New-Item -Path "$Path" -Name "UserLibs" -ItemType "directory" -Force
-Move-Item -Path $Path/UniverseLib.IL2CPP.Interop.dll -Destination $Path/UserLibs -Force
+Move-Item -Path $Path/UniverseLib.IL2CPP.Interop.ML.dll -Destination $Path/UserLibs -Force
 # (create zip archive)
 Remove-Item $Path/../UnityExplorer.MelonLoader.IL2CPP.net6preview.interop.zip -ErrorAction SilentlyContinue
 7z a $Path/../UnityExplorer.MelonLoader.IL2CPP.net6preview.interop.zip .\$Path\*
