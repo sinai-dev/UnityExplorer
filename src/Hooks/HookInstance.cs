@@ -46,6 +46,19 @@ namespace UnityExplorer.Hooks
             if (CompileAndGenerateProcessor(PatchSourceCode))
                 Patch();
         }
+        
+        public HookInstance(MethodInfo targetMethod, string code)
+        {
+            this.TargetMethod = targetMethod;
+            this.signature = TargetMethod.FullDescription();
+
+            PatchSourceCode = code;
+
+            if (CompileAndGenerateProcessor(PatchSourceCode))
+            {
+                Patch();
+            }
+        }
 
         // Evaluator.source_file 
         private static readonly FieldInfo fi_sourceFile = AccessTools.Field(typeof(Evaluator), "source_file");
