@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+using System.Linq;
+using System.Xml.Serialization;
+using HarmonyLib;
 using UnityExplorer.CSConsole;
 using UnityExplorer.Runtime;
 using UnityExplorer.UI.Panels;
@@ -225,11 +227,96 @@ namespace UnityExplorer.Hooks
                     CurrentEditedHook.Patch();
 
                 CurrentEditedHook.PatchSourceCode = input;
+                SaveHooks(CurrentEditedHook);
                 CurrentEditedHook = null;
                 HookManagerPanel.Instance.SetPage(HookManagerPanel.Pages.ClassMethodSelector);
             }
 
             HookList.HooksScrollPool.Refresh(true, false);
+        }
+        // Persistent hooks
+        public struct HookData
+        {
+            public string Description;
+            public string SourceCode;
+            public string ReflectedType;
+        }
+        
+        public static void SaveHooks(HookInstance hook)
+        {
+            HookData data = new HookData();
+            data.Description = hook.TargetMethod.FullDescription();
+            data.ReflectedType = hook.TargetMethod.ReflectedType.ToString();
+            data.SourceCode = hook.PatchSourceCode;
+            string filename = data.Description.GetHashCode().ToString("X8") + ".txt";
+            string folderpath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "UnityExplorerHarmonyHooks");
+            Directory.CreateDirectory(folderpath);
+            string fpath = Path.Combine(folderpath, filename);
+            XmlSerializer xs = new XmlSerializer(typeof(HookData));
+            TextWriter tw = new StreamWriter(fpath);
+            xs.Serialize(tw, data);
+            tw.Close();
+            ExplorerCore.Log("Save hook: " + data.Description + " to: " + filename);
+        }
+
+        public void LoadSavedHooks()
+        {
+            string folderpath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "UnityExplorerHarmonyHooks");
+            Directory.CreateDirectory(folderpath);
+            ExplorerCore.Log("Hooks path: " + folderpath);
+            XmlSerializer xs = new XmlSerializer(typeof(HookData));
+            xs.UnknownNode += new XmlNodeEventHandler(xs_UnknownNode);
+            xs.UnknownAttribute += new XmlAttributeEventHandler(xs_UnknownAttribute);
+            DirectoryInfo di = new DirectoryInfo(folderpath);
+            FileInfo[] fs = di.GetFiles("*.txt");
+            foreach (FileInfo fi in fs)
+            {
+                ExplorerCore.Log("Load: " + fi.Name);
+                try
+                {
+                    FileStream fileStream = new FileStream(fi.FullName, FileMode.Open, FileAccess.Read);
+                    HookData hookData;
+                    hookData = (HookData)xs.Deserialize(fileStream);
+                    ExplorerCore.Log("+> Hook: " + hookData.Description);
+                    Type type = ReflectionUtility.GetTypeByName(hookData.ReflectedType);
+                    IEnumerable<MethodInfo> ms = type.GetMethods().Where(
+                        mi => mi.FullDescription() == hookData.Description
+                        )
+                     );
+                    
+                    MethodInfo method = ms.First();
+                    HookManagerPanel.Instance.SetPage(HookManagerPanel.Pages.ClassMethodSelector);
+
+                    if (HookList.hookedSignatures.Contains(hookData.Description))
+                    {
+                        ExplorerCore.LogWarning($"Method is already hooked!");
+                        return;
+                    }
+
+                    HookInstance hook = new(method, hookData.SourceCode);
+                    HookList.hookedSignatures.Add(hookData.Description);
+                    HookList.currentHooks.Add(hookData.Description, hook);
+
+                    AddHooksScrollPool.Refresh(true, false);
+                    HookList.HooksScrollPool.Refresh(true, false);
+                }
+                catch (Exception ex)
+                {
+                    ExplorerCore.LogError("Exception when load: " + fi.Name + " ---------\n" + ex.Message);
+                }
+            }
+        }
+
+
+        private void xs_UnknownNode(object sender, XmlNodeEventArgs e)
+        {
+            ExplorerCore.LogWarning("Unknown Node in hooks:" + e.Name + "\t" + e.Text);
+        }
+
+        private void xs_UnknownAttribute(object sender, XmlAttributeEventArgs e)
+        {
+            System.Xml.XmlAttribute attr = e.Attr;
+            ExplorerCore.LogWarning("Unknown attribute in hooks:" + attr.Name + "='" + attr.Value + "'");
         }
 
         // UI Construction
