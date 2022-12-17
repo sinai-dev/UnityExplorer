@@ -97,6 +97,8 @@ namespace UnityExplorer.UI.Panels
 
             genericArgsHandler.ConstructUI(ContentRoot);
             genericArgsHandler.UIRoot.SetActive(false);
+            
+            hookCreator.LoadSavedHooks();
         }
     }
 }
