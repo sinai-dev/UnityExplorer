@@ -281,7 +281,6 @@ namespace UnityExplorer.Hooks
                     Type type = ReflectionUtility.GetTypeByName(hookData.ReflectedType);
                     IEnumerable<MethodInfo> ms = type.GetMethods().Where(
                         mi => mi.FullDescription() == hookData.Description
-                        )
                      );
                     
                     MethodInfo method = ms.First();
