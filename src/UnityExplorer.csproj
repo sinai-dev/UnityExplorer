@@ -103,7 +103,7 @@
 	<ItemGroup Condition="'$(Configuration)'=='ML_Cpp_net6_interop'">
 		<PackageReference Include="Il2CppInterop.Common" Version="1.0.0" />
 		<PackageReference Include="Il2CppInterop.Runtime" Version="1.0.0" />
-		<PackageReference Include="UniverseLib.IL2CPP.Interop.ML" Version="1.5.1" />
+		<PackageReference Include="UniverseLib.IL2CPP.Interop.ML" Version="1.5.1.2" />
 	</ItemGroup>
     <!-- mono nuget -->
     <ItemGroup Condition="'$(Configuration)'=='BIE6_Mono' or '$(Configuration)'=='BIE5_Mono' or '$(Configuration)'=='ML_Mono' or '$(Configuration)'=='STANDALONE_Mono'">
