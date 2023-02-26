@@ -70,6 +70,12 @@ namespace UnityExplorer.Runtime
 
         public static bool IsBlacklisted(MemberInfo member)
         {
+            if (ConfigManager.Reflection_Hide_NativeInfoPtrs.Value) {
+                bool isNativeInfoPtr = member.Name.StartsWith("NativeFieldInfoPtr_") || member.Name.StartsWith("NativeMethodInfoPtr_");
+                if (isNativeInfoPtr)
+                    return true;
+            }
+
             if (string.IsNullOrEmpty(member.DeclaringType?.Namespace))
                 return false;
 
