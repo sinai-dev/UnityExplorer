@@ -7,8 +7,8 @@
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
         <AllowedReferenceRelatedFileExtensions>none</AllowedReferenceRelatedFileExtensions>
-        <DebugSymbols>false</DebugSymbols>
-        <DebugType>none</DebugType>
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>embedded</DebugType>
         <RootNamespace>UnityExplorer</RootNamespace>
         <LangVersion>10.0</LangVersion>
         <Configurations>BIE_Cpp;BIE_Cpp_CoreCLR;BIE5_Mono;BIE6_Mono;ML_Cpp_net6;ML_Cpp_net6_interop;ML_Cpp_net472;ML_Mono;STANDALONE_Mono;STANDALONE_Cpp</Configurations>
@@ -103,7 +103,7 @@
 	<ItemGroup Condition="'$(Configuration)'=='ML_Cpp_net6_interop'">
 		<PackageReference Include="Il2CppInterop.Common" Version="1.0.0" />
 		<PackageReference Include="Il2CppInterop.Runtime" Version="1.0.0" />
-		<PackageReference Include="UniverseLib.IL2CPP.Interop.ML" Version="1.5.1.2" />
+		<PackageReference Include="UniverseLib.IL2CPP.Interop.ML" Version="1.5.4.1" />
 	</ItemGroup>
     <!-- mono nuget -->
     <ItemGroup Condition="'$(Configuration)'=='BIE6_Mono' or '$(Configuration)'=='BIE5_Mono' or '$(Configuration)'=='ML_Mono' or '$(Configuration)'=='STANDALONE_Mono'">
