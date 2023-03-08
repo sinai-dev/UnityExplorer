@@ -11,7 +11,7 @@
         <DebugType>none</DebugType>
         <RootNamespace>UnityExplorer</RootNamespace>
         <LangVersion>10.0</LangVersion>
-        <Configurations>BIE_Cpp;BIE_Cpp_CoreCLR;BIE5_Mono;BIE6_Mono;ML_Cpp_net6;ML_Cpp_net472;ML_Mono;STANDALONE_Mono;STANDALONE_Cpp</Configurations>
+        <Configurations>BIE_Cpp;BIE_Cpp_CoreCLR;BIE_Unity_Cpp_CoreCLR;BIE5_Mono;BIE6_Mono;ML_Cpp_net6;ML_Cpp_net472;ML_Mono;STANDALONE_Mono;STANDALONE_Cpp</Configurations>
     </PropertyGroup>
     <!-- ~~~~~ CONFIGURATIONS ~~~~~ -->
     <!-- ML IL2CPP net6 -->
@@ -48,6 +48,13 @@
         <OutputPath>..\Release\UnityExplorer.BepInEx.IL2CPP.CoreCLR\</OutputPath>
         <DefineConstants>CPP,BIE,BIE6,INTEROP</DefineConstants>
         <AssemblyName>UnityExplorer.BIE.IL2CPP.CoreCLR</AssemblyName>
+    </PropertyGroup>
+    <!-- BEPINEX UNITY IL2CPP CoreCLR -->
+    <PropertyGroup Condition="'$(Configuration)'=='BIE_Unity_Cpp_CoreCLR'">
+      <TargetFramework>net6</TargetFramework>
+      <OutputPath>..\Release\UnityExplorer.BepInEx.Unity.IL2CPP.CoreCLR\</OutputPath>
+      <DefineConstants>CPP,BIE,BIE6,BIPUNITY,INTEROP</DefineConstants>
+      <AssemblyName>UnityExplorer.BIE.Unity.IL2CPP.CoreCLR</AssemblyName>
     </PropertyGroup>
     <!-- BEPINEX 6 MONO -->
     <PropertyGroup Condition="'$(Configuration)'=='BIE6_Mono'">
@@ -88,7 +95,7 @@
         <PackageReference Include="Il2CppAssemblyUnhollower.BaseLib" Version="0.4.22" />
         <PackageReference Include="UniverseLib.IL2CPP.Unhollower" Version="1.5.1" />
     </ItemGroup>
-    <ItemGroup Condition="'$(Configuration)'=='BIE_Cpp_CoreCLR'">
+    <ItemGroup Condition="'$(Configuration)'=='BIE_Cpp_CoreCLR' or '$(Configuration)'=='BIE_Unity_Cpp_CoreCLR'">
         <PackageReference Include="Il2CppInterop.Common" Version="1.0.0" />
         <PackageReference Include="Il2CppInterop.Runtime" Version="1.0.0" />
         <PackageReference Include="UniverseLib.IL2CPP.Interop" Version="1.5.1" />
@@ -148,13 +155,23 @@
     <!-- BepInEx Il2Cpp -->
     <ItemGroup Condition="'$(Configuration)'=='BIE_Cpp' or '$(Configuration)'=='BIE_Cpp_CoreCLR'">
         <Reference Include="BepInEx">
-            <HintPath>..\lib\net472\BepInEx.Core.dll</HintPath>
+            <HintPath>..\lib\net472\#423~#577\BepInEx.Core.dll</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="BepInEx.IL2CPP">
-            <HintPath>..\lib\net472\BepInEx.IL2CPP.dll</HintPath>
+            <HintPath>..\lib\net472\#423~#577\BepInEx.IL2CPP.dll</HintPath>
             <Private>False</Private>
         </Reference>
+    </ItemGroup>
+    <ItemGroup Condition="'$(Configuration)'=='BIE_Unity_Cpp_CoreCLR'">
+      <Reference Include="BepInEx">
+        <HintPath>..\lib\net472\#647+\BepInEx.Core.dll</HintPath>
+        <Private>False</Private>
+      </Reference>
+      <Reference Include="BepInEx.IL2CPP">
+        <HintPath>..\lib\net472\#647+\BepInEx.Unity.IL2CPP.dll</HintPath>
+        <Private>False</Private>
+      </Reference>
     </ItemGroup>
     <!-- Mono -->
     <ItemGroup Condition="'$(Configuration)'=='BIE6_Mono' or '$(Configuration)'=='BIE5_Mono' or '$(Configuration)'=='ML_Mono' or '$(Configuration)'=='STANDALONE_Mono'">
@@ -211,7 +228,7 @@
         </Reference>
     </ItemGroup>
     <!-- Il2Cpp Interop -->
-    <ItemGroup Condition="'$(Configuration)'=='BIE_Cpp_CoreCLR'">
+    <ItemGroup Condition="'$(Configuration)'=='BIE_Cpp_CoreCLR' or '$(Configuration)'=='BIE_Unity_Cpp_CoreCLR'">
         <Reference Include="Il2Cppmscorlib">
             <HintPath>..\lib\interop\Il2Cppmscorlib.dll</HintPath>
             <Private>False</Private>

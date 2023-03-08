@@ -7,8 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnityExplorer", "UnityExplo
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Release_BIE_Cpp|Any CPU = Release_BIE_Cpp|Any CPU
 		Release_BIE_CoreCLR|Any CPU = Release_BIE_CoreCLR|Any CPU
+		Release_BIE_Cpp|Any CPU = Release_BIE_Cpp|Any CPU
 		Release_BIE5_Mono|Any CPU = Release_BIE5_Mono|Any CPU
 		Release_BIE6_Mono|Any CPU = Release_BIE6_Mono|Any CPU
 		Release_ML_Cpp_net472|Any CPU = Release_ML_Cpp_net472|Any CPU
@@ -16,12 +16,13 @@ Global
 		Release_ML_Mono|Any CPU = Release_ML_Mono|Any CPU
 		Release_STANDALONE_Cpp|Any CPU = Release_STANDALONE_Cpp|Any CPU
 		Release_STANDALONE_Mono|Any CPU = Release_STANDALONE_Mono|Any CPU
+		Release_Unity_Cpp_CoreCLR|Any CPU = Release_Unity_Cpp_CoreCLR|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE_Cpp|Any CPU.ActiveCfg = BIE_Cpp|Any CPU
-		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE_Cpp|Any CPU.Build.0 = BIE_Cpp|Any CPU
 		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE_CoreCLR|Any CPU.ActiveCfg = BIE_Cpp_CoreCLR|Any CPU
 		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE_CoreCLR|Any CPU.Build.0 = BIE_Cpp_CoreCLR|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE_Cpp|Any CPU.ActiveCfg = BIE_Cpp|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE_Cpp|Any CPU.Build.0 = BIE_Cpp|Any CPU
 		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE5_Mono|Any CPU.ActiveCfg = BIE5_Mono|Any CPU
 		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE5_Mono|Any CPU.Build.0 = BIE5_Mono|Any CPU
 		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_BIE6_Mono|Any CPU.ActiveCfg = BIE6_Mono|Any CPU
@@ -36,6 +37,8 @@ Global
 		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_STANDALONE_Cpp|Any CPU.Build.0 = STANDALONE_Cpp|Any CPU
 		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_STANDALONE_Mono|Any CPU.ActiveCfg = STANDALONE_Mono|Any CPU
 		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_STANDALONE_Mono|Any CPU.Build.0 = STANDALONE_Mono|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_Unity_Cpp_CoreCLR|Any CPU.ActiveCfg = BIE_Unity_Cpp_CoreCLR|Any CPU
+		{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}.Release_Unity_Cpp_CoreCLR|Any CPU.Build.0 = BIE_Unity_Cpp_CoreCLR|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
