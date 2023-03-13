@@ -27,7 +27,7 @@ namespace UnityExplorer
             if (TryFocusActiveInspector(obj))
                 return;
 
-            if (obj is GameObject)
+            if (obj.TryCast<GameObject>() is not null)
                 CreateInspector<GameObjectInspector>(obj);
             else
                 CreateInspector<ReflectionInspector>(obj, false, parent);
