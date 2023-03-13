@@ -155,21 +155,21 @@
     <!-- BepInEx Il2Cpp -->
     <ItemGroup Condition="'$(Configuration)'=='BIE_Cpp' or '$(Configuration)'=='BIE_Cpp_CoreCLR'">
         <Reference Include="BepInEx">
-            <HintPath>..\lib\net472\#423~#577\BepInEx.Core.dll</HintPath>
+            <HintPath>..\lib\net472\build423~577\BepInEx.Core.dll</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="BepInEx.IL2CPP">
-            <HintPath>..\lib\net472\#423~#577\BepInEx.IL2CPP.dll</HintPath>
+            <HintPath>..\lib\net472\build423~577\BepInEx.IL2CPP.dll</HintPath>
             <Private>False</Private>
         </Reference>
     </ItemGroup>
     <ItemGroup Condition="'$(Configuration)'=='BIE_Unity_Cpp_CoreCLR'">
       <Reference Include="BepInEx">
-        <HintPath>..\lib\net472\#647+\BepInEx.Core.dll</HintPath>
+        <HintPath>..\lib\net472\build647+\BepInEx.Core.dll</HintPath>
         <Private>False</Private>
       </Reference>
       <Reference Include="BepInEx.IL2CPP">
-        <HintPath>..\lib\net472\#647+\BepInEx.Unity.IL2CPP.dll</HintPath>
+        <HintPath>..\lib\net472\build647+\BepInEx.Unity.IL2CPP.dll</HintPath>
         <Private>False</Private>
       </Reference>
     </ItemGroup>
